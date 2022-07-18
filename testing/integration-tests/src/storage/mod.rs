@@ -3,10 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{
-        self,
-        DispatchError,
-    },
+    node_runtime,
     pair_signer,
     test_context,
     utils::wait_for_blocks,
@@ -14,7 +11,7 @@ use crate::{
 use sp_keyring::AccountKeyring;
 
 #[tokio::test]
-async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -30,7 +27,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -58,8 +55,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
 // treated as a StorageKey (ie we should hash both values together with one hasher, rather
 // than hash both values separately, or ignore the second value).
 #[tokio::test]
-async fn storage_n_mapish_key_is_properly_created(
-) -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
 
@@ -86,7 +82,7 @@ async fn storage_n_mapish_key_is_properly_created(
 }
 
 #[tokio::test]
-async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 

@@ -7,7 +7,6 @@ use crate::{
         self,
         runtime_types,
         sudo,
-        DispatchError,
     },
     pair_signer,
     test_context,
@@ -18,7 +17,7 @@ type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[tokio::test]
-async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
+async fn test_sudo() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -44,7 +43,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>> {
+async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 

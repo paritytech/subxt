@@ -22,7 +22,7 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
-/// Generate calls from the provided pallet's metadata. Each call returns a `SubmittableExtrinsic`
+/// Generate calls from the provided pallet's metadata. Each call returns a `StaticTxPayload`
 /// that can be passed to the subxt client to submit/sign/encode.
 ///
 /// # Arguments
@@ -53,35 +53,42 @@ pub fn generate_calls(
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
         .map(|(variant_name, struct_def)| {
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
-                match struct_def.fields {
-                    CompositeDefFields::Named(ref named_fields) => {
-                        named_fields
-                            .iter()
-                            .map(|(name, field)| {
-                                let fn_arg_type = &field.type_path;
-                                let call_arg = if field.is_boxed() {
-                                    quote! { #name: ::std::boxed::Box::new(#name) }
-                                } else {
-                                    quote! { #name }
-                                };
-                                (quote!( #name: #fn_arg_type ), call_arg)
-                            })
-                            .unzip()
-                    }
-                    CompositeDefFields::NoFields => Default::default(),
-                    CompositeDefFields::Unnamed(_) =>
-                        abort_call_site!(
-                            "Call variant for type {} must have all named fields",
-                            call.ty.id()
-                        )
-                };
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match struct_def.fields {
+                CompositeDefFields::Named(ref named_fields) => {
+                    named_fields
+                        .iter()
+                        .map(|(name, field)| {
+                            let fn_arg_type = &field.type_path;
+                            let call_arg = if field.is_boxed() {
+                                quote! { #name: ::std::boxed::Box::new(#name) }
+                            } else {
+                                quote! { #name }
+                            };
+                            (quote!( #name: #fn_arg_type ), call_arg)
+                        })
+                        .unzip()
+                }
+                CompositeDefFields::NoFields => Default::default(),
+                CompositeDefFields::Unnamed(_) => {
+                    abort_call_site!(
+                        "Call variant for type {} must have all named fields",
+                        call.ty.id()
+                    )
+                }
+            };
 
             let pallet_name = &pallet.name;
             let call_name = &variant_name;
             let struct_name = &struct_def.name;
-            let call_hash = subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
-                .unwrap_or_else(|_| abort_call_site!("Metadata information for the call {}_{} could not be found", pallet_name, call_name));
+            let call_hash =
+                subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
+                    .unwrap_or_else(|_| {
+                        abort_call_site!(
+                            "Metadata information for the call {}_{} could not be found",
+                            pallet_name,
+                            call_name
+                        )
+                    });
 
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
@@ -96,13 +103,11 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<::subxt::metadata::EncodeStaticCall<#struct_name>, DispatchError> {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: #pallet_name,
-                            call: #call_name,
-                            data: #struct_name { #( #call_args, )* }
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<#struct_name> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        #pallet_name,
+                        #call_name,
+                        #struct_name { #( #call_args, )* },
                         [#(#call_hash,)*]
                     )
                 }

@@ -10,7 +10,6 @@ use crate::{
             ValidatorPrefs,
         },
         staking,
-        DispatchError,
     },
     pair_signer,
     test_context,
@@ -21,7 +20,10 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-use subxt::Error;
+use subxt::error::{
+    DispatchError,
+    Error,
+};
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
@@ -57,7 +59,7 @@ async fn validate_with_controller_account() {
 }
 
 #[tokio::test]
-async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
+async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -73,7 +75,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .await?
         .wait_for_finalized_success()
         .await;
-    assert_matches!(announce_validator, Err(Error::Module(err)) => {
+    assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
         assert_eq!(err.pallet, "Staking");
         assert_eq!(err.error, "NotController");
     });
@@ -102,7 +104,7 @@ async fn nominate_with_controller_account() {
 }
 
 #[tokio::test]
-async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
+async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -121,7 +123,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(nomination, Err(Error::Module(err)) => {
+    assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
         assert_eq!(err.pallet, "Staking");
         assert_eq!(err.error, "NotController");
     });
@@ -129,7 +131,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
 }
 
 #[tokio::test]
-async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
+async fn chill_works_for_controller_only() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -160,7 +162,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(chill, Err(Error::Module(err)) => {
+    assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
         assert_eq!(err.pallet, "Staking");
         assert_eq!(err.error, "NotController");
     });
@@ -178,7 +180,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn tx_bond() -> Result<(), Error<DispatchError>> {
+async fn tx_bond() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -206,7 +208,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(bond_again, Err(Error::Module(err)) => {
+    assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
         assert_eq!(err.pallet, "Staking");
         assert_eq!(err.error, "AlreadyBonded");
     });
@@ -214,7 +216,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
+async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let history_depth_addr = node_runtime::storage().staking().history_depth();
@@ -227,7 +229,7 @@ async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn storage_current_era() -> Result<(), Error<DispatchError>> {
+async fn storage_current_era() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let current_era_addr = node_runtime::storage().staking().current_era();
@@ -240,7 +242,7 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
+async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(&0);

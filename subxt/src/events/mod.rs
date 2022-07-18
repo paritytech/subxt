@@ -4,7 +4,7 @@
 
 //! This module exposes the types and such necessary for working with events.
 //! The two main entry points into events are [`crate::OnlineClient::events()`]
-//! and calls like [crate::extrinsic::TransactionProgress::wait_for_finalized_success()].
+//! and calls like [crate::tx::TxProgress::wait_for_finalized_success()].
 
 mod event_subscription;
 mod events_client;

@@ -5,9 +5,9 @@
 use crate::{
     constants::ConstantsClient,
     events::EventsClient,
-    extrinsic::TxClient,
     rpc::RuntimeVersion,
     storage::StorageClient,
+    tx::TxClient,
     Config,
     Metadata,
 };

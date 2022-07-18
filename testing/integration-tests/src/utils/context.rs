@@ -10,7 +10,7 @@ pub(crate) use crate::{
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::PairSigner,
+    tx::PairSigner,
     SubstrateConfig,
 };
 

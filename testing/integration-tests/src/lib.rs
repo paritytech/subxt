@@ -26,6 +26,9 @@ use test_runtime::node_runtime;
 use utils::*;
 
 // We don't use this dependency, but it's here so that we
-// can enable logging easily if need be.
+// can enable logging easily if need be. Add this to a test
+// to enable tracing for it:
+//
+// tracing_subscriber::fmt::init();
 #[cfg(test)]
 use tracing_subscriber as _;

@@ -50,7 +50,7 @@ use std::{
 };
 
 use crate::{
-    error::BasicError,
+    error::Error,
     utils::PhantomDataSendSync,
     Config,
     Metadata,
@@ -160,7 +160,7 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 /// must be kept compatible with that type from the target substrate version.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum SubstrateTransactionStatus<Hash, BlockHash> {
+pub enum SubstrateTxStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
     Future,
     /// Transaction is part of the ready queue.
@@ -291,7 +291,7 @@ impl<T: Config> Rpc<T> {
         &self,
         key: &[u8],
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, BasicError> {
+    ) -> Result<Option<StorageData>, Error> {
         let params = rpc_params![to_hex(key), hash];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
@@ -306,7 +306,7 @@ impl<T: Config> Rpc<T> {
         count: u32,
         start_key: Option<&[u8]>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, BasicError> {
+    ) -> Result<Vec<StorageKey>, Error> {
         let start_key = start_key.map(to_hex);
         let params = rpc_params![to_hex(key), count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
@@ -319,7 +319,7 @@ impl<T: Config> Rpc<T> {
         keys: impl IntoIterator<Item = &[u8]>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, from, to];
         self.client
@@ -333,7 +333,7 @@ impl<T: Config> Rpc<T> {
         &self,
         keys: impl IntoIterator<Item = &[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, at];
         self.client
@@ -343,7 +343,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = 0u32;
         let params = rpc_params![block_zero];
         let genesis_hash: Option<T::Hash> =
@@ -352,7 +352,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, BasicError> {
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
         let bytes: Bytes = self
             .client
             .request("state_getMetadata", rpc_params![])
@@ -363,7 +363,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch system properties
-    pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
+    pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
         Ok(self
             .client
             .request("system_properties", rpc_params![])
@@ -371,22 +371,22 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch system health
-    pub async fn system_health(&self) -> Result<Health, BasicError> {
+    pub async fn system_health(&self) -> Result<Health, Error> {
         Ok(self.client.request("system_health", rpc_params![]).await?)
     }
 
     /// Fetch system chain
-    pub async fn system_chain(&self) -> Result<String, BasicError> {
+    pub async fn system_chain(&self) -> Result<String, Error> {
         Ok(self.client.request("system_chain", rpc_params![]).await?)
     }
 
     /// Fetch system name
-    pub async fn system_name(&self) -> Result<String, BasicError> {
+    pub async fn system_name(&self) -> Result<String, Error> {
         Ok(self.client.request("system_name", rpc_params![]).await?)
     }
 
     /// Fetch system version
-    pub async fn system_version(&self) -> Result<String, BasicError> {
+    pub async fn system_version(&self) -> Result<String, Error> {
         Ok(self.client.request("system_version", rpc_params![]).await?)
     }
 
@@ -394,7 +394,7 @@ impl<T: Config> Rpc<T> {
     pub async fn system_account_next_index(
         &self,
         account: &T::AccountId,
-    ) -> Result<T::Index, BasicError> {
+    ) -> Result<T::Index, Error> {
         Ok(self
             .client
             .request("system_accountNextIndex", rpc_params![account])
@@ -405,7 +405,7 @@ impl<T: Config> Rpc<T> {
     pub async fn header(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, BasicError> {
+    ) -> Result<Option<T::Header>, Error> {
         let params = rpc_params![hash];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -415,14 +415,14 @@ impl<T: Config> Rpc<T> {
     pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, BasicError> {
+    ) -> Result<Option<T::Hash>, Error> {
         let params = rpc_params![block_number];
         let block_hash = self.client.request("chain_getBlockHash", params).await?;
         Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
             .request("chain_getFinalizedHead", rpc_params![])
@@ -434,7 +434,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, BasicError> {
+    ) -> Result<Option<ChainBlock<T>>, Error> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -448,7 +448,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block_stats(
         &self,
         block_hash: T::Hash,
-    ) -> Result<Option<BlockStats>, BasicError> {
+    ) -> Result<Option<BlockStats>, Error> {
         let params = rpc_params![block_hash];
         let stats = self.client.request("dev_getBlockStats", params).await?;
         Ok(stats)
@@ -459,7 +459,7 @@ impl<T: Config> Rpc<T> {
         &self,
         keys: impl IntoIterator<Item = &[u8]>,
         hash: Option<T::Hash>,
-    ) -> Result<ReadProof<T::Hash>, BasicError> {
+    ) -> Result<ReadProof<T::Hash>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, hash];
         let proof = self.client.request("state_getReadProof", params).await?;
@@ -470,7 +470,7 @@ impl<T: Config> Rpc<T> {
     pub async fn runtime_version(
         &self,
         at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, BasicError> {
+    ) -> Result<RuntimeVersion, Error> {
         let params = rpc_params![at];
         let version = self
             .client
@@ -480,7 +480,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -496,7 +496,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> Result<Subscription<T::Header>, BasicError> {
+    ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -511,7 +511,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to runtime version updates that produce changes in the metadata.
     pub async fn subscribe_runtime_version(
         &self,
-    ) -> Result<Subscription<RuntimeVersion>, BasicError> {
+    ) -> Result<Subscription<RuntimeVersion>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -527,7 +527,7 @@ impl<T: Config> Rpc<T> {
     pub async fn submit_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<T::Hash, BasicError> {
+    ) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let xt_hash = self
@@ -541,8 +541,7 @@ impl<T: Config> Rpc<T> {
     pub async fn watch_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
-    {
+    ) -> Result<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let subscription = self
@@ -562,14 +561,14 @@ impl<T: Config> Rpc<T> {
         key_type: String,
         suri: String,
         public: Bytes,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         let params = rpc_params![key_type, suri, public];
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
 
     /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
+    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
         Ok(self
             .client
             .request("author_rotateKeys", rpc_params![])
@@ -581,10 +580,7 @@ impl<T: Config> Rpc<T> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(
-        &self,
-        session_keys: Bytes,
-    ) -> Result<bool, BasicError> {
+    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys];
         Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
@@ -596,7 +592,7 @@ impl<T: Config> Rpc<T> {
         &self,
         public_key: Bytes,
         key_type: String,
-    ) -> Result<bool, BasicError> {
+    ) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type];
         Ok(self.client.request("author_hasKey", params).await?)
     }
@@ -608,7 +604,7 @@ impl<T: Config> Rpc<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<ApplyExtrinsicResult, BasicError> {
+    ) -> Result<ApplyExtrinsicResult, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =

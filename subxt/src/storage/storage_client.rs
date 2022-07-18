@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::storage_address::{
-    StorageAddressT,
+    StorageAddress,
     Yes,
 };
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
-    error::BasicError,
+    error::Error,
     metadata::{
         DecodeWithMetadata,
         Metadata,
@@ -57,10 +57,10 @@ where
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
-    pub fn validate<Address: StorageAddressT>(
+    pub fn validate<Address: StorageAddress>(
         &self,
         address: &Address,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         if let Some(hash) = address.validation_hash() {
             validate_storage(
                 address.pallet_name(),
@@ -83,7 +83,7 @@ where
         &self,
         key: &'a [u8],
         hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<Option<Vec<u8>>, BasicError>> + 'a {
+    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'a {
         let client = self.client.clone();
         // Ensure that the returned future doesn't have a lifetime tied to api.storage(),
         // which is a temporary thing we'll be throwing away quickly:
@@ -125,13 +125,10 @@ where
         address: &'a Address,
         hash: Option<T::Hash>,
     ) -> impl Future<
-        Output = Result<
-            Option<<Address::Target as DecodeWithMetadata>::Target>,
-            BasicError,
-        >,
+        Output = Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>,
     > + 'a
     where
-        Address: StorageAddressT<IsFetchable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes> + 'a,
     {
         let client = self.clone();
         async move {
@@ -168,11 +165,10 @@ where
         &self,
         address: &'a Address,
         hash: Option<T::Hash>,
-    ) -> impl Future<
-        Output = Result<<Address::Target as DecodeWithMetadata>::Target, BasicError>,
-    > + 'a
+    ) -> impl Future<Output = Result<<Address::Target as DecodeWithMetadata>::Target, Error>>
+           + 'a
     where
-        Address: StorageAddressT<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
     {
         let client = self.client.clone();
         async move {
@@ -210,7 +206,7 @@ where
         count: u32,
         start_key: Option<&'a [u8]>,
         hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<Vec<StorageKey>, BasicError>> + 'a {
+    ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'a {
         let client = self.client.clone();
         async move {
             let keys = client
@@ -254,9 +250,9 @@ where
         address: Address,
         page_size: u32,
         hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<KeyIter<T, Client, Address::Target>, BasicError>> + 'static
+    ) -> impl Future<Output = Result<KeyIter<T, Client, Address::Target>, Error>> + 'static
     where
-        Address: StorageAddressT<IsIterable = Yes> + 'static,
+        Address: StorageAddress<IsIterable = Yes> + 'static,
     {
         let client = self.clone();
         async move {
@@ -332,7 +328,7 @@ where
     /// Returns the next key value pair from a map.
     pub async fn next(
         &mut self,
-    ) -> Result<Option<(StorageKey, ReturnTy::Target)>, BasicError> {
+    ) -> Result<Option<(StorageKey, ReturnTy::Target)>, Error> {
         loop {
             if let Some((k, v)) = self.buffer.pop() {
                 let val = ReturnTy::decode_with_metadata(
@@ -384,7 +380,7 @@ fn validate_storage(
     storage_name: &str,
     hash: [u8; 32],
     metadata: &Metadata,
-) -> Result<(), BasicError> {
+) -> Result<(), Error> {
     let expected_hash = match metadata.storage_hash(pallet_name, storage_name) {
         Ok(hash) => hash,
         Err(e) => return Err(e.into()),
@@ -400,7 +396,7 @@ fn lookup_storage_return_type(
     metadata: &Metadata,
     pallet: &str,
     entry: &str,
-) -> Result<u32, BasicError> {
+) -> Result<u32, Error> {
     let storage_entry_type = &metadata.pallet(pallet)?.storage(entry)?.ty;
 
     Ok(return_type_from_storage_entry_type(storage_entry_type))

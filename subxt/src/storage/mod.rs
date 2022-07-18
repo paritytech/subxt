@@ -20,7 +20,7 @@ pub use sp_core::storage::StorageKey;
 pub mod address {
     pub use super::storage_address::{
         StaticStorageAddress,
-        StorageAddressT,
+        StorageAddress,
         StorageHasher,
         StorageMapKey,
         Yes,

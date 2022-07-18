@@ -9,7 +9,6 @@ use crate::{
         self,
         contracts::events,
         system,
-        DispatchError,
     },
     test_context,
     TestContext,
@@ -17,9 +16,9 @@ use crate::{
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
-    extrinsic::{
+    tx::{
         PairSigner,
-        TransactionProgress,
+        TxProgress,
     },
     Config,
     Error,
@@ -47,9 +46,7 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    async fn instantiate_with_code(
-        &self,
-    ) -> Result<(Hash, AccountId), Error<DispatchError>> {
+    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
         tracing::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
@@ -99,7 +96,7 @@ impl ContractsTestContext {
         code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<AccountId, Error<DispatchError>> {
+    ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
         let instantiate_tx = node_runtime::tx().contracts().instantiate(
             100_000_000_000_000_000, // endowment
@@ -130,14 +127,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<
-        TransactionProgress<
-            SubstrateConfig,
-            OnlineClient<SubstrateConfig>,
-            DispatchError,
-        >,
-        Error<DispatchError>,
-    > {
+    ) -> Result<TxProgress<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error> {
         tracing::info!("call: {:?}", contract);
         let call_tx = node_runtime::tx().contracts().call(
             MultiAddress::Id(contract),

@@ -4,7 +4,7 @@
 
 use crate::{
     client::OnlineClientT,
-    error::BasicError,
+    error::Error,
     events::{
         EventSub,
         EventSubscription,
@@ -54,7 +54,7 @@ where
     pub fn at(
         &self,
         block_hash: T::Hash,
-    ) -> impl Future<Output = Result<Events<T>, BasicError>> + Send + 'static {
+    ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
@@ -94,7 +94,7 @@ where
     pub fn subscribe(
         &self,
     ) -> impl Future<
-        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>,
+        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
     > + Send
            + 'static {
         let client = self.client.clone();
@@ -107,7 +107,7 @@ where
     ) -> impl Future<
         Output = Result<
             EventSubscription<T, Client, FinalizedEventSub<T::Header>>,
-            BasicError,
+            Error,
         >,
     > + Send
            + 'static
@@ -119,10 +119,7 @@ where
     }
 }
 
-async fn at<T, Client>(
-    client: Client,
-    block_hash: T::Hash,
-) -> Result<Events<T>, BasicError>
+async fn at<T, Client>(client: Client, block_hash: T::Hash) -> Result<Events<T>, Error>
 where
     T: Config,
     Client: OnlineClientT<T>,
@@ -139,7 +136,7 @@ where
 
 async fn subscribe<T, Client>(
     client: Client,
-) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>
+) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>
 where
     T: Config,
     Client: OnlineClientT<T>,
@@ -151,7 +148,7 @@ where
 /// Subscribe to events from finalized blocks.
 async fn subscribe_finalized<T, Client>(
     client: Client,
-) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, BasicError>
+) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, Error>
 where
     T: Config,
     Client: OnlineClientT<T>,
@@ -184,12 +181,12 @@ pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
     client: Client,
     mut last_block_num: Option<u64>,
     sub: S,
-) -> impl Stream<Item = Result<T::Header, BasicError>> + Send
+) -> impl Stream<Item = Result<T::Header, Error>> + Send
 where
     T: Config,
     Client: OnlineClientT<T> + Send + Sync,
     S: Stream<Item = Result<T::Header, E>> + Send,
-    E: Into<BasicError> + Send + 'static,
+    E: Into<Error> + Send + 'static,
 {
     sub.flat_map(move |s| {
         let client = client.clone();
@@ -215,7 +212,7 @@ where
                 async move {
                     let hash = client.rpc().block_hash(Some(n.into())).await?;
                     let header = client.rpc().header(hash).await?;
-                    Ok::<_, BasicError>(header)
+                    Ok::<_, Error>(header)
                 }
             })
             .filter_map(|h| async { h.transpose() });

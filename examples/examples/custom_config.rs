@@ -11,7 +11,7 @@ use subxt::{
         Config,
         SubstrateConfig,
     },
-    extrinsic::{
+    tx::{
         PairSigner,
         SubstrateExtrinsicParams,
     },

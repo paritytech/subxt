@@ -50,7 +50,7 @@
 //! # Interacting with the API
 //!
 //! Once instantiated, a client, exposes four functions:
-//! - `.tx()` for submitting extrinsics/transactions. See [`crate::extrinsic::TxClient`] for more details, or see
+//! - `.tx()` for submitting extrinsics/transactions. See [`crate::tx::TxClient`] for more details, or see
 //!   the [balance_transfer](../examples/examples/balance_transfer.rs) example.
 //! - `.storage()` for fetching and iterating over storage entries. See [`crate::storage::StorageClient`] for more details, or see
 //!   the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example.
@@ -127,10 +127,10 @@ pub mod config;
 pub mod constants;
 pub mod error;
 pub mod events;
-pub mod extrinsic;
 pub mod metadata;
 pub mod rpc;
 pub mod storage;
+pub mod tx;
 pub mod utils;
 
 // Expose a few of the most common types at root,
@@ -145,10 +145,7 @@ pub use crate::{
         PolkadotConfig,
         SubstrateConfig,
     },
-    error::{
-        BasicError,
-        Error,
-    },
+    error::Error,
     metadata::Metadata,
 };
 

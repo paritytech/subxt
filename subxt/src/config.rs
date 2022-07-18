@@ -82,7 +82,7 @@ pub trait Config: 'static {
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: crate::extrinsic::ExtrinsicParams<Self::Index, Self::Hash>;
+    type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
 }
 
 /// Parameter trait copied from `substrate::frame_support`
@@ -105,36 +105,36 @@ impl Config for SubstrateConfig {
         sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    type ExtrinsicParams = crate::extrinsic::SubstrateExtrinsicParams<Self>;
+    type ExtrinsicParams = crate::tx::SubstrateExtrinsicParams<Self>;
 }
 
 /// Default set of commonly used types by Polkadot nodes.
 pub type PolkadotConfig = WithExtrinsicParams<
     SubstrateConfig,
-    crate::extrinsic::PolkadotExtrinsicParams<SubstrateConfig>,
+    crate::tx::PolkadotExtrinsicParams<SubstrateConfig>,
 >;
 
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
-/// additional and extra parameters to pass to an extrinsic (see [`crate::extrinsic::ExtrinsicParams`]),
+/// additional and extra parameters to pass to an extrinsic (see [`crate::tx::ExtrinsicParams`]),
 /// and returns a type implementing [`Config`] with those new `ExtrinsicParams`.
 ///
 /// # Example
 ///
 /// ```
 /// use subxt::config::{ SubstrateConfig, WithExtrinsicParams };
-/// use subxt::extrinsic::PolkadotExtrinsicParams;
+/// use subxt::tx::PolkadotExtrinsicParams;
 ///
 /// // This is how PolkadotConfig is implemented:
 /// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
 /// ```
 pub struct WithExtrinsicParams<
     T: Config,
-    E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>,
+    E: crate::tx::ExtrinsicParams<T::Index, T::Hash>,
 > {
     _marker: std::marker::PhantomData<(T, E)>,
 }
 
-impl<T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> Config
+impl<T: Config, E: crate::tx::ExtrinsicParams<T::Index, T::Hash>> Config
     for WithExtrinsicParams<T, E>
 {
     type Index = T::Index;

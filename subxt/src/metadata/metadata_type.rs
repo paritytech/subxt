@@ -75,7 +75,11 @@ struct MetadataInner {
     metadata: RuntimeMetadataV14,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
+    // Errors are hashed by pallet index.
     errors: HashMap<(u8, u8), ErrorMetadata>,
+    // Type of the DispatchError type, which is what comes back if
+    // an extrinsic fails.
+    dispatch_error_ty: Option<u32>,
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -126,6 +130,11 @@ impl Metadata {
             .get(&(pallet_index, error_index))
             .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
         Ok(error)
+    }
+
+    /// Return the DispatchError type ID if it exists.
+    pub fn dispatch_error_ty(&self) -> Option<u32> {
+        self.inner.dispatch_error_ty
     }
 
     /// Return the type registry embedded within the metadata.
@@ -286,8 +295,7 @@ impl PalletMetadata {
 /// Metadata for specific events.
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
-    pallet: String,
-    event: String,
+    pallet: Arc<str>,
     variant: Variant<PortableForm>,
 }
 
@@ -299,7 +307,7 @@ impl EventMetadata {
 
     /// Get the name of the pallet event which was emitted.
     pub fn event(&self) -> &str {
-        &self.event
+        &self.variant.name()
     }
 
     /// Get the type def variant for the pallet event.
@@ -308,15 +316,12 @@ impl EventMetadata {
     }
 }
 
-/// Metadata for specific errors obtained from the pallet's `PalletErrorMetadata`.
-///
-/// This holds in memory information regarding the Pallet's name, Error's name, and the underlying
-/// metadata representation.
+/// Details abotu a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
-    pallet: String,
+    pallet: Arc<str>,
     error: String,
-    variant: Variant<PortableForm>,
+    docs: Vec<String>,
 }
 
 impl ErrorMetadata {
@@ -325,14 +330,14 @@ impl ErrorMetadata {
         &self.pallet
     }
 
-    /// Get the name of the specific pallet error.
+    /// The name of the error.
     pub fn error(&self) -> &str {
         &self.error
     }
 
-    /// Get the description of the specific pallet error.
-    pub fn description(&self) -> &[String] {
-        self.variant.docs()
+    /// Documentation for the error.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
     }
 }
 
@@ -421,55 +426,47 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             })
             .collect::<Result<_, _>>()?;
 
-        let pallet_events = metadata
-            .pallets
-            .iter()
-            .filter_map(|pallet| {
-                pallet.event.as_ref().map(|event| {
-                    let type_def_variant = get_type_def_variant(event.ty.id())?;
-                    Ok((pallet, type_def_variant))
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let events = pallet_events
-            .iter()
-            .flat_map(|(pallet, type_def_variant)| {
-                type_def_variant.variants().iter().map(move |var| {
-                    let key = (pallet.index, var.index());
-                    let value = EventMetadata {
-                        pallet: pallet.name.clone(),
-                        event: var.name().clone(),
-                        variant: var.clone(),
-                    };
-                    (key, value)
-                })
-            })
-            .collect();
+        let mut events = HashMap::<(u8, u8), EventMetadata>::new();
+        for pallet in &metadata.pallets {
+            if let Some(event) = &pallet.event {
+                let pallet_name: Arc<str> = pallet.name.to_string().into();
+                let event_variant = get_type_def_variant(event.ty.id())?;
+                for variant in event_variant.variants() {
+                    events.insert(
+                        (pallet.index, variant.index()),
+                        EventMetadata {
+                            pallet: pallet_name.clone(),
+                            variant: variant.clone(),
+                        },
+                    );
+                }
+            }
+        }
 
-        let pallet_errors = metadata
-            .pallets
+        let mut errors = HashMap::<(u8, u8), ErrorMetadata>::new();
+        for pallet in &metadata.pallets {
+            if let Some(error) = &pallet.error {
+                let pallet_name: Arc<str> = pallet.name.to_string().into();
+                let error_variant = get_type_def_variant(error.ty.id())?;
+                for variant in error_variant.variants() {
+                    errors.insert(
+                        (pallet.index, variant.index()),
+                        ErrorMetadata {
+                            pallet: pallet_name.clone(),
+                            error: variant.name().clone(),
+                            docs: variant.docs().to_vec(),
+                        },
+                    );
+                }
+            }
+        }
+
+        let dispatch_error_ty = metadata
+            .types
+            .types()
             .iter()
-            .filter_map(|pallet| {
-                pallet.error.as_ref().map(|error| {
-                    let type_def_variant = get_type_def_variant(error.ty.id())?;
-                    Ok((pallet, type_def_variant))
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let errors = pallet_errors
-            .iter()
-            .flat_map(|(pallet, type_def_variant)| {
-                type_def_variant.variants().iter().map(move |var| {
-                    let key = (pallet.index, var.index());
-                    let value = ErrorMetadata {
-                        pallet: pallet.name.clone(),
-                        error: var.name().clone(),
-                        variant: var.clone(),
-                    };
-                    (key, value)
-                })
-            })
-            .collect();
+            .find(|ty| ty.ty().path().segments() == &["sp_runtime", "DispatchError"])
+            .map(|ty| ty.id());
 
         Ok(Metadata {
             inner: Arc::new(MetadataInner {
@@ -477,6 +474,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 pallets,
                 events,
                 errors,
+                dispatch_error_ty,
                 cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),

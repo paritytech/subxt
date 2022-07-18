@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::Metadata;
-use crate::error::BasicError;
+use crate::error::Error;
 use codec::Decode;
 use frame_metadata::StorageEntryType;
 
@@ -16,7 +16,7 @@ pub trait DecodeWithMetadata: Sized {
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<Self::Target, BasicError>;
+    ) -> Result<Self::Target, Error>;
 
     /// Decode a storage item using metadata. By default, this uses the metadata to
     /// work out the type ID to use, but for static items we can short circuit this
@@ -26,11 +26,8 @@ pub trait DecodeWithMetadata: Sized {
         pallet_name: &str,
         storage_entry: &str,
         metadata: &Metadata,
-    ) -> Result<Self::Target, BasicError> {
-        let ty = &metadata
-            .pallet(pallet_name)?
-            .storage(storage_entry)?
-            .ty;
+    ) -> Result<Self::Target, Error> {
+        let ty = &metadata.pallet(pallet_name)?.storage(storage_entry)?.ty;
 
         let id = match ty {
             StorageEntryType::Plain(ty) => ty.id(),
@@ -48,7 +45,7 @@ impl DecodeWithMetadata for scale_value::Value<scale_value::scale::TypeId> {
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<Self::Target, BasicError> {
+    ) -> Result<Self::Target, Error> {
         let res = scale_value::scale::decode_as_type(bytes, type_id, metadata.types())?;
         Ok(res)
     }
@@ -64,7 +61,7 @@ impl<T: Decode> DecodeWithMetadata for DecodeStaticType<T> {
         bytes: &mut &[u8],
         _type_id: u32,
         _metadata: &Metadata,
-    ) -> Result<Self::Target, BasicError> {
+    ) -> Result<Self::Target, Error> {
         T::decode(bytes).map_err(|e| e.into())
     }
 
@@ -73,7 +70,7 @@ impl<T: Decode> DecodeWithMetadata for DecodeStaticType<T> {
         _pallet_name: &str,
         _storage_entry: &str,
         _metadata: &Metadata,
-    ) -> Result<Self::Target, BasicError> {
+    ) -> Result<Self::Target, Error> {
         T::decode(bytes).map_err(|e| e.into())
     }
 }

@@ -6,7 +6,6 @@
 
 mod calls;
 mod constants;
-mod errors;
 mod events;
 mod storage;
 
@@ -256,9 +255,6 @@ impl RuntimeGenerator {
             })
             .collect();
 
-        let has_module_error_impl =
-            errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
-
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -271,10 +267,9 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                /// The default error type returned when there is a runtime issue.
+                /// The default error type returned when there is a runtime issue,
+                /// exposed here for ease of use.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
-                // Impl HasModuleError on DispatchError so we can pluck out module error details.
-                #has_module_error_impl
 
                 pub fn constants() -> ConstantsApi {
                     ConstantsApi

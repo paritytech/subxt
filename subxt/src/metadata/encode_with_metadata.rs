@@ -7,7 +7,7 @@ use super::{
     MetadataError,
     MetadataLocation,
 };
-use crate::error::BasicError;
+use crate::error::Error;
 use codec::Encode;
 use std::borrow::Cow;
 
@@ -18,10 +18,10 @@ pub trait EncodeWithMetadata {
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
-    ) -> Result<(), BasicError>;
+    ) -> Result<(), Error>;
 
     /// Given some metadata, attempt to SCALE encode `Self` and return the resulting bytes.
-    fn encode_with_metadata(&self, metadata: &Metadata) -> Result<Vec<u8>, BasicError> {
+    fn encode_with_metadata(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
         let mut out = Vec::new();
         self.encode_to_with_metadata(metadata, &mut out)?;
         Ok(out)
@@ -43,7 +43,7 @@ impl<T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         let pallet = metadata.pallet(self.pallet)?;
         let pallet_index = pallet.index();
         let call_index = pallet.call_index(self.call)?;
@@ -100,7 +100,7 @@ impl<'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         let pallet = metadata.pallet(&self.pallet)?;
         let pallet_index = pallet.index();
         let call_ty = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;

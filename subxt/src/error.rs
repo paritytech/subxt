@@ -16,17 +16,11 @@ pub use scale_value::scale::DecodeError;
 pub use sp_core::crypto::SecretStringError;
 pub use sp_runtime::transaction_validity::TransactionValidityError;
 
-/// An error that may contain some runtime error `E`
-pub type Error<E> = GenericError<RuntimeError<E>>;
-
-/// An error that will never contain a runtime error.
-pub type BasicError = GenericError<std::convert::Infallible>;
-
 /// The underlying error enum, generic over the type held by the `Runtime`
-/// variant. Prefer to use the [`Error<E>`] and [`BasicError`] aliases over
+/// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
 /// using this type directly.
 #[derive(Debug, thiserror::Error)]
-pub enum GenericError<E> {
+pub enum Error {
     /// Io error.
     #[error("Io error: {0}")]
     Io(#[from] std::io::Error),
@@ -53,100 +47,60 @@ pub enum GenericError<E> {
     Metadata(#[from] MetadataError),
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
-    Runtime(E),
+    Runtime(DispatchError),
     /// Events decoding error.
     #[error("Events decoding error: {0}")]
     EventsDecoding(#[from] DecodeError),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
-    #[error("Module error: {0}")]
-    /// An error from the `Module` variant of the generated `DispatchError`.
-    Module(ModuleError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
 }
 
-impl<E> GenericError<E> {
-    /// [`GenericError`] is parameterised over the type that it holds in the `Runtime`
-    /// variant. This function allows us to map the Runtime error contained within (if present)
-    /// to a different type.
-    pub fn map_runtime_err<F, NewE>(self, f: F) -> GenericError<NewE>
-    where
-        F: FnOnce(E) -> NewE,
-    {
-        match self {
-            GenericError::Io(e) => GenericError::Io(e),
-            GenericError::Codec(e) => GenericError::Codec(e),
-            GenericError::Rpc(e) => GenericError::Rpc(e),
-            GenericError::Serialization(e) => GenericError::Serialization(e),
-            GenericError::SecretString(e) => GenericError::SecretString(e),
-            GenericError::Invalid(e) => GenericError::Invalid(e),
-            GenericError::InvalidMetadata(e) => GenericError::InvalidMetadata(e),
-            GenericError::Metadata(e) => GenericError::Metadata(e),
-            GenericError::EventsDecoding(e) => GenericError::EventsDecoding(e),
-            GenericError::Transaction(e) => GenericError::Transaction(e),
-            GenericError::Module(e) => GenericError::Module(e),
-            GenericError::Other(e) => GenericError::Other(e),
-            // This is the only branch we really care about:
-            GenericError::Runtime(e) => GenericError::Runtime(f(e)),
-        }
-    }
-}
-
-impl BasicError {
-    /// Convert an [`BasicError`] into any
-    /// arbitrary [`Error<E>`].
-    pub fn into_error<E>(self) -> Error<E> {
-        self.map_runtime_err(|e| match e {})
-    }
-}
-
-impl<E> From<BasicError> for Error<E> {
-    fn from(err: BasicError) -> Self {
-        err.into_error()
-    }
-}
-
-impl<E> From<SecretStringError> for GenericError<E> {
+impl From<SecretStringError> for Error {
     fn from(error: SecretStringError) -> Self {
-        GenericError::SecretString(error)
+        Error::SecretString(error)
     }
 }
 
-impl<E> From<TransactionValidityError> for GenericError<E> {
+impl From<TransactionValidityError> for Error {
     fn from(error: TransactionValidityError) -> Self {
-        GenericError::Invalid(error)
+        Error::Invalid(error)
     }
 }
 
-impl<E> From<&str> for GenericError<E> {
+impl From<&str> for Error {
     fn from(error: &str) -> Self {
-        GenericError::Other(error.into())
+        Error::Other(error.into())
     }
 }
 
-impl<E> From<String> for GenericError<E> {
+impl From<String> for Error {
     fn from(error: String) -> Self {
-        GenericError::Other(error)
+        Error::Other(error)
     }
 }
 
-/// This is used in the place of the `E` in [`GenericError<E>`] when we may have a
-/// Runtime Error. We use this wrapper so that it is possible to implement
-/// `From<Error<Infallible>` for `Error<RuntimeError<E>>`.
-///
-/// This should not be used as a type; prefer to use the alias [`Error<E>`] when referring
-/// to errors which may contain some Runtime error `E`.
-#[derive(Clone, Debug, PartialEq)]
-pub struct RuntimeError<E>(pub E);
-
-impl<E> RuntimeError<E> {
-    /// Extract the actual runtime error from this struct.
-    pub fn inner(self) -> E {
-        self.0
+impl From<DispatchError> for Error {
+    fn from(error: DispatchError) -> Self {
+        Error::Runtime(error)
     }
+}
+
+/// This is our attempt to decode a runtime DispatchError. We either
+/// successfully decode it into a [`ModuleError`], or we fail and keep
+/// hold of the bytes, which we can attempt to decode if we have an
+/// appropriate static type to hand.
+#[derive(Debug, thiserror::Error)]
+pub enum DispatchError {
+    /// An error was emitted from a specific pallet/module.
+    #[error("Module error: {0}")]
+    Module(ModuleError),
+    /// Some other error was emitted.
+    #[error("Undecoded dispatch error: {0:?}")]
+    Other(Vec<u8>),
 }
 
 /// Transaction error.
@@ -194,13 +148,4 @@ impl ModuleErrorData {
         // Error index is utilized as the first byte from the error array.
         self.error[0]
     }
-}
-
-/// This trait is automatically implemented for the generated `DispatchError`,
-/// so that we can pluck out information about the `Module` error variant, if`
-/// it exists.
-pub trait HasModuleError {
-    /// If the error has a `Module` variant, return a tuple of the
-    /// pallet index and error index. Else, return `None`.
-    fn module_error_data(&self) -> Option<ModuleErrorData>;
 }

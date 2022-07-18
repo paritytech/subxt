@@ -9,7 +9,7 @@ use super::{
     StaticEvent,
 };
 use crate::{
-    error::BasicError,
+    error::Error,
     Config,
     Metadata,
 };
@@ -83,8 +83,7 @@ impl<T: Config> Events<T> {
     /// details. If an error occurs, all subsequent iterations return `None`.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + Send + Sync + 'static
-    {
+    ) -> impl Iterator<Item = Result<EventDetails, Error>> + Send + Sync + 'static {
         let event_bytes = self.event_bytes.clone();
         let num_events = self.num_events;
 
@@ -122,9 +121,7 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<Ev: StaticEvent>(
-        &self,
-    ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
         self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()
@@ -133,12 +130,12 @@ impl<T: Config> Events<T> {
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
-    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
         self.find::<Ev>().next().transpose()
     }
 
     /// Find an event that decodes to the type provided. Returns true if it was found.
-    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, BasicError> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
@@ -184,7 +181,7 @@ fn decode_raw_event_details<T: Config>(
     metadata: &Metadata,
     index: u32,
     input: &mut &[u8],
-) -> Result<EventDetails, BasicError> {
+) -> Result<EventDetails, Error> {
     // Decode basic event details:
     let phase = Phase::decode(input)?;
     let pallet_index = input.read_byte()?;

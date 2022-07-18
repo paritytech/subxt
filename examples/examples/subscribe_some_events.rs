@@ -14,7 +14,7 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
-    extrinsic::PairSigner,
+    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };

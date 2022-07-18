@@ -17,6 +17,7 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
+use subxt::error::DispatchError;
 
 #[tokio::test]
 async fn insert_key() {
@@ -206,7 +207,7 @@ async fn dry_run_fails() {
         .wait_for_finalized_success()
         .await;
 
-    if let Err(subxt::error::Error::Module(err)) = res {
+    if let Err(subxt::error::Error::Runtime(DispatchError::Module(err))) = res {
         assert_eq!(err.pallet, "Balances");
         assert_eq!(err.error, "InsufficientBalance");
     } else {

@@ -9,11 +9,10 @@ use std::task::Poll;
 use crate::{
     client::OnlineClientT,
     error::{
-        BasicError,
+        DispatchError,
         Error,
-        HasModuleError,
         ModuleError,
-        RuntimeError,
+        ModuleErrorData,
         TransactionError,
     },
     events::{
@@ -24,8 +23,8 @@ use crate::{
         Phase,
         StaticEvent,
     },
-    rpc::SubstrateTransactionStatus,
-    utils::PhantomDataSendSync,
+    metadata::Metadata,
+    rpc::SubstrateTxStatus,
     Config,
 };
 use codec::Decode;
@@ -38,6 +37,7 @@ use jsonrpsee::core::{
     client::Subscription as RpcSubscription,
     Error as RpcError,
 };
+use scale_info::TypeDef;
 use sp_runtime::traits::Hash;
 
 pub use sp_runtime::traits::SignedExtension;
@@ -45,24 +45,21 @@ pub use sp_runtime::traits::SignedExtension;
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub struct TransactionProgress<T: Config, C, Err> {
-    sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
+pub struct TxProgress<T: Config, C> {
+    sub: Option<RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
-    _error: PhantomDataSendSync<Err>,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<T: Config, C, Err> Unpin for TransactionProgress<T, C, Err> {}
+impl<T: Config, C> Unpin for TxProgress<T, C> {}
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
-    TransactionProgress<T, C, Err>
-{
-    /// Instantiate a new [`TransactionProgress`] from a custom subscription.
+impl<T: Config, C> TxProgress<T, C> {
+    /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
-        sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
+        sub: RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>,
         client: C,
         ext_hash: T::Hash,
     ) -> Self {
@@ -70,41 +67,36 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
             sub: Some(sub),
             client,
             ext_hash,
-            _error: PhantomDataSendSync::new(),
         }
     }
+}
 
+impl<T: Config, C: OnlineClientT<T>> TxProgress<T, C> {
     /// Return the next transaction status when it's emitted. This just delegates to the
-    /// [`futures::Stream`] implementation for [`TransactionProgress`], but allows you to
+    /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
     /// avoid importing that trait if you don't otherwise need it.
-    pub async fn next_item(
-        &mut self,
-    ) -> Option<Result<TransactionStatus<T, C, Err>, BasicError>> {
+    pub async fn next_item(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
         self.next().await
     }
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
-    /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
+    /// an [`TxInBlock`] instance when this happens, or an error if there was a problem
     /// waiting for this to happen.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_in_block(
-        mut self,
-    ) -> Result<TransactionInBlock<T, C, Err>, BasicError> {
+    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
-                TransactionStatus::InBlock(s) | TransactionStatus::Finalized(s) => {
-                    return Ok(s)
-                }
+                TxStatus::InBlock(s) | TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionStatus::FinalityTimeout(_) => {
+                TxStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
                 // Ignore anything else and wait for next status event:
@@ -114,25 +106,23 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
-    /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
+    /// Wait for the transaction to be finalized, and return a [`TxInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized(
-        mut self,
-    ) -> Result<TransactionInBlock<T, C, Err>, BasicError> {
+    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized! Return.
-                TransactionStatus::Finalized(s) => return Ok(s),
+                TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionStatus::FinalityTimeout(_) => {
+                TxStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
                 // Ignore and wait for next status event:
@@ -147,24 +137,20 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
     /// as well as a couple of other details (block hash and extrinsic hash).
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TransactionProgress::next_item()`] instead.
+    /// use [`TxProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(
-        self,
-    ) -> Result<TransactionEvents<T>, Error<Err>> {
+    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_finalized_success(self) -> Result<TxEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
-    for TransactionProgress<T, C, Err>
-{
-    type Item = Result<TransactionStatus<T, C, Err>, BasicError>;
+impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
+    type Item = Result<TxStatus<T, C>, Error>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -179,28 +165,22 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
             .map_err(|e| e.into())
             .map_ok(|status| {
                 match status {
-                    SubstrateTransactionStatus::Future => TransactionStatus::Future,
-                    SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
-                    SubstrateTransactionStatus::Broadcast(peers) => {
-                        TransactionStatus::Broadcast(peers)
-                    }
-                    SubstrateTransactionStatus::InBlock(hash) => {
-                        TransactionStatus::InBlock(TransactionInBlock::new(
+                    SubstrateTxStatus::Future => TxStatus::Future,
+                    SubstrateTxStatus::Ready => TxStatus::Ready,
+                    SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
+                    SubstrateTxStatus::InBlock(hash) => {
+                        TxStatus::InBlock(TxInBlock::new(
                             hash,
                             self.ext_hash,
                             self.client.clone(),
                         ))
                     }
-                    SubstrateTransactionStatus::Retracted(hash) => {
-                        TransactionStatus::Retracted(hash)
-                    }
-                    SubstrateTransactionStatus::Usurped(hash) => {
-                        TransactionStatus::Usurped(hash)
-                    }
-                    SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
-                    SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
+                    SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
+                    SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
+                    SubstrateTxStatus::Dropped => TxStatus::Dropped,
+                    SubstrateTxStatus::Invalid => TxStatus::Invalid,
                     // Only the following statuses are actually considered "final" (see the substrate
-                    // docs on `TransactionStatus`). Basically, either the transaction makes it into a
+                    // docs on `TxStatus`). Basically, either the transaction makes it into a
                     // block, or we eventually give up on waiting for it to make it into a block.
                     // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
                     //
@@ -208,13 +188,13 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
                     // nonce might still be valid on some fork on another node which ends up being finalized.
                     // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
                     // and make it into a block, on another node. Likewise with `Usurped`.
-                    SubstrateTransactionStatus::FinalityTimeout(hash) => {
+                    SubstrateTxStatus::FinalityTimeout(hash) => {
                         self.sub = None;
-                        TransactionStatus::FinalityTimeout(hash)
+                        TxStatus::FinalityTimeout(hash)
                     }
-                    SubstrateTransactionStatus::Finalized(hash) => {
+                    SubstrateTxStatus::Finalized(hash) => {
                         self.sub = None;
-                        TransactionStatus::Finalized(TransactionInBlock::new(
+                        TxStatus::Finalized(TxInBlock::new(
                             hash,
                             self.ext_hash,
                             self.client.clone(),
@@ -225,12 +205,12 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
     }
 }
 
-//* Dev note: The below is adapted from the substrate docs on `TransactionStatus`, which this
-//* enum was adapted from (and which is an exact copy of `SubstrateTransactionStatus` in this crate).
+//* Dev note: The below is adapted from the substrate docs on `TxStatus`, which this
+//* enum was adapted from (and which is an exact copy of `SubstrateTxStatus` in this crate).
 //* Note that the number of finality watchers is, at the time of writing, found in the constant
 //* `MAX_FINALITY_WATCHERS` in the `sc_transaction_pool` crate.
 //*
-/// Possible transaction statuses returned from our [`TransactionProgress::next_item()`] call.
+/// Possible transaction statuses returned from our [`TxProgress::next_item()`] call.
 ///
 /// These status events can be grouped based on their kinds as:
 ///
@@ -273,7 +253,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
 /// or that finality gadget is lagging behind.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub enum TransactionStatus<T: Config, C, Err> {
+pub enum TxStatus<T: Config, C> {
     /// The transaction is part of the "future" queue.
     Future,
     /// The transaction is part of the "ready" queue.
@@ -281,7 +261,7 @@ pub enum TransactionStatus<T: Config, C, Err> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// The transaction has been included in a block with given hash.
-    InBlock(TransactionInBlock<T, C, Err>),
+    InBlock(TxInBlock<T, C>),
     /// The block this transaction was included in has been retracted,
     /// probably because it did not make it onto the blocks which were
     /// finalized.
@@ -290,7 +270,7 @@ pub enum TransactionStatus<T: Config, C, Err> {
     /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
     /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TransactionInBlock<T, C, Err>),
+    Finalized(TxInBlock<T, C>),
     /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
@@ -300,10 +280,10 @@ pub enum TransactionStatus<T: Config, C, Err> {
     Invalid,
 }
 
-impl<T: Config, C, Err: Decode> TransactionStatus<T, C, Err> {
+impl<T: Config, C> TxStatus<T, C> {
     /// A convenience method to return the `Finalized` details. Returns
-    /// [`None`] if the enum variant is not [`TransactionStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, C, Err>> {
+    /// [`None`] if the enum variant is not [`TxStatus::Finalized`].
+    pub fn as_finalized(&self) -> Option<&TxInBlock<T, C>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None,
@@ -311,8 +291,8 @@ impl<T: Config, C, Err: Decode> TransactionStatus<T, C, Err> {
     }
 
     /// A convenience method to return the `InBlock` details. Returns
-    /// [`None`] if the enum variant is not [`TransactionStatus::InBlock`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, C, Err>> {
+    /// [`None`] if the enum variant is not [`TxStatus::InBlock`].
+    pub fn as_in_block(&self) -> Option<&TxInBlock<T, C>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None,
@@ -323,22 +303,18 @@ impl<T: Config, C, Err: Decode> TransactionStatus<T, C, Err> {
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub struct TransactionInBlock<T: Config, C, Err> {
+pub struct TxInBlock<T: Config, C> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: C,
-    _error: PhantomDataSendSync<Err>,
 }
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
-    TransactionInBlock<T, C, Err>
-{
+impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
         Self {
             block_hash,
             ext_hash,
             client,
-            _error: PhantomDataSendSync::new(),
         }
     }
 
@@ -360,33 +336,21 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
     /// **Note:** If multiple `ExtrinsicFailed` errors are returned (for instance
     /// because a pallet chooses to emit one as an event, which is considered
     /// abnormal behaviour), it is not specified which of the errors is returned here.
-    /// You can use [`TransactionInBlock::fetch_events`] instead if you'd like to
+    /// You can use [`TxInBlock::fetch_events`] instead if you'd like to
     /// work with multiple "error" events.
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error<Err>> {
+    pub async fn wait_for_success(&self) -> Result<TxEvents<T>, Error> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
         for ev in events.iter() {
             let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
-                let dispatch_error = Err::decode(&mut &*ev.bytes)?;
-                if let Some(error_data) = dispatch_error.module_error_data() {
-                    // Error index is utilized as the first byte from the error array.
-                    let metadata = self.client.metadata();
-                    let details = metadata
-                        .error(error_data.pallet_index, error_data.error_index())?;
-                    return Err(Error::Module(ModuleError {
-                        pallet: details.pallet().to_string(),
-                        error: details.error().to_string(),
-                        description: details.description().to_vec(),
-                        error_data,
-                    }))
-                } else {
-                    return Err(Error::Runtime(RuntimeError(dispatch_error)))
-                }
+                let dispatch_error =
+                    decode_dispatch_error(&self.client.metadata(), &ev.bytes);
+                return Err(dispatch_error.into())
             }
         }
 
@@ -399,13 +363,13 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
+    pub async fn fetch_events(&self) -> Result<TxEvents<T>, Error> {
         let block = self
             .client
             .rpc()
             .block(Some(self.block_hash))
             .await?
-            .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
 
         let extrinsic_idx = block.block.extrinsics
             .iter()
@@ -415,13 +379,13 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
             })
             // If we successfully obtain the block hash we think contains our
             // extrinsic, the extrinsic should be in there somewhere..
-            .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
 
         let events = EventsClient::new(self.client.clone())
             .at(self.block_hash)
             .await?;
 
-        Ok(TransactionEvents {
+        Ok(TxEvents {
             ext_hash: self.ext_hash,
             ext_idx: extrinsic_idx as u32,
             events,
@@ -433,13 +397,13 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
 /// We can iterate over the events, or look for a specific one.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionEvents<T: Config> {
+pub struct TxEvents<T: Config> {
     ext_hash: T::Hash,
     ext_idx: u32,
     events: Events<T>,
 }
 
-impl<T: Config> TransactionEvents<T> {
+impl<T: Config> TxEvents<T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.events.block_hash()
@@ -459,7 +423,7 @@ impl<T: Config> TransactionEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, Error>> + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
@@ -471,9 +435,7 @@ impl<T: Config> TransactionEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: StaticEvent>(
-        &self,
-    ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
         self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()
@@ -485,7 +447,7 @@ impl<T: Config> TransactionEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find_first()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
         self.find::<Ev>().next().transpose()
     }
 
@@ -493,7 +455,115 @@ impl<T: Config> TransactionEvents<T> {
     ///
     /// This works in the same way that [`events::Events::has()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, BasicError> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
+}
+
+// Attempt to decode a DispatchError, returning either the ModuleError it decodes to,
+// along with additional details on the error, or returning the raw bytes to work with
+// downstream if we couldn't decode it.
+fn decode_dispatch_error(metadata: &Metadata, bytes: &[u8]) -> DispatchError {
+    let dispatch_error_ty_id = match metadata.dispatch_error_ty() {
+        Some(id) => id,
+        None => {
+            tracing::warn!(
+                "Can't decode error: sp_runtime::DispatchError was not found in Metadata"
+            );
+            return DispatchError::Other(bytes.to_vec())
+        }
+    };
+
+    let dispatch_error_ty = match metadata.types().resolve(dispatch_error_ty_id) {
+        Some(ty) => ty,
+        None => {
+            tracing::warn!("Can't decode error: sp_runtime::DispatchError type ID doesn't resolve to a known type");
+            return DispatchError::Other(bytes.to_vec())
+        }
+    };
+
+    let variant = match dispatch_error_ty.type_def() {
+        TypeDef::Variant(var) => var,
+        _ => {
+            tracing::warn!(
+                "Can't decode error: sp_runtime::DispatchError type is not a Variant"
+            );
+            return DispatchError::Other(bytes.to_vec())
+        }
+    };
+
+    let module_variant_idx = variant
+        .variants()
+        .iter()
+        .find(|v| v.name() == "Module")
+        .map(|v| v.index());
+    let module_variant_idx = match module_variant_idx {
+        Some(idx) => idx,
+        None => {
+            tracing::warn!("Can't decode error: sp_runtime::DispatchError does not have a 'Module' variant");
+            return DispatchError::Other(bytes.to_vec())
+        }
+    };
+
+    // If the error bytes don't correspond to a ModuleError, just return the bytes.
+    // This is perfectly reasonable and expected, so no logging.
+    if bytes[0] != module_variant_idx {
+        return DispatchError::Other(bytes.to_vec())
+    }
+
+    // The remaining bytes are the module error, all being well:
+    let bytes = &bytes[1..];
+
+    // The oldest and second oldest type of error decode to this shape:
+    #[derive(Decode)]
+    struct LegacyModuleError {
+        index: u8,
+        error: u8,
+    }
+
+    // The newer case expands the error for forward compat:
+    #[derive(Decode)]
+    struct CurrentModuleError {
+        index: u8,
+        error: [u8; 4],
+    }
+
+    // try to decode into the new shape, or the old if that doesn't work
+    let err = match CurrentModuleError::decode(&mut &*bytes) {
+        Ok(e) => e,
+        Err(_) => {
+            let old_e = match LegacyModuleError::decode(&mut &*bytes) {
+                Ok(err) => err,
+                Err(_) => {
+                    tracing::warn!("Can't decode error: sp_runtime::DispatchError does not match known formats");
+                    return DispatchError::Other(bytes.to_vec())
+                }
+            };
+            CurrentModuleError {
+                index: old_e.index,
+                error: [old_e.error, 0, 0, 0],
+            }
+        }
+    };
+    println!(
+        "ERROR: pallet {:?} err {:?}, bytes: {bytes:?}",
+        err.index, err.error
+    );
+    let error_details = match metadata.error(err.index, err.error[0]) {
+        Ok(details) => details,
+        Err(_) => {
+            tracing::warn!("Can't decode error: sp_runtime::DispatchError::Module details do not match known information");
+            return DispatchError::Other(bytes.to_vec())
+        }
+    };
+
+    DispatchError::Module(ModuleError {
+        pallet: error_details.pallet().to_string(),
+        error: error_details.error().to_string(),
+        description: error_details.docs().to_vec(),
+        error_data: ModuleErrorData {
+            pallet_index: err.index,
+            error: err.error,
+        },
+    })
 }

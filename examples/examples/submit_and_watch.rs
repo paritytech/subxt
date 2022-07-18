@@ -13,7 +13,7 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::PairSigner,
+    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -127,7 +127,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
 
     while let Some(ev) = balance_transfer_progress.next().await {
         let ev = ev?;
-        use subxt::extrinsic::TransactionStatus::*;
+        use subxt::tx::TxStatus::*;
 
         // Made it into a block, but not finalized.
         if let InBlock(details) = ev {

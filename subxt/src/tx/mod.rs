@@ -20,8 +20,9 @@
 
 mod params;
 mod signer;
-mod transaction;
 mod tx_client;
+mod tx_payload;
+mod tx_progress;
 
 pub use self::{
     params::{
@@ -40,15 +41,18 @@ pub use self::{
         PairSigner,
         Signer,
     },
-    transaction::{
-        TransactionEvents,
-        TransactionInBlock,
-        TransactionProgress,
-        TransactionStatus,
-    },
     tx_client::{
         SignedSubmittableExtrinsic,
-        SubmittableExtrinsic,
         TxClient,
+    },
+    tx_payload::{
+        StaticTxPayload,
+        TxPayload,
+    },
+    tx_progress::{
+        TxEvents,
+        TxInBlock,
+        TxProgress,
+        TxStatus,
     },
 };

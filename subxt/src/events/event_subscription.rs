@@ -6,7 +6,7 @@
 
 use crate::{
     client::OnlineClientT,
-    error::BasicError,
+    error::Error,
     events::EventsClient,
     Config,
 };
@@ -35,7 +35,7 @@ pub use super::{
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe_finalized`, and is exposed to be used in codegen.
 #[doc(hidden)]
-pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, BasicError>>;
+pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, Error>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and is exposed to be used in codegen.
@@ -50,12 +50,10 @@ pub struct EventSubscription<T: Config, Client, Sub> {
     client: Client,
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
-    at: Option<
-        std::pin::Pin<Box<dyn Future<Output = Result<Events<T>, BasicError>> + Send>>,
-    >,
+    at: Option<std::pin::Pin<Box<dyn Future<Output = Result<Events<T>, Error>> + Send>>>,
 }
 
-impl<T: Config, Client, Sub, E: Into<BasicError>> EventSubscription<T, Client, Sub>
+impl<T: Config, Client, Sub, E: Into<Error>> EventSubscription<T, Client, Sub>
 where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
@@ -119,7 +117,7 @@ impl<T: Config, Client, Sub: Unpin> Unpin for EventSubscription<T, Client, Sub> 
 // way to roughly implement the following function:
 //
 // ```
-// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, BasicError>> + '_ {
+// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, Error>> + '_ {
 //     use futures::StreamExt;
 //     block_sub.then(move |block_header_res| async move {
 //         use sp_runtime::traits::Header;
@@ -137,9 +135,9 @@ where
     T: Config,
     Client: OnlineClientT<T>,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
-    E: Into<BasicError>,
+    E: Into<Error>,
 {
-    type Item = Result<Events<T>, BasicError>;
+    type Item = Result<Events<T>, Error>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,

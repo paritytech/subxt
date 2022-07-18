@@ -6,7 +6,6 @@ use crate::{
     node_runtime::{
         self,
         system,
-        DispatchError,
     },
     pair_signer,
     test_context,
@@ -15,7 +14,7 @@ use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
 
 #[tokio::test]
-async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_account() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -33,7 +32,7 @@ async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
+async fn tx_remark_with_event() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 

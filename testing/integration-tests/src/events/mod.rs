@@ -17,7 +17,7 @@ use sp_keyring::AccountKeyring;
 
 // Check that we can subscribe to non-finalized block events.
 #[tokio::test]
-async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
+async fn non_finalized_block_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -35,7 +35,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 
 // Check that we can subscribe to finalized block events.
 #[tokio::test]
-async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
+async fn finalized_block_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -55,7 +55,7 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // Check that our subscription actually keeps producing events for
 // a few blocks.
 #[tokio::test]
-async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
+async fn subscription_produces_events_each_block() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -85,7 +85,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 // Check that our subscription receives events, and we can filter them based on
 // it's Stream impl, and ultimately see the event we expect.
 #[tokio::test]
-async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
+async fn balance_transfer_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -127,7 +127,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 }
 
 #[tokio::test]
-async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicError> {
+async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -195,7 +195,7 @@ async fn check_events_are_sendable() {
             // requires Send. This will lead to a compile error.
         }
 
-        Ok::<_, subxt::BasicError>(())
+        Ok::<_, subxt::Error>(())
     });
 
     // Check that FilterEvents can be used across await points.
@@ -215,6 +215,6 @@ async fn check_events_are_sendable() {
             // requires Send; This will lead to a compile error.
         }
 
-        Ok::<_, subxt::BasicError>(())
+        Ok::<_, subxt::Error>(())
     });
 }

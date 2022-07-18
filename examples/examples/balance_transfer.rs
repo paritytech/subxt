@@ -12,7 +12,7 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::PairSigner,
+    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };

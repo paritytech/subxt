@@ -224,16 +224,11 @@ pub mod api {
                 pub fn fill_block(
                     &self,
                     ratio: runtime_types::sp_arithmetic::per_things::Perbill,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<FillBlock>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "fill_block",
-                            data: FillBlock { ratio },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<FillBlock> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "fill_block",
+                        FillBlock { ratio },
                         [
                             48u8, 18u8, 205u8, 90u8, 222u8, 4u8, 20u8, 251u8, 173u8,
                             76u8, 167u8, 4u8, 83u8, 203u8, 160u8, 89u8, 132u8, 218u8,
@@ -250,16 +245,11 @@ pub mod api {
                 pub fn remark(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Remark>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "remark",
-                            data: Remark { remark },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Remark> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "remark",
+                        Remark { remark },
                         [
                             101u8, 80u8, 195u8, 226u8, 224u8, 247u8, 60u8, 128u8, 3u8,
                             101u8, 51u8, 147u8, 96u8, 126u8, 76u8, 230u8, 194u8, 227u8,
@@ -272,16 +262,11 @@ pub mod api {
                 pub fn set_heap_pages(
                     &self,
                     pages: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHeapPages>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "set_heap_pages",
-                            data: SetHeapPages { pages },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHeapPages> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "set_heap_pages",
+                        SetHeapPages { pages },
                         [
                             43u8, 103u8, 128u8, 49u8, 156u8, 136u8, 11u8, 204u8, 80u8,
                             6u8, 244u8, 86u8, 171u8, 44u8, 140u8, 225u8, 142u8, 198u8,
@@ -305,16 +290,11 @@ pub mod api {
                 pub fn set_code(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetCode>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "set_code",
-                            data: SetCode { code },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetCode> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "set_code",
+                        SetCode { code },
                         [
                             27u8, 104u8, 244u8, 205u8, 188u8, 254u8, 121u8, 13u8, 106u8,
                             120u8, 244u8, 108u8, 97u8, 84u8, 100u8, 68u8, 26u8, 69u8,
@@ -335,16 +315,11 @@ pub mod api {
                 pub fn set_code_without_checks(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetCodeWithoutChecks>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "set_code_without_checks",
-                            data: SetCodeWithoutChecks { code },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetCodeWithoutChecks> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "set_code_without_checks",
+                        SetCodeWithoutChecks { code },
                         [
                             102u8, 160u8, 125u8, 235u8, 30u8, 23u8, 45u8, 239u8, 112u8,
                             148u8, 159u8, 158u8, 42u8, 93u8, 206u8, 94u8, 80u8, 250u8,
@@ -360,16 +335,11 @@ pub mod api {
                         ::std::vec::Vec<::core::primitive::u8>,
                         ::std::vec::Vec<::core::primitive::u8>,
                     )>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetStorage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "set_storage",
-                            data: SetStorage { items },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetStorage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "set_storage",
+                        SetStorage { items },
                         [
                             74u8, 43u8, 106u8, 255u8, 50u8, 151u8, 192u8, 155u8, 14u8,
                             90u8, 19u8, 45u8, 165u8, 16u8, 235u8, 242u8, 21u8, 131u8,
@@ -382,16 +352,11 @@ pub mod api {
                 pub fn kill_storage(
                     &self,
                     keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<KillStorage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "kill_storage",
-                            data: KillStorage { keys },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<KillStorage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "kill_storage",
+                        KillStorage { keys },
                         [
                             174u8, 174u8, 13u8, 174u8, 75u8, 138u8, 128u8, 235u8, 222u8,
                             216u8, 85u8, 18u8, 198u8, 1u8, 138u8, 70u8, 19u8, 108u8,
@@ -408,16 +373,11 @@ pub mod api {
                     &self,
                     prefix: ::std::vec::Vec<::core::primitive::u8>,
                     subkeys: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<KillPrefix>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "kill_prefix",
-                            data: KillPrefix { prefix, subkeys },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<KillPrefix> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "kill_prefix",
+                        KillPrefix { prefix, subkeys },
                         [
                             203u8, 116u8, 217u8, 42u8, 154u8, 215u8, 77u8, 217u8, 13u8,
                             22u8, 193u8, 2u8, 128u8, 115u8, 179u8, 115u8, 187u8, 218u8,
@@ -430,16 +390,11 @@ pub mod api {
                 pub fn remark_with_event(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemarkWithEvent>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "System",
-                            call: "remark_with_event",
-                            data: RemarkWithEvent { remark },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemarkWithEvent> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "System",
+                        "remark_with_event",
+                        RemarkWithEvent { remark },
                         [
                             123u8, 225u8, 180u8, 179u8, 144u8, 74u8, 27u8, 85u8, 101u8,
                             75u8, 134u8, 44u8, 181u8, 25u8, 183u8, 158u8, 14u8, 213u8,
@@ -1284,20 +1239,15 @@ pub mod api {
                         runtime_types::polkadot_runtime::Call,
                         ::subxt::ext::sp_core::H256,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Schedule>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "schedule",
-                            data: Schedule {
-                                when,
-                                maybe_periodic,
-                                priority,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Schedule> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "schedule",
+                        Schedule {
+                            when,
+                            maybe_periodic,
+                            priority,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             137u8, 178u8, 250u8, 136u8, 93u8, 23u8, 136u8, 247u8, 212u8,
@@ -1312,16 +1262,11 @@ pub mod api {
                     &self,
                     when: ::core::primitive::u32,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Cancel>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "cancel",
-                            data: Cancel { when, index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Cancel> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "cancel",
+                        Cancel { when, index },
                         [
                             81u8, 251u8, 234u8, 17u8, 214u8, 75u8, 19u8, 59u8, 19u8,
                             30u8, 89u8, 74u8, 6u8, 216u8, 238u8, 165u8, 7u8, 19u8, 153u8,
@@ -1344,21 +1289,16 @@ pub mod api {
                         runtime_types::polkadot_runtime::Call,
                         ::subxt::ext::sp_core::H256,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ScheduleNamed>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "schedule_named",
-                            data: ScheduleNamed {
-                                id,
-                                when,
-                                maybe_periodic,
-                                priority,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ScheduleNamed> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "schedule_named",
+                        ScheduleNamed {
+                            id,
+                            when,
+                            maybe_periodic,
+                            priority,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             1u8, 236u8, 205u8, 140u8, 220u8, 43u8, 237u8, 225u8, 189u8,
@@ -1372,16 +1312,11 @@ pub mod api {
                 pub fn cancel_named(
                     &self,
                     id: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelNamed>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "cancel_named",
-                            data: CancelNamed { id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelNamed> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "cancel_named",
+                        CancelNamed { id },
                         [
                             42u8, 232u8, 92u8, 167u8, 113u8, 136u8, 7u8, 215u8, 88u8,
                             117u8, 74u8, 26u8, 225u8, 230u8, 244u8, 106u8, 150u8, 112u8,
@@ -1407,20 +1342,15 @@ pub mod api {
                         runtime_types::polkadot_runtime::Call,
                         ::subxt::ext::sp_core::H256,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ScheduleAfter>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "schedule_after",
-                            data: ScheduleAfter {
-                                after,
-                                maybe_periodic,
-                                priority,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ScheduleAfter> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "schedule_after",
+                        ScheduleAfter {
+                            after,
+                            maybe_periodic,
+                            priority,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             128u8, 226u8, 249u8, 226u8, 27u8, 178u8, 222u8, 22u8, 126u8,
@@ -1448,21 +1378,16 @@ pub mod api {
                         runtime_types::polkadot_runtime::Call,
                         ::subxt::ext::sp_core::H256,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ScheduleNamedAfter>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Scheduler",
-                            call: "schedule_named_after",
-                            data: ScheduleNamedAfter {
-                                id,
-                                after,
-                                maybe_periodic,
-                                priority,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ScheduleNamedAfter> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Scheduler",
+                        "schedule_named_after",
+                        ScheduleNamedAfter {
+                            id,
+                            after,
+                            maybe_periodic,
+                            priority,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             13u8, 12u8, 26u8, 103u8, 66u8, 180u8, 139u8, 149u8, 147u8,
@@ -1719,16 +1644,11 @@ pub mod api {
                 pub fn note_preimage(
                     &self,
                     bytes: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NotePreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Preimage",
-                            call: "note_preimage",
-                            data: NotePreimage { bytes },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<NotePreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Preimage",
+                        "note_preimage",
+                        NotePreimage { bytes },
                         [
                             77u8, 48u8, 104u8, 3u8, 254u8, 65u8, 106u8, 95u8, 204u8,
                             89u8, 149u8, 29u8, 144u8, 188u8, 99u8, 23u8, 146u8, 142u8,
@@ -1741,16 +1661,11 @@ pub mod api {
                 pub fn unnote_preimage(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<UnnotePreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Preimage",
-                            call: "unnote_preimage",
-                            data: UnnotePreimage { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<UnnotePreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Preimage",
+                        "unnote_preimage",
+                        UnnotePreimage { hash },
                         [
                             211u8, 204u8, 205u8, 58u8, 33u8, 179u8, 68u8, 74u8, 149u8,
                             138u8, 213u8, 45u8, 140u8, 27u8, 106u8, 81u8, 68u8, 212u8,
@@ -1766,16 +1681,11 @@ pub mod api {
                 pub fn request_preimage(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RequestPreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Preimage",
-                            call: "request_preimage",
-                            data: RequestPreimage { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RequestPreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Preimage",
+                        "request_preimage",
+                        RequestPreimage { hash },
                         [
                             195u8, 26u8, 146u8, 255u8, 79u8, 43u8, 73u8, 60u8, 115u8,
                             78u8, 99u8, 197u8, 137u8, 95u8, 139u8, 141u8, 79u8, 213u8,
@@ -1790,16 +1700,11 @@ pub mod api {
                 pub fn unrequest_preimage(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<UnrequestPreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Preimage",
-                            call: "unrequest_preimage",
-                            data: UnrequestPreimage { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<UnrequestPreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Preimage",
+                        "unrequest_preimage",
+                        UnrequestPreimage { hash },
                         [
                             143u8, 225u8, 239u8, 44u8, 237u8, 83u8, 18u8, 105u8, 101u8,
                             68u8, 111u8, 116u8, 66u8, 212u8, 63u8, 190u8, 38u8, 32u8,
@@ -2032,20 +1937,15 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReportEquivocation>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Babe",
-                            call: "report_equivocation",
-                            data: ReportEquivocation {
-                                equivocation_proof: ::std::boxed::Box::new(
-                                    equivocation_proof,
-                                ),
-                                key_owner_proof,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocation> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Babe",
+                        "report_equivocation",
+                        ReportEquivocation {
+                            equivocation_proof: ::std::boxed::Box::new(
+                                equivocation_proof,
+                            ),
+                            key_owner_proof,
                         },
                         [
                             177u8, 237u8, 107u8, 138u8, 237u8, 233u8, 30u8, 195u8, 112u8,
@@ -2067,20 +1967,16 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReportEquivocationUnsigned>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Babe",
-                            call: "report_equivocation_unsigned",
-                            data: ReportEquivocationUnsigned {
-                                equivocation_proof: ::std::boxed::Box::new(
-                                    equivocation_proof,
-                                ),
-                                key_owner_proof,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocationUnsigned>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Babe",
+                        "report_equivocation_unsigned",
+                        ReportEquivocationUnsigned {
+                            equivocation_proof: ::std::boxed::Box::new(
+                                equivocation_proof,
+                            ),
+                            key_owner_proof,
                         },
                         [
                             56u8, 103u8, 238u8, 118u8, 61u8, 192u8, 222u8, 87u8, 254u8,
@@ -2097,16 +1993,11 @@ pub mod api {
                 pub fn plan_config_change(
                     &self,
                     config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<PlanConfigChange>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Babe",
-                            call: "plan_config_change",
-                            data: PlanConfigChange { config },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<PlanConfigChange> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Babe",
+                        "plan_config_change",
+                        PlanConfigChange { config },
                         [
                             229u8, 157u8, 41u8, 58u8, 56u8, 4u8, 52u8, 107u8, 104u8,
                             20u8, 42u8, 110u8, 1u8, 17u8, 45u8, 196u8, 30u8, 135u8, 63u8,
@@ -2632,16 +2523,11 @@ pub mod api {
                 pub fn set(
                     &self,
                     now: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Set>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Timestamp",
-                            call: "set",
-                            data: Set { now },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Set> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Timestamp",
+                        "set",
+                        Set { now },
                         [
                             6u8, 97u8, 172u8, 236u8, 118u8, 238u8, 228u8, 114u8, 15u8,
                             115u8, 102u8, 85u8, 66u8, 151u8, 16u8, 33u8, 187u8, 17u8,
@@ -2805,16 +2691,11 @@ pub mod api {
                 pub fn claim(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Claim>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Indices",
-                            call: "claim",
-                            data: Claim { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Claim> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Indices",
+                        "claim",
+                        Claim { index },
                         [
                             5u8, 24u8, 11u8, 173u8, 226u8, 170u8, 0u8, 30u8, 193u8,
                             102u8, 214u8, 59u8, 252u8, 32u8, 221u8, 88u8, 196u8, 189u8,
@@ -2847,16 +2728,11 @@ pub mod api {
                     &self,
                     new: ::subxt::ext::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Transfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Indices",
-                            call: "transfer",
-                            data: Transfer { new, index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Indices",
+                        "transfer",
+                        Transfer { new, index },
                         [
                             229u8, 48u8, 45u8, 2u8, 206u8, 24u8, 60u8, 43u8, 202u8, 99u8,
                             80u8, 172u8, 62u8, 134u8, 224u8, 128u8, 107u8, 219u8, 57u8,
@@ -2886,16 +2762,11 @@ pub mod api {
                 pub fn free(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Free>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Indices",
-                            call: "free",
-                            data: Free { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Free> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Indices",
+                        "free",
+                        Free { index },
                         [
                             133u8, 202u8, 225u8, 127u8, 69u8, 145u8, 43u8, 13u8, 160u8,
                             248u8, 215u8, 243u8, 232u8, 166u8, 74u8, 203u8, 235u8, 138u8,
@@ -2930,16 +2801,11 @@ pub mod api {
                     new: ::subxt::ext::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
                     freeze: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceTransfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Indices",
-                            call: "force_transfer",
-                            data: ForceTransfer { new, index, freeze },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceTransfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Indices",
+                        "force_transfer",
+                        ForceTransfer { new, index, freeze },
                         [
                             2u8, 134u8, 200u8, 233u8, 224u8, 80u8, 237u8, 130u8, 28u8,
                             159u8, 130u8, 223u8, 124u8, 205u8, 248u8, 70u8, 246u8, 77u8,
@@ -2969,16 +2835,11 @@ pub mod api {
                 pub fn freeze(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Freeze>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Indices",
-                            call: "freeze",
-                            data: Freeze { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Freeze> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Indices",
+                        "freeze",
+                        Freeze { index },
                         [
                             121u8, 45u8, 118u8, 2u8, 72u8, 48u8, 38u8, 7u8, 234u8, 204u8,
                             68u8, 20u8, 76u8, 251u8, 205u8, 246u8, 149u8, 31u8, 168u8,
@@ -3245,16 +3106,11 @@ pub mod api {
                         (),
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Transfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "transfer",
-                            data: Transfer { dest, value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "transfer",
+                        Transfer { dest, value },
                         [
                             111u8, 222u8, 32u8, 56u8, 171u8, 77u8, 252u8, 29u8, 194u8,
                             155u8, 200u8, 192u8, 198u8, 81u8, 23u8, 115u8, 236u8, 91u8,
@@ -3279,19 +3135,14 @@ pub mod api {
                     >,
                     new_free: ::core::primitive::u128,
                     new_reserved: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetBalance>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "set_balance",
-                            data: SetBalance {
-                                who,
-                                new_free,
-                                new_reserved,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetBalance> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "set_balance",
+                        SetBalance {
+                            who,
+                            new_free,
+                            new_reserved,
                         },
                         [
                             234u8, 215u8, 97u8, 98u8, 243u8, 199u8, 57u8, 76u8, 59u8,
@@ -3318,19 +3169,14 @@ pub mod api {
                         (),
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceTransfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "force_transfer",
-                            data: ForceTransfer {
-                                source,
-                                dest,
-                                value,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceTransfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "force_transfer",
+                        ForceTransfer {
+                            source,
+                            dest,
+                            value,
                         },
                         [
                             79u8, 174u8, 212u8, 108u8, 184u8, 33u8, 170u8, 29u8, 232u8,
@@ -3353,16 +3199,11 @@ pub mod api {
                         (),
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<TransferKeepAlive>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "transfer_keep_alive",
-                            data: TransferKeepAlive { dest, value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<TransferKeepAlive> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "transfer_keep_alive",
+                        TransferKeepAlive { dest, value },
                         [
                             112u8, 179u8, 75u8, 168u8, 193u8, 221u8, 9u8, 82u8, 190u8,
                             113u8, 253u8, 13u8, 130u8, 134u8, 170u8, 216u8, 136u8, 111u8,
@@ -3395,16 +3236,11 @@ pub mod api {
                         (),
                     >,
                     keep_alive: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<TransferAll>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "transfer_all",
-                            data: TransferAll { dest, keep_alive },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<TransferAll> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "transfer_all",
+                        TransferAll { dest, keep_alive },
                         [
                             46u8, 129u8, 29u8, 177u8, 221u8, 107u8, 245u8, 69u8, 238u8,
                             126u8, 145u8, 26u8, 219u8, 208u8, 14u8, 80u8, 149u8, 1u8,
@@ -3423,16 +3259,11 @@ pub mod api {
                         (),
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceUnreserve>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Balances",
-                            call: "force_unreserve",
-                            data: ForceUnreserve { who, amount },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceUnreserve> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Balances",
+                        "force_unreserve",
+                        ForceUnreserve { who, amount },
                         [
                             160u8, 146u8, 137u8, 76u8, 157u8, 187u8, 66u8, 148u8, 207u8,
                             76u8, 32u8, 254u8, 82u8, 215u8, 35u8, 161u8, 213u8, 52u8,
@@ -4030,16 +3861,11 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetUncles>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Authorship",
-                            call: "set_uncles",
-                            data: SetUncles { new_uncles },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetUncles> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Authorship",
+                        "set_uncles",
+                        SetUncles { new_uncles },
                         [
                             181u8, 70u8, 222u8, 83u8, 154u8, 215u8, 200u8, 64u8, 154u8,
                             228u8, 115u8, 247u8, 117u8, 89u8, 229u8, 102u8, 128u8, 189u8,
@@ -4453,19 +4279,14 @@ pub mod api {
                     payee: runtime_types::pallet_staking::RewardDestination<
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Bond>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "bond",
-                            data: Bond {
-                                controller,
-                                value,
-                                payee,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Bond> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "bond",
+                        Bond {
+                            controller,
+                            value,
+                            payee,
                         },
                         [
                             215u8, 211u8, 69u8, 215u8, 33u8, 158u8, 62u8, 3u8, 31u8,
@@ -4493,16 +4314,11 @@ pub mod api {
                 pub fn bond_extra(
                     &self,
                     max_additional: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<BondExtra>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "bond_extra",
-                            data: BondExtra { max_additional },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<BondExtra> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "bond_extra",
+                        BondExtra { max_additional },
                         [
                             60u8, 45u8, 82u8, 223u8, 113u8, 95u8, 0u8, 71u8, 59u8, 108u8,
                             228u8, 9u8, 95u8, 210u8, 113u8, 106u8, 252u8, 15u8, 19u8,
@@ -4533,16 +4349,11 @@ pub mod api {
                 pub fn unbond(
                     &self,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Unbond>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "unbond",
-                            data: Unbond { value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Unbond> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "unbond",
+                        Unbond { value },
                         [
                             85u8, 62u8, 34u8, 127u8, 60u8, 241u8, 134u8, 60u8, 125u8,
                             91u8, 31u8, 193u8, 50u8, 230u8, 237u8, 42u8, 114u8, 230u8,
@@ -4569,16 +4380,11 @@ pub mod api {
                 pub fn withdraw_unbonded(
                     &self,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<WithdrawUnbonded>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "withdraw_unbonded",
-                            data: WithdrawUnbonded { num_slashing_spans },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<WithdrawUnbonded> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "withdraw_unbonded",
+                        WithdrawUnbonded { num_slashing_spans },
                         [
                             95u8, 223u8, 122u8, 217u8, 76u8, 208u8, 86u8, 129u8, 31u8,
                             104u8, 70u8, 154u8, 23u8, 250u8, 165u8, 192u8, 149u8, 249u8,
@@ -4595,16 +4401,11 @@ pub mod api {
                 pub fn validate(
                     &self,
                     prefs: runtime_types::pallet_staking::ValidatorPrefs,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Validate>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "validate",
-                            data: Validate { prefs },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Validate> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "validate",
+                        Validate { prefs },
                         [
                             191u8, 116u8, 139u8, 35u8, 250u8, 211u8, 86u8, 240u8, 35u8,
                             9u8, 19u8, 44u8, 148u8, 35u8, 91u8, 106u8, 200u8, 172u8,
@@ -4632,16 +4433,11 @@ pub mod api {
                             (),
                         >,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Nominate>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "nominate",
-                            data: Nominate { targets },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Nominate> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "nominate",
+                        Nominate { targets },
                         [
                             112u8, 162u8, 70u8, 26u8, 74u8, 7u8, 188u8, 193u8, 210u8,
                             247u8, 27u8, 189u8, 133u8, 137u8, 33u8, 155u8, 255u8, 171u8,
@@ -4661,18 +4457,11 @@ pub mod api {
                 #[doc = "- Contains one read."]
                 #[doc = "- Writes are limited to the `origin` account key."]
                 #[doc = "# </weight>"]
-                pub fn chill(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Chill>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "chill",
-                            data: Chill {},
-                        },
+                pub fn chill(&self) -> ::subxt::tx::StaticTxPayload<Chill> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "chill",
+                        Chill {},
                         [
                             94u8, 20u8, 196u8, 31u8, 220u8, 125u8, 115u8, 167u8, 140u8,
                             3u8, 20u8, 132u8, 81u8, 120u8, 215u8, 166u8, 230u8, 56u8,
@@ -4702,16 +4491,11 @@ pub mod api {
                     payee: runtime_types::pallet_staking::RewardDestination<
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetPayee>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_payee",
-                            data: SetPayee { payee },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetPayee> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_payee",
+                        SetPayee { payee },
                         [
                             96u8, 8u8, 254u8, 164u8, 87u8, 46u8, 120u8, 11u8, 197u8,
                             63u8, 20u8, 178u8, 167u8, 236u8, 149u8, 245u8, 14u8, 171u8,
@@ -4742,16 +4526,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetController>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_controller",
-                            data: SetController { controller },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetController> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_controller",
+                        SetController { controller },
                         [
                             165u8, 250u8, 213u8, 32u8, 179u8, 163u8, 15u8, 35u8, 14u8,
                             152u8, 56u8, 171u8, 43u8, 101u8, 7u8, 167u8, 178u8, 60u8,
@@ -4771,16 +4550,11 @@ pub mod api {
                 pub fn set_validator_count(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetValidatorCount>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_validator_count",
-                            data: SetValidatorCount { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetValidatorCount> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_validator_count",
+                        SetValidatorCount { new },
                         [
                             55u8, 232u8, 95u8, 66u8, 228u8, 217u8, 11u8, 27u8, 3u8,
                             202u8, 199u8, 242u8, 70u8, 160u8, 250u8, 187u8, 194u8, 91u8,
@@ -4799,16 +4573,12 @@ pub mod api {
                 pub fn increase_validator_count(
                     &self,
                     additional: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<IncreaseValidatorCount>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "increase_validator_count",
-                            data: IncreaseValidatorCount { additional },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<IncreaseValidatorCount>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "increase_validator_count",
+                        IncreaseValidatorCount { additional },
                         [
                             239u8, 184u8, 155u8, 213u8, 25u8, 22u8, 193u8, 13u8, 102u8,
                             192u8, 82u8, 153u8, 249u8, 192u8, 60u8, 158u8, 8u8, 78u8,
@@ -4827,16 +4597,11 @@ pub mod api {
                 pub fn scale_validator_count(
                     &self,
                     factor: runtime_types::sp_arithmetic::per_things::Percent,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ScaleValidatorCount>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "scale_validator_count",
-                            data: ScaleValidatorCount { factor },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ScaleValidatorCount> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "scale_validator_count",
+                        ScaleValidatorCount { factor },
                         [
                             198u8, 68u8, 227u8, 94u8, 110u8, 157u8, 209u8, 217u8, 112u8,
                             37u8, 78u8, 142u8, 12u8, 193u8, 219u8, 167u8, 149u8, 112u8,
@@ -4860,18 +4625,11 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write: ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_no_eras(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceNoEras>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "force_no_eras",
-                            data: ForceNoEras {},
-                        },
+                pub fn force_no_eras(&self) -> ::subxt::tx::StaticTxPayload<ForceNoEras> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "force_no_eras",
+                        ForceNoEras {},
                         [
                             16u8, 81u8, 207u8, 168u8, 23u8, 236u8, 11u8, 75u8, 141u8,
                             107u8, 92u8, 2u8, 53u8, 111u8, 252u8, 116u8, 91u8, 120u8,
@@ -4896,18 +4654,11 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_new_era(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceNewEra>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "force_new_era",
-                            data: ForceNewEra {},
-                        },
+                pub fn force_new_era(&self) -> ::subxt::tx::StaticTxPayload<ForceNewEra> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "force_new_era",
+                        ForceNewEra {},
                         [
                             230u8, 242u8, 169u8, 196u8, 78u8, 145u8, 24u8, 191u8, 113u8,
                             68u8, 5u8, 138u8, 48u8, 51u8, 109u8, 126u8, 73u8, 136u8,
@@ -4924,16 +4675,11 @@ pub mod api {
                     invulnerables: ::std::vec::Vec<
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetInvulnerables>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_invulnerables",
-                            data: SetInvulnerables { invulnerables },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetInvulnerables> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_invulnerables",
+                        SetInvulnerables { invulnerables },
                         [
                             2u8, 148u8, 221u8, 111u8, 153u8, 48u8, 222u8, 36u8, 228u8,
                             84u8, 18u8, 35u8, 168u8, 239u8, 53u8, 245u8, 27u8, 76u8,
@@ -4949,18 +4695,13 @@ pub mod api {
                     &self,
                     stash: ::subxt::ext::sp_core::crypto::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceUnstake>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "force_unstake",
-                            data: ForceUnstake {
-                                stash,
-                                num_slashing_spans,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceUnstake> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "force_unstake",
+                        ForceUnstake {
+                            stash,
+                            num_slashing_spans,
                         },
                         [
                             94u8, 247u8, 238u8, 47u8, 250u8, 6u8, 96u8, 175u8, 173u8,
@@ -4981,16 +4722,11 @@ pub mod api {
                 #[doc = "have enough blocks to get a result."]
                 pub fn force_new_era_always(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceNewEraAlways>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "force_new_era_always",
-                            data: ForceNewEraAlways {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceNewEraAlways> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "force_new_era_always",
+                        ForceNewEraAlways {},
                         [
                             179u8, 118u8, 189u8, 54u8, 248u8, 141u8, 207u8, 142u8, 80u8,
                             37u8, 241u8, 185u8, 138u8, 254u8, 117u8, 147u8, 225u8, 118u8,
@@ -5008,16 +4744,11 @@ pub mod api {
                     &self,
                     era: ::core::primitive::u32,
                     slash_indices: ::std::vec::Vec<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelDeferredSlash>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "cancel_deferred_slash",
-                            data: CancelDeferredSlash { era, slash_indices },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelDeferredSlash> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "cancel_deferred_slash",
+                        CancelDeferredSlash { era, slash_indices },
                         [
                             120u8, 57u8, 162u8, 105u8, 91u8, 250u8, 129u8, 240u8, 110u8,
                             234u8, 170u8, 98u8, 164u8, 65u8, 106u8, 101u8, 19u8, 88u8,
@@ -5051,18 +4782,13 @@ pub mod api {
                     &self,
                     validator_stash: ::subxt::ext::sp_core::crypto::AccountId32,
                     era: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<PayoutStakers>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "payout_stakers",
-                            data: PayoutStakers {
-                                validator_stash,
-                                era,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<PayoutStakers> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "payout_stakers",
+                        PayoutStakers {
+                            validator_stash,
+                            era,
                         },
                         [
                             184u8, 194u8, 33u8, 118u8, 7u8, 203u8, 89u8, 119u8, 214u8,
@@ -5084,16 +4810,11 @@ pub mod api {
                 pub fn rebond(
                     &self,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Rebond>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "rebond",
-                            data: Rebond { value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Rebond> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "rebond",
+                        Rebond { value },
                         [
                             25u8, 22u8, 191u8, 172u8, 133u8, 101u8, 139u8, 102u8, 134u8,
                             16u8, 136u8, 56u8, 137u8, 162u8, 4u8, 253u8, 196u8, 30u8,
@@ -5128,18 +4849,13 @@ pub mod api {
                     &self,
                     new_history_depth: ::core::primitive::u32,
                     era_items_deleted: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHistoryDepth>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_history_depth",
-                            data: SetHistoryDepth {
-                                new_history_depth,
-                                era_items_deleted,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetHistoryDepth> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_history_depth",
+                        SetHistoryDepth {
+                            new_history_depth,
+                            era_items_deleted,
                         },
                         [
                             174u8, 55u8, 231u8, 132u8, 219u8, 215u8, 118u8, 202u8, 13u8,
@@ -5165,18 +4881,13 @@ pub mod api {
                     &self,
                     stash: ::subxt::ext::sp_core::crypto::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReapStash>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "reap_stash",
-                            data: ReapStash {
-                                stash,
-                                num_slashing_spans,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReapStash> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "reap_stash",
+                        ReapStash {
+                            stash,
+                            num_slashing_spans,
                         },
                         [
                             34u8, 168u8, 120u8, 161u8, 95u8, 199u8, 106u8, 233u8, 61u8,
@@ -5205,16 +4916,11 @@ pub mod api {
                             (),
                         >,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Kick>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "kick",
-                            data: Kick { who },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Kick> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "kick",
+                        Kick { who },
                         [
                             32u8, 26u8, 202u8, 6u8, 186u8, 180u8, 58u8, 121u8, 185u8,
                             208u8, 123u8, 10u8, 53u8, 179u8, 167u8, 203u8, 96u8, 229u8,
@@ -5248,22 +4954,17 @@ pub mod api {
                     max_validator_count : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < :: core :: primitive :: u32 >,
                     chill_threshold : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Percent >,
                     min_commission : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetStakingConfigs>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "set_staking_configs",
-                            data: SetStakingConfigs {
-                                min_nominator_bond,
-                                min_validator_bond,
-                                max_nominator_count,
-                                max_validator_count,
-                                chill_threshold,
-                                min_commission,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetStakingConfigs> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "set_staking_configs",
+                        SetStakingConfigs {
+                            min_nominator_bond,
+                            min_validator_bond,
+                            max_nominator_count,
+                            max_validator_count,
+                            chill_threshold,
+                            min_commission,
                         },
                         [
                             176u8, 168u8, 155u8, 176u8, 27u8, 79u8, 223u8, 92u8, 88u8,
@@ -5302,16 +5003,11 @@ pub mod api {
                 pub fn chill_other(
                     &self,
                     controller: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ChillOther>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "chill_other",
-                            data: ChillOther { controller },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ChillOther> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "chill_other",
+                        ChillOther { controller },
                         [
                             140u8, 98u8, 4u8, 203u8, 91u8, 131u8, 123u8, 119u8, 169u8,
                             47u8, 188u8, 23u8, 205u8, 170u8, 82u8, 220u8, 166u8, 170u8,
@@ -5326,16 +5022,12 @@ pub mod api {
                 pub fn force_apply_min_commission(
                     &self,
                     validator_stash: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceApplyMinCommission>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Staking",
-                            call: "force_apply_min_commission",
-                            data: ForceApplyMinCommission { validator_stash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceApplyMinCommission>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Staking",
+                        "force_apply_min_commission",
+                        ForceApplyMinCommission { validator_stash },
                         [
                             136u8, 163u8, 85u8, 134u8, 240u8, 247u8, 183u8, 227u8, 226u8,
                             202u8, 102u8, 186u8, 138u8, 119u8, 78u8, 123u8, 229u8, 135u8,
@@ -7439,16 +7131,11 @@ pub mod api {
                     &self,
                     keys: runtime_types::polkadot_runtime::SessionKeys,
                     proof: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetKeys>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Session",
-                            call: "set_keys",
-                            data: SetKeys { keys, proof },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetKeys> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Session",
+                        "set_keys",
+                        SetKeys { keys, proof },
                         [
                             17u8, 127u8, 23u8, 71u8, 118u8, 133u8, 89u8, 105u8, 93u8,
                             52u8, 46u8, 201u8, 151u8, 19u8, 124u8, 195u8, 228u8, 229u8,
@@ -7473,18 +7160,11 @@ pub mod api {
                 #[doc = "- DbWrites: `NextKeys`, `origin account`"]
                 #[doc = "- DbWrites per key id: `KeyOwner`"]
                 #[doc = "# </weight>"]
-                pub fn purge_keys(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<PurgeKeys>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Session",
-                            call: "purge_keys",
-                            data: PurgeKeys {},
-                        },
+                pub fn purge_keys(&self) -> ::subxt::tx::StaticTxPayload<PurgeKeys> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Session",
+                        "purge_keys",
+                        PurgeKeys {},
                         [
                             200u8, 255u8, 4u8, 213u8, 188u8, 92u8, 99u8, 116u8, 163u8,
                             152u8, 29u8, 35u8, 133u8, 119u8, 246u8, 44u8, 91u8, 31u8,
@@ -7798,20 +7478,15 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReportEquivocation>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Grandpa",
-                            call: "report_equivocation",
-                            data: ReportEquivocation {
-                                equivocation_proof: ::std::boxed::Box::new(
-                                    equivocation_proof,
-                                ),
-                                key_owner_proof,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocation> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Grandpa",
+                        "report_equivocation",
+                        ReportEquivocation {
+                            equivocation_proof: ::std::boxed::Box::new(
+                                equivocation_proof,
+                            ),
+                            key_owner_proof,
                         },
                         [
                             156u8, 162u8, 189u8, 89u8, 60u8, 156u8, 129u8, 176u8, 62u8,
@@ -7834,20 +7509,16 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReportEquivocationUnsigned>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Grandpa",
-                            call: "report_equivocation_unsigned",
-                            data: ReportEquivocationUnsigned {
-                                equivocation_proof: ::std::boxed::Box::new(
-                                    equivocation_proof,
-                                ),
-                                key_owner_proof,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocationUnsigned>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Grandpa",
+                        "report_equivocation_unsigned",
+                        ReportEquivocationUnsigned {
+                            equivocation_proof: ::std::boxed::Box::new(
+                                equivocation_proof,
+                            ),
+                            key_owner_proof,
                         },
                         [
                             166u8, 26u8, 217u8, 185u8, 215u8, 37u8, 174u8, 170u8, 137u8,
@@ -7873,18 +7544,13 @@ pub mod api {
                     &self,
                     delay: ::core::primitive::u32,
                     best_finalized_block_number: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NoteStalled>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Grandpa",
-                            call: "note_stalled",
-                            data: NoteStalled {
-                                delay,
-                                best_finalized_block_number,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<NoteStalled> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Grandpa",
+                        "note_stalled",
+                        NoteStalled {
+                            delay,
+                            best_finalized_block_number,
                         },
                         [
                             197u8, 236u8, 137u8, 32u8, 46u8, 200u8, 144u8, 13u8, 89u8,
@@ -8175,18 +7841,13 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     signature : runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Signature,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Heartbeat>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ImOnline",
-                            call: "heartbeat",
-                            data: Heartbeat {
-                                heartbeat,
-                                signature,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Heartbeat> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ImOnline",
+                        "heartbeat",
+                        Heartbeat {
+                            heartbeat,
+                            signature,
                         },
                         [
                             212u8, 23u8, 174u8, 246u8, 60u8, 220u8, 178u8, 137u8, 53u8,
@@ -8691,18 +8352,13 @@ pub mod api {
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Propose>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "propose",
-                            data: Propose {
-                                proposal_hash,
-                                value,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Propose> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "propose",
+                        Propose {
+                            proposal_hash,
+                            value,
                         },
                         [
                             151u8, 2u8, 117u8, 57u8, 201u8, 246u8, 181u8, 198u8, 83u8,
@@ -8726,18 +8382,13 @@ pub mod api {
                     &self,
                     proposal: ::core::primitive::u32,
                     seconds_upper_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Second>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "second",
-                            data: Second {
-                                proposal,
-                                seconds_upper_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Second> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "second",
+                        Second {
+                            proposal,
+                            seconds_upper_bound,
                         },
                         [
                             152u8, 56u8, 134u8, 181u8, 88u8, 224u8, 68u8, 238u8, 231u8,
@@ -8762,16 +8413,11 @@ pub mod api {
                     vote: runtime_types::pallet_democracy::vote::AccountVote<
                         ::core::primitive::u128,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Vote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "vote",
-                            data: Vote { ref_index, vote },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Vote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "vote",
+                        Vote { ref_index, vote },
                         [
                             138u8, 213u8, 229u8, 111u8, 1u8, 191u8, 73u8, 3u8, 145u8,
                             28u8, 44u8, 88u8, 163u8, 188u8, 129u8, 188u8, 64u8, 15u8,
@@ -8791,16 +8437,11 @@ pub mod api {
                 pub fn emergency_cancel(
                     &self,
                     ref_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<EmergencyCancel>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "emergency_cancel",
-                            data: EmergencyCancel { ref_index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<EmergencyCancel> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "emergency_cancel",
+                        EmergencyCancel { ref_index },
                         [
                             139u8, 213u8, 133u8, 75u8, 34u8, 206u8, 124u8, 245u8, 35u8,
                             237u8, 132u8, 92u8, 49u8, 167u8, 117u8, 80u8, 188u8, 93u8,
@@ -8821,16 +8462,11 @@ pub mod api {
                 pub fn external_propose(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ExternalPropose>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "external_propose",
-                            data: ExternalPropose { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ExternalPropose> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "external_propose",
+                        ExternalPropose { proposal_hash },
                         [
                             8u8, 206u8, 229u8, 218u8, 203u8, 208u8, 253u8, 113u8, 43u8,
                             62u8, 110u8, 155u8, 123u8, 35u8, 187u8, 211u8, 180u8, 225u8,
@@ -8853,16 +8489,12 @@ pub mod api {
                 pub fn external_propose_majority(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ExternalProposeMajority>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "external_propose_majority",
-                            data: ExternalProposeMajority { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ExternalProposeMajority>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "external_propose_majority",
+                        ExternalProposeMajority { proposal_hash },
                         [
                             36u8, 47u8, 192u8, 177u8, 164u8, 82u8, 109u8, 215u8, 98u8,
                             28u8, 47u8, 237u8, 159u8, 233u8, 53u8, 9u8, 158u8, 134u8,
@@ -8885,16 +8517,12 @@ pub mod api {
                 pub fn external_propose_default(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ExternalProposeDefault>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "external_propose_default",
-                            data: ExternalProposeDefault { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ExternalProposeDefault>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "external_propose_default",
+                        ExternalProposeDefault { proposal_hash },
                         [
                             32u8, 100u8, 249u8, 175u8, 187u8, 77u8, 30u8, 65u8, 90u8,
                             103u8, 251u8, 21u8, 21u8, 220u8, 8u8, 118u8, 97u8, 160u8,
@@ -8923,19 +8551,14 @@ pub mod api {
                     proposal_hash: ::subxt::ext::sp_core::H256,
                     voting_period: ::core::primitive::u32,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<FastTrack>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "fast_track",
-                            data: FastTrack {
-                                proposal_hash,
-                                voting_period,
-                                delay,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<FastTrack> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "fast_track",
+                        FastTrack {
+                            proposal_hash,
+                            voting_period,
+                            delay,
                         },
                         [
                             125u8, 209u8, 107u8, 120u8, 93u8, 205u8, 129u8, 147u8, 254u8,
@@ -8957,16 +8580,11 @@ pub mod api {
                 pub fn veto_external(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<VetoExternal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "veto_external",
-                            data: VetoExternal { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<VetoExternal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "veto_external",
+                        VetoExternal { proposal_hash },
                         [
                             209u8, 18u8, 18u8, 103u8, 186u8, 160u8, 214u8, 124u8, 150u8,
                             207u8, 112u8, 90u8, 84u8, 197u8, 95u8, 157u8, 165u8, 65u8,
@@ -8985,16 +8603,11 @@ pub mod api {
                 pub fn cancel_referendum(
                     &self,
                     ref_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelReferendum>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "cancel_referendum",
-                            data: CancelReferendum { ref_index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelReferendum> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "cancel_referendum",
+                        CancelReferendum { ref_index },
                         [
                             51u8, 25u8, 25u8, 251u8, 236u8, 115u8, 130u8, 230u8, 72u8,
                             186u8, 119u8, 71u8, 165u8, 137u8, 55u8, 167u8, 187u8, 128u8,
@@ -9013,16 +8626,11 @@ pub mod api {
                 pub fn cancel_queued(
                     &self,
                     which: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelQueued>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "cancel_queued",
-                            data: CancelQueued { which },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelQueued> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "cancel_queued",
+                        CancelQueued { which },
                         [
                             6u8, 97u8, 182u8, 142u8, 165u8, 206u8, 218u8, 245u8, 206u8,
                             224u8, 143u8, 164u8, 232u8, 129u8, 202u8, 141u8, 78u8, 65u8,
@@ -9056,19 +8664,14 @@ pub mod api {
                     to: ::subxt::ext::sp_core::crypto::AccountId32,
                     conviction: runtime_types::pallet_democracy::conviction::Conviction,
                     balance: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Delegate>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "delegate",
-                            data: Delegate {
-                                to,
-                                conviction,
-                                balance,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Delegate> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "delegate",
+                        Delegate {
+                            to,
+                            conviction,
+                            balance,
                         },
                         [
                             190u8, 241u8, 243u8, 105u8, 114u8, 112u8, 169u8, 52u8, 119u8,
@@ -9090,18 +8693,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
                 #[doc = "  voted on. Weight is charged as if maximum votes."]
-                pub fn undelegate(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Undelegate>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "undelegate",
-                            data: Undelegate {},
-                        },
+                pub fn undelegate(&self) -> ::subxt::tx::StaticTxPayload<Undelegate> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "undelegate",
+                        Undelegate {},
                         [
                             165u8, 40u8, 183u8, 209u8, 57u8, 153u8, 111u8, 29u8, 114u8,
                             109u8, 107u8, 235u8, 97u8, 61u8, 53u8, 155u8, 44u8, 245u8,
@@ -9117,16 +8713,11 @@ pub mod api {
                 #[doc = "Weight: `O(1)`."]
                 pub fn clear_public_proposals(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClearPublicProposals>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "clear_public_proposals",
-                            data: ClearPublicProposals {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ClearPublicProposals> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "clear_public_proposals",
+                        ClearPublicProposals {},
                         [
                             59u8, 126u8, 254u8, 223u8, 252u8, 225u8, 75u8, 185u8, 188u8,
                             181u8, 42u8, 179u8, 211u8, 73u8, 12u8, 141u8, 243u8, 197u8,
@@ -9148,16 +8739,11 @@ pub mod api {
                 pub fn note_preimage(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NotePreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "note_preimage",
-                            data: NotePreimage { encoded_proposal },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<NotePreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "note_preimage",
+                        NotePreimage { encoded_proposal },
                         [
                             31u8, 252u8, 248u8, 238u8, 103u8, 1u8, 82u8, 84u8, 135u8,
                             152u8, 246u8, 234u8, 251u8, 124u8, 193u8, 73u8, 52u8, 255u8,
@@ -9170,16 +8756,12 @@ pub mod api {
                 pub fn note_preimage_operational(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NotePreimageOperational>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "note_preimage_operational",
-                            data: NotePreimageOperational { encoded_proposal },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<NotePreimageOperational>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "note_preimage_operational",
+                        NotePreimageOperational { encoded_proposal },
                         [
                             184u8, 81u8, 31u8, 172u8, 81u8, 113u8, 84u8, 246u8, 189u8,
                             219u8, 167u8, 32u8, 191u8, 126u8, 165u8, 250u8, 147u8, 199u8,
@@ -9203,16 +8785,11 @@ pub mod api {
                 pub fn note_imminent_preimage(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NoteImminentPreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "note_imminent_preimage",
-                            data: NoteImminentPreimage { encoded_proposal },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<NoteImminentPreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "note_imminent_preimage",
+                        NoteImminentPreimage { encoded_proposal },
                         [
                             32u8, 188u8, 10u8, 215u8, 245u8, 132u8, 234u8, 124u8, 19u8,
                             90u8, 225u8, 216u8, 169u8, 105u8, 95u8, 231u8, 12u8, 109u8,
@@ -9225,16 +8802,12 @@ pub mod api {
                 pub fn note_imminent_preimage_operational(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NoteImminentPreimageOperational>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "note_imminent_preimage_operational",
-                            data: NoteImminentPreimageOperational { encoded_proposal },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<NoteImminentPreimageOperational>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "note_imminent_preimage_operational",
+                        NoteImminentPreimageOperational { encoded_proposal },
                         [
                             7u8, 31u8, 49u8, 238u8, 155u8, 234u8, 187u8, 147u8, 123u8,
                             84u8, 50u8, 98u8, 221u8, 39u8, 218u8, 204u8, 175u8, 136u8,
@@ -9262,18 +8835,13 @@ pub mod api {
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
                     proposal_len_upper_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReapPreimage>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "reap_preimage",
-                            data: ReapPreimage {
-                                proposal_hash,
-                                proposal_len_upper_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReapPreimage> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "reap_preimage",
+                        ReapPreimage {
+                            proposal_hash,
+                            proposal_len_upper_bound,
                         },
                         [
                             135u8, 43u8, 115u8, 154u8, 93u8, 121u8, 112u8, 65u8, 145u8,
@@ -9293,16 +8861,11 @@ pub mod api {
                 pub fn unlock(
                     &self,
                     target: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Unlock>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "unlock",
-                            data: Unlock { target },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Unlock> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "unlock",
+                        Unlock { target },
                         [
                             137u8, 93u8, 240u8, 75u8, 142u8, 148u8, 51u8, 55u8, 88u8,
                             159u8, 2u8, 57u8, 24u8, 169u8, 120u8, 121u8, 115u8, 53u8,
@@ -9341,16 +8904,11 @@ pub mod api {
                 pub fn remove_vote(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveVote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "remove_vote",
-                            data: RemoveVote { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveVote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "remove_vote",
+                        RemoveVote { index },
                         [
                             148u8, 120u8, 14u8, 172u8, 81u8, 152u8, 159u8, 178u8, 106u8,
                             244u8, 36u8, 98u8, 120u8, 189u8, 213u8, 93u8, 119u8, 156u8,
@@ -9378,16 +8936,11 @@ pub mod api {
                     &self,
                     target: ::subxt::ext::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveOtherVote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "remove_other_vote",
-                            data: RemoveOtherVote { target, index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveOtherVote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "remove_other_vote",
+                        RemoveOtherVote { target, index },
                         [
                             137u8, 59u8, 51u8, 72u8, 97u8, 181u8, 74u8, 123u8, 65u8,
                             147u8, 63u8, 23u8, 14u8, 6u8, 66u8, 186u8, 105u8, 72u8,
@@ -9401,18 +8954,13 @@ pub mod api {
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<EnactProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "enact_proposal",
-                            data: EnactProposal {
-                                proposal_hash,
-                                index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<EnactProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "enact_proposal",
+                        EnactProposal {
+                            proposal_hash,
+                            index,
                         },
                         [
                             191u8, 244u8, 244u8, 174u8, 95u8, 86u8, 132u8, 63u8, 2u8,
@@ -9441,18 +8989,13 @@ pub mod api {
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
                     maybe_ref_index: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Blacklist>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "blacklist",
-                            data: Blacklist {
-                                proposal_hash,
-                                maybe_ref_index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Blacklist> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "blacklist",
+                        Blacklist {
+                            proposal_hash,
+                            maybe_ref_index,
                         },
                         [
                             48u8, 144u8, 81u8, 164u8, 54u8, 111u8, 197u8, 134u8, 6u8,
@@ -9472,16 +9015,11 @@ pub mod api {
                 pub fn cancel_proposal(
                     &self,
                     prop_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Democracy",
-                            call: "cancel_proposal",
-                            data: CancelProposal { prop_index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Democracy",
+                        "cancel_proposal",
+                        CancelProposal { prop_index },
                         [
                             179u8, 3u8, 198u8, 244u8, 241u8, 124u8, 205u8, 58u8, 100u8,
                             80u8, 177u8, 254u8, 98u8, 220u8, 189u8, 63u8, 229u8, 60u8,
@@ -10632,19 +10170,14 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
                     old_count: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMembers>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "set_members",
-                            data: SetMembers {
-                                new_members,
-                                prime,
-                                old_count,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetMembers> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "set_members",
+                        SetMembers {
+                            new_members,
+                            prime,
+                            old_count,
                         },
                         [
                             196u8, 103u8, 123u8, 125u8, 226u8, 177u8, 126u8, 37u8, 160u8,
@@ -10669,18 +10202,13 @@ pub mod api {
                     &self,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Execute>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "execute",
-                            data: Execute {
-                                proposal: ::std::boxed::Box::new(proposal),
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Execute> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "execute",
+                        Execute {
+                            proposal: ::std::boxed::Box::new(proposal),
+                            length_bound,
                         },
                         [
                             33u8, 251u8, 197u8, 226u8, 205u8, 157u8, 230u8, 48u8, 209u8,
@@ -10722,19 +10250,14 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Propose>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "propose",
-                            data: Propose {
-                                threshold,
-                                proposal: ::std::boxed::Box::new(proposal),
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Propose> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "propose",
+                        Propose {
+                            threshold,
+                            proposal: ::std::boxed::Box::new(proposal),
+                            length_bound,
                         },
                         [
                             247u8, 17u8, 193u8, 12u8, 110u8, 242u8, 5u8, 205u8, 136u8,
@@ -10764,19 +10287,14 @@ pub mod api {
                     proposal: ::subxt::ext::sp_core::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Vote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "vote",
-                            data: Vote {
-                                proposal,
-                                index,
-                                approve,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Vote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "vote",
+                        Vote {
+                            proposal,
+                            index,
+                            approve,
                         },
                         [
                             108u8, 46u8, 180u8, 148u8, 145u8, 24u8, 173u8, 56u8, 36u8,
@@ -10824,20 +10342,15 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: ::core::primitive::u64,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Close>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "close",
-                            data: Close {
-                                proposal_hash,
-                                index,
-                                proposal_weight_bound,
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Close> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "close",
+                        Close {
+                            proposal_hash,
+                            index,
+                            proposal_weight_bound,
+                            length_bound,
                         },
                         [
                             88u8, 8u8, 33u8, 184u8, 4u8, 97u8, 120u8, 237u8, 43u8, 183u8,
@@ -10864,16 +10377,11 @@ pub mod api {
                 pub fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<DisapproveProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Council",
-                            call: "disapprove_proposal",
-                            data: DisapproveProposal { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<DisapproveProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Council",
+                        "disapprove_proposal",
+                        DisapproveProposal { proposal_hash },
                         [
                             25u8, 123u8, 1u8, 8u8, 74u8, 37u8, 3u8, 40u8, 97u8, 37u8,
                             175u8, 224u8, 72u8, 155u8, 123u8, 109u8, 104u8, 43u8, 91u8,
@@ -11318,19 +10826,14 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
                     old_count: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMembers>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "set_members",
-                            data: SetMembers {
-                                new_members,
-                                prime,
-                                old_count,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetMembers> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "set_members",
+                        SetMembers {
+                            new_members,
+                            prime,
+                            old_count,
                         },
                         [
                             196u8, 103u8, 123u8, 125u8, 226u8, 177u8, 126u8, 37u8, 160u8,
@@ -11355,18 +10858,13 @@ pub mod api {
                     &self,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Execute>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "execute",
-                            data: Execute {
-                                proposal: ::std::boxed::Box::new(proposal),
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Execute> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "execute",
+                        Execute {
+                            proposal: ::std::boxed::Box::new(proposal),
+                            length_bound,
                         },
                         [
                             33u8, 251u8, 197u8, 226u8, 205u8, 157u8, 230u8, 48u8, 209u8,
@@ -11408,19 +10906,14 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Propose>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "propose",
-                            data: Propose {
-                                threshold,
-                                proposal: ::std::boxed::Box::new(proposal),
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Propose> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "propose",
+                        Propose {
+                            threshold,
+                            proposal: ::std::boxed::Box::new(proposal),
+                            length_bound,
                         },
                         [
                             247u8, 17u8, 193u8, 12u8, 110u8, 242u8, 5u8, 205u8, 136u8,
@@ -11450,19 +10943,14 @@ pub mod api {
                     proposal: ::subxt::ext::sp_core::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Vote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "vote",
-                            data: Vote {
-                                proposal,
-                                index,
-                                approve,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Vote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "vote",
+                        Vote {
+                            proposal,
+                            index,
+                            approve,
                         },
                         [
                             108u8, 46u8, 180u8, 148u8, 145u8, 24u8, 173u8, 56u8, 36u8,
@@ -11510,20 +10998,15 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: ::core::primitive::u64,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Close>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "close",
-                            data: Close {
-                                proposal_hash,
-                                index,
-                                proposal_weight_bound,
-                                length_bound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Close> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "close",
+                        Close {
+                            proposal_hash,
+                            index,
+                            proposal_weight_bound,
+                            length_bound,
                         },
                         [
                             88u8, 8u8, 33u8, 184u8, 4u8, 97u8, 120u8, 237u8, 43u8, 183u8,
@@ -11550,16 +11033,11 @@ pub mod api {
                 pub fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<DisapproveProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalCommittee",
-                            call: "disapprove_proposal",
-                            data: DisapproveProposal { proposal_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<DisapproveProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalCommittee",
+                        "disapprove_proposal",
+                        DisapproveProposal { proposal_hash },
                         [
                             25u8, 123u8, 1u8, 8u8, 74u8, 37u8, 3u8, 40u8, 97u8, 37u8,
                             175u8, 224u8, 72u8, 155u8, 123u8, 109u8, 104u8, 43u8, 91u8,
@@ -11977,16 +11455,11 @@ pub mod api {
                     &self,
                     votes: ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Vote>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "vote",
-                            data: Vote { votes, value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Vote> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "vote",
+                        Vote { votes, value },
                         [
                             71u8, 90u8, 175u8, 225u8, 51u8, 202u8, 197u8, 252u8, 183u8,
                             92u8, 239u8, 83u8, 112u8, 144u8, 128u8, 211u8, 109u8, 33u8,
@@ -12000,18 +11473,11 @@ pub mod api {
                 #[doc = "This removes the lock and returns the deposit."]
                 #[doc = ""]
                 #[doc = "The dispatch origin of this call must be signed and be a voter."]
-                pub fn remove_voter(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveVoter>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "remove_voter",
-                            data: RemoveVoter {},
-                        },
+                pub fn remove_voter(&self) -> ::subxt::tx::StaticTxPayload<RemoveVoter> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "remove_voter",
+                        RemoveVoter {},
                         [
                             254u8, 46u8, 140u8, 4u8, 218u8, 45u8, 150u8, 72u8, 67u8,
                             131u8, 108u8, 201u8, 46u8, 157u8, 104u8, 161u8, 53u8, 155u8,
@@ -12038,16 +11504,11 @@ pub mod api {
                 pub fn submit_candidacy(
                     &self,
                     candidate_count: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SubmitCandidacy>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "submit_candidacy",
-                            data: SubmitCandidacy { candidate_count },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SubmitCandidacy> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "submit_candidacy",
+                        SubmitCandidacy { candidate_count },
                         [
                             228u8, 63u8, 217u8, 99u8, 128u8, 104u8, 175u8, 10u8, 30u8,
                             35u8, 47u8, 14u8, 254u8, 122u8, 146u8, 239u8, 61u8, 145u8,
@@ -12077,16 +11538,11 @@ pub mod api {
                 pub fn renounce_candidacy(
                     &self,
                     renouncing: runtime_types::pallet_elections_phragmen::Renouncing,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RenounceCandidacy>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "renounce_candidacy",
-                            data: RenounceCandidacy { renouncing },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RenounceCandidacy> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "renounce_candidacy",
+                        RenounceCandidacy { renouncing },
                         [
                             70u8, 72u8, 208u8, 36u8, 80u8, 245u8, 224u8, 75u8, 60u8,
                             142u8, 19u8, 49u8, 142u8, 90u8, 14u8, 69u8, 15u8, 61u8,
@@ -12116,18 +11572,13 @@ pub mod api {
                         (),
                     >,
                     has_replacement: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveMember>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "remove_member",
-                            data: RemoveMember {
-                                who,
-                                has_replacement,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveMember> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "remove_member",
+                        RemoveMember {
+                            who,
+                            has_replacement,
                         },
                         [
                             174u8, 77u8, 175u8, 88u8, 205u8, 45u8, 109u8, 227u8, 27u8,
@@ -12151,18 +11602,13 @@ pub mod api {
                     &self,
                     num_voters: ::core::primitive::u32,
                     num_defunct: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CleanDefunctVoters>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "PhragmenElection",
-                            call: "clean_defunct_voters",
-                            data: CleanDefunctVoters {
-                                num_voters,
-                                num_defunct,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<CleanDefunctVoters> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "PhragmenElection",
+                        "clean_defunct_voters",
+                        CleanDefunctVoters {
+                            num_voters,
+                            num_defunct,
                         },
                         [
                             198u8, 162u8, 30u8, 249u8, 191u8, 38u8, 141u8, 123u8, 230u8,
@@ -12668,16 +12114,11 @@ pub mod api {
                 pub fn add_member(
                     &self,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddMember>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "add_member",
-                            data: AddMember { who },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AddMember> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "add_member",
+                        AddMember { who },
                         [
                             106u8, 33u8, 171u8, 114u8, 223u8, 105u8, 71u8, 15u8, 77u8,
                             253u8, 40u8, 204u8, 244u8, 142u8, 103u8, 177u8, 200u8, 243u8,
@@ -12692,16 +12133,11 @@ pub mod api {
                 pub fn remove_member(
                     &self,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveMember>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "remove_member",
-                            data: RemoveMember { who },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveMember> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "remove_member",
+                        RemoveMember { who },
                         [
                             100u8, 17u8, 75u8, 92u8, 58u8, 100u8, 34u8, 187u8, 41u8,
                             160u8, 137u8, 58u8, 78u8, 166u8, 161u8, 116u8, 1u8, 67u8,
@@ -12719,16 +12155,11 @@ pub mod api {
                     &self,
                     remove: ::subxt::ext::sp_core::crypto::AccountId32,
                     add: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SwapMember>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "swap_member",
-                            data: SwapMember { remove, add },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SwapMember> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "swap_member",
+                        SwapMember { remove, add },
                         [
                             66u8, 84u8, 183u8, 29u8, 104u8, 163u8, 220u8, 217u8, 103u8,
                             234u8, 233u8, 138u8, 191u8, 147u8, 51u8, 98u8, 46u8, 51u8,
@@ -12744,16 +12175,11 @@ pub mod api {
                 pub fn reset_members(
                     &self,
                     members: ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ResetMembers>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "reset_members",
-                            data: ResetMembers { members },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ResetMembers> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "reset_members",
+                        ResetMembers { members },
                         [
                             9u8, 35u8, 28u8, 59u8, 158u8, 232u8, 89u8, 78u8, 101u8, 53u8,
                             240u8, 98u8, 13u8, 104u8, 235u8, 161u8, 201u8, 150u8, 117u8,
@@ -12770,16 +12196,11 @@ pub mod api {
                 pub fn change_key(
                     &self,
                     new: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ChangeKey>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "change_key",
-                            data: ChangeKey { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ChangeKey> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "change_key",
+                        ChangeKey { new },
                         [
                             53u8, 60u8, 54u8, 231u8, 151u8, 0u8, 27u8, 175u8, 250u8,
                             80u8, 74u8, 184u8, 184u8, 63u8, 90u8, 216u8, 186u8, 136u8,
@@ -12794,16 +12215,11 @@ pub mod api {
                 pub fn set_prime(
                     &self,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetPrime>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "set_prime",
-                            data: SetPrime { who },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetPrime> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "set_prime",
+                        SetPrime { who },
                         [
                             123u8, 95u8, 75u8, 129u8, 19u8, 34u8, 192u8, 65u8, 169u8,
                             47u8, 184u8, 246u8, 55u8, 250u8, 31u8, 158u8, 57u8, 197u8,
@@ -12815,18 +12231,11 @@ pub mod api {
                 #[doc = "Remove the prime member if it exists."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::PrimeOrigin`."]
-                pub fn clear_prime(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClearPrime>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "TechnicalMembership",
-                            call: "clear_prime",
-                            data: ClearPrime {},
-                        },
+                pub fn clear_prime(&self) -> ::subxt::tx::StaticTxPayload<ClearPrime> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "TechnicalMembership",
+                        "clear_prime",
+                        ClearPrime {},
                         [
                             186u8, 182u8, 225u8, 90u8, 71u8, 124u8, 69u8, 100u8, 234u8,
                             25u8, 53u8, 23u8, 182u8, 32u8, 176u8, 81u8, 54u8, 140u8,
@@ -13042,16 +12451,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProposeSpend>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Treasury",
-                            call: "propose_spend",
-                            data: ProposeSpend { value, beneficiary },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ProposeSpend> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Treasury",
+                        "propose_spend",
+                        ProposeSpend { value, beneficiary },
                         [
                             109u8, 46u8, 8u8, 159u8, 127u8, 79u8, 27u8, 100u8, 92u8,
                             244u8, 78u8, 46u8, 105u8, 246u8, 169u8, 210u8, 149u8, 7u8,
@@ -13072,16 +12476,11 @@ pub mod api {
                 pub fn reject_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RejectProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Treasury",
-                            call: "reject_proposal",
-                            data: RejectProposal { proposal_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RejectProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Treasury",
+                        "reject_proposal",
+                        RejectProposal { proposal_id },
                         [
                             106u8, 223u8, 97u8, 22u8, 111u8, 208u8, 128u8, 26u8, 198u8,
                             140u8, 118u8, 126u8, 187u8, 51u8, 193u8, 50u8, 193u8, 68u8,
@@ -13103,16 +12502,11 @@ pub mod api {
                 pub fn approve_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ApproveProposal>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Treasury",
-                            call: "approve_proposal",
-                            data: ApproveProposal { proposal_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ApproveProposal> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Treasury",
+                        "approve_proposal",
+                        ApproveProposal { proposal_id },
                         [
                             164u8, 229u8, 172u8, 98u8, 129u8, 62u8, 84u8, 128u8, 47u8,
                             108u8, 33u8, 120u8, 89u8, 79u8, 57u8, 121u8, 4u8, 197u8,
@@ -13136,18 +12530,13 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Spend>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Treasury",
-                            call: "spend",
-                            data: Spend {
-                                amount,
-                                beneficiary,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Spend> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Treasury",
+                        "spend",
+                        Spend {
+                            amount,
+                            beneficiary,
                         },
                         [
                             177u8, 178u8, 242u8, 136u8, 135u8, 237u8, 114u8, 71u8, 233u8,
@@ -13175,16 +12564,11 @@ pub mod api {
                 pub fn remove_approval(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveApproval>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Treasury",
-                            call: "remove_approval",
-                            data: RemoveApproval { proposal_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveApproval> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Treasury",
+                        "remove_approval",
+                        RemoveApproval { proposal_id },
                         [
                             133u8, 126u8, 181u8, 47u8, 196u8, 243u8, 7u8, 46u8, 25u8,
                             251u8, 154u8, 125u8, 217u8, 77u8, 54u8, 245u8, 240u8, 180u8,
@@ -13661,18 +13045,13 @@ pub mod api {
                     &self,
                     dest: ::subxt::ext::sp_core::crypto::AccountId32,
                     ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Claim>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Claims",
-                            call: "claim",
-                            data: Claim {
-                                dest,
-                                ethereum_signature,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Claim> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Claims",
+                        "claim",
+                        Claim {
+                            dest,
+                            ethereum_signature,
                         },
                         [
                             33u8, 63u8, 71u8, 104u8, 200u8, 179u8, 248u8, 38u8, 193u8,
@@ -13709,20 +13088,15 @@ pub mod api {
                     statement: ::core::option::Option<
                         runtime_types::polkadot_runtime_common::claims::StatementKind,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<MintClaim>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Claims",
-                            call: "mint_claim",
-                            data: MintClaim {
-                                who,
-                                value,
-                                vesting_schedule,
-                                statement,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<MintClaim> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Claims",
+                        "mint_claim",
+                        MintClaim {
+                            who,
+                            value,
+                            vesting_schedule,
+                            statement,
                         },
                         [
                             213u8, 79u8, 204u8, 40u8, 104u8, 84u8, 82u8, 62u8, 193u8,
@@ -13763,19 +13137,14 @@ pub mod api {
                     dest: ::subxt::ext::sp_core::crypto::AccountId32,
                     ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature,
                     statement: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClaimAttest>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Claims",
-                            call: "claim_attest",
-                            data: ClaimAttest {
-                                dest,
-                                ethereum_signature,
-                                statement,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ClaimAttest> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Claims",
+                        "claim_attest",
+                        ClaimAttest {
+                            dest,
+                            ethereum_signature,
+                            statement,
                         },
                         [
                             255u8, 10u8, 87u8, 106u8, 101u8, 195u8, 249u8, 25u8, 109u8,
@@ -13805,16 +13174,11 @@ pub mod api {
                 pub fn attest(
                     &self,
                     statement: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Attest>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Claims",
-                            call: "attest",
-                            data: Attest { statement },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Attest> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Claims",
+                        "attest",
+                        Attest { statement },
                         [
                             8u8, 218u8, 97u8, 237u8, 185u8, 61u8, 55u8, 4u8, 134u8, 18u8,
                             244u8, 226u8, 40u8, 97u8, 222u8, 246u8, 221u8, 74u8, 253u8,
@@ -13830,19 +13194,14 @@ pub mod api {
                     maybe_preclaim: ::core::option::Option<
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<MoveClaim>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Claims",
-                            call: "move_claim",
-                            data: MoveClaim {
-                                old,
-                                new,
-                                maybe_preclaim,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<MoveClaim> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Claims",
+                        "move_claim",
+                        MoveClaim {
+                            old,
+                            new,
+                            maybe_preclaim,
                         },
                         [
                             63u8, 48u8, 217u8, 16u8, 161u8, 102u8, 165u8, 241u8, 57u8,
@@ -14220,18 +13579,11 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "# </weight>"]
-                pub fn vest(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Vest>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Vesting",
-                            call: "vest",
-                            data: Vest {},
-                        },
+                pub fn vest(&self) -> ::subxt::tx::StaticTxPayload<Vest> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Vesting",
+                        "vest",
+                        Vest {},
                         [
                             123u8, 54u8, 10u8, 208u8, 154u8, 24u8, 39u8, 166u8, 64u8,
                             27u8, 74u8, 29u8, 243u8, 97u8, 155u8, 5u8, 130u8, 155u8,
@@ -14261,16 +13613,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<VestOther>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Vesting",
-                            call: "vest_other",
-                            data: VestOther { target },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<VestOther> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Vesting",
+                        "vest_other",
+                        VestOther { target },
                         [
                             164u8, 19u8, 93u8, 81u8, 235u8, 101u8, 18u8, 52u8, 187u8,
                             81u8, 243u8, 216u8, 116u8, 84u8, 188u8, 135u8, 1u8, 241u8,
@@ -14306,16 +13653,11 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<VestedTransfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Vesting",
-                            call: "vested_transfer",
-                            data: VestedTransfer { target, schedule },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<VestedTransfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Vesting",
+                        "vested_transfer",
+                        VestedTransfer { target, schedule },
                         [
                             135u8, 172u8, 56u8, 97u8, 45u8, 141u8, 93u8, 173u8, 111u8,
                             252u8, 75u8, 246u8, 92u8, 181u8, 138u8, 87u8, 145u8, 174u8,
@@ -14356,19 +13698,14 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceVestedTransfer>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Vesting",
-                            call: "force_vested_transfer",
-                            data: ForceVestedTransfer {
-                                source,
-                                target,
-                                schedule,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceVestedTransfer> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Vesting",
+                        "force_vested_transfer",
+                        ForceVestedTransfer {
+                            source,
+                            target,
+                            schedule,
                         },
                         [
                             110u8, 142u8, 63u8, 148u8, 90u8, 229u8, 237u8, 183u8, 240u8,
@@ -14403,18 +13740,13 @@ pub mod api {
                     &self,
                     schedule1_index: ::core::primitive::u32,
                     schedule2_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<MergeSchedules>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Vesting",
-                            call: "merge_schedules",
-                            data: MergeSchedules {
-                                schedule1_index,
-                                schedule2_index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<MergeSchedules> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Vesting",
+                        "merge_schedules",
+                        MergeSchedules {
+                            schedule1_index,
+                            schedule2_index,
                         },
                         [
                             95u8, 255u8, 147u8, 12u8, 49u8, 25u8, 70u8, 112u8, 55u8,
@@ -14667,16 +13999,11 @@ pub mod api {
                 pub fn batch(
                     &self,
                     calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Batch>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Utility",
-                            call: "batch",
-                            data: Batch { calls },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Batch> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Utility",
+                        "batch",
+                        Batch { calls },
                         [
                             230u8, 242u8, 253u8, 157u8, 0u8, 86u8, 104u8, 163u8, 42u8,
                             162u8, 114u8, 169u8, 67u8, 132u8, 54u8, 68u8, 32u8, 42u8,
@@ -14702,18 +14029,13 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u16,
                     call: runtime_types::polkadot_runtime::Call,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AsDerivative>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Utility",
-                            call: "as_derivative",
-                            data: AsDerivative {
-                                index,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AsDerivative> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Utility",
+                        "as_derivative",
+                        AsDerivative {
+                            index,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             209u8, 64u8, 30u8, 168u8, 146u8, 109u8, 20u8, 238u8, 158u8,
@@ -14740,16 +14062,11 @@ pub mod api {
                 pub fn batch_all(
                     &self,
                     calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<BatchAll>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Utility",
-                            call: "batch_all",
-                            data: BatchAll { calls },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<BatchAll> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Utility",
+                        "batch_all",
+                        BatchAll { calls },
                         [
                             169u8, 101u8, 230u8, 159u8, 101u8, 77u8, 48u8, 75u8, 209u8,
                             42u8, 1u8, 95u8, 117u8, 254u8, 136u8, 162u8, 194u8, 255u8,
@@ -14772,18 +14089,13 @@ pub mod api {
                     &self,
                     as_origin: runtime_types::polkadot_runtime::OriginCaller,
                     call: runtime_types::polkadot_runtime::Call,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<DispatchAs>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Utility",
-                            call: "dispatch_as",
-                            data: DispatchAs {
-                                as_origin: ::std::boxed::Box::new(as_origin),
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<DispatchAs> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Utility",
+                        "dispatch_as",
+                        DispatchAs {
+                            as_origin: ::std::boxed::Box::new(as_origin),
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             21u8, 250u8, 30u8, 78u8, 60u8, 151u8, 157u8, 90u8, 167u8,
@@ -14810,16 +14122,11 @@ pub mod api {
                 pub fn force_batch(
                     &self,
                     calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceBatch>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Utility",
-                            call: "force_batch",
-                            data: ForceBatch { calls },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceBatch> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Utility",
+                        "force_batch",
+                        ForceBatch { calls },
                         [
                             195u8, 179u8, 12u8, 198u8, 131u8, 78u8, 95u8, 171u8, 209u8,
                             198u8, 177u8, 95u8, 116u8, 196u8, 112u8, 71u8, 41u8, 13u8,
@@ -15117,16 +14424,11 @@ pub mod api {
                 pub fn add_registrar(
                     &self,
                     account: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddRegistrar>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "add_registrar",
-                            data: AddRegistrar { account },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AddRegistrar> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "add_registrar",
+                        AddRegistrar { account },
                         [
                             231u8, 221u8, 79u8, 233u8, 107u8, 34u8, 195u8, 186u8, 192u8,
                             129u8, 103u8, 159u8, 159u8, 83u8, 151u8, 161u8, 137u8, 164u8,
@@ -15157,17 +14459,12 @@ pub mod api {
                 pub fn set_identity(
                     &self,
                     info: runtime_types::pallet_identity::types::IdentityInfo,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetIdentity>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "set_identity",
-                            data: SetIdentity {
-                                info: ::std::boxed::Box::new(info),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SetIdentity> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "set_identity",
+                        SetIdentity {
+                            info: ::std::boxed::Box::new(info),
                         },
                         [
                             130u8, 89u8, 118u8, 6u8, 134u8, 166u8, 35u8, 192u8, 73u8,
@@ -15204,16 +14501,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         runtime_types::pallet_identity::types::Data,
                     )>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetSubs>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "set_subs",
-                            data: SetSubs { subs },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetSubs> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "set_subs",
+                        SetSubs { subs },
                         [
                             177u8, 219u8, 84u8, 183u8, 5u8, 32u8, 192u8, 82u8, 174u8,
                             68u8, 198u8, 224u8, 56u8, 85u8, 134u8, 171u8, 30u8, 132u8,
@@ -15242,16 +14534,11 @@ pub mod api {
                 #[doc = "# </weight>"]
                 pub fn clear_identity(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClearIdentity>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "clear_identity",
-                            data: ClearIdentity {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ClearIdentity> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "clear_identity",
+                        ClearIdentity {},
                         [
                             75u8, 44u8, 74u8, 122u8, 149u8, 202u8, 114u8, 230u8, 0u8,
                             255u8, 140u8, 122u8, 14u8, 196u8, 205u8, 249u8, 220u8, 94u8,
@@ -15287,16 +14574,11 @@ pub mod api {
                     &self,
                     reg_index: ::core::primitive::u32,
                     max_fee: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RequestJudgement>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "request_judgement",
-                            data: RequestJudgement { reg_index, max_fee },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RequestJudgement> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "request_judgement",
+                        RequestJudgement { reg_index, max_fee },
                         [
                             186u8, 149u8, 61u8, 54u8, 159u8, 194u8, 77u8, 161u8, 220u8,
                             157u8, 3u8, 216u8, 23u8, 105u8, 119u8, 76u8, 144u8, 198u8,
@@ -15325,16 +14607,11 @@ pub mod api {
                 pub fn cancel_request(
                     &self,
                     reg_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelRequest>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "cancel_request",
-                            data: CancelRequest { reg_index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelRequest> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "cancel_request",
+                        CancelRequest { reg_index },
                         [
                             83u8, 180u8, 239u8, 126u8, 32u8, 51u8, 17u8, 20u8, 180u8,
                             3u8, 59u8, 96u8, 24u8, 32u8, 136u8, 92u8, 58u8, 254u8, 68u8,
@@ -15360,16 +14637,11 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u32,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetFee>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "set_fee",
-                            data: SetFee { index, fee },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetFee> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "set_fee",
+                        SetFee { index, fee },
                         [
                             21u8, 157u8, 123u8, 182u8, 160u8, 190u8, 117u8, 37u8, 136u8,
                             133u8, 104u8, 234u8, 31u8, 145u8, 115u8, 154u8, 125u8, 40u8,
@@ -15395,16 +14667,11 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u32,
                     new: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetAccountId>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "set_account_id",
-                            data: SetAccountId { index, new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetAccountId> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "set_account_id",
+                        SetAccountId { index, new },
                         [
                             245u8, 76u8, 110u8, 237u8, 219u8, 246u8, 219u8, 136u8, 146u8,
                             42u8, 139u8, 60u8, 30u8, 188u8, 87u8, 10u8, 231u8, 89u8,
@@ -15432,16 +14699,11 @@ pub mod api {
                     fields: runtime_types::pallet_identity::types::BitFlags<
                         runtime_types::pallet_identity::types::IdentityField,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetFields>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "set_fields",
-                            data: SetFields { index, fields },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetFields> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "set_fields",
+                        SetFields { index, fields },
                         [
                             50u8, 196u8, 179u8, 71u8, 66u8, 65u8, 235u8, 7u8, 51u8, 14u8,
                             81u8, 173u8, 201u8, 58u8, 6u8, 151u8, 174u8, 245u8, 102u8,
@@ -15479,19 +14741,14 @@ pub mod api {
                     judgement: runtime_types::pallet_identity::types::Judgement<
                         ::core::primitive::u128,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProvideJudgement>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "provide_judgement",
-                            data: ProvideJudgement {
-                                reg_index,
-                                target,
-                                judgement,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ProvideJudgement> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "provide_judgement",
+                        ProvideJudgement {
+                            reg_index,
+                            target,
+                            judgement,
                         },
                         [
                             221u8, 244u8, 12u8, 17u8, 197u8, 130u8, 189u8, 136u8, 253u8,
@@ -15526,16 +14783,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<KillIdentity>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "kill_identity",
-                            data: KillIdentity { target },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<KillIdentity> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "kill_identity",
+                        KillIdentity { target },
                         [
                             76u8, 13u8, 158u8, 219u8, 221u8, 0u8, 151u8, 241u8, 137u8,
                             136u8, 179u8, 194u8, 188u8, 230u8, 56u8, 16u8, 254u8, 28u8,
@@ -15558,16 +14810,11 @@ pub mod api {
                         (),
                     >,
                     data: runtime_types::pallet_identity::types::Data,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddSub>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "add_sub",
-                            data: AddSub { sub, data },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AddSub> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "add_sub",
+                        AddSub { sub, data },
                         [
                             122u8, 218u8, 25u8, 93u8, 33u8, 176u8, 191u8, 254u8, 223u8,
                             147u8, 100u8, 135u8, 86u8, 71u8, 47u8, 163u8, 105u8, 222u8,
@@ -15587,16 +14834,11 @@ pub mod api {
                         (),
                     >,
                     data: runtime_types::pallet_identity::types::Data,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RenameSub>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "rename_sub",
-                            data: RenameSub { sub, data },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RenameSub> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "rename_sub",
+                        RenameSub { sub, data },
                         [
                             166u8, 167u8, 49u8, 114u8, 199u8, 168u8, 187u8, 221u8, 100u8,
                             85u8, 147u8, 211u8, 157u8, 31u8, 109u8, 135u8, 194u8, 135u8,
@@ -15618,16 +14860,11 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveSub>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "remove_sub",
-                            data: RemoveSub { sub },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveSub> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "remove_sub",
+                        RemoveSub { sub },
                         [
                             106u8, 223u8, 210u8, 67u8, 54u8, 11u8, 144u8, 222u8, 42u8,
                             46u8, 157u8, 33u8, 13u8, 245u8, 166u8, 195u8, 227u8, 81u8,
@@ -15646,18 +14883,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "NOTE: This should not normally be used, but is provided in the case that the non-"]
                 #[doc = "controller of an account is maliciously registered as a sub-account."]
-                pub fn quit_sub(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<QuitSub>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Identity",
-                            call: "quit_sub",
-                            data: QuitSub {},
-                        },
+                pub fn quit_sub(&self) -> ::subxt::tx::StaticTxPayload<QuitSub> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Identity",
+                        "quit_sub",
+                        QuitSub {},
                         [
                             62u8, 57u8, 73u8, 72u8, 119u8, 216u8, 250u8, 155u8, 57u8,
                             169u8, 157u8, 44u8, 87u8, 51u8, 63u8, 231u8, 77u8, 7u8, 0u8,
@@ -16282,19 +15512,14 @@ pub mod api {
                         runtime_types::polkadot_runtime::ProxyType,
                     >,
                     call: runtime_types::polkadot_runtime::Call,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Proxy>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "proxy",
-                            data: Proxy {
-                                real,
-                                force_proxy_type,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Proxy> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "proxy",
+                        Proxy {
+                            real,
+                            force_proxy_type,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             228u8, 178u8, 79u8, 159u8, 147u8, 71u8, 47u8, 204u8, 220u8,
@@ -16322,19 +15547,14 @@ pub mod api {
                     delegate: ::subxt::ext::sp_core::crypto::AccountId32,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddProxy>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "add_proxy",
-                            data: AddProxy {
-                                delegate,
-                                proxy_type,
-                                delay,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AddProxy> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "add_proxy",
+                        AddProxy {
+                            delegate,
+                            proxy_type,
+                            delay,
                         },
                         [
                             25u8, 189u8, 96u8, 67u8, 195u8, 60u8, 158u8, 251u8, 72u8,
@@ -16360,19 +15580,14 @@ pub mod api {
                     delegate: ::subxt::ext::sp_core::crypto::AccountId32,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveProxy>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "remove_proxy",
-                            data: RemoveProxy {
-                                delegate,
-                                proxy_type,
-                                delay,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveProxy> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "remove_proxy",
+                        RemoveProxy {
+                            delegate,
+                            proxy_type,
+                            delay,
                         },
                         [
                             40u8, 172u8, 127u8, 108u8, 114u8, 22u8, 17u8, 90u8, 153u8,
@@ -16394,16 +15609,11 @@ pub mod api {
                 #[doc = "# </weight>"]
                 pub fn remove_proxies(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveProxies>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "remove_proxies",
-                            data: RemoveProxies {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveProxies> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "remove_proxies",
+                        RemoveProxies {},
                         [
                             15u8, 237u8, 27u8, 166u8, 254u8, 218u8, 92u8, 5u8, 213u8,
                             239u8, 99u8, 59u8, 1u8, 26u8, 73u8, 252u8, 81u8, 94u8, 214u8,
@@ -16440,19 +15650,14 @@ pub mod api {
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     delay: ::core::primitive::u32,
                     index: ::core::primitive::u16,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Anonymous>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "anonymous",
-                            data: Anonymous {
-                                proxy_type,
-                                delay,
-                                index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Anonymous> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "anonymous",
+                        Anonymous {
+                            proxy_type,
+                            delay,
+                            index,
                         },
                         [
                             181u8, 76u8, 106u8, 208u8, 138u8, 11u8, 212u8, 10u8, 87u8,
@@ -16489,21 +15694,16 @@ pub mod api {
                     index: ::core::primitive::u16,
                     height: ::core::primitive::u32,
                     ext_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<KillAnonymous>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "kill_anonymous",
-                            data: KillAnonymous {
-                                spawner,
-                                proxy_type,
-                                index,
-                                height,
-                                ext_index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<KillAnonymous> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "kill_anonymous",
+                        KillAnonymous {
+                            spawner,
+                            proxy_type,
+                            index,
+                            height,
+                            ext_index,
                         },
                         [
                             216u8, 42u8, 41u8, 194u8, 47u8, 221u8, 65u8, 109u8, 144u8,
@@ -16538,16 +15738,11 @@ pub mod api {
                     &self,
                     real: ::subxt::ext::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Announce>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "announce",
-                            data: Announce { real, call_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Announce> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "announce",
+                        Announce { real, call_hash },
                         [
                             99u8, 237u8, 158u8, 131u8, 185u8, 119u8, 88u8, 167u8, 253u8,
                             29u8, 82u8, 216u8, 225u8, 33u8, 181u8, 244u8, 85u8, 176u8,
@@ -16576,16 +15771,11 @@ pub mod api {
                     &self,
                     real: ::subxt::ext::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RemoveAnnouncement>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "remove_announcement",
-                            data: RemoveAnnouncement { real, call_hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RemoveAnnouncement> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "remove_announcement",
+                        RemoveAnnouncement { real, call_hash },
                         [
                             197u8, 54u8, 240u8, 51u8, 65u8, 218u8, 154u8, 165u8, 24u8,
                             54u8, 157u8, 30u8, 144u8, 22u8, 247u8, 177u8, 105u8, 38u8,
@@ -16614,18 +15804,13 @@ pub mod api {
                     &self,
                     delegate: ::subxt::ext::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RejectAnnouncement>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "reject_announcement",
-                            data: RejectAnnouncement {
-                                delegate,
-                                call_hash,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<RejectAnnouncement> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "reject_announcement",
+                        RejectAnnouncement {
+                            delegate,
+                            call_hash,
                         },
                         [
                             205u8, 123u8, 102u8, 30u8, 196u8, 250u8, 247u8, 50u8, 243u8,
@@ -16660,20 +15845,15 @@ pub mod api {
                         runtime_types::polkadot_runtime::ProxyType,
                     >,
                     call: runtime_types::polkadot_runtime::Call,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProxyAnnounced>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Proxy",
-                            call: "proxy_announced",
-                            data: ProxyAnnounced {
-                                delegate,
-                                real,
-                                force_proxy_type,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ProxyAnnounced> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Proxy",
+                        "proxy_announced",
+                        ProxyAnnounced {
+                            delegate,
+                            real,
+                            force_proxy_type,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             11u8, 45u8, 62u8, 39u8, 183u8, 91u8, 202u8, 137u8, 241u8,
@@ -17120,18 +16300,13 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                     >,
                     call: runtime_types::polkadot_runtime::Call,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AsMultiThreshold1>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Multisig",
-                            call: "as_multi_threshold_1",
-                            data: AsMultiThreshold1 {
-                                other_signatories,
-                                call: ::std::boxed::Box::new(call),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AsMultiThreshold1> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Multisig",
+                        "as_multi_threshold_1",
+                        AsMultiThreshold1 {
+                            other_signatories,
+                            call: ::std::boxed::Box::new(call),
                         },
                         [
                             246u8, 222u8, 148u8, 4u8, 239u8, 222u8, 193u8, 79u8, 53u8,
@@ -17200,22 +16375,17 @@ pub mod api {
                     >,
                     store_call: ::core::primitive::bool,
                     max_weight: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AsMulti>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Multisig",
-                            call: "as_multi",
-                            data: AsMulti {
-                                threshold,
-                                other_signatories,
-                                maybe_timepoint,
-                                call,
-                                store_call,
-                                max_weight,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AsMulti> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Multisig",
+                        "as_multi",
+                        AsMulti {
+                            threshold,
+                            other_signatories,
+                            maybe_timepoint,
+                            call,
+                            store_call,
+                            max_weight,
                         },
                         [
                             145u8, 219u8, 104u8, 65u8, 73u8, 34u8, 65u8, 60u8, 105u8,
@@ -17271,21 +16441,16 @@ pub mod api {
                     >,
                     call_hash: [::core::primitive::u8; 32usize],
                     max_weight: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ApproveAsMulti>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Multisig",
-                            call: "approve_as_multi",
-                            data: ApproveAsMulti {
-                                threshold,
-                                other_signatories,
-                                maybe_timepoint,
-                                call_hash,
-                                max_weight,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ApproveAsMulti> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Multisig",
+                        "approve_as_multi",
+                        ApproveAsMulti {
+                            threshold,
+                            other_signatories,
+                            maybe_timepoint,
+                            call_hash,
+                            max_weight,
                         },
                         [
                             55u8, 94u8, 230u8, 217u8, 37u8, 143u8, 44u8, 108u8, 123u8,
@@ -17331,20 +16496,15 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call_hash: [::core::primitive::u8; 32usize],
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelAsMulti>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Multisig",
-                            call: "cancel_as_multi",
-                            data: CancelAsMulti {
-                                threshold,
-                                other_signatories,
-                                timepoint,
-                                call_hash,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<CancelAsMulti> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Multisig",
+                        "cancel_as_multi",
+                        CancelAsMulti {
+                            threshold,
+                            other_signatories,
+                            timepoint,
+                            call_hash,
                         },
                         [
                             30u8, 25u8, 186u8, 142u8, 168u8, 81u8, 235u8, 164u8, 82u8,
@@ -17724,16 +16884,11 @@ pub mod api {
                     &self,
                     value: ::core::primitive::u128,
                     description: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProposeBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "propose_bounty",
-                            data: ProposeBounty { value, description },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ProposeBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "propose_bounty",
+                        ProposeBounty { value, description },
                         [
                             99u8, 160u8, 94u8, 74u8, 105u8, 161u8, 123u8, 239u8, 241u8,
                             117u8, 97u8, 99u8, 84u8, 101u8, 87u8, 3u8, 88u8, 175u8, 75u8,
@@ -17753,16 +16908,11 @@ pub mod api {
                 pub fn approve_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ApproveBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "approve_bounty",
-                            data: ApproveBounty { bounty_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ApproveBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "approve_bounty",
+                        ApproveBounty { bounty_id },
                         [
                             82u8, 228u8, 232u8, 103u8, 198u8, 173u8, 190u8, 148u8, 159u8,
                             86u8, 48u8, 4u8, 32u8, 169u8, 1u8, 129u8, 96u8, 145u8, 235u8,
@@ -17786,19 +16936,14 @@ pub mod api {
                         (),
                     >,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProposeCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "propose_curator",
-                            data: ProposeCurator {
-                                bounty_id,
-                                curator,
-                                fee,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ProposeCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "propose_curator",
+                        ProposeCurator {
+                            bounty_id,
+                            curator,
+                            fee,
                         },
                         [
                             123u8, 148u8, 21u8, 204u8, 216u8, 6u8, 47u8, 83u8, 182u8,
@@ -17829,16 +16974,11 @@ pub mod api {
                 pub fn unassign_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<UnassignCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "unassign_curator",
-                            data: UnassignCurator { bounty_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<UnassignCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "unassign_curator",
+                        UnassignCurator { bounty_id },
                         [
                             218u8, 241u8, 247u8, 89u8, 95u8, 120u8, 93u8, 18u8, 85u8,
                             114u8, 158u8, 254u8, 68u8, 77u8, 230u8, 186u8, 230u8, 201u8,
@@ -17858,16 +16998,11 @@ pub mod api {
                 pub fn accept_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AcceptCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "accept_curator",
-                            data: AcceptCurator { bounty_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AcceptCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "accept_curator",
+                        AcceptCurator { bounty_id },
                         [
                             106u8, 96u8, 22u8, 67u8, 52u8, 109u8, 180u8, 225u8, 122u8,
                             253u8, 209u8, 214u8, 132u8, 131u8, 247u8, 131u8, 162u8, 51u8,
@@ -17894,18 +17029,13 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AwardBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "award_bounty",
-                            data: AwardBounty {
-                                bounty_id,
-                                beneficiary,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AwardBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "award_bounty",
+                        AwardBounty {
+                            bounty_id,
+                            beneficiary,
                         },
                         [
                             203u8, 164u8, 214u8, 242u8, 1u8, 11u8, 217u8, 32u8, 189u8,
@@ -17927,16 +17057,11 @@ pub mod api {
                 pub fn claim_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClaimBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "claim_bounty",
-                            data: ClaimBounty { bounty_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ClaimBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "claim_bounty",
+                        ClaimBounty { bounty_id },
                         [
                             102u8, 95u8, 8u8, 89u8, 4u8, 126u8, 189u8, 28u8, 241u8, 16u8,
                             125u8, 218u8, 42u8, 92u8, 177u8, 91u8, 8u8, 235u8, 33u8,
@@ -17958,16 +17083,11 @@ pub mod api {
                 pub fn close_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CloseBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "close_bounty",
-                            data: CloseBounty { bounty_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CloseBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "close_bounty",
+                        CloseBounty { bounty_id },
                         [
                             64u8, 113u8, 151u8, 228u8, 90u8, 55u8, 251u8, 63u8, 27u8,
                             211u8, 119u8, 229u8, 137u8, 137u8, 183u8, 240u8, 241u8,
@@ -17990,16 +17110,11 @@ pub mod api {
                     &self,
                     bounty_id: ::core::primitive::u32,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ExtendBountyExpiry>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Bounties",
-                            call: "extend_bounty_expiry",
-                            data: ExtendBountyExpiry { bounty_id, remark },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ExtendBountyExpiry> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Bounties",
+                        "extend_bounty_expiry",
+                        ExtendBountyExpiry { bounty_id, remark },
                         [
                             97u8, 69u8, 157u8, 39u8, 59u8, 72u8, 79u8, 88u8, 104u8,
                             119u8, 91u8, 26u8, 73u8, 216u8, 174u8, 95u8, 254u8, 214u8,
@@ -18580,19 +17695,14 @@ pub mod api {
                     parent_bounty_id: ::core::primitive::u32,
                     value: ::core::primitive::u128,
                     description: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddChildBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "add_child_bounty",
-                            data: AddChildBounty {
-                                parent_bounty_id,
-                                value,
-                                description,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AddChildBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "add_child_bounty",
+                        AddChildBounty {
+                            parent_bounty_id,
+                            value,
+                            description,
                         },
                         [
                             210u8, 156u8, 242u8, 121u8, 28u8, 214u8, 212u8, 203u8, 46u8,
@@ -18626,20 +17736,15 @@ pub mod api {
                         (),
                     >,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ProposeCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "propose_curator",
-                            data: ProposeCurator {
-                                parent_bounty_id,
-                                child_bounty_id,
-                                curator,
-                                fee,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ProposeCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "propose_curator",
+                        ProposeCurator {
+                            parent_bounty_id,
+                            child_bounty_id,
+                            curator,
+                            fee,
                         },
                         [
                             37u8, 101u8, 96u8, 75u8, 254u8, 212u8, 42u8, 140u8, 72u8,
@@ -18672,18 +17777,13 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AcceptCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "accept_curator",
-                            data: AcceptCurator {
-                                parent_bounty_id,
-                                child_bounty_id,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AcceptCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "accept_curator",
+                        AcceptCurator {
+                            parent_bounty_id,
+                            child_bounty_id,
                         },
                         [
                             112u8, 175u8, 238u8, 54u8, 132u8, 20u8, 206u8, 59u8, 220u8,
@@ -18731,18 +17831,13 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<UnassignCurator>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "unassign_curator",
-                            data: UnassignCurator {
-                                parent_bounty_id,
-                                child_bounty_id,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<UnassignCurator> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "unassign_curator",
+                        UnassignCurator {
+                            parent_bounty_id,
+                            child_bounty_id,
                         },
                         [
                             228u8, 189u8, 46u8, 75u8, 121u8, 161u8, 150u8, 87u8, 207u8,
@@ -18777,19 +17872,14 @@ pub mod api {
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         (),
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AwardChildBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "award_child_bounty",
-                            data: AwardChildBounty {
-                                parent_bounty_id,
-                                child_bounty_id,
-                                beneficiary,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<AwardChildBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "award_child_bounty",
+                        AwardChildBounty {
+                            parent_bounty_id,
+                            child_bounty_id,
+                            beneficiary,
                         },
                         [
                             231u8, 185u8, 73u8, 232u8, 92u8, 116u8, 204u8, 165u8, 216u8,
@@ -18819,18 +17909,13 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClaimChildBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "claim_child_bounty",
-                            data: ClaimChildBounty {
-                                parent_bounty_id,
-                                child_bounty_id,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ClaimChildBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "claim_child_bounty",
+                        ClaimChildBounty {
+                            parent_bounty_id,
+                            child_bounty_id,
                         },
                         [
                             134u8, 243u8, 151u8, 228u8, 38u8, 174u8, 96u8, 140u8, 104u8,
@@ -18866,18 +17951,13 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CloseChildBounty>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ChildBounties",
-                            call: "close_child_bounty",
-                            data: CloseChildBounty {
-                                parent_bounty_id,
-                                child_bounty_id,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<CloseChildBounty> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ChildBounties",
+                        "close_child_bounty",
+                        CloseChildBounty {
+                            parent_bounty_id,
+                            child_bounty_id,
                         },
                         [
                             40u8, 0u8, 235u8, 75u8, 36u8, 196u8, 29u8, 26u8, 30u8, 172u8,
@@ -19323,16 +18403,11 @@ pub mod api {
                     &self,
                     reason: ::std::vec::Vec<::core::primitive::u8>,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReportAwesome>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "report_awesome",
-                            data: ReportAwesome { reason, who },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ReportAwesome> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "report_awesome",
+                        ReportAwesome { reason, who },
                         [
                             43u8, 6u8, 185u8, 209u8, 110u8, 99u8, 94u8, 100u8, 33u8, 5u8,
                             27u8, 199u8, 67u8, 255u8, 252u8, 26u8, 104u8, 192u8, 55u8,
@@ -19363,16 +18438,11 @@ pub mod api {
                 pub fn retract_tip(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<RetractTip>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "retract_tip",
-                            data: RetractTip { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<RetractTip> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "retract_tip",
+                        RetractTip { hash },
                         [
                             137u8, 42u8, 229u8, 188u8, 157u8, 195u8, 184u8, 176u8, 64u8,
                             142u8, 67u8, 175u8, 185u8, 207u8, 214u8, 71u8, 165u8, 29u8,
@@ -19408,19 +18478,14 @@ pub mod api {
                     reason: ::std::vec::Vec<::core::primitive::u8>,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
                     tip_value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<TipNew>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "tip_new",
-                            data: TipNew {
-                                reason,
-                                who,
-                                tip_value,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<TipNew> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "tip_new",
+                        TipNew {
+                            reason,
+                            who,
+                            tip_value,
                         },
                         [
                             146u8, 216u8, 159u8, 132u8, 163u8, 180u8, 42u8, 203u8, 181u8,
@@ -19458,16 +18523,11 @@ pub mod api {
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
                     tip_value: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Tip>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "tip",
-                            data: Tip { hash, tip_value },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Tip> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "tip",
+                        Tip { hash, tip_value },
                         [
                             133u8, 52u8, 131u8, 14u8, 71u8, 232u8, 254u8, 31u8, 33u8,
                             206u8, 50u8, 76u8, 56u8, 167u8, 228u8, 202u8, 195u8, 0u8,
@@ -19495,16 +18555,11 @@ pub mod api {
                 pub fn close_tip(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CloseTip>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "close_tip",
-                            data: CloseTip { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CloseTip> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "close_tip",
+                        CloseTip { hash },
                         [
                             32u8, 53u8, 0u8, 222u8, 45u8, 157u8, 107u8, 174u8, 203u8,
                             50u8, 81u8, 230u8, 6u8, 111u8, 79u8, 55u8, 49u8, 151u8,
@@ -19528,16 +18583,11 @@ pub mod api {
                 pub fn slash_tip(
                     &self,
                     hash: ::subxt::ext::sp_core::H256,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SlashTip>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Tips",
-                            call: "slash_tip",
-                            data: SlashTip { hash },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SlashTip> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Tips",
+                        "slash_tip",
+                        SlashTip { hash },
                         [
                             222u8, 209u8, 22u8, 47u8, 114u8, 230u8, 81u8, 200u8, 131u8,
                             0u8, 209u8, 54u8, 17u8, 200u8, 175u8, 125u8, 100u8, 254u8,
@@ -19923,18 +18973,13 @@ pub mod api {
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 >,
                     witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SubmitUnsigned>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ElectionProviderMultiPhase",
-                            call: "submit_unsigned",
-                            data: SubmitUnsigned {
-                                raw_solution: ::std::boxed::Box::new(raw_solution),
-                                witness,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<SubmitUnsigned> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ElectionProviderMultiPhase",
+                        "submit_unsigned",
+                        SubmitUnsigned {
+                            raw_solution: ::std::boxed::Box::new(raw_solution),
+                            witness,
                         },
                         [
                             100u8, 240u8, 31u8, 34u8, 93u8, 98u8, 93u8, 57u8, 41u8,
@@ -19954,16 +18999,12 @@ pub mod api {
                     maybe_next_score: ::core::option::Option<
                         runtime_types::sp_npos_elections::ElectionScore,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMinimumUntrustedScore>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ElectionProviderMultiPhase",
-                            call: "set_minimum_untrusted_score",
-                            data: SetMinimumUntrustedScore { maybe_next_score },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMinimumUntrustedScore>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ElectionProviderMultiPhase",
+                        "set_minimum_untrusted_score",
+                        SetMinimumUntrustedScore { maybe_next_score },
                         [
                             63u8, 101u8, 105u8, 146u8, 133u8, 162u8, 149u8, 112u8, 150u8,
                             219u8, 183u8, 213u8, 234u8, 211u8, 144u8, 74u8, 106u8, 15u8,
@@ -19988,16 +19029,12 @@ pub mod api {
                             ::subxt::ext::sp_core::crypto::AccountId32,
                         >,
                     )>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetEmergencyElectionResult>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ElectionProviderMultiPhase",
-                            call: "set_emergency_election_result",
-                            data: SetEmergencyElectionResult { supports },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetEmergencyElectionResult>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ElectionProviderMultiPhase",
+                        "set_emergency_election_result",
+                        SetEmergencyElectionResult { supports },
                         [
                             115u8, 255u8, 205u8, 58u8, 153u8, 1u8, 246u8, 8u8, 225u8,
                             36u8, 66u8, 144u8, 250u8, 145u8, 70u8, 76u8, 54u8, 63u8,
@@ -20018,17 +19055,12 @@ pub mod api {
                 pub fn submit(
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Submit>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ElectionProviderMultiPhase",
-                            call: "submit",
-                            data: Submit {
-                                raw_solution: ::std::boxed::Box::new(raw_solution),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Submit> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ElectionProviderMultiPhase",
+                        "submit",
+                        Submit {
+                            raw_solution: ::std::boxed::Box::new(raw_solution),
                         },
                         [
                             220u8, 167u8, 40u8, 47u8, 253u8, 244u8, 72u8, 124u8, 30u8,
@@ -20046,18 +19078,13 @@ pub mod api {
                     &self,
                     maybe_max_voters: ::core::option::Option<::core::primitive::u32>,
                     maybe_max_targets: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<GovernanceFallback>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ElectionProviderMultiPhase",
-                            call: "governance_fallback",
-                            data: GovernanceFallback {
-                                maybe_max_voters,
-                                maybe_max_targets,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<GovernanceFallback> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ElectionProviderMultiPhase",
+                        "governance_fallback",
+                        GovernanceFallback {
+                            maybe_max_voters,
+                            maybe_max_targets,
                         },
                         [
                             206u8, 247u8, 76u8, 85u8, 7u8, 24u8, 231u8, 226u8, 192u8,
@@ -20741,16 +19768,11 @@ pub mod api {
                 pub fn rebag(
                     &self,
                     dislocated: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Rebag>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "VoterList",
-                            call: "rebag",
-                            data: Rebag { dislocated },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Rebag> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "VoterList",
+                        "rebag",
+                        Rebag { dislocated },
                         [
                             8u8, 182u8, 221u8, 221u8, 242u8, 48u8, 178u8, 182u8, 236u8,
                             54u8, 188u8, 107u8, 32u8, 24u8, 90u8, 76u8, 28u8, 67u8, 8u8,
@@ -20770,16 +19792,11 @@ pub mod api {
                 pub fn put_in_front_of(
                     &self,
                     lighter: ::subxt::ext::sp_core::crypto::AccountId32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<PutInFrontOf>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "VoterList",
-                            call: "put_in_front_of",
-                            data: PutInFrontOf { lighter },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<PutInFrontOf> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "VoterList",
+                        "put_in_front_of",
+                        PutInFrontOf { lighter },
                         [
                             247u8, 154u8, 37u8, 142u8, 28u8, 130u8, 53u8, 223u8, 255u8,
                             154u8, 21u8, 149u8, 244u8, 21u8, 105u8, 77u8, 189u8, 74u8,
@@ -21447,16 +20464,12 @@ pub mod api {
                 pub fn set_validation_upgrade_cooldown(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetValidationUpgradeCooldown>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_validation_upgrade_cooldown",
-                            data: SetValidationUpgradeCooldown { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetValidationUpgradeCooldown>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_validation_upgrade_cooldown",
+                        SetValidationUpgradeCooldown { new },
                         [
                             109u8, 185u8, 0u8, 59u8, 177u8, 198u8, 76u8, 90u8, 108u8,
                             190u8, 56u8, 126u8, 147u8, 110u8, 76u8, 111u8, 38u8, 200u8,
@@ -21469,16 +20482,12 @@ pub mod api {
                 pub fn set_validation_upgrade_delay(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetValidationUpgradeDelay>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_validation_upgrade_delay",
-                            data: SetValidationUpgradeDelay { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetValidationUpgradeDelay>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_validation_upgrade_delay",
+                        SetValidationUpgradeDelay { new },
                         [
                             18u8, 130u8, 158u8, 253u8, 160u8, 194u8, 220u8, 120u8, 9u8,
                             68u8, 232u8, 176u8, 34u8, 81u8, 200u8, 236u8, 141u8, 139u8,
@@ -21491,16 +20500,12 @@ pub mod api {
                 pub fn set_code_retention_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetCodeRetentionPeriod>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_code_retention_period",
-                            data: SetCodeRetentionPeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetCodeRetentionPeriod>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_code_retention_period",
+                        SetCodeRetentionPeriod { new },
                         [
                             221u8, 140u8, 253u8, 111u8, 64u8, 236u8, 93u8, 52u8, 214u8,
                             245u8, 178u8, 30u8, 77u8, 166u8, 242u8, 252u8, 203u8, 106u8,
@@ -21513,16 +20518,11 @@ pub mod api {
                 pub fn set_max_code_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxCodeSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_code_size",
-                            data: SetMaxCodeSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxCodeSize> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_code_size",
+                        SetMaxCodeSize { new },
                         [
                             232u8, 106u8, 45u8, 195u8, 27u8, 162u8, 188u8, 213u8, 137u8,
                             13u8, 123u8, 89u8, 215u8, 141u8, 231u8, 82u8, 205u8, 215u8,
@@ -21535,16 +20535,11 @@ pub mod api {
                 pub fn set_max_pov_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxPovSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_pov_size",
-                            data: SetMaxPovSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxPovSize> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_pov_size",
+                        SetMaxPovSize { new },
                         [
                             15u8, 176u8, 13u8, 19u8, 177u8, 160u8, 211u8, 238u8, 29u8,
                             194u8, 187u8, 235u8, 244u8, 65u8, 158u8, 47u8, 102u8, 221u8,
@@ -21557,16 +20552,11 @@ pub mod api {
                 pub fn set_max_head_data_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxHeadDataSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_head_data_size",
-                            data: SetMaxHeadDataSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxHeadDataSize> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_head_data_size",
+                        SetMaxHeadDataSize { new },
                         [
                             219u8, 128u8, 213u8, 65u8, 190u8, 224u8, 87u8, 80u8, 172u8,
                             112u8, 160u8, 229u8, 52u8, 1u8, 189u8, 125u8, 177u8, 139u8,
@@ -21579,16 +20569,11 @@ pub mod api {
                 pub fn set_parathread_cores(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetParathreadCores>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_parathread_cores",
-                            data: SetParathreadCores { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetParathreadCores> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_parathread_cores",
+                        SetParathreadCores { new },
                         [
                             155u8, 102u8, 168u8, 202u8, 236u8, 87u8, 16u8, 128u8, 141u8,
                             99u8, 154u8, 162u8, 216u8, 198u8, 236u8, 233u8, 104u8, 230u8,
@@ -21601,16 +20586,11 @@ pub mod api {
                 pub fn set_parathread_retries(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetParathreadRetries>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_parathread_retries",
-                            data: SetParathreadRetries { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetParathreadRetries> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_parathread_retries",
+                        SetParathreadRetries { new },
                         [
                             192u8, 81u8, 152u8, 41u8, 40u8, 3u8, 251u8, 205u8, 244u8,
                             133u8, 42u8, 197u8, 21u8, 221u8, 80u8, 196u8, 222u8, 69u8,
@@ -21623,16 +20603,12 @@ pub mod api {
                 pub fn set_group_rotation_frequency(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetGroupRotationFrequency>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_group_rotation_frequency",
-                            data: SetGroupRotationFrequency { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetGroupRotationFrequency>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_group_rotation_frequency",
+                        SetGroupRotationFrequency { new },
                         [
                             205u8, 222u8, 129u8, 36u8, 136u8, 186u8, 114u8, 70u8, 214u8,
                             22u8, 112u8, 65u8, 56u8, 42u8, 103u8, 93u8, 108u8, 242u8,
@@ -21645,16 +20621,12 @@ pub mod api {
                 pub fn set_chain_availability_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetChainAvailabilityPeriod>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_chain_availability_period",
-                            data: SetChainAvailabilityPeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetChainAvailabilityPeriod>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_chain_availability_period",
+                        SetChainAvailabilityPeriod { new },
                         [
                             171u8, 21u8, 54u8, 241u8, 19u8, 100u8, 54u8, 143u8, 97u8,
                             191u8, 193u8, 96u8, 7u8, 86u8, 255u8, 109u8, 255u8, 93u8,
@@ -21667,16 +20639,12 @@ pub mod api {
                 pub fn set_thread_availability_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetThreadAvailabilityPeriod>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_thread_availability_period",
-                            data: SetThreadAvailabilityPeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetThreadAvailabilityPeriod>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_thread_availability_period",
+                        SetThreadAvailabilityPeriod { new },
                         [
                             208u8, 27u8, 246u8, 33u8, 90u8, 200u8, 75u8, 177u8, 19u8,
                             107u8, 236u8, 43u8, 159u8, 156u8, 184u8, 10u8, 146u8, 71u8,
@@ -21689,16 +20657,12 @@ pub mod api {
                 pub fn set_scheduling_lookahead(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetSchedulingLookahead>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_scheduling_lookahead",
-                            data: SetSchedulingLookahead { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetSchedulingLookahead>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_scheduling_lookahead",
+                        SetSchedulingLookahead { new },
                         [
                             220u8, 74u8, 0u8, 150u8, 45u8, 29u8, 56u8, 210u8, 66u8, 12u8,
                             119u8, 176u8, 103u8, 24u8, 216u8, 55u8, 211u8, 120u8, 233u8,
@@ -21711,16 +20675,12 @@ pub mod api {
                 pub fn set_max_validators_per_core(
                     &self,
                     new: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxValidatorsPerCore>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_validators_per_core",
-                            data: SetMaxValidatorsPerCore { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxValidatorsPerCore>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_validators_per_core",
+                        SetMaxValidatorsPerCore { new },
                         [
                             227u8, 113u8, 192u8, 116u8, 114u8, 171u8, 27u8, 22u8, 84u8,
                             117u8, 146u8, 152u8, 94u8, 101u8, 14u8, 52u8, 228u8, 170u8,
@@ -21733,16 +20693,11 @@ pub mod api {
                 pub fn set_max_validators(
                     &self,
                     new: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxValidators>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_validators",
-                            data: SetMaxValidators { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxValidators> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_validators",
+                        SetMaxValidators { new },
                         [
                             143u8, 212u8, 59u8, 147u8, 4u8, 55u8, 142u8, 209u8, 237u8,
                             76u8, 7u8, 178u8, 41u8, 81u8, 4u8, 203u8, 184u8, 149u8, 32u8,
@@ -21755,16 +20710,11 @@ pub mod api {
                 pub fn set_dispute_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetDisputePeriod>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_dispute_period",
-                            data: SetDisputePeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetDisputePeriod> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_dispute_period",
+                        SetDisputePeriod { new },
                         [
                             36u8, 191u8, 142u8, 240u8, 48u8, 101u8, 10u8, 197u8, 117u8,
                             125u8, 156u8, 189u8, 130u8, 77u8, 242u8, 130u8, 205u8, 154u8,
@@ -21777,18 +20727,12 @@ pub mod api {
                 pub fn set_dispute_post_conclusion_acceptance_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetDisputePostConclusionAcceptancePeriod,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_dispute_post_conclusion_acceptance_period",
-                            data: SetDisputePostConclusionAcceptancePeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetDisputePostConclusionAcceptancePeriod>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_dispute_post_conclusion_acceptance_period",
+                        SetDisputePostConclusionAcceptancePeriod { new },
                         [
                             66u8, 56u8, 45u8, 87u8, 51u8, 49u8, 91u8, 95u8, 255u8, 185u8,
                             54u8, 165u8, 85u8, 142u8, 238u8, 251u8, 174u8, 81u8, 3u8,
@@ -21801,16 +20745,12 @@ pub mod api {
                 pub fn set_dispute_max_spam_slots(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetDisputeMaxSpamSlots>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_dispute_max_spam_slots",
-                            data: SetDisputeMaxSpamSlots { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetDisputeMaxSpamSlots>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_dispute_max_spam_slots",
+                        SetDisputeMaxSpamSlots { new },
                         [
                             177u8, 58u8, 3u8, 205u8, 145u8, 85u8, 160u8, 162u8, 13u8,
                             171u8, 124u8, 54u8, 58u8, 209u8, 88u8, 131u8, 230u8, 248u8,
@@ -21823,18 +20763,12 @@ pub mod api {
                 pub fn set_dispute_conclusion_by_time_out_period(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetDisputeConclusionByTimeOutPeriod,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_dispute_conclusion_by_time_out_period",
-                            data: SetDisputeConclusionByTimeOutPeriod { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetDisputeConclusionByTimeOutPeriod>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_dispute_conclusion_by_time_out_period",
+                        SetDisputeConclusionByTimeOutPeriod { new },
                         [
                             238u8, 102u8, 27u8, 169u8, 68u8, 116u8, 198u8, 64u8, 190u8,
                             33u8, 36u8, 98u8, 176u8, 157u8, 123u8, 148u8, 126u8, 85u8,
@@ -21848,16 +20782,11 @@ pub mod api {
                 pub fn set_no_show_slots(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetNoShowSlots>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_no_show_slots",
-                            data: SetNoShowSlots { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetNoShowSlots> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_no_show_slots",
+                        SetNoShowSlots { new },
                         [
                             94u8, 230u8, 89u8, 131u8, 188u8, 246u8, 251u8, 34u8, 249u8,
                             16u8, 134u8, 63u8, 238u8, 115u8, 19u8, 97u8, 97u8, 218u8,
@@ -21870,16 +20799,11 @@ pub mod api {
                 pub fn set_n_delay_tranches(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetNDelayTranches>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_n_delay_tranches",
-                            data: SetNDelayTranches { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetNDelayTranches> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_n_delay_tranches",
+                        SetNDelayTranches { new },
                         [
                             195u8, 168u8, 178u8, 51u8, 20u8, 107u8, 227u8, 236u8, 57u8,
                             30u8, 130u8, 93u8, 149u8, 2u8, 161u8, 66u8, 48u8, 37u8, 71u8,
@@ -21892,16 +20816,12 @@ pub mod api {
                 pub fn set_zeroth_delay_tranche_width(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetZerothDelayTrancheWidth>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_zeroth_delay_tranche_width",
-                            data: SetZerothDelayTrancheWidth { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetZerothDelayTrancheWidth>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_zeroth_delay_tranche_width",
+                        SetZerothDelayTrancheWidth { new },
                         [
                             69u8, 56u8, 125u8, 24u8, 181u8, 62u8, 99u8, 92u8, 166u8,
                             107u8, 91u8, 134u8, 230u8, 128u8, 214u8, 135u8, 245u8, 64u8,
@@ -21914,16 +20834,11 @@ pub mod api {
                 pub fn set_needed_approvals(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetNeededApprovals>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_needed_approvals",
-                            data: SetNeededApprovals { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetNeededApprovals> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_needed_approvals",
+                        SetNeededApprovals { new },
                         [
                             238u8, 55u8, 134u8, 30u8, 67u8, 153u8, 150u8, 5u8, 226u8,
                             227u8, 185u8, 188u8, 66u8, 60u8, 147u8, 118u8, 46u8, 174u8,
@@ -21936,16 +20851,12 @@ pub mod api {
                 pub fn set_relay_vrf_modulo_samples(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetRelayVrfModuloSamples>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_relay_vrf_modulo_samples",
-                            data: SetRelayVrfModuloSamples { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetRelayVrfModuloSamples>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_relay_vrf_modulo_samples",
+                        SetRelayVrfModuloSamples { new },
                         [
                             76u8, 101u8, 207u8, 184u8, 211u8, 8u8, 43u8, 4u8, 165u8,
                             147u8, 166u8, 3u8, 189u8, 42u8, 125u8, 130u8, 21u8, 43u8,
@@ -21958,16 +20869,12 @@ pub mod api {
                 pub fn set_max_upward_queue_count(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxUpwardQueueCount>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_upward_queue_count",
-                            data: SetMaxUpwardQueueCount { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxUpwardQueueCount>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_upward_queue_count",
+                        SetMaxUpwardQueueCount { new },
                         [
                             116u8, 186u8, 216u8, 17u8, 150u8, 187u8, 86u8, 154u8, 92u8,
                             122u8, 178u8, 167u8, 215u8, 165u8, 55u8, 86u8, 229u8, 114u8,
@@ -21980,16 +20887,11 @@ pub mod api {
                 pub fn set_max_upward_queue_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxUpwardQueueSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_upward_queue_size",
-                            data: SetMaxUpwardQueueSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxUpwardQueueSize> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_upward_queue_size",
+                        SetMaxUpwardQueueSize { new },
                         [
                             18u8, 60u8, 141u8, 57u8, 134u8, 96u8, 140u8, 85u8, 137u8,
                             9u8, 209u8, 123u8, 10u8, 165u8, 33u8, 184u8, 34u8, 82u8,
@@ -22002,16 +20904,12 @@ pub mod api {
                 pub fn set_max_downward_message_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxDownwardMessageSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_downward_message_size",
-                            data: SetMaxDownwardMessageSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxDownwardMessageSize>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_downward_message_size",
+                        SetMaxDownwardMessageSize { new },
                         [
                             104u8, 25u8, 229u8, 184u8, 53u8, 246u8, 206u8, 180u8, 13u8,
                             156u8, 14u8, 224u8, 215u8, 115u8, 104u8, 127u8, 167u8, 189u8,
@@ -22024,16 +20922,12 @@ pub mod api {
                 pub fn set_ump_service_total_weight(
                     &self,
                     new: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetUmpServiceTotalWeight>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_ump_service_total_weight",
-                            data: SetUmpServiceTotalWeight { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetUmpServiceTotalWeight>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_ump_service_total_weight",
+                        SetUmpServiceTotalWeight { new },
                         [
                             253u8, 228u8, 226u8, 127u8, 202u8, 30u8, 148u8, 254u8, 133u8,
                             38u8, 2u8, 83u8, 173u8, 147u8, 113u8, 224u8, 16u8, 160u8,
@@ -22046,16 +20940,12 @@ pub mod api {
                 pub fn set_max_upward_message_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMaxUpwardMessageSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_upward_message_size",
-                            data: SetMaxUpwardMessageSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxUpwardMessageSize>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_upward_message_size",
+                        SetMaxUpwardMessageSize { new },
                         [
                             213u8, 120u8, 21u8, 247u8, 101u8, 21u8, 164u8, 228u8, 33u8,
                             115u8, 20u8, 138u8, 28u8, 174u8, 247u8, 39u8, 194u8, 113u8,
@@ -22068,18 +20958,12 @@ pub mod api {
                 pub fn set_max_upward_message_num_per_candidate(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetMaxUpwardMessageNumPerCandidate,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_max_upward_message_num_per_candidate",
-                            data: SetMaxUpwardMessageNumPerCandidate { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMaxUpwardMessageNumPerCandidate>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_max_upward_message_num_per_candidate",
+                        SetMaxUpwardMessageNumPerCandidate { new },
                         [
                             54u8, 133u8, 226u8, 138u8, 184u8, 27u8, 130u8, 153u8, 130u8,
                             196u8, 54u8, 79u8, 124u8, 10u8, 37u8, 139u8, 59u8, 190u8,
@@ -22092,16 +20976,11 @@ pub mod api {
                 pub fn set_hrmp_open_request_ttl(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpOpenRequestTtl>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_open_request_ttl",
-                            data: SetHrmpOpenRequestTtl { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpOpenRequestTtl> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_open_request_ttl",
+                        SetHrmpOpenRequestTtl { new },
                         [
                             192u8, 113u8, 113u8, 133u8, 197u8, 75u8, 88u8, 67u8, 130u8,
                             207u8, 37u8, 192u8, 157u8, 159u8, 114u8, 75u8, 83u8, 180u8,
@@ -22114,16 +20993,11 @@ pub mod api {
                 pub fn set_hrmp_sender_deposit(
                     &self,
                     new: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpSenderDeposit>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_sender_deposit",
-                            data: SetHrmpSenderDeposit { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpSenderDeposit> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_sender_deposit",
+                        SetHrmpSenderDeposit { new },
                         [
                             49u8, 38u8, 173u8, 114u8, 66u8, 140u8, 15u8, 151u8, 193u8,
                             54u8, 128u8, 108u8, 72u8, 71u8, 28u8, 65u8, 129u8, 199u8,
@@ -22137,16 +21011,12 @@ pub mod api {
                 pub fn set_hrmp_recipient_deposit(
                     &self,
                     new: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpRecipientDeposit>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_recipient_deposit",
-                            data: SetHrmpRecipientDeposit { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpRecipientDeposit>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_recipient_deposit",
+                        SetHrmpRecipientDeposit { new },
                         [
                             209u8, 212u8, 164u8, 56u8, 71u8, 215u8, 98u8, 250u8, 202u8,
                             150u8, 228u8, 6u8, 166u8, 94u8, 171u8, 142u8, 10u8, 253u8,
@@ -22159,16 +21029,12 @@ pub mod api {
                 pub fn set_hrmp_channel_max_capacity(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpChannelMaxCapacity>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_channel_max_capacity",
-                            data: SetHrmpChannelMaxCapacity { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpChannelMaxCapacity>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_channel_max_capacity",
+                        SetHrmpChannelMaxCapacity { new },
                         [
                             148u8, 109u8, 67u8, 220u8, 1u8, 115u8, 70u8, 93u8, 138u8,
                             190u8, 60u8, 220u8, 80u8, 137u8, 246u8, 230u8, 115u8, 162u8,
@@ -22181,16 +21047,12 @@ pub mod api {
                 pub fn set_hrmp_channel_max_total_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpChannelMaxTotalSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_channel_max_total_size",
-                            data: SetHrmpChannelMaxTotalSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpChannelMaxTotalSize>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_channel_max_total_size",
+                        SetHrmpChannelMaxTotalSize { new },
                         [
                             79u8, 40u8, 207u8, 173u8, 168u8, 143u8, 130u8, 240u8, 205u8,
                             34u8, 61u8, 217u8, 215u8, 106u8, 61u8, 181u8, 8u8, 21u8,
@@ -22203,18 +21065,12 @@ pub mod api {
                 pub fn set_hrmp_max_parachain_inbound_channels(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetHrmpMaxParachainInboundChannels,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_max_parachain_inbound_channels",
-                            data: SetHrmpMaxParachainInboundChannels { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpMaxParachainInboundChannels>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_max_parachain_inbound_channels",
+                        SetHrmpMaxParachainInboundChannels { new },
                         [
                             91u8, 215u8, 212u8, 131u8, 140u8, 185u8, 119u8, 184u8, 61u8,
                             121u8, 120u8, 73u8, 202u8, 98u8, 124u8, 187u8, 171u8, 84u8,
@@ -22227,18 +21083,12 @@ pub mod api {
                 pub fn set_hrmp_max_parathread_inbound_channels(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetHrmpMaxParathreadInboundChannels,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_max_parathread_inbound_channels",
-                            data: SetHrmpMaxParathreadInboundChannels { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpMaxParathreadInboundChannels>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_max_parathread_inbound_channels",
+                        SetHrmpMaxParathreadInboundChannels { new },
                         [
                             209u8, 66u8, 180u8, 20u8, 87u8, 242u8, 219u8, 71u8, 22u8,
                             145u8, 220u8, 48u8, 44u8, 42u8, 77u8, 69u8, 255u8, 82u8,
@@ -22251,16 +21101,12 @@ pub mod api {
                 pub fn set_hrmp_channel_max_message_size(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpChannelMaxMessageSize>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_channel_max_message_size",
-                            data: SetHrmpChannelMaxMessageSize { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpChannelMaxMessageSize>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_channel_max_message_size",
+                        SetHrmpChannelMaxMessageSize { new },
                         [
                             17u8, 224u8, 230u8, 9u8, 114u8, 221u8, 138u8, 46u8, 234u8,
                             151u8, 27u8, 34u8, 179u8, 67u8, 113u8, 228u8, 128u8, 212u8,
@@ -22273,18 +21119,12 @@ pub mod api {
                 pub fn set_hrmp_max_parachain_outbound_channels(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetHrmpMaxParachainOutboundChannels,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_max_parachain_outbound_channels",
-                            data: SetHrmpMaxParachainOutboundChannels { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpMaxParachainOutboundChannels>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_max_parachain_outbound_channels",
+                        SetHrmpMaxParachainOutboundChannels { new },
                         [
                             26u8, 146u8, 150u8, 88u8, 236u8, 8u8, 63u8, 103u8, 71u8,
                             11u8, 20u8, 210u8, 205u8, 106u8, 101u8, 112u8, 116u8, 73u8,
@@ -22297,18 +21137,12 @@ pub mod api {
                 pub fn set_hrmp_max_parathread_outbound_channels(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<
-                        SetHrmpMaxParathreadOutboundChannels,
-                    >,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_max_parathread_outbound_channels",
-                            data: SetHrmpMaxParathreadOutboundChannels { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpMaxParathreadOutboundChannels>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_max_parathread_outbound_channels",
+                        SetHrmpMaxParathreadOutboundChannels { new },
                         [
                             31u8, 72u8, 93u8, 21u8, 180u8, 156u8, 101u8, 24u8, 145u8,
                             220u8, 194u8, 93u8, 176u8, 164u8, 53u8, 123u8, 36u8, 113u8,
@@ -22321,16 +21155,12 @@ pub mod api {
                 pub fn set_hrmp_max_message_num_per_candidate(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetHrmpMaxMessageNumPerCandidate>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_hrmp_max_message_num_per_candidate",
-                            data: SetHrmpMaxMessageNumPerCandidate { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetHrmpMaxMessageNumPerCandidate>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_hrmp_max_message_num_per_candidate",
+                        SetHrmpMaxMessageNumPerCandidate { new },
                         [
                             244u8, 94u8, 225u8, 194u8, 133u8, 116u8, 202u8, 238u8, 8u8,
                             57u8, 122u8, 125u8, 6u8, 131u8, 84u8, 102u8, 180u8, 67u8,
@@ -22343,16 +21173,12 @@ pub mod api {
                 pub fn set_ump_max_individual_weight(
                     &self,
                     new: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetUmpMaxIndividualWeight>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_ump_max_individual_weight",
-                            data: SetUmpMaxIndividualWeight { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetUmpMaxIndividualWeight>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_ump_max_individual_weight",
+                        SetUmpMaxIndividualWeight { new },
                         [
                             122u8, 12u8, 77u8, 188u8, 26u8, 100u8, 16u8, 182u8, 66u8,
                             159u8, 127u8, 111u8, 193u8, 204u8, 119u8, 102u8, 186u8, 12u8,
@@ -22365,16 +21191,11 @@ pub mod api {
                 pub fn set_pvf_checking_enabled(
                     &self,
                     new: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetPvfCheckingEnabled>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_pvf_checking_enabled",
-                            data: SetPvfCheckingEnabled { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetPvfCheckingEnabled> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_pvf_checking_enabled",
+                        SetPvfCheckingEnabled { new },
                         [
                             123u8, 76u8, 1u8, 112u8, 174u8, 245u8, 18u8, 67u8, 13u8,
                             29u8, 219u8, 197u8, 201u8, 112u8, 230u8, 191u8, 37u8, 148u8,
@@ -22387,16 +21208,11 @@ pub mod api {
                 pub fn set_pvf_voting_ttl(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetPvfVotingTtl>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_pvf_voting_ttl",
-                            data: SetPvfVotingTtl { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetPvfVotingTtl> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_pvf_voting_ttl",
+                        SetPvfVotingTtl { new },
                         [
                             17u8, 11u8, 98u8, 217u8, 208u8, 102u8, 238u8, 83u8, 118u8,
                             123u8, 20u8, 18u8, 46u8, 212u8, 21u8, 164u8, 61u8, 104u8,
@@ -22412,16 +21228,12 @@ pub mod api {
                 pub fn set_minimum_validation_upgrade_delay(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetMinimumValidationUpgradeDelay>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_minimum_validation_upgrade_delay",
-                            data: SetMinimumValidationUpgradeDelay { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetMinimumValidationUpgradeDelay>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_minimum_validation_upgrade_delay",
+                        SetMinimumValidationUpgradeDelay { new },
                         [
                             205u8, 188u8, 75u8, 136u8, 228u8, 26u8, 112u8, 27u8, 119u8,
                             37u8, 252u8, 109u8, 23u8, 145u8, 21u8, 212u8, 7u8, 28u8,
@@ -22435,16 +21247,12 @@ pub mod api {
                 pub fn set_bypass_consistency_check(
                     &self,
                     new: ::core::primitive::bool,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<SetBypassConsistencyCheck>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Configuration",
-                            call: "set_bypass_consistency_check",
-                            data: SetBypassConsistencyCheck { new },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<SetBypassConsistencyCheck>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Configuration",
+                        "set_bypass_consistency_check",
+                        SetBypassConsistencyCheck { new },
                         [
                             80u8, 66u8, 200u8, 98u8, 54u8, 207u8, 64u8, 99u8, 162u8,
                             121u8, 26u8, 173u8, 113u8, 224u8, 240u8, 106u8, 69u8, 191u8,
@@ -22830,16 +21638,11 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Enter>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ParaInherent",
-                            call: "enter",
-                            data: Enter { data },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Enter> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ParaInherent",
+                        "enter",
+                        Enter { data },
                         [
                             92u8, 247u8, 59u8, 6u8, 2u8, 102u8, 76u8, 147u8, 46u8, 232u8,
                             38u8, 191u8, 145u8, 155u8, 23u8, 39u8, 228u8, 95u8, 57u8,
@@ -23162,16 +21965,11 @@ pub mod api {
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceSetCurrentCode>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "force_set_current_code",
-                            data: ForceSetCurrentCode { para, new_code },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceSetCurrentCode> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "force_set_current_code",
+                        ForceSetCurrentCode { para, new_code },
                         [
                             56u8, 59u8, 48u8, 185u8, 106u8, 99u8, 250u8, 32u8, 207u8,
                             2u8, 4u8, 110u8, 165u8, 131u8, 22u8, 33u8, 248u8, 175u8,
@@ -23185,16 +21983,11 @@ pub mod api {
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_head: runtime_types::polkadot_parachain::primitives::HeadData,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceSetCurrentHead>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "force_set_current_head",
-                            data: ForceSetCurrentHead { para, new_head },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceSetCurrentHead> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "force_set_current_head",
+                        ForceSetCurrentHead { para, new_head },
                         [
                             203u8, 70u8, 33u8, 168u8, 133u8, 64u8, 146u8, 137u8, 156u8,
                             104u8, 183u8, 26u8, 74u8, 227u8, 154u8, 224u8, 75u8, 85u8,
@@ -23209,19 +22002,15 @@ pub mod api {
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
                     relay_parent_number: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceScheduleCodeUpgrade>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "force_schedule_code_upgrade",
-                            data: ForceScheduleCodeUpgrade {
-                                para,
-                                new_code,
-                                relay_parent_number,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceScheduleCodeUpgrade>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "force_schedule_code_upgrade",
+                        ForceScheduleCodeUpgrade {
+                            para,
+                            new_code,
+                            relay_parent_number,
                         },
                         [
                             30u8, 210u8, 178u8, 31u8, 48u8, 144u8, 167u8, 117u8, 220u8,
@@ -23236,16 +22025,11 @@ pub mod api {
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_head: runtime_types::polkadot_parachain::primitives::HeadData,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceNoteNewHead>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "force_note_new_head",
-                            data: ForceNoteNewHead { para, new_head },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceNoteNewHead> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "force_note_new_head",
+                        ForceNoteNewHead { para, new_head },
                         [
                             83u8, 93u8, 166u8, 142u8, 213u8, 1u8, 243u8, 73u8, 192u8,
                             164u8, 104u8, 206u8, 99u8, 250u8, 31u8, 222u8, 231u8, 54u8,
@@ -23260,16 +22044,11 @@ pub mod api {
                 pub fn force_queue_action(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceQueueAction>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "force_queue_action",
-                            data: ForceQueueAction { para },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceQueueAction> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "force_queue_action",
+                        ForceQueueAction { para },
                         [
                             195u8, 243u8, 79u8, 34u8, 111u8, 246u8, 109u8, 90u8, 251u8,
                             137u8, 48u8, 23u8, 117u8, 29u8, 26u8, 200u8, 37u8, 64u8,
@@ -23294,16 +22073,12 @@ pub mod api {
                 pub fn add_trusted_validation_code(
                     &self,
                     validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddTrustedValidationCode>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "add_trusted_validation_code",
-                            data: AddTrustedValidationCode { validation_code },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AddTrustedValidationCode>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "add_trusted_validation_code",
+                        AddTrustedValidationCode { validation_code },
                         [
                             160u8, 199u8, 245u8, 178u8, 58u8, 65u8, 79u8, 199u8, 53u8,
                             60u8, 84u8, 225u8, 2u8, 145u8, 154u8, 204u8, 165u8, 171u8,
@@ -23320,17 +22095,13 @@ pub mod api {
                 pub fn poke_unused_validation_code(
                     &self,
                     validation_code_hash : runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<PokeUnusedValidationCode>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "poke_unused_validation_code",
-                            data: PokeUnusedValidationCode {
-                                validation_code_hash,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<PokeUnusedValidationCode>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "poke_unused_validation_code",
+                        PokeUnusedValidationCode {
+                            validation_code_hash,
                         },
                         [
                             98u8, 9u8, 24u8, 180u8, 8u8, 144u8, 36u8, 28u8, 111u8, 83u8,
@@ -23346,16 +22117,12 @@ pub mod api {
                     &self,
                     stmt: runtime_types::polkadot_primitives::v2::PvfCheckStatement,
                     signature : runtime_types :: polkadot_primitives :: v2 :: validator_app :: Signature,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<IncludePvfCheckStatement>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Paras",
-                            call: "include_pvf_check_statement",
-                            data: IncludePvfCheckStatement { stmt, signature },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<IncludePvfCheckStatement>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Paras",
+                        "include_pvf_check_statement",
+                        IncludePvfCheckStatement { stmt, signature },
                         [
                             22u8, 136u8, 241u8, 59u8, 36u8, 249u8, 239u8, 255u8, 169u8,
                             117u8, 19u8, 58u8, 214u8, 16u8, 135u8, 65u8, 13u8, 250u8,
@@ -24391,16 +23158,11 @@ pub mod api {
                 pub fn force_approve(
                     &self,
                     up_to: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceApprove>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Initializer",
-                            call: "force_approve",
-                            data: ForceApprove { up_to },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceApprove> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Initializer",
+                        "force_approve",
+                        ForceApprove { up_to },
                         [
                             28u8, 117u8, 86u8, 182u8, 19u8, 127u8, 43u8, 17u8, 153u8,
                             80u8, 193u8, 53u8, 120u8, 41u8, 205u8, 23u8, 252u8, 148u8,
@@ -24607,18 +23369,13 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u64,
                     weight_limit: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ServiceOverweight>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Ump",
-                            call: "service_overweight",
-                            data: ServiceOverweight {
-                                index,
-                                weight_limit,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ServiceOverweight> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Ump",
+                        "service_overweight",
+                        ServiceOverweight {
+                            index,
+                            weight_limit,
                         },
                         [
                             225u8, 41u8, 132u8, 91u8, 28u8, 116u8, 89u8, 197u8, 194u8,
@@ -25111,19 +23868,14 @@ pub mod api {
                     recipient: runtime_types::polkadot_parachain::primitives::Id,
                     proposed_max_capacity: ::core::primitive::u32,
                     proposed_max_message_size: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<HrmpInitOpenChannel>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "hrmp_init_open_channel",
-                            data: HrmpInitOpenChannel {
-                                recipient,
-                                proposed_max_capacity,
-                                proposed_max_message_size,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<HrmpInitOpenChannel> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "hrmp_init_open_channel",
+                        HrmpInitOpenChannel {
+                            recipient,
+                            proposed_max_capacity,
+                            proposed_max_message_size,
                         },
                         [
                             170u8, 72u8, 58u8, 42u8, 38u8, 11u8, 110u8, 229u8, 239u8,
@@ -25139,16 +23891,11 @@ pub mod api {
                 pub fn hrmp_accept_open_channel(
                     &self,
                     sender: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<HrmpAcceptOpenChannel>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "hrmp_accept_open_channel",
-                            data: HrmpAcceptOpenChannel { sender },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<HrmpAcceptOpenChannel> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "hrmp_accept_open_channel",
+                        HrmpAcceptOpenChannel { sender },
                         [
                             75u8, 111u8, 52u8, 164u8, 204u8, 100u8, 204u8, 111u8, 127u8,
                             84u8, 60u8, 136u8, 95u8, 255u8, 48u8, 157u8, 189u8, 76u8,
@@ -25164,16 +23911,11 @@ pub mod api {
                 pub fn hrmp_close_channel(
                     &self,
                     channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<HrmpCloseChannel>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "hrmp_close_channel",
-                            data: HrmpCloseChannel { channel_id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<HrmpCloseChannel> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "hrmp_close_channel",
+                        HrmpCloseChannel { channel_id },
                         [
                             11u8, 202u8, 76u8, 107u8, 213u8, 21u8, 191u8, 190u8, 40u8,
                             229u8, 60u8, 115u8, 232u8, 136u8, 41u8, 114u8, 21u8, 19u8,
@@ -25194,19 +23936,14 @@ pub mod api {
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     inbound: ::core::primitive::u32,
                     outbound: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceCleanHrmp>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "force_clean_hrmp",
-                            data: ForceCleanHrmp {
-                                para,
-                                inbound,
-                                outbound,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceCleanHrmp> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "force_clean_hrmp",
+                        ForceCleanHrmp {
+                            para,
+                            inbound,
+                            outbound,
                         },
                         [
                             171u8, 109u8, 147u8, 49u8, 163u8, 107u8, 36u8, 169u8, 117u8,
@@ -25225,16 +23962,11 @@ pub mod api {
                 pub fn force_process_hrmp_open(
                     &self,
                     channels: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceProcessHrmpOpen>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "force_process_hrmp_open",
-                            data: ForceProcessHrmpOpen { channels },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceProcessHrmpOpen> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "force_process_hrmp_open",
+                        ForceProcessHrmpOpen { channels },
                         [
                             231u8, 80u8, 233u8, 15u8, 131u8, 167u8, 223u8, 28u8, 182u8,
                             185u8, 213u8, 24u8, 154u8, 160u8, 68u8, 94u8, 160u8, 59u8,
@@ -25252,16 +23984,11 @@ pub mod api {
                 pub fn force_process_hrmp_close(
                     &self,
                     channels: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceProcessHrmpClose>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "force_process_hrmp_close",
-                            data: ForceProcessHrmpClose { channels },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceProcessHrmpClose> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "force_process_hrmp_close",
+                        ForceProcessHrmpClose { channels },
                         [
                             248u8, 138u8, 30u8, 151u8, 53u8, 16u8, 44u8, 116u8, 51u8,
                             194u8, 173u8, 252u8, 143u8, 53u8, 184u8, 129u8, 80u8, 80u8,
@@ -25282,18 +24009,13 @@ pub mod api {
                     &self,
                     channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId,
                     open_requests: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<HrmpCancelOpenRequest>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Hrmp",
-                            call: "hrmp_cancel_open_request",
-                            data: HrmpCancelOpenRequest {
-                                channel_id,
-                                open_requests,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<HrmpCancelOpenRequest> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Hrmp",
+                        "hrmp_cancel_open_request",
+                        HrmpCancelOpenRequest {
+                            channel_id,
+                            open_requests,
                         },
                         [
                             136u8, 217u8, 56u8, 138u8, 227u8, 37u8, 120u8, 83u8, 116u8,
@@ -26172,16 +24894,11 @@ pub mod api {
             impl TransactionApi {
                 pub fn force_unfreeze(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceUnfreeze>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "ParasDisputes",
-                            call: "force_unfreeze",
-                            data: ForceUnfreeze {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceUnfreeze> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "ParasDisputes",
+                        "force_unfreeze",
+                        ForceUnfreeze {},
                         [
                             212u8, 211u8, 58u8, 159u8, 23u8, 220u8, 64u8, 175u8, 65u8,
                             50u8, 192u8, 122u8, 113u8, 189u8, 74u8, 191u8, 48u8, 93u8,
@@ -26535,19 +25252,14 @@ pub mod api {
                     id: runtime_types::polkadot_parachain::primitives::Id,
                     genesis_head: runtime_types::polkadot_parachain::primitives::HeadData,
                     validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Register>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "register",
-                            data: Register {
-                                id,
-                                genesis_head,
-                                validation_code,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Register> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "register",
+                        Register {
+                            id,
+                            genesis_head,
+                            validation_code,
                         },
                         [
                             154u8, 84u8, 201u8, 125u8, 72u8, 69u8, 188u8, 42u8, 225u8,
@@ -26570,21 +25282,16 @@ pub mod api {
                     id: runtime_types::polkadot_parachain::primitives::Id,
                     genesis_head: runtime_types::polkadot_parachain::primitives::HeadData,
                     validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceRegister>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "force_register",
-                            data: ForceRegister {
-                                who,
-                                deposit,
-                                id,
-                                genesis_head,
-                                validation_code,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceRegister> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "force_register",
+                        ForceRegister {
+                            who,
+                            deposit,
+                            id,
+                            genesis_head,
+                            validation_code,
                         },
                         [
                             59u8, 24u8, 236u8, 163u8, 53u8, 49u8, 92u8, 199u8, 38u8,
@@ -26600,16 +25307,11 @@ pub mod api {
                 pub fn deregister(
                     &self,
                     id: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Deregister>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "deregister",
-                            data: Deregister { id },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Deregister> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "deregister",
+                        Deregister { id },
                         [
                             137u8, 9u8, 146u8, 11u8, 126u8, 125u8, 186u8, 222u8, 246u8,
                             199u8, 94u8, 229u8, 147u8, 245u8, 213u8, 51u8, 203u8, 181u8,
@@ -26633,16 +25335,11 @@ pub mod api {
                     &self,
                     id: runtime_types::polkadot_parachain::primitives::Id,
                     other: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Swap>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "swap",
-                            data: Swap { id, other },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Swap> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "swap",
+                        Swap { id, other },
                         [
                             238u8, 154u8, 249u8, 250u8, 57u8, 242u8, 47u8, 17u8, 50u8,
                             70u8, 124u8, 189u8, 193u8, 137u8, 107u8, 138u8, 216u8, 137u8,
@@ -26658,16 +25355,11 @@ pub mod api {
                 pub fn force_remove_lock(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceRemoveLock>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "force_remove_lock",
-                            data: ForceRemoveLock { para },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceRemoveLock> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "force_remove_lock",
+                        ForceRemoveLock { para },
                         [
                             161u8, 77u8, 236u8, 143u8, 243u8, 159u8, 88u8, 61u8, 217u8,
                             140u8, 161u8, 61u8, 20u8, 76u8, 130u8, 59u8, 85u8, 219u8,
@@ -26690,18 +25382,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "## Events"]
                 #[doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for use."]
-                pub fn reserve(
-                    &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Reserve>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Registrar",
-                            call: "reserve",
-                            data: Reserve {},
-                        },
+                pub fn reserve(&self) -> ::subxt::tx::StaticTxPayload<Reserve> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Registrar",
+                        "reserve",
+                        Reserve {},
                         [
                             22u8, 210u8, 13u8, 54u8, 253u8, 13u8, 89u8, 174u8, 232u8,
                             119u8, 148u8, 206u8, 130u8, 133u8, 199u8, 127u8, 201u8,
@@ -26994,21 +25679,16 @@ pub mod api {
                     amount: ::core::primitive::u128,
                     period_begin: ::core::primitive::u32,
                     period_count: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceLease>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Slots",
-                            call: "force_lease",
-                            data: ForceLease {
-                                para,
-                                leaser,
-                                amount,
-                                period_begin,
-                                period_count,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceLease> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Slots",
+                        "force_lease",
+                        ForceLease {
+                            para,
+                            leaser,
+                            amount,
+                            period_begin,
+                            period_count,
                         },
                         [
                             196u8, 2u8, 63u8, 229u8, 18u8, 134u8, 48u8, 4u8, 165u8, 46u8,
@@ -27024,16 +25704,11 @@ pub mod api {
                 pub fn clear_all_leases(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ClearAllLeases>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Slots",
-                            call: "clear_all_leases",
-                            data: ClearAllLeases { para },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ClearAllLeases> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Slots",
+                        "clear_all_leases",
+                        ClearAllLeases { para },
                         [
                             16u8, 14u8, 185u8, 45u8, 149u8, 70u8, 177u8, 133u8, 130u8,
                             173u8, 196u8, 244u8, 77u8, 63u8, 218u8, 64u8, 108u8, 83u8,
@@ -27052,16 +25727,11 @@ pub mod api {
                 pub fn trigger_onboard(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<TriggerOnboard>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Slots",
-                            call: "trigger_onboard",
-                            data: TriggerOnboard { para },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<TriggerOnboard> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Slots",
+                        "trigger_onboard",
+                        TriggerOnboard { para },
                         [
                             74u8, 158u8, 122u8, 37u8, 34u8, 62u8, 61u8, 218u8, 94u8,
                             222u8, 1u8, 153u8, 131u8, 215u8, 157u8, 180u8, 98u8, 130u8,
@@ -27305,18 +25975,13 @@ pub mod api {
                     &self,
                     duration: ::core::primitive::u32,
                     lease_period_index: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<NewAuction>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Auctions",
-                            call: "new_auction",
-                            data: NewAuction {
-                                duration,
-                                lease_period_index,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<NewAuction> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Auctions",
+                        "new_auction",
+                        NewAuction {
+                            duration,
+                            lease_period_index,
                         },
                         [
                             171u8, 40u8, 200u8, 164u8, 213u8, 10u8, 145u8, 164u8, 212u8,
@@ -27349,21 +26014,16 @@ pub mod api {
                     first_slot: ::core::primitive::u32,
                     last_slot: ::core::primitive::u32,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Bid>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Auctions",
-                            call: "bid",
-                            data: Bid {
-                                para,
-                                auction_index,
-                                first_slot,
-                                last_slot,
-                                amount,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Bid> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Auctions",
+                        "bid",
+                        Bid {
+                            para,
+                            auction_index,
+                            first_slot,
+                            last_slot,
+                            amount,
                         },
                         [
                             243u8, 233u8, 248u8, 221u8, 239u8, 59u8, 65u8, 63u8, 125u8,
@@ -27378,16 +26038,11 @@ pub mod api {
                 #[doc = "Can only be called by Root origin."]
                 pub fn cancel_auction(
                     &self,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<CancelAuction>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Auctions",
-                            call: "cancel_auction",
-                            data: CancelAuction {},
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<CancelAuction> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Auctions",
+                        "cancel_auction",
+                        CancelAuction {},
                         [
                             182u8, 223u8, 178u8, 136u8, 1u8, 115u8, 229u8, 78u8, 166u8,
                             128u8, 28u8, 106u8, 6u8, 248u8, 46u8, 55u8, 110u8, 120u8,
@@ -27888,22 +26543,17 @@ pub mod api {
                     verifier: ::core::option::Option<
                         runtime_types::sp_runtime::MultiSigner,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Create>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "create",
-                            data: Create {
-                                index,
-                                cap,
-                                first_period,
-                                last_period,
-                                end,
-                                verifier,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Create> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "create",
+                        Create {
+                            index,
+                            cap,
+                            first_period,
+                            last_period,
+                            end,
+                            verifier,
                         },
                         [
                             78u8, 52u8, 156u8, 23u8, 104u8, 251u8, 20u8, 233u8, 42u8,
@@ -27922,19 +26572,14 @@ pub mod api {
                     signature: ::core::option::Option<
                         runtime_types::sp_runtime::MultiSignature,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Contribute>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "contribute",
-                            data: Contribute {
-                                index,
-                                value,
-                                signature,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Contribute> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "contribute",
+                        Contribute {
+                            index,
+                            value,
+                            signature,
                         },
                         [
                             159u8, 180u8, 248u8, 203u8, 128u8, 231u8, 28u8, 84u8, 14u8,
@@ -27965,16 +26610,11 @@ pub mod api {
                     &self,
                     who: ::subxt::ext::sp_core::crypto::AccountId32,
                     index: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Withdraw>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "withdraw",
-                            data: Withdraw { who, index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Withdraw> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "withdraw",
+                        Withdraw { who, index },
                         [
                             147u8, 177u8, 116u8, 152u8, 9u8, 102u8, 4u8, 201u8, 204u8,
                             145u8, 104u8, 226u8, 86u8, 211u8, 66u8, 109u8, 109u8, 139u8,
@@ -27991,16 +26631,11 @@ pub mod api {
                 pub fn refund(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Refund>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "refund",
-                            data: Refund { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Refund> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "refund",
+                        Refund { index },
                         [
                             223u8, 64u8, 5u8, 135u8, 15u8, 234u8, 60u8, 114u8, 199u8,
                             216u8, 73u8, 165u8, 198u8, 34u8, 140u8, 142u8, 214u8, 254u8,
@@ -28013,16 +26648,11 @@ pub mod api {
                 pub fn dissolve(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Dissolve>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "dissolve",
-                            data: Dissolve { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Dissolve> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "dissolve",
+                        Dissolve { index },
                         [
                             100u8, 67u8, 105u8, 3u8, 213u8, 149u8, 201u8, 146u8, 241u8,
                             62u8, 31u8, 108u8, 58u8, 30u8, 241u8, 141u8, 134u8, 115u8,
@@ -28044,22 +26674,17 @@ pub mod api {
                     verifier: ::core::option::Option<
                         runtime_types::sp_runtime::MultiSigner,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Edit>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "edit",
-                            data: Edit {
-                                index,
-                                cap,
-                                first_period,
-                                last_period,
-                                end,
-                                verifier,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Edit> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "edit",
+                        Edit {
+                            index,
+                            cap,
+                            first_period,
+                            last_period,
+                            end,
+                            verifier,
                         },
                         [
                             222u8, 124u8, 94u8, 221u8, 36u8, 183u8, 67u8, 114u8, 198u8,
@@ -28076,16 +26701,11 @@ pub mod api {
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     memo: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<AddMemo>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "add_memo",
-                            data: AddMemo { index, memo },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<AddMemo> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "add_memo",
+                        AddMemo { index, memo },
                         [
                             104u8, 199u8, 143u8, 251u8, 28u8, 49u8, 144u8, 186u8, 83u8,
                             108u8, 26u8, 127u8, 22u8, 141u8, 48u8, 62u8, 194u8, 193u8,
@@ -28100,16 +26720,11 @@ pub mod api {
                 pub fn poke(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Poke>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "poke",
-                            data: Poke { index },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<Poke> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "poke",
+                        Poke { index },
                         [
                             118u8, 60u8, 131u8, 17u8, 27u8, 153u8, 57u8, 24u8, 191u8,
                             211u8, 101u8, 123u8, 34u8, 145u8, 193u8, 113u8, 244u8, 162u8,
@@ -28126,16 +26741,11 @@ pub mod api {
                     signature: ::core::option::Option<
                         runtime_types::sp_runtime::MultiSignature,
                     >,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ContributeAll>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "Crowdloan",
-                            call: "contribute_all",
-                            data: ContributeAll { index, signature },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ContributeAll> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "Crowdloan",
+                        "contribute_all",
+                        ContributeAll { index, signature },
                         [
                             94u8, 61u8, 105u8, 107u8, 204u8, 18u8, 223u8, 242u8, 19u8,
                             162u8, 205u8, 130u8, 203u8, 73u8, 42u8, 85u8, 208u8, 157u8,
@@ -28609,18 +27219,13 @@ pub mod api {
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     message: runtime_types::xcm::VersionedXcm,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Send>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "send",
-                            data: Send {
-                                dest: ::std::boxed::Box::new(dest),
-                                message: ::std::boxed::Box::new(message),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Send> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "send",
+                        Send {
+                            dest: ::std::boxed::Box::new(dest),
+                            message: ::std::boxed::Box::new(message),
                         },
                         [
                             62u8, 5u8, 58u8, 216u8, 236u8, 6u8, 23u8, 64u8, 52u8, 141u8,
@@ -28651,20 +27256,15 @@ pub mod api {
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
                     assets: runtime_types::xcm::VersionedMultiAssets,
                     fee_asset_item: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<TeleportAssets>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "teleport_assets",
-                            data: TeleportAssets {
-                                dest: ::std::boxed::Box::new(dest),
-                                beneficiary: ::std::boxed::Box::new(beneficiary),
-                                assets: ::std::boxed::Box::new(assets),
-                                fee_asset_item,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<TeleportAssets> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "teleport_assets",
+                        TeleportAssets {
+                            dest: ::std::boxed::Box::new(dest),
+                            beneficiary: ::std::boxed::Box::new(beneficiary),
+                            assets: ::std::boxed::Box::new(assets),
+                            fee_asset_item,
                         },
                         [
                             10u8, 218u8, 192u8, 242u8, 222u8, 140u8, 137u8, 249u8, 15u8,
@@ -28696,20 +27296,15 @@ pub mod api {
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
                     assets: runtime_types::xcm::VersionedMultiAssets,
                     fee_asset_item: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ReserveTransferAssets>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "reserve_transfer_assets",
-                            data: ReserveTransferAssets {
-                                dest: ::std::boxed::Box::new(dest),
-                                beneficiary: ::std::boxed::Box::new(beneficiary),
-                                assets: ::std::boxed::Box::new(assets),
-                                fee_asset_item,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ReserveTransferAssets> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "reserve_transfer_assets",
+                        ReserveTransferAssets {
+                            dest: ::std::boxed::Box::new(dest),
+                            beneficiary: ::std::boxed::Box::new(beneficiary),
+                            assets: ::std::boxed::Box::new(assets),
+                            fee_asset_item,
                         },
                         [
                             99u8, 57u8, 160u8, 112u8, 160u8, 82u8, 240u8, 74u8, 105u8,
@@ -28734,18 +27329,13 @@ pub mod api {
                     &self,
                     message: runtime_types::xcm::VersionedXcm,
                     max_weight: ::core::primitive::u64,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<Execute>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "execute",
-                            data: Execute {
-                                message: ::std::boxed::Box::new(message),
-                                max_weight,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<Execute> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "execute",
+                        Execute {
+                            message: ::std::boxed::Box::new(message),
+                            max_weight,
                         },
                         [
                             234u8, 145u8, 40u8, 18u8, 224u8, 25u8, 249u8, 87u8, 214u8,
@@ -28765,18 +27355,13 @@ pub mod api {
                     &self,
                     location: runtime_types::xcm::v1::multilocation::MultiLocation,
                     xcm_version: ::core::primitive::u32,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceXcmVersion>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "force_xcm_version",
-                            data: ForceXcmVersion {
-                                location: ::std::boxed::Box::new(location),
-                                xcm_version,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceXcmVersion> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "force_xcm_version",
+                        ForceXcmVersion {
+                            location: ::std::boxed::Box::new(location),
+                            xcm_version,
                         },
                         [
                             222u8, 53u8, 133u8, 159u8, 195u8, 147u8, 113u8, 8u8, 157u8,
@@ -28794,16 +27379,12 @@ pub mod api {
                 pub fn force_default_xcm_version(
                     &self,
                     maybe_xcm_version: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceDefaultXcmVersion>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "force_default_xcm_version",
-                            data: ForceDefaultXcmVersion { maybe_xcm_version },
-                        },
+                ) -> ::subxt::tx::StaticTxPayload<ForceDefaultXcmVersion>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "force_default_xcm_version",
+                        ForceDefaultXcmVersion { maybe_xcm_version },
                         [
                             38u8, 36u8, 59u8, 231u8, 18u8, 79u8, 76u8, 9u8, 200u8, 125u8,
                             214u8, 166u8, 37u8, 99u8, 111u8, 161u8, 135u8, 2u8, 133u8,
@@ -28819,17 +27400,13 @@ pub mod api {
                 pub fn force_subscribe_version_notify(
                     &self,
                     location: runtime_types::xcm::VersionedMultiLocation,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceSubscribeVersionNotify>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "force_subscribe_version_notify",
-                            data: ForceSubscribeVersionNotify {
-                                location: ::std::boxed::Box::new(location),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceSubscribeVersionNotify>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "force_subscribe_version_notify",
+                        ForceSubscribeVersionNotify {
+                            location: ::std::boxed::Box::new(location),
                         },
                         [
                             248u8, 225u8, 152u8, 123u8, 25u8, 248u8, 170u8, 97u8, 88u8,
@@ -28848,17 +27425,13 @@ pub mod api {
                 pub fn force_unsubscribe_version_notify(
                     &self,
                     location: runtime_types::xcm::VersionedMultiLocation,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<ForceUnsubscribeVersionNotify>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "force_unsubscribe_version_notify",
-                            data: ForceUnsubscribeVersionNotify {
-                                location: ::std::boxed::Box::new(location),
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<ForceUnsubscribeVersionNotify>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "force_unsubscribe_version_notify",
+                        ForceUnsubscribeVersionNotify {
+                            location: ::std::boxed::Box::new(location),
                         },
                         [
                             136u8, 187u8, 225u8, 130u8, 146u8, 74u8, 93u8, 240u8, 184u8,
@@ -28893,21 +27466,17 @@ pub mod api {
                     assets: runtime_types::xcm::VersionedMultiAssets,
                     fee_asset_item: ::core::primitive::u32,
                     weight_limit: runtime_types::xcm::v2::WeightLimit,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<LimitedReserveTransferAssets>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "limited_reserve_transfer_assets",
-                            data: LimitedReserveTransferAssets {
-                                dest: ::std::boxed::Box::new(dest),
-                                beneficiary: ::std::boxed::Box::new(beneficiary),
-                                assets: ::std::boxed::Box::new(assets),
-                                fee_asset_item,
-                                weight_limit,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<LimitedReserveTransferAssets>
+                {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "limited_reserve_transfer_assets",
+                        LimitedReserveTransferAssets {
+                            dest: ::std::boxed::Box::new(dest),
+                            beneficiary: ::std::boxed::Box::new(beneficiary),
+                            assets: ::std::boxed::Box::new(assets),
+                            fee_asset_item,
+                            weight_limit,
                         },
                         [
                             221u8, 220u8, 116u8, 79u8, 10u8, 95u8, 250u8, 251u8, 252u8,
@@ -28941,21 +27510,16 @@ pub mod api {
                     assets: runtime_types::xcm::VersionedMultiAssets,
                     fee_asset_item: ::core::primitive::u32,
                     weight_limit: runtime_types::xcm::v2::WeightLimit,
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<
-                    ::subxt::metadata::EncodeStaticCall<LimitedTeleportAssets>,
-                    DispatchError,
-                > {
-                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
-                        ::subxt::metadata::EncodeStaticCall {
-                            pallet: "XcmPallet",
-                            call: "limited_teleport_assets",
-                            data: LimitedTeleportAssets {
-                                dest: ::std::boxed::Box::new(dest),
-                                beneficiary: ::std::boxed::Box::new(beneficiary),
-                                assets: ::std::boxed::Box::new(assets),
-                                fee_asset_item,
-                                weight_limit,
-                            },
+                ) -> ::subxt::tx::StaticTxPayload<LimitedTeleportAssets> {
+                    ::subxt::tx::StaticTxPayload::new(
+                        "XcmPallet",
+                        "limited_teleport_assets",
+                        LimitedTeleportAssets {
+                            dest: ::std::boxed::Box::new(dest),
+                            beneficiary: ::std::boxed::Box::new(beneficiary),
+                            assets: ::std::boxed::Box::new(assets),
+                            fee_asset_item,
+                            weight_limit,
                         },
                         [
                             82u8, 234u8, 41u8, 231u8, 90u8, 49u8, 150u8, 217u8, 51u8,
@@ -41559,20 +40123,9 @@ pub mod api {
             }
         }
     }
-    #[doc = r" The default error type returned when there is a runtime issue."]
+    #[doc = r" The default error type returned when there is a runtime issue,"]
+    #[doc = r" exposed here for ease of use."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-    impl ::subxt::error::HasModuleError for runtime_types::sp_runtime::DispatchError {
-        fn module_error_data(&self) -> Option<::subxt::error::ModuleErrorData> {
-            if let Self::Module(module_error) = self {
-                Some(::subxt::error::ModuleErrorData {
-                    pallet_index: module_error.index,
-                    error: module_error.error,
-                })
-            } else {
-                None
-            }
-        }
-    }
     pub fn constants() -> ConstantsApi {
         ConstantsApi
     }

@@ -10,8 +10,8 @@ use super::{
     StaticEvent,
 };
 use crate::{
-    BasicError,
     Config,
+    Error,
 };
 use futures::{
     Stream,
@@ -29,7 +29,7 @@ use std::{
 /// exactly one of these will be `Some(event)` each iteration.
 pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
     // A subscription; in order for the Stream impl to apply, this will
-    // impl `Stream<Item = Result<Events<'a, T, Evs>, BasicError>> + Unpin + 'a`.
+    // impl `Stream<Item = Result<Events<'a, T, Evs>, Error>> + Unpin + 'a`.
     sub: Sub,
     // Each time we get Events from our subscription, they are stored here
     // and iterated through in future stream iterations until exhausted.
@@ -38,7 +38,7 @@ pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
             dyn Iterator<
                     Item = Result<
                         FilteredEventDetails<T::Hash, Filter::ReturnType>,
-                        BasicError,
+                        Error,
                     >,
                 > + Send
                 + 'a,
@@ -59,11 +59,11 @@ impl<'a, Sub: 'a, T: Config, Filter: EventFilter> FilterEvents<'a, Sub, T, Filte
 
 impl<'a, Sub, T, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
 where
-    Sub: Stream<Item = Result<Events<T>, BasicError>> + Unpin + 'a,
+    Sub: Stream<Item = Result<Events<T>, Error>> + Unpin + 'a,
     T: Config,
     Filter: EventFilter,
 {
-    type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, BasicError>;
+    type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, Error>;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -116,10 +116,7 @@ pub trait EventFilter: private::Sealed {
         events: Events<T>,
     ) -> Box<
         dyn Iterator<
-                Item = Result<
-                    FilteredEventDetails<T::Hash, Self::ReturnType>,
-                    BasicError,
-                >,
+                Item = Result<FilteredEventDetails<T::Hash, Self::ReturnType>, Error>,
             > + Send
             + 'a,
     >;
@@ -140,9 +137,7 @@ impl<Ev: StaticEvent> EventFilter for (Ev,) {
     fn filter<'a, T: Config>(
         events: Events<T>,
     ) -> Box<
-        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>>
-            + Send
-            + 'a,
+        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, Error>> + Send + 'a,
     > {
         let block_hash = events.block_hash();
         let mut iter = events.iter();
@@ -181,7 +176,7 @@ macro_rules! impl_event_filter {
             type ReturnType = ( $(Option<$ty>,)+ );
             fn filter<'a, T: Config>(
                 events: Events<T>
-            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
+            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, Error>> + Send + 'a> {
                 let block_hash = events.block_hash();
                 let mut iter = events.iter();
                 Box::new(std::iter::from_fn(move || {
@@ -286,7 +281,7 @@ mod test {
     // A stream of fake events for us to try filtering on.
     fn events_stream(
         metadata: Metadata,
-    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, BasicError>> {
+    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, Error>> {
         stream::iter(vec![
             events::<PalletEvents>(
                 metadata.clone(),
@@ -311,7 +306,7 @@ mod test {
                 ],
             ),
         ])
-        .map(Ok::<_, BasicError>)
+        .map(Ok::<_, Error>)
     }
 
     #[tokio::test]

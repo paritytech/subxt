@@ -8,15 +8,15 @@ use super::{
 };
 use crate::{
     constants::ConstantsClient,
-    error::BasicError,
+    error::Error,
     events::EventsClient,
-    extrinsic::TxClient,
     rpc::{
         Rpc,
         RpcClient,
         RuntimeVersion,
     },
     storage::StorageClient,
+    tx::TxClient,
     Config,
     Metadata,
 };
@@ -60,13 +60,13 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
-    pub async fn new() -> Result<OnlineClient<T>, BasicError> {
+    pub async fn new() -> Result<OnlineClient<T>, Error> {
         let url = "ws://127.0.0.1:9944";
         OnlineClient::from_url(url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
-    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, BasicError> {
+    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
         let client = crate::rpc::ws_client(url.as_ref()).await?;
         OnlineClient::from_rpc_client(client).await
     }
@@ -75,7 +75,7 @@ impl<T: Config> OnlineClient<T> {
     /// to use to drive the connection.
     pub async fn from_rpc_client(
         rpc_client: impl Into<RpcClient>,
-    ) -> Result<OnlineClient<T>, BasicError> {
+    ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::new(rpc_client.into());
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
@@ -206,7 +206,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     ///
     /// *Note:* This will run indefinitely until it errors, so the typical usage
     /// would be to run it in a separate background task.
-    pub async fn perform_runtime_updates(&self) -> Result<(), BasicError> {
+    pub async fn perform_runtime_updates(&self) -> Result<(), Error> {
         // Obtain an update subscription to further detect changes in the runtime version of the node.
         let mut update_subscription = self.0.rpc.subscribe_runtime_version().await?;
 

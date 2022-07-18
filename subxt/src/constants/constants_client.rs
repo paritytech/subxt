@@ -5,7 +5,7 @@
 use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
-    error::BasicError,
+    error::Error,
     metadata::{
         DecodeWithMetadata,
         MetadataError,
@@ -40,7 +40,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     pub fn validate<ReturnTy>(
         &self,
         address: &ConstantAddress<'_, ReturnTy>,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         if let Some(actual_hash) = address.validation_hash() {
             let expected_hash = self
                 .client
@@ -59,7 +59,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     pub fn at<ReturnTy: DecodeWithMetadata>(
         &self,
         address: &ConstantAddress<'_, ReturnTy>,
-    ) -> Result<ReturnTy::Target, BasicError> {
+    ) -> Result<ReturnTy::Target, Error> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:

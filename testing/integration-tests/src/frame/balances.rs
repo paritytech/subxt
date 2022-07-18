@@ -8,7 +8,6 @@ use crate::{
         balances,
         runtime_types,
         system,
-        DispatchError,
     },
     pair_signer,
     test_context,
@@ -23,10 +22,13 @@ use sp_runtime::{
     AccountId32,
     MultiAddress,
 };
-use subxt::Error;
+use subxt::error::{
+    DispatchError,
+    Error,
+};
 
 #[tokio::test]
-async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
+async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
@@ -84,8 +86,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn multiple_transfers_work_nonce_incremented(
-) -> Result<(), subxt::Error<DispatchError>> {
+async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();
@@ -133,7 +134,7 @@ async fn storage_total_issuance() {
 }
 
 #[tokio::test]
-async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
     let ctx = test_context().await;
@@ -203,7 +204,7 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
-    if let Err(Error::Module(err)) = res {
+    if let Err(Error::Runtime(DispatchError::Module(err))) = res {
         assert_eq!(err.pallet, "Balances");
         assert_eq!(err.error, "InsufficientBalance");
     } else {

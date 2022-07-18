@@ -9,9 +9,9 @@ pub use sp_runtime::traits::SignedExtension;
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
 
-/// A trait representing a storage address. Anything implementing this trait
+/// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
-pub trait StorageAddressT {
+pub trait StorageAddress {
     /// Thye target type of the value that lives at this address?
     type Target: DecodeWithMetadata;
     /// Can an entry be fetched from this address?
@@ -74,9 +74,7 @@ pub trait StorageAddressT {
 /// fetched and returned with a default value in the type system.
 pub struct Yes;
 
-/// This is returned from storage accesses in the statically generated
-/// code, and contains the information needed to find, validate and decode
-/// the storage entry.
+/// This represents a statically generated storage lookup address.
 pub struct StaticStorageAddress<ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: &'static str,
     entry_name: &'static str,
@@ -112,11 +110,8 @@ where
     /// Do not validate this storage entry prior to accessing it.
     pub fn unvalidated(self) -> Self {
         Self {
-            pallet_name: self.pallet_name,
-            entry_name: self.entry_name,
-            storage_entry_key: self.storage_entry_key,
             validation_hash: None,
-            _marker: self._marker,
+            ..self
         }
     }
 
@@ -124,17 +119,17 @@ where
 
     /// Return bytes representing this storage entry.
     pub fn to_bytes(&self) -> Vec<u8> {
-        StorageAddressT::to_bytes(self)
+        StorageAddress::to_bytes(self)
     }
 
     /// Return bytes representing the root of this storage entry (ie a hash of
     /// the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        StorageAddressT::to_root_bytes(self)
+        StorageAddress::to_root_bytes(self)
     }
 }
 
-impl<ReturnTy, Fetchable, Defaultable, Iterable> StorageAddressT
+impl<ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
     for StaticStorageAddress<ReturnTy, Fetchable, Defaultable, Iterable>
 where
     ReturnTy: DecodeWithMetadata,
