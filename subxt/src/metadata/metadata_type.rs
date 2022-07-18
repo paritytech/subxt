@@ -307,7 +307,7 @@ impl EventMetadata {
 
     /// Get the name of the pallet event which was emitted.
     pub fn event(&self) -> &str {
-        &self.variant.name()
+        self.variant.name()
     }
 
     /// Get the type def variant for the pallet event.
@@ -465,7 +465,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .types
             .types()
             .iter()
-            .find(|ty| ty.ty().path().segments() == &["sp_runtime", "DispatchError"])
+            .find(|ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id());
 
         Ok(Metadata {
