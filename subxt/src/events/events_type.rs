@@ -221,7 +221,7 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: Decode>(&self) -> Result<E, CodecError> {
-        Ok(E::decode(&mut &self.bytes[..])?)
+        E::decode(&mut &self.bytes[..])
     }
 }
 
