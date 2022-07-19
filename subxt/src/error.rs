@@ -12,7 +12,10 @@ pub use crate::metadata::{
     MetadataError,
 };
 pub use jsonrpsee::core::error::Error as RequestError;
-pub use scale_value::scale::DecodeError;
+pub use scale_value::scale::{
+    DecodeError,
+    EncodeError,
+};
 pub use sp_core::crypto::SecretStringError;
 pub use sp_runtime::transaction_validity::TransactionValidityError;
 
@@ -48,12 +51,18 @@ pub enum Error {
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
     Runtime(DispatchError),
-    /// Events decoding error.
-    #[error("Events decoding error: {0}")]
-    EventsDecoding(#[from] DecodeError),
+    /// Error decoding to a [`crate::dynamic::Value`].
+    #[error("Error decoding into dynamic value: {0}")]
+    DecodeValue(#[from] DecodeError),
+    /// Error encoding from a [`crate::dynamic::Value`].
+    #[error("Error encoding from dynamic value: {0}")]
+    EncodeValue(#[from] EncodeError<()>),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    /// An error encoding a storage address.
+    #[error("Error encoding storage address: {0}")]
+    StorageAddress(#[from] StorageAddressError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -148,4 +157,35 @@ impl ModuleErrorData {
         // Error index is utilized as the first byte from the error array.
         self.error[0]
     }
+}
+
+/// Something went wrong trying to encode a storage address.
+#[derive(Clone, Debug, thiserror::Error)]
+pub enum StorageAddressError {
+    /// Storage map type must be a composite type.
+    #[error("Storage map type must be a composite type")]
+    MapTypeMustbeComposite,
+    /// Storage lookup does not have the expected number of keys.
+    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
+    WrongNumberOfKeys {
+        /// The actual number of keys needed, based on the metadata.
+        actual: usize,
+        /// The number of keys provided in the storage address.
+        expected: usize,
+    },
+    /// Storage lookup requires a type that wasn't found in the metadata.
+    #[error(
+        "Storage lookup requires type {0} to exist in the metadata, but it was not found"
+    )]
+    TypeNotFound(u32),
+    /// This storage entry in the metadata does not have the correct number of hashers to fields.
+    #[error(
+        "Storage entry in metadata does not have the correct number of hashers to fields"
+    )]
+    WrongNumberOfHashers {
+        /// The number of hashers in the metadata for this storage entry.
+        hashers: usize,
+        /// The number of fields in the metadata for this storage entry.
+        fields: usize,
+    },
 }

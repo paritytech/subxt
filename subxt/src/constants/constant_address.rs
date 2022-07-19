@@ -2,7 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::metadata::DecodeWithMetadata;
+use crate::{
+    dynamic::DecodedValue,
+    metadata::DecodeWithMetadata,
+};
+use std::borrow::Cow;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.
@@ -72,5 +76,34 @@ impl<ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<Ret
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.constant_hash
+    }
+}
+
+/// This represents a dynamically generated constant address.
+pub struct DynamicConstantAddress<'a> {
+    pallet_name: Cow<'a, str>,
+    constant_name: Cow<'a, str>,
+}
+
+/// Construct a new dynamic constant lookup.
+pub fn dynamic<'a>(
+    pallet_name: impl Into<Cow<'a, str>>,
+    constant_name: impl Into<Cow<'a, str>>,
+) -> DynamicConstantAddress<'a> {
+    DynamicConstantAddress {
+        pallet_name: pallet_name.into(),
+        constant_name: constant_name.into(),
+    }
+}
+
+impl<'a> ConstantAddress for DynamicConstantAddress<'a> {
+    type Target = DecodedValue;
+
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    fn constant_name(&self) -> &str {
+        &self.constant_name
     }
 }

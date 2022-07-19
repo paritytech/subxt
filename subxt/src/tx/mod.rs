@@ -46,6 +46,8 @@ pub use self::{
         TxClient,
     },
     tx_payload::{
+        dynamic,
+        DynamicTxPayload,
         StaticTxPayload,
         TxPayload,
     },

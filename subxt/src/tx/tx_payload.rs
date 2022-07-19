@@ -6,10 +6,15 @@
 //! transactions that can be submitted.
 
 use crate::{
-    error::Error,
+    dynamic::Value,
+    error::{
+        Error,
+        MetadataError,
+    },
     metadata::Metadata,
 };
 use codec::Encode;
+use std::borrow::Cow;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
@@ -94,5 +99,49 @@ impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.validation_hash
+    }
+}
+
+/// This represents a dynamically generated transaction payload.
+pub struct DynamicTxPayload<'a> {
+    pallet_name: Cow<'a, str>,
+    call_name: Cow<'a, str>,
+    fields: Vec<Value<()>>,
+}
+
+/// Construct a new dynamic transaction payload to submit to a node.
+pub fn dynamic<'a>(
+    pallet_name: impl Into<Cow<'a, str>>,
+    call_name: impl Into<Cow<'a, str>>,
+    fields: Vec<Value<()>>,
+) -> DynamicTxPayload<'a> {
+    DynamicTxPayload {
+        pallet_name: pallet_name.into(),
+        call_name: call_name.into(),
+        fields,
+    }
+}
+
+impl<'a> TxPayload for DynamicTxPayload<'a> {
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    fn call_name(&self) -> &str {
+        &self.call_name
+    }
+
+    fn encode_call_data(
+        &self,
+        metadata: &Metadata,
+        out: &mut Vec<u8>,
+    ) -> Result<(), Error> {
+        let pallet = metadata.pallet(&self.pallet_name)?;
+        let call_id = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;
+        let call_value =
+            Value::unnamed_variant(self.call_name.to_owned(), self.fields.clone());
+
+        scale_value::scale::encode_as_type(call_value, call_id, metadata.types(), out)?;
+        Ok(())
     }
 }

@@ -2,9 +2,22 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::metadata::DecodeWithMetadata;
-use codec::Encode;
-pub use sp_runtime::traits::SignedExtension;
+use super::storage_map_key::StorageMapKey;
+use crate::{
+    dynamic::DecodedValue,
+    error::{
+        Error,
+        StorageAddressError,
+    },
+    metadata::{
+        DecodeWithMetadata,
+        EncodeWithMetadata,
+        Metadata,
+    },
+};
+use frame_metadata::StorageEntryType;
+use scale_info::TypeDef;
+use std::borrow::Cow;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
@@ -32,44 +45,17 @@ pub trait StorageAddress {
 
     /// Output the non-prefix bytes; that is, any additional bytes that need
     /// to be appended to the key to dig into maps.
-    fn append_entry_bytes(&self, bytes: &mut Vec<u8>);
+    fn append_entry_bytes(
+        &self,
+        metadata: &Metadata,
+        bytes: &mut Vec<u8>,
+    ) -> Result<(), Error>;
 
     /// An optional hash which, if present, will be checked against
     /// the node metadata to confirm that the return type matches what
     /// we are expecting.
     fn validation_hash(&self) -> Option<[u8; 32]> {
         None
-    }
-
-    /// Output the "prefix"; the bytes which encode the pallet
-    /// name and entry name.
-    ///
-    /// There should be no need to override this.
-    fn append_root_bytes(&self, bytes: &mut Vec<u8>) {
-        bytes.extend(&sp_core::twox_128(self.pallet_name().as_bytes()));
-        bytes.extend(&sp_core::twox_128(self.entry_name().as_bytes()));
-    }
-
-    /// This is a helper which combines [`StorageAddress::append_root_bytes()`]
-    /// and [`StorageAddress::append_entry_bytes`] and gives back all of the bytes
-    /// that represent this storage address.
-    ///
-    /// There should be no need to override this.
-    fn to_bytes(&self) -> Vec<u8> {
-        let mut bytes = Vec::new();
-        self.append_root_bytes(&mut bytes);
-        self.append_entry_bytes(&mut bytes);
-        bytes
-    }
-
-    /// This is a helper which returns bytes representing the root pallet/entry
-    /// location of this address; useful for manually iterating over for instance.
-    ///
-    /// There should be no need to override this.
-    fn to_root_bytes(&self) -> Vec<u8> {
-        let mut bytes = Vec::new();
-        self.append_root_bytes(&mut bytes);
-        bytes
     }
 }
 
@@ -82,7 +68,7 @@ pub struct StaticStorageAddress<ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: &'static str,
     entry_name: &'static str,
     // How to access the specific value at that storage address.
-    storage_entry_key: Vec<StorageMapKey>,
+    storage_entry_keys: Vec<StorageMapKey>,
     // Hash provided from static code for validation.
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
@@ -98,13 +84,13 @@ where
     pub fn new(
         pallet_name: &'static str,
         entry_name: &'static str,
-        storage_entry_key: Vec<StorageMapKey>,
+        storage_entry_keys: Vec<StorageMapKey>,
         hash: [u8; 32],
     ) -> Self {
         Self {
             pallet_name,
             entry_name,
-            storage_entry_key,
+            storage_entry_keys,
             validation_hash: Some(hash),
             _marker: std::marker::PhantomData,
         }
@@ -118,17 +104,20 @@ where
         }
     }
 
-    // A common trait methods implemented to avoid needingto import the trait:
-
     /// Return bytes representing this storage entry.
     pub fn to_bytes(&self) -> Vec<u8> {
-        StorageAddress::to_bytes(self)
+        let mut bytes = Vec::new();
+        super::utils::storage_address_root_bytes(self, &mut bytes);
+        for entry in &self.storage_entry_keys {
+            entry.to_bytes(&mut bytes);
+        }
+        bytes
     }
 
     /// Return bytes representing the root of this storage entry (ie a hash of
     /// the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        StorageAddress::to_root_bytes(self)
+        super::utils::storage_address_to_root_bytes(self)
     }
 }
 
@@ -150,10 +139,15 @@ where
         self.entry_name
     }
 
-    fn append_entry_bytes(&self, bytes: &mut Vec<u8>) {
-        for entry in &self.storage_entry_key {
+    fn append_entry_bytes(
+        &self,
+        _metadata: &Metadata,
+        bytes: &mut Vec<u8>,
+    ) -> Result<(), Error> {
+        for entry in &self.storage_entry_keys {
             entry.to_bytes(bytes);
         }
+        Ok(())
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
@@ -161,40 +155,114 @@ where
     }
 }
 
-/// Storage key for a Map.
-#[derive(Clone)]
-pub struct StorageMapKey {
-    value: Vec<u8>,
-    hasher: StorageHasher,
+/// This represents a dynamically generated storage address.
+pub struct DynamicStorageAddress<'a, Encodable> {
+    pallet_name: Cow<'a, str>,
+    entry_name: Cow<'a, str>,
+    storage_entry_keys: Vec<Encodable>,
 }
 
-impl StorageMapKey {
-    /// Create a new [`StorageMapKey`] with the encoded data and the hasher.
-    pub fn new<T: Encode>(value: T, hasher: StorageHasher) -> Self {
-        Self {
-            value: value.encode(),
-            hasher,
-        }
+/// Construct a new dynamic storage lookup.
+pub fn dynamic<'a, Encodable: EncodeWithMetadata>(
+    pallet_name: impl Into<Cow<'a, str>>,
+    entry_name: impl Into<Cow<'a, str>>,
+    storage_entry_keys: Vec<Encodable>,
+) -> DynamicStorageAddress<'a, Encodable> {
+    DynamicStorageAddress {
+        pallet_name: pallet_name.into(),
+        entry_name: entry_name.into(),
+        storage_entry_keys,
+    }
+}
+
+impl<'a, Encodable> StorageAddress for DynamicStorageAddress<'a, Encodable>
+where
+    Encodable: EncodeWithMetadata,
+{
+    type Target = DecodedValue;
+
+    // For dynamic types, we have no static guarantees about any of
+    // this stuff, so we just allow it and let it fail at runtime:
+    type IsFetchable = Yes;
+    type IsDefaultable = Yes;
+    type IsIterable = Yes;
+
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
     }
 
-    /// Convert this [`StorageMapKey`] into bytes and append them to some existing bytes.
-    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
-        match &self.hasher {
-            StorageHasher::Identity => bytes.extend(&self.value),
-            StorageHasher::Blake2_128 => bytes.extend(sp_core::blake2_128(bytes)),
-            StorageHasher::Blake2_128Concat => {
-                // adapted from substrate Blake2_128Concat::hash since StorageHasher is not public
-                let v = sp_core::blake2_128(&self.value);
-                let v = v.iter().chain(&self.value).cloned();
-                bytes.extend(v);
+    fn entry_name(&self) -> &str {
+        &self.entry_name
+    }
+
+    fn append_entry_bytes(
+        &self,
+        metadata: &Metadata,
+        bytes: &mut Vec<u8>,
+    ) -> Result<(), Error> {
+        let pallet = metadata.pallet(&self.pallet_name)?;
+        let storage = pallet.storage(&self.entry_name)?;
+
+        match &storage.ty {
+            StorageEntryType::Plain(_) => {
+                if !self.storage_entry_keys.is_empty() {
+                    Err(StorageAddressError::WrongNumberOfKeys {
+                        expected: 0,
+                        actual: self.storage_entry_keys.len(),
+                    }
+                    .into())
+                } else {
+                    Ok(())
+                }
             }
-            StorageHasher::Blake2_256 => bytes.extend(sp_core::blake2_256(&self.value)),
-            StorageHasher::Twox128 => bytes.extend(sp_core::twox_128(&self.value)),
-            StorageHasher::Twox256 => bytes.extend(sp_core::twox_256(&self.value)),
-            StorageHasher::Twox64Concat => {
-                let v = sp_core::twox_64(&self.value);
-                let v = v.iter().chain(&self.value).cloned();
-                bytes.extend(v);
+            StorageEntryType::Map { hashers, key, .. } => {
+                let ty = metadata
+                    .resolve_type(key.id())
+                    .ok_or(StorageAddressError::TypeNotFound(key.id()))?;
+                let tuple = match ty.type_def() {
+                    TypeDef::Tuple(t) => t,
+                    _ => return Err(StorageAddressError::MapTypeMustbeComposite.into()),
+                };
+                let fields = tuple.fields();
+
+                if fields.len() != self.storage_entry_keys.len() {
+                    return Err(StorageAddressError::WrongNumberOfKeys {
+                        expected: fields.len(),
+                        actual: self.storage_entry_keys.len(),
+                    }
+                    .into())
+                }
+
+                if hashers.len() == 1 {
+                    // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
+                    let mut input = Vec::new();
+                    for (key, field) in self.storage_entry_keys.iter().zip(tuple.fields())
+                    {
+                        key.encode_with_metadata(field.id(), metadata, &mut input)?;
+                    }
+                    super::storage_map_key::hash_bytes(input, &hashers[0], bytes);
+                    Ok(())
+                } else if hashers.len() == fields.len() {
+                    // A hasher per field; encode and hash each field independently.
+                    for ((key, field), hasher) in self
+                        .storage_entry_keys
+                        .iter()
+                        .zip(tuple.fields())
+                        .zip(hashers)
+                    {
+                        let mut input = Vec::new();
+                        key.encode_with_metadata(field.id(), metadata, &mut input)?;
+                        super::storage_map_key::hash_bytes(input, hasher, bytes);
+                    }
+                    Ok(())
+                } else {
+                    // Mismatch; wrong number of hashers/fields.
+                    Err(StorageAddressError::WrongNumberOfHashers {
+                        hashers: hashers.len(),
+                        fields: fields.len(),
+                    }
+                    .into())
+                }
             }
         }
     }

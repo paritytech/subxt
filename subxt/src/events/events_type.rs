@@ -9,6 +9,7 @@ use super::{
     StaticEvent,
 };
 use crate::{
+    dynamic::DecodedValue,
     error::Error,
     Config,
     Metadata,
@@ -149,7 +150,7 @@ pub struct EventDetails {
     pallet: String,
     variant: String,
     bytes: Vec<u8>,
-    fields: Vec<scale_value::Value<scale_value::scale::TypeId>>,
+    fields: Vec<DecodedValue>,
 }
 
 impl EventDetails {
@@ -195,13 +196,13 @@ impl EventDetails {
     }
 
     /// Decode and provide the event fields back in the form of a
-    /// list of [`scale_value::Value`]s.
+    /// list of [`DecodedValue`]s.
     // Dev note: if we can optimise Value decoding to avoid allocating
     // while working through events, or if the event structure changes
     // to allow us to skip over them, we'll no longer keep a copy of the
     // decoded events in the event, and the actual decoding will happen
     // when this method is called.
-    pub fn field_values(&self) -> Vec<scale_value::Value<scale_value::scale::TypeId>> {
+    pub fn field_values(&self) -> Vec<DecodedValue> {
         self.fields.clone()
     }
 

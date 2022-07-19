@@ -6,6 +6,9 @@
 
 mod storage_address;
 mod storage_client;
+mod storage_map_key;
+
+pub mod utils;
 
 pub use storage_client::{
     KeyIter,
@@ -18,18 +21,26 @@ pub use sp_core::storage::StorageKey;
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
-    pub use super::storage_address::{
-        StaticStorageAddress,
-        StorageAddress,
-        StorageHasher,
-        StorageMapKey,
-        Yes,
+    pub use super::{
+        storage_address::{
+            dynamic,
+            DynamicStorageAddress,
+            StaticStorageAddress,
+            StorageAddress,
+            Yes,
+        },
+        storage_map_key::{
+            StorageHasher,
+            StorageMapKey,
+        },
     };
 }
 
 // For consistency with other modules, also expose
 // the basic address stuff at the root of the module.
 pub use storage_address::{
+    dynamic,
+    DynamicStorageAddress,
     StaticStorageAddress,
     StorageAddress,
 };

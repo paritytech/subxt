@@ -3,12 +3,15 @@
 // see LICENSE for license details.
 
 use super::Metadata;
-use crate::error::Error;
+use crate::{
+    dynamic::DecodedValue,
+    error::Error,
+};
 use codec::Decode;
 use frame_metadata::StorageEntryType;
 
 /// This trait is implemented for types which can be decoded with the help of metadata.
-pub trait DecodeWithMetadata: Sized {
+pub trait DecodeWithMetadata {
     /// The type that we'll get back from decoding.
     type Target;
     /// Given some metadata and a type ID, attempt to SCALE decode the provided bytes into `Self`.
@@ -39,7 +42,7 @@ pub trait DecodeWithMetadata: Sized {
 }
 
 // Things can be dynamically decoded to our Value type:
-impl DecodeWithMetadata for scale_value::Value<scale_value::scale::TypeId> {
+impl DecodeWithMetadata for DecodedValue {
     type Target = Self;
     fn decode_with_metadata(
         bytes: &mut &[u8],

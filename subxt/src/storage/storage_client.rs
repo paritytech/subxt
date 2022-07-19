@@ -140,7 +140,8 @@ where
 
             // Look up the return type ID to enable DecodeWithMetadata:
             let metadata = client.client.metadata();
-            let lookup_bytes = address.to_bytes();
+            let lookup_bytes =
+                super::utils::storage_address_to_bytes(address, &metadata)?;
             if let Some(data) = client
                 .client
                 .storage()
@@ -288,8 +289,8 @@ where
             )?;
 
             // The root pallet/entry bytes for this storage entry:
-            let mut address_root_bytes = Vec::new();
-            address.append_root_bytes(&mut address_root_bytes);
+            let address_root_bytes =
+                super::utils::storage_address_to_root_bytes(&address);
 
             Ok(KeyIter {
                 client,
