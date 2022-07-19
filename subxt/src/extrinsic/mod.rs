@@ -26,6 +26,8 @@ pub use self::{
         AssetTip,
         BaseExtrinsicParams,
         BaseExtrinsicParamsBuilder,
+        BridgeHubExtrinsicParams,
+        BridgeHubExtrinsicParamsBuilder,
         Era,
         ExtrinsicParams,
         PlainTip,

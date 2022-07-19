@@ -57,6 +57,13 @@ pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
 pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
 
 /// A struct representing the signed extra and additional parameters required
+/// to construct a transaction for the default substrate node.
+pub type BridgeHubExtrinsicParams<T> = ExtendedExtrinsicParams<T, PlainTip>;
+/// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
+/// This is what you provide to methods like `sign_and_submit()`.
+pub type BridgeHubExtrinsicParamsBuilder<T> = ExtendedExtrinsicParamsBuilder<T, PlainTip>;
+
+/// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for a polkadot node.
 pub type PolkadotExtrinsicParams<T> = BaseExtrinsicParams<T, PlainTip>;
 
@@ -170,6 +177,126 @@ impl<T: Config, Tip: Debug + Encode> ExtrinsicParams<T> for BaseExtrinsicParams<
             self.transaction_version,
             self.genesis_hash,
             self.mortality_checkpoint,
+        )
+            .encode_to(v);
+    }
+}
+
+/// An implementation of [`ExtrinsicParams`] that is suitable for constructing
+/// extrinsics that can be sent to a node with the same signed extra and additional
+/// parameters as a Polkadot/Substrate node. The way that tip payments are specified
+/// differs between Substrate and Polkadot nodes, and so we are generic over that in
+/// order to support both here with relative ease.
+///
+/// If your node differs in the "signed extra" and "additional" parameters expected
+/// to be sent/signed with a transaction, then you can define your own type which
+/// implements the [`ExtrinsicParams`] trait.
+#[derive(Debug)]
+pub struct ExtendedExtrinsicParams<T: Config, Tip: Debug> {
+    era: Era,
+    nonce: T::Index,
+    tip: Tip,
+    max_size: u32,
+    priority: u8,
+    spec_version: u32,
+    transaction_version: u32,
+    genesis_hash: T::Hash,
+    mortality_checkpoint: T::Hash,
+    marker: std::marker::PhantomData<T>,
+}
+
+/// This builder allows you to provide the parameters that can be configured in order to
+/// construct a [`BaseExtrinsicParams`] value. This implements [`Default`], which allows
+/// [`BaseExtrinsicParams`] to be used with convenience methods like `sign_and_submit_default()`.
+///
+/// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
+/// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+pub struct ExtendedExtrinsicParamsBuilder<T: Config, Tip> {
+    era: Era,
+    mortality_checkpoint: Option<T::Hash>,
+    tip: Tip,
+    max_size: u32,
+    priority: u8,
+}
+
+impl<T: Config, Tip: Default> ExtendedExtrinsicParamsBuilder<T, Tip> {
+    /// Instantiate the default set of [`BaseExtrinsicParamsBuilder`]
+    pub fn new(max_size: u32, priority: u8) -> Self {
+        Self {
+            era: Era::Immortal,
+            mortality_checkpoint: None,
+            tip: Tip::default(),
+            max_size,
+            priority,
+        }
+    }
+
+    /// Set the [`Era`], which defines how long the transaction will be valid for
+    /// (it can be either immortal, or it can be mortal and expire after a certain amount
+    /// of time). The second argument is the block hash after which the transaction
+    /// becomes valid, and must align with the era phase (see the [`Era::Mortal`] docs
+    /// for more detail on that).
+    pub fn era(mut self, era: Era, checkpoint: T::Hash) -> Self {
+        self.era = era;
+        self.mortality_checkpoint = Some(checkpoint);
+        self
+    }
+
+    /// Set the tip you'd like to give to the block author
+    /// for this transaction.
+    pub fn tip(mut self, tip: impl Into<Tip>) -> Self {
+        self.tip = tip.into();
+        self
+    }
+
+    /// Set the priority
+    pub fn priority(mut self, priority: u8) -> Self {
+        self.priority = priority;
+        self
+    }
+}
+
+impl<T: Config, Tip: Debug + Encode> ExtrinsicParams<T> for ExtendedExtrinsicParams<T, Tip> {
+    type OtherParams = ExtendedExtrinsicParamsBuilder<T, Tip>;
+
+    fn new(
+        // Provided from subxt client:
+        spec_version: u32,
+        transaction_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+        // Provided externally:
+        other_params: Self::OtherParams,
+    ) -> Self {
+        ExtendedExtrinsicParams {
+            era: other_params.era,
+            mortality_checkpoint: other_params
+                .mortality_checkpoint
+                .unwrap_or(genesis_hash),
+            tip: other_params.tip,
+            max_size: other_params.max_size,
+            priority: other_params.priority,
+            nonce,
+            spec_version,
+            transaction_version,
+            genesis_hash,
+            marker: std::marker::PhantomData,
+        }
+    }
+
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        let nonce: u64 = self.nonce.into();
+        let tip = Encoded(self.tip.encode());
+        (self.era, Compact(nonce), tip, self.priority).encode_to(v);
+    }
+
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        (
+            self.spec_version,
+            self.transaction_version,
+            self.genesis_hash,
+            self.mortality_checkpoint,
+            self.max_size,
         )
             .encode_to(v);
     }
