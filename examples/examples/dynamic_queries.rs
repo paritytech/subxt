@@ -14,17 +14,15 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
+    dynamic::Value,
     tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
-    dynamic::Value,
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-
     let api = OnlineClient::<PolkadotConfig>::new().await?;
-
 
     // 1. Dynamic Balance Transfer (the dynamic equivalent to the balance_transfer example).
 
@@ -32,20 +30,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = AccountKeyring::Bob.to_account_id();
 
     // Create a transaction to submit:
-    let tx = subxt::dynamic::tx("Balances", "transfer", vec![
-        // A value representing a MultiAddress<AccountId32, _>. We want the "Id" variant, and that
-        // will ultimately contain the bytes for our destination address (there is a new type wrapping
-        // the address, but our encoding will happily ignore such things and do it's best to line up what
-        // we provide with what it needs).
-        Value::unnamed_variant("Id", vec![ Value::from_bytes(&dest) ]),
-        // A value representing the amount we'd like to transfer.
-        Value::uint(123_456_789_012_345u128),
-    ]);
+    let tx = subxt::dynamic::tx(
+        "Balances",
+        "transfer",
+        vec![
+            // A value representing a MultiAddress<AccountId32, _>. We want the "Id" variant, and that
+            // will ultimately contain the bytes for our destination address (there is a new type wrapping
+            // the address, but our encoding will happily ignore such things and do it's best to line up what
+            // we provide with what it needs).
+            Value::unnamed_variant("Id", vec![Value::from_bytes(&dest)]),
+            // A value representing the amount we'd like to transfer.
+            Value::uint(123_456_789_012_345u128),
+        ],
+    );
 
     // submit the transaction with default params:
     let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
     println!("Balance transfer extrinsic submitted: {}", hash);
-
 
     // 2. Dynamic constant access (the dynamic equivalent to the fetch_constants example).
 
@@ -53,16 +54,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let existential_deposit = api.constants().at(&constant_address)?;
     println!("Existential Deposit: {}", existential_deposit);
 
-
     // 3. Dynamic storage access
 
-    let storage_address = subxt::dynamic::storage("System", "Account", vec![
-        // Something that encodes to an AccountId32 is what we need for the map key here:
-        Value::from_bytes(&dest)
-    ]);
-    let account = api.storage().fetch_or_default(&storage_address, None).await?;
+    let storage_address = subxt::dynamic::storage(
+        "System",
+        "Account",
+        vec![
+            // Something that encodes to an AccountId32 is what we need for the map key here:
+            Value::from_bytes(&dest),
+        ],
+    );
+    let account = api
+        .storage()
+        .fetch_or_default(&storage_address, None)
+        .await?;
     println!("Bob's account details: {account}");
-
 
     // 4. Dynamic storage iteration (the dynamic equivalent to the fetch_all_accounts example).
 

@@ -20,6 +20,7 @@ pub use crate::tx::dynamic as tx;
 pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::dynamic as storage;
-pub use crate::storage::dynamic_root as storage_root;
-
+pub use crate::storage::{
+    dynamic as storage,
+    dynamic_root as storage_root,
+};

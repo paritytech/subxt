@@ -5,8 +5,8 @@
 use super::storage_map_key::StorageMapKey;
 use crate::{
     dynamic::{
-        Value,
         DecodedValue,
+        Value,
     },
     error::{
         Error,
@@ -240,10 +240,10 @@ where
                 let type_ids = match ty.type_def() {
                     TypeDef::Tuple(tuple) => {
                         tuple.fields().iter().map(|f| f.id()).collect()
-                    },
+                    }
                     _other => {
                         vec![key.id()]
-                    },
+                    }
                 };
 
                 if type_ids.len() != self.storage_entry_keys.len() {
@@ -257,19 +257,15 @@ where
                 if hashers.len() == 1 {
                     // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
                     let mut input = Vec::new();
-                    for (key, type_id) in self.storage_entry_keys.iter().zip(type_ids)
-                    {
+                    for (key, type_id) in self.storage_entry_keys.iter().zip(type_ids) {
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
                     }
                     super::storage_map_key::hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
                 } else if hashers.len() == type_ids.len() {
                     // A hasher per field; encode and hash each field independently.
-                    for ((key, type_id), hasher) in self
-                        .storage_entry_keys
-                        .iter()
-                        .zip(type_ids)
-                        .zip(hashers)
+                    for ((key, type_id), hasher) in
+                        self.storage_entry_keys.iter().zip(type_ids).zip(hashers)
                     {
                         let mut input = Vec::new();
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
