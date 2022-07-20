@@ -218,7 +218,7 @@ where
             StorageEntryType::Map { hashers, key, .. } => {
                 let ty = metadata
                     .resolve_type(key.id())
-                    .ok_or(StorageAddressError::TypeNotFound(key.id()))?;
+                    .ok_or_else(|| StorageAddressError::TypeNotFound(key.id()))?;
                 let tuple = match ty.type_def() {
                     TypeDef::Tuple(t) => t,
                     _ => return Err(StorageAddressError::MapTypeMustbeComposite.into()),
