@@ -240,7 +240,7 @@ where
                     {
                         key.encode_with_metadata(field.id(), metadata, &mut input)?;
                     }
-                    super::storage_map_key::hash_bytes(input, &hashers[0], bytes);
+                    super::storage_map_key::hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
                 } else if hashers.len() == fields.len() {
                     // A hasher per field; encode and hash each field independently.
@@ -252,7 +252,7 @@ where
                     {
                         let mut input = Vec::new();
                         key.encode_with_metadata(field.id(), metadata, &mut input)?;
-                        super::storage_map_key::hash_bytes(input, hasher, bytes);
+                        super::storage_map_key::hash_bytes(&input, hasher, bytes);
                     }
                     Ok(())
                 } else {
