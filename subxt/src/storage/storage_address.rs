@@ -4,7 +4,10 @@
 
 use super::storage_map_key::StorageMapKey;
 use crate::{
-    dynamic::DecodedValue,
+    dynamic::{
+        Value,
+        DecodedValue,
+    },
     error::{
         Error,
         StorageAddressError,
@@ -162,6 +165,18 @@ pub struct DynamicStorageAddress<'a, Encodable> {
     storage_entry_keys: Vec<Encodable>,
 }
 
+/// Construct a new dynamic storage lookup to the root of some entry.
+pub fn dynamic_root<'a>(
+    pallet_name: impl Into<Cow<'a, str>>,
+    entry_name: impl Into<Cow<'a, str>>,
+) -> DynamicStorageAddress<'a, Value> {
+    DynamicStorageAddress {
+        pallet_name: pallet_name.into(),
+        entry_name: entry_name.into(),
+        storage_entry_keys: vec![],
+    }
+}
+
 /// Construct a new dynamic storage lookup.
 pub fn dynamic<'a, Encodable: EncodeWithMetadata>(
     pallet_name: impl Into<Cow<'a, str>>,
@@ -219,15 +234,21 @@ where
                 let ty = metadata
                     .resolve_type(key.id())
                     .ok_or_else(|| StorageAddressError::TypeNotFound(key.id()))?;
-                let tuple = match ty.type_def() {
-                    TypeDef::Tuple(t) => t,
-                    _ => return Err(StorageAddressError::MapTypeMustbeComposite.into()),
-                };
-                let fields = tuple.fields();
 
-                if fields.len() != self.storage_entry_keys.len() {
+                // If the key is a tuple, we encode each value to the corresponding tuple type.
+                // If the key is not a tuple, encode a single value to the key type.
+                let type_ids = match ty.type_def() {
+                    TypeDef::Tuple(tuple) => {
+                        tuple.fields().iter().map(|f| f.id()).collect()
+                    },
+                    _other => {
+                        vec![key.id()]
+                    },
+                };
+
+                if type_ids.len() != self.storage_entry_keys.len() {
                     return Err(StorageAddressError::WrongNumberOfKeys {
-                        expected: fields.len(),
+                        expected: type_ids.len(),
                         actual: self.storage_entry_keys.len(),
                     }
                     .into())
@@ -236,22 +257,22 @@ where
                 if hashers.len() == 1 {
                     // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
                     let mut input = Vec::new();
-                    for (key, field) in self.storage_entry_keys.iter().zip(tuple.fields())
+                    for (key, type_id) in self.storage_entry_keys.iter().zip(type_ids)
                     {
-                        key.encode_with_metadata(field.id(), metadata, &mut input)?;
+                        key.encode_with_metadata(type_id, metadata, &mut input)?;
                     }
                     super::storage_map_key::hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
-                } else if hashers.len() == fields.len() {
+                } else if hashers.len() == type_ids.len() {
                     // A hasher per field; encode and hash each field independently.
-                    for ((key, field), hasher) in self
+                    for ((key, type_id), hasher) in self
                         .storage_entry_keys
                         .iter()
-                        .zip(tuple.fields())
+                        .zip(type_ids)
                         .zip(hashers)
                     {
                         let mut input = Vec::new();
-                        key.encode_with_metadata(field.id(), metadata, &mut input)?;
+                        key.encode_with_metadata(type_id, metadata, &mut input)?;
                         super::storage_map_key::hash_bytes(&input, hasher, bytes);
                     }
                     Ok(())
@@ -259,7 +280,7 @@ where
                     // Mismatch; wrong number of hashers/fields.
                     Err(StorageAddressError::WrongNumberOfHashers {
                         hashers: hashers.len(),
-                        fields: fields.len(),
+                        fields: type_ids.len(),
                     }
                     .into())
                 }

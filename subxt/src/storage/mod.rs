@@ -24,6 +24,7 @@ pub mod address {
     pub use super::{
         storage_address::{
             dynamic,
+            dynamic_root,
             DynamicStorageAddress,
             StaticStorageAddress,
             StorageAddress,
@@ -40,6 +41,7 @@ pub mod address {
 // the basic address stuff at the root of the module.
 pub use storage_address::{
     dynamic,
+    dynamic_root,
     DynamicStorageAddress,
     StaticStorageAddress,
     StorageAddress,

@@ -27,7 +27,7 @@ impl EncodeWithMetadata for Value<()> {
         metadata: &Metadata,
         bytes: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        scale_value::scale::encode_as_type(self.clone(), type_id, metadata.types(), bytes)
+        scale_value::scale::encode_as_type(self, type_id, metadata.types(), bytes)
             .map_err(|e| e.into())
     }
 }

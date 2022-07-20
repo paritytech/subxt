@@ -443,7 +443,7 @@ mod tests {
         let mut actual_bytes = vec![];
         for field in &actual.fields {
             scale_value::scale::encode_as_type(
-                field.clone(),
+                field,
                 field.context,
                 types,
                 &mut actual_bytes,
