@@ -141,8 +141,7 @@ impl<T: Config> Events<T> {
     }
 }
 
-/// The raw bytes for an event with associated details about
-/// where and when it was emitted.
+/// The event details.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EventDetails {
     phase: Phase,
@@ -150,10 +149,41 @@ pub struct EventDetails {
     pallet: String,
     variant: String,
     bytes: Vec<u8>,
-    fields: Vec<DecodedValue>,
+    // Dev note: this is here because we've pretty much had to generate it
+    // anyway, but expect it to be generated on the fly in future versions,
+    // and so don't expose it.
+    fields: Vec<(Option<String>, DecodedValue)>,
+}
+
+/// The raw data associated with some event.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EventDetailParts {
+    /// When was the event produced?
+    pub phase: Phase,
+    /// What index is this event in the stored events for this block.
+    pub index: u32,
+    /// The name of the pallet from whence the Event originated.
+    pub pallet: String,
+    /// The name of the pallet's Event variant.
+    pub variant: String,
+    /// All of the bytes representing this event, including the pallet
+    /// and variant index that the event originated from.
+    pub bytes: Vec<u8>,
 }
 
 impl EventDetails {
+    /// Return the raw data associated with this event. Useful if you want
+    /// ownership over parts of the event data.
+    pub fn parts(self) -> EventDetailParts {
+        EventDetailParts {
+            phase: self.phase,
+            index: self.index,
+            pallet: self.pallet,
+            variant: self.variant,
+            bytes: self.bytes
+        }
+    }
+
     /// When was the event produced?
     pub fn phase(&self) -> Phase {
         self.phase
@@ -195,15 +225,32 @@ impl EventDetails {
         &self.bytes[2..]
     }
 
-    /// Decode and provide the event fields back in the form of a
-    /// list of [`DecodedValue`]s.
+    /// Decode and provide the event fields back in the form of a composite
+    /// type, which represents either the named or unnamed fields that were
+    /// present.
+    //
     // Dev note: if we can optimise Value decoding to avoid allocating
     // while working through events, or if the event structure changes
     // to allow us to skip over them, we'll no longer keep a copy of the
     // decoded events in the event, and the actual decoding will happen
-    // when this method is called.
-    pub fn field_values(&self) -> Vec<DecodedValue> {
-        self.fields.clone()
+    // when this method is called. This is why we return an owned vec and
+    // not a reference.
+    pub fn field_values(&self) -> scale_value::Composite<scale_value::scale::TypeId> {
+        if self.fields.is_empty() {
+            scale_value::Composite::Unnamed(vec![])
+        } else if self.fields[0].0.is_some() {
+            let named = self.fields
+                .iter()
+                .map(|(n,f)| (n.clone().unwrap_or(String::new()), f.clone()))
+                .collect();
+            scale_value::Composite::Named(named)
+        } else {
+            let unnamed = self.fields
+                .iter()
+                .map(|(_n, f)| f.clone())
+                .collect();
+            scale_value::Composite::Unnamed(unnamed)
+        }
     }
 
     /// Attempt to decode these [`EventDetails`] into a specific static event.
@@ -257,16 +304,18 @@ fn decode_raw_event_details<T: Config>(
     // like, we can decode them quite easily into a top level event type.
     let mut event_bytes = vec![pallet_index, variant_index];
     let mut event_fields = Vec::new();
-    for arg in event_metadata.variant().fields() {
-        let type_id = arg.ty().id();
+    for (name, type_id) in event_metadata.fields() {
         let all_bytes = *input;
         // consume some bytes for each event field, moving the cursor forward:
         let value = scale_value::scale::decode_as_type(
             input,
-            type_id,
+            *type_id,
             &metadata.runtime_metadata().types,
         )?;
-        event_fields.push(value);
+        event_fields.push((
+            name.clone(),
+            value
+        ));
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
@@ -441,7 +490,7 @@ mod tests {
         // Make sure that the bytes handed back line up with the fields handed back;
         // encode the fields back into bytes and they should be equal.
         let mut actual_bytes = vec![];
-        for field in &actual.fields {
+        for (_name, field) in &actual.fields {
             scale_value::scale::encode_as_type(
                 field,
                 field.context,
@@ -450,12 +499,12 @@ mod tests {
             )
             .expect("should be able to encode properly");
         }
-        assert_eq!(actual_bytes, actual.bytes);
+        assert_eq!(actual_bytes, actual.field_bytes());
 
         let actual_fields_no_context: Vec<_> = actual
             .field_values()
-            .into_iter()
-            .map(|f| f.remove_context())
+            .into_values()
+            .map(|value| value.remove_context())
             .collect();
 
         // Check each of the other fields:

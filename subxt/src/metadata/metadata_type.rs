@@ -17,7 +17,6 @@ use scale_info::{
     form::PortableForm,
     PortableRegistry,
     Type,
-    Variant,
 };
 use std::{
     collections::HashMap,
@@ -296,7 +295,9 @@ impl PalletMetadata {
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
     pallet: Arc<str>,
-    variant: Variant<PortableForm>,
+    event: String,
+    fields: Vec<(Option<String>, u32)>,
+    docs: Vec<String>
 }
 
 impl EventMetadata {
@@ -307,12 +308,17 @@ impl EventMetadata {
 
     /// Get the name of the pallet event which was emitted.
     pub fn event(&self) -> &str {
-        self.variant.name()
+        &self.event
     }
 
-    /// Get the type def variant for the pallet event.
-    pub fn variant(&self) -> &Variant<PortableForm> {
-        &self.variant
+    /// The names and types of each field in the event.
+    pub fn fields(&self) -> &[(Option<String>, u32)] {
+        &self.fields
+    }
+
+    /// Documentation for this event.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
     }
 }
 
@@ -430,13 +436,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         for pallet in &metadata.pallets {
             if let Some(event) = &pallet.event {
                 let pallet_name: Arc<str> = pallet.name.to_string().into();
-                let event_variant = get_type_def_variant(event.ty.id())?;
+                let event_type_id = event.ty.id();
+                let event_variant = get_type_def_variant(event_type_id)?;
                 for variant in event_variant.variants() {
                     events.insert(
                         (pallet.index, variant.index()),
                         EventMetadata {
                             pallet: pallet_name.clone(),
-                            variant: variant.clone(),
+                            event: variant.name().to_owned(),
+                            fields: variant.fields().iter().map(|f| (f.name().map(|n| n.to_owned()), f.ty().id())).collect(),
+                            docs: variant.docs().to_vec(),
                         },
                     );
                 }
