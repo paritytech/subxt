@@ -297,7 +297,7 @@ pub struct EventMetadata {
     pallet: Arc<str>,
     event: String,
     fields: Vec<(Option<String>, u32)>,
-    docs: Vec<String>
+    docs: Vec<String>,
 }
 
 impl EventMetadata {
@@ -444,7 +444,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                         EventMetadata {
                             pallet: pallet_name.clone(),
                             event: variant.name().to_owned(),
-                            fields: variant.fields().iter().map(|f| (f.name().map(|n| n.to_owned()), f.ty().id())).collect(),
+                            fields: variant
+                                .fields()
+                                .iter()
+                                .map(|f| (f.name().map(|n| n.to_owned()), f.ty().id()))
+                                .collect(),
                             docs: variant.docs().to_vec(),
                         },
                     );

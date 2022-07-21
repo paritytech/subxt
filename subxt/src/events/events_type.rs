@@ -180,7 +180,7 @@ impl EventDetails {
             index: self.index,
             pallet: self.pallet,
             variant: self.variant,
-            bytes: self.bytes
+            bytes: self.bytes,
         }
     }
 
@@ -228,7 +228,6 @@ impl EventDetails {
     /// Decode and provide the event fields back in the form of a composite
     /// type, which represents either the named or unnamed fields that were
     /// present.
-    //
     // Dev note: if we can optimise Value decoding to avoid allocating
     // while working through events, or if the event structure changes
     // to allow us to skip over them, we'll no longer keep a copy of the
@@ -239,16 +238,14 @@ impl EventDetails {
         if self.fields.is_empty() {
             scale_value::Composite::Unnamed(vec![])
         } else if self.fields[0].0.is_some() {
-            let named = self.fields
+            let named = self
+                .fields
                 .iter()
-                .map(|(n,f)| (n.clone().unwrap_or(String::new()), f.clone()))
+                .map(|(n, f)| (n.clone().unwrap_or_default(), f.clone()))
                 .collect();
             scale_value::Composite::Named(named)
         } else {
-            let unnamed = self.fields
-                .iter()
-                .map(|(_n, f)| f.clone())
-                .collect();
+            let unnamed = self.fields.iter().map(|(_n, f)| f.clone()).collect();
             scale_value::Composite::Unnamed(unnamed)
         }
     }
@@ -312,10 +309,7 @@ fn decode_raw_event_details<T: Config>(
             *type_id,
             &metadata.runtime_metadata().types,
         )?;
-        event_fields.push((
-            name.clone(),
-            value
-        ));
+        event_fields.push((name.clone(), value));
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
