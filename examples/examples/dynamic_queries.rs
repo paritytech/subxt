@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // will ultimately contain the bytes for our destination address (there is a new type wrapping
             // the address, but our encoding will happily ignore such things and do it's best to line up what
             // we provide with what it needs).
-            Value::unnamed_variant("Id", vec![Value::from_bytes(&dest)]),
+            Value::unnamed_variant("Id", [Value::from_bytes(&dest)]),
             // A value representing the amount we'd like to transfer.
             Value::u128(123_456_789_012_345),
         ],
