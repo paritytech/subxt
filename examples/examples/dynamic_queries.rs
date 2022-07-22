@@ -40,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // we provide with what it needs).
             Value::unnamed_variant("Id", vec![Value::from_bytes(&dest)]),
             // A value representing the amount we'd like to transfer.
-            Value::uint(123_456_789_012_345u128),
+            Value::u128(123_456_789_012_345),
         ],
     );
 

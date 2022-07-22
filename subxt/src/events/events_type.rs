@@ -541,7 +541,7 @@ mod tests {
                 variant: "A".to_string(),
                 variant_index: 0,
                 fields: vec![
-                    Value::uint(1u8),
+                    Value::u128(1),
                     Value::bool(true),
                     Value::unnamed_composite(vec![Value::string("Hi")]),
                 ],
@@ -588,7 +588,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::uint(1u8)],
+                fields: vec![Value::u128(1)],
             },
         );
         assert_raw_events_match(
@@ -614,7 +614,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::uint(234u8)],
+                fields: vec![Value::u128(234)],
             },
         );
         assert!(event_details.next().is_none());
@@ -659,7 +659,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::uint(1u8)],
+                fields: vec![Value::u128(1)],
             },
         );
         assert_raw_events_match(
@@ -712,7 +712,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::uint(1u8)],
+                fields: vec![Value::u128(1)],
             },
         );
         assert!(event_details.next().is_none());
@@ -753,7 +753,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::unnamed_composite(vec![Value::uint(1u8)])],
+                fields: vec![Value::unnamed_composite(vec![Value::u128(1)])],
             },
         );
         assert!(event_details.next().is_none());

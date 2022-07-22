@@ -86,6 +86,97 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
+async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
+    use subxt::ext::scale_value::{
+        At,
+        Composite,
+        Value,
+    };
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice_account_addr = subxt::dynamic::storage(
+        "System",
+        "Account",
+        vec![Value::from_bytes(&alice.account_id())],
+    );
+    let bob_account_addr = subxt::dynamic::storage(
+        "System",
+        "Account",
+        vec![Value::from_bytes(&bob.account_id())],
+    );
+
+    let alice_pre = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_pre = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
+
+    let tx = subxt::dynamic::tx(
+        "Balances",
+        "transfer",
+        vec![
+            Value::unnamed_variant("Id", vec![Value::from_bytes(&bob.account_id())]),
+            Value::u128(10_000u128),
+        ],
+    );
+
+    let events = api
+        .tx()
+        .sign_and_submit_then_watch_default(&tx, &alice)
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+
+    let event_fields = events
+        .iter()
+        .filter_map(|ev| ev.ok())
+        .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
+        .expect("Failed to find Transfer event")
+        .field_values()
+        .map_context(|_| ());
+
+    let expected_fields = Composite::Named(vec![
+        (
+            "from".into(),
+            Value::unnamed_composite(vec![Value::from_bytes(&alice.account_id())]),
+        ),
+        (
+            "to".into(),
+            Value::unnamed_composite(vec![Value::from_bytes(&bob.account_id())]),
+        ),
+        ("amount".into(), Value::u128(10_000)),
+    ]);
+    assert_eq!(event_fields, expected_fields);
+
+    let alice_post = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_post = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
+
+    let alice_pre_free = alice_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let alice_post_free = alice_post.at("data").at("free").unwrap().as_u128().unwrap();
+
+    let bob_pre_free = bob_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let bob_post_free = bob_post.at("data").at("free").unwrap().as_u128().unwrap();
+
+    assert!(alice_pre_free - 10_000 >= alice_post_free);
+    assert_eq!(bob_pre_free + 10_000, bob_post_free);
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
