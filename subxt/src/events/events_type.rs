@@ -196,11 +196,15 @@ impl EventDetails {
 
     /// The index of the pallet that the event originated from.
     pub fn pallet_index(&self) -> u8 {
+        // Note: never panics because we set the first two bytes
+        // in `decode_event_details` to build this.
         self.bytes[0]
     }
 
     /// The index of the event variant that the event originated from.
     pub fn variant_index(&self) -> u8 {
+        // Note: never panics because we set the first two bytes
+        // in `decode_event_details` to build this.
         self.bytes[1]
     }
 

@@ -382,7 +382,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
 
         let events = EventsClient::new(self.client.clone())
-            .at(self.block_hash)
+            .at(Some(self.block_hash))
             .await?;
 
         Ok(TxEvents {
@@ -545,10 +545,7 @@ fn decode_dispatch_error(metadata: &Metadata, bytes: &[u8]) -> DispatchError {
             }
         }
     };
-    println!(
-        "ERROR: pallet {:?} err {:?}, bytes: {bytes:?}",
-        err.index, err.error
-    );
+
     let error_details = match metadata.error(err.index, err.error[0]) {
         Ok(details) => details,
         Err(_) => {

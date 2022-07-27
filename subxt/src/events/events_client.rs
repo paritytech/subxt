@@ -53,7 +53,7 @@ where
     /// Obtain events at some block hash.
     pub fn at(
         &self,
-        block_hash: T::Hash,
+        block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
@@ -119,11 +119,27 @@ where
     }
 }
 
-async fn at<T, Client>(client: Client, block_hash: T::Hash) -> Result<Events<T>, Error>
+async fn at<T, Client>(
+    client: Client,
+    block_hash: Option<T::Hash>,
+) -> Result<Events<T>, Error>
 where
     T: Config,
     Client: OnlineClientT<T>,
 {
+    // If block hash is not provided, get the hash
+    // for the latest block and use that.
+    let block_hash = match block_hash {
+        Some(hash) => hash,
+        None => {
+            client
+                .rpc()
+                .block_hash(None)
+                .await?
+                .expect("didn't pass a block number; qed")
+        }
+    };
+
     let event_bytes = client
         .rpc()
         .storage(&*system_events_key().0, Some(block_hash))
