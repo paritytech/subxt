@@ -79,7 +79,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Ok(bytes)
     }
 
-    /// Creates a returns a raw signed extrinsic, without submitting it.
+    /// Creates a raw signed extrinsic, without submitting it.
     pub async fn create_signed_with_nonce<Call>(
         &self,
         call: &Call,
@@ -169,7 +169,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 }
 
 impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
-    /// Creates a returns a raw signed extrinsic, without submitting it.
+    /// Creates a raw signed extrinsic, without submitting it.
     pub async fn create_signed<Call>(
         &self,
         call: &Call,

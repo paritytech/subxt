@@ -322,7 +322,7 @@ impl EventMetadata {
     }
 }
 
-/// Details abotu a specific runtime error.
+/// Details about a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
     pallet: Arc<str>,

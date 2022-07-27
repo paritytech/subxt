@@ -7,8 +7,8 @@ use subxt::{
     Config,
 };
 
-/// Wait for blocks to be produced before running tests. waiting for two blocks
-/// (the genesis block aond one actual one?) seems to be enough to allow tests
+/// Wait for blocks to be produced before running tests. Waiting for two blocks
+/// (the genesis block and another one) seems to be enough to allow tests
 /// like `dry_run_passes` to work properly.
 pub async fn wait_for_blocks<C: Config>(api: &impl OnlineClientT<C>) {
     let mut sub = api.rpc().subscribe_blocks().await.unwrap();
