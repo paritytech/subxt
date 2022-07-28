@@ -148,11 +148,15 @@ pub struct EventDetails {
     index: u32,
     pallet: String,
     variant: String,
-    bytes: Vec<u8>,
-    // Dev note: this is here because we've pretty much had to generate it
-    // anyway, but expect it to be generated on the fly in future versions,
-    // and so don't expose it.
-    fields: Vec<(Option<String>, DecodedValue)>,
+    // where in the bytes do these event fields begin?
+    start: usize,
+    // where in the bytes do these event fields end?
+    end: usize,
+    // Bytes for all events in the block.
+    bytes: Arc<[u8]>,
+    // Keep a copy of this so that we can decode fields
+    // on demand.
+    metadata: Metadata,
 }
 
 /// The raw data associated with some event.
@@ -239,6 +243,31 @@ impl EventDetails {
     // when this method is called. This is why we return an owned vec and
     // not a reference.
     pub fn field_values(&self) -> scale_value::Composite<scale_value::scale::TypeId> {
+
+        for (name, type_id) in event_metadata.fields() {
+            let all_bytes = *input;
+
+            // Skip over the bytes for this field:
+            scale_decode::decode(
+                input,
+                *type_id,
+                &metadata.runtime_metadata().types,
+                scale_decode::visitor::IgnoreVisitor
+            )?;
+
+            // consume some bytes for each event field, moving the cursor forward:
+            let value = scale_value::scale::decode_as_type(
+                input,
+                *type_id,
+                &metadata.runtime_metadata().types,
+            )?;
+            event_fields.push((name.clone(), value));
+            // count how many bytes were consumed based on remaining length:
+            let consumed_len = all_bytes.len() - input.len();
+            // move those consumed bytes to the output vec unaltered:
+            event_bytes.extend(&all_bytes[0..consumed_len]);
+        }
+
         if self.fields.is_empty() {
             scale_value::Composite::Unnamed(vec![])
         } else if self.fields[0].0.is_some() {
@@ -275,8 +304,8 @@ impl EventDetails {
 }
 
 // Attempt to dynamically decode a single event from our events input.
-fn decode_raw_event_details<T: Config>(
-    metadata: &Metadata,
+fn decode_raw_event_details<'a, T: Config>(
+    metadata: &'a Metadata,
     index: u32,
     input: &mut &[u8],
 ) -> Result<EventDetails, Error> {
@@ -304,16 +333,16 @@ fn decode_raw_event_details<T: Config>(
     // the event bytes also include the pallet/variant index so that, if we
     // like, we can decode them quite easily into a top level event type.
     let mut event_bytes = vec![pallet_index, variant_index];
-    let mut event_fields = Vec::new();
     for (name, type_id) in event_metadata.fields() {
         let all_bytes = *input;
-        // consume some bytes for each event field, moving the cursor forward:
-        let value = scale_value::scale::decode_as_type(
+
+        // Skip over the bytes for this field:
+        scale_decode::decode(
             input,
             *type_id,
             &metadata.runtime_metadata().types,
+            scale_decode::visitor::IgnoreVisitor
         )?;
-        event_fields.push((name.clone(), value));
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
@@ -331,7 +360,7 @@ fn decode_raw_event_details<T: Config>(
         pallet: event_metadata.pallet().to_string(),
         variant: event_metadata.event().to_string(),
         bytes: event_bytes,
-        fields: event_fields,
+        metadata: metadata
     })
 }
 
