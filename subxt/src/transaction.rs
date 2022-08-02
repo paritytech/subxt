@@ -157,6 +157,11 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
+
+    /// Return the hash of the extrinsic that was submitted.
+    pub fn extrinsic_hash(&self) -> T::Hash {
+        self.ext_hash
+    }
 }
 
 impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode> Stream
