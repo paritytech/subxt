@@ -112,13 +112,12 @@ pub trait EventFilter: private::Sealed {
     /// The type we'll be handed back from filtering.
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
-    fn filter<'a, T: Config>(
+    fn filter<T: Config>(
         events: Events<T>,
     ) -> Box<
         dyn Iterator<
                 Item = Result<FilteredEventDetails<T::Hash, Self::ReturnType>, Error>,
-            > + Send
-            + 'a,
+            > + Send,
     >;
 }
 
@@ -134,11 +133,10 @@ pub(crate) mod private {
 impl<Ev: StaticEvent> private::Sealed for (Ev,) {}
 impl<Ev: StaticEvent> EventFilter for (Ev,) {
     type ReturnType = Ev;
-    fn filter<'a, T: Config>(
+    fn filter<T: Config>(
         events: Events<T>,
-    ) -> Box<
-        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, Error>> + Send + 'a,
-    > {
+    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, Error>> + Send>
+    {
         let block_hash = events.block_hash();
         let mut iter = events.iter();
         Box::new(std::iter::from_fn(move || {
@@ -174,9 +172,9 @@ macro_rules! impl_event_filter {
         impl <$($ty: StaticEvent),+> private::Sealed for ( $($ty,)+ ) {}
         impl <$($ty: StaticEvent),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
-            fn filter<'a, T: Config>(
+            fn filter<T: Config>(
                 events: Events<T>
-            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, Error>> + Send + 'a> {
+            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, Error>> + Send> {
                 let block_hash = events.block_hash();
                 let mut iter = events.iter();
                 Box::new(std::iter::from_fn(move || {

@@ -139,7 +139,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         .filter_map(|ev| ev.ok())
         .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
         .expect("Failed to find Transfer event")
-        .field_values()
+        .field_values()?
         .map_context(|_| ());
 
     let expected_fields = Composite::Named(vec![
