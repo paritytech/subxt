@@ -231,15 +231,15 @@ impl EventDetails {
 
     /// The index of the pallet that the event originated from.
     pub fn pallet_index(&self) -> u8 {
-        // Note: never panics; we expect these bytes to exist for the
-        // event to have gotten this far.
+        // Note: never panics; we expect these bytes to exist
+        // in order that the EventDetails could be created.
         self.all_bytes[self.fields_start_idx - 2]
     }
 
     /// The index of the event variant that the event originated from.
     pub fn variant_index(&self) -> u8 {
-        // Note: never panics; we expect these bytes to exist for the
-        // event to have gotten this far.
+        // Note: never panics; we expect these bytes to exist
+        // in order that the EventDetails could be created.
         self.all_bytes[self.fields_start_idx - 1]
     }
 
