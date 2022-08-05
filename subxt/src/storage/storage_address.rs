@@ -110,7 +110,7 @@ where
     /// Return bytes representing this storage entry.
     pub fn to_bytes(&self) -> Vec<u8> {
         let mut bytes = Vec::new();
-        super::utils::storage_address_root_bytes(self, &mut bytes);
+        super::utils::write_storage_address_root_bytes(self, &mut bytes);
         for entry in &self.storage_entry_keys {
             entry.to_bytes(&mut bytes);
         }
@@ -120,7 +120,7 @@ where
     /// Return bytes representing the root of this storage entry (ie a hash of
     /// the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        super::utils::storage_address_to_root_bytes(self)
+        super::utils::storage_address_root_bytes(self)
     }
 }
 
