@@ -294,6 +294,8 @@ impl PalletMetadata {
 /// Metadata for specific events.
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
+    // The pallet name is shared across every event, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
     pallet: Arc<str>,
     event: String,
     fields: Vec<(Option<String>, u32)>,
@@ -325,6 +327,8 @@ impl EventMetadata {
 /// Details about a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
+    // The pallet name is shared across every event, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
     pallet: Arc<str>,
     error: String,
     docs: Vec<String>,

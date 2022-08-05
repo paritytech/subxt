@@ -32,7 +32,8 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
     fn rpc(&self) -> &Rpc<T>;
 }
 
-/// A client capable of performing offline or online operations.
+/// A client that can be used to perform API calls (that is, either those
+/// requiriing an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {

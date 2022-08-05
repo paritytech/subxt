@@ -182,7 +182,7 @@ fn generate_storage_entry_fns(
         // The field type is translated from `std::vec::Vec<T>` to `[T]`. We apply
         // AsRef to all types, so this just makes it a little more ergonomic.
         //
-        // TODO [jsdw]: Support mappings like `String -> str` too for better Borrow
+        // TODO [jsdw]: Support mappings like `String -> str` too for better borrow
         // ergonomics.
         let field_ty = match field_type.vec_type_param() {
             Some(ty) => quote!([#ty]),
