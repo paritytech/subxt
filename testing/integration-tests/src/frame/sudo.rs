@@ -13,7 +13,7 @@ use crate::{
 };
 use sp_keyring::AccountKeyring;
 
-type Call = runtime_types::node_runtime::Call;
+type Call = runtime_types::kitchensink_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[tokio::test]
