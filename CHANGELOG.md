@@ -92,7 +92,7 @@ parameters (such as mortality and tip payment) to be customized. See `examples/b
 small usage example.
 
 If you're targeting a node which involves custom additional and extra transaction data, you'll need to implement the
-trait `subxt::tx::ExtrinsicParams`, which determines the parameters that can be provided to `sign_and_submit`, as
+trait `subxt::extrinsic::ExtrinsicParams`, which determines the parameters that can be provided to `sign_and_submit`, as
 well as how to encode these into the "additional" and "extra" data needed for a transaction. Have a look at
 `subxt/src/extrinsic/params.rs` for the trait definition and Substrate/Polkadot implementations. The aim with this change
 is to make it easier to customise this for your own chains, and provide a simple way to provide values at runtime.
