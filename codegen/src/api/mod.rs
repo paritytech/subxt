@@ -6,7 +6,6 @@
 
 mod calls;
 mod constants;
-mod errors;
 mod events;
 mod storage;
 
@@ -110,33 +109,33 @@ impl RuntimeGenerator {
         let mut type_substitutes = [
             (
                 "bitvec::order::Lsb0",
-                parse_quote!(::subxt::bitvec::order::Lsb0),
+                parse_quote!(::subxt::ext::bitvec::order::Lsb0),
             ),
             (
                 "bitvec::order::Msb0",
-                parse_quote!(::subxt::bitvec::order::Msb0),
+                parse_quote!(::subxt::ext::bitvec::order::Msb0),
             ),
             (
                 "sp_core::crypto::AccountId32",
-                parse_quote!(::subxt::sp_core::crypto::AccountId32),
+                parse_quote!(::subxt::ext::sp_core::crypto::AccountId32),
             ),
             (
                 "primitive_types::H256",
-                parse_quote!(::subxt::sp_core::H256),
+                parse_quote!(::subxt::ext::sp_core::H256),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(::subxt::sp_runtime::MultiAddress),
+                parse_quote!(::subxt::ext::sp_runtime::MultiAddress),
             ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",
-                parse_quote!(::subxt::WrapperKeepOpaque),
+                parse_quote!(::subxt::utils::WrapperKeepOpaque),
             ),
             // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
             // can cause an issue with generated code that doesn't impl `Ord` by default.
             // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
             // suitable type params) avoids these issues.
-            ("BTreeMap", parse_quote!(::subxt::KeyedVec)),
+            ("BTreeMap", parse_quote!(::subxt::utils::KeyedVec)),
             ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()
@@ -256,9 +255,6 @@ impl RuntimeGenerator {
             })
             .collect();
 
-        let has_module_error_impl =
-            errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
-
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -271,127 +267,57 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                /// The default error type returned when there is a runtime issue.
+                /// The default error type returned when there is a runtime issue,
+                /// exposed here for ease of use.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
-                // Impl HasModuleError on DispatchError so we can pluck out module error details.
-                #has_module_error_impl
 
-                pub struct RuntimeApi<T: ::subxt::Config, X> {
-                    pub client: ::subxt::Client<T>,
-                    marker: ::core::marker::PhantomData<X>,
+                pub fn constants() -> ConstantsApi {
+                    ConstantsApi
                 }
 
-                impl<T: ::subxt::Config, X> Clone for RuntimeApi<T, X> {
-                    fn clone(&self) -> Self {
-                        Self { client: self.client.clone(), marker: ::core::marker::PhantomData }
-                    }
+                pub fn storage() -> StorageApi {
+                    StorageApi
                 }
 
-                impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
-                where
-                    T: ::subxt::Config,
-                    X: ::subxt::extrinsic::ExtrinsicParams<T>
-                {
-                    fn from(client: ::subxt::Client<T>) -> Self {
-                        Self { client, marker: ::core::marker::PhantomData }
-                    }
+                pub fn tx() -> TransactionApi {
+                    TransactionApi
                 }
 
-                impl<'a, T, X> RuntimeApi<T, X>
-                where
-                    T: ::subxt::Config,
-                    X: ::subxt::extrinsic::ExtrinsicParams<T>,
-                {
-                    pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
-                        let runtime_metadata_hash = {
-                            let locked_metadata = self.client.metadata();
-                            let metadata = locked_metadata.read();
-                            metadata.metadata_hash(&PALLETS)
-                        };
-                        if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                            Err(::subxt::MetadataError::IncompatibleMetadata)
-                        } else {
-                            Ok(())
-                        }
-                    }
-
-                    pub fn constants(&'a self) -> ConstantsApi<'a, T> {
-                        ConstantsApi { client: &self.client }
-                    }
-
-                    pub fn storage(&'a self) -> StorageApi<'a, T> {
-                        StorageApi { client: &self.client }
-                    }
-
-                    pub fn tx(&'a self) -> TransactionApi<'a, T, X> {
-                        TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
-                    }
-
-                    pub fn events(&'a self) -> EventsApi<'a, T> {
-                        EventsApi { client: &self.client }
-                    }
-                }
-
-                pub struct EventsApi<'a, T: ::subxt::Config> {
-                    client: &'a ::subxt::Client<T>,
-                }
-
-                impl <'a, T: ::subxt::Config> EventsApi<'a, T> {
-                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<T, Event>, ::subxt::BasicError> {
-                        ::subxt::events::at::<T, Event>(self.client, block_hash).await
-                    }
-
-                    pub async fn subscribe(&self) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::EventSub<T::Header>, T, Event>, ::subxt::BasicError> {
-                        ::subxt::events::subscribe::<T, Event>(self.client).await
-                    }
-
-                    pub async fn subscribe_finalized(&self) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<'a, T::Header>, T, Event>, ::subxt::BasicError> {
-                        ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
-                    }
-                }
-
-                pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                    client: &'a ::subxt::Client<T>,
-                }
-
-                impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
+                pub struct ConstantsApi;
+                impl ConstantsApi {
                     #(
-                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
-                            #pallets_with_constants::constants::ConstantsApi::new(self.client)
+                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
+                            #pallets_with_constants::constants::ConstantsApi
                         }
                     )*
                 }
 
-                pub struct StorageApi<'a, T: ::subxt::Config> {
-                    client: &'a ::subxt::Client<T>,
-                }
-
-                impl<'a, T> StorageApi<'a, T>
-                where
-                    T: ::subxt::Config,
-                {
+                pub struct StorageApi;
+                impl StorageApi {
                     #(
-                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
-                            #pallets_with_storage::storage::StorageApi::new(self.client)
+                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi {
+                            #pallets_with_storage::storage::StorageApi
                         }
                     )*
                 }
 
-                pub struct TransactionApi<'a, T: ::subxt::Config, X> {
-                    client: &'a ::subxt::Client<T>,
-                    marker: ::core::marker::PhantomData<X>,
-                }
-
-                impl<'a, T, X> TransactionApi<'a, T, X>
-                where
-                    T: ::subxt::Config,
-                    X: ::subxt::extrinsic::ExtrinsicParams<T>,
-                {
+                pub struct TransactionApi;
+                impl TransactionApi {
                     #(
-                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X> {
-                            #pallets_with_calls::calls::TransactionApi::new(self.client)
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
+                            #pallets_with_calls::calls::TransactionApi
                         }
                     )*
+                }
+
+                /// check whether the Client you are using is aligned with the statically generated codegen.
+                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: &C) -> Result<(), ::subxt::error::MetadataError> {
+                    let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
+                    if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
+                        Err(::subxt::error::MetadataError::IncompatibleMetadata)
+                    } else {
+                        Ok(())
+                    }
                 }
             }
         }

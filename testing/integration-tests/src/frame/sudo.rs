@@ -4,35 +4,35 @@
 
 use crate::{
     node_runtime::{
+        self,
         runtime_types,
         sudo,
-        DispatchError,
     },
     pair_signer,
     test_context,
 };
 use sp_keyring::AccountKeyring;
 
-type Call = runtime_types::node_runtime::Call;
+type Call = runtime_types::kitchensink_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[tokio::test]
-async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
+async fn test_sudo() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
-    let cxt = test_context().await;
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
         value: 10_000,
     });
+    let tx = node_runtime::tx().sudo().sudo(call);
 
-    let found_event = cxt
-        .api
+    let found_event = api
         .tx()
-        .sudo()
-        .sudo(call)?
-        .sign_and_submit_then_watch_default(&alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -43,22 +43,22 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>> {
+async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
-    let cxt = test_context().await;
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
         value: 10_000,
     });
+    let tx = node_runtime::tx().sudo().sudo_unchecked_weight(call, 0);
 
-    let found_event = cxt
-        .api
+    let found_event = api
         .tx()
-        .sudo()
-        .sudo_unchecked_weight(call, 0)?
-        .sign_and_submit_then_watch_default(&alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?

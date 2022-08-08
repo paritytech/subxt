@@ -2,8 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
-
+//! Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 #![allow(clippy::redundant_clone)]
 
 #[subxt::subxt(

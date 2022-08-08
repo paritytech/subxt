@@ -7,57 +7,46 @@ use sp_keyring::AccountKeyring;
 use crate::{
     node_runtime::{
         self,
-        contracts::{
-            calls::TransactionApi,
-            events,
-            storage,
-        },
+        contracts::events,
         system,
-        DispatchError,
     },
     test_context,
-    NodeRuntimeParams,
     TestContext,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
-    Client,
+    tx::{
+        PairSigner,
+        TxProgress,
+    },
     Config,
-    DefaultConfig,
     Error,
-    PairSigner,
-    TransactionProgress,
+    OnlineClient,
+    SubstrateConfig,
 };
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<SubstrateConfig, Pair>,
 }
 
-type Hash = <DefaultConfig as Config>::Hash;
-type AccountId = <DefaultConfig as Config>::AccountId;
+type Hash = <SubstrateConfig as Config>::Hash;
+type AccountId = <SubstrateConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        tracing_subscriber::fmt::try_init().ok();
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<DefaultConfig> {
+    fn client(&self) -> OnlineClient<SubstrateConfig> {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
-        self.cxt.api.tx().contracts()
-    }
-
-    async fn instantiate_with_code(
-        &self,
-    ) -> Result<(Hash, AccountId), Error<DispatchError>> {
+    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
         tracing::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
@@ -67,20 +56,19 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
+        let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
+            100_000_000_000_000_000, // endowment
+            500_000_000_000,         // gas_limit
+            None,                    // storage_deposit_limit
+            code,
+            vec![], // data
+            vec![], // salt
+        );
+
         let events = self
-            .cxt
-            .api
+            .client()
             .tx()
-            .contracts()
-            .instantiate_with_code(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code,
-                vec![], // data
-                vec![], // salt
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -108,19 +96,21 @@ impl ContractsTestContext {
         code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<AccountId, Error<DispatchError>> {
+    ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
+        let instantiate_tx = node_runtime::tx().contracts().instantiate(
+            100_000_000_000_000_000, // endowment
+            500_000_000_000,         // gas_limit
+            None,                    // storage_deposit_limit
+            code_hash,
+            data,
+            salt,
+        );
+
         let result = self
-            .contracts_tx()
-            .instantiate(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code_hash,
-                data,
-                salt,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -137,21 +127,20 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<
-        TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
-        Error<DispatchError>,
-    > {
+    ) -> Result<TxProgress<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error> {
         tracing::info!("call: {:?}", contract);
+        let call_tx = node_runtime::tx().contracts().call(
+            MultiAddress::Id(contract),
+            0,           // value
+            500_000_000, // gas_limit
+            None,        // storage_deposit_limit
+            input_data,
+        );
+
         let result = self
-            .contracts_tx()
-            .call(
-                MultiAddress::Id(contract),
-                0,           // value
-                500_000_000, // gas_limit
-                None,        // storage_deposit_limit
-                input_data,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&call_tx, &self.signer)
             .await?;
 
         tracing::info!("Call result: {:?}", result);
@@ -190,19 +179,17 @@ async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
 
-    let contract_info = cxt
-        .cxt
-        .api
-        .storage()
+    let info_addr = node_runtime::storage()
         .contracts()
-        .contract_info_of(&contract, None)
-        .await;
+        .contract_info_of(&contract);
+
+    let contract_info = cxt.client().storage().fetch(&info_addr, None).await;
     assert!(contract_info.is_ok());
 
     let keys = cxt
         .client()
         .storage()
-        .fetch_keys::<storage::ContractInfoOf>(5, None, None)
+        .fetch_keys(&info_addr.to_bytes(), 10, None, None)
         .await
         .unwrap()
         .iter()

@@ -2,18 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
 use subxt::{
-    ClientBuilder,
-    DefaultConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 // Generate the API from a static metadata path.
@@ -24,22 +23,14 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    // Upon connecting to the target polkadot node, the node's metadata is downloaded (referred to
-    // as the runtime metadata).
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Constants are queried from the node's runtime metadata.
-    // Query the `ExistentialDeposit` constant from the `Balances` pallet.
-    let existential_deposit = api
-        // This is the constants query.
-        .constants()
-        // Constant from the `Balances` pallet.
-        .balances()
-        // Constant name.
-        .existential_deposit()?;
+    // Build a constant address to query:
+    let address = polkadot::constants().balances().existential_deposit();
+
+    // Look it up:
+    let existential_deposit = api.constants().at(&address)?;
 
     println!("Existential Deposit: {}", existential_deposit);
 

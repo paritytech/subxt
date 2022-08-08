@@ -182,7 +182,7 @@ impl TypePathType {
                 let bit_order_type = &self.params[0];
                 let bit_store_type = &self.params[1];
 
-                let type_path = parse_quote! { ::subxt::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
+                let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
 
                 syn::Type::Path(type_path)
             }
