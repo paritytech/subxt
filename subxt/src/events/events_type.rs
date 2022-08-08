@@ -323,7 +323,8 @@ impl EventDetails {
     /// decode the entirety of the event type (including the pallet and event
     /// variants) using [`EventDetails::as_root_event()`].
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, CodecError> {
-        if self.pallet_name() == E::PALLET && self.variant_name() == E::EVENT {
+        let ev_metadata = self.event_metadata();
+        if ev_metadata.pallet() == E::PALLET && ev_metadata.event() == E::EVENT {
             Ok(Some(E::decode(&mut self.field_bytes())?))
         } else {
             Ok(None)
