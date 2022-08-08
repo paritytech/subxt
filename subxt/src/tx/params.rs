@@ -92,6 +92,13 @@ pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
 ///
 /// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
 /// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+#[derive(Derivative)]
+#[derivative(
+    Debug(bound = "Tip: Debug"),
+    Clone(bound = "Tip: Clone"),
+    Copy(bound = "Tip: Copy"),
+    PartialEq(bound = "Tip: PartialEq")
+)]
 pub struct BaseExtrinsicParamsBuilder<T: Config, Tip> {
     era: Era,
     mortality_checkpoint: Option<T::Hash>,
