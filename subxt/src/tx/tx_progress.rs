@@ -64,6 +64,11 @@ impl<T: Config, C> TxProgress<T, C> {
             ext_hash,
         }
     }
+
+    /// Return the hash of the extrinsic.
+    pub fn extrinsic_hash(&self) -> T::Hash {
+        self.ext_hash
+    }
 }
 
 impl<T: Config, C: OnlineClientT<T>> TxProgress<T, C> {
