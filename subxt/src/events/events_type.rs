@@ -9,8 +9,8 @@ use super::{
     StaticEvent,
 };
 use crate::{
-    dynamic::DecodedValue,
     error::Error,
+    metadata::EventMetadata,
     Config,
     Metadata,
 };
@@ -18,7 +18,6 @@ use codec::{
     Compact,
     Decode,
     Error as CodecError,
-    Input,
 };
 use derivative::Derivative;
 use std::sync::Arc;
@@ -31,9 +30,10 @@ pub struct Events<T: Config> {
     metadata: Metadata,
     block_hash: T::Hash,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
-    // the number of events to be decoded. We should have stripped that off
-    // before storing the bytes here.
+    // the number of events to be decoded. The start_idx reflects that, so
+    // that we can skip over those bytes when decoding them
     event_bytes: Arc<[u8]>,
+    start_idx: usize,
     num_events: u32,
 }
 
@@ -41,7 +41,7 @@ impl<T: Config> Events<T> {
     pub(crate) fn new(
         metadata: Metadata,
         block_hash: T::Hash,
-        mut event_bytes: Vec<u8>,
+        event_bytes: Vec<u8>,
     ) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
@@ -51,14 +51,15 @@ impl<T: Config> Events<T> {
         // and default to 0 events.
         let cursor = &mut &*event_bytes;
         let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
-        let event_bytes_len = event_bytes.len();
-        let remaining_len = cursor.len();
-        event_bytes.drain(0..event_bytes_len - remaining_len);
+
+        // Start decoding after the compact encoded bytes.
+        let start_idx = event_bytes.len() - cursor.len();
 
         Self {
             metadata,
             block_hash,
             event_bytes: event_bytes.into(),
+            start_idx,
             num_events,
         }
     }
@@ -85,27 +86,30 @@ impl<T: Config> Events<T> {
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Result<EventDetails, Error>> + Send + Sync + 'static {
+        // The event bytes ignoring the compact encoded length on the front:
         let event_bytes = self.event_bytes.clone();
+        let metadata = self.metadata.clone();
         let num_events = self.num_events;
 
-        let metadata = self.metadata.clone();
-        let mut pos = 0;
+        let mut pos = self.start_idx;
         let mut index = 0;
         std::iter::from_fn(move || {
-            let cursor = &mut &event_bytes[pos..];
-            let start_len = cursor.len();
-
-            if start_len == 0 || num_events == index {
+            if event_bytes.len() <= pos || num_events == index {
                 None
             } else {
-                match decode_raw_event_details::<T>(&metadata, index, cursor) {
-                    Ok(raw_event) => {
+                match EventDetails::decode_from::<T>(
+                    metadata.clone(),
+                    event_bytes.clone(),
+                    pos,
+                    index,
+                ) {
+                    Ok(event_details) => {
                         // Skip over decoded bytes in next iteration:
-                        pos += start_len - cursor.len();
+                        pos += event_details.bytes().len();
                         // Increment the index:
                         index += 1;
                         // Return the event details:
-                        Some(Ok(raw_event))
+                        Some(Ok(event_details))
                     }
                     Err(e) => {
                         // By setting the position to the "end" of the event bytes,
@@ -142,46 +146,77 @@ impl<T: Config> Events<T> {
 }
 
 /// The event details.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct EventDetails {
     phase: Phase,
     index: u32,
-    pallet: String,
-    variant: String,
-    bytes: Vec<u8>,
-    // Dev note: this is here because we've pretty much had to generate it
-    // anyway, but expect it to be generated on the fly in future versions,
-    // and so don't expose it.
-    fields: Vec<(Option<String>, DecodedValue)>,
-}
-
-/// The raw data associated with some event.
-#[derive(Debug, Clone, PartialEq)]
-pub struct EventDetailParts {
-    /// When was the event produced?
-    pub phase: Phase,
-    /// What index is this event in the stored events for this block.
-    pub index: u32,
-    /// The name of the pallet from whence the Event originated.
-    pub pallet: String,
-    /// The name of the pallet's Event variant.
-    pub variant: String,
-    /// All of the bytes representing this event, including the pallet
-    /// and variant index that the event originated from.
-    pub bytes: Vec<u8>,
+    all_bytes: Arc<[u8]>,
+    // start of the bytes (phase, pallet/variant index and then fields and then topic to follow).
+    start_idx: usize,
+    // start of the fields (ie after phase nad pallet/variant index).
+    fields_start_idx: usize,
+    // end of the fields.
+    fields_end_idx: usize,
+    // end of everything (fields + topics)
+    end_idx: usize,
+    metadata: Metadata,
 }
 
 impl EventDetails {
-    /// Return the raw data associated with this event. Useful if you want
-    /// ownership over parts of the event data.
-    pub fn parts(self) -> EventDetailParts {
-        EventDetailParts {
-            phase: self.phase,
-            index: self.index,
-            pallet: self.pallet,
-            variant: self.variant,
-            bytes: self.bytes,
+    // Attempt to dynamically decode a single event from our events input.
+    fn decode_from<T: Config>(
+        metadata: Metadata,
+        all_bytes: Arc<[u8]>,
+        start_idx: usize,
+        index: u32,
+    ) -> Result<EventDetails, Error> {
+        let input = &mut &all_bytes[start_idx..];
+
+        let phase = Phase::decode(input)?;
+        let pallet_index = u8::decode(input)?;
+        let variant_index = u8::decode(input)?;
+
+        let fields_start_idx = all_bytes.len() - input.len();
+
+        // Get metadata for the event:
+        let event_metadata = metadata.event(pallet_index, variant_index)?;
+        tracing::debug!(
+            "Decoding Event '{}::{}'",
+            event_metadata.pallet(),
+            event_metadata.event()
+        );
+
+        // Skip over the bytes belonging to this event.
+        for (_name, type_id) in event_metadata.fields() {
+            // Skip over the bytes for this field:
+            scale_decode::decode(
+                input,
+                *type_id,
+                &metadata.runtime_metadata().types,
+                scale_decode::visitor::IgnoreVisitor,
+            )?;
         }
+
+        // the end of the field bytes.
+        let fields_end_idx = all_bytes.len() - input.len();
+
+        // topics come after the event data in EventRecord. They aren't used for
+        // anything at the moment, so just decode and throw them away.
+        let _topics = Vec::<T::Hash>::decode(input)?;
+
+        // what bytes did we skip over in total, including topics.
+        let end_idx = all_bytes.len() - input.len();
+
+        Ok(EventDetails {
+            phase,
+            index,
+            start_idx,
+            fields_start_idx,
+            fields_end_idx,
+            end_idx,
+            all_bytes,
+            metadata,
+        })
     }
 
     /// When was the event produced?
@@ -196,61 +231,90 @@ impl EventDetails {
 
     /// The index of the pallet that the event originated from.
     pub fn pallet_index(&self) -> u8 {
-        // Note: never panics because we set the first two bytes
-        // in `decode_event_details` to build this.
-        self.bytes[0]
+        // Note: never panics; we expect these bytes to exist
+        // in order that the EventDetails could be created.
+        self.all_bytes[self.fields_start_idx - 2]
     }
 
     /// The index of the event variant that the event originated from.
     pub fn variant_index(&self) -> u8 {
-        // Note: never panics because we set the first two bytes
-        // in `decode_event_details` to build this.
-        self.bytes[1]
+        // Note: never panics; we expect these bytes to exist
+        // in order that the EventDetails could be created.
+        self.all_bytes[self.fields_start_idx - 1]
     }
 
     /// The name of the pallet from whence the Event originated.
     pub fn pallet_name(&self) -> &str {
-        &self.pallet
+        self.event_metadata().pallet()
     }
 
-    /// The name of the pallet's Event variant.
+    /// The name of the event (ie the name of the variant that it corresponds to).
     pub fn variant_name(&self) -> &str {
-        &self.variant
+        self.event_metadata().event()
     }
 
-    /// Return the bytes representing this event, which include the pallet
-    /// and variant index that the event originated from.
+    /// Fetch the metadata for this event.
+    pub fn event_metadata(&self) -> &EventMetadata {
+        self.metadata
+            .event(self.pallet_index(), self.variant_index())
+            .expect("this must exist in order to have produced the EventDetails")
+    }
+
+    /// Return _all_ of the bytes representing this event, which include, in order:
+    /// - The phase.
+    /// - Pallet and event index.
+    /// - Event fields.
+    /// - Event Topics.
     pub fn bytes(&self) -> &[u8] {
-        &self.bytes
+        &self.all_bytes[self.start_idx..self.end_idx]
     }
 
     /// Return the bytes representing the fields stored in this event.
     pub fn field_bytes(&self) -> &[u8] {
-        &self.bytes[2..]
+        &self.all_bytes[self.fields_start_idx..self.fields_end_idx]
     }
 
-    /// Decode and provide the event fields back in the form of a composite
-    /// type, which represents either the named or unnamed fields that were
-    /// present.
-    // Dev note: if we can optimise Value decoding to avoid allocating
-    // while working through events, or if the event structure changes
-    // to allow us to skip over them, we'll no longer keep a copy of the
-    // decoded events in the event, and the actual decoding will happen
-    // when this method is called. This is why we return an owned vec and
-    // not a reference.
-    pub fn field_values(&self) -> scale_value::Composite<scale_value::scale::TypeId> {
-        if self.fields.is_empty() {
-            scale_value::Composite::Unnamed(vec![])
-        } else if self.fields[0].0.is_some() {
-            let named = self
-                .fields
-                .iter()
-                .map(|(n, f)| (n.clone().unwrap_or_default(), f.clone()))
-                .collect();
-            scale_value::Composite::Named(named)
+    /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
+    /// type which represents the named or unnamed fields that were
+    /// present in the event.
+    pub fn field_values(
+        &self,
+    ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
+        let bytes = &mut self.field_bytes();
+        let event_metadata = self.event_metadata();
+
+        // If the first field has a name, we assume that the rest do too (it'll either
+        // be a named struct or a tuple type). If no fields, assume unnamed.
+        let is_named = event_metadata
+            .fields()
+            .get(0)
+            .map(|(n, _)| n.is_some())
+            .unwrap_or(false);
+
+        if !is_named {
+            let mut event_values = vec![];
+            for (_, type_id) in event_metadata.fields() {
+                let value = scale_value::scale::decode_as_type(
+                    bytes,
+                    *type_id,
+                    &self.metadata.runtime_metadata().types,
+                )?;
+                event_values.push(value);
+            }
+
+            Ok(scale_value::Composite::Unnamed(event_values))
         } else {
-            let unnamed = self.fields.iter().map(|(_n, f)| f.clone()).collect();
-            scale_value::Composite::Unnamed(unnamed)
+            let mut event_values = vec![];
+            for (name, type_id) in event_metadata.fields() {
+                let value = scale_value::scale::decode_as_type(
+                    bytes,
+                    *type_id,
+                    &self.metadata.runtime_metadata().types,
+                )?;
+                event_values.push((name.clone().unwrap_or_default(), value));
+            }
+
+            Ok(scale_value::Composite::Named(event_values))
         }
     }
 
@@ -259,8 +323,9 @@ impl EventDetails {
     /// decode the entirety of the event type (including the pallet and event
     /// variants) using [`EventDetails::as_root_event()`].
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, CodecError> {
-        if self.pallet == E::PALLET && self.variant == E::EVENT {
-            Ok(Some(E::decode(&mut &self.bytes[2..])?))
+        let ev_metadata = self.event_metadata();
+        if ev_metadata.pallet() == E::PALLET && ev_metadata.event() == E::EVENT {
+            Ok(Some(E::decode(&mut self.field_bytes())?))
         } else {
             Ok(None)
         }
@@ -270,69 +335,8 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: Decode>(&self) -> Result<E, CodecError> {
-        E::decode(&mut &self.bytes[..])
+        E::decode(&mut self.bytes())
     }
-}
-
-// Attempt to dynamically decode a single event from our events input.
-fn decode_raw_event_details<T: Config>(
-    metadata: &Metadata,
-    index: u32,
-    input: &mut &[u8],
-) -> Result<EventDetails, Error> {
-    // Decode basic event details:
-    let phase = Phase::decode(input)?;
-    let pallet_index = input.read_byte()?;
-    let variant_index = input.read_byte()?;
-    tracing::debug!(
-        "phase {:?}, pallet_index {}, event_variant: {}",
-        phase,
-        pallet_index,
-        variant_index
-    );
-    tracing::debug!("remaining input: {}", hex::encode(&input));
-
-    // Get metadata for the event:
-    let event_metadata = metadata.event(pallet_index, variant_index)?;
-    tracing::debug!(
-        "Decoding Event '{}::{}'",
-        event_metadata.pallet(),
-        event_metadata.event()
-    );
-
-    // Use metadata to figure out which bytes belong to this event.
-    // the event bytes also include the pallet/variant index so that, if we
-    // like, we can decode them quite easily into a top level event type.
-    let mut event_bytes = vec![pallet_index, variant_index];
-    let mut event_fields = Vec::new();
-    for (name, type_id) in event_metadata.fields() {
-        let all_bytes = *input;
-        // consume some bytes for each event field, moving the cursor forward:
-        let value = scale_value::scale::decode_as_type(
-            input,
-            *type_id,
-            &metadata.runtime_metadata().types,
-        )?;
-        event_fields.push((name.clone(), value));
-        // count how many bytes were consumed based on remaining length:
-        let consumed_len = all_bytes.len() - input.len();
-        // move those consumed bytes to the output vec unaltered:
-        event_bytes.extend(&all_bytes[0..consumed_len]);
-    }
-
-    // topics come after the event data in EventRecord. They aren't used for
-    // anything at the moment, so just decode and throw them away.
-    let topics = Vec::<T::Hash>::decode(input)?;
-    tracing::debug!("topics: {:?}", topics);
-
-    Ok(EventDetails {
-        phase,
-        index,
-        pallet: event_metadata.pallet().to_string(),
-        variant: event_metadata.event().to_string(),
-        bytes: event_bytes,
-        fields: event_fields,
-    })
 }
 
 /// Event related test utilities used outside this module.
@@ -432,12 +436,14 @@ pub(crate) mod test_utils {
         event_bytes: Vec<u8>,
         num_events: u32,
     ) -> Events<SubstrateConfig> {
-        Events {
-            block_hash: <SubstrateConfig as Config>::Hash::default(),
-            event_bytes: event_bytes.into(),
+        // Prepend compact encoded length to event bytes:
+        let mut all_event_bytes = Compact(num_events).encode();
+        all_event_bytes.extend(event_bytes);
+        Events::new(
             metadata,
-            num_events,
-        }
+            <SubstrateConfig as Config>::Hash::default(),
+            all_event_bytes,
+        )
     }
 }
 
@@ -487,10 +493,11 @@ mod tests {
 
         // Make sure that the bytes handed back line up with the fields handed back;
         // encode the fields back into bytes and they should be equal.
+        let actual_fields = actual.field_values().expect("can decode field values (1)");
         let mut actual_bytes = vec![];
-        for (_name, field) in &actual.fields {
+        for field in actual_fields.into_values() {
             scale_value::scale::encode_as_type(
-                field,
+                &field,
                 field.context,
                 types,
                 &mut actual_bytes,
@@ -501,6 +508,7 @@ mod tests {
 
         let actual_fields_no_context: Vec<_> = actual
             .field_values()
+            .expect("can decode field values (2)")
             .into_values()
             .map(|value| value.remove_context())
             .collect();
@@ -757,7 +765,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::unnamed_composite(vec![Value::u128(1)])],
+                fields: vec![Value::u128(1)],
             },
         );
         assert!(event_details.next().is_none());
