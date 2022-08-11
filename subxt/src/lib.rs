@@ -34,10 +34,13 @@
 //!
 //! # Generating runtime types
 //!
-//! Subxt can generate types at compile time to help you interact with a node. The metadata can be downloaded using the
-//! [subxt-cli](https://crates.io/crates/subxt-cli) tool.
+//! Subxt can optionally generate types at compile time to help you interact with a node. These types are
+//! generated using metadata which can be downloaded from a node using the [subxt-cli](https://crates.io/crates/subxt-cli)
+//! tool. These generated types provide a degree of type safety when interacting with a node that is compatible with
+//! the metadata that they were generated using. We also do runtime checks in case the node you're talking to has
+//! deviated from the types you're using to communicate with it (see below).
 //!
-//! To generate the types, use the `subxt` attribute which points at downloaded static metadata.
+//! To generate the types, use the `subxt` macro and point it at the metadata you've downloaded, like so:
 //!
 //! ```ignore
 //! #[subxt::subxt(runtime_metadata_path = "metadata.scale")]
@@ -47,9 +50,12 @@
 //! For more information, please visit the [subxt-codegen](https://docs.rs/subxt-codegen/latest/subxt_codegen/)
 //! documentation.
 //!
+//! You can opt to skip this step and use dynamic queries to talk to nodes instead, which can be useful in some cases,
+//! but doesn't provide any type safety.
+//!
 //! # Interacting with the API
 //!
-//! Once instantiated, a client, exposes four functions:
+//! Once instantiated, a client exposes four core functions:
 //! - `.tx()` for submitting extrinsics/transactions. See [`crate::tx::TxClient`] for more details, or see
 //!   the [balance_transfer](../examples/examples/balance_transfer.rs) example.
 //! - `.storage()` for fetching and iterating over storage entries. See [`crate::storage::StorageClient`] for more details, or see
@@ -86,13 +92,20 @@
 //! }
 //! # }
 //! ```
+//! ## Opting out of static validation
+//!
+//! The static types that are used to query/access information are validated by default, to make sure that they are
+//! compatible with the node being queried. You can generally call `.unvalidated()` on these static types to
+//! disable this validation.
 //!
 //! # Runtime Updates
 //!
-//! There are cases when the node would perform a runtime update, and the runtime node's metadata would be
-//! out of sync with the subxt's metadata.
+//! The node you're connected to may occasionally perform runtime updates while you're connected, which would ordinarily
+//! leave the runtime state of the node out of sync with the information Subxt requires to do things like submit
+//! transactions.
 //!
-//! The `UpdateClient` API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
+//! If this is a concern, you can use the `UpdateClient` API to keep the `RuntimeVersion` and `Metadata` of the client
+//! synced with the target node.
 //!
 //! Please visit the [subscribe_runtime_updates](../examples/examples/subscribe_runtime_updates.rs) example for more details.
 

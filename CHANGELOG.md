@@ -4,6 +4,210 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2022-08-11
+
+This is one of the most significant releases to date in Subxt, and carries with it a number of significant breaking changes, but in exchange, a number of significant improvements. The most significant PR is [#593](https://github.com/paritytech/subxt/pull/593); the fundamental change that this makes is to separate creating a query/transaction/address from submitting it. This gives us flexibility when creating queries; they can be either dynamically or statically generated, but also flexibility in our client, enabling methods to be exposed for online or offline use.
+
+The best place to look to get a feel for what's changed, aside from the documentation itself, is the `examples` folder. What follows are some examples of the changes you'll need to make, which all follow a similar pattern:
+
+### Submitting a transaction
+
+Previously, we'd build a client which is tied to the static codegen, and then use the client to build and submit a transaction like so:
+
+```rust
+let api = ClientBuilder::new()
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
+
+let balance_transfer = api
+    .tx()
+    .balances()
+    .transfer(dest, 10_000)?
+    .sign_and_submit_then_watch_default(&signer)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+Now, we build a transaction separately (in this case, using static codegen to guide us as before) and then submit it to a client like so:
+
+``` rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
+
+let balance_transfer = api
+    .tx()
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &signer)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+See the `examples/examples/submit_and_watch.rs` example for more.
+
+### Fetching a storage entry
+
+Previously, we build and submit a storage query in one step:
+
+```rust
+let api = ClientBuilder::new()
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+let entry = api.storage().staking().bonded(&addr, None).await;
+```
+
+Now, we build the storage query separately and submit it to the client:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let staking_bonded = polkadot::storage().staking().bonded(&addr);
+
+let entry = api.storage().fetch(&staking_bonded, None).await;
+```
+
+Note that previously, the generated code would do the equivalent of `fetch_or_default` if possible, or `fetch` if no default existed. You must now decide whether to:
+- fetch an entry, returning `None` if it's not found (`api.storage().fetch(..)`), or
+- fetch an entry, returning the default if it's not found (`api.storage().fetch_or_default(..)`).
+
+The static types will protect you against using `fetch_or_default` when no such default exists, and so the recommendation is to try changing all storage requests to use `fetch_or_default`, falling back to using `fetch` where doing so leads to compile errors.
+
+See `examples/examples/concurrent_storage_requests.rs` for an example of fetching entries.
+
+### Iterating over storage entries
+
+Previously:
+
+```rust
+let api = ClientBuilder::new()
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+let mut iter = api
+    .storage()
+    .xcm_pallet()
+    .version_notifiers_iter(None)
+    .await?;
+
+while let Some((key, value)) = iter.next().await? {
+    // ...
+}
+```
+
+Now, as before, building the storage query to iterate over is separate from using it:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let key_addr = polkadot::storage()
+    .xcm_pallet()
+    .version_notifiers_root();
+
+let mut iter = api
+    .storage()
+    .iter(key_addr, 10, None).await?;
+
+while let Some((key, value)) = iter.next().await? {
+    // ...
+}
+```
+
+Note that the `_root()` suffix on generated storage queries accesses the root entry at that address,
+and is available when the address is a map that can be iterated over. By not appending `_root()`, you'll
+be asked to provide the values needed to access a specific entry in the map.
+
+See the `examples/examples/storage_iterating.rs` example for more.
+
+### Accessing constants
+
+Before, we'd build a client and use the client to select and query a constant:
+
+```rust
+let api = ClientBuilder::new()
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+let existential_deposit = api
+    .constants()
+    .balances()
+    .existential_deposit()?;
+```
+
+Now, similar to the other examples, we separately build a constant _address_ and provide that address to the client to look it up:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let address = polkadot::constants()
+    .balances()
+    .existential_deposit();
+
+let existential_deposit = api.constants().at(&address)?;
+```
+
+See the `examples/examples/fetch_constants.rs` example for more.
+
+### Subscribing to events
+
+Event subscriptions themselves are relatively unchanged (although the data you can access/get back has changed a little). Before:
+
+```rust
+let api = ClientBuilder::new()
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+let mut event_sub = api.events().subscribe().await?;
+
+while let Some(events) = event_sub.next().await {
+    // ...
+}
+```
+
+Now, we simply swap the client out for our new one, and the rest is similar:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let mut event_sub = api.events().subscribe().await?;
+
+while let Some(events) = event_sub.next().await {
+    // ...
+}
+```
+
+See the `examples/examples/subscribe_all_events.rs` example for more.
+
+The general pattern, as seen above, is that we break apart constructing a query/address and using it. You can now construct queries dynamically instead and forego all static codegen by using the functionality exposed in the `subxt::dynamic` module instead.
+
+Other smaller breaking changes have happened, but they should be easier to address by following compile errors.
+
+For more details about all of the changes, the full commit history since the last release is as follows:
+
+### Added
+
+- Expose the extrinsic hash from TxProgress ([#614](https://github.com/paritytech/subxt/pull/614))
+- Add support for `ws` in `subxt-cli` ([#579](https://github.com/paritytech/subxt/pull/579))
+- Expose the SCALE encoded call data of an extrinsic ([#573](https://github.com/paritytech/subxt/pull/573))
+- Validate absolute path for `substitute_type` ([#577](https://github.com/paritytech/subxt/pull/577))
+
+### Changed
+
+- Rework Subxt API to support offline and dynamic transactions ([#593](https://github.com/paritytech/subxt/pull/593))
+- Use scale-decode to help optimise event decoding ([#607](https://github.com/paritytech/subxt/pull/607))
+- Decode raw events using scale_value and return the decoded Values, too ([#576](https://github.com/paritytech/subxt/pull/576))
+- dual license ([#590](https://github.com/paritytech/subxt/pull/590))
+- Don't hash constant values; only their types ([#587](https://github.com/paritytech/subxt/pull/587))
+- metadata: Exclude `field::type_name` from metadata validation ([#595](https://github.com/paritytech/subxt/pull/595))
+- Bump Swatinem/rust-cache from 1.4.0 to 2.0.0 ([#597](https://github.com/paritytech/subxt/pull/597))
+- Update jsonrpsee requirement from 0.14.0 to 0.15.1 ([#603](https://github.com/paritytech/subxt/pull/603))
+
 ## [0.22.0] - 2022-06-20
 
 With this release, subxt can subscribe to the node's runtime upgrades to ensure that the metadata is updated and
