@@ -25,7 +25,7 @@ use std::{
 };
 
 /// Metadata error originated from inspecting the internal representation of the runtime metadata.
-#[derive(Debug, thiserror::Error, PartialEq)]
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
 pub enum MetadataError {
     /// Module is not in metadata.
     #[error("Pallet not found")]
