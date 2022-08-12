@@ -82,6 +82,49 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+// Iterate all of the events in a few blocks to ensure we can decode them properly.
+#[tokio::test]
+async fn decoding_all_events_in_a_block_works() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    wait_for_blocks(&api).await;
+
+    let mut event_sub = api.events().subscribe().await?;
+
+    tokio::spawn(async move {
+        let alice = pair_signer(AccountKeyring::Alice.pair());
+        let bob = AccountKeyring::Bob.to_account_id();
+        let transfer_tx = node_runtime::tx()
+            .balances()
+            .transfer(bob.clone().into(), 10_000);
+
+        // Make a load of transfers to get lots of events going.
+        for _i in 0..10 {
+            api.tx()
+                .sign_and_submit_then_watch_default(&transfer_tx, &alice)
+                .await
+                .expect("can submit_transaction");
+        }
+    });
+
+    for _ in 0..4 {
+        let events = event_sub
+            .next()
+            .await
+            .expect("events expected each block")?;
+
+        for event in events.iter() {
+            // make sure that we can get every event properly.
+            let event = event.expect("valid event decoded");
+            // make sure that we can decode the field values from every event.
+            event.field_values().expect("can decode fields");
+        }
+    }
+
+    Ok(())
+}
+
 // Check that our subscription receives events, and we can filter them based on
 // it's Stream impl, and ultimately see the event we expect.
 #[tokio::test]
