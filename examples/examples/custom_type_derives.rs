@@ -11,7 +11,7 @@
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    derive_for_all_types = "Clone, PartialEq",
+    derive_for_all_types = "Clone, PartialEq, Eq",
 
     // To apply derives to specific generated types, add a `derive_for_type` per type,
     // mapping the type path to the derives which should be added for that type only.

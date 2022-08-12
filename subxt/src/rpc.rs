@@ -112,7 +112,7 @@ use sp_runtime::{
 ///
 /// The primary motivation for having this type is to avoid overflows when using big integers in
 /// JavaScript (which we consider as an important RPC API consumer).
-#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum NumberOrHex {
     /// The number represented directly.
@@ -158,7 +158,7 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 ///
 /// This is copied from `sp-transaction-pool` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SubstrateTxStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
@@ -187,7 +187,7 @@ pub enum SubstrateTxStatus<Hash, BlockHash> {
 
 /// This contains the runtime version information necessary to make transactions, as obtained from
 /// the RPC call `state_getRuntimeVersion`,
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
@@ -218,7 +218,7 @@ pub struct RuntimeVersion {
 ///
 /// This is copied from `sc-rpc-api` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadProof<Hash> {
     /// Block hash used to generate the proof
@@ -228,7 +228,7 @@ pub struct ReadProof<Hash> {
 }
 
 /// Statistics of a block returned by the `dev_getBlockStats` RPC.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockStats {
     /// The length in bytes of the storage proof produced by executing the block.
@@ -248,7 +248,7 @@ pub struct BlockStats {
 }
 
 /// Health struct returned by the RPC
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Health {
     /// Number of connected peers

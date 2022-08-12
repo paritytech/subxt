@@ -182,7 +182,10 @@ while let Some(events) = event_sub.next().await {
 }
 ```
 
+Note that when working with a single event, the method `event.bytes()` previously returned just the bytes associated with the event fields. Now, `event.bytes()` returns _all_ of the bytes associated with the event. There is a separate method, `event.field_bytes()`, that returns the bytes for just the fields in the event. This change will **not** lead to a compile error, and so it's worth keeping an eye out for any uses of `.bytes()` to update them to `.field_bytes()`.
+
 See the `examples/examples/subscribe_all_events.rs` example for more.
+
 
 The general pattern, as seen above, is that we break apart constructing a query/address and using it. You can now construct queries dynamically instead and forego all static codegen by using the functionality exposed in the `subxt::dynamic` module instead.
 

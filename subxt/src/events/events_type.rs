@@ -364,7 +364,7 @@ pub(crate) mod test_utils {
     use std::convert::TryFrom;
 
     /// An "outer" events enum containing exactly one event.
-    #[derive(Encode, Decode, TypeInfo, Clone, Debug, PartialEq)]
+    #[derive(Encode, Decode, TypeInfo, Clone, Debug, PartialEq, Eq)]
     pub enum AllEvents<Ev> {
         Test(Ev),
     }
@@ -773,7 +773,7 @@ mod tests {
 
     #[test]
     fn event_containing_explicit_index() {
-        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Eq, Decode, Encode, TypeInfo)]
         #[repr(u8)]
         #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
         pub enum MyType {
