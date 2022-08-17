@@ -120,8 +120,16 @@ impl RuntimeGenerator {
                 parse_quote!(::subxt::ext::sp_core::crypto::AccountId32),
             ),
             (
+                "primitive_types::H160",
+                parse_quote!(::subxt::ext::sp_core::H160),
+            ),
+            (
                 "primitive_types::H256",
                 parse_quote!(::subxt::ext::sp_core::H256),
+            ),
+            (
+                "primitive_types::H512",
+                parse_quote!(::subxt::ext::sp_core::H512),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
