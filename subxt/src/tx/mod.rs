@@ -42,7 +42,7 @@ pub use self::{
         Signer,
     },
     tx_client::{
-        SignedSubmittableExtrinsic,
+        SubmittableExtrinsic,
         TxClient,
     },
     tx_payload::{
