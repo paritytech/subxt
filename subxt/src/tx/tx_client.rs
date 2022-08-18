@@ -79,14 +79,52 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Ok(bytes)
     }
 
-    /// Creates a raw signed extrinsic, without submitting it.
+    /// Creates an unsigned extrinsic without submitting it.
+    pub async fn create_unsigned<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    where
+        Call: TxPayload,
+    {
+        // 1. Validate this call against the current node metadata if the call comes
+        // with a hash allowing us to do so.
+        self.validate(call)?;
+
+        // 2. Encode extrinsic
+        let extrinsic = {
+            let mut encoded_inner = Vec::new();
+            // transaction protocol version (4) (is not signed, so no 1 bit at the front).
+            4u8.encode_to(&mut encoded_inner);
+            // encode call data after this byte.
+            call.encode_call_data(&self.client.metadata(), &mut encoded_inner)?;
+            // now, prefix byte length:
+            let len = Compact(
+                u32::try_from(encoded_inner.len())
+                    .expect("extrinsic size expected to be <4GB"),
+            );
+            let mut encoded = Vec::new();
+            len.encode_to(&mut encoded);
+            encoded.extend(encoded_inner);
+            encoded
+        };
+
+        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
+        Ok(SubmittableExtrinsic {
+            client: self.client.clone(),
+            encoded: Encoded(extrinsic),
+            marker: std::marker::PhantomData,
+        })
+    }
+
+    /// Creates a raw signed extrinsic without submitting it.
     pub async fn create_signed_with_nonce<Call>(
         &self,
         call: &Call,
         signer: &(dyn Signer<T> + Send + Sync),
         account_nonce: T::Index,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -160,7 +198,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         // maybe we can just return the raw bytes..
-        Ok(SignedSubmittableExtrinsic {
+        Ok(SubmittableExtrinsic {
             client: self.client.clone(),
             encoded: Encoded(extrinsic),
             marker: std::marker::PhantomData,
@@ -175,7 +213,7 @@ impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         call: &Call,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -277,13 +315,24 @@ impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SignedSubmittableExtrinsic<T, C> {
+pub struct SubmittableExtrinsic<T, C> {
     client: C,
     encoded: Encoded,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T, C> SignedSubmittableExtrinsic<T, C>
+impl<T, C> SubmittableExtrinsic<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    /// Returns the SCALE encoded extrinsic bytes.
+    pub fn encoded(&self) -> &[u8] {
+        &self.encoded.0
+    }
+}
+
+impl<T, C> SubmittableExtrinsic<T, C>
 where
     T: Config,
     C: OnlineClientT<T>,
@@ -322,10 +371,5 @@ where
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
-    }
-
-    /// Returns the SCALE encoded extrinsic bytes.
-    pub fn encoded(&self) -> &[u8] {
-        &self.encoded.0
     }
 }
