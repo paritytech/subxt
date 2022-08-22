@@ -50,7 +50,7 @@ use std::{
 };
 
 use crate::{
-    error::Error,
+    error::{ Error, RpcError },
     utils::PhantomDataSendSync,
     Config,
     Metadata,
@@ -82,6 +82,10 @@ pub use jsonrpsee::{
         JsonValue,
     },
     rpc_params,
+};
+use std::{
+    future::Future,
+    pin::Pin,
 };
 use serde::{
     Deserialize,
@@ -261,14 +265,23 @@ pub struct Health {
     pub should_have_peers: bool,
 }
 
+/// Any RPC client which implements this can be used here.
+pub trait RpcClientT: Send + Sync + 'static {
+    fn request<P, I, R>(&self, method: &str, params: P) -> Pin<Box<dyn Future<Output = Result<R, RpcError>>>>
+    where
+        P: IntoIterator<Item = I>,
+        I: serde::Serialize,
+        R: serde::de::DeserializeOwned;
+}
+
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Config> {
+pub struct Rpc<T: Config, R: RpcClientT> {
     /// Rpc client for sending requests.
-    pub client: Arc<RpcClient>,
+    pub client: Arc<dyn RpcClientT>,
     _marker: PhantomDataSendSync<T>,
 }
 
-impl<T: Config> Clone for Rpc<T> {
+impl<T: Config, R: RpcClientT> Clone for Rpc<T, R> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -277,9 +290,9 @@ impl<T: Config> Clone for Rpc<T> {
     }
 }
 
-impl<T: Config> Rpc<T> {
+impl<T: Config, R: RpcClientT> Rpc<T, R> {
     /// Create a new [`Rpc`]
-    pub fn new(client: RpcClient) -> Self {
+    pub fn new(client: R) -> Self {
         Self {
             client: Arc::new(client),
             _marker: PhantomDataSendSync::new(),

@@ -15,7 +15,6 @@ pub use crate::metadata::{
     InvalidMetadataError,
     MetadataError,
 };
-pub use jsonrpsee::core::error::Error as RequestError;
 pub use scale_value::scale::{
     DecodeError,
     EncodeError,
@@ -36,7 +35,7 @@ pub enum Error {
     Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
-    Rpc(#[from] RequestError),
+    Rpc(#[from] RpcError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
@@ -99,6 +98,18 @@ impl From<String> for Error {
 impl From<DispatchError> for Error {
     fn from(error: DispatchError) -> Self {
         Error::Runtime(error)
+    }
+}
+
+/// An RPC error. Since we are generic over the RPC client that is used,
+/// the error is any custom string.
+#[derive(Debug, thiserror::Error)]
+#[error("RPC error: {0}")]
+pub struct RpcError(String);
+
+impl From<RpcError> for Error {
+    fn from(error: RpcError) -> Self {
+        Error::Rpc(error)
     }
 }
 

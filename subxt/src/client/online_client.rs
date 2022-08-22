@@ -12,7 +12,7 @@ use crate::{
     events::EventsClient,
     rpc::{
         Rpc,
-        RpcClient,
+        RpcClientT,
         RuntimeVersion,
     },
     storage::StorageClient,
@@ -20,6 +20,7 @@ use crate::{
     Config,
     Metadata,
 };
+use jsonrpsee::core::client::Client as JsonRpcClient;
 use derivative::Derivative;
 use futures::future;
 use parking_lot::RwLock;
@@ -27,18 +28,18 @@ use std::sync::Arc;
 
 /// A trait representing a client that can perform
 /// online actions.
-pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
+pub trait OnlineClientT<T: Config, R: RpcClientT>: OfflineClientT<T> {
     /// Return an RPC client that can be used to communicate with a node.
-    fn rpc(&self) -> &Rpc<T>;
+    fn rpc(&self) -> &Rpc<T, R>;
 }
 
 /// A client that can be used to perform API calls (that is, either those
 /// requiriing an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct OnlineClient<T: Config> {
+pub struct OnlineClient<T: Config, R> {
     inner: Arc<RwLock<Inner<T>>>,
-    rpc: Rpc<T>,
+    rpc: R,
 }
 
 #[derive(Derivative)]
@@ -49,7 +50,7 @@ struct Inner<T: Config> {
     metadata: Metadata,
 }
 
-impl<T: Config> std::fmt::Debug for OnlineClient<T> {
+impl<T: Config, R> std::fmt::Debug for OnlineClient<T, R> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
             .field("rpc", &"<Rpc>")
@@ -58,24 +59,26 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
-impl<T: Config> OnlineClient<T> {
+impl<T: Config> OnlineClient<T, JsonRpcClient> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
-    pub async fn new() -> Result<OnlineClient<T>, Error> {
+    pub async fn new() -> Result<OnlineClient<T, JsonRpcClient>, Error> {
         let url = "ws://127.0.0.1:9944";
         OnlineClient::from_url(url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
-    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T, JsonRpcClient>, Error> {
         let client = crate::rpc::ws_client(url.as_ref()).await?;
         OnlineClient::from_rpc_client(client).await
     }
+}
 
-    /// Construct a new [`OnlineClient`] by providing the underlying [`RpcClient`]
-    /// to use to drive the connection.
+impl<T: Config, R: RpcClientT> OnlineClient<T, R> {
+    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
+    /// implementation to use to drive the connection.
     pub async fn from_rpc_client(
-        rpc_client: impl Into<RpcClient>,
+        rpc_client: impl Into<JsonRpcClient>,
     ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::new(rpc_client.into());
 
@@ -114,7 +117,7 @@ impl<T: Config> OnlineClient<T> {
     /// });
     /// # }
     /// ```
-    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
+    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T, R> {
         ClientRuntimeUpdater(self.clone())
     }
 
@@ -137,7 +140,7 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Return an RPC client to make raw requests with.
-    pub fn rpc(&self) -> &Rpc<T> {
+    pub fn rpc(&self) -> &Rpc<T, R> {
         &self.rpc
     }
 
@@ -175,7 +178,7 @@ impl<T: Config> OnlineClient<T> {
     }
 }
 
-impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
+impl<T: Config, R> OfflineClientT<T> for OnlineClient<T, R> {
     fn metadata(&self) -> Metadata {
         self.metadata()
     }
@@ -187,17 +190,17 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
 }
 
-impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
-    fn rpc(&self) -> &Rpc<T> {
+impl<T: Config, R: RpcClientT> OnlineClientT<T, R> for OnlineClient<T, R> {
+    fn rpc(&self) -> &Rpc<T, R> {
         &self.rpc
     }
 }
 
 /// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
 /// for example usage.
-pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
+pub struct ClientRuntimeUpdater<T, R>(OnlineClient<T, R>);
 
-impl<T: Config> ClientRuntimeUpdater<T> {
+impl<T: Config, R: RpcClientT> ClientRuntimeUpdater<T, R> {
     fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
         let curr = self.0.inner.read();
         &curr.runtime_version != new
