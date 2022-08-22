@@ -148,7 +148,7 @@ impl RuntimeGenerator {
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {
-            (path.to_string(), substitute.clone())
+            (path.to_string(), (substitute.clone(), false))
         })
         .collect::<HashMap<_, _>>();
 

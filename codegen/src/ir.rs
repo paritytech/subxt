@@ -41,18 +41,30 @@ impl From<syn::ItemMod> for ItemMod {
 }
 
 impl ItemMod {
-    pub fn type_substitutes(&self) -> HashMap<String, syn::TypePath> {
+    pub fn type_substitutes(&self) -> HashMap<String, (syn::TypePath, bool)> {
         self.items
             .iter()
             .filter_map(|item| {
-                if let Item::Subxt(SubxtItem::TypeSubstitute {
-                    generated_type_path,
-                    substitute_with: substitute_type,
-                }) = item
-                {
-                    Some((generated_type_path.clone(), substitute_type.clone()))
-                } else {
-                    None
+                match item {
+                    Item::Subxt(SubxtItem::TypeSubstitute {
+                        generated_type_path,
+                        substitute_with: substitute_type,
+                    }) => {
+                        Some((
+                            generated_type_path.clone(),
+                            (substitute_type.clone(), false),
+                        ))
+                    }
+                    Item::Subxt(SubxtItem::TypeSubstituteNoParams {
+                        generated_type_path,
+                        substitute_with: substitute_type,
+                    }) => {
+                        Some((
+                            generated_type_path.clone(),
+                            (substitute_type.clone(), true),
+                        ))
+                    }
+                    _ => None,
                 }
             })
             .collect()
@@ -110,9 +122,19 @@ impl From<syn::Item> for Item {
                     )
                 }
 
-                let type_substitute = SubxtItem::TypeSubstitute {
-                    generated_type_path: attr.substitute_type(),
-                    substitute_with,
+                let type_substitute = match attr {
+                    attrs::Subxt::SubstituteType(path) => {
+                        SubxtItem::TypeSubstitute {
+                            generated_type_path: path.to_string(),
+                            substitute_with,
+                        }
+                    }
+                    attrs::Subxt::SubstituteTypeNoParams(path) => {
+                        SubxtItem::TypeSubstituteNoParams {
+                            generated_type_path: path.to_string(),
+                            substitute_with,
+                        }
+                    }
                 };
                 Self::Subxt(type_substitute)
             } else {
@@ -130,6 +152,10 @@ pub enum SubxtItem {
         generated_type_path: String,
         substitute_with: syn::TypePath,
     },
+    TypeSubstituteNoParams {
+        generated_type_path: String,
+        substitute_with: syn::TypePath,
+    },
 }
 
 mod attrs {
@@ -139,13 +165,6 @@ mod attrs {
     #[darling(rename_all = "snake_case")]
     pub enum Subxt {
         SubstituteType(String),
-    }
-
-    impl Subxt {
-        pub fn substitute_type(&self) -> String {
-            match self {
-                Self::SubstituteType(path) => path.clone(),
-            }
-        }
+        SubstituteTypeNoParams(String),
     }
 }

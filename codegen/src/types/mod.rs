@@ -61,7 +61,7 @@ pub struct TypeGenerator<'a> {
     /// Registry of type definitions to be transformed into Rust type definitions.
     type_registry: &'a PortableRegistry,
     /// User defined overrides for generated types.
-    type_substitutes: HashMap<String, syn::TypePath>,
+    type_substitutes: HashMap<String, (syn::TypePath, bool)>,
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
 }
@@ -71,7 +71,7 @@ impl<'a> TypeGenerator<'a> {
     pub fn new(
         type_registry: &'a PortableRegistry,
         root_mod: &'static str,
-        type_substitutes: HashMap<String, syn::TypePath>,
+        type_substitutes: HashMap<String, (syn::TypePath, bool)>,
         derives: DerivesRegistry,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
@@ -193,10 +193,12 @@ impl<'a> TypeGenerator<'a> {
             .collect::<Vec<_>>();
 
         let joined_path = ty.path().segments().join("::");
-        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
+        if let Some((substitute_type_path, no_params)) =
+            self.type_substitutes.get(&joined_path)
+        {
             TypePath::Substitute(TypePathSubstitute {
                 path: substitute_type_path.clone(),
-                params,
+                params: if *no_params { vec![] } else { params },
             })
         } else {
             TypePath::Type(TypePathType {
