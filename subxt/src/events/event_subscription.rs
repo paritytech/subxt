@@ -130,10 +130,10 @@ impl<T: Config, Client, Sub: Unpin> Unpin for EventSubscription<T, Client, Sub> 
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<T, Client, Sub, E> Stream for EventSubscription<T, Client, Sub>
+impl<T, Client, R, Sub, E> Stream for EventSubscription<T, Client, Sub>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
     E: Into<Error>,
 {

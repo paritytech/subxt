@@ -45,10 +45,10 @@ impl<T, Client> EventsClient<T, Client> {
     }
 }
 
-impl<T, Client> EventsClient<T, Client>
+impl<T, Client, R> EventsClient<T, Client>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
 {
     /// Obtain events at some block hash.
     pub fn at(
@@ -119,13 +119,13 @@ where
     }
 }
 
-async fn at<T, Client>(
+async fn at<T, Client, R>(
     client: Client,
     block_hash: Option<T::Hash>,
 ) -> Result<Events<T>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
 {
     // If block hash is not provided, get the hash
     // for the latest block and use that.
@@ -150,24 +150,24 @@ where
     Ok(Events::new(client.metadata(), block_hash, event_bytes))
 }
 
-async fn subscribe<T, Client>(
+async fn subscribe<T, Client, R>(
     client: Client,
 ) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
 {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
-async fn subscribe_finalized<T, Client>(
+async fn subscribe_finalized<T, Client, R>(
     client: Client,
 ) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
 {
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.
@@ -193,14 +193,14 @@ where
 /// Note: This is exposed for testing but is not considered stable and may change
 /// without notice in a patch release.
 #[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
+pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, R, S, E>(
     client: Client,
     mut last_block_num: Option<u64>,
     sub: S,
 ) -> impl Stream<Item = Result<T::Header, Error>> + Send
 where
     T: Config,
-    Client: OnlineClientT<T> + Send + Sync,
+    Client: OnlineClientT<T, R> + Send + Sync,
     S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<Error> + Send + 'static,
 {

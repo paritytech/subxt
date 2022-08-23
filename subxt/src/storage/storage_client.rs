@@ -73,10 +73,10 @@ where
     }
 }
 
-impl<T, Client> StorageClient<T, Client>
+impl<T, Client, R> StorageClient<T, Client>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
 {
     /// Fetch the raw encoded value at the address/key given.
     pub fn fetch_raw<'a>(
@@ -318,10 +318,10 @@ pub struct KeyIter<T: Config, Client, ReturnTy> {
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy> KeyIter<T, Client, ReturnTy>
+impl<'a, T, Client, R, ReturnTy> KeyIter<T, Client, ReturnTy>
 where
     T: Config,
-    Client: OnlineClientT<T>,
+    Client: OnlineClientT<T, R>,
     ReturnTy: DecodeWithMetadata,
 {
     /// Returns the next key value pair from a map.

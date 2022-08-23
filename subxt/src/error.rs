@@ -107,12 +107,6 @@ impl From<DispatchError> for Error {
 #[error("RPC error: {0}")]
 pub struct RpcError(String);
 
-impl From<RpcError> for Error {
-    fn from(error: RpcError) -> Self {
-        Error::Rpc(error)
-    }
-}
-
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep
 /// hold of the bytes, which we can attempt to decode if we have an
