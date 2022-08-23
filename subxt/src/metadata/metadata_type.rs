@@ -60,9 +60,15 @@ pub enum MetadataError {
     /// Type is not in metadata.
     #[error("Type {0} missing from type registry")]
     TypeNotFound(u32),
-    /// Runtime pallet metadata is incompatible with the static one.
-    #[error("Pallet {0} has incompatible metadata")]
-    IncompatiblePalletMetadata(&'static str),
+    /// Runtime constant metadata is incompatible with the static one.
+    #[error("Pallet {0} Constant {0} has incompatible metadata")]
+    IncompatibleConstantMetadata(String, String),
+    /// Runtime call metadata is incompatible with the static one.
+    #[error("Pallet {0} Call {0} has incompatible metadata")]
+    IncompatibleCallMetadata(String, String),
+    /// Runtime storage metadata is incompatible with the static one.
+    #[error("Pallet {0} Storage {0} has incompatible metadata")]
+    IncompatibleStorageMetadata(String, String),
     /// Runtime metadata is not fully compatible with the static one.
     #[error("Node metadata is not fully compatible")]
     IncompatibleMetadata,
