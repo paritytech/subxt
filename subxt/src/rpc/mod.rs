@@ -48,7 +48,9 @@ pub use methods::*;
 
 // The underlying client used to talk to a node.
 pub use rpc_client::{
+    RpcClient,
     RpcClientT,
     RpcResponse,
-    RpcSubscription
+    RpcSubscription,
+    RpcSubscriptionStream,
 };

@@ -45,10 +45,10 @@ impl<T, Client> EventsClient<T, Client> {
     }
 }
 
-impl<T, Client, R> EventsClient<T, Client>
+impl<T, Client> EventsClient<T, Client>
 where
     T: Config,
-    Client: OnlineClientT<T, R>,
+    Client: OnlineClientT<T>,
 {
     /// Obtain events at some block hash.
     pub fn at(
@@ -119,13 +119,13 @@ where
     }
 }
 
-async fn at<T, Client, R>(
+async fn at<T, Client>(
     client: Client,
     block_hash: Option<T::Hash>,
 ) -> Result<Events<T>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T, R>,
+    Client: OnlineClientT<T>,
 {
     // If block hash is not provided, get the hash
     // for the latest block and use that.
@@ -150,24 +150,24 @@ where
     Ok(Events::new(client.metadata(), block_hash, event_bytes))
 }
 
-async fn subscribe<T, Client, R>(
+async fn subscribe<T, Client>(
     client: Client,
 ) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T, R>,
+    Client: OnlineClientT<T>,
 {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
-async fn subscribe_finalized<T, Client, R>(
+async fn subscribe_finalized<T, Client>(
     client: Client,
 ) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, Error>
 where
     T: Config,
-    Client: OnlineClientT<T, R>,
+    Client: OnlineClientT<T>,
 {
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.
@@ -200,7 +200,7 @@ pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, R, S, E>(
 ) -> impl Stream<Item = Result<T::Header, Error>> + Send
 where
     T: Config,
-    Client: OnlineClientT<T, R> + Send + Sync,
+    Client: OnlineClientT<T> + Send + Sync,
     S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<Error> + Send + 'static,
 {

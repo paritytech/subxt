@@ -5,26 +5,44 @@
 use super::{
     RpcClientT,
     RpcResponse,
-    RpcSubscription
+    RpcSubscription,
 };
-use jsonrpsee::core::client::{
-    Client
+use serde_json::value::{ Value, RawValue };
+use crate::error::RpcError;
+use jsonrpsee::{
+    core::client::{ ClientT, SubscriptionClientT, Client },
+    types::ParamsSer,
 };
 
 impl RpcClientT for Client {
-    fn request<P, I, R>(&self, method: &str, params: P) -> RpcResponse<R>
-    where
-        P: IntoIterator<Item = I>,
-        I: serde::Serialize,
-        R: serde::de::DeserializeOwned {
-        Box::pin(self.request(method, params))
+    fn request(&self, method: &str, params: Box<RawValue>) -> RpcResponse {
+        Box::pin(async move {
+            let params = prep_params_for_jsonrpsee(&params)?;
+            let res = ClientT::request(self, method, Some(params))
+                .await
+                .map_err(|e| RpcError(e.to_string()))?;
+            Ok(res)
+        })
     }
 
-    fn subscribe<P, I, R>(&self, sub: &str, params: P, unsub: &str) -> RpcSubscription<R>
-        where
-            P: IntoIterator<Item = I>,
-            I: serde::Serialize,
-            R: serde::de::DeserializeOwned {
-        Box::pin(self.subscribe(sub, params, unsub))
+    fn subscribe(&self, sub: &str, params: Box<RawValue>, unsub: &str) -> RpcSubscription {
+        Box::pin(async move {
+            let params = prep_params_for_jsonrpsee(&params)?;
+            let res = SubscriptionClientT::subscribe(self, sub, Some(params), unsub)
+                .await
+                .map_err(|e| RpcError(e.to_string()))?;
+            Ok(res)
+        })
     }
+}
+
+// This is ugly; we have to encode to Value's to be compat with the jsonrpc interface.
+// Remove and simplify this once something like https://github.com/paritytech/jsonrpsee/issues/862 is in:
+fn prep_params_for_jsonrpsee(params: &RawValue) -> Result<ParamsSer<'static>, RpcError> {
+    let val = serde_json::to_value(&params).expect("RawValue guarantees valid JSON");
+    let arr = match val {
+        Value::Array(arr) => Ok(arr),
+        _ => RpcError(format!("RPC Params are expected to be an array but got {params}"))
+    }?;
+    Ok(ParamsSer::Array(arr))
 }

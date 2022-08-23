@@ -105,7 +105,7 @@ impl From<DispatchError> for Error {
 /// the error is any custom string.
 #[derive(Debug, thiserror::Error)]
 #[error("RPC error: {0}")]
-pub struct RpcError(String);
+pub struct RpcError(pub String);
 
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep

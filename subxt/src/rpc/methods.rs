@@ -46,10 +46,10 @@
 
 use std::{
     collections::HashMap,
-    sync::Arc,
 };
 use super::rpc_client::{
     RpcClientT,
+    RpcClient,
     RpcSubscription,
 };
 use crate::{
@@ -242,12 +242,12 @@ pub struct Health {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Config, R> {
-    client: Arc<R>,
+pub struct Rpc<T: Config> {
+    client: RpcClient,
     _marker: PhantomDataSendSync<T>,
 }
 
-impl<T: Config, R> Clone for Rpc<T, R> {
+impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -256,17 +256,17 @@ impl<T: Config, R> Clone for Rpc<T, R> {
     }
 }
 
-impl<T: Config, R: RpcClientT> Rpc<T, R> {
+impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
-    pub fn new(client: Arc<dyn RpcClientT>) -> Self {
+    pub fn new<R: RpcClientT>(client: R) -> Self {
         Self {
-            client: Arc::new(client),
+            client: RpcClient::new(client),
             _marker: PhantomDataSendSync::new(),
         }
     }
 
     /// Return the underlying [`RpcClientT`] implementation.
-    pub fn client(&self) -> &R {
+    pub fn client(&self) -> &dyn RpcClientT {
         &self.client
     }
 
@@ -276,7 +276,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         key: &[u8],
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
-        let params = [to_hex(key), hash];
+        let params = (to_hex(key), hash);
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
@@ -292,7 +292,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
         let start_key = start_key.map(to_hex);
-        let params = [to_hex(key), count, start_key, hash];
+        let params = (to_hex(key), count, start_key, hash);
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -305,7 +305,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = [keys, from, to];
+        let params = (keys, from, to);
         self.client
             .request("state_queryStorage", params)
             .await
@@ -319,7 +319,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = [keys, at];
+        let params = (keys, at);
         self.client
             .request("state_queryStorageAt", params)
             .await
@@ -445,7 +445,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = [keys, hash];
+        let params = (keys, hash);
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
     }
@@ -546,7 +546,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         suri: String,
         public: Bytes,
     ) -> Result<(), Error> {
-        let params = [key_type, suri, public];
+        let params = (key_type, suri, public);
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
@@ -577,7 +577,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         public_key: Bytes,
         key_type: String,
     ) -> Result<bool, Error> {
-        let params = [public_key, key_type];
+        let params = (public_key, key_type);
         Ok(self.client.request("author_hasKey", params).await?)
     }
 
@@ -589,7 +589,7 @@ impl<T: Config, R: RpcClientT> Rpc<T, R> {
         encoded_signed: &[u8],
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, Error> {
-        let params = [to_hex(encoded_signed), at];
+        let params = (to_hex(encoded_signed), at);
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;

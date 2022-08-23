@@ -21,7 +21,7 @@ use crate::{
         Phase,
         StaticEvent,
     },
-    rpc::{SubstrateTxStatus, RpcClientT},
+    rpc::SubstrateTxStatus,
     Config,
 };
 use derivative::Derivative;
@@ -40,19 +40,18 @@ pub use sp_runtime::traits::SignedExtension;
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub struct TxProgress<T: Config, C, R> {
+pub struct TxProgress<T: Config, C> {
     sub: Option<RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
-    _marker: std::marker::PhantomData<R>
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<T: Config, C, R> Unpin for TxProgress<T, C, R> {}
+impl<T: Config, C> Unpin for TxProgress<T, C> {}
 
-impl<T: Config, C, R> TxProgress<T, C, R> {
+impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
         sub: RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>,
@@ -63,7 +62,6 @@ impl<T: Config, C, R> TxProgress<T, C, R> {
             sub: Some(sub),
             client,
             ext_hash,
-            _marker: std::marker::PhantomData
         }
     }
 
@@ -73,11 +71,10 @@ impl<T: Config, C, R> TxProgress<T, C, R> {
     }
 }
 
-impl<T, C, R> TxProgress<T, C, R>
+impl<T, C> TxProgress<T, C>
 where
     T: Config,
-    C: OnlineClientT<T, R>,
-    R: RpcClientT,
+    C: OnlineClientT<T>,
 {
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
@@ -156,8 +153,8 @@ where
     }
 }
 
-impl<T: Config, C: OnlineClientT<T, R>, R> Stream for TxProgress<T, C, R> {
-    type Item = Result<TxStatus<T, C, R>, Error>;
+impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
+    type Item = Result<TxStatus<T, C>, Error>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -259,8 +256,8 @@ impl<T: Config, C: OnlineClientT<T, R>, R> Stream for TxProgress<T, C, R> {
 /// within 512 blocks. This either indicates that finality is not available for your chain,
 /// or that finality gadget is lagging behind.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug, R: std::fmt::Debug"))]
-pub enum TxStatus<T: Config, C, R> {
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+pub enum TxStatus<T: Config, C> {
     /// The transaction is part of the "future" queue.
     Future,
     /// The transaction is part of the "ready" queue.
@@ -268,7 +265,7 @@ pub enum TxStatus<T: Config, C, R> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// The transaction has been included in a block with given hash.
-    InBlock(TxInBlock<T, C, R>),
+    InBlock(TxInBlock<T, C>),
     /// The block this transaction was included in has been retracted,
     /// probably because it did not make it onto the blocks which were
     /// finalized.
@@ -277,7 +274,7 @@ pub enum TxStatus<T: Config, C, R> {
     /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
     /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TxInBlock<T, C, R>),
+    Finalized(TxInBlock<T, C>),
     /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
@@ -287,10 +284,10 @@ pub enum TxStatus<T: Config, C, R> {
     Invalid,
 }
 
-impl<T: Config, C, R> TxStatus<T, C, R> {
+impl<T: Config, C> TxStatus<T, C> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TxStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TxInBlock<T, C, R>> {
+    pub fn as_finalized(&self) -> Option<&TxInBlock<T, C>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None,
@@ -299,7 +296,7 @@ impl<T: Config, C, R> TxStatus<T, C, R> {
 
     /// A convenience method to return the `InBlock` details. Returns
     /// [`None`] if the enum variant is not [`TxStatus::InBlock`].
-    pub fn as_in_block(&self) -> Option<&TxInBlock<T, C, R>> {
+    pub fn as_in_block(&self) -> Option<&TxInBlock<T, C>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None,
@@ -309,21 +306,19 @@ impl<T: Config, C, R> TxStatus<T, C, R> {
 
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug, R: std::fmt::Debug"))]
-pub struct TxInBlock<T: Config, C, R> {
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+pub struct TxInBlock<T: Config, C> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: C,
-    _marker: std::marker::PhantomData<R>
 }
 
-impl<T: Config, C: OnlineClientT<T, R>, R: RpcClientT> TxInBlock<T, C, R> {
+impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
         Self {
             block_hash,
             ext_hash,
             client,
-            _marker: std::marker::PhantomData
         }
     }
 
