@@ -79,7 +79,7 @@ macro_rules! rpc_params {
     ($($p:expr), *) => {{
         // May be unused if empty; no params.
         #[allow(unused_mut)]
-        let mut params = crate::rpc::RpcParams::new();
+        let mut params = $crate::rpc::RpcParams::new();
         // loop here to allow breaking early with an error.
         loop {
             $(
@@ -87,7 +87,7 @@ macro_rules! rpc_params {
                     break Err(e)
                 }
             )*
-            break Ok::<crate::rpc::RpcParams, crate::error::Error>(params)
+            break Ok::<$crate::rpc::RpcParams, $crate::error::Error>(params)
         }
     }}
 }
@@ -95,6 +95,7 @@ pub use rpc_params;
 
 /// This represents the parameters passed to an [`RpcClient`], and exists to
 /// enforce that parameters are provided in the correct format.
+#[derive(Debug, Clone, Default)]
 pub struct RpcParams(Vec<u8>);
 
 impl RpcParams {

@@ -343,33 +343,33 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        Ok(self
+        self
             .client
             .request("system_properties", rpc_params![]?)
-            .await?)
+            .await
     }
 
     /// Fetch system health
     pub async fn system_health(&self) -> Result<Health, Error> {
-        Ok(self.client.request("system_health", rpc_params![]?).await?)
+        self.client.request("system_health", rpc_params![]?).await
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_chain", rpc_params![]?).await?)
+        self.client.request("system_chain", rpc_params![]?).await
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_name", rpc_params![]?).await?)
+        self.client.request("system_name", rpc_params![]?).await
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        Ok(self
+        self
             .client
             .request("system_version", rpc_params![]?)
-            .await?)
+            .await
     }
 
     /// Fetch the current nonce for the given account ID.
@@ -377,10 +377,10 @@ impl<T: Config> Rpc<T> {
         &self,
         account: &T::AccountId,
     ) -> Result<T::Index, Error> {
-        Ok(self
+        self
             .client
             .request("system_accountNextIndex", rpc_params![account]?)
-            .await?)
+            .await
     }
 
     /// Get a header
@@ -551,10 +551,10 @@ impl<T: Config> Rpc<T> {
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        Ok(self
+        self
             .client
             .request("author_rotateKeys", rpc_params![]?)
-            .await?)
+            .await
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -564,7 +564,7 @@ impl<T: Config> Rpc<T> {
     /// Returns `true` iff all private keys could be found.
     pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys]?;
-        Ok(self.client.request("author_hasSessionKeys", params).await?)
+        self.client.request("author_hasSessionKeys", params).await
     }
 
     /// Checks if the keystore has private keys for the given public key and key type.
@@ -576,7 +576,7 @@ impl<T: Config> Rpc<T> {
         key_type: String,
     ) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type]?;
-        Ok(self.client.request("author_hasKey", params).await?)
+        self.client.request("author_hasKey", params).await
     }
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.

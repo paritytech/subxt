@@ -166,7 +166,6 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
         };
 
         sub.poll_next_unpin(cx)
-            .map_err(|e| e.into())
             .map_ok(|status| {
                 match status {
                     SubstrateTxStatus::Future => TxStatus::Future,

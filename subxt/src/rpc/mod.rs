@@ -39,6 +39,9 @@
 //! # }
 //! ```
 
+// Allow an `rpc.rs` file in the `rpc` folder.
+#![allow(clippy::module_inception)]
+
 #[cfg(feature = "jsonrpsee")]
 mod jsonrpsee_impl;
 
