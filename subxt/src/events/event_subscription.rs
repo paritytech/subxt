@@ -8,6 +8,7 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     events::EventsClient,
+    rpc::Subscription,
     Config,
 };
 use derivative::Derivative;
@@ -18,7 +19,6 @@ use futures::{
     Stream,
     StreamExt,
 };
-use jsonrpsee::core::client::Subscription;
 use sp_runtime::traits::Header;
 use std::{
     marker::Unpin,
@@ -32,12 +32,12 @@ pub use super::{
     FilterEvents,
 };
 
-/// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
+/// A Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe_finalized`, and is exposed to be used in codegen.
 #[doc(hidden)]
 pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, Error>>;
 
-/// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
+/// A Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and is exposed to be used in codegen.
 #[doc(hidden)]
 pub type EventSub<Item> = Subscription<Item>;

@@ -6,44 +6,23 @@ use crate::error::{
     Error,
     RpcError
 };
-use std::{
-    future::Future,
-    pin::Pin,
-};
+use std::pin::Pin;
 use futures::{ Stream, StreamExt };
 use serde::{ Serialize, de::DeserializeOwned };
 use serde_json::value::RawValue;
 use std::task::Poll;
 use std::sync::Arc;
-
-/// Any RPC client which implements this can be used in our [`super::Rpc`] type
-/// to talk to a node.
-///
-/// This is a low level interface which expects an already-serialized set of params,
-/// and returns an owned but still-serialized [`RawValue`], deferring deserialization to
-/// the caller. This is the case because we want the methods to be object-safe (which prohibits
-/// generics), and want to avoid any unnecessary allocations.
-//
-// Dev note: to avoid a proliferation of where clauses and generic types, we
-// currently expect boxed futures/streams to be returned. This imposes a limit on
-// implementations and forces an allocation, but is simpler for the library to
-// work with.
-pub trait RpcClientT: Send + Sync + 'static {
-    fn request(&self, method: &str, params: Box<RawValue>) -> RpcResponse;
-    fn subscribe(&self, sub: &str, params: Box<RawValue>, unsub: &str) -> RpcSubscription;
-}
-
-/// The response returned from our [`RpcClientT`] implementation's `request` method.
-pub type RpcResponse = Pin<Box<dyn Future<Output = Result<Box<RawValue>, RpcError>>>>;
-
-/// The response returned from our [`RpcClientT`] implementation's `subscribe` method.
-pub type RpcSubscription = Pin<Box<dyn Future<Output = Result<RpcSubscriptionStream, RpcError>>>>;
-
-/// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscriptionStream = Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + Sync + 'static>>;
-
+use super::{
+    RpcClientT,
+    RpcSubscriptionStream,
+};
 
 /// A concrete wrapper around an [`RpcClientT`] to add a layer of useful functionality on top.
+//
+// Dev note: These would be an Ext trait or methods on the `RpcClientT` trait, but
+// we run into issues with async fns not supported in traits and object safety issues,
+// which we can avoid by having this concrete wrapper type.
+#[derive(Clone)]
 pub struct RpcClient(Arc<dyn RpcClientT>);
 
 impl RpcClient {
@@ -60,8 +39,11 @@ impl RpcClient {
     {
         let param_string = serde_json::to_string(&params)
             .map_err(|e| RpcError(e.to_string()))?;
-        let res = self.0.request(method, &param_string).await?;
-        let val = serde_json::from_str(&res)?;
+        let params_value = RawValue::from_string(param_string)
+            .expect("Just serialized so must be valid JSON");
+
+        let res = self.0.request_raw(method, params_value).await?;
+        let val = serde_json::from_str(res.get())?;
         Ok(val)
     }
 
@@ -75,36 +57,68 @@ impl RpcClient {
     {
         let param_string = serde_json::to_string(&params)
             .map_err(|e| RpcError(e.to_string()))?;
-        let sub = self.0.subscribe(sub, &param_string, unsub).await?;
+        let params_value = RawValue::from_string(param_string)
+            .expect("Just serialized so must be valid JSON");
+
+        let sub = self.0.subscribe_raw(sub, params_value, unsub).await?;
         Ok(Subscription::new(sub))
     }
 }
 
-/// An RPC Subscription. This implements [`Stream`].
+impl std::fmt::Debug for RpcClient {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("RpcClient").finish()
+    }
+}
+
+impl std::ops::Deref for RpcClient {
+    type Target = dyn RpcClientT;
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+/// A generic RPC Subscription. This implements [`Stream`].
 pub struct Subscription<Res> {
-    inner: RpcSubscription,
+    inner: RpcSubscriptionStream,
     _marker: std::marker::PhantomData<Res>
+}
+
+impl <Res> std::fmt::Debug for Subscription<Res> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Subscription")
+            .field("inner", &"RpcSubscriptionStream")
+            .field("_marker", &self._marker)
+            .finish()
+    }
 }
 
 impl <Res> std::marker::Unpin for Subscription<Res> {}
 
 impl <Res> Subscription<Res> {
-    fn new(inner: RpcSubscription) -> Self {
+    fn new(inner: RpcSubscriptionStream) -> Self {
         Self { inner, _marker: std::marker::PhantomData }
+    }
+}
+
+impl <Res: DeserializeOwned> Subscription<Res> {
+    /// Wait for the next item from the subscription.
+    pub async fn next(&mut self) -> Option<Result<Res, Error>> {
+        StreamExt::next(self).await
     }
 }
 
 impl <Res: DeserializeOwned> Stream for Subscription<Res> {
     type Item = Result<Res, Error>;
 
-    fn poll_next(self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Option<Self::Item>> {
         let res = futures::ready!(self.inner.poll_next_unpin(cx));
 
         // Decode the inner RawValue to the type we're expecting and map
         // any errors to the right shape:
-        res.map(|r| {
+        let res = res.map(|r| {
             r.map_err(|e| e.into()).and_then(|raw_val| {
-                serde_json::from_str(&raw_val).map_err(|e| e.into())
+                serde_json::from_str(raw_val.get()).map_err(|e| e.into())
             })
         });
 

@@ -18,7 +18,7 @@ use crate::{
         Encoded,
         PhantomDataSendSync,
     },
-    Config, rpc::RpcClientT,
+    Config,
 };
 use codec::{
     Compact,
@@ -33,9 +33,9 @@ use sp_runtime::{
 /// A client for working with transactions.
 #[derive(Derivative)]
 #[derivative(Clone(bound = "Client: Clone"))]
-pub struct TxClient<T: Config, Client, R> {
+pub struct TxClient<T: Config, Client> {
     client: Client,
-    _marker: PhantomDataSendSync<(T, R)>,
+    _marker: PhantomDataSendSync<T>,
 }
 
 impl<T: Config, Client> TxClient<T, Client> {
@@ -48,7 +48,7 @@ impl<T: Config, Client> TxClient<T, Client> {
     }
 }
 
-impl<T: Config, C: OfflineClientT<T>, R> TxClient<T, C, R> {
+impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
@@ -206,10 +206,10 @@ impl<T: Config, C: OfflineClientT<T>, R> TxClient<T, C, R> {
     }
 }
 
-impl<T, C, R> TxClient<T, C, R>
+impl<T, C> TxClient<T, C>
 where
     T: Config,
-    C: OnlineClientT<T, R>
+    C: OnlineClientT<T>
 {
     /// Creates a raw signed extrinsic, without submitting it.
     pub async fn create_signed<Call>(
@@ -319,13 +319,13 @@ where
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SubmittableExtrinsic<T, C, R> {
+pub struct SubmittableExtrinsic<T, C> {
     client: C,
     encoded: Encoded,
-    marker: std::marker::PhantomData<(T, R)>,
+    marker: std::marker::PhantomData<T>,
 }
 
-impl<T, C, R> SubmittableExtrinsic<T, C, R>
+impl<T, C> SubmittableExtrinsic<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
@@ -336,11 +336,10 @@ where
     }
 }
 
-impl<T, C, R> SubmittableExtrinsic<T, C, R>
+impl<T, C> SubmittableExtrinsic<T, C>
 where
     T: Config,
-    C: OnlineClientT<T, R>,
-    R: RpcClientT,
+    C: OnlineClientT<T>,
 {
     /// Submits the extrinsic to the chain.
     ///

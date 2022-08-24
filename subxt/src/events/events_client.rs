@@ -193,7 +193,7 @@ where
 /// Note: This is exposed for testing but is not considered stable and may change
 /// without notice in a patch release.
 #[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, R, S, E>(
+pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
     client: Client,
     mut last_block_num: Option<u64>,
     sub: S,

@@ -11,7 +11,11 @@ use crate::{
     error::{
         DispatchError,
         Error,
+        RpcError,
         TransactionError,
+    },
+    rpc::{
+        Subscription,
     },
     events::{
         self,
@@ -29,10 +33,6 @@ use futures::{
     Stream,
     StreamExt,
 };
-use jsonrpsee::core::{
-    client::Subscription as RpcSubscription,
-    Error as RpcError,
-};
 use sp_runtime::traits::Hash;
 
 pub use sp_runtime::traits::SignedExtension;
@@ -41,7 +41,7 @@ pub use sp_runtime::traits::SignedExtension;
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TxProgress<T: Config, C> {
-    sub: Option<RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
+    sub: Option<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
 }
@@ -54,7 +54,7 @@ impl<T: Config, C> Unpin for TxProgress<T, C> {}
 impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
-        sub: RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>,
+        sub: Subscription<SubstrateTxStatus<T::Hash, T::Hash>>,
         client: C,
         ext_hash: T::Hash,
     ) -> Self {
@@ -107,7 +107,7 @@ where
                 _ => continue,
             }
         }
-        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+        Err(RpcError("RPC subscription dropped".to_string()).into())
     }
 
     /// Wait for the transaction to be finalized, and return a [`TxInBlock`]
@@ -133,7 +133,7 @@ where
                 _ => continue,
             }
         }
-        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+        Err(RpcError("RPC subscription dropped".to_string()).into())
     }
 
     /// Wait for the transaction to be finalized, and for the transaction events to indicate

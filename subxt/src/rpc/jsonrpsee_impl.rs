@@ -13,9 +13,13 @@ use jsonrpsee::{
     core::client::{ ClientT, SubscriptionClientT, Client },
     types::ParamsSer,
 };
+use futures::stream::{
+    StreamExt,
+    TryStreamExt,
+};
 
 impl RpcClientT for Client {
-    fn request(&self, method: &str, params: Box<RawValue>) -> RpcResponse {
+    fn request_raw<'a>(&'a self, method: &'a str, params: Box<RawValue>) -> RpcResponse<'a> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
             let res = ClientT::request(self, method, Some(params))
@@ -25,13 +29,15 @@ impl RpcClientT for Client {
         })
     }
 
-    fn subscribe(&self, sub: &str, params: Box<RawValue>, unsub: &str) -> RpcSubscription {
+    fn subscribe_raw<'a>(&'a self, sub: &'a str, params: Box<RawValue>, unsub: &'a str) -> RpcSubscription<'a> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
-            let res = SubscriptionClientT::subscribe(self, sub, Some(params), unsub)
+            let sub = SubscriptionClientT::subscribe::<Box<RawValue>>(self, sub, Some(params), unsub)
                 .await
-                .map_err(|e| RpcError(e.to_string()))?;
-            Ok(res)
+                .map_err(|e| RpcError(e.to_string()))?
+                .map_err(|e| RpcError(e.to_string()))
+                .boxed();
+            Ok(sub)
         })
     }
 }
@@ -42,7 +48,7 @@ fn prep_params_for_jsonrpsee(params: &RawValue) -> Result<ParamsSer<'static>, Rp
     let val = serde_json::to_value(&params).expect("RawValue guarantees valid JSON");
     let arr = match val {
         Value::Array(arr) => Ok(arr),
-        _ => RpcError(format!("RPC Params are expected to be an array but got {params}"))
+        _ => Err(RpcError(format!("RPC Params are expected to be an array but got {params}")))
     }?;
     Ok(ParamsSer::Array(arr))
 }

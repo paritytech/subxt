@@ -47,10 +47,10 @@
 use std::{
     collections::HashMap,
 };
-use super::rpc_client::{
+use super::{
     RpcClientT,
     RpcClient,
-    RpcSubscription,
+    Subscription,
 };
 use crate::{
     error::Error,
@@ -266,7 +266,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Return the underlying [`RpcClientT`] implementation.
-    pub fn client(&self) -> &dyn RpcClientT {
+    pub fn client(&self) -> &RpcClient {
         &self.client
     }
 
@@ -339,7 +339,7 @@ impl<T: Config> Rpc<T> {
     pub async fn metadata(&self) -> Result<Metadata, Error> {
         let bytes: Bytes = self
             .client
-            .request("state_getMetadata", [])
+            .request("state_getMetadata", ())
             .await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
@@ -350,28 +350,28 @@ impl<T: Config> Rpc<T> {
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
         Ok(self
             .client
-            .request("system_properties", [])
+            .request("system_properties", ())
             .await?)
     }
 
     /// Fetch system health
     pub async fn system_health(&self) -> Result<Health, Error> {
-        Ok(self.client.request("system_health", []).await?)
+        Ok(self.client.request("system_health", ()).await?)
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_chain", []).await?)
+        Ok(self.client.request("system_chain", ()).await?)
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_name", []).await?)
+        Ok(self.client.request("system_name", ()).await?)
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_version", []).await?)
+        Ok(self.client.request("system_version", ()).await?)
     }
 
     /// Fetch the current nonce for the given account ID.
@@ -409,7 +409,7 @@ impl<T: Config> Rpc<T> {
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
-            .request("chain_getFinalizedHead", [])
+            .request("chain_getFinalizedHead", ())
             .await?;
         Ok(hash)
     }
@@ -464,12 +464,12 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<RpcSubscription<T::Header>, Error> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
                 "chain_subscribeNewHeads",
-                [],
+                (),
                 "chain_unsubscribeNewHeads",
             )
             .await?;
@@ -480,12 +480,12 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> Result<RpcSubscription<T::Header>, Error> {
+    ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
                 "chain_subscribeFinalizedHeads",
-                [],
+                (),
                 "chain_unsubscribeFinalizedHeads",
             )
             .await?;
@@ -495,12 +495,12 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to runtime version updates that produce changes in the metadata.
     pub async fn subscribe_runtime_version(
         &self,
-    ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
+    ) -> Result<Subscription<RuntimeVersion>, Error> {
         let subscription = self
             .client
             .subscribe(
                 "state_subscribeRuntimeVersion",
-                [],
+                (),
                 "state_unsubscribeRuntimeVersion",
             )
             .await?;
@@ -525,7 +525,7 @@ impl<T: Config> Rpc<T> {
     pub async fn watch_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
+    ) -> Result<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = [bytes];
         let subscription = self
@@ -555,7 +555,7 @@ impl<T: Config> Rpc<T> {
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
         Ok(self
             .client
-            .request("author_rotateKeys", [])
+            .request("author_rotateKeys", ())
             .await?)
     }
 

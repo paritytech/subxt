@@ -8,11 +8,13 @@ use super::{
 };
 use crate::{
     constants::ConstantsClient,
-    error::Error,
+    error::{
+        Error,
+        RpcError,
+    },
     events::EventsClient,
     rpc::{
         Rpc,
-        RpcClient,
         RpcClientT,
         RuntimeVersion,
     },
@@ -21,7 +23,6 @@ use crate::{
     Config,
     Metadata,
 };
-use jsonrpsee::core::client::Client as JsonRpcClient;
 use derivative::Derivative;
 use futures::future;
 use parking_lot::RwLock;
@@ -40,7 +41,7 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
     inner: Arc<RwLock<Inner<T>>>,
-    rpc: RpcClient,
+    rpc: Rpc<T>,
 }
 
 #[derive(Derivative)]
@@ -63,14 +64,16 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
-    pub async fn new() -> Result<OnlineClient<T, JsonRpcClient>, Error> {
+    pub async fn new() -> Result<OnlineClient<T>, Error> {
         let url = "ws://127.0.0.1:9944";
         OnlineClient::from_url(url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
-    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T, JsonRpcClient>, Error> {
-        let client = jsonrpsee_helpers::ws_client(url.as_ref()).await?;
+    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+        let client = jsonrpsee_helpers::ws_client(url.as_ref())
+            .await
+            .map_err(|e| RpcError(e.to_string()))?;
         OnlineClient::from_rpc_client(client).await
     }
 }
@@ -82,7 +85,7 @@ impl <T: Config> OnlineClient<T> {
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: R,
     ) -> Result<OnlineClient<T>, Error> {
-        let rpc = Rpc::new(RpcClient::new(rpc_client));
+        let rpc = Rpc::new(rpc_client);
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
@@ -180,7 +183,7 @@ impl <T: Config> OnlineClient<T> {
     }
 }
 
-impl<T: Config, R> OfflineClientT<T> for OnlineClient<T> {
+impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn metadata(&self) -> Metadata {
         self.metadata()
     }
@@ -200,7 +203,7 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
 
 /// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
 /// for example usage.
-pub struct ClientRuntimeUpdater<T>(OnlineClient<T>);
+pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 
 impl<T: Config> ClientRuntimeUpdater<T> {
     fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
