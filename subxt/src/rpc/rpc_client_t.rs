@@ -16,11 +16,8 @@ use std::{
 /// This is a low level interface which expects an already-serialized set of params,
 /// and returns an owned but still-serialized [`RawValue`], deferring deserialization to
 /// the caller. This is the case because we want the methods to be object-safe (which prohibits
-/// generics), and want to avoid any unnecessary allocations.
-// Dev note: to avoid a proliferation of where clauses and generic types, we
-// currently expect boxed futures/streams to be returned. This imposes a limit on
-// implementations and forces an allocation, but is simpler for the library to
-// work with.
+/// generics), and want to avoid any unnecessary allocations in serializing/deserializing
+/// parameters.
 pub trait RpcClientT: Send + Sync + 'static {
     /// Make a raw request for which we expect a single response back from. The params will
     /// be provided in the form of a pre-encoded JSON array.
