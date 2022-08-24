@@ -165,46 +165,45 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
             None => return Poll::Ready(None),
         };
 
-        sub.poll_next_unpin(cx)
-            .map_ok(|status| {
-                match status {
-                    SubstrateTxStatus::Future => TxStatus::Future,
-                    SubstrateTxStatus::Ready => TxStatus::Ready,
-                    SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
-                    SubstrateTxStatus::InBlock(hash) => {
-                        TxStatus::InBlock(TxInBlock::new(
-                            hash,
-                            self.ext_hash,
-                            self.client.clone(),
-                        ))
-                    }
-                    SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
-                    SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
-                    SubstrateTxStatus::Dropped => TxStatus::Dropped,
-                    SubstrateTxStatus::Invalid => TxStatus::Invalid,
-                    // Only the following statuses are actually considered "final" (see the substrate
-                    // docs on `TxStatus`). Basically, either the transaction makes it into a
-                    // block, or we eventually give up on waiting for it to make it into a block.
-                    // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
-                    //
-                    // As an example, a transaction that is `Invalid` on one node due to having the wrong
-                    // nonce might still be valid on some fork on another node which ends up being finalized.
-                    // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
-                    // and make it into a block, on another node. Likewise with `Usurped`.
-                    SubstrateTxStatus::FinalityTimeout(hash) => {
-                        self.sub = None;
-                        TxStatus::FinalityTimeout(hash)
-                    }
-                    SubstrateTxStatus::Finalized(hash) => {
-                        self.sub = None;
-                        TxStatus::Finalized(TxInBlock::new(
-                            hash,
-                            self.ext_hash,
-                            self.client.clone(),
-                        ))
-                    }
+        sub.poll_next_unpin(cx).map_ok(|status| {
+            match status {
+                SubstrateTxStatus::Future => TxStatus::Future,
+                SubstrateTxStatus::Ready => TxStatus::Ready,
+                SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
+                SubstrateTxStatus::InBlock(hash) => {
+                    TxStatus::InBlock(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
                 }
-            })
+                SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
+                SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
+                SubstrateTxStatus::Dropped => TxStatus::Dropped,
+                SubstrateTxStatus::Invalid => TxStatus::Invalid,
+                // Only the following statuses are actually considered "final" (see the substrate
+                // docs on `TxStatus`). Basically, either the transaction makes it into a
+                // block, or we eventually give up on waiting for it to make it into a block.
+                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                //
+                // As an example, a transaction that is `Invalid` on one node due to having the wrong
+                // nonce might still be valid on some fork on another node which ends up being finalized.
+                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
+                // and make it into a block, on another node. Likewise with `Usurped`.
+                SubstrateTxStatus::FinalityTimeout(hash) => {
+                    self.sub = None;
+                    TxStatus::FinalityTimeout(hash)
+                }
+                SubstrateTxStatus::Finalized(hash) => {
+                    self.sub = None;
+                    TxStatus::Finalized(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
+                }
+            }
+        })
     }
 }
 

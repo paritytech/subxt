@@ -343,8 +343,7 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        self
-            .client
+        self.client
             .request("system_properties", rpc_params![]?)
             .await
     }
@@ -366,10 +365,7 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        self
-            .client
-            .request("system_version", rpc_params![]?)
-            .await
+        self.client.request("system_version", rpc_params![]?).await
     }
 
     /// Fetch the current nonce for the given account ID.
@@ -377,8 +373,7 @@ impl<T: Config> Rpc<T> {
         &self,
         account: &T::AccountId,
     ) -> Result<T::Index, Error> {
-        self
-            .client
+        self.client
             .request("system_accountNextIndex", rpc_params![account]?)
             .await
     }
@@ -551,8 +546,7 @@ impl<T: Config> Rpc<T> {
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        self
-            .client
+        self.client
             .request("author_rotateKeys", rpc_params![]?)
             .await
     }
