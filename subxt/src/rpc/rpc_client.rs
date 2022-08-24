@@ -22,10 +22,11 @@ use std::{
     task::Poll,
 };
 
-/// A concrete wrapper around an [`RpcClientT`] to add a layer of useful functionality on top.
-// Dev note: These would be an Ext trait or methods on the `RpcClientT` trait, but
-// we run into issues with async fns not supported in traits and object safety issues,
-// which we can avoid by having this concrete wrapper type.
+/// A concrete wrapper around an [`RpcClientT`] which exposes the underlying methods via deref,
+/// but adds some higher level functions on top which handle serializing and deserializing, too.
+///
+/// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
+/// without getting into issues with non-object-safe methods or no `async` in traits.
 #[derive(Clone)]
 pub struct RpcClient(Arc<dyn RpcClientT>);
 
@@ -34,8 +35,7 @@ impl RpcClient {
         RpcClient(Arc::new(client))
     }
 
-    /// Make an RPC request. Params are expected to be an array or tuple of 0 or more
-    /// items which can be serialized.
+    /// Make an RPC request, given a method name and some parameters.
     pub async fn request<Res: DeserializeOwned>(
         &self,
         method: &str,
@@ -47,8 +47,7 @@ impl RpcClient {
     }
 
     /// Subscribe to an RPC endpoint, providing the parameters and the method to call to
-    /// unsubscribe from it again. Params are expected to be an array or tuple of 0 or more
-    /// items which can be serialized.
+    /// unsubscribe from it again.
     pub async fn subscribe<Res: DeserializeOwned>(
         &self,
         sub: &str,
@@ -73,7 +72,24 @@ impl std::ops::Deref for RpcClient {
     }
 }
 
-/// Create some [`RpcParams`] to pass to our [`RpcClient`].
+/// Create some [`RpcParams`] to pass to our [`RpcClient`]. [`RpcParams`]
+/// simply enforces that parameters handed to our [`RpcClient`] methods
+/// are the correct shape.
+///
+/// Returns `Ok(params)` if it was successful, else an error if there was
+/// some issue serializing your type to JSON.
+///
+/// # Example
+///
+/// ```rust
+/// use subxt::rpc::{ rpc_params, RpcParams };
+///
+/// let params: RpcParams = rpc_params![].unwrap();
+/// assert_eq!(params.build().get(), "[]");
+///
+/// let params: RpcParams = rpc_params![1, true, "foo"].unwrap();
+/// assert_eq!(params.build().get(), "[1,true,\"foo\"]");
+/// ```
 #[macro_export]
 macro_rules! rpc_params {
     ($($p:expr), *) => {{
@@ -95,16 +111,35 @@ pub use rpc_params;
 
 /// This represents the parameters passed to an [`RpcClient`], and exists to
 /// enforce that parameters are provided in the correct format.
+///
+/// Prefer to use the [`rpc_params!`] macro for simpler creation of these.
+///
+/// # Example
+///
+/// ```rust
+/// use subxt::rpc::RpcParams;
+///
+/// let mut params = RpcParams::new();
+/// params.push(1).unwrap();
+/// params.push(true).unwrap();
+/// params.push("foo").unwrap();
+///
+/// assert_eq!(params.build().get(), "[1,true,\"foo\"]");
+/// ```
 #[derive(Debug, Clone, Default)]
 pub struct RpcParams(Vec<u8>);
 
 impl RpcParams {
     /// Create a new empty set of [`RpcParams`].
+    ///
+    /// Note: this allocates, since we'll need at least 2 bytes of space, and
+    /// need to produce a [`Box<RawValue>`] at the end.
     pub fn new() -> Self {
         // Empty params still need 2 bytes for "[]".
         Self(Vec::with_capacity(2))
     }
-    /// Push a parameter into our [`RpcParams`]. This serializes it.
+    /// Push a parameter into our [`RpcParams`]. This serializes it to JSON
+    /// in the process, and so will return an error if this is not possible.
     pub fn push<P: Serialize>(&mut self, param: P) -> Result<(), Error> {
         if self.0.is_empty() {
             self.0.push(b'[');
@@ -115,7 +150,7 @@ impl RpcParams {
         Ok(())
     }
     /// Build a [`RawValue`] from our params.
-    fn build(mut self) -> Box<RawValue> {
+    pub fn build(mut self) -> Box<RawValue> {
         if self.0.is_empty() {
             self.0.push(b'[');
         }
@@ -125,7 +160,9 @@ impl RpcParams {
     }
 }
 
-/// A generic RPC Subscription. This implements [`Stream`].
+/// A generic RPC Subscription. This implements [`Stream`], and so most of
+/// the functionality you'll need to interact with it comes from the
+/// [`StreamExt`] extension trait.
 pub struct Subscription<Res> {
     inner: RpcSubscription,
     _marker: std::marker::PhantomData<Res>,
