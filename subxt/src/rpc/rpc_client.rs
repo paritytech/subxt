@@ -139,8 +139,6 @@ impl<Res> std::fmt::Debug for Subscription<Res> {
     }
 }
 
-impl<Res> std::marker::Unpin for Subscription<Res> {}
-
 impl<Res> Subscription<Res> {
     fn new(inner: RpcSubscriptionStream) -> Self {
         Self {
@@ -156,6 +154,8 @@ impl<Res: DeserializeOwned> Subscription<Res> {
         StreamExt::next(self).await
     }
 }
+
+impl<Res> std::marker::Unpin for Subscription<Res> {}
 
 impl<Res: DeserializeOwned> Stream for Subscription<Res> {
     type Item = Result<Res, Error>;
