@@ -14,9 +14,6 @@ use crate::{
         RpcError,
         TransactionError,
     },
-    rpc::{
-        Subscription,
-    },
     events::{
         self,
         EventDetails,
@@ -25,7 +22,10 @@ use crate::{
         Phase,
         StaticEvent,
     },
-    rpc::SubstrateTxStatus,
+    rpc::{
+        Subscription,
+        SubstrateTxStatus,
+    },
     Config,
 };
 use derivative::Derivative;

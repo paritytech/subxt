@@ -39,12 +39,9 @@
 //! # }
 //! ```
 
-use std::{
-    collections::HashMap,
-};
 use super::{
-    RpcClientT,
     RpcClient,
+    RpcClientT,
     Subscription,
 };
 use crate::{
@@ -78,6 +75,7 @@ use sp_runtime::{
     },
     ApplyExtrinsicResult,
 };
+use std::collections::HashMap;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -332,10 +330,7 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch the metadata
     pub async fn metadata(&self) -> Result<Metadata, Error> {
-        let bytes: Bytes = self
-            .client
-            .request("state_getMetadata", ())
-            .await?;
+        let bytes: Bytes = self.client.request("state_getMetadata", ()).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
@@ -343,10 +338,7 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        Ok(self
-            .client
-            .request("system_properties", ())
-            .await?)
+        Ok(self.client.request("system_properties", ()).await?)
     }
 
     /// Fetch system health
@@ -402,10 +394,7 @@ impl<T: Config> Rpc<T> {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let hash = self
-            .client
-            .request("chain_getFinalizedHead", ())
-            .await?;
+        let hash = self.client.request("chain_getFinalizedHead", ()).await?;
         Ok(hash)
     }
 
@@ -462,11 +451,7 @@ impl<T: Config> Rpc<T> {
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
-            .subscribe(
-                "chain_subscribeNewHeads",
-                (),
-                "chain_unsubscribeNewHeads",
-            )
+            .subscribe("chain_subscribeNewHeads", (), "chain_unsubscribeNewHeads")
             .await?;
 
         Ok(subscription)
@@ -548,10 +533,7 @@ impl<T: Config> Rpc<T> {
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        Ok(self
-            .client
-            .request("author_rotateKeys", ())
-            .await?)
+        Ok(self.client.request("author_rotateKeys", ()).await?)
     }
 
     /// Checks if the keystore has private keys for the given session public keys.

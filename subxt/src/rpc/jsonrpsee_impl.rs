@@ -7,19 +7,30 @@ use super::{
     RpcResponse,
     RpcSubscription,
 };
-use serde_json::value::{ Value, RawValue };
 use crate::error::RpcError;
-use jsonrpsee::{
-    core::client::{ ClientT, SubscriptionClientT, Client },
-    types::ParamsSer,
-};
 use futures::stream::{
     StreamExt,
     TryStreamExt,
 };
+use jsonrpsee::{
+    core::client::{
+        Client,
+        ClientT,
+        SubscriptionClientT,
+    },
+    types::ParamsSer,
+};
+use serde_json::value::{
+    RawValue,
+    Value,
+};
 
 impl RpcClientT for Client {
-    fn request_raw<'a>(&'a self, method: &'a str, params: Box<RawValue>) -> RpcResponse<'a> {
+    fn request_raw<'a>(
+        &'a self,
+        method: &'a str,
+        params: Box<RawValue>,
+    ) -> RpcResponse<'a> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
             let res = ClientT::request(self, method, Some(params))
@@ -29,14 +40,24 @@ impl RpcClientT for Client {
         })
     }
 
-    fn subscribe_raw<'a>(&'a self, sub: &'a str, params: Box<RawValue>, unsub: &'a str) -> RpcSubscription<'a> {
+    fn subscribe_raw<'a>(
+        &'a self,
+        sub: &'a str,
+        params: Box<RawValue>,
+        unsub: &'a str,
+    ) -> RpcSubscription<'a> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
-            let sub = SubscriptionClientT::subscribe::<Box<RawValue>>(self, sub, Some(params), unsub)
-                .await
-                .map_err(|e| RpcError(e.to_string()))?
-                .map_err(|e| RpcError(e.to_string()))
-                .boxed();
+            let sub = SubscriptionClientT::subscribe::<Box<RawValue>>(
+                self,
+                sub,
+                Some(params),
+                unsub,
+            )
+            .await
+            .map_err(|e| RpcError(e.to_string()))?
+            .map_err(|e| RpcError(e.to_string()))
+            .boxed();
             Ok(sub)
         })
     }
@@ -48,7 +69,11 @@ fn prep_params_for_jsonrpsee(params: &RawValue) -> Result<ParamsSer<'static>, Rp
     let val = serde_json::to_value(&params).expect("RawValue guarantees valid JSON");
     let arr = match val {
         Value::Array(arr) => Ok(arr),
-        _ => Err(RpcError(format!("RPC Params are expected to be an array but got {params}")))
+        _ => {
+            Err(RpcError(format!(
+                "RPC Params are expected to be an array but got {params}"
+            )))
+        }
     }?;
     Ok(ParamsSer::Array(arr))
 }

@@ -8,9 +8,7 @@ use super::{
 };
 use crate::{
     constants::ConstantsClient,
-    error::{
-        Error,
-    },
+    error::Error,
     events::EventsClient,
     rpc::{
         Rpc,
@@ -79,8 +77,7 @@ impl<T: Config> OnlineClient<T> {
     }
 }
 
-impl <T: Config> OnlineClient<T> {
-
+impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
     /// implementation to use to drive the connection.
     pub async fn from_rpc_client<R: RpcClientT>(
