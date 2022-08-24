@@ -39,7 +39,8 @@
 //! # }
 //! ```
 
-// Allow an `rpc.rs` file in the `rpc` folder.
+// Allow an `rpc.rs` file in the `rpc` folder to align better
+// with other file names for their types.
 #![allow(clippy::module_inception)]
 
 #[cfg(feature = "jsonrpsee")]
@@ -54,9 +55,8 @@ pub use rpc::*;
 
 pub use rpc_client_t::{
     RpcClientT,
-    RpcResponse,
+    RpcFuture,
     RpcSubscription,
-    RpcSubscriptionStream,
 };
 
 pub use rpc_client::{

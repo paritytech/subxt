@@ -4,7 +4,7 @@
 
 use super::{
     RpcClientT,
-    RpcResponse,
+    RpcFuture,
     RpcSubscription,
 };
 use crate::error::RpcError;
@@ -30,7 +30,7 @@ impl RpcClientT for Client {
         &'a self,
         method: &'a str,
         params: Box<RawValue>,
-    ) -> RpcResponse<'a> {
+    ) -> RpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
             let res = ClientT::request(self, method, Some(params))
@@ -45,7 +45,7 @@ impl RpcClientT for Client {
         sub: &'a str,
         params: Box<RawValue>,
         unsub: &'a str,
-    ) -> RpcSubscription<'a> {
+    ) -> RpcFuture<'a, RpcSubscription> {
         Box::pin(async move {
             let params = prep_params_for_jsonrpsee(&params)?;
             let sub = SubscriptionClientT::subscribe::<Box<RawValue>>(

@@ -28,7 +28,7 @@ pub trait RpcClientT: Send + Sync + 'static {
         &'a self,
         method: &'a str,
         params: Box<RawValue>,
-    ) -> RpcResponse<'a>;
+    ) -> RpcFuture<'a, Box<RawValue>>;
 
     /// Subscribe to some method. The params will be provided in the form of a pre-encoded JSON array,
     /// and the "unsub" param tells the underlying client which method is expected to be called to unsubscribe.
@@ -37,17 +37,13 @@ pub trait RpcClientT: Send + Sync + 'static {
         sub: &'a str,
         params: Box<RawValue>,
         unsub: &'a str,
-    ) -> RpcSubscription<'a>;
+    ) -> RpcFuture<'a, RpcSubscription>;
 }
 
-/// The response returned from our [`RpcClientT`] implementation's `request` method.
-pub type RpcResponse<'a> =
-    Pin<Box<dyn Future<Output = Result<Box<RawValue>, RpcError>> + Send + 'a>>;
-
-/// The response returned from our [`RpcClientT`] implementation's `subscribe` method.
-pub type RpcSubscription<'a> =
-    Pin<Box<dyn Future<Output = Result<RpcSubscriptionStream, RpcError>> + Send + 'a>>;
+/// A boxed future that is returned from the [`RpcClientT`] methods.
+pub type RpcFuture<'a, T> =
+    Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
 /// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscriptionStream =
+pub type RpcSubscription =
     Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>;

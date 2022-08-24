@@ -4,7 +4,7 @@
 
 use super::{
     RpcClientT,
-    RpcSubscriptionStream,
+    RpcSubscription,
 };
 use crate::error::Error;
 use futures::{
@@ -127,21 +127,21 @@ impl RpcParams {
 
 /// A generic RPC Subscription. This implements [`Stream`].
 pub struct Subscription<Res> {
-    inner: RpcSubscriptionStream,
+    inner: RpcSubscription,
     _marker: std::marker::PhantomData<Res>,
 }
 
 impl<Res> std::fmt::Debug for Subscription<Res> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Subscription")
-            .field("inner", &"RpcSubscriptionStream")
+            .field("inner", &"RpcSubscription")
             .field("_marker", &self._marker)
             .finish()
     }
 }
 
 impl<Res> Subscription<Res> {
-    fn new(inner: RpcSubscriptionStream) -> Self {
+    fn new(inner: RpcSubscription) -> Self {
         Self {
             inner,
             _marker: std::marker::PhantomData,
