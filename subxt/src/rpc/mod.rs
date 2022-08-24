@@ -42,14 +42,13 @@
 #[cfg(feature = "jsonrpsee")]
 mod jsonrpsee_impl;
 
-mod methods;
+mod rpc;
 mod rpc_client;
 mod rpc_client_t;
 
 // Expose the `Rpc` struct and any associated types.
-pub use methods::*;
+pub use rpc::*;
 
-// The underlying client used to talk to a node.
 pub use rpc_client_t::{
     RpcClientT,
     RpcResponse,
@@ -57,8 +56,9 @@ pub use rpc_client_t::{
     RpcSubscriptionStream,
 };
 
-// A wrapper around the above; this is what is generally exposed.
 pub use rpc_client::{
+    rpc_params,
     RpcClient,
+    RpcParams,
     Subscription,
 };

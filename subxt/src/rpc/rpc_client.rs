@@ -6,10 +6,7 @@ use super::{
     RpcClientT,
     RpcSubscriptionStream,
 };
-use crate::error::{
-    Error,
-    RpcError,
-};
+use crate::error::Error;
 use futures::{
     Stream,
     StreamExt,
@@ -39,17 +36,12 @@ impl RpcClient {
 
     /// Make an RPC request. Params are expected to be an array or tuple of 0 or more
     /// items which can be serialized.
-    pub async fn request<P, Res>(&self, method: &str, params: P) -> Result<Res, Error>
-    where
-        P: Serialize,
-        Res: DeserializeOwned,
-    {
-        let param_string =
-            serde_json::to_string(&params).map_err(|e| RpcError(e.to_string()))?;
-        let params_value = RawValue::from_string(param_string)
-            .expect("Just serialized so must be valid JSON");
-
-        let res = self.0.request_raw(method, params_value).await?;
+    pub async fn request<Res: DeserializeOwned>(
+        &self,
+        method: &str,
+        params: RpcParams,
+    ) -> Result<Res, Error> {
+        let res = self.0.request_raw(method, params.build()).await?;
         let val = serde_json::from_str(res.get())?;
         Ok(val)
     }
@@ -57,22 +49,13 @@ impl RpcClient {
     /// Subscribe to an RPC endpoint, providing the parameters and the method to call to
     /// unsubscribe from it again. Params are expected to be an array or tuple of 0 or more
     /// items which can be serialized.
-    pub async fn subscribe<P, Res>(
+    pub async fn subscribe<Res: DeserializeOwned>(
         &self,
         sub: &str,
-        params: P,
+        params: RpcParams,
         unsub: &str,
-    ) -> Result<Subscription<Res>, Error>
-    where
-        P: Serialize,
-        Res: DeserializeOwned,
-    {
-        let param_string =
-            serde_json::to_string(&params).map_err(|e| RpcError(e.to_string()))?;
-        let params_value = RawValue::from_string(param_string)
-            .expect("Just serialized so must be valid JSON");
-
-        let sub = self.0.subscribe_raw(sub, params_value, unsub).await?;
+    ) -> Result<Subscription<Res>, Error> {
+        let sub = self.0.subscribe_raw(sub, params.build(), unsub).await?;
         Ok(Subscription::new(sub))
     }
 }
@@ -87,6 +70,57 @@ impl std::ops::Deref for RpcClient {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
         &*self.0
+    }
+}
+
+/// Create some [`RpcParams`] to pass to our [`RpcClient`].
+#[macro_export]
+macro_rules! rpc_params {
+    ($($p:expr), *) => {{
+        // May be unused if empty; no params.
+        #[allow(unused_mut)]
+        let mut params = crate::rpc::RpcParams::new();
+        // loop here to allow breaking early with an error.
+        loop {
+            $(
+                if let Err(e) = params.push($p) {
+                    break Err(e)
+                }
+            )*
+            break Ok::<crate::rpc::RpcParams, crate::error::Error>(params)
+        }
+    }}
+}
+pub use rpc_params;
+
+/// This represents the parameters passed to an [`RpcClient`], and exists to
+/// enforce that parameters are provided in the correct format.
+pub struct RpcParams(Vec<u8>);
+
+impl RpcParams {
+    /// Create a new empty set of [`RpcParams`].
+    pub fn new() -> Self {
+        // Empty params still need 2 bytes for "[]".
+        Self(Vec::with_capacity(2))
+    }
+    /// Push a parameter into our [`RpcParams`]. This serializes it.
+    pub fn push<P: Serialize>(&mut self, param: P) -> Result<(), Error> {
+        if self.0.is_empty() {
+            self.0.push(b'[');
+        } else {
+            self.0.push(b',')
+        }
+        serde_json::to_writer(&mut self.0, &param)?;
+        Ok(())
+    }
+    /// Build a [`RawValue`] from our params.
+    fn build(mut self) -> Box<RawValue> {
+        if self.0.is_empty() {
+            self.0.push(b'[');
+        }
+        self.0.push(b']');
+        let s = String::from_utf8(self.0).expect("JSON is valid utf8");
+        RawValue::from_string(s).expect("Should be valid JSON")
     }
 }
 

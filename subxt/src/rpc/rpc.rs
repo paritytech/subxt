@@ -40,6 +40,7 @@
 //! ```
 
 use super::{
+    rpc_params,
     RpcClient,
     RpcClientT,
     Subscription,
@@ -258,7 +259,8 @@ impl<T: Config> Rpc<T> {
         }
     }
 
-    /// Return the underlying [`RpcClientT`] implementation.
+    /// Return the underlying [`RpcClient`], which itself exposes
+    /// the methods from the generic [`RpcClientT`] implementation.
     pub fn client(&self) -> &RpcClient {
         &self.client
     }
@@ -269,7 +271,7 @@ impl<T: Config> Rpc<T> {
         key: &[u8],
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
-        let params = (to_hex(key), hash);
+        let params = rpc_params![to_hex(key), hash]?;
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
@@ -285,7 +287,7 @@ impl<T: Config> Rpc<T> {
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
         let start_key = start_key.map(to_hex);
-        let params = (to_hex(key), count, start_key, hash);
+        let params = rpc_params![to_hex(key), count, start_key, hash]?;
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -298,7 +300,7 @@ impl<T: Config> Rpc<T> {
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = (keys, from, to);
+        let params = rpc_params![keys, from, to]?;
         self.client
             .request("state_queryStorage", params)
             .await
@@ -312,7 +314,7 @@ impl<T: Config> Rpc<T> {
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = (keys, at);
+        let params = rpc_params![keys, at]?;
         self.client
             .request("state_queryStorageAt", params)
             .await
@@ -322,7 +324,7 @@ impl<T: Config> Rpc<T> {
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = 0u32;
-        let params = [block_zero];
+        let params = rpc_params![block_zero]?;
         let genesis_hash: Option<T::Hash> =
             self.client.request("chain_getBlockHash", params).await?;
         genesis_hash.ok_or_else(|| "Genesis hash not found".into())
@@ -330,7 +332,10 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch the metadata
     pub async fn metadata(&self) -> Result<Metadata, Error> {
-        let bytes: Bytes = self.client.request("state_getMetadata", ()).await?;
+        let bytes: Bytes = self
+            .client
+            .request("state_getMetadata", rpc_params![]?)
+            .await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
@@ -338,27 +343,33 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        Ok(self.client.request("system_properties", ()).await?)
+        Ok(self
+            .client
+            .request("system_properties", rpc_params![]?)
+            .await?)
     }
 
     /// Fetch system health
     pub async fn system_health(&self) -> Result<Health, Error> {
-        Ok(self.client.request("system_health", ()).await?)
+        Ok(self.client.request("system_health", rpc_params![]?).await?)
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_chain", ()).await?)
+        Ok(self.client.request("system_chain", rpc_params![]?).await?)
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_name", ()).await?)
+        Ok(self.client.request("system_name", rpc_params![]?).await?)
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_version", ()).await?)
+        Ok(self
+            .client
+            .request("system_version", rpc_params![]?)
+            .await?)
     }
 
     /// Fetch the current nonce for the given account ID.
@@ -368,7 +379,7 @@ impl<T: Config> Rpc<T> {
     ) -> Result<T::Index, Error> {
         Ok(self
             .client
-            .request("system_accountNextIndex", [account])
+            .request("system_accountNextIndex", rpc_params![account]?)
             .await?)
     }
 
@@ -377,7 +388,7 @@ impl<T: Config> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<T::Header>, Error> {
-        let params = [hash];
+        let params = rpc_params![hash]?;
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
     }
@@ -387,14 +398,17 @@ impl<T: Config> Rpc<T> {
         &self,
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
-        let params = [block_number];
+        let params = rpc_params![block_number]?;
         let block_hash = self.client.request("chain_getBlockHash", params).await?;
         Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let hash = self.client.request("chain_getFinalizedHead", ()).await?;
+        let hash = self
+            .client
+            .request("chain_getFinalizedHead", rpc_params![]?)
+            .await?;
         Ok(hash)
     }
 
@@ -403,7 +417,7 @@ impl<T: Config> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        let params = [hash];
+        let params = rpc_params![hash]?;
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
     }
@@ -417,7 +431,7 @@ impl<T: Config> Rpc<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<BlockStats>, Error> {
-        let params = [block_hash];
+        let params = rpc_params![block_hash]?;
         let stats = self.client.request("dev_getBlockStats", params).await?;
         Ok(stats)
     }
@@ -429,7 +443,7 @@ impl<T: Config> Rpc<T> {
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
-        let params = (keys, hash);
+        let params = rpc_params![keys, hash]?;
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
     }
@@ -439,7 +453,7 @@ impl<T: Config> Rpc<T> {
         &self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
-        let params = [at];
+        let params = rpc_params![at]?;
         let version = self
             .client
             .request("state_getRuntimeVersion", params)
@@ -451,7 +465,11 @@ impl<T: Config> Rpc<T> {
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
-            .subscribe("chain_subscribeNewHeads", (), "chain_unsubscribeNewHeads")
+            .subscribe(
+                "chain_subscribeNewHeads",
+                rpc_params![]?,
+                "chain_unsubscribeNewHeads",
+            )
             .await?;
 
         Ok(subscription)
@@ -465,7 +483,7 @@ impl<T: Config> Rpc<T> {
             .client
             .subscribe(
                 "chain_subscribeFinalizedHeads",
-                (),
+                rpc_params![]?,
                 "chain_unsubscribeFinalizedHeads",
             )
             .await?;
@@ -480,7 +498,7 @@ impl<T: Config> Rpc<T> {
             .client
             .subscribe(
                 "state_subscribeRuntimeVersion",
-                (),
+                rpc_params![]?,
                 "state_unsubscribeRuntimeVersion",
             )
             .await?;
@@ -493,7 +511,7 @@ impl<T: Config> Rpc<T> {
         extrinsic: X,
     ) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
-        let params = [bytes];
+        let params = rpc_params![bytes]?;
         let xt_hash = self
             .client
             .request("author_submitExtrinsic", params)
@@ -507,7 +525,7 @@ impl<T: Config> Rpc<T> {
         extrinsic: X,
     ) -> Result<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
-        let params = [bytes];
+        let params = rpc_params![bytes]?;
         let subscription = self
             .client
             .subscribe(
@@ -526,14 +544,17 @@ impl<T: Config> Rpc<T> {
         suri: String,
         public: Bytes,
     ) -> Result<(), Error> {
-        let params = (key_type, suri, public);
+        let params = rpc_params![key_type, suri, public]?;
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        Ok(self.client.request("author_rotateKeys", ()).await?)
+        Ok(self
+            .client
+            .request("author_rotateKeys", rpc_params![]?)
+            .await?)
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -542,7 +563,7 @@ impl<T: Config> Rpc<T> {
     ///
     /// Returns `true` iff all private keys could be found.
     pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
-        let params = [session_keys];
+        let params = rpc_params![session_keys]?;
         Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
 
@@ -554,7 +575,7 @@ impl<T: Config> Rpc<T> {
         public_key: Bytes,
         key_type: String,
     ) -> Result<bool, Error> {
-        let params = (public_key, key_type);
+        let params = rpc_params![public_key, key_type]?;
         Ok(self.client.request("author_hasKey", params).await?)
     }
 
@@ -566,7 +587,7 @@ impl<T: Config> Rpc<T> {
         encoded_signed: &[u8],
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, Error> {
-        let params = (to_hex(encoded_signed), at);
+        let params = rpc_params![to_hex(encoded_signed), at]?;
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;
