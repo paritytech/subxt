@@ -10,7 +10,6 @@ use crate::{
     constants::ConstantsClient,
     error::{
         Error,
-        RpcError,
     },
     events::EventsClient,
     rpc::{
@@ -61,6 +60,8 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
+// The default constructors assume Jsonrpsee.
+#[cfg(feature = "jsonrpsee")]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
@@ -73,7 +74,7 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
         let client = jsonrpsee_helpers::ws_client(url.as_ref())
             .await
-            .map_err(|e| RpcError(e.to_string()))?;
+            .map_err(|e| crate::error::RpcError(e.to_string()))?;
         OnlineClient::from_rpc_client(client).await
     }
 }
@@ -242,12 +243,13 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
+#[cfg(feature = "jsonrpsee")]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
             InvalidUri,
-            Receiver as WsReceiver,
-            Sender as WsSender,
+            Receiver,
+            Sender,
             Uri,
             WsTransportClientBuilder,
         },
@@ -255,18 +257,10 @@ mod jsonrpsee_helpers {
             client::{
                 Client,
                 ClientBuilder,
-                ClientT,
-                Subscription,
-                SubscriptionClientT,
             },
-            to_json_value,
-            DeserializeOwned,
             Error,
-            JsonValue,
         },
-        rpc_params,
     };
-
 
     /// Build WS RPC client from URL
     pub async fn ws_client(url: &str) -> Result<Client, Error> {
@@ -276,7 +270,7 @@ mod jsonrpsee_helpers {
             .build_with_tokio(sender, receiver))
     }
 
-    async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), Error> {
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
         let url: Uri = url
             .parse()
             .map_err(|e: InvalidUri| Error::Transport(e.into()))?;

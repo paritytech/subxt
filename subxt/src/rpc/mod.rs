@@ -39,7 +39,9 @@
 //! # }
 //! ```
 
+#[cfg(feature = "jsonrpsee")]
 mod jsonrpsee_impl;
+
 mod methods;
 mod rpc_client;
 mod rpc_client_t;

@@ -39,11 +39,6 @@
 //! # }
 //! ```
 
-// jsonrpsee subscriptions are interminable.
-// Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/subxt/issues/66
-#![allow(irrefutable_let_patterns)]
-
 use std::{
     collections::HashMap,
 };
