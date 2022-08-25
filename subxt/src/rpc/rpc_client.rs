@@ -91,7 +91,7 @@ impl std::ops::Deref for RpcClient {
 /// use subxt::rpc::{ rpc_params, RpcParams };
 ///
 /// let params: RpcParams = rpc_params![].unwrap();
-/// assert_eq!(params.build().unwrap().get(), "[]");
+/// assert_eq!(params.build(), None);
 ///
 /// let params: RpcParams = rpc_params![1, true, "foo"].unwrap();
 /// assert_eq!(params.build().unwrap().get(), "[1,true,\"foo\"]");
@@ -137,9 +137,6 @@ pub struct RpcParams(Vec<u8>);
 
 impl RpcParams {
     /// Create a new empty set of [`RpcParams`].
-    ///
-    /// Note: this allocates, since we'll need at least 2 bytes of space, and
-    /// need to produce a [`Box<RawValue>`] at the end.
     pub fn new() -> Self {
         Self(Vec::new())
     }
@@ -154,7 +151,8 @@ impl RpcParams {
         serde_json::to_writer(&mut self.0, &param)?;
         Ok(())
     }
-    /// Build a [`RawValue`] from our params.
+    /// Build a [`RawValue`] from our params, returning `None` if no parameters
+    /// were provided.
     pub fn build(mut self) -> Option<Box<RawValue>> {
         if self.0.is_empty() {
             None
