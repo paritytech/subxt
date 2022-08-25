@@ -720,7 +720,6 @@ mod test {
     use super::*;
 
     /// A util function to assert the result of serialization and deserialization is the same.
-    #[cfg(test)]
     pub(crate) fn assert_deser<T>(s: &str, expected: T)
     where
         T: std::fmt::Debug
