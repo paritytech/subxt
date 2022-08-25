@@ -41,7 +41,7 @@ pub struct ValidationDetails<'a> {
     pub call_name: &'a str,
     /// A hash (this is generated at compile time in our codegen)
     /// to compare against the runtime code.
-    pub hash: [u8; 32]
+    pub hash: [u8; 32],
 }
 
 /// This represents a statically generated transaction payload.
@@ -98,7 +98,7 @@ impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
             ValidationDetails {
                 pallet_name: &self.pallet_name,
                 call_name: &self.call_name,
-                hash
+                hash,
             }
         })
     }
