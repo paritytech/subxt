@@ -71,6 +71,13 @@ impl std::fmt::Debug for RpcClient {
     }
 }
 
+impl std::ops::Deref for RpcClient {
+    type Target = dyn RpcClientT;
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
 /// Create some [`RpcParams`] to pass to our [`RpcClient`]. [`RpcParams`]
 /// simply enforces that parameters handed to our [`RpcClient`] methods
 /// are the correct shape.

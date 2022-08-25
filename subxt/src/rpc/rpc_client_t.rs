@@ -23,9 +23,10 @@ pub trait RpcClientT: Send + Sync + 'static {
     /// should expect that the params will either be `None`, or be an already-serialized
     /// JSON array of parameters.
     ///
-    /// This is a lower level method and is not expected to be manually called; have
-    /// a look at [`crate::rpc::RpcClient`] for the higher level wrapper that is used
-    /// to interact with this.
+    /// See [`super::RpcParams`] and the [`super::rpc_params!`] macro for an example of how to
+    /// construct the parameters.
+    ///
+    /// Prefer to use the interface provided on [`super::RpcClient`] where possible.
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
@@ -35,9 +36,10 @@ pub trait RpcClientT: Send + Sync + 'static {
     /// Subscribe to some method. Implementations should expect that the params will
     /// either be `None`, or be an already-serialized JSON array of parameters.
     ///
-    /// This is a lower level method and is not expected to be manually called; have
-    /// a look at [`crate::rpc::RpcClient`] for the higher level wrapper that is used
-    /// to interact with this.
+    /// See [`super::RpcParams`] and the [`super::rpc_params!`] macro for an example of how to
+    /// construct the parameters.
+    ///
+    /// Prefer to use the interface provided on [`super::RpcClient`] where possible.
     fn subscribe_raw<'a>(
         &'a self,
         sub: &'a str,
