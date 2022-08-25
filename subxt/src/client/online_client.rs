@@ -79,7 +79,7 @@ impl<T: Config> OnlineClient<T> {
 
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
-    /// implementation to use to drive the connection.
+    /// implementation to drive the connection.
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: R,
     ) -> Result<OnlineClient<T>, Error> {
