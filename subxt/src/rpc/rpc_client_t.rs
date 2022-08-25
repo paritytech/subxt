@@ -13,8 +13,8 @@ use std::{
 /// Any RPC client which implements this can be used in our [`super::Rpc`] type
 /// to talk to a node.
 ///
-/// This is a low level interface which expects an already-serialized set of params,
-/// and returns an owned but still-serialized [`RawValue`], deferring deserialization to
+/// This is a low level interface whose methods expect an already-serialized set of params,
+/// and return an owned but still-serialized [`RawValue`], deferring deserialization to
 /// the caller. This is the case because we want the methods to be object-safe (which prohibits
 /// generics), and want to avoid any unnecessary allocations in serializing/deserializing
 /// parameters.
