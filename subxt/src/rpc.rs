@@ -178,7 +178,7 @@ impl From<U256> for NumberOrHex {
 /// An error type that signals an out-of-range conversion attempt.
 #[derive(Debug, thiserror::Error)]
 #[error("Out-of-range conversion attempt")]
-pub struct TryFromIntError();
+pub struct TryFromIntError;
 
 impl TryFrom<NumberOrHex> for u32 {
     type Error = TryFromIntError;
@@ -186,7 +186,7 @@ impl TryFrom<NumberOrHex> for u32 {
         num_or_hex
             .into_u256()
             .try_into()
-            .map_err(|_| TryFromIntError())
+            .map_err(|_| TryFromIntError)
     }
 }
 
@@ -196,7 +196,7 @@ impl TryFrom<NumberOrHex> for u64 {
         num_or_hex
             .into_u256()
             .try_into()
-            .map_err(|_| TryFromIntError())
+            .map_err(|_| TryFromIntError)
     }
 }
 
@@ -206,7 +206,7 @@ impl TryFrom<NumberOrHex> for u128 {
         num_or_hex
             .into_u256()
             .try_into()
-            .map_err(|_| TryFromIntError())
+            .map_err(|_| TryFromIntError)
     }
 }
 
