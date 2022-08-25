@@ -109,6 +109,87 @@ impl From<NumberOrHex> for BlockNumber {
     }
 }
 
+impl Default for NumberOrHex {
+    fn default() -> Self {
+        Self::Number(Default::default())
+    }
+}
+
+impl NumberOrHex {
+    /// Converts this number into an U256.
+    pub fn into_u256(self) -> U256 {
+        match self {
+            NumberOrHex::Number(n) => n.into(),
+            NumberOrHex::Hex(h) => h,
+        }
+    }
+}
+
+impl From<u32> for NumberOrHex {
+    fn from(n: u32) -> Self {
+        NumberOrHex::Number(n.into())
+    }
+}
+
+impl From<u64> for NumberOrHex {
+    fn from(n: u64) -> Self {
+        NumberOrHex::Number(n)
+    }
+}
+
+impl From<u128> for NumberOrHex {
+    fn from(n: u128) -> Self {
+        NumberOrHex::Hex(n.into())
+    }
+}
+
+impl From<U256> for NumberOrHex {
+    fn from(n: U256) -> Self {
+        NumberOrHex::Hex(n)
+    }
+}
+
+/// An error type that signals an out-of-range conversion attempt.
+#[derive(Debug, thiserror::Error)]
+#[error("Out-of-range conversion attempt")]
+pub struct TryFromIntError;
+
+impl TryFrom<NumberOrHex> for u32 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u32, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl TryFrom<NumberOrHex> for u64 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u64, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl TryFrom<NumberOrHex> for u128 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u128, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl From<NumberOrHex> for U256 {
+    fn from(num_or_hex: NumberOrHex) -> U256 {
+        num_or_hex.into_u256()
+    }
+}
+
 // All unsigned ints can be converted into a BlockNumber:
 macro_rules! into_block_number {
     ($($t: ty)+) => {
@@ -597,6 +678,18 @@ fn to_hex(bytes: impl AsRef<[u8]>) -> String {
 mod test {
     use super::*;
 
+    /// A util function to assert the result of serialization and deserialization is the same.
+    pub(crate) fn assert_deser<T>(s: &str, expected: T)
+    where
+        T: std::fmt::Debug
+            + serde::ser::Serialize
+            + serde::de::DeserializeOwned
+            + PartialEq,
+    {
+        assert_eq!(serde_json::from_str::<T>(s).unwrap(), expected);
+        assert_eq!(serde_json::to_string(&expected).unwrap(), s);
+    }
+
     #[test]
     fn test_deser_runtime_version() {
         let val: RuntimeVersion = serde_json::from_str(
@@ -621,5 +714,15 @@ mod test {
                 other: m
             }
         );
+    }
+
+    #[test]
+    fn should_serialize_and_deserialize() {
+        assert_deser(r#""0x1234""#, NumberOrHex::Hex(0x1234.into()));
+        assert_deser(r#""0x0""#, NumberOrHex::Hex(0.into()));
+        assert_deser(r#"5"#, NumberOrHex::Number(5));
+        assert_deser(r#"10000"#, NumberOrHex::Number(10000));
+        assert_deser(r#"0"#, NumberOrHex::Number(0));
+        assert_deser(r#"1000000000000"#, NumberOrHex::Number(1000000000000));
     }
 }

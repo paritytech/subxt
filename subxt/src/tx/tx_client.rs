@@ -62,7 +62,11 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             let expected_hash =
                 metadata.call_hash(call.pallet_name(), call.call_name())?;
             if actual_hash != expected_hash {
-                return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
+                return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
+                    call.pallet_name().into(),
+                    call.call_name().into(),
+                )
+                .into())
             }
         }
         Ok(())

@@ -386,7 +386,13 @@ fn validate_storage(
     };
     match expected_hash == hash {
         true => Ok(()),
-        false => Err(crate::error::MetadataError::IncompatibleMetadata.into()),
+        false => {
+            Err(crate::error::MetadataError::IncompatibleStorageMetadata(
+                pallet_name.into(),
+                storage_name.into(),
+            )
+            .into())
+        }
     }
 }
 
