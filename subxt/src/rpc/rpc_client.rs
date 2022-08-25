@@ -22,8 +22,8 @@ use std::{
     task::Poll,
 };
 
-/// A concrete wrapper around an [`RpcClientT`] which exposes the underlying methods via deref,
-/// but adds some higher level functions on top which handle serializing and deserializing, too.
+/// A concrete wrapper around an [`RpcClientT`] which exposes the udnerlying interface via some
+/// higher level methods that make it a little easier to work with.
 ///
 /// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
 /// without getting into issues with non-object-safe methods or no `async` in traits.
@@ -36,6 +36,9 @@ impl RpcClient {
     }
 
     /// Make an RPC request, given a method name and some parameters.
+    ///
+    /// See [`RpcParams`] and the [`rpc_params!`] macro for an example of how to
+    /// construct the parameters.
     pub async fn request<Res: DeserializeOwned>(
         &self,
         method: &str,
@@ -48,6 +51,9 @@ impl RpcClient {
 
     /// Subscribe to an RPC endpoint, providing the parameters and the method to call to
     /// unsubscribe from it again.
+    ///
+    /// See [`RpcParams`] and the [`rpc_params!`] macro for an example of how to
+    /// construct the parameters.
     pub async fn subscribe<Res: DeserializeOwned>(
         &self,
         sub: &str,
@@ -65,13 +71,6 @@ impl std::fmt::Debug for RpcClient {
     }
 }
 
-impl std::ops::Deref for RpcClient {
-    type Target = dyn RpcClientT;
-    fn deref(&self) -> &Self::Target {
-        &*self.0
-    }
-}
-
 /// Create some [`RpcParams`] to pass to our [`RpcClient`]. [`RpcParams`]
 /// simply enforces that parameters handed to our [`RpcClient`] methods
 /// are the correct shape.
@@ -85,10 +84,10 @@ impl std::ops::Deref for RpcClient {
 /// use subxt::rpc::{ rpc_params, RpcParams };
 ///
 /// let params: RpcParams = rpc_params![].unwrap();
-/// assert_eq!(params.build().get(), "[]");
+/// assert_eq!(params.build().unwrap().get(), "[]");
 ///
 /// let params: RpcParams = rpc_params![1, true, "foo"].unwrap();
-/// assert_eq!(params.build().get(), "[1,true,\"foo\"]");
+/// assert_eq!(params.build().unwrap().get(), "[1,true,\"foo\"]");
 /// ```
 #[macro_export]
 macro_rules! rpc_params {
@@ -124,7 +123,7 @@ pub use rpc_params;
 /// params.push(true).unwrap();
 /// params.push("foo").unwrap();
 ///
-/// assert_eq!(params.build().get(), "[1,true,\"foo\"]");
+/// assert_eq!(params.build().unwrap().get(), "[1,true,\"foo\"]");
 /// ```
 #[derive(Debug, Clone, Default)]
 pub struct RpcParams(Vec<u8>);

@@ -19,17 +19,25 @@ use std::{
 /// generics), and want to avoid any unnecessary allocations in serializing/deserializing
 /// parameters.
 pub trait RpcClientT: Send + Sync + 'static {
-    /// Make a raw request for which we expect a single response back from. The params will
-    /// be provided in the form of a pre-encoded JSON array, or `None` if there are none.
+    /// Make a raw request for which we expect a single response back from. Implementations
+    /// should expect that the params will either be `None`, or be an already-serialized
+    /// JSON array of parameters.
+    ///
+    /// This is a lower level method and is not expected to be manually called; have
+    /// a look at [`crate::rpc::RpcClient`] for the higher level wrapper that is used
+    /// to interact with this.
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>>;
 
-    /// Subscribe to some method. The params will be provided in the form of a pre-encoded JSON array, or
-    /// `None` if there are none, and the "unsub" param tells the underlying client which method is
-    /// expected to be called to unsubscribe.
+    /// Subscribe to some method. Implementations should expect that the params will
+    /// either be `None`, or be an already-serialized JSON array of parameters.
+    ///
+    /// This is a lower level method and is not expected to be manually called; have
+    /// a look at [`crate::rpc::RpcClient`] for the higher level wrapper that is used
+    /// to interact with this.
     fn subscribe_raw<'a>(
         &'a self,
         sub: &'a str,
