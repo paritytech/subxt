@@ -20,15 +20,16 @@ use std::{
 /// parameters.
 pub trait RpcClientT: Send + Sync + 'static {
     /// Make a raw request for which we expect a single response back from. The params will
-    /// be provided in the form of a pre-encoded JSON array.
+    /// be provided in the form of a pre-encoded JSON array, or `None` if there are none.
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>>;
 
-    /// Subscribe to some method. The params will be provided in the form of a pre-encoded JSON array,
-    /// and the "unsub" param tells the underlying client which method is expected to be called to unsubscribe.
+    /// Subscribe to some method. The params will be provided in the form of a pre-encoded JSON array, or
+    /// `None` if there are none, and the "unsub" param tells the underlying client which method is
+    /// expected to be called to unsubscribe.
     fn subscribe_raw<'a>(
         &'a self,
         sub: &'a str,
