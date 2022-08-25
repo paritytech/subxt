@@ -57,14 +57,14 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        if let Some(actual_hash) = call.validation_hash() {
+        if let Some(details) = call.validation_details() {
             let metadata = self.client.metadata();
             let expected_hash =
-                metadata.call_hash(call.pallet_name(), call.call_name())?;
-            if actual_hash != expected_hash {
+                metadata.call_hash(details.pallet_name, details.call_name)?;
+            if details.hash != expected_hash {
                 return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
-                    call.pallet_name().into(),
-                    call.call_name().into(),
+                    details.pallet_name.into(),
+                    details.call_name.into(),
                 )
                 .into())
             }
