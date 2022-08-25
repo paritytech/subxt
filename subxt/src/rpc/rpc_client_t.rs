@@ -4,11 +4,13 @@
 
 use crate::error::RpcError;
 use futures::Stream;
-use serde_json::value::RawValue;
 use std::{
     future::Future,
     pin::Pin,
 };
+
+// Re-exporting for simplicity since it's used a bunch in the trait definition.
+pub use serde_json::value::RawValue;
 
 /// Any RPC client which implements this can be used in our [`super::Rpc`] type
 /// to talk to a node.

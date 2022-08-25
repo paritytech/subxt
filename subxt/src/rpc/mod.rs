@@ -63,6 +63,7 @@ mod rpc_client_t;
 pub use rpc::*;
 
 pub use rpc_client_t::{
+    RawValue,
     RpcClientT,
     RpcFuture,
     RpcSubscription,
