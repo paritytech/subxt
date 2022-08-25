@@ -24,7 +24,7 @@ pub trait RpcClientT: Send + Sync + 'static {
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
-        params: Box<RawValue>,
+        params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>>;
 
     /// Subscribe to some method. The params will be provided in the form of a pre-encoded JSON array,
@@ -32,7 +32,7 @@ pub trait RpcClientT: Send + Sync + 'static {
     fn subscribe_raw<'a>(
         &'a self,
         sub: &'a str,
-        params: Box<RawValue>,
+        params: Option<Box<RawValue>>,
         unsub: &'a str,
     ) -> RpcFuture<'a, RpcSubscription>;
 }

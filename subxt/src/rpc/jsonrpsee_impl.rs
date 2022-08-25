@@ -29,10 +29,10 @@ impl RpcClientT for Client {
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
-        params: Box<RawValue>,
+        params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
-            let params = prep_params_for_jsonrpsee(&params)?;
+            let params = prep_params_for_jsonrpsee(params)?;
             let res = ClientT::request(self, method, Some(params))
                 .await
                 .map_err(|e| RpcError(e.to_string()))?;
@@ -43,11 +43,11 @@ impl RpcClientT for Client {
     fn subscribe_raw<'a>(
         &'a self,
         sub: &'a str,
-        params: Box<RawValue>,
+        params: Option<Box<RawValue>>,
         unsub: &'a str,
     ) -> RpcFuture<'a, RpcSubscription> {
         Box::pin(async move {
-            let params = prep_params_for_jsonrpsee(&params)?;
+            let params = prep_params_for_jsonrpsee(params)?;
             let sub = SubscriptionClientT::subscribe::<Box<RawValue>>(
                 self,
                 sub,
@@ -65,7 +65,14 @@ impl RpcClientT for Client {
 
 // This is ugly; we have to encode to Value's to be compat with the jsonrpc interface.
 // Remove and simplify this once something like https://github.com/paritytech/jsonrpsee/issues/862 is in:
-fn prep_params_for_jsonrpsee(params: &RawValue) -> Result<ParamsSer<'static>, RpcError> {
+fn prep_params_for_jsonrpsee(
+    params: Option<Box<RawValue>>,
+) -> Result<ParamsSer<'static>, RpcError> {
+    let params = match params {
+        Some(params) => params,
+        // No params? avoid any work and bail early.
+        None => return Ok(ParamsSer::Array(Vec::new())),
+    };
     let val = serde_json::to_value(&params).expect("RawValue guarantees valid JSON");
     let arr = match val {
         Value::Array(arr) => Ok(arr),

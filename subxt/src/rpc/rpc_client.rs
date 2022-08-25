@@ -135,8 +135,7 @@ impl RpcParams {
     /// Note: this allocates, since we'll need at least 2 bytes of space, and
     /// need to produce a [`Box<RawValue>`] at the end.
     pub fn new() -> Self {
-        // Empty params still need 2 bytes for "[]".
-        Self(Vec::with_capacity(2))
+        Self(Vec::new())
     }
     /// Push a parameter into our [`RpcParams`]. This serializes it to JSON
     /// in the process, and so will return an error if this is not possible.
@@ -150,13 +149,14 @@ impl RpcParams {
         Ok(())
     }
     /// Build a [`RawValue`] from our params.
-    pub fn build(mut self) -> Box<RawValue> {
+    pub fn build(mut self) -> Option<Box<RawValue>> {
         if self.0.is_empty() {
-            self.0.push(b'[');
+            None
+        } else {
+            self.0.push(b']');
+            let s = unsafe { String::from_utf8_unchecked(self.0) };
+            Some(RawValue::from_string(s).expect("Should be valid JSON"))
         }
-        self.0.push(b']');
-        let s = String::from_utf8(self.0).expect("JSON is valid utf8");
-        RawValue::from_string(s).expect("Should be valid JSON")
     }
 }
 
