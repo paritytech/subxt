@@ -29,7 +29,7 @@ struct MyLoggingClient {
 }
 
 // We have to implement this fairly low level trait to turn [`MyLoggingClient`]
-// into an RPC client that wecan make use of in Subxt. Here we just log the requests
+// into an RPC client that we can make use of in Subxt. Here we just log the requests
 // made but don't forward them to any real node, and instead just return nonsense.
 impl RpcClientT for MyLoggingClient {
     fn request_raw<'a>(
