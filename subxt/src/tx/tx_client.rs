@@ -114,11 +114,10 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         };
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
-        Ok(SubmittableExtrinsic {
-            client: self.client.clone(),
-            encoded: Encoded(extrinsic),
-            marker: std::marker::PhantomData,
-        })
+        Ok(SubmittableExtrinsic::from_bytes(
+            self.client.clone(),
+            extrinsic,
+        ))
     }
 
     /// Creates a raw signed extrinsic without submitting it.
@@ -202,11 +201,10 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         // maybe we can just return the raw bytes..
-        Ok(SubmittableExtrinsic {
-            client: self.client.clone(),
-            encoded: Encoded(extrinsic),
-            marker: std::marker::PhantomData,
-        })
+        Ok(SubmittableExtrinsic::from_bytes(
+            self.client.clone(),
+            extrinsic,
+        ))
     }
 }
 
@@ -330,6 +328,21 @@ where
     T: Config,
     C: OfflineClientT<T>,
 {
+    /// Create a [`SubmittableExtrinsic`] from some already-signed and prepared
+    /// extrinsic bytes, and some client (anything implementing [`OfflineClientT`]
+    /// or [`OnlineClientT`]).
+    ///
+    /// Prefer to use [`TxClient`] to create and sign extrinsics. This is simply
+    /// exposed in case you want to skip this process and submit something you've
+    /// already created.
+    pub fn from_bytes(client: C, tx_bytes: Vec<u8>) -> Self {
+        Self {
+            client,
+            encoded: Encoded(tx_bytes),
+            marker: std::marker::PhantomData,
+        }
+    }
+
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
