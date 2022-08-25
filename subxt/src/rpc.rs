@@ -176,6 +176,7 @@ impl From<U256> for NumberOrHex {
 }
 
 /// An error type that signals an out-of-range conversion attempt.
+#[derive(thiserror::Error)]
 pub struct TryFromIntError(pub(crate) ());
 
 impl TryFrom<NumberOrHex> for u32 {
