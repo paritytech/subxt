@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use sp_keyring::AccountKeyring;
 use std::{
+    fmt::Write,
     pin::Pin,
     sync::{
         Arc,
@@ -17,7 +17,6 @@ use subxt::{
         RpcFuture,
         RpcSubscription,
     },
-    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -37,10 +36,12 @@ impl RpcClientT for MyLoggingClient {
         method: &'a str,
         params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>> {
-        self.log.lock().unwrap().push_str(&format!(
+        write!(
+            self.log.lock().unwrap(),
             "{method}({})\n",
             params.as_ref().map(|p| p.get()).unwrap_or("[]")
-        ));
+        )
+        .unwrap();
 
         // We've logged the request; just return garbage. Because a boxed future is returned,
         // you're able to run whatever async code you'd need to actually talk to a node.
@@ -54,10 +55,12 @@ impl RpcClientT for MyLoggingClient {
         params: Option<Box<RawValue>>,
         unsub: &'a str,
     ) -> RpcFuture<'a, RpcSubscription> {
-        self.log.lock().unwrap().push_str(&format!(
+        write!(
+            self.log.lock().unwrap(),
             "{sub}({}) (unsub: {unsub})",
             params.as_ref().map(|p| p.get()).unwrap_or("[]")
-        ));
+        )
+        .unwrap();
 
         // We've logged the request; just return garbage. Because a boxed future is returned,
         // and that will return a boxed Stream impl, you have a bunch of flexibility to build
