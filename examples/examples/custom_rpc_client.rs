@@ -36,9 +36,9 @@ impl RpcClientT for MyLoggingClient {
         method: &'a str,
         params: Option<Box<RawValue>>,
     ) -> RpcFuture<'a, Box<RawValue>> {
-        write!(
+        writeln!(
             self.log.lock().unwrap(),
-            "{method}({})\n",
+            "{method}({})",
             params.as_ref().map(|p| p.get()).unwrap_or("[]")
         )
         .unwrap();
@@ -55,7 +55,7 @@ impl RpcClientT for MyLoggingClient {
         params: Option<Box<RawValue>>,
         unsub: &'a str,
     ) -> RpcFuture<'a, RpcSubscription> {
-        write!(
+        writeln!(
             self.log.lock().unwrap(),
             "{sub}({}) (unsub: {unsub})",
             params.as_ref().map(|p| p.get()).unwrap_or("[]")
