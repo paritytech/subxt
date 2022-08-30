@@ -82,8 +82,8 @@ impl std::ops::Deref for RpcClient {
 /// simply enforces that parameters handed to our [`RpcClient`] methods
 /// are the correct shape.
 ///
-/// Returns `Ok(params)` if it was successful, else an error if there was
-/// some issue serializing your type to JSON.
+/// As with the [`serde_json::json!`] macro, this will panic if you provide
+/// parameters which cannot successfully be serialized to JSON.
 ///
 /// # Example
 ///
@@ -95,7 +95,7 @@ impl std::ops::Deref for RpcClient {
 /// assert!(params.build().is_none());
 ///
 /// // If you provide params you get `Some<Box<RawValue>>` back.
-/// let params: RpcParams = rpc_params![1, true, "foo"].unwrap();
+/// let params: RpcParams = rpc_params![1, true, "foo"];
 /// assert_eq!(params.build().unwrap().get(), "[1,true,\"foo\"]");
 /// ```
 #[macro_export]
@@ -104,15 +104,10 @@ macro_rules! rpc_params {
         // May be unused if empty; no params.
         #[allow(unused_mut)]
         let mut params = $crate::rpc::RpcParams::new();
-        // loop here to allow breaking early with an error.
-        loop {
-            $(
-                if let Err(e) = params.push($p) {
-                    break Err(e)
-                }
-            )*
-            break Ok::<$crate::rpc::RpcParams, $crate::error::Error>(params)
-        }
+        $(
+            params.push($p).expect("values passed to rpc_params! must be serializable to JSON");
+        )*
+        params
     }}
 }
 pub use rpc_params;
