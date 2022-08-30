@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api =
         OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
-    // For non-finalised blocks use `.subscribe_blocks()`
+    // For non-finalised blocks use `.subscribe_new_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
         api.rpc().subscribe_finalized_blocks().await?;
 

@@ -74,7 +74,7 @@ async fn fetch_read_proof() {
 }
 
 #[tokio::test]
-async fn chain_subscribe_blocks() {
+async fn subscribe_new_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();
 
