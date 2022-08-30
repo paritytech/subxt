@@ -91,7 +91,7 @@ impl std::ops::Deref for RpcClient {
 /// use subxt::rpc::{ rpc_params, RpcParams };
 ///
 /// // If you provide no params you get `None` back
-/// let params: RpcParams = rpc_params![].unwrap();
+/// let params: RpcParams = rpc_params![];
 /// assert!(params.build().is_none());
 ///
 /// // If you provide params you get `Some<Box<RawValue>>` back.
