@@ -74,6 +74,15 @@ async fn fetch_read_proof() {
 }
 
 #[tokio::test]
+async fn subscribe_all_blocks() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().subscribe_all_blocks().await.unwrap();
+    blocks.next().await.unwrap().unwrap();
+}
+
+#[tokio::test]
 async fn subscribe_new_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();
