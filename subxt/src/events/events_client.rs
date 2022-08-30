@@ -157,7 +157,7 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    let block_subscription = client.rpc().subscribe_blocks().await?;
+    let block_subscription = client.rpc().subscribe_new_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 

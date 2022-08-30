@@ -560,8 +560,22 @@ impl<T: Config> Rpc<T> {
         Ok(version)
     }
 
-    /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+    /// Subscribe to all blocks.
+    pub async fn subscribe_all_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chain_subscribeAllHeads",
+                rpc_params![],
+                "chain_unsubscribeAllHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to new blocks.
+    pub async fn subscribe_new_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(

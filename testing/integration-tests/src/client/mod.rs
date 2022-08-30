@@ -78,7 +78,7 @@ async fn chain_subscribe_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut blocks = api.rpc().subscribe_blocks().await.unwrap();
+    let mut blocks = api.rpc().subscribe_new_blocks().await.unwrap();
     blocks.next().await.unwrap().unwrap();
 }
 
