@@ -39,16 +39,12 @@
 //! # }
 //! ```
 
-// jsonrpsee subscriptions are interminable.
-// Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/subxt/issues/66
-#![allow(irrefutable_let_patterns)]
-
-use std::{
-    collections::HashMap,
-    sync::Arc,
+use super::{
+    rpc_params,
+    RpcClient,
+    RpcClientT,
+    Subscription,
 };
-
 use crate::{
     error::Error,
     utils::PhantomDataSendSync,
@@ -60,29 +56,6 @@ use codec::{
     Encode,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-pub use jsonrpsee::{
-    client_transport::ws::{
-        InvalidUri,
-        Receiver as WsReceiver,
-        Sender as WsSender,
-        Uri,
-        WsTransportClientBuilder,
-    },
-    core::{
-        client::{
-            Client as RpcClient,
-            ClientBuilder as RpcClientBuilder,
-            ClientT,
-            Subscription,
-            SubscriptionClientT,
-        },
-        to_json_value,
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
-    },
-    rpc_params,
-};
 use serde::{
     Deserialize,
     Serialize,
@@ -103,6 +76,7 @@ use sp_runtime::{
     },
     ApplyExtrinsicResult,
 };
+use std::collections::HashMap;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -344,8 +318,7 @@ pub struct Health {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
-    /// Rpc client for sending requests.
-    pub client: Arc<RpcClient>,
+    client: RpcClient,
     _marker: PhantomDataSendSync<T>,
 }
 
@@ -358,11 +331,20 @@ impl<T: Config> Clone for Rpc<T> {
     }
 }
 
+// Expose subscribe/request, and also subscribe_raw/request_raw
+// from the even-deeper `dyn RpcClientT` impl.
+impl<T: Config> std::ops::Deref for Rpc<T> {
+    type Target = RpcClient;
+    fn deref(&self) -> &Self::Target {
+        &self.client
+    }
+}
+
 impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
-    pub fn new(client: RpcClient) -> Self {
+    pub fn new<R: RpcClientT>(client: R) -> Self {
         Self {
-            client: Arc::new(client),
+            client: RpcClient::new(client),
             _marker: PhantomDataSendSync::new(),
         }
     }
@@ -445,30 +427,29 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        Ok(self
-            .client
+        self.client
             .request("system_properties", rpc_params![])
-            .await?)
+            .await
     }
 
     /// Fetch system health
     pub async fn system_health(&self) -> Result<Health, Error> {
-        Ok(self.client.request("system_health", rpc_params![]).await?)
+        self.client.request("system_health", rpc_params![]).await
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_chain", rpc_params![]).await?)
+        self.client.request("system_chain", rpc_params![]).await
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_name", rpc_params![]).await?)
+        self.client.request("system_name", rpc_params![]).await
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        Ok(self.client.request("system_version", rpc_params![]).await?)
+        self.client.request("system_version", rpc_params![]).await
     }
 
     /// Fetch the current nonce for the given account ID.
@@ -476,10 +457,9 @@ impl<T: Config> Rpc<T> {
         &self,
         account: &T::AccountId,
     ) -> Result<T::Index, Error> {
-        Ok(self
-            .client
+        self.client
             .request("system_accountNextIndex", rpc_params![account])
-            .await?)
+            .await
     }
 
     /// Get a header
@@ -650,10 +630,9 @@ impl<T: Config> Rpc<T> {
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        Ok(self
-            .client
+        self.client
             .request("author_rotateKeys", rpc_params![])
-            .await?)
+            .await
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -663,7 +642,7 @@ impl<T: Config> Rpc<T> {
     /// Returns `true` iff all private keys could be found.
     pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys];
-        Ok(self.client.request("author_hasSessionKeys", params).await?)
+        self.client.request("author_hasSessionKeys", params).await
     }
 
     /// Checks if the keystore has private keys for the given public key and key type.
@@ -675,7 +654,7 @@ impl<T: Config> Rpc<T> {
         key_type: String,
     ) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type];
-        Ok(self.client.request("author_hasKey", params).await?)
+        self.client.request("author_hasKey", params).await
     }
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
@@ -692,24 +671,6 @@ impl<T: Config> Rpc<T> {
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;
         Ok(data)
     }
-}
-
-/// Build WS RPC client from URL
-pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
-    let (sender, receiver) = ws_transport(url).await?;
-    Ok(RpcClientBuilder::default()
-        .max_notifs_per_subscription(4096)
-        .build_with_tokio(sender, receiver))
-}
-
-async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
-    let url: Uri = url
-        .parse()
-        .map_err(|e: InvalidUri| RpcError::Transport(e.into()))?;
-    WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .map_err(|e| RpcError::Transport(e.into()))
 }
 
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {

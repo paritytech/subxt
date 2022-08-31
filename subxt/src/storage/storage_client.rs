@@ -318,7 +318,7 @@ pub struct KeyIter<T: Config, Client, ReturnTy> {
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy> KeyIter<T, Client, ReturnTy>
+impl<'a, T, Client, ReturnTy> KeyIter<T, Client, ReturnTy>
 where
     T: Config,
     Client: OnlineClientT<T>,

@@ -208,7 +208,11 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
+impl<T, C> TxClient<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
     /// Creates a raw signed extrinsic, without submitting it.
     pub async fn create_signed<Call>(
         &self,

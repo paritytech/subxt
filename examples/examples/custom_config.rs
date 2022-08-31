@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! This example should compile but should aos fail to work, since we've modified the
+//! This example should compile but should fail to work, since we've modified the
 //! config to not align with a Polkadot node.
 
 use sp_keyring::AccountKeyring;
