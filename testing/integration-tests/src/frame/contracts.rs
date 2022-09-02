@@ -8,6 +8,7 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
+        runtime_types::frame_support::weights::weight_v2::Weight,
         system,
     },
     test_context,
@@ -58,7 +59,9 @@ impl ContractsTestContext {
 
         let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
             100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
+            Weight {
+                ref_time: 500_000_000_000,
+            }, // gas_limit
             None,                    // storage_deposit_limit
             code,
             vec![], // data
@@ -100,7 +103,9 @@ impl ContractsTestContext {
         // call instantiate extrinsic
         let instantiate_tx = node_runtime::tx().contracts().instantiate(
             100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
+            Weight {
+                ref_time: 500_000_000_000,
+            }, // gas_limit
             None,                    // storage_deposit_limit
             code_hash,
             data,
@@ -131,9 +136,11 @@ impl ContractsTestContext {
         tracing::info!("call: {:?}", contract);
         let call_tx = node_runtime::tx().contracts().call(
             MultiAddress::Id(contract),
-            0,           // value
-            500_000_000, // gas_limit
-            None,        // storage_deposit_limit
+            0, // value
+            Weight {
+                ref_time: 500_000_000,
+            }, // gas_limit
+            None, // storage_deposit_limit
             input_data,
         );
 

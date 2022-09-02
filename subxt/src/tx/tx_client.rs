@@ -84,7 +84,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates an unsigned extrinsic without submitting it.
-    pub async fn create_unsigned<Call>(
+    pub fn create_unsigned<Call>(
         &self,
         call: &Call,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
@@ -121,7 +121,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates a raw signed extrinsic without submitting it.
-    pub async fn create_signed_with_nonce<Call>(
+    pub fn create_signed_with_nonce<Call>(
         &self,
         call: &Call,
         signer: &(dyn Signer<T> + Send + Sync),
@@ -234,7 +234,6 @@ where
         };
 
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
-            .await
     }
 
     /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters

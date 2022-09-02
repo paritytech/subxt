@@ -227,7 +227,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
         12345,
     );
 
-    let actual_tx = api.tx().create_unsigned(&tx).await.unwrap();
+    let actual_tx = api.tx().create_unsigned(&tx).unwrap();
 
     let actual_tx_bytes = actual_tx.encoded();
 
