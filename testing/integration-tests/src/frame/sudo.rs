@@ -5,7 +5,10 @@
 use crate::{
     node_runtime::{
         self,
-        runtime_types,
+        runtime_types::{
+            self,
+            frame_support::weights::weight_v2::Weight,
+        },
         sudo,
     },
     pair_signer,
@@ -54,7 +57,9 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         dest: bob,
         value: 10_000,
     });
-    let tx = node_runtime::tx().sudo().sudo_unchecked_weight(call, 0);
+    let tx = node_runtime::tx()
+        .sudo()
+        .sudo_unchecked_weight(call, Weight { ref_time: 0 });
 
     let found_event = api
         .tx()
