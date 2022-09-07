@@ -10,4 +10,10 @@ members = [
     "macro",
     "metadata",
     "subxt",
+    "wasm-tests",
 ]
+
+resolver = "2"
+
+[patch.crates-io]
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee", branch = "na-async-wasm-feature" }
