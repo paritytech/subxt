@@ -372,6 +372,44 @@ fn compact_fields() {
 }
 
 #[test]
+fn compact_generic_parameter() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct S {
+        a: Option<<u128 as codec::HasCompact>::Type>,
+    }
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<S>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+    );
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
+                pub struct S {
+                    pub a: ::core::Option<::subxt::ext::codec::Compact<::core::primitive::u128>>,
+                }
+            }
+        }
+            .to_string()
+    )
+}
+
+
+#[test]
 fn generate_array_field() {
     #[allow(unused)]
     #[derive(TypeInfo)]
