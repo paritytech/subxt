@@ -10,7 +10,13 @@ use quote::{
     format_ident,
     quote,
 };
-use scale_info::{form::PortableForm, Path, Type, TypeDef, TypeDefPrimitive};
+use scale_info::{
+    form::PortableForm,
+    Path,
+    Type,
+    TypeDef,
+    TypeDefPrimitive,
+};
 use std::collections::BTreeSet;
 use syn::parse_quote;
 
@@ -133,7 +139,10 @@ impl TypePathType {
                 };
                 syn::Type::Path(path)
             }
-            TypePathTypeKind::BitVec { bit_order_type, bit_store_type } => {
+            TypePathTypeKind::BitVec {
+                bit_order_type,
+                bit_store_type,
+            } => {
                 let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
                 syn::Type::Path(type_path)
             }
@@ -158,17 +167,39 @@ impl TypePathType {
 
 #[derive(Clone, Debug)]
 pub enum TypePathTypeKind {
-    Path { path: syn::TypePath, params: Vec<TypePath> },
-    Vec { of: Box<TypePath> },
-    Array { len: usize, of: Box<TypePath> },
-    Tuple { elements: Vec<TypePath> },
-    Primitive { def: TypeDefPrimitive },
-    Compact { inner: Box<TypePath>, is_field: bool },
-    BitVec { bit_order_type: Box<TypePath>, bit_store_type: Box<TypePath> }
+    Path {
+        path: syn::TypePath,
+        params: Vec<TypePath>,
+    },
+    Vec {
+        of: Box<TypePath>,
+    },
+    Array {
+        len: usize,
+        of: Box<TypePath>,
+    },
+    Tuple {
+        elements: Vec<TypePath>,
+    },
+    Primitive {
+        def: TypeDefPrimitive,
+    },
+    Compact {
+        inner: Box<TypePath>,
+        is_field: bool,
+    },
+    BitVec {
+        bit_order_type: Box<TypePath>,
+        bit_store_type: Box<TypePath>,
+    },
 }
 
 impl TypePathTypeKind {
-    pub fn from_type_def_path(path: &Path<PortableForm>, root_mod_ident: Ident, params: Vec<TypePath>) -> Self {
+    pub fn from_type_def_path(
+        path: &Path<PortableForm>,
+        root_mod_ident: Ident,
+        params: Vec<TypePath>,
+    ) -> Self {
         let path_segments = path.segments();
 
         let path: syn::TypePath = match path_segments {
@@ -195,10 +226,7 @@ impl TypePathTypeKind {
                         syn::PathSegment,
                         syn::Token![::],
                     >>();
-                ty_path.insert(
-                    0,
-                    syn::PathSegment::from(root_mod_ident),
-                );
+                ty_path.insert(0, syn::PathSegment::from(root_mod_ident));
                 parse_quote!( #ty_path )
             }
         };

@@ -171,54 +171,79 @@ impl<'a> TypeGenerator<'a> {
             )
         }
 
-        let params = ty.type_params()
+        let params = ty
+            .type_params()
             .iter()
-            .filter_map(|f| f.ty().map(|f| self.resolve_type_path(f.id(), parent_type_params)))
+            .filter_map(|f| {
+                f.ty()
+                    .map(|f| self.resolve_type_path(f.id(), parent_type_params))
+            })
             .collect();
 
-        let kind =
-            match ty.type_def() {
-                TypeDef::Composite(_) | TypeDef::Variant(_) => {
-                    let joined_path = ty.path().segments().join("::");
-                    if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
-                        TypePathTypeKind::Path {
-                            path: substitute_type_path.clone(),
-                            params
-                        }
-                    } else {
-                        TypePathTypeKind::from_type_def_path(ty.path(), self.types_mod_ident.clone(), params)
+        let kind = match ty.type_def() {
+            TypeDef::Composite(_) | TypeDef::Variant(_) => {
+                let joined_path = ty.path().segments().join("::");
+                if let Some(substitute_type_path) =
+                    self.type_substitutes.get(&joined_path)
+                {
+                    TypePathTypeKind::Path {
+                        path: substitute_type_path.clone(),
+                        params,
                     }
-                },
-                TypeDef::Array(arr) => {
-                    TypePathTypeKind::Array {
-                        len: arr.len() as usize,
-                        of: Box::new(self.resolve_type_path(arr.type_param().id(), parent_type_params)),
-                    }
-                },
-                TypeDef::Sequence(seq) => {
-                    TypePathTypeKind::Vec {
-                        of: Box::new(self.resolve_type_path(seq.type_param().id(), parent_type_params)),
-                    }
-                },
-                TypeDef::Tuple(tuple) => {
-                    TypePathTypeKind::Tuple {
-                        elements: tuple.fields().iter().map(|f|
-                            self.resolve_type_path(f.id(), parent_type_params)).collect()
-                    }
-                },
-                TypeDef::Compact(compact) => {
-                    TypePathTypeKind::Compact {
-                        inner: Box::new(self.resolve_type_path(compact.type_param().id(), parent_type_params)),
-                        is_field: false, // todo
-                    }
-                },
-                TypeDef::BitSequence(bitseq) => {
-                    TypePathTypeKind::BitVec {
-                        bit_order_type: Box::new(self.resolve_type_path(bitseq.bit_order_type().id(), parent_type_params)),
-                        bit_store_type: Box::new(self.resolve_type_path(bitseq.bit_store_type().id(), parent_type_params))
-                    }
+                } else {
+                    TypePathTypeKind::from_type_def_path(
+                        ty.path(),
+                        self.types_mod_ident.clone(),
+                        params,
+                    )
                 }
-            };
+            }
+            TypeDef::Array(arr) => {
+                TypePathTypeKind::Array {
+                    len: arr.len() as usize,
+                    of: Box::new(
+                        self.resolve_type_path(arr.type_param().id(), parent_type_params),
+                    ),
+                }
+            }
+            TypeDef::Sequence(seq) => {
+                TypePathTypeKind::Vec {
+                    of: Box::new(
+                        self.resolve_type_path(seq.type_param().id(), parent_type_params),
+                    ),
+                }
+            }
+            TypeDef::Tuple(tuple) => {
+                TypePathTypeKind::Tuple {
+                    elements: tuple
+                        .fields()
+                        .iter()
+                        .map(|f| self.resolve_type_path(f.id(), parent_type_params))
+                        .collect(),
+                }
+            }
+            TypeDef::Compact(compact) => {
+                TypePathTypeKind::Compact {
+                    inner: Box::new(self.resolve_type_path(
+                        compact.type_param().id(),
+                        parent_type_params,
+                    )),
+                    is_field: false, // todo
+                }
+            }
+            TypeDef::BitSequence(bitseq) => {
+                TypePathTypeKind::BitVec {
+                    bit_order_type: Box::new(self.resolve_type_path(
+                        bitseq.bit_order_type().id(),
+                        parent_type_params,
+                    )),
+                    bit_store_type: Box::new(self.resolve_type_path(
+                        bitseq.bit_store_type().id(),
+                        parent_type_params,
+                    )),
+                }
+            }
+        };
 
         TypePath::Type(TypePathType {
             kind,

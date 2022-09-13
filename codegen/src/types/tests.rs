@@ -408,7 +408,6 @@ fn compact_generic_parameter() {
     )
 }
 
-
 #[test]
 fn generate_array_field() {
     #[allow(unused)]
