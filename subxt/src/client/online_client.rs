@@ -12,7 +12,7 @@ use crate::{
     events::EventsClient,
     rpc::{
         Rpc,
-        RpcClient,
+        RpcClientT,
         RuntimeVersion,
     },
     storage::StorageClient,
@@ -52,12 +52,14 @@ struct Inner<T: Config> {
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
-            .field("rpc", &"<Rpc>")
+            .field("rpc", &"RpcClient")
             .field("inner", &self.inner)
             .finish()
     }
 }
 
+// The default constructors assume Jsonrpsee.
+#[cfg(feature = "jsonrpsee")]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
@@ -68,16 +70,20 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let client = crate::rpc::ws_client(url.as_ref()).await?;
+        let client = jsonrpsee_helpers::ws_client(url.as_ref())
+            .await
+            .map_err(|e| crate::error::RpcError(e.to_string()))?;
         OnlineClient::from_rpc_client(client).await
     }
+}
 
-    /// Construct a new [`OnlineClient`] by providing the underlying [`RpcClient`]
-    /// to use to drive the connection.
-    pub async fn from_rpc_client(
-        rpc_client: impl Into<RpcClient>,
+impl<T: Config> OnlineClient<T> {
+    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
+    /// implementation to drive the connection.
+    pub async fn from_rpc_client<R: RpcClientT>(
+        rpc_client: R,
     ) -> Result<OnlineClient<T>, Error> {
-        let rpc = Rpc::new(rpc_client.into());
+        let rpc = Rpc::new(rpc_client);
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
@@ -230,5 +236,44 @@ impl<T: Config> ClientRuntimeUpdater<T> {
         }
 
         Ok(())
+    }
+}
+
+// helpers for a jsonrpsee specific OnlineClient.
+#[cfg(feature = "jsonrpsee")]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::ws::{
+            InvalidUri,
+            Receiver,
+            Sender,
+            Uri,
+            WsTransportClientBuilder,
+        },
+        core::{
+            client::{
+                Client,
+                ClientBuilder,
+            },
+            Error,
+        },
+    };
+
+    /// Build WS RPC client from URL
+    pub async fn ws_client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(ClientBuilder::default()
+            .max_notifs_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url: Uri = url
+            .parse()
+            .map_err(|e: InvalidUri| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
     }
 }

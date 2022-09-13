@@ -15,7 +15,6 @@ pub use crate::metadata::{
     InvalidMetadataError,
     MetadataError,
 };
-pub use jsonrpsee::core::error::Error as RequestError;
 pub use scale_value::scale::{
     DecodeError,
     EncodeError,
@@ -36,7 +35,7 @@ pub enum Error {
     Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
-    Rpc(#[from] RequestError),
+    Rpc(#[from] RpcError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
@@ -101,6 +100,12 @@ impl From<DispatchError> for Error {
         Error::Runtime(error)
     }
 }
+
+/// An RPC error. Since we are generic over the RPC client that is used,
+/// the error is any custom string.
+#[derive(Debug, thiserror::Error)]
+#[error("RPC error: {0}")]
+pub struct RpcError(pub String);
 
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep
@@ -232,7 +237,7 @@ pub enum TransactionError {
     /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
     FinalitySubscriptionTimeout,
-    /// The block hash that the tranaction was added to could not be found.
+    /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
     BlockHashNotFound,

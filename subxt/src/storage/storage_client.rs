@@ -318,7 +318,7 @@ pub struct KeyIter<T: Config, Client, ReturnTy> {
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy> KeyIter<T, Client, ReturnTy>
+impl<'a, T, Client, ReturnTy> KeyIter<T, Client, ReturnTy>
 where
     T: Config,
     Client: OnlineClientT<T>,
@@ -386,7 +386,13 @@ fn validate_storage(
     };
     match expected_hash == hash {
         true => Ok(()),
-        false => Err(crate::error::MetadataError::IncompatibleMetadata.into()),
+        false => {
+            Err(crate::error::MetadataError::IncompatibleStorageMetadata(
+                pallet_name.into(),
+                storage_name.into(),
+            )
+            .into())
+        }
     }
 }
 

@@ -19,12 +19,6 @@ use std::borrow::Cow;
 /// This represents a transaction payload that can be submitted
 /// to a node.
 pub trait TxPayload {
-    /// The name of the pallet that the call lives under.
-    fn pallet_name(&self) -> &str;
-
-    /// The name of the call.
-    fn call_name(&self) -> &str;
-
     /// Encode call data to the provided output.
     fn encode_call_data(
         &self,
@@ -32,12 +26,22 @@ pub trait TxPayload {
         out: &mut Vec<u8>,
     ) -> Result<(), Error>;
 
-    /// An optional validation hash that can be provided
-    /// to verify that the shape of the call on the node
-    /// aligns with our expectations.
-    fn validation_hash(&self) -> Option<[u8; 32]> {
+    /// Returns the details needed to validate the call, which
+    /// include a statically generated hash, the pallet name,
+    /// and the call name.
+    fn validation_details(&self) -> Option<ValidationDetails<'_>> {
         None
     }
+}
+
+pub struct ValidationDetails<'a> {
+    /// The pallet name.
+    pub pallet_name: &'a str,
+    /// The call name.
+    pub call_name: &'a str,
+    /// A hash (this is generated at compile time in our codegen)
+    /// to compare against the runtime code.
+    pub hash: [u8; 32],
 }
 
 /// This represents a statically generated transaction payload.
@@ -74,14 +78,6 @@ impl<CallData> StaticTxPayload<CallData> {
 }
 
 impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
-    fn pallet_name(&self) -> &str {
-        self.pallet_name
-    }
-
-    fn call_name(&self) -> &str {
-        self.call_name
-    }
-
     fn encode_call_data(
         &self,
         metadata: &Metadata,
@@ -97,8 +93,14 @@ impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
         Ok(())
     }
 
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        self.validation_hash
+    fn validation_details(&self) -> Option<ValidationDetails<'_>> {
+        self.validation_hash.map(|hash| {
+            ValidationDetails {
+                pallet_name: self.pallet_name,
+                call_name: self.call_name,
+                hash,
+            }
+        })
     }
 }
 
@@ -123,14 +125,6 @@ pub fn dynamic<'a>(
 }
 
 impl<'a> TxPayload for DynamicTxPayload<'a> {
-    fn pallet_name(&self) -> &str {
-        &self.pallet_name
-    }
-
-    fn call_name(&self) -> &str {
-        &self.call_name
-    }
-
     fn encode_call_data(
         &self,
         metadata: &Metadata,

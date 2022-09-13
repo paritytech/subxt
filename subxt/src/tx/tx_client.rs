@@ -57,12 +57,16 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        if let Some(actual_hash) = call.validation_hash() {
+        if let Some(details) = call.validation_details() {
             let metadata = self.client.metadata();
             let expected_hash =
-                metadata.call_hash(call.pallet_name(), call.call_name())?;
-            if actual_hash != expected_hash {
-                return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
+                metadata.call_hash(details.pallet_name, details.call_name)?;
+            if details.hash != expected_hash {
+                return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
+                    details.pallet_name.into(),
+                    details.call_name.into(),
+                )
+                .into())
             }
         }
         Ok(())
@@ -79,14 +83,51 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Ok(bytes)
     }
 
-    /// Creates a raw signed extrinsic, without submitting it.
-    pub async fn create_signed_with_nonce<Call>(
+    /// Creates an unsigned extrinsic without submitting it.
+    pub fn create_unsigned<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    where
+        Call: TxPayload,
+    {
+        // 1. Validate this call against the current node metadata if the call comes
+        // with a hash allowing us to do so.
+        self.validate(call)?;
+
+        // 2. Encode extrinsic
+        let extrinsic = {
+            let mut encoded_inner = Vec::new();
+            // transaction protocol version (4) (is not signed, so no 1 bit at the front).
+            4u8.encode_to(&mut encoded_inner);
+            // encode call data after this byte.
+            call.encode_call_data(&self.client.metadata(), &mut encoded_inner)?;
+            // now, prefix byte length:
+            let len = Compact(
+                u32::try_from(encoded_inner.len())
+                    .expect("extrinsic size expected to be <4GB"),
+            );
+            let mut encoded = Vec::new();
+            len.encode_to(&mut encoded);
+            encoded.extend(encoded_inner);
+            encoded
+        };
+
+        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
+        Ok(SubmittableExtrinsic::from_bytes(
+            self.client.clone(),
+            extrinsic,
+        ))
+    }
+
+    /// Creates a raw signed extrinsic without submitting it.
+    pub fn create_signed_with_nonce<Call>(
         &self,
         call: &Call,
         signer: &(dyn Signer<T> + Send + Sync),
         account_nonce: T::Index,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -160,22 +201,25 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         // maybe we can just return the raw bytes..
-        Ok(SignedSubmittableExtrinsic {
-            client: self.client.clone(),
-            encoded: Encoded(extrinsic),
-            marker: std::marker::PhantomData,
-        })
+        Ok(SubmittableExtrinsic::from_bytes(
+            self.client.clone(),
+            extrinsic,
+        ))
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
+impl<T, C> TxClient<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
     /// Creates a raw signed extrinsic, without submitting it.
     pub async fn create_signed<Call>(
         &self,
         call: &Call,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -190,7 +234,6 @@ impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         };
 
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
-            .await
     }
 
     /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
@@ -277,13 +320,39 @@ impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SignedSubmittableExtrinsic<T, C> {
+pub struct SubmittableExtrinsic<T, C> {
     client: C,
     encoded: Encoded,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T, C> SignedSubmittableExtrinsic<T, C>
+impl<T, C> SubmittableExtrinsic<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    /// Create a [`SubmittableExtrinsic`] from some already-signed and prepared
+    /// extrinsic bytes, and some client (anything implementing [`OfflineClientT`]
+    /// or [`OnlineClientT`]).
+    ///
+    /// Prefer to use [`TxClient`] to create and sign extrinsics. This is simply
+    /// exposed in case you want to skip this process and submit something you've
+    /// already created.
+    pub fn from_bytes(client: C, tx_bytes: Vec<u8>) -> Self {
+        Self {
+            client,
+            encoded: Encoded(tx_bytes),
+            marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Returns the SCALE encoded extrinsic bytes.
+    pub fn encoded(&self) -> &[u8] {
+        &self.encoded.0
+    }
+}
+
+impl<T, C> SubmittableExtrinsic<T, C>
 where
     T: Config,
     C: OnlineClientT<T>,
@@ -322,10 +391,5 @@ where
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
-    }
-
-    /// Returns the SCALE encoded extrinsic bytes.
-    pub fn encoded(&self) -> &[u8] {
-        &self.encoded.0
     }
 }

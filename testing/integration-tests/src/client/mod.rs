@@ -149,8 +149,8 @@ async fn dry_run_passes() {
         .await
         .unwrap();
 
-    api.rpc()
-        .dry_run(signed_extrinsic.encoded(), None)
+    signed_extrinsic
+        .dry_run(None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrunning to be successful")
@@ -186,9 +186,8 @@ async fn dry_run_fails() {
         .await
         .unwrap();
 
-    let dry_run_res = api
-        .rpc()
-        .dry_run(signed_extrinsic.encoded(), None)
+    let dry_run_res = signed_extrinsic
+        .dry_run(None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrun transaction to be valid");
@@ -213,4 +212,36 @@ async fn dry_run_fails() {
     } else {
         panic!("expected a runtime module error");
     }
+}
+
+#[tokio::test]
+async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let tx = node_runtime::tx().balances().transfer(
+        pair_signer(AccountKeyring::Alice.pair())
+            .account_id()
+            .clone()
+            .into(),
+        12345,
+    );
+
+    let actual_tx = api.tx().create_unsigned(&tx).unwrap();
+
+    let actual_tx_bytes = actual_tx.encoded();
+
+    // How these were obtained:
+    // - start local substrate node.
+    // - open polkadot.js UI in browser and point at local node.
+    // - open dev console (may need to refresh page now) and find the WS connection.
+    // - create a balances.transfer to ALICE with 12345 and "submit unsigned".
+    // - find the submitAndWatchExtrinsic call in the WS connection to get these bytes:
+    let expected_tx_bytes = hex::decode(
+        "9804060000d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27de5c0",
+    )
+    .unwrap();
+
+    // Make sure our encoding is the same as the encoding polkadot UI created.
+    assert_eq!(actual_tx_bytes, expected_tx_bytes);
 }

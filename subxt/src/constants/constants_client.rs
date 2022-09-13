@@ -47,7 +47,11 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
                 .metadata()
                 .constant_hash(address.pallet_name(), address.constant_name())?;
             if actual_hash != expected_hash {
-                return Err(MetadataError::IncompatibleMetadata.into())
+                return Err(MetadataError::IncompatibleConstantMetadata(
+                    address.pallet_name().into(),
+                    address.constant_name().into(),
+                )
+                .into())
             }
         }
         Ok(())

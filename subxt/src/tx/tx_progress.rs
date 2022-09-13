@@ -11,6 +11,7 @@ use crate::{
     error::{
         DispatchError,
         Error,
+        RpcError,
         TransactionError,
     },
     events::{
@@ -21,17 +22,16 @@ use crate::{
         Phase,
         StaticEvent,
     },
-    rpc::SubstrateTxStatus,
+    rpc::{
+        Subscription,
+        SubstrateTxStatus,
+    },
     Config,
 };
 use derivative::Derivative;
 use futures::{
     Stream,
     StreamExt,
-};
-use jsonrpsee::core::{
-    client::Subscription as RpcSubscription,
-    Error as RpcError,
 };
 use sp_runtime::traits::Hash;
 
@@ -41,7 +41,7 @@ pub use sp_runtime::traits::SignedExtension;
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TxProgress<T: Config, C> {
-    sub: Option<RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
+    sub: Option<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
 }
@@ -54,7 +54,7 @@ impl<T: Config, C> Unpin for TxProgress<T, C> {}
 impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
-        sub: RpcSubscription<SubstrateTxStatus<T::Hash, T::Hash>>,
+        sub: Subscription<SubstrateTxStatus<T::Hash, T::Hash>>,
         client: C,
         ext_hash: T::Hash,
     ) -> Self {
@@ -71,7 +71,11 @@ impl<T: Config, C> TxProgress<T, C> {
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>> TxProgress<T, C> {
+impl<T, C> TxProgress<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
     /// avoid importing that trait if you don't otherwise need it.
@@ -103,7 +107,7 @@ impl<T: Config, C: OnlineClientT<T>> TxProgress<T, C> {
                 _ => continue,
             }
         }
-        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+        Err(RpcError("RPC subscription dropped".to_string()).into())
     }
 
     /// Wait for the transaction to be finalized, and return a [`TxInBlock`]
@@ -129,7 +133,7 @@ impl<T: Config, C: OnlineClientT<T>> TxProgress<T, C> {
                 _ => continue,
             }
         }
-        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+        Err(RpcError("RPC subscription dropped".to_string()).into())
     }
 
     /// Wait for the transaction to be finalized, and for the transaction events to indicate
@@ -161,47 +165,45 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
             None => return Poll::Ready(None),
         };
 
-        sub.poll_next_unpin(cx)
-            .map_err(|e| e.into())
-            .map_ok(|status| {
-                match status {
-                    SubstrateTxStatus::Future => TxStatus::Future,
-                    SubstrateTxStatus::Ready => TxStatus::Ready,
-                    SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
-                    SubstrateTxStatus::InBlock(hash) => {
-                        TxStatus::InBlock(TxInBlock::new(
-                            hash,
-                            self.ext_hash,
-                            self.client.clone(),
-                        ))
-                    }
-                    SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
-                    SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
-                    SubstrateTxStatus::Dropped => TxStatus::Dropped,
-                    SubstrateTxStatus::Invalid => TxStatus::Invalid,
-                    // Only the following statuses are actually considered "final" (see the substrate
-                    // docs on `TxStatus`). Basically, either the transaction makes it into a
-                    // block, or we eventually give up on waiting for it to make it into a block.
-                    // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
-                    //
-                    // As an example, a transaction that is `Invalid` on one node due to having the wrong
-                    // nonce might still be valid on some fork on another node which ends up being finalized.
-                    // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
-                    // and make it into a block, on another node. Likewise with `Usurped`.
-                    SubstrateTxStatus::FinalityTimeout(hash) => {
-                        self.sub = None;
-                        TxStatus::FinalityTimeout(hash)
-                    }
-                    SubstrateTxStatus::Finalized(hash) => {
-                        self.sub = None;
-                        TxStatus::Finalized(TxInBlock::new(
-                            hash,
-                            self.ext_hash,
-                            self.client.clone(),
-                        ))
-                    }
+        sub.poll_next_unpin(cx).map_ok(|status| {
+            match status {
+                SubstrateTxStatus::Future => TxStatus::Future,
+                SubstrateTxStatus::Ready => TxStatus::Ready,
+                SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
+                SubstrateTxStatus::InBlock(hash) => {
+                    TxStatus::InBlock(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
                 }
-            })
+                SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
+                SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
+                SubstrateTxStatus::Dropped => TxStatus::Dropped,
+                SubstrateTxStatus::Invalid => TxStatus::Invalid,
+                // Only the following statuses are actually considered "final" (see the substrate
+                // docs on `TxStatus`). Basically, either the transaction makes it into a
+                // block, or we eventually give up on waiting for it to make it into a block.
+                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                //
+                // As an example, a transaction that is `Invalid` on one node due to having the wrong
+                // nonce might still be valid on some fork on another node which ends up being finalized.
+                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
+                // and make it into a block, on another node. Likewise with `Usurped`.
+                SubstrateTxStatus::FinalityTimeout(hash) => {
+                    self.sub = None;
+                    TxStatus::FinalityTimeout(hash)
+                }
+                SubstrateTxStatus::Finalized(hash) => {
+                    self.sub = None;
+                    TxStatus::Finalized(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
+                }
+            }
+        })
     }
 }
 
