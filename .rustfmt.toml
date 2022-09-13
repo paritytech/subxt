@@ -57,8 +57,6 @@ skip_children = false
 hide_parse_errors = false
 error_on_line_overflow = false
 error_on_unformatted = false
-report_todo = "Always"
-report_fixme = "Always"
 ignore = []
 
 # Below are `rustfmt` internal settings
