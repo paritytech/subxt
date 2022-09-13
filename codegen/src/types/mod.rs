@@ -46,8 +46,8 @@ pub use self::{
     type_path::{
         TypeParameter,
         TypePath,
-        TypePathSubstitute,
         TypePathType,
+        TypePathTypeKind,
     },
 };
 
@@ -171,40 +171,59 @@ impl<'a> TypeGenerator<'a> {
             )
         }
 
-        let params_type_ids = match ty.type_def() {
-            TypeDef::Array(arr) => vec![arr.type_param().id()],
-            TypeDef::Sequence(seq) => vec![seq.type_param().id()],
-            TypeDef::Tuple(tuple) => tuple.fields().iter().map(|f| f.id()).collect(),
-            TypeDef::Compact(compact) => vec![compact.type_param().id()],
-            TypeDef::BitSequence(seq) => {
-                vec![seq.bit_order_type().id(), seq.bit_store_type().id()]
-            }
-            _ => {
-                ty.type_params()
-                    .iter()
-                    .filter_map(|f| f.ty().map(|f| f.id()))
-                    .collect()
-            }
-        };
-
-        let params = params_type_ids
+        let params = ty.type_params()
             .iter()
-            .map(|tp| self.resolve_type_path(*tp, parent_type_params))
-            .collect::<Vec<_>>();
+            .filter_map(|f| f.ty().map(|f| self.resolve_type_path(f.id(), parent_type_params)))
+            .collect();
 
-        let joined_path = ty.path().segments().join("::");
-        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
-            TypePath::Substitute(TypePathSubstitute {
-                path: substitute_type_path.clone(),
-                params,
-            })
-        } else {
-            TypePath::Type(TypePathType {
-                ty,
-                params,
-                root_mod_ident: self.types_mod_ident.clone(),
-            })
-        }
+        let kind =
+            match ty.type_def() {
+                TypeDef::Composite(_) | TypeDef::Variant(_) => {
+                    let joined_path = ty.path().segments().join("::");
+                    if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
+                        TypePathTypeKind::Path {
+                            path: substitute_type_path.clone(),
+                            params
+                        }
+                    } else {
+                        TypePathTypeKind::from_type_def_path(ty.path(), self.types_mod_ident.clone(), params)
+                    }
+                },
+                TypeDef::Array(arr) => {
+                    TypePathTypeKind::Array {
+                        len: arr.len() as usize,
+                        of: Box::new(self.resolve_type_path(arr.type_param().id(), parent_type_params)),
+                    }
+                },
+                TypeDef::Sequence(seq) => {
+                    TypePathTypeKind::Vec {
+                        of: Box::new(self.resolve_type_path(seq.type_param().id(), parent_type_params)),
+                    }
+                },
+                TypeDef::Tuple(tuple) => {
+                    TypePathTypeKind::Tuple {
+                        elements: tuple.fields().iter().map(|f|
+                            self.resolve_type_path(f.id(), parent_type_params)).collect()
+                    }
+                },
+                TypeDef::Compact(compact) => {
+                    TypePathTypeKind::Compact {
+                        inner: Box::new(self.resolve_type_path(compact.type_param().id(), parent_type_params)),
+                        is_field: false, // todo
+                    }
+                },
+                TypeDef::BitSequence(bitseq) => {
+                    TypePathTypeKind::BitVec {
+                        bit_order_type: Box::new(self.resolve_type_path(bitseq.bit_order_type().id(), parent_type_params)),
+                        bit_store_type: Box::new(self.resolve_type_path(bitseq.bit_store_type().id(), parent_type_params))
+                    }
+                }
+            };
+
+        TypePath::Type(TypePathType {
+            kind,
+            root_mod_ident: self.types_mod_ident.clone(),
+        })
     }
 
     /// Returns the derives to be applied to all generated types.
