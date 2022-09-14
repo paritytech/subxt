@@ -224,6 +224,8 @@ impl TypePathType {
             }
             TypePathType::Compact { inner, is_field } => {
                 let path = if *is_field {
+                    // compact fields can use the inner compact type directly and be annotated with
+                    // the `compact` attribute e.g. `#[codec(compact)] my_compact_field: u128`
                     parse_quote! ( #inner )
                 } else {
                     parse_quote! ( ::subxt::ext::codec::Compact<#inner> )
