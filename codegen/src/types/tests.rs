@@ -400,7 +400,7 @@ fn compact_generic_parameter() {
 
                 #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
-                    pub a: ::core::Option<::subxt::ext::codec::Compact<::core::primitive::u128>>,
+                    pub a: ::core::option::Option<::subxt::ext::codec::Compact<::core::primitive::u128> >,
                 }
             }
         }

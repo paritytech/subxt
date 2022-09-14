@@ -6,15 +6,10 @@ use proc_macro2::{
     Ident,
     TokenStream,
 };
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::format_ident;
 use scale_info::{
     form::PortableForm,
     Path,
-    Type,
-    TypeDef,
     TypeDefPrimitive,
 };
 use std::collections::BTreeSet;
@@ -72,101 +67,15 @@ impl TypePath {
             _ => return None,
         };
 
-        match ty.kind {
-            TypePathTypeKind::Vec { ref of } => Some(of),
+        match ty {
+            TypePathType::Vec { ref of } => Some(of),
             _ => None,
         }
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct TypePathType {
-    pub(super) kind: TypePathTypeKind,
-    pub(super) root_mod_ident: Ident,
-}
-
-impl TypePathType {
-    pub(crate) fn is_compact(&self) -> bool {
-        matches!(self.kind, TypePathTypeKind::Compact { .. })
-    }
-
-    fn to_syn_type(&self) -> syn::Type {
-        match &self.kind {
-            TypePathTypeKind::Path { path, params } => {
-                let path = if params.is_empty() {
-                    parse_quote! { #path }
-                } else {
-                    parse_quote! { #path< #( #params ),* > }
-                };
-                syn::Type::Path(path)
-            }
-            TypePathTypeKind::Vec { of } => {
-                let type_path = parse_quote! { ::std::vec::Vec<#of> };
-                syn::Type::Path(type_path)
-            }
-            TypePathTypeKind::Array { len, of } => {
-                let array = parse_quote! { [#of; #len] };
-                syn::Type::Array(array)
-            }
-            TypePathTypeKind::Tuple { elements } => {
-                let tuple = parse_quote! { (#( # elements, )* ) };
-                syn::Type::Tuple(tuple)
-            }
-            TypePathTypeKind::Primitive { def } => {
-                syn::Type::Path(match def {
-                    TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
-                    TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
-                    TypeDefPrimitive::Str => parse_quote!(::std::string::String),
-                    TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
-                    TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
-                    TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
-                    TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
-                    TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
-                    TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
-                    TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
-                    TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
-                    TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
-                    TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
-                    TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
-                    TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
-                })
-            }
-            TypePathTypeKind::Compact { inner, is_field } => {
-                let path = if *is_field {
-                    parse_quote! ( #inner )
-                } else {
-                    parse_quote! ( ::subxt::ext::codec::Compact<#inner> )
-                };
-                syn::Type::Path(path)
-            }
-            TypePathTypeKind::BitVec {
-                bit_order_type,
-                bit_store_type,
-            } => {
-                let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
-                syn::Type::Path(type_path)
-            }
-        }
-    }
-
-    /// Returns the type parameters in a path which are inherited from the containing type.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// struct S<T> {
-    ///     a: Vec<Option<T>>, // the parent type param here is `T`
-    /// }
-    /// ```
-    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
-        for p in &self.params {
-            p.parent_type_params(acc);
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub enum TypePathTypeKind {
+pub enum TypePathType {
     Path {
         path: syn::TypePath,
         params: Vec<TypePath>,
@@ -194,7 +103,7 @@ pub enum TypePathTypeKind {
     },
 }
 
-impl TypePathTypeKind {
+impl TypePathType {
     pub fn from_type_def_path(
         path: &Path<PortableForm>,
         root_mod_ident: Ident,
@@ -231,6 +140,104 @@ impl TypePathTypeKind {
             }
         };
         Self::Path { path, params }
+    }
+
+    /// Visits a type path, collecting all the generic type parameters from the containing type.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// struct S<T> {
+    ///     a: Vec<Option<T>>, // the parent type param here is `T`
+    /// }
+    /// ```
+    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
+        match self {
+            TypePathType::Path { params, .. } => {
+                for p in params {
+                    p.parent_type_params(acc)
+                }
+            }
+            TypePathType::Vec { of } => of.parent_type_params(acc),
+            TypePathType::Array { of, .. } => of.parent_type_params(acc),
+            TypePathType::Tuple { elements } => {
+                for e in elements {
+                    e.parent_type_params(acc)
+                }
+            }
+            TypePathType::Primitive { .. } => (),
+            TypePathType::Compact { inner, .. } => inner.parent_type_params(acc),
+            TypePathType::BitVec {
+                bit_order_type,
+                bit_store_type,
+            } => {
+                bit_order_type.parent_type_params(acc);
+                bit_store_type.parent_type_params(acc);
+            }
+        }
+    }
+
+    pub(crate) fn is_compact(&self) -> bool {
+        matches!(self, TypePathType::Compact { .. })
+    }
+
+    fn to_syn_type(&self) -> syn::Type {
+        match &self {
+            TypePathType::Path { path, params } => {
+                let path = if params.is_empty() {
+                    parse_quote! { #path }
+                } else {
+                    parse_quote! { #path< #( #params ),* > }
+                };
+                syn::Type::Path(path)
+            }
+            TypePathType::Vec { of } => {
+                let type_path = parse_quote! { ::std::vec::Vec<#of> };
+                syn::Type::Path(type_path)
+            }
+            TypePathType::Array { len, of } => {
+                let array = parse_quote! { [#of; #len] };
+                syn::Type::Array(array)
+            }
+            TypePathType::Tuple { elements } => {
+                let tuple = parse_quote! { (#( # elements, )* ) };
+                syn::Type::Tuple(tuple)
+            }
+            TypePathType::Primitive { def } => {
+                syn::Type::Path(match def {
+                    TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
+                    TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
+                    TypeDefPrimitive::Str => parse_quote!(::std::string::String),
+                    TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
+                    TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
+                    TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
+                    TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
+                    TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
+                    TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
+                    TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
+                    TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
+                    TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
+                    TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
+                    TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
+                    TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
+                })
+            }
+            TypePathType::Compact { inner, is_field } => {
+                let path = if *is_field {
+                    parse_quote! ( #inner )
+                } else {
+                    parse_quote! ( ::subxt::ext::codec::Compact<#inner> )
+                };
+                syn::Type::Path(path)
+            }
+            TypePathType::BitVec {
+                bit_order_type,
+                bit_store_type,
+            } => {
+                let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
+                syn::Type::Path(type_path)
+            }
+        }
     }
 }
 

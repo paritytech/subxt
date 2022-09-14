@@ -47,7 +47,6 @@ pub use self::{
         TypeParameter,
         TypePath,
         TypePathType,
-        TypePathTypeKind,
     },
 };
 
@@ -180,26 +179,31 @@ impl<'a> TypeGenerator<'a> {
             })
             .collect();
 
-        let kind = match ty.type_def() {
+        let ty = match ty.type_def() {
             TypeDef::Composite(_) | TypeDef::Variant(_) => {
                 let joined_path = ty.path().segments().join("::");
                 if let Some(substitute_type_path) =
                     self.type_substitutes.get(&joined_path)
                 {
-                    TypePathTypeKind::Path {
+                    TypePathType::Path {
                         path: substitute_type_path.clone(),
                         params,
                     }
                 } else {
-                    TypePathTypeKind::from_type_def_path(
+                    TypePathType::from_type_def_path(
                         ty.path(),
                         self.types_mod_ident.clone(),
                         params,
                     )
                 }
             }
+            TypeDef::Primitive(primitive) => {
+                TypePathType::Primitive {
+                    def: primitive.clone(),
+                }
+            }
             TypeDef::Array(arr) => {
-                TypePathTypeKind::Array {
+                TypePathType::Array {
                     len: arr.len() as usize,
                     of: Box::new(
                         self.resolve_type_path(arr.type_param().id(), parent_type_params),
@@ -207,14 +211,14 @@ impl<'a> TypeGenerator<'a> {
                 }
             }
             TypeDef::Sequence(seq) => {
-                TypePathTypeKind::Vec {
+                TypePathType::Vec {
                     of: Box::new(
                         self.resolve_type_path(seq.type_param().id(), parent_type_params),
                     ),
                 }
             }
             TypeDef::Tuple(tuple) => {
-                TypePathTypeKind::Tuple {
+                TypePathType::Tuple {
                     elements: tuple
                         .fields()
                         .iter()
@@ -223,7 +227,7 @@ impl<'a> TypeGenerator<'a> {
                 }
             }
             TypeDef::Compact(compact) => {
-                TypePathTypeKind::Compact {
+                TypePathType::Compact {
                     inner: Box::new(self.resolve_type_path(
                         compact.type_param().id(),
                         parent_type_params,
@@ -232,7 +236,7 @@ impl<'a> TypeGenerator<'a> {
                 }
             }
             TypeDef::BitSequence(bitseq) => {
-                TypePathTypeKind::BitVec {
+                TypePathType::BitVec {
                     bit_order_type: Box::new(self.resolve_type_path(
                         bitseq.bit_order_type().id(),
                         parent_type_params,
@@ -245,10 +249,7 @@ impl<'a> TypeGenerator<'a> {
             }
         };
 
-        TypePath::Type(TypePathType {
-            kind,
-            root_mod_ident: self.types_mod_ident.clone(),
-        })
+        TypePath::Type(ty)
     }
 
     /// Returns the derives to be applied to all generated types.
