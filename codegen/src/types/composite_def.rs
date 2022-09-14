@@ -190,7 +190,7 @@ impl CompositeDefFields {
 
         for field in fields {
             let type_path =
-                type_gen.resolve_type_path(field.ty().id(), parent_type_params);
+                type_gen.resolve_field_type_path(field.ty().id(), parent_type_params);
             let field_type = CompositeDefFieldType::new(
                 field.ty().id(),
                 type_path,
