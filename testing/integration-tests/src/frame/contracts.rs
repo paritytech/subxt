@@ -8,7 +8,7 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
-        runtime_types::frame_support::weights::weight_v2::Weight,
+        runtime_types::sp_weights::weight_v2::Weight,
         system,
     },
     test_context,

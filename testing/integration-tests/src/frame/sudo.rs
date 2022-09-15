@@ -7,7 +7,7 @@ use crate::{
         self,
         runtime_types::{
             self,
-            frame_support::weights::weight_v2::Weight,
+            sp_weights::weight_v2::Weight,
         },
         sudo,
     },
