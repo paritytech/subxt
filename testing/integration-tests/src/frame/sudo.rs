@@ -7,7 +7,7 @@ use crate::{
         self,
         runtime_types::{
             self,
-            frame_support::weights::weight_v2::Weight,
+            sp_weights::weight_v2::Weight,
         },
         sudo,
     },
@@ -16,7 +16,7 @@ use crate::{
 };
 use sp_keyring::AccountKeyring;
 
-type Call = runtime_types::kitchensink_runtime::Call;
+type Call = runtime_types::kitchensink_runtime::RuntimeCall;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[tokio::test]
