@@ -457,7 +457,13 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                             fields: variant
                                 .fields()
                                 .iter()
-                                .map(|f| (f.name().map(|n| n.to_owned()), f.type_name().map(|n| n.to_owned()), f.ty().id()))
+                                .map(|f| {
+                                    (
+                                        f.name().map(|n| n.to_owned()),
+                                        f.type_name().map(|n| n.to_owned()),
+                                        f.ty().id(),
+                                    )
+                                })
                                 .collect(),
                             docs: variant.docs().to_vec(),
                         },
