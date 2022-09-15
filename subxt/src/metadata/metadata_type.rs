@@ -304,7 +304,7 @@ pub struct EventMetadata {
     // behind an Arc to avoid lots of needless clones of it existing.
     pallet: Arc<str>,
     event: String,
-    fields: Vec<(Option<String>, u32)>,
+    fields: Vec<(Option<String>, Option<String>, u32)>,
     docs: Vec<String>,
 }
 
@@ -319,8 +319,8 @@ impl EventMetadata {
         &self.event
     }
 
-    /// The names and types of each field in the event.
-    pub fn fields(&self) -> &[(Option<String>, u32)] {
+    /// The names, type names & types of each field in the event.
+    pub fn fields(&self) -> &[(Option<String>, Option<String>, u32)] {
         &self.fields
     }
 
@@ -457,7 +457,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                             fields: variant
                                 .fields()
                                 .iter()
-                                .map(|f| (f.name().map(|n| n.to_owned()), f.ty().id()))
+                                .map(|f| (f.name().map(|n| n.to_owned()), f.type_name().map(|n| n.to_owned()), f.ty().id()))
                                 .collect(),
                             docs: variant.docs().to_vec(),
                         },
