@@ -109,7 +109,7 @@ impl CustomTypeDecoder for Hash {
         &self,
         input: &mut &[u8],
     ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
-        let hash = sp_core::H256::decode(input)?.to_string();
+        let hash = format!("{:?}", sp_core::H256::decode(input)?);
         Ok(Value::string(hash).map_context(|_| 0_u32.into()))
     }
 }
