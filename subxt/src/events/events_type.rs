@@ -187,11 +187,11 @@ impl EventDetails {
         );
 
         // Skip over the bytes belonging to this event.
-        for (_name, _type_name, type_id) in event_metadata.fields() {
+        for field_metadata in event_metadata.fields() {
             // Skip over the bytes for this field:
             scale_decode::decode(
                 input,
-                *type_id,
+                field_metadata.type_id(),
                 &metadata.runtime_metadata().types,
                 scale_decode::visitor::IgnoreVisitor,
             )?;
@@ -288,15 +288,15 @@ impl EventDetails {
         let is_named = event_metadata
             .fields()
             .get(0)
-            .map(|(n, _, _)| n.is_some())
+            .map(|fm| fm.name().is_some())
             .unwrap_or(false);
 
         if !is_named {
             let mut event_values = vec![];
-            for (_, _, type_id) in event_metadata.fields() {
+            for field_metadata in event_metadata.fields() {
                 let value = scale_value::scale::decode_as_type(
                     bytes,
-                    *type_id,
+                    field_metadata.type_id(),
                     &self.metadata.runtime_metadata().types,
                 )?;
                 event_values.push(value);
@@ -305,13 +305,14 @@ impl EventDetails {
             Ok(scale_value::Composite::Unnamed(event_values))
         } else {
             let mut event_values = vec![];
-            for (name, _, type_id) in event_metadata.fields() {
+            for field_metadata in event_metadata.fields() {
                 let value = scale_value::scale::decode_as_type(
                     bytes,
-                    *type_id,
+                    field_metadata.type_id(),
                     &self.metadata.runtime_metadata().types,
                 )?;
-                event_values.push((name.clone().unwrap_or_default(), value));
+                event_values
+                    .push((field_metadata.name().unwrap_or_default().to_string(), value));
             }
 
             Ok(scale_value::Composite::Named(event_values))
