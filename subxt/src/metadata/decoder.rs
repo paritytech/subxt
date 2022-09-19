@@ -99,7 +99,6 @@ impl DecoderBuilder {
         )
         .register_custom_type_decoder::<sp_core::H256, _>(env_types::Hash)
         .register_custom_type_decoder::<tidefi_primitives::Hash, _>(env_types::Hash)
-        .register_custom_type_decoder::<sp_core::H256, _>(env_types::Hash)
         .register_custom_type_decoder::<tidefi_primitives::CurrencyId, _>(
             env_types::CurrencyId,
         )
