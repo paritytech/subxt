@@ -17,15 +17,8 @@
 use crate::BasicError;
 use codec::Decode;
 use scale_value::Value;
-use sp_core::crypto::{
-    AccountId32,
-    Ss58Codec,
-};
-use std::{
-    boxed::Box,
-    collections::HashMap,
-    fmt::Debug,
-};
+use sp_core::crypto::{AccountId32, Ss58Codec};
+use std::{boxed::Box, collections::HashMap, fmt::Debug};
 use tidefi_primitives::CurrencyId as TidefiCurrencyId;
 
 /// Provides custom decoding for predefined environment types.
@@ -109,7 +102,7 @@ impl CustomTypeDecoder for Hash {
         &self,
         input: &mut &[u8],
     ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
-        let hash = sp_core::H256::decode(input)?.to_string();
+        let hash = format!("{:?}", sp_core::H256::decode(input)?);
         Ok(Value::string(hash).map_context(|_| 0_u32.into()))
     }
 }
