@@ -18,19 +18,37 @@
 
 use crate::{
     metadata::{
-        env_types::{self, CustomTypeDecoder, EnvTypesTranscoder},
-        MetadataPalletCalls, PathKey,
+        env_types::{
+            self,
+            CustomTypeDecoder,
+            EnvTypesTranscoder,
+        },
+        MetadataPalletCalls,
+        PathKey,
     },
     u8_map::U8Map,
     BasicError,
 };
-use codec::{Compact, Decode};
+use codec::{
+    Compact,
+    Decode,
+};
 use frame_metadata::SignedExtensionMetadata;
-use scale_info::{form::PortableForm, TypeInfo};
+use scale_info::{
+    form::PortableForm,
+    TypeInfo,
+};
 use scale_value::Value;
 use serde::Serialize;
-use sp_runtime::{AccountId32, MultiAddress, MultiSignature};
-use std::{collections::HashMap, fmt::Debug};
+use sp_runtime::{
+    AccountId32,
+    MultiAddress,
+    MultiSignature,
+};
+use std::{
+    collections::HashMap,
+    fmt::Debug,
+};
 // use metadata::Metadata;
 
 /// The result of successfully decoding an extrinsic.
@@ -97,7 +115,6 @@ impl DecoderBuilder {
         self.register_custom_type_decoder::<tidefi_primitives::AccountId, _>(
             env_types::AccountId,
         )
-        .register_custom_type_decoder::<sp_core::H256, _>(env_types::Hash)
         .register_custom_type_decoder::<tidefi_primitives::Hash, _>(env_types::Hash)
         .register_custom_type_decoder::<tidefi_primitives::CurrencyId, _>(
             env_types::CurrencyId,
@@ -186,7 +203,7 @@ impl Decoder {
         if data.is_empty() {
             return Err(BasicError::Other(
                 "unwrapped extrinsic byte length should be > 0".into(),
-            ));
+            ))
         }
 
         // Ignore the expected extrinsic length here at the moment, since we know it's 1
@@ -216,7 +233,7 @@ impl Decoder {
 
         // We only know how to decode V4 extrinsics at the moment
         if version != 4 {
-            return Err(BasicError::Other(format!("Invalid version {}", version)));
+            return Err(BasicError::Other(format!("Invalid version {}", version)))
         }
 
         // If the extrinsic is signed, decode the signature next.
@@ -254,12 +271,12 @@ impl Decoder {
         &self,
         ty: scale_info::interner::UntrackedSymbol<std::any::TypeId>,
     ) -> Option<&scale_info::TypeDefVariant<PortableForm>> {
-        self.registry
-            .resolve(ty.id())
-            .and_then(|ty| match ty.type_def() {
+        self.registry.resolve(ty.id()).and_then(|ty| {
+            match ty.type_def() {
                 scale_info::TypeDef::Variant(variant) => Some(variant),
                 _ => None,
-            })
+            }
+        })
     }
 
     fn decode_call_data(&self, data: &mut &[u8]) -> Result<CallData, BasicError> {
@@ -268,7 +285,7 @@ impl Decoder {
             return Err(BasicError::Other(
                 "expected at least 2 more bytes for the pallet/call index".into(),
             )
-            .into());
+            .into())
         }
         let pallet_index = u8::decode(data)?;
         let call_index = u8::decode(data)?;
