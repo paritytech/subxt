@@ -1,21 +1,8 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
-//! Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
-
+//! Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 #![allow(clippy::redundant_clone)]
 
 #[subxt::subxt(
@@ -24,7 +11,7 @@
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    derive_for_all_types = "Clone, PartialEq",
+    derive_for_all_types = "Clone, PartialEq, Eq",
 
     // To apply derives to specific generated types, add a `derive_for_type` per type,
     // mapping the type path to the derives which should be added for that type only.

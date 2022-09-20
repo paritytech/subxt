@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use proc_macro2::{
     Ident,
@@ -194,7 +182,7 @@ impl TypePathType {
                 let bit_order_type = &self.params[0];
                 let bit_store_type = &self.params[1];
 
-                let type_path = parse_quote! { ::subxt::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
+                let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
 
                 syn::Type::Path(type_path)
             }

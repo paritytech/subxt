@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 //! Subxt is a library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 //!
@@ -22,173 +10,102 @@
 //! - [Query constants](https://docs.substrate.io/how-to-guides/v3/basics/configurable-constants/) (Constants)
 //! - [Subscribe to events](https://docs.substrate.io/v3/runtime/events-and-errors/) (Events)
 //!
+//! # Initializing the API client
 //!
-//! # Generate the runtime API
+//! To interact with a node, you'll need to construct a client.
 //!
-//! Subxt generates a runtime API from downloaded static metadata. The metadata can be downloaded using the
-//! [subxt-cli](https://crates.io/crates/subxt-cli) tool.
+//! ```no_run
+//! use subxt::{OnlineClient, PolkadotConfig};
 //!
-//! To generate the runtime API, use the `subxt` attribute which points at downloaded static metadata.
+//! # #[tokio::main]
+//! # async fn main() {
+//! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+//! # }
+//! ```
+//!
+//! This default client connects to a locally running node, but can be configured to point anywhere.
+//! Additionally, an [`crate::OfflineClient`] is available to perform operations that don't require a
+//! network connection to a node.
+//!
+//! The client takes a type parameter, here [`crate::PolkadotConfig`], which bakes in assumptions about
+//! the structure of extrinsics and the underlying types used by the node for things like block numbers.
+//! If the node you'd like to interact with deviates from Polkadot or the default Substrate node in these
+//! areas, you'll need to configure them by implementing the [`crate::config::Config`] type yourself.
+//!
+//! # Generating runtime types
+//!
+//! Subxt can optionally generate types at compile time to help you interact with a node. These types are
+//! generated using metadata which can be downloaded from a node using the [subxt-cli](https://crates.io/crates/subxt-cli)
+//! tool. These generated types provide a degree of type safety when interacting with a node that is compatible with
+//! the metadata that they were generated using. We also do runtime checks in case the node you're talking to has
+//! deviated from the types you're using to communicate with it (see below).
+//!
+//! To generate the types, use the `subxt` macro and point it at the metadata you've downloaded, like so:
 //!
 //! ```ignore
 //! #[subxt::subxt(runtime_metadata_path = "metadata.scale")]
 //! pub mod node_runtime { }
 //! ```
 //!
-//! The `node_runtime` has the following hierarchy:
+//! For more information, please visit the [subxt-codegen](https://docs.rs/subxt-codegen/latest/subxt_codegen/)
+//! documentation.
 //!
-//! ```rust
-//! pub mod node_runtime {
-//!     pub mod PalletName {
-//!         pub mod calls { }
-//!         pub mod storage { }
-//!         pub mod constants { }
-//!         pub mod events { }
-//!     }
-//! }
-//! ```
+//! You can opt to skip this step and use dynamic queries to talk to nodes instead, which can be useful in some cases,
+//! but doesn't provide any type safety.
 //!
-//! For more information regarding the `node_runtime` hierarchy, please visit the
-//! [subxt-codegen](https://docs.rs/subxt-codegen/latest/subxt_codegen/) documentation.
+//! # Interacting with the API
 //!
+//! Once instantiated, a client exposes four core functions:
+//! - `.tx()` for submitting extrinsics/transactions. See [`crate::tx::TxClient`] for more details, or see
+//!   the [balance_transfer](../examples/examples/balance_transfer.rs) example.
+//! - `.storage()` for fetching and iterating over storage entries. See [`crate::storage::StorageClient`] for more details, or see
+//!   the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example.
+//! - `.constants()` for getting hold of constants. See [`crate::constants::ConstantsClient`] for more details, or see
+//!   the [fetch_constants](../examples/examples/fetch_constants.rs) example.
+//! - `.events()` for subscribing/obtaining events. See [`crate::events::EventsClient`] for more details, or see:
+//!    - [subscribe_all_events](../examples/examples/subscribe_all_events.rs): Subscribe to events emitted from blocks.
+//!    - [subscribe_one_event](../examples/examples/subscribe_one_event.rs): Subscribe and filter by one event.
+//!    - [subscribe_some_events](../examples/examples/subscribe_some_events.rs): Subscribe and filter event.
 //!
-//! # Initializing the API client
+//! # Static Metadata Validation
+//!
+//! If you use types generated by the [`crate::subxt`] macro, there is a chance that they will fall out of sync
+//! with the actual state of the node you're trying to interact with.
+//!
+//! When you attempt to use any of these static types to interact with a node, Subxt will validate that they are
+//! still compatible and issue an error if they have deviated.
+//!
+//! Additionally, you can validate that the entirety of the statically generated code aligns with a node like so:
 //!
 //! ```no_run
-//! use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! use subxt::{OnlineClient, PolkadotConfig};
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! let api = ClientBuilder::new()
-//!     .set_url("wss://rpc.polkadot.io:443")
-//!     .build()
-//!     .await
-//!     .unwrap()
-//!     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+//!
+//! if let Err(_e) = polkadot::validate_codegen(&api) {
+//!     println!("Generated code is not up to date with node we're connected to");
+//! }
 //! # }
 //! ```
+//! ## Opting out of static validation
 //!
-//! The `RuntimeApi` type is generated by the `subxt` macro from the supplied metadata. This can be parameterized with user
-//! supplied implementations for the `Config` and `Extra` types, if the default implementation differs from the target
-//! chain.
-//!
-//! To ensure that extrinsics are properly submitted, during the build phase of the Client the
-//! runtime metadata of the node is downloaded. If the URL is not specified (`set_url`), the local host is used instead.
-//!
-//!
-//! # Submit Extrinsics
-//!
-//! Extrinsics are obtained using the API's `RuntimeApi::tx()` method, followed by `pallet_name()` and then the
-//! `call_item_name()`.
-//!
-//! Submit an extrinsic, returning success once the transaction is validated and accepted into the pool:
-//!
-//! Please visit the [balance_transfer](../examples/examples/balance_transfer.rs) example for more details.
-//!
-//!
-//! # Querying Storage
-//!
-//! The runtime storage is queried via the generated `RuntimeApi::storage()` method, followed by the `pallet_name()` and
-//! then the `storage_item_name()`.
-//!
-//! Please visit the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example for more details.
-//!
-//! # Query Constants
-//!
-//! Constants are embedded into the node's metadata.
-//!
-//! The subxt offers the ability to query constants from the runtime metadata (metadata downloaded when constructing
-//! the client, *not* the one provided for API generation).
-//!
-//! To query constants use the generated `RuntimeApi::constants()` method, followed by the `pallet_name()` and then the
-//! `constant_item_name()`.
-//!
-//! Please visit the [fetch_constants](../examples/examples/fetch_constants.rs) example for more details.
-//!
-//! # Subscribe to Events
-//!
-//! To subscribe to events, use the generated `RuntimeApi::events()` method which exposes:
-//! - `subscribe()` - Subscribe to events emitted from blocks. These blocks haven't necessarily been finalised.
-//! - `subscribe_finalized()` - Subscribe to events from finalized blocks.
-//! - `at()` - Obtain events at a given block hash.
-//!
-//!
-//! *Examples*
-//! - [subscribe_all_events](../examples/examples/subscribe_all_events.rs): Subscribe to events emitted from blocks.
-//! - [subscribe_one_event](../examples/examples/subscribe_one_event.rs): Subscribe and filter by one event.
-//! - [subscribe_some_events](../examples/examples/subscribe_some_events.rs): Subscribe and filter event.
-//!
-//! # Static Metadata Validation
-//!
-//! There are two types of metadata that the subxt is aware of:
-//! - static metadata: Metadata used for generating the API.
-//! - runtime metadata: Metadata downloaded from the target node when a subxt client is created.
-//!
-//! There are cases when the static metadata is different from the runtime metadata of a node.
-//! Such is the case when the node performs a runtime update.
-//!
-//! To ensure that subxt can properly communicate with the target node the static metadata is validated
-//! against the runtime metadata of the node.
-//!
-//! This validation is performed at the Call, Constant, and Storage levels, as well for the entire metadata.
-//! The level of granularity ensures that the users can still submit a given call, even if another
-//! call suffered changes.
-//!
-//! Full metadata validation:
-//!
-//! ```no_run
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-//! # pub mod polkadot {}
-//! # #[tokio::main]
-//! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! // To make sure that all of our statically generated pallets are compatible with the
-//! // runtime node, we can run this check:
-//! api.validate_metadata().unwrap();
-//! # }
-//! ```
-//!
-//! Call level validation:
-//!
-//! ```ignore
-//! # use sp_keyring::AccountKeyring;
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-//! # pub mod polkadot {}
-//! # #[tokio::main]
-//! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! // Submit the `transfer` extrinsic from Alice's account to Bob's.
-//! let dest = AccountKeyring::Bob.to_account_id().into();
-//!
-//! let extrinsic = api
-//!     .tx()
-//!     .balances()
-//!     // Constructing an extrinsic will fail if the metadata
-//!     // is not in sync with the generated API.
-//!     .transfer(dest, 123_456_789_012_345)
-//!     .unwrap();
-//! # }
-//! ```
+//! The static types that are used to query/access information are validated by default, to make sure that they are
+//! compatible with the node being queried. You can generally call `.unvalidated()` on these static types to
+//! disable this validation.
 //!
 //! # Runtime Updates
 //!
-//! There are cases when the node would perform a runtime update, and the runtime node's metadata would be
-//! out of sync with the subxt's metadata.
+//! The node you're connected to may occasionally perform runtime updates while you're connected, which would ordinarily
+//! leave the runtime state of the node out of sync with the information Subxt requires to do things like submit
+//! transactions.
 //!
-//! The `UpdateClient` API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
+//! If this is a concern, you can use the `UpdateClient` API to keep the `RuntimeVersion` and `Metadata` of the client
+//! synced with the target node.
 //!
 //! Please visit the [subscribe_runtime_updates](../examples/examples/subscribe_runtime_updates.rs) example for more details.
 
@@ -216,231 +133,42 @@
 )]
 #![allow(clippy::type_complexity)]
 
-pub use frame_metadata::StorageHasher;
 pub use subxt_macro::subxt;
 
-pub use bitvec;
-pub use codec;
-pub use sp_core;
-pub use sp_runtime;
-
-use codec::{
-    Decode,
-    DecodeAll,
-    Encode,
-};
-use core::fmt::Debug;
-use derivative::Derivative;
-
-mod client;
-mod config;
-mod error;
+pub mod client;
+pub mod config;
+pub mod constants;
+pub mod dynamic;
+pub mod error;
 pub mod events;
-pub mod extrinsic;
-mod metadata;
+pub mod metadata;
 pub mod rpc;
 pub mod storage;
-mod transaction;
-#[cfg(feature = "decoder")]
-mod u8_map;
-pub mod updates;
+pub mod tx;
+pub mod utils;
 
+// Expose a few of the most common types at root,
+// but leave most types behind their respoctive modules.
 pub use crate::{
     client::{
-        Client,
-        ClientBuilder,
-        SubmittableExtrinsic,
+        OfflineClient,
+        OnlineClient,
     },
     config::{
         Config,
-        DefaultConfig,
+        PolkadotConfig,
+        SubstrateConfig,
     },
-    error::{
-        BasicError,
-        Error,
-        GenericError,
-        HasModuleError,
-        ModuleError,
-        ModuleErrorData,
-        RuntimeError,
-        TransactionError,
-    },
-    events::{
-        EventDetails,
-        Events,
-        RawEventDetails,
-    },
-    extrinsic::{
-        PairSigner,
-        PolkadotExtrinsicParams,
-        PolkadotExtrinsicParamsBuilder,
-        SubstrateExtrinsicParams,
-        SubstrateExtrinsicParamsBuilder,
-    },
-    metadata::{
-        ErrorMetadata,
-        Metadata,
-        MetadataError,
-    },
-    rpc::{
-        BlockNumber,
-        ReadProof,
-        RpcClient,
-        SystemProperties,
-    },
-    storage::{
-        KeyIter,
-        StorageEntry,
-        StorageEntryKey,
-        StorageMapKey,
-    },
-    transaction::{
-        TransactionEvents,
-        TransactionInBlock,
-        TransactionProgress,
-        TransactionStatus,
-    },
+    error::Error,
+    metadata::Metadata,
 };
 
-#[cfg(feature = "decoder")]
-pub use crate::metadata::{
-    CallData,
-    Decoder,
-    DecoderBuilder,
-    Extrinsic,
-    PalletMetadata,
-    PathKey,
-};
-/// Trait to uniquely identify the call (extrinsic)'s identity from the runtime metadata.
-///
-/// Generated API structures that represent each of the different possible
-/// calls to a node each implement this trait.
-///
-/// When encoding an extrinsic, we use this information to know how to map
-/// the call to the specific pallet and call index needed by a particular node.
-pub trait Call: Encode {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Function name.
-    const FUNCTION: &'static str;
-
-    /// Returns true if the given pallet and function names match this call.
-    fn is_call(pallet: &str, function: &str) -> bool {
-        Self::PALLET == pallet && Self::FUNCTION == function
-    }
+/// Re-export external crates that are made use of in the subxt API.
+pub mod ext {
+    pub use bitvec;
+    pub use codec;
+    pub use frame_metadata;
+    pub use scale_value;
+    pub use sp_core;
+    pub use sp_runtime;
 }
-
-/// Trait to uniquely identify the events's identity from the runtime metadata.
-///
-/// Generated API structures that represent an event implement this trait.
-///
-/// The trait is utilized to decode emitted events from a block, via obtaining the
-/// form of the `Event` from the metadata.
-pub trait Event: Decode {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Event name.
-    const EVENT: &'static str;
-
-    /// Returns true if the given pallet and event names match this event.
-    fn is_event(pallet: &str, event: &str) -> bool {
-        Self::PALLET == pallet && Self::EVENT == event
-    }
-}
-
-/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
-/// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Encoded(pub Vec<u8>);
-
-impl codec::Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
-    }
-}
-
-/// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
-pub enum Phase {
-    /// Applying an extrinsic.
-    ApplyExtrinsic(u32),
-    /// Finalizing the block.
-    Finalization,
-    /// Initializing the block.
-    Initialization,
-}
-
-/// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
-///
-/// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
-/// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Derivative, Encode, Decode)]
-#[derivative(
-    Debug(bound = ""),
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-pub struct WrapperKeepOpaque<T> {
-    data: Vec<u8>,
-    _phantom: PhantomDataSendSync<T>,
-}
-
-impl<T: Decode> WrapperKeepOpaque<T> {
-    /// Try to decode the wrapped type from the inner `data`.
-    ///
-    /// Returns `None` if the decoding failed.
-    pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
-    }
-
-    /// Returns the length of the encoded `T`.
-    pub fn encoded_len(&self) -> usize {
-        self.data.len()
-    }
-
-    /// Returns the encoded data.
-    pub fn encoded(&self) -> &[u8] {
-        &self.data
-    }
-
-    /// Create from the given encoded `data`.
-    pub fn from_encoded(data: Vec<u8>) -> Self {
-        Self {
-            data,
-            _phantom: PhantomDataSendSync::new(),
-        }
-    }
-}
-
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
-/// because regardless of the generic param, it is always possible to Send + Sync this
-/// 0 size type).
-#[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]
-#[derivative(
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Debug(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-#[scale_info(skip_type_params(T))]
-#[doc(hidden)]
-pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
-
-impl<T> PhantomDataSendSync<T> {
-    pub(crate) fn new() -> Self {
-        Self(core::marker::PhantomData)
-    }
-}
-
-unsafe impl<T> Send for PhantomDataSendSync<T> {}
-unsafe impl<T> Sync for PhantomDataSendSync<T> {}
-
-/// This represents a key-value collection and is SCALE compatible
-/// with collections like BTreeMap. This has the same type params
-/// as `BTreeMap` which allows us to easily swap the two during codegen.
-pub type KeyedVec<K, V> = Vec<(K, V)>;

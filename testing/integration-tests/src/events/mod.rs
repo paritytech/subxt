@@ -1,43 +1,33 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use crate::{
     node_runtime::{
+        self,
         balances,
         system,
     },
     pair_signer,
     test_context,
+    utils::wait_for_blocks,
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 
 // Check that we can subscribe to non-finalized block events.
 #[tokio::test]
-async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
+async fn non_finalized_block_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is not finalized yet.
     let events = event_sub.next().await.unwrap()?;
     let event_block_hash = events.block_hash();
-    let current_block_hash = ctx.api.client.rpc().block_hash(None).await?.unwrap();
+    let current_block_hash = api.rpc().block_hash(None).await?.unwrap();
 
     assert_eq!(event_block_hash, current_block_hash);
     Ok(())
@@ -45,18 +35,18 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 
 // Check that we can subscribe to finalized block events.
 #[tokio::test]
-async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
+async fn finalized_block_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe_finalized().await?;
+    let mut event_sub = api.events().subscribe_finalized().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is the one we just finalized.
     // (this can be a bit slow as we have to wait for finalization)
     let events = event_sub.next().await.unwrap()?;
     let event_block_hash = events.block_hash();
-    let finalized_hash = ctx.api.client.rpc().finalized_head().await?;
+    let finalized_hash = api.rpc().finalized_head().await?;
 
     assert_eq!(event_block_hash, finalized_hash);
     Ok(())
@@ -65,26 +55,70 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // Check that our subscription actually keeps producing events for
 // a few blocks.
 #[tokio::test]
-async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
+async fn subscription_produces_events_each_block() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe().await?;
+    wait_for_blocks(&api).await;
+
+    let mut event_sub = api.events().subscribe().await?;
 
     for i in 0..3 {
         let events = event_sub
             .next()
             .await
             .expect("events expected each block")?;
+
         let success_event = events
             .find_first::<system::events::ExtrinsicSuccess>()
             .expect("decode error");
-        // Every now and then I get no bytes back for the first block events;
-        // I assume that this might be the case for the genesis block, so don't
-        // worry if no event found (but we should have no decode errors etc either way).
-        if i > 0 && success_event.is_none() {
+
+        if success_event.is_none() {
             let n = events.len();
             panic!("Expected an extrinsic success event on iteration {i} (saw {n} other events)")
+        }
+    }
+
+    Ok(())
+}
+
+// Iterate all of the events in a few blocks to ensure we can decode them properly.
+#[tokio::test]
+async fn decoding_all_events_in_a_block_works() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    wait_for_blocks(&api).await;
+
+    let mut event_sub = api.events().subscribe().await?;
+
+    tokio::spawn(async move {
+        let alice = pair_signer(AccountKeyring::Alice.pair());
+        let bob = AccountKeyring::Bob.to_account_id();
+        let transfer_tx = node_runtime::tx()
+            .balances()
+            .transfer(bob.clone().into(), 10_000);
+
+        // Make a load of transfers to get lots of events going.
+        for _i in 0..10 {
+            api.tx()
+                .sign_and_submit_then_watch_default(&transfer_tx, &alice)
+                .await
+                .expect("can submit_transaction");
+        }
+    });
+
+    for _ in 0..4 {
+        let events = event_sub
+            .next()
+            .await
+            .expect("events expected each block")?;
+
+        for event in events.iter() {
+            // make sure that we can get every event properly.
+            let event = event.expect("valid event decoded");
+            // make sure that we can decode the field values from every event.
+            event.field_values().expect("can decode fields");
         }
     }
 
@@ -94,13 +128,12 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 // Check that our subscription receives events, and we can filter them based on
 // it's Stream impl, and ultimately see the event we expect.
 #[tokio::test]
-async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
+async fn balance_transfer_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
+    let api = ctx.client();
 
     // Subscribe to balance transfer events, ignoring all else.
-    let event_sub = ctx
-        .api
+    let event_sub = api
         .events()
         .subscribe()
         .await?
@@ -113,11 +146,12 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     // Make a transfer:
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
-    ctx.api
-        .tx()
+    let transfer_tx = node_runtime::tx()
         .balances()
-        .transfer(bob.clone().into(), 10_000)?
-        .sign_and_submit_then_watch_default(&alice)
+        .transfer(bob.clone().into(), 10_000);
+
+    api.tx()
+        .sign_and_submit_then_watch_default(&transfer_tx, &alice)
         .await?;
 
     // Wait for the next balance transfer event in our subscription stream
@@ -136,21 +170,20 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 }
 
 #[tokio::test]
-async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicError> {
+async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
     // This function is not publically available to use, but contains
     // the key logic for filling in missing blocks, so we want to test it.
     // This is used in `subscribe_finalized` to ensure no block headers are
     // missed.
     use subxt::events::subscribe_to_block_headers_filling_in_gaps;
 
-    let ctx = test_context().await;
-
     // Manually subscribe to the next 6 finalized block headers, but deliberately
     // filter out some in the middle so we get back b _ _ b _ b. This guarantees
     // that there will be some gaps, even if there aren't any from the subscription.
-    let some_finalized_blocks = ctx
-        .api
-        .client
+    let some_finalized_blocks = api
         .rpc()
         .subscribe_finalized_blocks()
         .await?
@@ -164,7 +197,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
 
     // This should spot any gaps in the middle and fill them back in.
     let all_finalized_blocks = subscribe_to_block_headers_filling_in_gaps(
-        &ctx.api.client,
+        ctx.client(),
         None,
         some_finalized_blocks,
     );
@@ -197,7 +230,7 @@ async fn check_events_are_sendable() {
     tokio::task::spawn(async {
         let ctx = test_context().await;
 
-        let mut event_sub = ctx.api.events().subscribe().await?;
+        let mut event_sub = ctx.client().events().subscribe().await?;
 
         while let Some(ev) = event_sub.next().await {
             // if `event_sub` doesn't implement Send, we can't hold
@@ -205,7 +238,7 @@ async fn check_events_are_sendable() {
             // requires Send. This will lead to a compile error.
         }
 
-        Ok::<_, subxt::BasicError>(())
+        Ok::<_, subxt::Error>(())
     });
 
     // Check that FilterEvents can be used across await points.
@@ -213,7 +246,7 @@ async fn check_events_are_sendable() {
         let ctx = test_context().await;
 
         let mut event_sub = ctx
-            .api
+            .client()
             .events()
             .subscribe()
             .await?
@@ -225,6 +258,6 @@ async fn check_events_are_sendable() {
             // requires Send; This will lead to a compile error.
         }
 
-        Ok::<_, subxt::BasicError>(())
+        Ok::<_, subxt::Error>(())
     });
 }

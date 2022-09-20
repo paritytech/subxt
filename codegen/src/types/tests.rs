@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use super::*;
 use pretty_assertions::assert_eq;
@@ -65,7 +53,7 @@ fn generate_struct_with_primitives() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: ::core::primitive::bool,
                     pub b: ::core::primitive::u32,
@@ -111,12 +99,12 @@ fn generate_struct_with_a_struct_field() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Child {
                     pub a: ::core::primitive::i32,
                 }
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Parent {
                     pub a: ::core::primitive::bool,
                     pub b: root::subxt_codegen::types::tests::Child,
@@ -156,10 +144,10 @@ fn generate_tuple_struct() {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                    #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                     pub struct Child(pub ::core::primitive::i32,);
 
-                    #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                    #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                     pub struct Parent(pub ::core::primitive::bool, pub root::subxt_codegen::types::tests::Child,);
                 }
             }
@@ -238,34 +226,34 @@ fn derive_compact_as_for_uint_wrapper_structs() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Su128 { pub a: ::core::primitive::u128, }
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Su16 { pub a: ::core::primitive::u16, }
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Su32 { pub a: ::core::primitive::u32, }
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Su64 { pub a: ::core::primitive::u64, }
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Su8 { pub a: ::core::primitive::u8, }
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TSu128(pub ::core::primitive::u128,);
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TSu16(pub ::core::primitive::u16,);
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TSu32(pub ::core::primitive::u32,);
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TSu64(pub ::core::primitive::u64,);
 
-                #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TSu8(pub ::core::primitive::u8,);
             }
         }
@@ -301,7 +289,7 @@ fn generate_enum() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub enum E {
                     # [codec (index = 0)]
                     A,
@@ -359,7 +347,7 @@ fn compact_fields() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub enum E {
                     # [codec (index = 0)]
                     A {
@@ -370,12 +358,12 @@ fn compact_fields() {
                     B( #[codec(compact)] ::core::primitive::u32,),
                 }
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     #[codec(compact)] pub a: ::core::primitive::u32,
                 }
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct TupleStruct(#[codec(compact)] pub ::core::primitive::u32,);
             }
         }
@@ -409,7 +397,7 @@ fn generate_array_field() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: [::core::primitive::u8; 32usize],
                 }
@@ -446,7 +434,7 @@ fn option_fields() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: ::core::option::Option<::core::primitive::bool>,
                     pub b: ::core::option::Option<::core::primitive::u32>,
@@ -486,7 +474,7 @@ fn box_fields_struct() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: ::std::boxed::Box<::core::primitive::bool>,
                     pub b: ::std::boxed::Box<::core::primitive::u32>,
@@ -526,7 +514,7 @@ fn box_fields_enum() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub enum E {
                     # [codec (index = 0)]
                     A(::std::boxed::Box<::core::primitive::bool>,),
@@ -566,7 +554,7 @@ fn range_fields() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: ::core::ops::Range<::core::primitive::u32>,
                     pub b: ::core::ops::RangeInclusive<::core::primitive::u32>,
@@ -610,12 +598,12 @@ fn generics() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Bar {
                     pub b: root::subxt_codegen::types::tests::Foo<::core::primitive::u32>,
                     pub c: root::subxt_codegen::types::tests::Foo<::core::primitive::u8>,
                 }
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Foo<_0> {
                     pub a: _0,
                 }
@@ -658,12 +646,12 @@ fn generics_nested() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Bar<_0> {
                     pub b: root::subxt_codegen::types::tests::Foo<_0, ::core::primitive::u32>,
                 }
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct Foo<_0, _1> {
                     pub a: _0,
                     pub b: ::core::option::Option<(_0, _1,)>,
@@ -709,10 +697,10 @@ fn generate_bitvec() {
         quote! {
             pub mod tests {
                 use super::root;
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
-                    pub lsb: ::subxt::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
-                    pub msb: ::subxt::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
+                    pub lsb: ::subxt::ext::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
+                    pub msb: ::subxt::ext::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
                 }
             }
         }
@@ -762,12 +750,12 @@ fn generics_with_alias_adds_phantom_data_marker() {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(::subxt::codec::CompactAs, ::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                    #[derive(::subxt::ext::codec::CompactAs, ::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                     pub struct NamedFields<_0> {
                         pub b: ::core::primitive::u32,
                         #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
                     }
-                    #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                    #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (::core::primitive::u32, ::core::primitive::u32,),
                         #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>
@@ -830,20 +818,20 @@ fn modules() {
                         pub mod b {
                             use super::root;
 
-                            #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                            #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                             pub struct Bar {
                                 pub a: root::subxt_codegen::types::tests::m::a::Foo,
                             }
                         }
 
-                        #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                        #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                         pub struct Foo;
                     }
 
                     pub mod c {
                         use super::root;
 
-                        #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                        #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                         pub struct Foo {
                             pub a: root::subxt_codegen::types::tests::m::a::b::Bar,
                         }
@@ -880,7 +868,7 @@ fn dont_force_struct_names_camel_case() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct AB;
             }
         }
@@ -917,10 +905,10 @@ fn apply_user_defined_derives_for_all_types() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Clone, Debug, Eq)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Clone, Debug, Eq)]
                 pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Clone, Debug, Eq)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Clone, Debug, Eq)]
                 pub struct B;
             }
         }
@@ -976,13 +964,13 @@ fn apply_user_defined_derives_for_specific_types() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug, Eq)]
                 pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq, Hash)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug, Eq, Hash)]
                 pub struct B(pub root :: subxt_codegen :: types :: tests :: C,);
 
-                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq, Ord, PartialOrd)]
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug, Eq, Ord, PartialOrd)]
                 pub struct C;
             }
         }

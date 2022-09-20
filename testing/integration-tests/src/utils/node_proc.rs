@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use sp_keyring::AccountKeyring;
 use std::{
@@ -28,16 +16,14 @@ use std::{
     process,
 };
 use subxt::{
-    Client,
-    ClientBuilder,
     Config,
+    OnlineClient,
 };
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
-    client: Client<R>,
-    ws_url: String,
+    client: OnlineClient<R>,
 }
 
 impl<R> Drop for TestNodeProcess<R>
@@ -73,13 +59,8 @@ where
     }
 
     /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> &Client<R> {
-        &self.client
-    }
-
-    /// Returns the address to which the client is connected.
-    pub fn ws_url(&self) -> &str {
-        &self.ws_url
+    pub fn client(&self) -> OnlineClient<R> {
+        self.client.clone()
     }
 }
 
@@ -141,15 +122,9 @@ impl TestNodeProcessBuilder {
         let ws_url = format!("ws://127.0.0.1:{}", ws_port);
 
         // Connect to the node with a subxt client:
-        let client = ClientBuilder::new().set_url(ws_url.clone()).build().await;
+        let client = OnlineClient::from_url(ws_url.clone()).await;
         match client {
-            Ok(client) => {
-                Ok(TestNodeProcess {
-                    proc,
-                    client,
-                    ws_url,
-                })
-            }
+            Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
                 let err = format!("Failed to connect to node rpc at {}: {}", ws_url, err);
                 tracing::error!("{}", err);

@@ -1,85 +1,35 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 //! RPC types and client for interacting with a substrate node.
 //!
 //! This is used behind the scenes by various `subxt` APIs, but can
 //! also be used directly.
 //!
-//! # Examples
+//! # Example
 //!
-//! ## Fetch Storage
+//! Fetching storage keys
 //!
 //! ```no_run
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # use subxt::storage::StorageKeyPrefix;
-//! # use subxt::rpc::Rpc;
+//! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! // Storage prefix is `twox_128("System") ++ twox_128("ExtrinsicCount")`.
-//! let key = StorageKeyPrefix::new::<polkadot::system::storage::ExtrinsicCount>()
-//!     .to_storage_key();
+//! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 //!
-//! // Obtain the RPC from a generated API
-//! let rpc: &Rpc<_> = api
-//!     .client
-//!     .rpc();
-//!
-//! let result = rpc.storage(&key, None).await.unwrap();
-//! println!("Storage result: {:?}", result);
-//! # }
-//! ```
-//!
-//! ## Fetch Keys
-//!
-//! ```no_run
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # use subxt::storage::StorageKeyPrefix;
-//! # use subxt::rpc::Rpc;
-//!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-//! pub mod polkadot {}
-//!
-//! # #[tokio::main]
-//! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>()
-//!     .to_storage_key();
-//!
-//! // Obtain the RPC from a generated API
-//! let rpc: &Rpc<_> = api
-//!     .client
-//!     .rpc();
+//! let key = polkadot::storage()
+//!     .xcm_pallet()
+//!     .version_notifiers_root()
+//!     .to_bytes();
 //!
 //! // Fetch up to 10 keys.
-//! let keys = rpc
-//!     .storage_keys_paged(Some(key), 10, None, None)
+//! let keys = api
+//!     .rpc()
+//!     .storage_keys_paged(&key, 10, None, None)
 //!     .await
 //!     .unwrap();
 //!
@@ -89,50 +39,23 @@
 //! # }
 //! ```
 
-// jsonrpsee subscriptions are interminable.
-// Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/subxt/issues/66
-#![allow(irrefutable_let_patterns)]
-
-use std::{
-    collections::HashMap,
-    sync::Arc,
+use super::{
+    rpc_params,
+    RpcClient,
+    RpcClientT,
+    Subscription,
 };
-
 use crate::{
-    error::BasicError,
+    error::Error,
+    utils::PhantomDataSendSync,
     Config,
     Metadata,
-    PhantomDataSendSync,
 };
 use codec::{
     Decode,
     Encode,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-pub use jsonrpsee::{
-    client_transport::ws::{
-        InvalidUri,
-        Receiver as WsReceiver,
-        Sender as WsSender,
-        Uri,
-        WsTransportClientBuilder,
-    },
-    core::{
-        client::{
-            Client as RpcClient,
-            ClientBuilder as RpcClientBuilder,
-            ClientT,
-            Subscription,
-            SubscriptionClientT,
-        },
-        to_json_value,
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
-    },
-    rpc_params,
-};
 use serde::{
     Deserialize,
     Serialize,
@@ -153,6 +76,7 @@ use sp_runtime::{
     },
     ApplyExtrinsicResult,
 };
+use std::collections::HashMap;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -162,7 +86,7 @@ use sp_runtime::{
 ///
 /// The primary motivation for having this type is to avoid overflows when using big integers in
 /// JavaScript (which we consider as an important RPC API consumer).
-#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum NumberOrHex {
     /// The number represented directly.
@@ -182,6 +106,87 @@ pub struct BlockNumber(NumberOrHex);
 impl From<NumberOrHex> for BlockNumber {
     fn from(x: NumberOrHex) -> Self {
         BlockNumber(x)
+    }
+}
+
+impl Default for NumberOrHex {
+    fn default() -> Self {
+        Self::Number(Default::default())
+    }
+}
+
+impl NumberOrHex {
+    /// Converts this number into an U256.
+    pub fn into_u256(self) -> U256 {
+        match self {
+            NumberOrHex::Number(n) => n.into(),
+            NumberOrHex::Hex(h) => h,
+        }
+    }
+}
+
+impl From<u32> for NumberOrHex {
+    fn from(n: u32) -> Self {
+        NumberOrHex::Number(n.into())
+    }
+}
+
+impl From<u64> for NumberOrHex {
+    fn from(n: u64) -> Self {
+        NumberOrHex::Number(n)
+    }
+}
+
+impl From<u128> for NumberOrHex {
+    fn from(n: u128) -> Self {
+        NumberOrHex::Hex(n.into())
+    }
+}
+
+impl From<U256> for NumberOrHex {
+    fn from(n: U256) -> Self {
+        NumberOrHex::Hex(n)
+    }
+}
+
+/// An error type that signals an out-of-range conversion attempt.
+#[derive(Debug, thiserror::Error)]
+#[error("Out-of-range conversion attempt")]
+pub struct TryFromIntError;
+
+impl TryFrom<NumberOrHex> for u32 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u32, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl TryFrom<NumberOrHex> for u64 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u64, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl TryFrom<NumberOrHex> for u128 {
+    type Error = TryFromIntError;
+    fn try_from(num_or_hex: NumberOrHex) -> Result<u128, Self::Error> {
+        num_or_hex
+            .into_u256()
+            .try_into()
+            .map_err(|_| TryFromIntError)
+    }
+}
+
+impl From<NumberOrHex> for U256 {
+    fn from(num_or_hex: NumberOrHex) -> U256 {
+        num_or_hex.into_u256()
     }
 }
 
@@ -208,9 +213,9 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 ///
 /// This is copied from `sp-transaction-pool` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum SubstrateTransactionStatus<Hash, BlockHash> {
+pub enum SubstrateTxStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
     Future,
     /// Transaction is part of the ready queue.
@@ -237,7 +242,7 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
 
 /// This contains the runtime version information necessary to make transactions, as obtained from
 /// the RPC call `state_getRuntimeVersion`,
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
@@ -268,7 +273,7 @@ pub struct RuntimeVersion {
 ///
 /// This is copied from `sc-rpc-api` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadProof<Hash> {
     /// Block hash used to generate the proof
@@ -278,7 +283,7 @@ pub struct ReadProof<Hash> {
 }
 
 /// Statistics of a block returned by the `dev_getBlockStats` RPC.
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockStats {
     /// The length in bytes of the storage proof produced by executing the block.
@@ -298,7 +303,7 @@ pub struct BlockStats {
 }
 
 /// Health struct returned by the RPC
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Health {
     /// Number of connected peers
@@ -313,8 +318,7 @@ pub struct Health {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
-    /// Rpc client for sending requests.
-    pub client: Arc<RpcClient>,
+    client: RpcClient,
     _marker: PhantomDataSendSync<T>,
 }
 
@@ -327,22 +331,31 @@ impl<T: Config> Clone for Rpc<T> {
     }
 }
 
+// Expose subscribe/request, and also subscribe_raw/request_raw
+// from the even-deeper `dyn RpcClientT` impl.
+impl<T: Config> std::ops::Deref for Rpc<T> {
+    type Target = RpcClient;
+    fn deref(&self) -> &Self::Target {
+        &self.client
+    }
+}
+
 impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
-    pub fn new(client: RpcClient) -> Self {
+    pub fn new<R: RpcClientT>(client: R) -> Self {
         Self {
-            client: Arc::new(client),
+            client: RpcClient::new(client),
             _marker: PhantomDataSendSync::new(),
         }
     }
 
-    /// Fetch a storage key
+    /// Fetch the raw bytes for a given storage key
     pub async fn storage(
         &self,
-        key: &StorageKey,
+        key: &[u8],
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, BasicError> {
-        let params = rpc_params![key, hash];
+    ) -> Result<Option<StorageData>, Error> {
+        let params = rpc_params![to_hex(key), hash];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
@@ -352,12 +365,13 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        key: Option<StorageKey>,
+        key: &[u8],
         count: u32,
-        start_key: Option<StorageKey>,
+        start_key: Option<&[u8]>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, BasicError> {
-        let params = rpc_params![key, count, start_key, hash];
+    ) -> Result<Vec<StorageKey>, Error> {
+        let start_key = start_key.map(to_hex);
+        let params = rpc_params![to_hex(key), count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -365,10 +379,11 @@ impl<T: Config> Rpc<T> {
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
-        keys: Vec<StorageKey>,
+        keys: impl IntoIterator<Item = &[u8]>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, from, to];
         self.client
             .request("state_queryStorage", params)
@@ -379,9 +394,10 @@ impl<T: Config> Rpc<T> {
     /// Query historical storage entries
     pub async fn query_storage_at(
         &self,
-        keys: &[StorageKey],
+        keys: impl IntoIterator<Item = &[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, at];
         self.client
             .request("state_queryStorageAt", params)
@@ -390,7 +406,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = 0u32;
         let params = rpc_params![block_zero];
         let genesis_hash: Option<T::Hash> =
@@ -399,7 +415,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, BasicError> {
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
         let bytes: Bytes = self
             .client
             .request("state_getMetadata", rpc_params![])
@@ -410,49 +426,47 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch system properties
-    pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
-        Ok(self
-            .client
+    pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
+        self.client
             .request("system_properties", rpc_params![])
-            .await?)
+            .await
     }
 
     /// Fetch system health
-    pub async fn system_health(&self) -> Result<Health, BasicError> {
-        Ok(self.client.request("system_health", rpc_params![]).await?)
+    pub async fn system_health(&self) -> Result<Health, Error> {
+        self.client.request("system_health", rpc_params![]).await
     }
 
     /// Fetch system chain
-    pub async fn system_chain(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_chain", rpc_params![]).await?)
+    pub async fn system_chain(&self) -> Result<String, Error> {
+        self.client.request("system_chain", rpc_params![]).await
     }
 
     /// Fetch system name
-    pub async fn system_name(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_name", rpc_params![]).await?)
+    pub async fn system_name(&self) -> Result<String, Error> {
+        self.client.request("system_name", rpc_params![]).await
     }
 
     /// Fetch system version
-    pub async fn system_version(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_version", rpc_params![]).await?)
+    pub async fn system_version(&self) -> Result<String, Error> {
+        self.client.request("system_version", rpc_params![]).await
     }
 
     /// Fetch the current nonce for the given account ID.
     pub async fn system_account_next_index(
         &self,
         account: &T::AccountId,
-    ) -> Result<T::Index, BasicError> {
-        Ok(self
-            .client
+    ) -> Result<T::Index, Error> {
+        self.client
             .request("system_accountNextIndex", rpc_params![account])
-            .await?)
+            .await
     }
 
     /// Get a header
     pub async fn header(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, BasicError> {
+    ) -> Result<Option<T::Header>, Error> {
         let params = rpc_params![hash];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -462,14 +476,14 @@ impl<T: Config> Rpc<T> {
     pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, BasicError> {
+    ) -> Result<Option<T::Hash>, Error> {
         let params = rpc_params![block_number];
         let block_hash = self.client.request("chain_getBlockHash", params).await?;
         Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
             .request("chain_getFinalizedHead", rpc_params![])
@@ -481,7 +495,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, BasicError> {
+    ) -> Result<Option<ChainBlock<T>>, Error> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -495,7 +509,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block_stats(
         &self,
         block_hash: T::Hash,
-    ) -> Result<Option<BlockStats>, BasicError> {
+    ) -> Result<Option<BlockStats>, Error> {
         let params = rpc_params![block_hash];
         let stats = self.client.request("dev_getBlockStats", params).await?;
         Ok(stats)
@@ -504,9 +518,10 @@ impl<T: Config> Rpc<T> {
     /// Get proof of storage entries at a specific block's state.
     pub async fn read_proof(
         &self,
-        keys: Vec<StorageKey>,
+        keys: impl IntoIterator<Item = &[u8]>,
         hash: Option<T::Hash>,
-    ) -> Result<ReadProof<T::Hash>, BasicError> {
+    ) -> Result<ReadProof<T::Hash>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, hash];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
@@ -516,7 +531,7 @@ impl<T: Config> Rpc<T> {
     pub async fn runtime_version(
         &self,
         at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, BasicError> {
+    ) -> Result<RuntimeVersion, Error> {
         let params = rpc_params![at];
         let version = self
             .client
@@ -526,7 +541,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -542,7 +557,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> Result<Subscription<T::Header>, BasicError> {
+    ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -557,7 +572,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to runtime version updates that produce changes in the metadata.
     pub async fn subscribe_runtime_version(
         &self,
-    ) -> Result<Subscription<RuntimeVersion>, BasicError> {
+    ) -> Result<Subscription<RuntimeVersion>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -573,7 +588,7 @@ impl<T: Config> Rpc<T> {
     pub async fn submit_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<T::Hash, BasicError> {
+    ) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let xt_hash = self
@@ -587,8 +602,7 @@ impl<T: Config> Rpc<T> {
     pub async fn watch_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
-    {
+    ) -> Result<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let subscription = self
@@ -608,18 +622,17 @@ impl<T: Config> Rpc<T> {
         key_type: String,
         suri: String,
         public: Bytes,
-    ) -> Result<(), BasicError> {
+    ) -> Result<(), Error> {
         let params = rpc_params![key_type, suri, public];
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
 
     /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
-        Ok(self
-            .client
+    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
+        self.client
             .request("author_rotateKeys", rpc_params![])
-            .await?)
+            .await
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -627,12 +640,9 @@ impl<T: Config> Rpc<T> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(
-        &self,
-        session_keys: Bytes,
-    ) -> Result<bool, BasicError> {
+    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys];
-        Ok(self.client.request("author_hasSessionKeys", params).await?)
+        self.client.request("author_hasSessionKeys", params).await
     }
 
     /// Checks if the keystore has private keys for the given public key and key type.
@@ -642,9 +652,9 @@ impl<T: Config> Rpc<T> {
         &self,
         public_key: Bytes,
         key_type: String,
-    ) -> Result<bool, BasicError> {
+    ) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type];
-        Ok(self.client.request("author_hasKey", params).await?)
+        self.client.request("author_hasKey", params).await
     }
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
@@ -654,8 +664,8 @@ impl<T: Config> Rpc<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<ApplyExtrinsicResult, BasicError> {
-        let params = rpc_params![format!("0x{}", hex::encode(encoded_signed)), at];
+    ) -> Result<ApplyExtrinsicResult, Error> {
+        let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;
@@ -663,27 +673,25 @@ impl<T: Config> Rpc<T> {
     }
 }
 
-/// Build WS RPC client from URL
-pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
-    let (sender, receiver) = ws_transport(url).await?;
-    Ok(RpcClientBuilder::default()
-        .max_notifs_per_subscription(4096)
-        .build_with_tokio(sender, receiver))
-}
-
-async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
-    let url: Uri = url
-        .parse()
-        .map_err(|e: InvalidUri| RpcError::Transport(e.into()))?;
-    WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .map_err(|e| RpcError::Transport(e.into()))
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    /// A util function to assert the result of serialization and deserialization is the same.
+    pub(crate) fn assert_deser<T>(s: &str, expected: T)
+    where
+        T: std::fmt::Debug
+            + serde::ser::Serialize
+            + serde::de::DeserializeOwned
+            + PartialEq,
+    {
+        assert_eq!(serde_json::from_str::<T>(s).unwrap(), expected);
+        assert_eq!(serde_json::to_string(&expected).unwrap(), s);
+    }
 
     #[test]
     fn test_deser_runtime_version() {
@@ -709,5 +717,15 @@ mod test {
                 other: m
             }
         );
+    }
+
+    #[test]
+    fn should_serialize_and_deserialize() {
+        assert_deser(r#""0x1234""#, NumberOrHex::Hex(0x1234.into()));
+        assert_deser(r#""0x0""#, NumberOrHex::Hex(0.into()));
+        assert_deser(r#"5"#, NumberOrHex::Number(5));
+        assert_deser(r#"10000"#, NumberOrHex::Number(10000));
+        assert_deser(r#"0"#, NumberOrHex::Number(0));
+        assert_deser(r#"1000000000000"#, NumberOrHex::Number(1000000000000));
     }
 }

@@ -1,10 +1,10 @@
 [package]
 name = "subxt"
-version = "0.22.0"
+version = "0.23.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
-license = "GPL-3.0"
+license = "Apache-2.0 OR GPL-3.0"
 readme = "../README.md"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
@@ -13,28 +13,35 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
+default = ["jsonrpsee"]
+
 # Activate this to expose functionality only used for integration testing.
 # The exposed functionality is subject to breaking changes at any point,
 # and should not be relied upon.
 integration-tests = []
 decoder = ["tidefi-primitives"]
 
+# Jsonrpsee if the default RPC provider used in Subxt. However, it can be
+# swapped out for an alternative implementation, and so is optional.
+jsonrpsee = ["dep:jsonrpsee"]
+
 [dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-scale-value = "0.2.0"
+scale-value = "0.5.0"
+scale-decode = "0.3.0"
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.14.0", features = ["async-client", "client-ws-transport"] }
+jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "jsonrpsee-types"], optional = true }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
 tracing = "0.1.34"
 parking_lot = "0.12.0"
 
-subxt-macro = { version = "0.22.0", path = "../macro" }
-subxt-metadata = { version = "0.22.0", path = "../metadata" }
+subxt-macro = { version = "0.23.0", path = "../macro" }
+subxt-metadata = { version = "0.23.0", path = "../metadata" }
 
 sp-core = { package = "sp-core", git = "https://github.com/tidelabs/substrate", branch = "tidechain", default-features = false }
 sp-runtime = { package = "sp-runtime", git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
@@ -45,4 +52,4 @@ derivative = "2.2.0"
 tidefi-primitives = { git = "https://github.com/tidelabs/primitives", branch = "dev", optional = true }
 
 [dev-dependencies]
-tokio = { version = "1.8", features = ["macros", "time"] }
+tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }

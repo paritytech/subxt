@@ -34,7 +34,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v1.4.0
+        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
 
       - name: Cargo test
         uses: actions-rs/cargo@v1.0.3
@@ -45,7 +45,7 @@ jobs:
       # If the previous step fails, create a new Github issue
       # to nofity us about it.
       - if: ${{ failure() }}
-        uses: JasonEtco/create-an-issue@v2
+        uses: JasonEtco/create-an-issue@9e6213aec58987fa7d2f4deb8b256b99e63107a2 # v2.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

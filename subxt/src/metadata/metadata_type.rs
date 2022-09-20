@@ -1,31 +1,8 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use super::hash_cache::HashCache;
-
-#[cfg(feature = "decoder")]
-use super::decoder::DecoderBuilder;
-
-#[cfg(feature = "decoder")]
-use crate::{
-    u8_map::U8Map,
-    BasicError,
-};
-
-use crate::Call;
 use codec::Error as CodecError;
 use frame_metadata::{
     PalletConstantMetadata,
@@ -38,8 +15,8 @@ use frame_metadata::{
 use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
+    PortableRegistry,
     Type,
-    Variant,
 };
 use std::{
     collections::HashMap,
@@ -47,39 +24,8 @@ use std::{
     sync::Arc,
 };
 
-#[cfg(feature = "decoder")]
-use scale_info::IntoPortable;
-
-/// Path key
-#[cfg(feature = "decoder")]
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct PathKey(Vec<String>);
-
-#[cfg(feature = "decoder")]
-impl PathKey {
-    /// From path key
-    pub fn from_type<T>() -> Self
-    where
-        T: scale_info::TypeInfo,
-    {
-        let type_info = T::type_info();
-        let path = type_info
-            .path()
-            .clone()
-            .into_portable(&mut Default::default());
-        PathKey::from(&path)
-    }
-}
-
-#[cfg(feature = "decoder")]
-impl From<&scale_info::Path<PortableForm>> for PathKey {
-    fn from(path: &scale_info::Path<PortableForm>) -> Self {
-        PathKey(path.segments().to_vec())
-    }
-}
-
 /// Metadata error originated from inspecting the internal representation of the runtime metadata.
-#[derive(Debug, thiserror::Error, PartialEq)]
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
 pub enum MetadataError {
     /// Module is not in metadata.
     #[error("Pallet not found")]
@@ -114,9 +60,15 @@ pub enum MetadataError {
     /// Type is not in metadata.
     #[error("Type {0} missing from type registry")]
     TypeNotFound(u32),
-    /// Runtime pallet metadata is incompatible with the static one.
-    #[error("Pallet {0} has incompatible metadata")]
-    IncompatiblePalletMetadata(&'static str),
+    /// Runtime constant metadata is incompatible with the static one.
+    #[error("Pallet {0} Constant {0} has incompatible metadata")]
+    IncompatibleConstantMetadata(String, String),
+    /// Runtime call metadata is incompatible with the static one.
+    #[error("Pallet {0} Call {0} has incompatible metadata")]
+    IncompatibleCallMetadata(String, String),
+    /// Runtime storage metadata is incompatible with the static one.
+    #[error("Pallet {0} Storage {0} has incompatible metadata")]
+    IncompatibleStorageMetadata(String, String),
     /// Runtime metadata is not fully compatible with the static one.
     #[error("Node metadata is not fully compatible")]
     IncompatibleMetadata,
@@ -128,7 +80,11 @@ struct MetadataInner {
     metadata: RuntimeMetadataV14,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
+    // Errors are hashed by pallet index.
     errors: HashMap<(u8, u8), ErrorMetadata>,
+    // Type of the DispatchError type, which is what comes back if
+    // an extrinsic fails.
+    dispatch_error_ty: Option<u32>,
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -136,30 +92,6 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
-    #[cfg(feature = "decoder")]
-    decoder: super::Decoder,
-}
-
-#[cfg(feature = "decoder")]
-#[derive(Debug)]
-pub struct MetadataPalletCalls {
-    /// The pallet name.
-    pub name: String,
-    /// Metadata may not contain call information. If it does,
-    /// it'll be here.
-    pub calls: Option<MetadataCalls>,
-}
-
-#[cfg(feature = "decoder")]
-#[derive(Debug)]
-pub struct MetadataCalls {
-    /// This allows us to find the type information corresponding to
-    /// the call in the [`PortableRegistry`]/
-    pub calls_type_id: scale_info::interner::UntrackedSymbol<std::any::TypeId>,
-    /// This allows us to map a u8 enum index to the correct call variant
-    /// from the calls type, above. The variant contains information on the
-    /// fields and such that the call has.
-    pub call_variant_indexes: U8Map<usize>,
 }
 
 /// A representation of the runtime metadata received from a node.
@@ -170,7 +102,7 @@ pub struct Metadata {
 
 impl Metadata {
     /// Returns a reference to [`PalletMetadata`].
-    pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
+    pub fn pallet(&self, name: &str) -> Result<&PalletMetadata, MetadataError> {
         self.inner
             .pallets
             .get(name)
@@ -205,28 +137,19 @@ impl Metadata {
         Ok(error)
     }
 
+    /// Return the DispatchError type ID if it exists.
+    pub fn dispatch_error_ty(&self) -> Option<u32> {
+        self.inner.dispatch_error_ty
+    }
+
+    /// Return the type registry embedded within the metadata.
+    pub fn types(&self) -> &PortableRegistry {
+        &self.inner.metadata.types
+    }
+
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
         self.inner.metadata.types.resolve(id)
-    }
-
-    /// Decode extrinsic
-    #[cfg(feature = "decoder")]
-    pub fn decode_extrinsic(
-        &self,
-        data: &mut &[u8],
-    ) -> Result<super::decoder::Extrinsic, BasicError> {
-        self.inner.decoder.decode_extrinsic(data)
-    }
-
-    /// Decode extrinsic
-    #[cfg(feature = "decoder")]
-    pub fn decode_as_type(
-        &self,
-        type_id: u32,
-        input: &mut &[u8],
-    ) -> Result<scale_value::Value<scale_value::scale::TypeId>, BasicError> {
-        self.inner.decoder.decode(type_id, input)
     }
 
     /// Return the runtime metadata.
@@ -235,23 +158,25 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for a specific storage entry.
-    pub fn storage_hash<S: crate::StorageEntry>(
+    pub fn storage_hash(
         &self,
+        pallet: &str,
+        storage: &str,
     ) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_storage_hashes
-            .get_or_insert(S::PALLET, S::STORAGE, || {
-                subxt_metadata::get_storage_hash(
-                    &self.inner.metadata,
-                    S::PALLET,
-                    S::STORAGE,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
-                    }
-                })
+            .get_or_insert(pallet, storage, || {
+                subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => {
+                                MetadataError::StorageNotFound
+                            }
+                        }
+                    })
             })
     }
 
@@ -279,21 +204,23 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for a call.
-    pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
+    pub fn call_hash(
+        &self,
+        pallet: &str,
+        function: &str,
+    ) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_call_hashes
-            .get_or_insert(C::PALLET, C::FUNCTION, || {
-                subxt_metadata::get_call_hash(
-                    &self.inner.metadata,
-                    C::PALLET,
-                    C::FUNCTION,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
-                    }
-                })
+            .get_or_insert(pallet, function, || {
+                subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
+                        }
+                    })
             })
     }
 
@@ -318,7 +245,8 @@ impl Metadata {
 pub struct PalletMetadata {
     index: u8,
     name: String,
-    calls: HashMap<String, u8>,
+    call_indexes: HashMap<String, u8>,
+    call_ty_id: Option<u32>,
     storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
     constants: HashMap<String, PalletConstantMetadata<PortableForm>>,
 }
@@ -334,15 +262,18 @@ impl PalletMetadata {
         self.index
     }
 
+    /// If calls exist for this pallet, this returns the type ID of the variant
+    /// representing the different possible calls.
+    pub fn call_ty_id(&self) -> Option<u32> {
+        self.call_ty_id
+    }
+
     /// Attempt to resolve a call into an index in this pallet, failing
     /// if the call is not found in this pallet.
-    pub fn call_index<C>(&self) -> Result<u8, MetadataError>
-    where
-        C: Call,
-    {
+    pub fn call_index(&self, function: &str) -> Result<u8, MetadataError> {
         let fn_index = *self
-            .calls
-            .get(C::FUNCTION)
+            .call_indexes
+            .get(function)
             .ok_or(MetadataError::CallNotFound)?;
         Ok(fn_index)
     }
@@ -366,12 +297,48 @@ impl PalletMetadata {
     }
 }
 
+/// Metadata for specific field.
+#[derive(Clone, Debug)]
+pub struct EventFieldMetadata {
+    name: Option<String>,
+    type_name: Option<String>,
+    type_id: u32,
+}
+
+impl EventFieldMetadata {
+    pub fn new(name: Option<String>, type_name: Option<String>, type_id: u32) -> Self {
+        EventFieldMetadata {
+            name,
+            type_name,
+            type_id,
+        }
+    }
+
+    /// Get the name of the field.
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_deref()
+    }
+
+    // Get the type name of the field as it appears in the code
+    pub fn type_name(&self) -> Option<&str> {
+        self.type_name.as_deref()
+    }
+
+    /// Get the id of a type
+    pub fn type_id(&self) -> u32 {
+        self.type_id
+    }
+}
+
 /// Metadata for specific events.
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
-    pallet: String,
+    // The pallet name is shared across every event, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
+    pallet: Arc<str>,
     event: String,
-    variant: Variant<PortableForm>,
+    fields: Vec<EventFieldMetadata>,
+    docs: Vec<String>,
 }
 
 impl EventMetadata {
@@ -385,21 +352,25 @@ impl EventMetadata {
         &self.event
     }
 
-    /// Get the type def variant for the pallet event.
-    pub fn variant(&self) -> &Variant<PortableForm> {
-        &self.variant
+    /// The names, type names & types of each field in the event.
+    pub fn fields(&self) -> &[EventFieldMetadata] {
+        &self.fields
+    }
+
+    /// Documentation for this event.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
     }
 }
 
-/// Metadata for specific errors obtained from the pallet's `PalletErrorMetadata`.
-///
-/// This holds in memory information regarding the Pallet's name, Error's name, and the underlying
-/// metadata representation.
+/// Details about a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
-    pallet: String,
+    // The pallet name is shared across every event, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
+    pallet: Arc<str>,
     error: String,
-    variant: Variant<PortableForm>,
+    docs: Vec<String>,
 }
 
 impl ErrorMetadata {
@@ -408,36 +379,33 @@ impl ErrorMetadata {
         &self.pallet
     }
 
-    /// Get the name of the specific pallet error.
+    /// The name of the error.
     pub fn error(&self) -> &str {
         &self.error
     }
 
-    /// Get the description of the specific pallet error.
-    pub fn description(&self) -> &[String] {
-        self.variant.docs()
+    /// Documentation for the error.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
     }
 }
 
 /// Error originated from converting a runtime metadata [RuntimeMetadataPrefixed] to
 /// the internal [Metadata] representation.
-///
-/// The runtime metadata is converted when building the [crate::client::Client].
 #[derive(Debug, thiserror::Error)]
 pub enum InvalidMetadataError {
+    /// Invalid prefix
     #[error("Invalid prefix")]
     InvalidPrefix,
+    /// Invalid version
     #[error("Invalid version")]
     InvalidVersion,
+    /// Type missing from type registry
     #[error("Type {0} missing from type registry")]
     MissingType(u32),
+    /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type")]
     TypeDefNotVariant(u32),
-    #[error("{0}")]
-    Other(String),
-    #[cfg(feature = "decoder")]
-    #[error("Unable to initialize decoder")]
-    InvalidDecoderBuilder,
 }
 
 impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
@@ -467,15 +435,18 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .pallets
             .iter()
             .map(|pallet| {
-                let calls = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
-                    let type_def_variant = get_type_def_variant(call.ty.id())?;
-                    let calls = type_def_variant
-                        .variants()
-                        .iter()
-                        .map(|v| (v.name().clone(), v.index()))
-                        .collect();
-                    Ok(calls)
-                })?;
+                let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
+
+                let call_indexes =
+                    pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
+                        let type_def_variant = get_type_def_variant(call.ty.id())?;
+                        let call_indexes = type_def_variant
+                            .variants()
+                            .iter()
+                            .map(|v| (v.name().clone(), v.index()))
+                            .collect();
+                        Ok(call_indexes)
+                    })?;
 
                 let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
                     storage
@@ -494,7 +465,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
-                    calls,
+                    call_indexes,
+                    call_ty_id,
                     storage,
                     constants,
                 };
@@ -503,124 +475,60 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             })
             .collect::<Result<_, _>>()?;
 
-        let pallet_events = metadata
-            .pallets
-            .iter()
-            .filter_map(|pallet| {
-                pallet.event.as_ref().map(|event| {
-                    let type_def_variant = get_type_def_variant(event.ty.id())?;
-                    Ok((pallet, type_def_variant))
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let events = pallet_events
-            .iter()
-            .flat_map(|(pallet, type_def_variant)| {
-                type_def_variant.variants().iter().map(move |var| {
-                    let key = (pallet.index, var.index());
-                    let value = EventMetadata {
-                        pallet: pallet.name.clone(),
-                        event: var.name().clone(),
-                        variant: var.clone(),
-                    };
-                    (key, value)
-                })
-            })
-            .collect();
-
-        let pallet_errors = metadata
-            .pallets
-            .iter()
-            .filter_map(|pallet| {
-                pallet.error.as_ref().map(|error| {
-                    let type_def_variant = get_type_def_variant(error.ty.id())?;
-                    Ok((pallet, type_def_variant))
-                })
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        let errors = pallet_errors
-            .iter()
-            .flat_map(|(pallet, type_def_variant)| {
-                type_def_variant.variants().iter().map(move |var| {
-                    let key = (pallet.index, var.index());
-                    let value = ErrorMetadata {
-                        pallet: pallet.name.clone(),
-                        error: var.name().clone(),
-                        variant: var.clone(),
-                    };
-                    (key, value)
-                })
-            })
-            .collect();
-
-        #[cfg(feature = "decoder")]
-        let mut pallet_calls_by_index = U8Map::new();
-        // Gather information about the calls/storage in use:
-        #[cfg(feature = "decoder")]
+        let mut events = HashMap::<(u8, u8), EventMetadata>::new();
         for pallet in &metadata.pallets {
-            // capture the call information in this pallet:
-            let calls = pallet
-                .calls
-                .as_ref()
-                .map(|call_md| {
-                    // Get the type representing the variant of available calls:
-                    let calls_type_id = call_md.ty;
-                    let calls_type =
-                        metadata.types.resolve(calls_type_id.id()).ok_or_else(|| {
-                            InvalidMetadataError::Other(format!(
-                                "Error not found {}",
-                                calls_type_id.id()
-                            ))
-                        })?;
-
-                    // Expect that type to be a variant:
-                    let calls_type_def = calls_type.type_def();
-                    let calls_variant = match calls_type_def {
-                        scale_info::TypeDef::Variant(variant) => variant,
-                        _ => {
-                            return Err(InvalidMetadataError::Other(format!(
-                                "Invalid call {:?}",
-                                calls_type_def
-                            )))
-                        }
-                    };
-
-                    // Store the mapping from u8 index to variant slice index for quicker decode lookup:
-                    let call_variant_indexes = calls_variant
-                        .variants()
-                        .iter()
-                        .enumerate()
-                        .map(|(idx, v)| (v.index(), idx))
-                        .collect();
-
-                    Ok(MetadataCalls {
-                        calls_type_id,
-                        call_variant_indexes,
-                    })
-                })
-                .transpose()
-                .map_err(|err| {
-                    InvalidMetadataError::Other(format!("Something wrong {}", err))
-                })?;
-
-            pallet_calls_by_index.insert(
-                pallet.index,
-                MetadataPalletCalls {
-                    name: pallet.name.to_owned(),
-                    calls,
-                },
-            );
+            if let Some(event) = &pallet.event {
+                let pallet_name: Arc<str> = pallet.name.to_string().into();
+                let event_type_id = event.ty.id();
+                let event_variant = get_type_def_variant(event_type_id)?;
+                for variant in event_variant.variants() {
+                    events.insert(
+                        (pallet.index, variant.index()),
+                        EventMetadata {
+                            pallet: pallet_name.clone(),
+                            event: variant.name().to_owned(),
+                            fields: variant
+                                .fields()
+                                .iter()
+                                .map(|f| {
+                                    EventFieldMetadata::new(
+                                        f.name().map(|n| n.to_owned()),
+                                        f.type_name().map(|n| n.to_owned()),
+                                        f.ty().id(),
+                                    )
+                                })
+                                .collect(),
+                            docs: variant.docs().to_vec(),
+                        },
+                    );
+                }
+            }
         }
 
-        #[cfg(feature = "decoder")]
-        let decoder = DecoderBuilder::new(
-            metadata.types.clone(),
-            pallet_calls_by_index,
-            metadata.extrinsic.signed_extensions.clone(),
-        )
-        .with_default_custom_type_decodes()
-        .build()
-        .map_err(|_| InvalidMetadataError::InvalidDecoderBuilder)?;
+        let mut errors = HashMap::<(u8, u8), ErrorMetadata>::new();
+        for pallet in &metadata.pallets {
+            if let Some(error) = &pallet.error {
+                let pallet_name: Arc<str> = pallet.name.to_string().into();
+                let error_variant = get_type_def_variant(error.ty.id())?;
+                for variant in error_variant.variants() {
+                    errors.insert(
+                        (pallet.index, variant.index()),
+                        ErrorMetadata {
+                            pallet: pallet_name.clone(),
+                            error: variant.name().clone(),
+                            docs: variant.docs().to_vec(),
+                        },
+                    );
+                }
+            }
+        }
+
+        let dispatch_error_ty = metadata
+            .types
+            .types()
+            .iter()
+            .find(|ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
+            .map(|ty| ty.id());
 
         Ok(Metadata {
             inner: Arc::new(MetadataInner {
@@ -628,12 +536,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 pallets,
                 events,
                 errors,
+                dispatch_error_ty,
                 cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
-                #[cfg(feature = "decoder")]
-                decoder,
             }),
         })
     }
@@ -642,7 +549,6 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::StorageEntryKey;
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletStorageMetadata,
@@ -725,14 +631,7 @@ mod tests {
     fn metadata_call_inner_cache() {
         let metadata = load_metadata();
 
-        #[derive(codec::Encode)]
-        struct ValidCall;
-        impl crate::Call for ValidCall {
-            const PALLET: &'static str = "System";
-            const FUNCTION: &'static str = "fill_block";
-        }
-
-        let hash = metadata.call_hash::<ValidCall>();
+        let hash = metadata.call_hash("System", "fill_block");
 
         let mut call_number = 0;
         let hash_cached = metadata.inner.cached_call_hashes.get_or_insert(
@@ -773,20 +672,7 @@ mod tests {
     #[test]
     fn metadata_storage_inner_cache() {
         let metadata = load_metadata();
-
-        #[derive(codec::Encode)]
-        struct ValidStorage;
-        impl crate::StorageEntry for ValidStorage {
-            const PALLET: &'static str = "System";
-            const STORAGE: &'static str = "Account";
-            type Value = ();
-
-            fn key(&self) -> StorageEntryKey {
-                unreachable!("Should not be called");
-            }
-        }
-
-        let hash = metadata.storage_hash::<ValidStorage>();
+        let hash = metadata.storage_hash("System", "Account");
 
         let mut call_number = 0;
         let hash_cached = metadata.inner.cached_storage_hashes.get_or_insert(

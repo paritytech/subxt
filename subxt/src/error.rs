@@ -1,40 +1,32 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
-use crate::metadata::{
+//! Types representing the errors that can be returned.
+
+use crate::metadata::Metadata;
+use codec::Decode;
+use core::fmt::Debug;
+use scale_info::TypeDef;
+use std::borrow::Cow;
+
+// Re-expose the errors we use from other crates here:
+pub use crate::metadata::{
     InvalidMetadataError,
     MetadataError,
 };
-use core::fmt::Debug;
-use jsonrpsee::core::error::Error as RequestError;
-use scale_value::scale::DecodeError;
-use sp_core::crypto::SecretStringError;
-use sp_runtime::transaction_validity::TransactionValidityError;
-
-/// An error that may contain some runtime error `E`
-pub type Error<E> = GenericError<RuntimeError<E>>;
-
-/// An error that will never contain a runtime error.
-pub type BasicError = GenericError<std::convert::Infallible>;
+pub use scale_value::scale::{
+    DecodeError,
+    EncodeError,
+};
+pub use sp_core::crypto::SecretStringError;
+pub use sp_runtime::transaction_validity::TransactionValidityError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
-/// variant. Prefer to use the [`Error<E>`] and [`BasicError`] aliases over
+/// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
 /// using this type directly.
 #[derive(Debug, thiserror::Error)]
-pub enum GenericError<E> {
+pub enum Error {
     /// Io error.
     #[error("Io error: {0}")]
     Io(#[from] std::io::Error),
@@ -43,7 +35,7 @@ pub enum GenericError<E> {
     Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
-    Rpc(#[from] RequestError),
+    Rpc(#[from] RpcError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
@@ -61,99 +53,180 @@ pub enum GenericError<E> {
     Metadata(#[from] MetadataError),
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
-    Runtime(E),
-    /// Events decoding error.
-    #[error("Events decoding error: {0}")]
-    EventsDecoding(#[from] DecodeError),
+    Runtime(DispatchError),
+    /// Error decoding to a [`crate::dynamic::Value`].
+    #[error("Error decoding into dynamic value: {0}")]
+    DecodeValue(#[from] DecodeError),
+    /// Error encoding from a [`crate::dynamic::Value`].
+    #[error("Error encoding from dynamic value: {0}")]
+    EncodeValue(#[from] EncodeError<()>),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
-    #[error("Module error: {0}")]
-    /// An error from the `Module` variant of the generated `DispatchError`.
-    Module(ModuleError),
+    /// An error encoding a storage address.
+    #[error("Error encoding storage address: {0}")]
+    StorageAddress(#[from] StorageAddressError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
 }
 
-impl<E> GenericError<E> {
-    /// [`GenericError`] is parameterised over the type that it holds in the `Runtime`
-    /// variant. This function allows us to map the Runtime error contained within (if present)
-    /// to a different type.
-    pub fn map_runtime_err<F, NewE>(self, f: F) -> GenericError<NewE>
-    where
-        F: FnOnce(E) -> NewE,
-    {
-        match self {
-            GenericError::Io(e) => GenericError::Io(e),
-            GenericError::Codec(e) => GenericError::Codec(e),
-            GenericError::Rpc(e) => GenericError::Rpc(e),
-            GenericError::Serialization(e) => GenericError::Serialization(e),
-            GenericError::SecretString(e) => GenericError::SecretString(e),
-            GenericError::Invalid(e) => GenericError::Invalid(e),
-            GenericError::InvalidMetadata(e) => GenericError::InvalidMetadata(e),
-            GenericError::Metadata(e) => GenericError::Metadata(e),
-            GenericError::EventsDecoding(e) => GenericError::EventsDecoding(e),
-            GenericError::Transaction(e) => GenericError::Transaction(e),
-            GenericError::Module(e) => GenericError::Module(e),
-            GenericError::Other(e) => GenericError::Other(e),
-            // This is the only branch we really care about:
-            GenericError::Runtime(e) => GenericError::Runtime(f(e)),
-        }
-    }
-}
-
-impl BasicError {
-    /// Convert an [`BasicError`] into any
-    /// arbitrary [`Error<E>`].
-    pub fn into_error<E>(self) -> Error<E> {
-        self.map_runtime_err(|e| match e {})
-    }
-}
-
-impl<E> From<BasicError> for Error<E> {
-    fn from(err: BasicError) -> Self {
-        err.into_error()
-    }
-}
-
-impl<E> From<SecretStringError> for GenericError<E> {
+impl From<SecretStringError> for Error {
     fn from(error: SecretStringError) -> Self {
-        GenericError::SecretString(error)
+        Error::SecretString(error)
     }
 }
 
-impl<E> From<TransactionValidityError> for GenericError<E> {
+impl From<TransactionValidityError> for Error {
     fn from(error: TransactionValidityError) -> Self {
-        GenericError::Invalid(error)
+        Error::Invalid(error)
     }
 }
 
-impl<E> From<&str> for GenericError<E> {
+impl From<&str> for Error {
     fn from(error: &str) -> Self {
-        GenericError::Other(error.into())
+        Error::Other(error.into())
     }
 }
 
-impl<E> From<String> for GenericError<E> {
+impl From<String> for Error {
     fn from(error: String) -> Self {
-        GenericError::Other(error)
+        Error::Other(error)
     }
 }
 
-/// This is used in the place of the `E` in [`GenericError<E>`] when we may have a
-/// Runtime Error. We use this wrapper so that it is possible to implement
-/// `From<Error<Infallible>` for `Error<RuntimeError<E>>`.
-///
-/// This should not be used as a type; prefer to use the alias [`Error<E>`] when referring
-/// to errors which may contain some Runtime error `E`.
-#[derive(Clone, Debug, PartialEq)]
-pub struct RuntimeError<E>(pub E);
+impl From<DispatchError> for Error {
+    fn from(error: DispatchError) -> Self {
+        Error::Runtime(error)
+    }
+}
 
-impl<E> RuntimeError<E> {
-    /// Extract the actual runtime error from this struct.
-    pub fn inner(self) -> E {
-        self.0
+/// An RPC error. Since we are generic over the RPC client that is used,
+/// the error is any custom string.
+#[derive(Debug, thiserror::Error)]
+#[error("RPC error: {0}")]
+pub struct RpcError(pub String);
+
+/// This is our attempt to decode a runtime DispatchError. We either
+/// successfully decode it into a [`ModuleError`], or we fail and keep
+/// hold of the bytes, which we can attempt to decode if we have an
+/// appropriate static type to hand.
+#[derive(Debug, thiserror::Error)]
+pub enum DispatchError {
+    /// An error was emitted from a specific pallet/module.
+    #[error("Module error: {0}")]
+    Module(ModuleError),
+    /// Some other error was emitted.
+    #[error("Undecoded dispatch error: {0:?}")]
+    Other(Vec<u8>),
+}
+
+impl DispatchError {
+    /// Attempt to decode a runtime DispatchError, returning either the [`ModuleError`] it decodes
+    /// to, along with additional details on the error, or returning the raw bytes if it could not
+    /// be decoded.
+    pub fn decode_from<'a>(bytes: impl Into<Cow<'a, [u8]>>, metadata: &Metadata) -> Self {
+        let bytes = bytes.into();
+
+        let dispatch_error_ty_id = match metadata.dispatch_error_ty() {
+            Some(id) => id,
+            None => {
+                tracing::warn!(
+                    "Can't decode error: sp_runtime::DispatchError was not found in Metadata"
+                );
+                return DispatchError::Other(bytes.into_owned())
+            }
+        };
+
+        let dispatch_error_ty = match metadata.types().resolve(dispatch_error_ty_id) {
+            Some(ty) => ty,
+            None => {
+                tracing::warn!("Can't decode error: sp_runtime::DispatchError type ID doesn't resolve to a known type");
+                return DispatchError::Other(bytes.into_owned())
+            }
+        };
+
+        let variant = match dispatch_error_ty.type_def() {
+            TypeDef::Variant(var) => var,
+            _ => {
+                tracing::warn!(
+                    "Can't decode error: sp_runtime::DispatchError type is not a Variant"
+                );
+                return DispatchError::Other(bytes.into_owned())
+            }
+        };
+
+        let module_variant_idx = variant
+            .variants()
+            .iter()
+            .find(|v| v.name() == "Module")
+            .map(|v| v.index());
+        let module_variant_idx = match module_variant_idx {
+            Some(idx) => idx,
+            None => {
+                tracing::warn!("Can't decode error: sp_runtime::DispatchError does not have a 'Module' variant");
+                return DispatchError::Other(bytes.into_owned())
+            }
+        };
+
+        // If the error bytes don't correspond to a ModuleError, just return the bytes.
+        // This is perfectly reasonable and expected, so no logging.
+        if bytes[0] != module_variant_idx {
+            return DispatchError::Other(bytes.into_owned())
+        }
+
+        // The remaining bytes are the module error, all being well:
+        let bytes = &bytes[1..];
+
+        // The oldest and second oldest type of error decode to this shape:
+        #[derive(Decode)]
+        struct LegacyModuleError {
+            index: u8,
+            error: u8,
+        }
+
+        // The newer case expands the error for forward compat:
+        #[derive(Decode)]
+        struct CurrentModuleError {
+            index: u8,
+            error: [u8; 4],
+        }
+
+        // try to decode into the new shape, or the old if that doesn't work
+        let err = match CurrentModuleError::decode(&mut &*bytes) {
+            Ok(e) => e,
+            Err(_) => {
+                let old_e = match LegacyModuleError::decode(&mut &*bytes) {
+                    Ok(err) => err,
+                    Err(_) => {
+                        tracing::warn!("Can't decode error: sp_runtime::DispatchError does not match known formats");
+                        return DispatchError::Other(bytes.to_vec())
+                    }
+                };
+                CurrentModuleError {
+                    index: old_e.index,
+                    error: [old_e.error, 0, 0, 0],
+                }
+            }
+        };
+
+        let error_details = match metadata.error(err.index, err.error[0]) {
+            Ok(details) => details,
+            Err(_) => {
+                tracing::warn!("Can't decode error: sp_runtime::DispatchError::Module details do not match known information");
+                return DispatchError::Other(bytes.to_vec())
+            }
+        };
+
+        DispatchError::Module(ModuleError {
+            pallet: error_details.pallet().to_string(),
+            error: error_details.error().to_string(),
+            description: error_details.docs().to_vec(),
+            error_data: ModuleErrorData {
+                pallet_index: err.index,
+                error: err.error,
+            },
+        })
     }
 }
 
@@ -164,7 +237,7 @@ pub enum TransactionError {
     /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
     FinalitySubscriptionTimeout,
-    /// The block hash that the tranaction was added to could not be found.
+    /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
     BlockHashNotFound,
@@ -204,11 +277,33 @@ impl ModuleErrorData {
     }
 }
 
-/// This trait is automatically implemented for the generated `DispatchError`,
-/// so that we can pluck out information about the `Module` error variant, if`
-/// it exists.
-pub trait HasModuleError {
-    /// If the error has a `Module` variant, return a tuple of the
-    /// pallet index and error index. Else, return `None`.
-    fn module_error_data(&self) -> Option<ModuleErrorData>;
+/// Something went wrong trying to encode a storage address.
+#[derive(Clone, Debug, thiserror::Error)]
+pub enum StorageAddressError {
+    /// Storage map type must be a composite type.
+    #[error("Storage map type must be a composite type")]
+    MapTypeMustBeTuple,
+    /// Storage lookup does not have the expected number of keys.
+    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
+    WrongNumberOfKeys {
+        /// The actual number of keys needed, based on the metadata.
+        actual: usize,
+        /// The number of keys provided in the storage address.
+        expected: usize,
+    },
+    /// Storage lookup requires a type that wasn't found in the metadata.
+    #[error(
+        "Storage lookup requires type {0} to exist in the metadata, but it was not found"
+    )]
+    TypeNotFound(u32),
+    /// This storage entry in the metadata does not have the correct number of hashers to fields.
+    #[error(
+        "Storage entry in metadata does not have the correct number of hashers to fields"
+    )]
+    WrongNumberOfHashers {
+        /// The number of hashers in the metadata for this storage entry.
+        hashers: usize,
+        /// The number of fields in the metadata for this storage entry.
+        fields: usize,
+    },
 }

@@ -1,25 +1,13 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use crate::{
     node_runtime::{
+        self,
         balances,
         runtime_types,
         system,
-        DispatchError,
     },
     pair_signer,
     test_context,
@@ -34,32 +22,36 @@ use sp_runtime::{
     AccountId32,
     MultiAddress,
 };
-use subxt::Error;
+use subxt::error::{
+    DispatchError,
+    Error,
+};
 
 #[tokio::test]
-async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
+async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
-    let cxt = test_context().await;
-    let api = &cxt.api;
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice_account_addr = node_runtime::storage().system().account(alice.account_id());
+    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
 
     let alice_pre = api
         .storage()
-        .system()
-        .account(alice.account_id(), None)
+        .fetch_or_default(&alice_account_addr, None)
         .await?;
     let bob_pre = api
         .storage()
-        .system()
-        .account(bob.account_id(), None)
+        .fetch_or_default(&bob_account_addr, None)
         .await?;
+
+    let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
 
     let events = api
         .tx()
-        .balances()
-        .transfer(bob_address, 10_000)?
-        .sign_and_submit_then_watch_default(&alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -81,13 +73,11 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 
     let alice_post = api
         .storage()
-        .system()
-        .account(alice.account_id(), None)
+        .fetch_or_default(&alice_account_addr, None)
         .await?;
     let bob_post = api
         .storage()
-        .system()
-        .account(bob.account_id(), None)
+        .fetch_or_default(&bob_account_addr, None)
         .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
@@ -96,26 +86,118 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[tokio::test]
-async fn multiple_transfers_work_nonce_incremented(
-) -> Result<(), subxt::Error<DispatchError>> {
+async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
+    use subxt::ext::scale_value::{
+        At,
+        Composite,
+        Value,
+    };
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice_account_addr = subxt::dynamic::storage(
+        "System",
+        "Account",
+        vec![Value::from_bytes(&alice.account_id())],
+    );
+    let bob_account_addr = subxt::dynamic::storage(
+        "System",
+        "Account",
+        vec![Value::from_bytes(&bob.account_id())],
+    );
+
+    let alice_pre = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_pre = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
+
+    let tx = subxt::dynamic::tx(
+        "Balances",
+        "transfer",
+        vec![
+            Value::unnamed_variant("Id", vec![Value::from_bytes(&bob.account_id())]),
+            Value::u128(10_000u128),
+        ],
+    );
+
+    let events = api
+        .tx()
+        .sign_and_submit_then_watch_default(&tx, &alice)
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+
+    let event_fields = events
+        .iter()
+        .filter_map(|ev| ev.ok())
+        .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
+        .expect("Failed to find Transfer event")
+        .field_values()?
+        .map_context(|_| ());
+
+    let expected_fields = Composite::Named(vec![
+        (
+            "from".into(),
+            Value::unnamed_composite(vec![Value::from_bytes(&alice.account_id())]),
+        ),
+        (
+            "to".into(),
+            Value::unnamed_composite(vec![Value::from_bytes(&bob.account_id())]),
+        ),
+        ("amount".into(), Value::u128(10_000)),
+    ]);
+    assert_eq!(event_fields, expected_fields);
+
+    let alice_post = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_post = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
+
+    let alice_pre_free = alice_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let alice_post_free = alice_post.at("data").at("free").unwrap().as_u128().unwrap();
+
+    let bob_pre_free = bob_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let bob_post_free = bob_post.at("data").at("free").unwrap().as_u128().unwrap();
+
+    assert!(alice_pre_free - 10_000 >= alice_post_free);
+    assert_eq!(bob_pre_free + 10_000, bob_post_free);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();
-    let cxt = test_context().await;
-    let api = &cxt.api;
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
 
     let bob_pre = api
         .storage()
-        .system()
-        .account(bob.account_id(), None)
+        .fetch_or_default(&bob_account_addr, None)
         .await?;
 
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(bob_address.clone(), 10_000);
     for _ in 0..3 {
         api
             .tx()
-            .balances()
-            .transfer(bob_address.clone(), 10_000)?
-            .sign_and_submit_then_watch_default(&alice)
+            .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
             .await?
@@ -125,8 +207,7 @@ async fn multiple_transfers_work_nonce_incremented(
 
     let bob_post = api
         .storage()
-        .system()
-        .account(bob.account_id(), None)
+        .fetch_or_default(&bob_account_addr, None)
         .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
@@ -135,45 +216,40 @@ async fn multiple_transfers_work_nonce_incremented(
 
 #[tokio::test]
 async fn storage_total_issuance() {
-    let cxt = test_context().await;
-    let total_issuance = cxt
-        .api
-        .storage()
-        .balances()
-        .total_issuance(None)
-        .await
-        .unwrap();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let addr = node_runtime::storage().balances().total_issuance();
+    let total_issuance = api.storage().fetch_or_default(&addr, None).await.unwrap();
     assert_ne!(total_issuance, 0);
 }
 
 #[tokio::test]
-async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
-    let cxt = test_context().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
-    cxt.api
-        .tx()
-        .staking()
-        .bond(
-            charlie.into(),
-            100_000_000_000_000,
-            runtime_types::pallet_staking::RewardDestination::Stash,
-        )?
-        .sign_and_submit_then_watch_default(&bob)
+    let tx = node_runtime::tx().staking().bond(
+        charlie.into(),
+        100_000_000_000_000,
+        runtime_types::pallet_staking::RewardDestination::Stash,
+    );
+
+    api.tx()
+        .sign_and_submit_then_watch_default(&tx, &bob)
         .await?
         .wait_for_finalized_success()
         .await?
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locked_account = AccountKeyring::Bob.to_account_id();
-    let locks = cxt
-        .api
-        .storage()
+    let locks_addr = node_runtime::storage()
         .balances()
-        .locks(&locked_account, None)
-        .await?;
+        .locks(&AccountKeyring::Bob.to_account_id());
+
+    let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
     assert_eq!(
         locks.0,
@@ -189,38 +265,37 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
 
 #[tokio::test]
 async fn transfer_error() {
-    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    ctx.api
-        .tx()
+    let to_hans_tx = node_runtime::tx()
         .balances()
-        .transfer(hans_address, 100_000_000_000_000_000)
-        .unwrap()
-        .sign_and_submit_then_watch_default(&alice)
+        .transfer(hans_address, 100_000_000_000_000_000);
+    let to_alice_tx = node_runtime::tx()
+        .balances()
+        .transfer(alice_addr, 100_000_000_000_000_000);
+
+    api.tx()
+        .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
         .await
         .unwrap();
 
-    let res = ctx
-        .api
+    let res = api
         .tx()
-        .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000)
-        .unwrap()
-        .sign_and_submit_then_watch_default(&hans)
+        .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
         .await
         .unwrap()
         .wait_for_finalized_success()
         .await;
 
-    if let Err(Error::Module(err)) = res {
+    if let Err(Error::Runtime(DispatchError::Module(err))) = res {
         assert_eq!(err.pallet, "Balances");
         assert_eq!(err.error, "InsufficientBalance");
     } else {
@@ -230,19 +305,17 @@ async fn transfer_error() {
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {
-    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
-    let cxt = test_context().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
-    let event = cxt
-        .api
+    let to_bob_tx = node_runtime::tx().balances().transfer(bob_addr, 10_000);
+
+    let event = api
         .tx()
-        .balances()
-        .transfer(bob_addr, 10_000)
-        .unwrap()
-        .sign_and_submit_then_watch_default(&alice)
+        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -264,19 +337,19 @@ async fn transfer_implicit_subscription() {
 
 #[tokio::test]
 async fn constant_existential_deposit() {
-    let cxt = test_context().await;
-    let locked_metadata = cxt.client().metadata();
-    let metadata = locked_metadata.read();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // get and decode constant manually via metadata:
+    let metadata = api.metadata();
     let balances_metadata = metadata.pallet("Balances").unwrap();
     let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
     let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);
-    assert_eq!(
-        existential_deposit,
-        cxt.api
-            .constants()
-            .balances()
-            .existential_deposit()
-            .unwrap()
-    );
+
+    // constant address for API access:
+    let addr = node_runtime::constants().balances().existential_deposit();
+
+    // Make sure thetwo are identical:
+    assert_eq!(existential_deposit, api.constants().at(&addr).unwrap());
 }

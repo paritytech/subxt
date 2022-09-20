@@ -1,18 +1,12 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+//! This module provides a [`Config`] type, which is used to define various
+//! types that are important in order to speak to a particular chain.
+//! [`SubstrateConfig`] provides a default set of these types suitable for the
+//! default Substrate node implementation, and [`PolkadotConfig`] for a
+//! Polkadot node.
 
 use codec::{
     Codec,
@@ -34,7 +28,7 @@ use sp_runtime::traits::{
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
 // automatically applies a 'static bound to all generic types (including this one),
 // and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
-pub trait Config: Debug + 'static {
+pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
@@ -86,6 +80,9 @@ pub trait Config: Debug + 'static {
 
     /// Extrinsic type within blocks.
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+
+    /// This type defines the extrinsic extra and additional parameters.
+    type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
 }
 
 /// Parameter trait copied from `substrate::frame_support`
@@ -95,10 +92,9 @@ impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
 // create an instance of it.
-#[derive(Debug)]
-pub enum DefaultConfig {}
+pub enum SubstrateConfig {}
 
-impl Config for DefaultConfig {
+impl Config for SubstrateConfig {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = sp_core::H256;
@@ -109,4 +105,46 @@ impl Config for DefaultConfig {
         sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
+    type ExtrinsicParams = crate::tx::SubstrateExtrinsicParams<Self>;
+}
+
+/// Default set of commonly used types by Polkadot nodes.
+pub type PolkadotConfig = WithExtrinsicParams<
+    SubstrateConfig,
+    crate::tx::PolkadotExtrinsicParams<SubstrateConfig>,
+>;
+
+/// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
+/// additional and extra parameters to pass to an extrinsic (see [`crate::tx::ExtrinsicParams`]),
+/// and returns a type implementing [`Config`] with those new `ExtrinsicParams`.
+///
+/// # Example
+///
+/// ```
+/// use subxt::config::{ SubstrateConfig, WithExtrinsicParams };
+/// use subxt::tx::PolkadotExtrinsicParams;
+///
+/// // This is how PolkadotConfig is implemented:
+/// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
+/// ```
+pub struct WithExtrinsicParams<
+    T: Config,
+    E: crate::tx::ExtrinsicParams<T::Index, T::Hash>,
+> {
+    _marker: std::marker::PhantomData<(T, E)>,
+}
+
+impl<T: Config, E: crate::tx::ExtrinsicParams<T::Index, T::Hash>> Config
+    for WithExtrinsicParams<T, E>
+{
+    type Index = T::Index;
+    type BlockNumber = T::BlockNumber;
+    type Hash = T::Hash;
+    type Hashing = T::Hashing;
+    type AccountId = T::AccountId;
+    type Address = T::Address;
+    type Header = T::Header;
+    type Signature = T::Signature;
+    type Extrinsic = T::Extrinsic;
+    type ExtrinsicParams = E;
 }

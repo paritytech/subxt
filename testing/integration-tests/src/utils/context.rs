@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 pub(crate) use crate::{
     node_runtime,
@@ -22,20 +10,14 @@ pub(crate) use crate::{
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    Client,
-    DefaultConfig,
-    PairSigner,
-    SubstrateExtrinsicParams,
+    tx::PairSigner,
+    SubstrateConfig,
 };
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub type NodeRuntimeParams = SubstrateExtrinsicParams<DefaultConfig>;
-
-pub async fn test_node_process_with(
-    key: AccountKeyring,
-) -> TestNodeProcess<DefaultConfig> {
+pub async fn test_context_with(key: AccountKeyring) -> TestContext {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
@@ -44,35 +26,19 @@ pub async fn test_node_process_with(
         SUBSTRATE_NODE_PATH.to_string()
     });
 
-    let proc = TestNodeProcess::<DefaultConfig>::build(path.as_str())
+    let proc = TestContext::build(path.as_str())
         .with_authority(key)
-        .spawn::<DefaultConfig>()
+        .spawn::<SubstrateConfig>()
         .await;
     proc.unwrap()
 }
 
-pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
-    test_node_process_with(AccountKeyring::Alice).await
-}
-
-pub struct TestContext {
-    pub node_proc: TestNodeProcess<DefaultConfig>,
-    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeParams>,
-}
-
-impl TestContext {
-    pub fn client(&self) -> &Client<DefaultConfig> {
-        &self.api.client
-    }
-}
+pub type TestContext = TestNodeProcess<SubstrateConfig>;
 
 pub async fn test_context() -> TestContext {
-    tracing_subscriber::fmt::try_init().ok();
-    let node_proc = test_node_process_with(AccountKeyring::Alice).await;
-    let api = node_proc.client().clone().to_runtime_api();
-    TestContext { node_proc, api }
+    test_context_with(AccountKeyring::Alice).await
 }
 
-pub fn pair_signer(pair: Pair) -> PairSigner<DefaultConfig, Pair> {
+pub fn pair_signer(pair: Pair) -> PairSigner<SubstrateConfig, Pair> {
     PairSigner::new(pair)
 }

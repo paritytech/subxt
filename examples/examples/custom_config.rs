@@ -1,34 +1,21 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
-//!
-//! E.g.
-//! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
-//! polkadot --dev --tmp
-//! ```
+//! This example should compile but should fail to work, since we've modified the
+//! config to not align with a Polkadot node.
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    ClientBuilder,
-    Config,
-    DefaultConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
+    config::{
+        Config,
+        SubstrateConfig,
+    },
+    tx::{
+        PairSigner,
+        SubstrateExtrinsicParams,
+    },
+    OnlineClient,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -45,32 +32,34 @@ impl Config for MyConfig {
     // polkadot runtime used, so some operations will fail. Normally when using a custom `Config`
     // impl types MUST match exactly those used in the actual runtime.
     type Index = u64;
-    type BlockNumber = <DefaultConfig as Config>::BlockNumber;
-    type Hash = <DefaultConfig as Config>::Hash;
-    type Hashing = <DefaultConfig as Config>::Hashing;
-    type AccountId = <DefaultConfig as Config>::AccountId;
-    type Address = <DefaultConfig as Config>::Address;
-    type Header = <DefaultConfig as Config>::Header;
-    type Signature = <DefaultConfig as Config>::Signature;
-    type Extrinsic = <DefaultConfig as Config>::Extrinsic;
+    type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
+    type Hash = <SubstrateConfig as Config>::Hash;
+    type Hashing = <SubstrateConfig as Config>::Hashing;
+    type AccountId = <SubstrateConfig as Config>::AccountId;
+    type Address = <SubstrateConfig as Config>::Address;
+    type Header = <SubstrateConfig as Config>::Header;
+    type Signature = <SubstrateConfig as Config>::Signature;
+    type Extrinsic = <SubstrateConfig as Config>::Extrinsic;
+    // ExtrinsicParams makes use of the index type, so we need to adjust it
+    // too to align with our modified index type, above:
+    type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, PolkadotExtrinsicParams<MyConfig>>>();
-
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let hash = api
-        .tx()
+    // Create a client to use:
+    let api = OnlineClient::<MyConfig>::new().await?;
+
+    // Create a transaction to submit:
+    let tx = polkadot::tx()
         .balances()
-        .transfer(dest, 10_000)?
-        .sign_and_submit_default(&signer)
-        .await?;
+        .transfer(dest, 123_456_789_012_345);
+
+    // submit the transaction with default params:
+    let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 

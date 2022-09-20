@@ -1,29 +1,17 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
+use crate::{
+    utils::Encoded,
+    Config,
+};
 use codec::{
     Compact,
     Encode,
 };
 use core::fmt::Debug;
-
-use crate::{
-    Config,
-    Encoded,
-};
+use derivative::Derivative;
 
 // We require Era as a param below, so make it available from here.
 pub use sp_runtime::generic::Era;
@@ -32,7 +20,7 @@ pub use sp_runtime::generic::Era;
 /// "additional" parameters that are signed and used in transactions.
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
-pub trait ExtrinsicParams<T: Config>: Debug {
+pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
@@ -42,8 +30,8 @@ pub trait ExtrinsicParams<T: Config>: Debug {
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: T::Index,
-        genesis_hash: T::Hash,
+        nonce: Index,
+        genesis_hash: Hash,
         other_params: Self::OtherParams,
     ) -> Self;
 
@@ -85,7 +73,8 @@ pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Plain
 /// If your node differs in the "signed extra" and "additional" parameters expected
 /// to be sent/signed with a transaction, then you can define your own type which
 /// implements the [`ExtrinsicParams`] trait.
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = "Tip: Debug"))]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
     era: Era,
     nonce: T::Index,
@@ -103,6 +92,13 @@ pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
 ///
 /// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
 /// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+#[derive(Derivative)]
+#[derivative(
+    Debug(bound = "Tip: Debug"),
+    Clone(bound = "Tip: Clone"),
+    Copy(bound = "Tip: Copy"),
+    PartialEq(bound = "Tip: PartialEq")
+)]
 pub struct BaseExtrinsicParamsBuilder<T: Config, Tip> {
     era: Era,
     mortality_checkpoint: Option<T::Hash>,
@@ -144,7 +140,9 @@ impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl<T: Config, Tip: Debug + Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
+impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash>
+    for BaseExtrinsicParams<T, Tip>
+{
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(

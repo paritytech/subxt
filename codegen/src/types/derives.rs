@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use syn::{
     parse_quote,
@@ -81,9 +69,9 @@ impl FromIterator<syn::Path> for Derives {
 }
 
 impl Derives {
-    /// Add `::subxt::codec::CompactAs` to the derives.
+    /// Add `::subxt::ext::codec::CompactAs` to the derives.
     pub fn insert_codec_compact_as(&mut self) {
-        self.insert(parse_quote!(::subxt::codec::CompactAs));
+        self.insert(parse_quote!(::subxt::ext::codec::CompactAs));
     }
 
     pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
@@ -100,8 +88,8 @@ impl Derives {
 impl Default for Derives {
     fn default() -> Self {
         let mut derives = HashSet::new();
-        derives.insert(syn::parse_quote!(::subxt::codec::Encode));
-        derives.insert(syn::parse_quote!(::subxt::codec::Decode));
+        derives.insert(syn::parse_quote!(::subxt::ext::codec::Encode));
+        derives.insert(syn::parse_quote!(::subxt::ext::codec::Decode));
         derives.insert(syn::parse_quote!(Debug));
         Self { derives }
     }

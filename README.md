@@ -47,6 +47,8 @@ Please add your project to this list via a PR.
 - [crunch](https://github.com/turboflakes/crunch) CLI to claim staking rewards in batch every Era or X hours for substrate-based chains.
 - [interbtc-clients](https://github.com/interlay/interbtc-clients) Client implementations for the interBTC parachain; notably the Vault / Relayer and Oracle.
 - [tidext](https://github.com/tidelabs/tidext) Tidechain client with Stronghold signer.
+- [staking-miner-v2](https://github.com/paritytech/staking-miner-v2) Submit NPos election solutions and get rewards.
+- [polkadot-introspector](https://github.com/paritytech/polkadot-introspector) Tools for monitoring Polkadot nodes.
 
 **Alternatives**
 
@@ -54,8 +56,6 @@ Please add your project to this list via a PR.
 
 #### License
 
-<sup>
-The entire code within this repository is licensed under the <a href="LICENSE">GPLv3</a>.
-Please <a href="https://www.parity.io/contact/">contact us</a> if you have questions about the licensing of our
- products.
-</sup>
+The entire code within this repository is dual licensed under the _GPL-3.0_ or _Apache-2.0_ licenses. See [the LICENSE](./LICENSE) file for more details.
+
+Please <a href="https://www.parity.io/contact/">contact us</a> if you have questions about the licensing of our products.

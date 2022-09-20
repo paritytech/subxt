@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use std::{
     env,
@@ -26,10 +14,6 @@ use std::{
     process::Command,
     thread,
     time,
-};
-use subxt::rpc::{
-    self,
-    ClientT,
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
@@ -74,7 +58,8 @@ async fn run() {
 
             // It might take a while for substrate node that spin up the RPC server.
             // Thus, the connection might get rejected a few times.
-            let res = match rpc::ws_client(&format!("ws://localhost:{}", port)).await {
+            use client::ClientT;
+            let res = match client::build(&format!("ws://localhost:{}", port)).await {
                 Ok(c) => c.request("state_getMetadata", None).await,
                 Err(e) => Err(e),
             };
@@ -167,5 +152,43 @@ impl DerefMut for KillOnDrop {
 impl Drop for KillOnDrop {
     fn drop(&mut self) {
         let _ = self.0.kill();
+    }
+}
+
+// Use jsonrpsee to obtain metadata from the node.
+mod client {
+    pub use jsonrpsee::{
+        client_transport::ws::{
+            InvalidUri,
+            Receiver,
+            Sender,
+            Uri,
+            WsTransportClientBuilder,
+        },
+        core::{
+            client::{
+                Client,
+                ClientBuilder,
+            },
+            Error,
+        },
+    };
+
+    pub use jsonrpsee::core::client::ClientT;
+
+    /// Build WS RPC client from URL
+    pub async fn build(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(ClientBuilder::default().build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url: Uri = url
+            .parse()
+            .map_err(|e: InvalidUri| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
     }
 }

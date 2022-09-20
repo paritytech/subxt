@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 #![deny(unused_crate_dependencies)]
 
@@ -36,3 +24,11 @@ mod storage;
 use test_runtime::node_runtime;
 #[cfg(test)]
 use utils::*;
+
+// We don't use this dependency, but it's here so that we
+// can enable logging easily if need be. Add this to a test
+// to enable tracing for it:
+//
+// tracing_subscriber::fmt::init();
+#[cfg(test)]
+use tracing_subscriber as _;

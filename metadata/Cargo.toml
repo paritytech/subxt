@@ -1,11 +1,11 @@
 [package]
 name = "subxt-metadata"
-version = "0.22.0"
+version = "0.23.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 autotests = false
 
-license = "GPL-3.0"
+license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
@@ -19,7 +19,7 @@ sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain" 
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
-criterion = "0.3"
+criterion = "0.4"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 
 [lib]

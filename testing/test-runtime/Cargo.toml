@@ -1,6 +1,6 @@
 [package]
 name = "test-runtime"
-version = "0.22.0"
+version = "0.23.0"
 edition = "2021"
 
 [dependencies]
@@ -13,3 +13,4 @@ subxt = { path = "../../subxt" }
 sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
+jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport"] }

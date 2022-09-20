@@ -1,18 +1,6 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use frame_metadata::{
     ExtrinsicMetadata,
@@ -82,9 +70,6 @@ fn get_field_hash(
 
     // XOR name and field name with the type hash if they exist
     if let Some(name) = field.name() {
-        bytes = xor(bytes, hash(name.as_bytes()));
-    }
-    if let Some(name) = field.type_name() {
         bytes = xor(bytes, hash(name.as_bytes()));
     }
 
@@ -302,10 +287,8 @@ pub fn get_constant_hash(
         .find(|c| c.name == constant_name)
         .ok_or(NotFound::Item)?;
 
-    let mut bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
-    bytes = xor(bytes, hash(constant.name.as_bytes()));
-    bytes = xor(bytes, hash(&constant.value));
-
+    // We only need to check that the type of the constant asked for matches.
+    let bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
     Ok(bytes)
 }
 
@@ -363,7 +346,6 @@ pub fn get_pallet_hash(
     }
     for constant in pallet.constants.iter() {
         bytes = xor(bytes, hash(constant.name.as_bytes()));
-        bytes = xor(bytes, hash(&constant.value));
         bytes = xor(
             bytes,
             get_type_hash(registry, constant.ty.id(), &mut visited_ids),

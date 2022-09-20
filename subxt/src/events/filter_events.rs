@@ -1,29 +1,18 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 //! Filtering individual events from subscriptions.
 
-use super::Events;
-use crate::{
-    BasicError,
-    Config,
-    Event,
+use super::{
+    Events,
     Phase,
+    StaticEvent,
 };
-use codec::Decode;
+use crate::{
+    Config,
+    Error,
+};
 use futures::{
     Stream,
     StreamExt,
@@ -40,7 +29,7 @@ use std::{
 /// exactly one of these will be `Some(event)` each iteration.
 pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
     // A subscription; in order for the Stream impl to apply, this will
-    // impl `Stream<Item = Result<Events<'a, T, Evs>, BasicError>> + Unpin + 'a`.
+    // impl `Stream<Item = Result<Events<'a, T, Evs>, Error>> + Unpin + 'a`.
     sub: Sub,
     // Each time we get Events from our subscription, they are stored here
     // and iterated through in future stream iterations until exhausted.
@@ -49,7 +38,7 @@ pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
             dyn Iterator<
                     Item = Result<
                         FilteredEventDetails<T::Hash, Filter::ReturnType>,
-                        BasicError,
+                        Error,
                     >,
                 > + Send
                 + 'a,
@@ -68,14 +57,13 @@ impl<'a, Sub: 'a, T: Config, Filter: EventFilter> FilterEvents<'a, Sub, T, Filte
     }
 }
 
-impl<'a, Sub, T, Evs, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
+impl<'a, Sub, T, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
 where
-    Sub: Stream<Item = Result<Events<T, Evs>, BasicError>> + Unpin + 'a,
+    Sub: Stream<Item = Result<Events<T>, Error>> + Unpin + 'a,
     T: Config,
-    Evs: Decode + 'static,
     Filter: EventFilter,
 {
-    type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, BasicError>;
+    type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, Error>;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -124,16 +112,12 @@ pub trait EventFilter: private::Sealed {
     /// The type we'll be handed back from filtering.
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
-    fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<T, Evs>,
+    fn filter<T: Config>(
+        events: Events<T>,
     ) -> Box<
         dyn Iterator<
-                Item = Result<
-                    FilteredEventDetails<T::Hash, Self::ReturnType>,
-                    BasicError,
-                >,
-            > + Send
-            + 'a,
+                Item = Result<FilteredEventDetails<T::Hash, Self::ReturnType>, Error>,
+            > + Send,
     >;
 }
 
@@ -146,18 +130,15 @@ pub(crate) mod private {
 
 // A special case impl for searching for a tuple of exactly one event (in this case, we don't
 // need to return an `(Option<Event>,)`; we can just return `Event`.
-impl<Ev: Event> private::Sealed for (Ev,) {}
-impl<Ev: Event> EventFilter for (Ev,) {
+impl<Ev: StaticEvent> private::Sealed for (Ev,) {}
+impl<Ev: StaticEvent> EventFilter for (Ev,) {
     type ReturnType = Ev;
-    fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<T, Evs>,
-    ) -> Box<
-        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>>
-            + Send
-            + 'a,
-    > {
+    fn filter<T: Config>(
+        events: Events<T>,
+    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, Error>> + Send>
+    {
         let block_hash = events.block_hash();
-        let mut iter = events.into_iter_raw();
+        let mut iter = events.iter();
         Box::new(std::iter::from_fn(move || {
             for ev in iter.by_ref() {
                 // Forward any error immediately:
@@ -170,7 +151,7 @@ impl<Ev: Event> EventFilter for (Ev,) {
                 if let Ok(Some(event)) = ev {
                     // We found a match; return our tuple.
                     return Some(Ok(FilteredEventDetails {
-                        phase: raw_event.phase,
+                        phase: raw_event.phase(),
                         block_hash,
                         event,
                     }))
@@ -188,14 +169,14 @@ impl<Ev: Event> EventFilter for (Ev,) {
 // A generalised impl for tuples of sizes greater than 1:
 macro_rules! impl_event_filter {
     ($($ty:ident $idx:tt),+) => {
-        impl <$($ty: Event),+> private::Sealed for ( $($ty,)+ ) {}
-        impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
+        impl <$($ty: StaticEvent),+> private::Sealed for ( $($ty,)+ ) {}
+        impl <$($ty: StaticEvent),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
-            fn filter<'a, T: Config, Evs: Decode + 'static>(
-                events: Events<T, Evs>
-            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
+            fn filter<T: Config>(
+                events: Events<T>
+            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, Error>> + Send> {
                 let block_hash = events.block_hash();
-                let mut iter = events.into_iter_raw();
+                let mut iter = events.iter();
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
                     for ev in iter.by_ref() {
@@ -211,7 +192,7 @@ macro_rules! impl_event_filter {
                                 // We found a match; return our tuple.
                                 out.$idx = Some(ev);
                                 return Some(Ok(FilteredEventDetails {
-                                    phase: raw_event.phase,
+                                    phase: raw_event.phase(),
                                     block_hash,
                                     event: out
                                 }))
@@ -244,24 +225,24 @@ mod test {
             event_record,
             events,
             metadata,
-            AllEvents,
         },
         *,
     };
     use crate::{
         Config,
-        DefaultConfig,
         Metadata,
+        SubstrateConfig,
     };
-    use codec::Encode;
+    use codec::{
+        Decode,
+        Encode,
+    };
     use futures::{
         stream,
         Stream,
         StreamExt,
     };
-    use parking_lot::RwLock;
     use scale_info::TypeInfo;
-    use std::sync::Arc;
 
     // Some pretend events in a pallet
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
@@ -274,7 +255,7 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventA(u8);
-    impl crate::Event for EventA {
+    impl StaticEvent for EventA {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "A";
     }
@@ -282,7 +263,7 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventB(bool);
-    impl crate::Event for EventB {
+    impl StaticEvent for EventB {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "B";
     }
@@ -290,16 +271,15 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventC(u8, bool);
-    impl crate::Event for EventC {
+    impl StaticEvent for EventC {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "C";
     }
 
     // A stream of fake events for us to try filtering on.
     fn events_stream(
-        metadata: Arc<RwLock<Metadata>>,
-    ) -> impl Stream<Item = Result<Events<DefaultConfig, AllEvents<PalletEvents>>, BasicError>>
-    {
+        metadata: Metadata,
+    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, Error>> {
         stream::iter(vec![
             events::<PalletEvents>(
                 metadata.clone(),
@@ -324,16 +304,16 @@ mod test {
                 ],
             ),
         ])
-        .map(Ok::<_, BasicError>)
+        .map(Ok::<_, Error>)
     }
 
     #[tokio::test]
     async fn filter_one_event_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventA` only.
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventA,)>::new(events_stream(metadata))
+            FilterEvents::<_, SubstrateConfig, (EventA,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;
@@ -341,17 +321,17 @@ mod test {
         let expected = vec![
             FilteredEventDetails {
                 phase: Phase::Initialization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(1),
             },
             FilteredEventDetails {
                 phase: Phase::Finalization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(2),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(3),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(3),
             },
         ];
@@ -361,10 +341,10 @@ mod test {
 
     #[tokio::test]
     async fn filter_some_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventA` or `EventB`.
-        let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
+        let actual: Vec<_> = FilterEvents::<_, SubstrateConfig, (EventA, EventB)>::new(
             events_stream(metadata),
         )
         .map(|e| e.unwrap())
@@ -374,32 +354,32 @@ mod test {
         let expected = vec![
             FilteredEventDetails {
                 phase: Phase::Initialization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(1)), None),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(0),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(true))),
             },
             FilteredEventDetails {
                 phase: Phase::Finalization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(2)), None),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(1),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(false))),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(2),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(true))),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(3),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(3)), None),
             },
         ];
@@ -409,11 +389,11 @@ mod test {
 
     #[tokio::test]
     async fn filter_no_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventC` (none exist).
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventC,)>::new(events_stream(metadata))
+            FilterEvents::<_, SubstrateConfig, (EventC,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;

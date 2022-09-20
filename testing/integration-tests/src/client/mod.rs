@@ -1,38 +1,31 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use crate::{
-    test_node_process,
-    test_node_process_with,
-    utils::node_runtime::system,
+    pair_signer,
+    test_context,
+    test_context_with,
+    utils::{
+        node_runtime,
+        wait_for_blocks,
+    },
 };
-
-use sp_core::storage::{
-    well_known_keys,
-    StorageKey,
+use sp_core::{
+    sr25519::Pair as Sr25519Pair,
+    storage::well_known_keys,
+    Pair,
 };
 use sp_keyring::AccountKeyring;
+use subxt::error::DispatchError;
 
 #[tokio::test]
 async fn insert_key() {
-    let test_node_process = test_node_process_with(AccountKeyring::Bob).await;
-    let client = test_node_process.client();
+    let ctx = test_context_with(AccountKeyring::Bob).await;
+    let api = ctx.client();
+
     let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
-    client
-        .rpc()
+    api.rpc()
         .insert_key(
             "aura".to_string(),
             "//Alice".to_string(),
@@ -40,7 +33,7 @@ async fn insert_key() {
         )
         .await
         .unwrap();
-    assert!(client
+    assert!(api
         .rpc()
         .has_key(public.clone().into(), "aura".to_string())
         .await
@@ -49,29 +42,30 @@ async fn insert_key() {
 
 #[tokio::test]
 async fn fetch_block_hash() {
-    let node_process = test_node_process().await;
-    node_process.client().rpc().block_hash(None).await.unwrap();
+    let ctx = test_context().await;
+    ctx.client().rpc().block_hash(None).await.unwrap();
 }
 
 #[tokio::test]
 async fn fetch_block() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let block_hash = client.rpc().block_hash(None).await.unwrap();
-    client.rpc().block(block_hash).await.unwrap();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let block_hash = api.rpc().block_hash(None).await.unwrap();
+    api.rpc().block(block_hash).await.unwrap();
 }
 
 #[tokio::test]
 async fn fetch_read_proof() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let block_hash = client.rpc().block_hash(None).await.unwrap();
-    client
-        .rpc()
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let block_hash = api.rpc().block_hash(None).await.unwrap();
+    api.rpc()
         .read_proof(
             vec![
-                StorageKey(well_known_keys::HEAP_PAGES.to_vec()),
-                StorageKey(well_known_keys::EXTRINSIC_INDEX.to_vec()),
+                well_known_keys::HEAP_PAGES,
+                well_known_keys::EXTRINSIC_INDEX,
             ],
             block_hash,
         )
@@ -81,27 +75,31 @@ async fn fetch_read_proof() {
 
 #[tokio::test]
 async fn chain_subscribe_blocks() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let mut blocks = client.rpc().subscribe_blocks().await.unwrap();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().subscribe_blocks().await.unwrap();
     blocks.next().await.unwrap().unwrap();
 }
 
 #[tokio::test]
 async fn chain_subscribe_finalized_blocks() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let mut blocks = client.rpc().subscribe_finalized_blocks().await.unwrap();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().subscribe_finalized_blocks().await.unwrap();
     blocks.next().await.unwrap().unwrap();
 }
 
 #[tokio::test]
 async fn fetch_keys() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let keys = client
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let addr = node_runtime::storage().system().account_root();
+    let keys = api
         .storage()
-        .fetch_keys::<system::storage::Account>(4, None, None)
+        .fetch_keys(&addr.to_root_bytes(), 4, None, None)
         .await
         .unwrap();
     assert_eq!(keys.len(), 4)
@@ -109,13 +107,11 @@ async fn fetch_keys() {
 
 #[tokio::test]
 async fn test_iter() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    let mut iter = client
-        .storage()
-        .iter::<system::storage::Account>(None)
-        .await
-        .unwrap();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let addr = node_runtime::storage().system().account_root();
+    let mut iter = api.storage().iter(addr, 10, None).await.unwrap();
     let mut i = 0;
     while iter.next().await.unwrap().is_some() {
         i += 1;
@@ -125,9 +121,127 @@ async fn test_iter() {
 
 #[tokio::test]
 async fn fetch_system_info() {
-    let node_process = test_node_process().await;
-    let client = node_process.client();
-    assert_eq!(client.rpc().system_chain().await.unwrap(), "Development");
-    assert_eq!(client.rpc().system_name().await.unwrap(), "Substrate Node");
-    assert!(!client.rpc().system_version().await.unwrap().is_empty());
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    assert_eq!(api.rpc().system_chain().await.unwrap(), "Development");
+    assert_eq!(api.rpc().system_name().await.unwrap(), "Substrate Node");
+    assert!(!api.rpc().system_version().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn dry_run_passes() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+
+    wait_for_blocks(&api).await;
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.account_id().clone().into(), 10_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    signed_extrinsic
+        .dry_run(None)
+        .await
+        .expect("dryrunning failed")
+        .expect("expected dryrunning to be successful")
+        .unwrap();
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
+async fn dry_run_fails() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    wait_for_blocks(&api).await;
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let hans = pair_signer(Sr25519Pair::generate().0);
+
+    let tx = node_runtime::tx().balances().transfer(
+        hans.account_id().clone().into(),
+        100_000_000_000_000_000_000_000_000_000_000_000,
+    );
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    let dry_run_res = signed_extrinsic
+        .dry_run(None)
+        .await
+        .expect("dryrunning failed")
+        .expect("expected dryrun transaction to be valid");
+
+    if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
+        assert_eq!(module_error.index, 6);
+        assert_eq!(module_error.error, 2);
+    } else {
+        panic!("expected a module error when dryrunning");
+    }
+
+    let res = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
+
+    if let Err(subxt::error::Error::Runtime(DispatchError::Module(err))) = res {
+        assert_eq!(err.pallet, "Balances");
+        assert_eq!(err.error, "InsufficientBalance");
+    } else {
+        panic!("expected a runtime module error");
+    }
+}
+
+#[tokio::test]
+async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let tx = node_runtime::tx().balances().transfer(
+        pair_signer(AccountKeyring::Alice.pair())
+            .account_id()
+            .clone()
+            .into(),
+        12345,
+    );
+
+    let actual_tx = api.tx().create_unsigned(&tx).unwrap();
+
+    let actual_tx_bytes = actual_tx.encoded();
+
+    // How these were obtained:
+    // - start local substrate node.
+    // - open polkadot.js UI in browser and point at local node.
+    // - open dev console (may need to refresh page now) and find the WS connection.
+    // - create a balances.transfer to ALICE with 12345 and "submit unsigned".
+    // - find the submitAndWatchExtrinsic call in the WS connection to get these bytes:
+    let expected_tx_bytes = hex::decode(
+        "9804060000d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27de5c0",
+    )
+    .unwrap();
+
+    // Make sure our encoding is the same as the encoding polkadot UI created.
+    assert_eq!(actual_tx_bytes, expected_tx_bytes);
 }

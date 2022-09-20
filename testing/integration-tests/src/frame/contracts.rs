@@ -1,75 +1,53 @@
 // Copyright 2019-2022 Parity Technologies (UK) Ltd.
-// This file is part of subxt.
-//
-// subxt is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// subxt is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
 
 use sp_keyring::AccountKeyring;
 
 use crate::{
     node_runtime::{
         self,
-        contracts::{
-            calls::TransactionApi,
-            events,
-            storage,
-        },
+        contracts::events,
+        runtime_types::sp_weights::weight_v2::Weight,
         system,
-        DispatchError,
     },
     test_context,
-    NodeRuntimeParams,
     TestContext,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
-    Client,
+    tx::{
+        PairSigner,
+        TxProgress,
+    },
     Config,
-    DefaultConfig,
     Error,
-    PairSigner,
-    TransactionProgress,
+    OnlineClient,
+    SubstrateConfig,
 };
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<SubstrateConfig, Pair>,
 }
 
-type Hash = <DefaultConfig as Config>::Hash;
-type AccountId = <DefaultConfig as Config>::AccountId;
+type Hash = <SubstrateConfig as Config>::Hash;
+type AccountId = <SubstrateConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        tracing_subscriber::fmt::try_init().ok();
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<DefaultConfig> {
+    fn client(&self) -> OnlineClient<SubstrateConfig> {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
-        self.cxt.api.tx().contracts()
-    }
-
-    async fn instantiate_with_code(
-        &self,
-    ) -> Result<(Hash, AccountId), Error<DispatchError>> {
+    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
         tracing::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
@@ -79,20 +57,21 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
+        let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
+            100_000_000_000_000_000, // endowment
+            Weight {
+                ref_time: 500_000_000_000,
+            }, // gas_limit
+            None,                    // storage_deposit_limit
+            code,
+            vec![], // data
+            vec![], // salt
+        );
+
         let events = self
-            .cxt
-            .api
+            .client()
             .tx()
-            .contracts()
-            .instantiate_with_code(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code,
-                vec![], // data
-                vec![], // salt
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -120,19 +99,23 @@ impl ContractsTestContext {
         code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<AccountId, Error<DispatchError>> {
+    ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
+        let instantiate_tx = node_runtime::tx().contracts().instantiate(
+            100_000_000_000_000_000, // endowment
+            Weight {
+                ref_time: 500_000_000_000,
+            }, // gas_limit
+            None,                    // storage_deposit_limit
+            code_hash,
+            data,
+            salt,
+        );
+
         let result = self
-            .contracts_tx()
-            .instantiate(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code_hash,
-                data,
-                salt,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -149,21 +132,22 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<
-        TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
-        Error<DispatchError>,
-    > {
+    ) -> Result<TxProgress<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error> {
         tracing::info!("call: {:?}", contract);
+        let call_tx = node_runtime::tx().contracts().call(
+            MultiAddress::Id(contract),
+            0, // value
+            Weight {
+                ref_time: 500_000_000,
+            }, // gas_limit
+            None, // storage_deposit_limit
+            input_data,
+        );
+
         let result = self
-            .contracts_tx()
-            .call(
-                MultiAddress::Id(contract),
-                0,           // value
-                500_000_000, // gas_limit
-                None,        // storage_deposit_limit
-                input_data,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&call_tx, &self.signer)
             .await?;
 
         tracing::info!("Call result: {:?}", result);
@@ -202,19 +186,17 @@ async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
 
-    let contract_info = cxt
-        .cxt
-        .api
-        .storage()
+    let info_addr = node_runtime::storage()
         .contracts()
-        .contract_info_of(&contract, None)
-        .await;
+        .contract_info_of(&contract);
+
+    let contract_info = cxt.client().storage().fetch(&info_addr, None).await;
     assert!(contract_info.is_ok());
 
     let keys = cxt
         .client()
         .storage()
-        .fetch_keys::<storage::ContractInfoOf>(5, None, None)
+        .fetch_keys(&info_addr.to_bytes(), 10, None, None)
         .await
         .unwrap()
         .iter()
