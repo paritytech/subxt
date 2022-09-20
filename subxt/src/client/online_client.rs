@@ -14,6 +14,7 @@ use crate::{
         Rpc,
         RpcClientT,
         RuntimeVersion,
+        Subscription,
     },
     storage::StorageClient,
     tx::TxClient,
@@ -33,7 +34,7 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 }
 
 /// A client that can be used to perform API calls (that is, either those
-/// requiriing an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
+/// requiring an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
@@ -102,7 +103,7 @@ impl<T: Config> OnlineClient<T> {
         })
     }
 
-    /// Create an object which can be used to keep the runtime uptodate
+    /// Create an object which can be used to keep the runtime up to date
     /// in a separate thread.
     ///
     /// # Example
@@ -114,9 +115,26 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
+    /// // high level API.
+    /// // no possible to know when an upgrade occurs just that it occurs.
+    ///
     /// let update_task = client.subscribe_to_updates();
     /// tokio::spawn(async move {
     ///     update_task.perform_runtime_updates().await;
+    /// });
+    ///
+    ///
+    /// // low level API.
+    ///
+    /// let updater = client.subscribe_to_updates();
+    /// tokio::spawn(async move {
+    ///     let mut stream = updater.stream().await.unwrap();
+    ///
+    ///     while let Some(Ok(new_runtime_version)) = stream.next().await {
+    ///         if updater.is_runtime_version_different(&new_runtime_version) {
+    ///             updater.do_update(new_runtime_version).await.unwrap();
+    ///         }
+    ///     }
     /// });
     /// # }
     /// ```
@@ -204,9 +222,24 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
 pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 
 impl<T: Config> ClientRuntimeUpdater<T> {
-    fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
+    pub fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
         let curr = self.0.inner.read();
         &curr.runtime_version != new
+    }
+
+    pub async fn do_update(
+        &self,
+        new_runtime_version: RuntimeVersion,
+    ) -> Result<(), Error> {
+        // Fetch new metadata.
+        let new_metadata = self.0.rpc.metadata().await?;
+
+        // Do the update.
+        let mut writable = self.0.inner.write();
+        writable.metadata = new_metadata;
+        writable.runtime_version = new_runtime_version;
+
+        Ok(())
     }
 
     /// Performs runtime updates indefinitely unless encountering an error.
@@ -215,9 +248,9 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// would be to run it in a separate background task.
     pub async fn perform_runtime_updates(&self) -> Result<(), Error> {
         // Obtain an update subscription to further detect changes in the runtime version of the node.
-        let mut update_subscription = self.0.rpc.subscribe_runtime_version().await?;
+        let mut runtime_version_stream = self.0.rpc().subscribe_runtime_version().await?;
 
-        while let Some(new_runtime_version) = update_subscription.next().await {
+        while let Some(new_runtime_version) = runtime_version_stream.next().await {
             // The Runtime Version obtained via subscription.
             let new_runtime_version = new_runtime_version?;
 
@@ -226,16 +259,19 @@ impl<T: Config> ClientRuntimeUpdater<T> {
                 continue
             }
 
-            // Fetch new metadata.
-            let new_metadata = self.0.rpc.metadata().await?;
-
-            // Do the update.
-            let mut writable = self.0.inner.write();
-            writable.metadata = new_metadata;
-            writable.runtime_version = new_runtime_version;
+            self.do_update(new_runtime_version).await?;
         }
 
         Ok(())
+    }
+
+    /// Low-level API to get runtime updates as a stream but it's doesn't check if the
+    /// runtime version is newer or updates the runtime.
+    ///
+    /// Instead that's up to the user of this API to decide when to update and
+    /// to perform the actual updating.
+    pub async fn stream(&self) -> Result<Subscription<RuntimeVersion>, Error> {
+        self.0.rpc().subscribe_runtime_version().await
     }
 }
 
