@@ -4,7 +4,12 @@
 
 use super::*;
 use pretty_assertions::assert_eq;
-use scale_info::{meta_type, Registry, scale, TypeInfo};
+use scale_info::{
+    meta_type,
+    scale,
+    Registry,
+    TypeInfo,
+};
 use syn::parse_quote;
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
