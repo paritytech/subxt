@@ -4,11 +4,7 @@
 
 use super::*;
 use pretty_assertions::assert_eq;
-use scale_info::{
-    meta_type,
-    Registry,
-    TypeInfo,
-};
+use scale_info::{meta_type, Registry, scale, TypeInfo};
 use syn::parse_quote;
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
@@ -373,10 +369,16 @@ fn compact_fields() {
 
 #[test]
 fn compact_generic_parameter() {
+    use scale::Compact;
+
     #[allow(unused)]
     #[derive(TypeInfo)]
     struct S {
         a: Option<<u128 as codec::HasCompact>::Type>,
+        nested: Option<Result<Compact<u128>, u8>>,
+        vector: Vec<Compact<u16>>,
+        array: [Compact<u8>; 32],
+        tuple: (Compact<u8>, Compact<u16>),
     }
 
     let mut registry = Registry::new();
@@ -401,6 +403,10 @@ fn compact_generic_parameter() {
                 #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: ::core::option::Option<::subxt::ext::codec::Compact<::core::primitive::u128> >,
+                    pub nested: ::core::option::Option<::core::result::Result<::subxt::ext::codec::Compact<::core::primitive::u128>, ::core::primitive::u8 > >,
+                    pub vector: ::std::vec::Vec<::subxt::ext::codec::Compact<::core::primitive::u16> >,
+                    pub array: [::subxt::ext::codec::Compact<::core::primitive::u8>; 32usize],
+                    pub tuple: (::subxt::ext::codec::Compact<::core::primitive::u8>, ::subxt::ext::codec::Compact<::core::primitive::u16>,),
                 }
             }
         }
