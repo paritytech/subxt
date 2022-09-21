@@ -130,7 +130,7 @@ impl<T: Config> OnlineClient<T> {
     /// tokio::spawn(async move {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
-    ///     while let Some(Ok(new_runtime_version)) = update_stream.next().await {
+    ///     while let Some(Ok(update)) = update_stream.next().await {
     ///         let version = update.runtime_version().spec_version;
     ///
     ///         match updater.apply_update(update) {
