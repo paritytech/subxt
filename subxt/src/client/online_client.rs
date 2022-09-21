@@ -2,24 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    OfflineClient,
-    OfflineClientT,
-};
+use super::{OfflineClient, OfflineClientT};
 use crate::{
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
-    rpc::{
-        Rpc,
-        RpcClientT,
-        RuntimeVersion,
-        Subscription,
-    },
+    rpc::{Rpc, RpcClientT, RuntimeVersion, Subscription},
     storage::StorageClient,
     tx::TxClient,
-    Config,
-    Metadata,
+    Config, Metadata,
 };
 use derivative::Derivative;
 use futures::future;
@@ -222,24 +213,34 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
 pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 
 impl<T: Config> ClientRuntimeUpdater<T> {
-    pub fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
+    fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
         let curr = self.0.inner.read();
         &curr.runtime_version != new
     }
 
-    pub async fn do_update(
-        &self,
-        new_runtime_version: RuntimeVersion,
-    ) -> Result<(), Error> {
-        // Fetch new metadata.
-        let new_metadata = self.0.rpc.metadata().await?;
+    /// Tries to apply a new update.
+    ///
+    /// Returns `Ok(UpgradeResult)` which indicates whether the upgrade was successful or not
+    /// but it is not treated as hard error because it may appear during normal use.
+    ///
+    /// Returns `Err(Error)` if the metadata couldn't be fetched.
+    pub async fn apply_update(&self, update: Update) -> Result<UpgradeResult, Error> {
+        if !self.is_runtime_version_different(&update.runtime_version) {
+            return Ok(UpgradeResult::SameVersion);
+        }
+
+        let metadata = self.0.rpc.metadata().await?;
+
+        if update.metadata.runtime_metadata() != metadata.runtime_metadata() {
+            return Ok(UpgradeResult::SameVersion);
+        }
 
         // Do the update.
         let mut writable = self.0.inner.write();
-        writable.metadata = new_metadata;
-        writable.runtime_version = new_runtime_version;
+        writable.metadata = update.metadata;
+        writable.runtime_version = update.runtime_version;
 
-        Ok(())
+        Ok(UpgradeResult::Success)
     }
 
     /// Performs runtime updates indefinitely unless encountering an error.
@@ -254,12 +255,15 @@ impl<T: Config> ClientRuntimeUpdater<T> {
             // The Runtime Version obtained via subscription.
             let new_runtime_version = new_runtime_version?;
 
-            // Ignore this update if there is no difference.
-            if !self.is_runtime_version_different(&new_runtime_version) {
-                continue
-            }
+            // Fetch new metadata.
+            let metadata = self.0.rpc.metadata().await?;
 
-            self.do_update(new_runtime_version).await?;
+            let _ = self
+                .apply_update(Update {
+                    runtime_version: new_runtime_version,
+                    metadata,
+                })
+                .await?;
         }
 
         Ok(())
@@ -270,9 +274,58 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     ///
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
-    pub async fn stream(&self) -> Result<Subscription<RuntimeVersion>, Error> {
-        self.0.rpc().subscribe_runtime_version().await
+    pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
+        let stream = self.0.rpc().subscribe_runtime_version().await?;
+        Ok(RuntimeUpdaterStream {
+            stream,
+            client: self.0.clone(),
+        })
     }
+}
+
+/// Stream to perform runtime upgrades.
+pub struct RuntimeUpdaterStream<T: Config> {
+    stream: Subscription<RuntimeVersion>,
+    client: OnlineClient<T>,
+}
+
+impl<T: Config> RuntimeUpdaterStream<T> {
+    /// Get the next element of the stream.
+    pub async fn next(&mut self) -> Option<Result<Update, Error>> {
+        let maybe_runtime_version = self.stream.next().await?;
+
+        let runtime_version = match maybe_runtime_version {
+            Ok(runtime_version) => runtime_version,
+            Err(err) => return Some(Err(err)),
+        };
+
+        let metadata = match self.client.rpc().metadata().await {
+            Ok(metadata) => metadata,
+            Err(err) => return Some(Err(err)),
+        };
+
+        Some(Ok(Update {
+            metadata,
+            runtime_version,
+        }))
+    }
+}
+
+/// Result of applied upgrade.
+#[derive(Debug, Clone)]
+pub enum UpgradeResult {
+    /// The version is the same as the current version.
+    SameVersion,
+    /// Metadata is outdated, skipping the upgrade.
+    Metadata,
+    /// The upgrade was successful.
+    Success,
+}
+
+/// Represents the state when a runtime upgrade occurred.
+pub struct Update {
+    pub runtime_version: RuntimeVersion,
+    pub metadata: Metadata,
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
@@ -280,17 +333,10 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
-            InvalidUri,
-            Receiver,
-            Sender,
-            Uri,
-            WsTransportClientBuilder,
+            InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder,
         },
         core::{
-            client::{
-                Client,
-                ClientBuilder,
-            },
+            client::{Client, ClientBuilder},
             Error,
         },
     };

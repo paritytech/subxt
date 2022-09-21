@@ -11,10 +11,7 @@
 //! ```
 
 use std::time::Duration;
-use subxt::{
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{client::UpgradeResult, OnlineClient, PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,12 +24,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // utilizing the API for other use cases.
     let updater = api.subscribe_to_updates();
     tokio::spawn(async move {
-        let mut update_stream = updater.stream().await.unwrap();
+        let mut update_stream = updater.runtime_updates().await.unwrap();
 
-        while let Some(Ok(new_runtime_version)) = update_stream.next().await {
-            if updater.is_runtime_version_different(&new_runtime_version) {
-                updater.do_update(new_runtime_version).await.unwrap();
-            }
+        while let Some(Ok(update)) = update_stream.next().await {
+            let version = update.runtime_version.spec_version;
+
+            match updater.apply_update(update).await {
+                Ok(UpgradeResult::Success) => {
+                    println!("Upgrade to version: {} successful", version)
+                }
+                Ok(reason) => {
+                    println!("Upgrade to version: {} failed {:?}", version, reason)
+                }
+                Err(e) => {
+                    println!(
+                        "Upgrade failed {:?} (the websocket connection is probably gone)",
+                        e
+                    );
+                    return;
+                }
+            };
         }
     });
 
