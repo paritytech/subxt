@@ -2,7 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
+use crate::{
+    types::TypeGenerator,
+    CratePath,
+};
 use frame_metadata::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
@@ -41,6 +44,7 @@ pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
+    crate_path: &CratePath,
 ) -> TokenStream2 {
     // Early return if the pallet has no events.
     let event = if let Some(ref event) = pallet.event {
@@ -54,7 +58,9 @@ pub fn generate_events(
         event.ty.id(),
         |name| name.into(),
         "Event",
+        crate_path,
     );
+    let crate_path = crate_path.syn_path();
     let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
         let pallet_name = &pallet.name;
         let event_struct = &struct_def.name;
@@ -63,7 +69,7 @@ pub fn generate_events(
         quote! {
             #struct_def
 
-            impl ::subxt::events::StaticEvent for #event_struct {
+            impl #crate_path::events::StaticEvent for #event_struct {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;
             }

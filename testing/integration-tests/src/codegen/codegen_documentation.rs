@@ -54,7 +54,9 @@ fn generate_runtime_interface() -> String {
         pub mod api {}
     );
     let derives = DerivesRegistry::default();
-    generator.generate_runtime(item_mod, derives).to_string()
+    generator
+        .generate_runtime(item_mod, derives, None)
+        .to_string()
 }
 
 fn interface_docs() -> Vec<String> {

@@ -91,6 +91,10 @@ enum Command {
         /// Additional derives
         #[structopt(long = "derive")]
         derives: Vec<String>,
+        /// The `subxt` crate access path in the generated code.
+        /// Defaults to `::subxt`.
+        #[structopt(short = "crate")]
+        crate_path: Option<String>,
     },
     /// Verify metadata compatibility between substrate nodes.
     Compatibility {
@@ -136,7 +140,12 @@ async fn main() -> color_eyre::Result<()> {
                 }
             }
         }
-        Command::Codegen { url, file, derives } => {
+        Command::Codegen {
+            url,
+            file,
+            derives,
+            crate_path,
+        } => {
             if let Some(file) = file.as_ref() {
                 if url.is_some() {
                     eyre::bail!("specify one of `--url` or `--file` but not both")
@@ -145,7 +154,7 @@ async fn main() -> color_eyre::Result<()> {
                 let mut file = fs::File::open(file)?;
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes)?;
-                codegen(&mut &bytes[..], derives)?;
+                codegen(&mut &bytes[..], derives, crate_path)?;
                 return Ok(())
             }
 
@@ -155,7 +164,7 @@ async fn main() -> color_eyre::Result<()> {
                     .expect("default url is valid")
             });
             let (_, bytes) = fetch_metadata(&url).await?;
-            codegen(&mut &bytes[..], derives)?;
+            codegen(&mut &bytes[..], derives, crate_path)?;
             Ok(())
         }
         Command::Compatibility { nodes, pallet } => {
@@ -296,6 +305,7 @@ async fn fetch_metadata(url: &Uri) -> color_eyre::Result<(String, Vec<u8>)> {
 fn codegen<I: Input>(
     encoded: &mut I,
     raw_derives: Vec<String>,
+    crate_path: Option<String>,
 ) -> color_eyre::Result<()> {
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
     let generator = subxt_codegen::RuntimeGenerator::new(metadata);
@@ -307,10 +317,12 @@ fn codegen<I: Input>(
         .iter()
         .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
+
     let mut derives = DerivesRegistry::default();
     derives.extend_for_all(p.into_iter());
 
-    let runtime_api = generator.generate_runtime(item_mod, derives);
+    let runtime_api =
+        generator.generate_runtime(item_mod, derives, crate_path.map(Into::into));
     println!("{}", runtime_api);
     Ok(())
 }

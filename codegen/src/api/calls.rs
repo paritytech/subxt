@@ -2,9 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::{
-    CompositeDefFields,
-    TypeGenerator,
+use crate::{
+    types::{
+        CompositeDefFields,
+        TypeGenerator,
+    },
+    CratePath,
 };
 use frame_metadata::{
     v14::RuntimeMetadataV14,
@@ -36,6 +39,7 @@ pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
+    crate_path: &CratePath,
 ) -> TokenStream2 {
     // Early return if the pallet has no calls.
     let call = if let Some(ref calls) = pallet.calls {
@@ -49,7 +53,9 @@ pub fn generate_calls(
         call.ty.id(),
         |name| name.to_upper_camel_case().into(),
         "Call",
+        crate_path,
     );
+    let crate_path = crate_path.syn_path();
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
         .map(|(variant_name, struct_def)| {
@@ -98,13 +104,14 @@ pub fn generate_calls(
             let call_struct = quote! {
                 #struct_def
             };
+
             let client_fn = quote! {
                 #docs
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::tx::StaticTxPayload<#struct_name> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> #crate_path::tx::StaticTxPayload<#struct_name> {
+                    #crate_path::tx::StaticTxPayload::new(
                         #pallet_name,
                         #call_name,
                         #struct_name { #( #call_args, )* },

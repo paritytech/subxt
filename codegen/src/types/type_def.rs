@@ -5,6 +5,7 @@
 use super::{
     CompositeDef,
     CompositeDefFields,
+    CratePath,
     Derives,
     TypeDefParameters,
     TypeGenerator,
@@ -40,7 +41,11 @@ pub struct TypeDefGen {
 
 impl TypeDefGen {
     /// Construct a type definition for codegen from the given [`scale_info::Type`].
-    pub fn from_type(ty: Type<PortableForm>, type_gen: &TypeGenerator) -> Self {
+    pub fn from_type(
+        ty: Type<PortableForm>,
+        type_gen: &TypeGenerator,
+        crate_path: &CratePath,
+    ) -> Self {
         let derives = type_gen.type_derives(&ty);
 
         let type_params = ty
@@ -82,6 +87,7 @@ impl TypeDefGen {
                     Some(parse_quote!(pub)),
                     type_gen,
                     ty.docs(),
+                    crate_path,
                 );
                 TypeDefGenKind::Struct(composite_def)
             }

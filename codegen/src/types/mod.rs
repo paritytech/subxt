@@ -10,6 +10,7 @@ mod type_def;
 mod type_def_params;
 mod type_path;
 
+use darling::FromMeta;
 use proc_macro2::{
     Ident,
     Span,
@@ -83,7 +84,7 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Generate a module containing all types defined in the supplied type registry.
-    pub fn generate_types_mod(&self) -> Module {
+    pub fn generate_types_mod(&self, crate_path: &CratePath) -> Module {
         let mut root_mod =
             Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
@@ -98,6 +99,7 @@ impl<'a> TypeGenerator<'a> {
                 ty.ty().path().namespace().to_vec(),
                 &self.types_mod_ident,
                 &mut root_mod,
+                crate_path,
             )
         }
 
@@ -111,6 +113,7 @@ impl<'a> TypeGenerator<'a> {
         path: Vec<String>,
         root_mod_ident: &Ident,
         module: &mut Module,
+        crate_path: &CratePath,
     ) {
         let joined_path = path.join("::");
         if self.type_substitutes.contains_key(&joined_path) {
@@ -126,11 +129,19 @@ impl<'a> TypeGenerator<'a> {
             .or_insert_with(|| Module::new(mod_ident, root_mod_ident.clone()));
 
         if path.len() == 1 {
-            child_mod
-                .types
-                .insert(ty.path().clone(), TypeDefGen::from_type(ty, self));
+            child_mod.types.insert(
+                ty.path().clone(),
+                TypeDefGen::from_type(ty, self, crate_path),
+            );
         } else {
-            self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
+            self.insert_type(
+                ty,
+                id,
+                path[1..].to_vec(),
+                root_mod_ident,
+                child_mod,
+                crate_path,
+            )
         }
     }
 
@@ -356,5 +367,54 @@ impl Module {
     /// Returns the module ident.
     pub fn ident(&self) -> &Ident {
         &self.name
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CratePath(syn::Path);
+
+impl CratePath {
+    /// Crate a new `CratePath` from a `syn::Path`.
+    pub fn new(path: syn::Path) -> Self {
+        Self(path)
+    }
+
+    /// Returns the crate path as a `syn::Path`.
+    pub fn syn_path(&self) -> &syn::Path {
+        &self.0
+    }
+}
+
+impl Default for CratePath {
+    fn default() -> Self {
+        Self(syn::parse_quote!(::subxt))
+    }
+}
+
+impl From<syn::Path> for CratePath {
+    fn from(path: syn::Path) -> Self {
+        CratePath::new(path)
+    }
+}
+
+impl From<String> for CratePath {
+    fn from(crate_path: String) -> Self {
+        Self(syn::Path::from_string(&crate_path).unwrap_or_else(|err| {
+            panic!(
+                "failed converting {:?} to `syn::Path`: {:?}",
+                crate_path, err
+            );
+        }))
+    }
+}
+
+impl From<&str> for CratePath {
+    fn from(crate_path: &str) -> Self {
+        Self(syn::Path::from_string(&crate_path).unwrap_or_else(|err| {
+            panic!(
+                "failed converting {:?} to `syn::Path`: {:?}",
+                crate_path, err
+            );
+        }))
     }
 }

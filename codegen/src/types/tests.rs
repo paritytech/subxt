@@ -45,7 +45,7 @@ fn generate_struct_with_primitives() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -91,7 +91,7 @@ fn generate_struct_with_a_struct_field() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -136,7 +136,7 @@ fn generate_tuple_struct() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -218,7 +218,7 @@ fn derive_compact_as_for_uint_wrapper_structs() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -282,7 +282,7 @@ fn generate_enum() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -340,7 +340,7 @@ fn compact_fields() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -396,7 +396,7 @@ fn compact_generic_parameter() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -437,7 +437,7 @@ fn generate_array_field() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -446,6 +446,45 @@ fn generate_array_field() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
+                pub struct S {
+                    pub a: [::core::primitive::u8; 32usize],
+                }
+            }
+        }
+        .to_string()
+    )
+}
+
+#[test]
+fn generate_array_field_with_custom_prefix() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct S {
+        a: [u8; 32],
+    }
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<S>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+    );
+    let types = type_gen.generate_types_mod(&"::foo".into());
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod
+            .into_token_stream()
+            .to_string()
+            .replace(":: subxt", ":: foo"),
+        quote! {
+            pub mod tests {
+                use super::root;
+                #[derive(::foo::ext::codec::Decode, ::foo::ext::codec::Encode, Debug)]
                 pub struct S {
                     pub a: [::core::primitive::u8; 32usize],
                 }
@@ -474,7 +513,7 @@ fn option_fields() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -514,7 +553,7 @@ fn box_fields_struct() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -554,7 +593,7 @@ fn box_fields_enum() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -594,7 +633,7 @@ fn range_fields() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -638,7 +677,7 @@ fn generics() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -686,7 +725,7 @@ fn generics_nested() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -737,7 +776,7 @@ fn generate_bitvec() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -790,7 +829,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -850,7 +889,7 @@ fn modules() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -907,7 +946,7 @@ fn dont_force_struct_names_camel_case() {
         Default::default(),
         Default::default(),
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -944,7 +983,7 @@ fn apply_user_defined_derives_for_all_types() {
 
     let type_gen =
         TypeGenerator::new(&portable_types, "root", Default::default(), derives);
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -990,6 +1029,7 @@ fn apply_user_defined_derives_for_specific_types() {
     derives.extend_for_type(
         parse_quote!(subxt_codegen::types::tests::B),
         vec![parse_quote!(Hash)],
+        &CratePath::default(),
     );
     // duplicates (in this case `Eq`) will be combined (i.e. a set union)
     derives.extend_for_type(
@@ -999,11 +1039,12 @@ fn apply_user_defined_derives_for_specific_types() {
             parse_quote!(Ord),
             parse_quote!(PartialOrd),
         ],
+        &CratePath::default(),
     );
 
     let type_gen =
         TypeGenerator::new(&portable_types, "root", Default::default(), derives);
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod(&CratePath::default());
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
