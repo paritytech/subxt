@@ -29,7 +29,7 @@ bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 scale-value = "0.5.0"
-scale-decode = "0.3.0"
+scale-decode = "0.4.0"
 futures = "0.3.13"
 hex = "0.4.3"
 jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "jsonrpsee-types"], optional = true }
