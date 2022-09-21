@@ -25,22 +25,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Start a new tokio task to perform the runtime updates while
     // utilizing the API for other use cases.
-    let updater = api.subscribe_to_updates();
+    let update_client = api.subscribe_to_updates();
     tokio::spawn(async move {
-        let mut update_stream = updater.runtime_updates().await.unwrap();
-
-        while let Some(Ok(update)) = update_stream.next().await {
-            let version = update.runtime_version().spec_version;
-
-            match updater.apply_update(update) {
-                Ok(()) => {
-                    println!("Upgrade to version: {} successful", version)
-                }
-                Err(e) => {
-                    println!("Upgrade to version {} failed {:?}", version, e);
-                }
-            };
-        }
+        let result = update_client.perform_runtime_updates().await;
+        println!("Runtime update failed with result={:?}", result);
     });
 
     // If this client is kept in use a while, it'll update its metadata and such

@@ -2,24 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    OfflineClient,
-    OfflineClientT,
-};
+use super::{OfflineClient, OfflineClientT};
 use crate::{
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
-    rpc::{
-        Rpc,
-        RpcClientT,
-        RuntimeVersion,
-        Subscription,
-    },
+    rpc::{Rpc, RpcClientT, RuntimeVersion, Subscription},
     storage::StorageClient,
     tx::TxClient,
-    Config,
-    Metadata,
+    Config, Metadata,
 };
 use derivative::Derivative;
 use futures::future;
@@ -243,7 +234,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Tries to apply a new update.
     pub fn apply_update(&self, update: Update) -> Result<(), UpgradeError> {
         if !self.is_runtime_version_different(&update.runtime_version) {
-            return Err(UpgradeError::SameVersion)
+            return Err(UpgradeError::SameVersion);
         }
 
         self.do_update(update);
@@ -257,25 +248,13 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// would be to run it in a separate background task.
     pub async fn perform_runtime_updates(&self) -> Result<(), Error> {
         // Obtain an update subscription to further detect changes in the runtime version of the node.
-        let mut runtime_version_stream = self.0.rpc().subscribe_runtime_version().await?;
+        let mut runtime_version_stream = self.runtime_updates().await?;
 
-        while let Some(new_runtime_version) = runtime_version_stream.next().await {
-            // The Runtime Version obtained via subscription.
-            let new_runtime_version = new_runtime_version?;
-
-            // Fetch new metadata.
-            let metadata = self.0.rpc.metadata().await?;
-
-            // Ignore this update if there is no difference.
-            if !self.is_runtime_version_different(&new_runtime_version) {
-                continue
-            }
+        while let Some(update) = runtime_version_stream.next().await {
+            let update = update?;
 
             // Ignore if the update fails.
-            let _ = self.apply_update(Update {
-                metadata,
-                runtime_version: new_runtime_version,
-            });
+            let _ = self.apply_update(update);
         }
 
         Ok(())
@@ -354,17 +333,10 @@ impl Update {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
-            InvalidUri,
-            Receiver,
-            Sender,
-            Uri,
-            WsTransportClientBuilder,
+            InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder,
         },
         core::{
-            client::{
-                Client,
-                ClientBuilder,
-            },
+            client::{Client, ClientBuilder},
             Error,
         },
     };
