@@ -261,7 +261,10 @@ impl<T: Config> ClientRuntimeUpdater<T> {
         while let Some(update) = runtime_version_stream.next().await {
             let update = update?;
 
-            // Ignore if the update fails.
+            // This only fails if received the runtime version is the same the current runtime version
+            // which might occur because that runtime subscriptions in substrate sends out the initial
+            // value when they created and not only when runtime upgrades occurs.
+            // Thus, fine to ignore here as it strictly speaking isn't really an error
             let _ = self.apply_update(update);
         }
 
