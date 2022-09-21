@@ -75,6 +75,11 @@ impl<CallData> StaticTxPayload<CallData> {
             ..self
         }
     }
+
+    /// Returns the call data.
+    pub fn call_data(&self) -> &CallData {
+        &self.call_data
+    }
 }
 
 impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
