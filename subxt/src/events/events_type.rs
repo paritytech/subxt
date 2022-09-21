@@ -470,7 +470,7 @@ mod tests {
     /// [`RawEventDetails`] can be annoying to test, because it contains
     /// type info in the decoded field Values. Strip that here so that
     /// we can compare fields more easily.
-    #[derive(Debug, PartialEq, Clone)]
+    #[derive(Debug, PartialEq, Eq, Clone)]
     pub struct TestRawEventDetails {
         pub phase: Phase,
         pub index: u32,
