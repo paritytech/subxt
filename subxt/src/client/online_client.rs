@@ -247,7 +247,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
         let metadata = self.0.rpc.metadata().await?;
 
         if update.metadata.runtime_metadata() != metadata.runtime_metadata() {
-            return Ok(UpgradeResult::SameVersion)
+            return Ok(UpgradeResult::OldMetadata)
         }
 
         self.do_update(update);
@@ -332,7 +332,7 @@ pub enum UpgradeResult {
     /// The version is the same as the current version.
     SameVersion,
     /// Metadata is outdated, skipping the upgrade.
-    Metadata,
+    OldMetadata,
     /// The upgrade was successful.
     Success,
 }
