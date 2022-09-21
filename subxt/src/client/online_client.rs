@@ -2,15 +2,24 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{OfflineClient, OfflineClientT};
+use super::{
+    OfflineClient,
+    OfflineClientT,
+};
 use crate::{
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
-    rpc::{Rpc, RpcClientT, RuntimeVersion, Subscription},
+    rpc::{
+        Rpc,
+        RpcClientT,
+        RuntimeVersion,
+        Subscription,
+    },
     storage::StorageClient,
     tx::TxClient,
-    Config, Metadata,
+    Config,
+    Metadata,
 };
 use derivative::Derivative;
 use futures::future;
@@ -226,13 +235,13 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Returns `Err(Error)` if the metadata couldn't be fetched.
     pub async fn apply_update(&self, update: Update) -> Result<UpgradeResult, Error> {
         if !self.is_runtime_version_different(&update.runtime_version) {
-            return Ok(UpgradeResult::SameVersion);
+            return Ok(UpgradeResult::SameVersion)
         }
 
         let metadata = self.0.rpc.metadata().await?;
 
         if update.metadata.runtime_metadata() != metadata.runtime_metadata() {
-            return Ok(UpgradeResult::SameVersion);
+            return Ok(UpgradeResult::SameVersion)
         }
 
         // Do the update.
@@ -333,10 +342,17 @@ pub struct Update {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
-            InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder,
+            InvalidUri,
+            Receiver,
+            Sender,
+            Uri,
+            WsTransportClientBuilder,
         },
         core::{
-            client::{Client, ClientBuilder},
+            client::{
+                Client,
+                ClientBuilder,
+            },
             Error,
         },
     };

@@ -11,8 +11,14 @@
 mod offline_client;
 mod online_client;
 
-pub use offline_client::{OfflineClient, OfflineClientT};
+pub use offline_client::{
+    OfflineClient,
+    OfflineClientT,
+};
 pub use online_client::{
-    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream,
+    ClientRuntimeUpdater,
+    OnlineClient,
+    OnlineClientT,
+    RuntimeUpdaterStream,
     UpgradeResult,
 };

@@ -11,7 +11,11 @@
 //! ```
 
 use std::time::Duration;
-use subxt::{client::UpgradeResult, OnlineClient, PolkadotConfig};
+use subxt::{
+    client::UpgradeResult,
+    OnlineClient,
+    PolkadotConfig,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         "Upgrade failed {:?} (the websocket connection is probably gone)",
                         e
                     );
-                    return;
+                    return
                 }
             };
         }
