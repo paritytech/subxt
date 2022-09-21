@@ -227,6 +227,12 @@ impl<T: Config> ClientRuntimeUpdater<T> {
         &curr.runtime_version != new
     }
 
+    fn do_update(&self, update: Update) {
+        let mut writable = self.0.inner.write();
+        writable.metadata = update.metadata;
+        writable.runtime_version = update.runtime_version;
+    }
+
     /// Tries to apply a new update.
     ///
     /// Returns `Ok(UpgradeResult)` which indicates whether the upgrade was successful or not
@@ -244,10 +250,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
             return Ok(UpgradeResult::SameVersion)
         }
 
-        // Do the update.
-        let mut writable = self.0.inner.write();
-        writable.metadata = update.metadata;
-        writable.runtime_version = update.runtime_version;
+        self.do_update(update);
 
         Ok(UpgradeResult::Success)
     }
@@ -267,12 +270,15 @@ impl<T: Config> ClientRuntimeUpdater<T> {
             // Fetch new metadata.
             let metadata = self.0.rpc.metadata().await?;
 
-            let _ = self
-                .apply_update(Update {
-                    runtime_version: new_runtime_version,
-                    metadata,
-                })
-                .await?;
+            // Ignore this update if there is no difference.
+            if !self.is_runtime_version_different(&new_runtime_version) {
+                continue
+            }
+
+            self.do_update(Update {
+                metadata,
+                runtime_version: new_runtime_version,
+            })
         }
 
         Ok(())
