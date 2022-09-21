@@ -58,7 +58,7 @@ pub fn generate_constants(
         let constant_hash = subxt_metadata::get_constant_hash(metadata, pallet_name, constant_name)
             .unwrap_or_else(|_| abort_call_site!("Metadata information for the constant {}_{} could not be found", pallet_name, constant_name));
 
-        let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
+        let return_ty = type_gen.resolve_type_path(constant.ty.id());
         let docs = &constant.docs;
 
         quote! {

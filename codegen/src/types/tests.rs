@@ -6,6 +6,7 @@ use super::*;
 use pretty_assertions::assert_eq;
 use scale_info::{
     meta_type,
+    scale,
     Registry,
     TypeInfo,
 };
@@ -368,6 +369,53 @@ fn compact_fields() {
             }
         }
         .to_string()
+    )
+}
+
+#[test]
+fn compact_generic_parameter() {
+    use scale::Compact;
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct S {
+        a: Option<<u128 as codec::HasCompact>::Type>,
+        nested: Option<Result<Compact<u128>, u8>>,
+        vector: Vec<Compact<u16>>,
+        array: [Compact<u8>; 32],
+        tuple: (Compact<u8>, Compact<u16>),
+    }
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<S>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+    );
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
+                pub struct S {
+                    pub a: ::core::option::Option<::subxt::ext::codec::Compact<::core::primitive::u128> >,
+                    pub nested: ::core::option::Option<::core::result::Result<::subxt::ext::codec::Compact<::core::primitive::u128>, ::core::primitive::u8 > >,
+                    pub vector: ::std::vec::Vec<::subxt::ext::codec::Compact<::core::primitive::u16> >,
+                    pub array: [::subxt::ext::codec::Compact<::core::primitive::u8>; 32usize],
+                    pub tuple: (::subxt::ext::codec::Compact<::core::primitive::u8>, ::subxt::ext::codec::Compact<::core::primitive::u16>,),
+                }
+            }
+        }
+            .to_string()
     )
 }
 

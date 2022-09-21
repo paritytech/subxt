@@ -46,7 +46,6 @@ pub use self::{
     type_path::{
         TypeParameter,
         TypePath,
-        TypePathSubstitute,
         TypePathType,
     },
 };
@@ -145,12 +144,46 @@ impl<'a> TypeGenerator<'a> {
             .clone()
     }
 
+    /// Get the type path for a field of a struct or an enum variant, providing any generic
+    /// type parameters from the containing type. This is for identifying where a generic type
+    /// parameter is used in a field type e.g.
+    ///
+    /// ```rust
+    /// struct S<T> {
+    ///     a: T, // `T` is the "parent" type param from the containing type.
+    ///     b: Vec<Option<T>>, // nested use of generic type param `T`.
+    /// }
+    /// ```
+    ///
+    /// This allows generating the correct generic field type paths.
+    ///
     /// # Panics
     ///
     /// If no type with the given id found in the type registry.
-    pub fn resolve_type_path(
+    pub fn resolve_field_type_path(
         &self,
         id: u32,
+        parent_type_params: &[TypeParameter],
+    ) -> TypePath {
+        self.resolve_type_path_recurse(id, true, parent_type_params)
+    }
+
+    /// Get the type path for the given type identifier.
+    ///
+    /// # Panics
+    ///
+    /// If no type with the given id found in the type registry.
+    pub fn resolve_type_path(&self, id: u32) -> TypePath {
+        self.resolve_type_path_recurse(id, false, &[])
+    }
+
+    /// Visit each node in a possibly nested type definition to produce a type path.
+    ///
+    /// e.g `Result<GenericStruct<NestedGenericStruct<T>>, String>`
+    fn resolve_type_path_recurse(
+        &self,
+        id: u32,
+        is_field: bool,
         parent_type_params: &[TypeParameter],
     ) -> TypePath {
         if let Some(parent_type_param) = parent_type_params
@@ -171,40 +204,100 @@ impl<'a> TypeGenerator<'a> {
             )
         }
 
-        let params_type_ids = match ty.type_def() {
-            TypeDef::Array(arr) => vec![arr.type_param().id()],
-            TypeDef::Sequence(seq) => vec![seq.type_param().id()],
-            TypeDef::Tuple(tuple) => tuple.fields().iter().map(|f| f.id()).collect(),
-            TypeDef::Compact(compact) => vec![compact.type_param().id()],
-            TypeDef::BitSequence(seq) => {
-                vec![seq.bit_order_type().id(), seq.bit_store_type().id()]
+        let params = ty
+            .type_params()
+            .iter()
+            .filter_map(|f| {
+                f.ty().map(|f| {
+                    self.resolve_type_path_recurse(f.id(), false, parent_type_params)
+                })
+            })
+            .collect();
+
+        let ty = match ty.type_def() {
+            TypeDef::Composite(_) | TypeDef::Variant(_) => {
+                let joined_path = ty.path().segments().join("::");
+                if let Some(substitute_type_path) =
+                    self.type_substitutes.get(&joined_path)
+                {
+                    TypePathType::Path {
+                        path: substitute_type_path.clone(),
+                        params,
+                    }
+                } else {
+                    TypePathType::from_type_def_path(
+                        ty.path(),
+                        self.types_mod_ident.clone(),
+                        params,
+                    )
+                }
             }
-            _ => {
-                ty.type_params()
-                    .iter()
-                    .filter_map(|f| f.ty().map(|f| f.id()))
-                    .collect()
+            TypeDef::Primitive(primitive) => {
+                TypePathType::Primitive {
+                    def: primitive.clone(),
+                }
+            }
+            TypeDef::Array(arr) => {
+                TypePathType::Array {
+                    len: arr.len() as usize,
+                    of: Box::new(self.resolve_type_path_recurse(
+                        arr.type_param().id(),
+                        false,
+                        parent_type_params,
+                    )),
+                }
+            }
+            TypeDef::Sequence(seq) => {
+                TypePathType::Vec {
+                    of: Box::new(self.resolve_type_path_recurse(
+                        seq.type_param().id(),
+                        false,
+                        parent_type_params,
+                    )),
+                }
+            }
+            TypeDef::Tuple(tuple) => {
+                TypePathType::Tuple {
+                    elements: tuple
+                        .fields()
+                        .iter()
+                        .map(|f| {
+                            self.resolve_type_path_recurse(
+                                f.id(),
+                                false,
+                                parent_type_params,
+                            )
+                        })
+                        .collect(),
+                }
+            }
+            TypeDef::Compact(compact) => {
+                TypePathType::Compact {
+                    inner: Box::new(self.resolve_type_path_recurse(
+                        compact.type_param().id(),
+                        false,
+                        parent_type_params,
+                    )),
+                    is_field,
+                }
+            }
+            TypeDef::BitSequence(bitseq) => {
+                TypePathType::BitVec {
+                    bit_order_type: Box::new(self.resolve_type_path_recurse(
+                        bitseq.bit_order_type().id(),
+                        false,
+                        parent_type_params,
+                    )),
+                    bit_store_type: Box::new(self.resolve_type_path_recurse(
+                        bitseq.bit_store_type().id(),
+                        false,
+                        parent_type_params,
+                    )),
+                }
             }
         };
 
-        let params = params_type_ids
-            .iter()
-            .map(|tp| self.resolve_type_path(*tp, parent_type_params))
-            .collect::<Vec<_>>();
-
-        let joined_path = ty.path().segments().join("::");
-        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
-            TypePath::Substitute(TypePathSubstitute {
-                path: substitute_type_path.clone(),
-                params,
-            })
-        } else {
-            TypePath::Type(TypePathType {
-                ty,
-                params,
-                root_mod_ident: self.types_mod_ident.clone(),
-            })
-        }
+        TypePath::Type(ty)
     }
 
     /// Returns the derives to be applied to all generated types.
@@ -228,7 +321,7 @@ pub struct Module {
     name: Ident,
     root_mod: Ident,
     children: BTreeMap<Ident, Module>,
-    types: BTreeMap<scale_info::Path<scale_info::form::PortableForm>, TypeDefGen>,
+    types: BTreeMap<scale_info::Path<PortableForm>, TypeDefGen>,
 }
 
 impl ToTokens for Module {
