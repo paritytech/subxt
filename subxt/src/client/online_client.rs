@@ -107,7 +107,6 @@ impl<T: Config> OnlineClient<T> {
     /// let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
     /// // high level API.
-    /// // no possible to know when an upgrade occurs just that it occurs.
     ///
     /// let update_task = client.subscribe_to_updates();
     /// tokio::spawn(async move {
