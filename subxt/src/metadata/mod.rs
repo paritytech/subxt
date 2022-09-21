@@ -5,10 +5,16 @@
 //! Types representing the metadata obtained from a node.
 
 mod decode_with_metadata;
+#[cfg(feature = "decoder")]
+mod decoder;
 mod encode_with_metadata;
+#[cfg(feature = "decoder")]
+mod env_types;
 mod hash_cache;
 mod metadata_location;
 mod metadata_type;
+#[cfg(feature = "decoder")]
+mod util;
 
 pub use metadata_location::MetadataLocation;
 
@@ -29,4 +35,18 @@ pub use decode_with_metadata::{
 pub use encode_with_metadata::{
     EncodeStaticType,
     EncodeWithMetadata,
+};
+
+#[cfg(feature = "decoder")]
+pub use metadata_type::{
+    MetadataPalletCalls,
+    PathKey,
+};
+
+#[cfg(feature = "decoder")]
+pub use decoder::{
+    CallData,
+    Decoder,
+    DecoderBuilder,
+    Extrinsic,
 };

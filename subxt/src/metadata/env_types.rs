@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::BasicError;
+use crate::Error;
 use codec::Decode;
 use scale_value::Value;
 use sp_core::crypto::{AccountId32, Ss58Codec};
@@ -52,7 +52,7 @@ impl EnvTypesTranscoder {
         &self,
         type_id: u32,
         input: &mut &[u8],
-    ) -> Result<Option<Value<scale_value::scale::TypeId>>, BasicError> {
+    ) -> Result<Option<Value<scale_value::scale::TypeId>>, Error> {
         match self.decoders.get(&type_id) {
             Some(decoder) => {
                 // log::debug!("Decoding type {:?} with custom decoder", type_id);
@@ -72,7 +72,7 @@ pub trait CustomTypeDecoder: Send + Sync {
     fn decode_value(
         &self,
         input: &mut &[u8],
-    ) -> Result<Value<scale_value::scale::TypeId>, BasicError>;
+    ) -> Result<Value<scale_value::scale::TypeId>, Error>;
 }
 
 /// Custom encoding/decoding for the Substrate `AccountId` type.
@@ -86,7 +86,7 @@ impl CustomTypeDecoder for AccountId {
     fn decode_value(
         &self,
         input: &mut &[u8],
-    ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
+    ) -> Result<Value<scale_value::scale::TypeId>, Error> {
         let account_id = AccountId32::decode(input)?;
         Ok(Value::string(account_id.to_ss58check()).map_context(|_| 0_u32.into()))
     }
@@ -101,7 +101,7 @@ impl CustomTypeDecoder for Hash {
     fn decode_value(
         &self,
         input: &mut &[u8],
-    ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
+    ) -> Result<Value<scale_value::scale::TypeId>, Error> {
         let hash = format!("{:?}", sp_core::H256::decode(input)?);
         Ok(Value::string(hash).map_context(|_| 0_u32.into()))
     }
@@ -115,11 +115,11 @@ impl CustomTypeDecoder for CurrencyId {
     fn decode_value(
         &self,
         input: &mut &[u8],
-    ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
+    ) -> Result<Value<scale_value::scale::TypeId>, Error> {
         let currency = TidefiCurrencyId::decode(input)?;
         let asset: tidefi_primitives::assets::Asset = currency
             .try_into()
-            .map_err(|e: &str| BasicError::Other(e.to_string()))?;
+            .map_err(|e: &str| Error::Other(e.to_string()))?;
 
         Ok(Value::string(asset.symbol()).map_context(|_| 0_u32.into()))
     }

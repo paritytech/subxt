@@ -145,6 +145,8 @@ pub mod metadata;
 pub mod rpc;
 pub mod storage;
 pub mod tx;
+#[cfg(feature = "decoder")]
+mod u8_map;
 pub mod utils;
 
 // Expose a few of the most common types at root,
@@ -161,6 +163,16 @@ pub use crate::{
     },
     error::Error,
     metadata::Metadata,
+};
+
+#[cfg(feature = "decoder")]
+pub use crate::metadata::{
+    CallData,
+    Decoder,
+    DecoderBuilder,
+    Extrinsic,
+    PalletMetadata,
+    PathKey,
 };
 
 /// Re-export external crates that are made use of in the subxt API.

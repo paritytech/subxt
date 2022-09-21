@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+#[cfg(feature = "decoder")]
+use super::decoder::DecoderBuilder;
 use super::hash_cache::HashCache;
 use codec::Error as CodecError;
 use frame_metadata::{
@@ -23,6 +25,42 @@ use std::{
     convert::TryFrom,
     sync::Arc,
 };
+
+#[cfg(feature = "decoder")]
+use crate::{
+    u8_map::U8Map,
+    Error,
+};
+#[cfg(feature = "decoder")]
+use scale_info::IntoPortable;
+
+/// Path key
+#[cfg(feature = "decoder")]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub struct PathKey(Vec<String>);
+
+#[cfg(feature = "decoder")]
+impl PathKey {
+    /// From path key
+    pub fn from_type<T>() -> Self
+    where
+        T: scale_info::TypeInfo,
+    {
+        let type_info = T::type_info();
+        let path = type_info
+            .path()
+            .clone()
+            .into_portable(&mut Default::default());
+        PathKey::from(&path)
+    }
+}
+
+#[cfg(feature = "decoder")]
+impl From<&scale_info::Path<PortableForm>> for PathKey {
+    fn from(path: &scale_info::Path<PortableForm>) -> Self {
+        PathKey(path.segments().to_vec())
+    }
+}
 
 /// Metadata error originated from inspecting the internal representation of the runtime metadata.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -92,6 +130,31 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
+    #[cfg(feature = "decoder")]
+    decoder: super::Decoder,
+}
+
+/// Metadata pallet calls
+#[cfg(feature = "decoder")]
+#[derive(Debug)]
+pub struct MetadataPalletCalls {
+    /// The pallet name.
+    pub name: String,
+    /// Metadata may not contain call information. If it does,
+    /// it'll be here.
+    pub calls: Option<MetadataCalls>,
+}
+
+#[cfg(feature = "decoder")]
+#[derive(Debug)]
+pub struct MetadataCalls {
+    /// This allows us to find the type information corresponding to
+    /// the call in the [`PortableRegistry`]/
+    pub calls_type_id: scale_info::interner::UntrackedSymbol<std::any::TypeId>,
+    /// This allows us to map a u8 enum index to the correct call variant
+    /// from the calls type, above. The variant contains information on the
+    /// fields and such that the call has.
+    pub call_variant_indexes: U8Map<usize>,
 }
 
 /// A representation of the runtime metadata received from a node.
@@ -150,6 +213,25 @@ impl Metadata {
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
         self.inner.metadata.types.resolve(id)
+    }
+
+    /// Decode extrinsic
+    #[cfg(feature = "decoder")]
+    pub fn decode_extrinsic(
+        &self,
+        data: &mut &[u8],
+    ) -> Result<super::decoder::Extrinsic, Error> {
+        self.inner.decoder.decode_extrinsic(data)
+    }
+
+    /// Decode extrinsic
+    #[cfg(feature = "decoder")]
+    pub fn decode_as_type(
+        &self,
+        type_id: u32,
+        input: &mut &[u8],
+    ) -> Result<scale_value::Value<scale_value::scale::TypeId>, Error> {
+        self.inner.decoder.decode(type_id, input)
     }
 
     /// Return the runtime metadata.
@@ -406,6 +488,13 @@ pub enum InvalidMetadataError {
     /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type")]
     TypeDefNotVariant(u32),
+    /// Something went wrong
+    #[error("{0}")]
+    Other(String),
+    /// Unable to create decoder
+    #[cfg(feature = "decoder")]
+    #[error("Unable to initialize decoder")]
+    InvalidDecoderBuilder,
 }
 
 impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
@@ -530,6 +619,75 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .find(|ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id());
 
+        #[cfg(feature = "decoder")]
+        let mut pallet_calls_by_index = U8Map::new();
+        // Gather information about the calls/storage in use:
+        #[cfg(feature = "decoder")]
+        for pallet in &metadata.pallets {
+            // capture the call information in this pallet:
+            let calls = pallet
+                .calls
+                .as_ref()
+                .map(|call_md| {
+                    // Get the type representing the variant of available calls:
+                    let calls_type_id = call_md.ty;
+                    let calls_type =
+                        metadata.types.resolve(calls_type_id.id()).ok_or_else(|| {
+                            InvalidMetadataError::Other(format!(
+                                "Error not found {}",
+                                calls_type_id.id()
+                            ))
+                        })?;
+
+                    // Expect that type to be a variant:
+                    let calls_type_def = calls_type.type_def();
+                    let calls_variant = match calls_type_def {
+                        scale_info::TypeDef::Variant(variant) => variant,
+                        _ => {
+                            return Err(InvalidMetadataError::Other(format!(
+                                "Invalid call {:?}",
+                                calls_type_def
+                            )))
+                        }
+                    };
+
+                    // Store the mapping from u8 index to variant slice index for quicker decode lookup:
+                    let call_variant_indexes = calls_variant
+                        .variants()
+                        .iter()
+                        .enumerate()
+                        .map(|(idx, v)| (v.index(), idx))
+                        .collect();
+
+                    Ok(MetadataCalls {
+                        calls_type_id,
+                        call_variant_indexes,
+                    })
+                })
+                .transpose()
+                .map_err(|err| {
+                    InvalidMetadataError::Other(format!("Something wrong {}", err))
+                })?;
+
+            pallet_calls_by_index.insert(
+                pallet.index,
+                MetadataPalletCalls {
+                    name: pallet.name.to_owned(),
+                    calls,
+                },
+            );
+        }
+
+        #[cfg(feature = "decoder")]
+        let decoder = DecoderBuilder::new(
+            metadata.types.clone(),
+            pallet_calls_by_index,
+            metadata.extrinsic.signed_extensions.clone(),
+        )
+        .with_default_custom_type_decodes()
+        .build()
+        .map_err(|_| InvalidMetadataError::InvalidDecoderBuilder)?;
+
         Ok(Metadata {
             inner: Arc::new(MetadataInner {
                 metadata,
@@ -541,6 +699,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
+                #[cfg(feature = "decoder")]
+                decoder,
             }),
         })
     }

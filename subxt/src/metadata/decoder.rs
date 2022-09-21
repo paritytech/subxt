@@ -27,7 +27,7 @@ use crate::{
         PathKey,
     },
     u8_map::U8Map,
-    BasicError,
+    Error,
 };
 use codec::{
     Compact,
@@ -158,7 +158,7 @@ impl DecoderBuilder {
     }
 
     /// Build decoder
-    pub fn build(self) -> Result<Decoder, BasicError> {
+    pub fn build(self) -> Result<Decoder, Error> {
         let env_types_transcoder = EnvTypesTranscoder::new(self.decoders);
         Ok(Decoder::new(
             self.registry,
@@ -199,9 +199,9 @@ impl Decoder {
     }
 
     /// Decode extrinsic
-    pub fn decode_extrinsic(&self, data: &mut &[u8]) -> Result<Extrinsic, BasicError> {
+    pub fn decode_extrinsic(&self, data: &mut &[u8]) -> Result<Extrinsic, Error> {
         if data.is_empty() {
-            return Err(BasicError::Other(
+            return Err(Error::Other(
                 "unwrapped extrinsic byte length should be > 0".into(),
             ))
         }
@@ -233,7 +233,7 @@ impl Decoder {
 
         // We only know how to decode V4 extrinsics at the moment
         if version != 4 {
-            return Err(BasicError::Other(format!("Invalid version {}", version)))
+            return Err(Error::Other(format!("Invalid version {}", version)))
         }
 
         // If the extrinsic is signed, decode the signature next.
@@ -279,10 +279,10 @@ impl Decoder {
         })
     }
 
-    fn decode_call_data(&self, data: &mut &[u8]) -> Result<CallData, BasicError> {
+    fn decode_call_data(&self, data: &mut &[u8]) -> Result<CallData, Error> {
         // Pluck out the u8's representing the pallet and call enum next.
         if data.len() < 2 {
-            return Err(BasicError::Other(
+            return Err(Error::Other(
                 "expected at least 2 more bytes for the pallet/call index".into(),
             )
             .into())
@@ -295,7 +295,7 @@ impl Decoder {
             match self.call_variant_by_enum_index(pallet_index, call_index) {
                 Some(call) => call,
                 None => {
-                    return Err(BasicError::Other(format!(
+                    return Err(Error::Other(format!(
                         "Unable to find call for pallet: {} call: {}",
                         pallet_index, call_index
                     )))
@@ -307,7 +307,7 @@ impl Decoder {
             .fields()
             .iter()
             .map(|field| self.decode(field.ty().id(), data))
-            .collect::<Result<Vec<_>, BasicError>>()?;
+            .collect::<Result<Vec<_>, Error>>()?;
 
         Ok(CallData {
             pallet_name: pallet_name.to_owned(),
@@ -319,7 +319,7 @@ impl Decoder {
     fn decode_signature(
         &self,
         data: &mut &[u8],
-    ) -> Result<ExtrinsicSignature, BasicError> {
+    ) -> Result<ExtrinsicSignature, Error> {
         let address = <MultiAddress<AccountId32, u32>>::decode(data)?;
         let signature = MultiSignature::decode(data)?;
         let extensions = self.decode_signed_extensions(data)?;
@@ -334,7 +334,7 @@ impl Decoder {
     fn decode_signed_extensions(
         &self,
         data: &mut &[u8],
-    ) -> Result<Vec<(String, Value<scale_value::scale::TypeId>)>, BasicError> {
+    ) -> Result<Vec<(String, Value<scale_value::scale::TypeId>)>, Error> {
         self.signed_extensions
             .iter()
             .map(|ext| {
@@ -350,7 +350,7 @@ impl Decoder {
         &self,
         type_id: u32,
         input: &mut &[u8],
-    ) -> Result<Value<scale_value::scale::TypeId>, BasicError> {
+    ) -> Result<Value<scale_value::scale::TypeId>, Error> {
         match self.env_types.try_decode(type_id, input) {
             // Value was decoded with custom decoder for type.
             Ok(Some(value)) => Ok(value),
