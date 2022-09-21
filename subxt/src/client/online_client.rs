@@ -128,12 +128,19 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// let updater = client.subscribe_to_updates();
     /// tokio::spawn(async move {
-    ///     let mut stream = updater.stream().await.unwrap();
+    ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
-    ///     while let Some(Ok(new_runtime_version)) = stream.next().await {
-    ///         if updater.is_runtime_version_different(&new_runtime_version) {
-    ///             updater.do_update(new_runtime_version).await.unwrap();
-    ///         }
+    ///     while let Some(Ok(new_runtime_version)) = update_stream.next().await {
+    ///         let version = update.runtime_version().spec_version;
+    ///
+    ///         match updater.apply_update(update) {
+    ///             Ok(()) => {
+    ///                 println!("Upgrade to version: {} successful", version)
+    ///             }
+    ///             Err(e) => {
+    ///                println!("Upgrade to version {} failed {:?}", version, e);
+    ///             }
+    ///        };
     ///     }
     /// });
     /// # }
@@ -234,25 +241,14 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     }
 
     /// Tries to apply a new update.
-    ///
-    /// Returns `Ok(UpgradeResult)` which indicates whether the upgrade was successful or not
-    /// but it is not treated as hard error because it may appear during normal use.
-    ///
-    /// Returns `Err(Error)` if the metadata couldn't be fetched.
-    pub async fn apply_update(&self, update: Update) -> Result<UpgradeResult, Error> {
+    pub fn apply_update(&self, update: Update) -> Result<(), UpgradeError> {
         if !self.is_runtime_version_different(&update.runtime_version) {
-            return Ok(UpgradeResult::SameVersion)
-        }
-
-        let metadata = self.0.rpc.metadata().await?;
-
-        if update.metadata.runtime_metadata() != metadata.runtime_metadata() {
-            return Ok(UpgradeResult::OldMetadata)
+            return Err(UpgradeError::SameVersion)
         }
 
         self.do_update(update);
 
-        Ok(UpgradeResult::Success)
+        Ok(())
     }
 
     /// Performs runtime updates indefinitely unless encountering an error.
@@ -275,10 +271,11 @@ impl<T: Config> ClientRuntimeUpdater<T> {
                 continue
             }
 
-            self.do_update(Update {
+            // Ignore if the update fails.
+            let _ = self.apply_update(Update {
                 metadata,
                 runtime_version: new_runtime_version,
-            })
+            });
         }
 
         Ok(())
@@ -326,21 +323,30 @@ impl<T: Config> RuntimeUpdaterStream<T> {
     }
 }
 
-/// Result of applied upgrade.
+/// Error that can occur during upgrade.
+#[non_exhaustive]
 #[derive(Debug, Clone)]
-pub enum UpgradeResult {
+pub enum UpgradeError {
     /// The version is the same as the current version.
     SameVersion,
-    /// Metadata is outdated, skipping the upgrade.
-    OldMetadata,
-    /// The upgrade was successful.
-    Success,
 }
 
 /// Represents the state when a runtime upgrade occurred.
 pub struct Update {
-    pub runtime_version: RuntimeVersion,
-    pub metadata: Metadata,
+    runtime_version: RuntimeVersion,
+    metadata: Metadata,
+}
+
+impl Update {
+    /// Get the runtime version.
+    pub fn runtime_version(&self) -> &RuntimeVersion {
+        &self.runtime_version
+    }
+
+    /// Get the metadata.
+    pub fn metadata(&self) -> &Metadata {
+        &self.metadata
+    }
 }
 
 // helpers for a jsonrpsee specific OnlineClient.

@@ -12,7 +12,6 @@
 
 use std::time::Duration;
 use subxt::{
-    client::UpgradeResult,
     OnlineClient,
     PolkadotConfig,
 };
@@ -31,21 +30,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut update_stream = updater.runtime_updates().await.unwrap();
 
         while let Some(Ok(update)) = update_stream.next().await {
-            let version = update.runtime_version.spec_version;
+            let version = update.runtime_version().spec_version;
 
-            match updater.apply_update(update).await {
-                Ok(UpgradeResult::Success) => {
+            match updater.apply_update(update) {
+                Ok(()) => {
                     println!("Upgrade to version: {} successful", version)
                 }
-                Ok(reason) => {
-                    println!("Upgrade to version: {} failed {:?}", version, reason)
-                }
                 Err(e) => {
-                    println!(
-                        "Upgrade failed {:?} (the websocket connection is probably gone)",
-                        e
-                    );
-                    return
+                    println!("Upgrade to version {} failed {:?}", version, e);
                 }
             };
         }

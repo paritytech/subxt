@@ -20,5 +20,5 @@ pub use online_client::{
     OnlineClient,
     OnlineClientT,
     RuntimeUpdaterStream,
-    UpgradeResult,
+    UpgradeError,
 };
