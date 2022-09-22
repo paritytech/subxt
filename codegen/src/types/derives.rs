@@ -94,6 +94,8 @@ impl Derives {
         self.derives.insert(derive);
     }
 
+    /// Creates a default instance of `Derives` with the `crate_path` prepended
+    /// to the set of default derives that reside in `subxt`.
     pub fn default_with_crate_path(crate_path: &CratePath) -> Self {
         let crate_path = crate_path.syn_path();
         let mut derives = HashSet::new();

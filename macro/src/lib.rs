@@ -74,6 +74,16 @@
 //! )]
 //! pub mod polkadot {}
 //! ```
+//!
+//! ### Custom crate path
+//!
+//! In order to specify a custom crate path to be used for the code generation:
+//!
+//! ```ignore
+//! #[subxt::subxt(crate = "crate::path::to::subxt")]
+//! ```
+//!
+//! By default the path `::subxt` is used.
 
 #![deny(unused_crate_dependencies)]
 
