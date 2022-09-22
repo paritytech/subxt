@@ -16,6 +16,9 @@ pub use offline_client::{
     OfflineClientT,
 };
 pub use online_client::{
+    ClientRuntimeUpdater,
     OnlineClient,
     OnlineClientT,
+    RuntimeUpdaterStream,
+    UpgradeError,
 };
