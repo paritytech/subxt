@@ -8,8 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This release has a bunch of smaller changes and fixes. The breaking changes are fairly minor and should be easy to address if encountered. Notable additions are:
 - Allowing the underlying RPC implementation to be swapped out ([#634](https://github.com/paritytech/subxt/pull/634)). This makes `jsonrpsee` an optional dependency, and opens the door for Subxt to be integrated into things like light clients, since we can decide how to handle RPC calls.
-- A low level "runtime upgrade" API is exposed, giving more visibility into when node updates happen incase your application needs to handle them.
-- `scale-value` and `scale-decode` dependencies are bumped. The main effect of this is that `bitvec` is no longer used under the hood in the core of subxt, which helps to remove one hurdle on the way to being able to compile Subxt to WASM.
+- A low level "runtime upgrade" API is exposed, giving more visibility into when node updates happen in case your application needs to handle them.
+- `scale-value` and `scale-decode` dependencies are bumped. The main effect of this is that `bitvec` is no longer used under the hood in the core of Subxt, which helps to remove one hurdle on the way to being able to compile it to WASM.
+
+Notable PRs merged:
 
 ### Added
 
@@ -19,6 +21,7 @@ This release has a bunch of smaller changes and fixes. The breaking changes are 
 - Allow generalising over RPC implementation ([#634](https://github.com/paritytech/subxt/pull/634))
 - Add conversion and default functions for `NumberOrHex` ([#636](https://github.com/paritytech/subxt/pull/636))
 - Allow creating/submitting unsigned transactions, too. ([#625](https://github.com/paritytech/subxt/pull/625))
+- Add Staking Miner and Introspector to usage list ([#647](https://github.com/paritytech/subxt/pull/647))
 
 ### Changed
 
@@ -28,7 +31,6 @@ This release has a bunch of smaller changes and fixes. The breaking changes are 
 - Simplify the TxPayload trait a little ([#638](https://github.com/paritytech/subxt/pull/638))
 - Remove unnecessary `async` ([#645](https://github.com/paritytech/subxt/pull/645))
 - Store type name of a field in event metadata ([#654](https://github.com/paritytech/subxt/pull/654))
-- Add Staking Miner and Introspector to usage list ([#647](https://github.com/paritytech/subxt/pull/647))
 - Use 'sp_core::Hxxx' for all hash types ([#623](https://github.com/paritytech/subxt/pull/623))
 
 ### Fixed
