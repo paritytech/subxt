@@ -245,7 +245,7 @@ impl RuntimeGenerator {
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
-                (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+                (!pallet.constants.is_empty()).then_some(pallet_mod_name)
             })
             .collect();
 

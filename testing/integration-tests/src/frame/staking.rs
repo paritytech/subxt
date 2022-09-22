@@ -219,11 +219,8 @@ async fn tx_bond() -> Result<(), Error> {
 async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let history_depth_addr = node_runtime::storage().staking().history_depth();
-    let history_depth = api
-        .storage()
-        .fetch_or_default(&history_depth_addr, None)
-        .await?;
+    let history_depth_addr = node_runtime::constants().staking().history_depth();
+    let history_depth = api.constants().at(&history_depth_addr)?;
     assert_eq!(history_depth, 84);
     Ok(())
 }
