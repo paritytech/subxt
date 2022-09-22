@@ -14,7 +14,7 @@ use std::collections::{
     HashSet,
 };
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct DerivesRegistry {
     default_derives: Derives,
     specific_type_derives: HashMap<syn::TypePath, Derives>,

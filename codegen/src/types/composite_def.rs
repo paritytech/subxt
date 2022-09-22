@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{
+    CratePath,
     Derives,
     Field,
     TypeDefParameters,
@@ -10,7 +11,6 @@ use super::{
     TypeParameter,
     TypePath,
 };
-use crate::CratePath;
 use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
 use quote::{
