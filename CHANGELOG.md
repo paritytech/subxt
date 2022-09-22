@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.24.0] - 2022-09-22
+
+This release has a bunch of smaller changes and fixes. The breaking changes are fairly minor and should be easy to address if encountered. Notable additions are:
+- Allowing the underlying RPC implementation to be swapped out ([#634](https://github.com/paritytech/subxt/pull/634)). This makes `jsonrpsee` an optional dependency, and opens the door for Subxt to be integrated into things like light clients, since we can decide how to handle RPC calls.
+- A low level "runtime upgrade" API is exposed, giving more visibility into when node updates happen in case your application needs to handle them.
+- `scale-value` and `scale-decode` dependencies are bumped. The main effect of this is that `bitvec` is no longer used under the hood in the core of Subxt, which helps to remove one hurdle on the way to being able to compile it to WASM.
+
+Notable PRs merged:
+
+### Added
+
+- feat: add low-level `runtime upgrade API` ([#657](https://github.com/paritytech/subxt/pull/657))
+- Add accessor for `StaticTxPayload::call_data` ([#660](https://github.com/paritytech/subxt/pull/660))
+- Store type name of a field in event metadata, and export EventFieldMetadata ([#656](https://github.com/paritytech/subxt/pull/656) and [#654](https://github.com/paritytech/subxt/pull/654))
+- Allow generalising over RPC implementation ([#634](https://github.com/paritytech/subxt/pull/634))
+- Add conversion and default functions for `NumberOrHex` ([#636](https://github.com/paritytech/subxt/pull/636))
+- Allow creating/submitting unsigned transactions, too. ([#625](https://github.com/paritytech/subxt/pull/625))
+- Add Staking Miner and Introspector to usage list ([#647](https://github.com/paritytech/subxt/pull/647))
+
+### Changed
+
+- Bump scale-value and scale-decode ([#659](https://github.com/paritytech/subxt/pull/659))
+- Tweak 0.23 notes and add another test for events ([#618](https://github.com/paritytech/subxt/pull/618))
+- Specialize metadata errors ([#633](https://github.com/paritytech/subxt/pull/633))
+- Simplify the TxPayload trait a little ([#638](https://github.com/paritytech/subxt/pull/638))
+- Remove unnecessary `async` ([#645](https://github.com/paritytech/subxt/pull/645))
+- Use 'sp_core::Hxxx' for all hash types ([#623](https://github.com/paritytech/subxt/pull/623))
+
+### Fixed
+
+- Fix `history_depth` testing ([#662](https://github.com/paritytech/subxt/pull/662))
+- Fix codegen for `codec::Compact` as type parameters ([#651](https://github.com/paritytech/subxt/pull/651))
+- Support latest substrate release ([#653](https://github.com/paritytech/subxt/pull/653))
+
 ## [0.23.0] - 2022-08-11
 
 This is one of the most significant releases to date in Subxt, and carries with it a number of significant breaking changes, but in exchange, a number of significant improvements. The most significant PR is [#593](https://github.com/paritytech/subxt/pull/593); the fundamental change that this makes is to separate creating a query/transaction/address from submitting it. This gives us flexibility when creating queries; they can be either dynamically or statically generated, but also flexibility in our client, enabling methods to be exposed for online or offline use.
