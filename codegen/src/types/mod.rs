@@ -410,7 +410,7 @@ impl From<String> for CratePath {
 
 impl From<&str> for CratePath {
     fn from(crate_path: &str) -> Self {
-        Self(syn::Path::from_string(&crate_path).unwrap_or_else(|err| {
+        Self(syn::Path::from_string(crate_path).unwrap_or_else(|err| {
             panic!(
                 "failed converting {:?} to `syn::Path`: {:?}",
                 crate_path, err
