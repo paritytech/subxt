@@ -17,7 +17,7 @@ Notable PRs merged:
 
 - feat: add low-level `runtime upgrade API` ([#657](https://github.com/paritytech/subxt/pull/657))
 - Add accessor for `StaticTxPayload::call_data` ([#660](https://github.com/paritytech/subxt/pull/660))
-- Export EventFieldMetadata ([#656](https://github.com/paritytech/subxt/pull/656))
+- Store type name of a field in event metadata, and export EventFieldMetadata ([#656](https://github.com/paritytech/subxt/pull/656) and [#654](https://github.com/paritytech/subxt/pull/654))
 - Allow generalising over RPC implementation ([#634](https://github.com/paritytech/subxt/pull/634))
 - Add conversion and default functions for `NumberOrHex` ([#636](https://github.com/paritytech/subxt/pull/636))
 - Allow creating/submitting unsigned transactions, too. ([#625](https://github.com/paritytech/subxt/pull/625))
@@ -30,7 +30,6 @@ Notable PRs merged:
 - Specialize metadata errors ([#633](https://github.com/paritytech/subxt/pull/633))
 - Simplify the TxPayload trait a little ([#638](https://github.com/paritytech/subxt/pull/638))
 - Remove unnecessary `async` ([#645](https://github.com/paritytech/subxt/pull/645))
-- Store type name of a field in event metadata ([#654](https://github.com/paritytech/subxt/pull/654))
 - Use 'sp_core::Hxxx' for all hash types ([#623](https://github.com/paritytech/subxt/pull/623))
 
 ### Fixed
