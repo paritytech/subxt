@@ -456,45 +456,6 @@ fn generate_array_field() {
 }
 
 #[test]
-fn generate_array_field_with_custom_prefix() {
-    #[allow(unused)]
-    #[derive(TypeInfo)]
-    struct S {
-        a: [u8; 32],
-    }
-
-    let mut registry = Registry::new();
-    registry.register_type(&meta_type::<S>());
-    let portable_types: PortableRegistry = registry.into();
-
-    let type_gen = TypeGenerator::new(
-        &portable_types,
-        "root",
-        Default::default(),
-        Default::default(),
-    );
-    let types = type_gen.generate_types_mod(&"::foo".into());
-    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
-
-    assert_eq!(
-        tests_mod
-            .into_token_stream()
-            .to_string()
-            .replace(":: subxt", ":: foo"),
-        quote! {
-            pub mod tests {
-                use super::root;
-                #[derive(::foo::ext::codec::Decode, ::foo::ext::codec::Encode, Debug)]
-                pub struct S {
-                    pub a: [::core::primitive::u8; 32usize],
-                }
-            }
-        }
-        .to_string()
-    )
-}
-
-#[test]
 fn option_fields() {
     #[allow(unused)]
     #[derive(TypeInfo)]
