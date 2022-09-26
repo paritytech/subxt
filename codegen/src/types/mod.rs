@@ -64,7 +64,7 @@ pub struct TypeGenerator<'a> {
     type_substitutes: HashMap<String, syn::TypePath>,
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
-    /// TODO
+    /// The `subxt` crate access path in the generated code.
     crate_path: CratePath,
 }
 
