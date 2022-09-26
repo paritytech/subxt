@@ -54,7 +54,7 @@ fn generate_runtime_interface(crate_path: CratePath) -> String {
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let derives = DerivesRegistry::default();
+    let derives = DerivesRegistry::new(&crate_path);
     generator
         .generate_runtime(item_mod, derives, crate_path)
         .to_string()

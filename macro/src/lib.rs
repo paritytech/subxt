@@ -134,7 +134,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         Some(crate_path) => crate_path.into(),
         None => subxt_codegen::CratePath::default(),
     };
-    let mut derives_registry = DerivesRegistry::default_with_crate_path(&crate_path);
+    let mut derives_registry = DerivesRegistry::new(&crate_path);
     if let Some(derive_for_all) = args.derive_for_all_types {
         derives_registry.extend_for_all(derive_for_all.iter().cloned());
     }

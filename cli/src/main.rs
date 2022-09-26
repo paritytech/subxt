@@ -318,7 +318,8 @@ fn codegen<I: Input>(
         .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let mut derives = DerivesRegistry::default();
+    let crate_path = crate_path.map(Into::into).unwrap_or_default();
+    let mut derives = DerivesRegistry::new(&crate_path);
     derives.extend_for_all(p.into_iter());
 
     let runtime_api = generator.generate_runtime(item_mod, derives, crate_path.into());

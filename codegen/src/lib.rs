@@ -32,7 +32,7 @@
 //!     pub mod api {}
 //! );
 //! // Default module derivatives.
-//! let mut derives = DerivesRegistry::default();
+//! let mut derives = DerivesRegistry::new(&CratePath::default());
 //! // Generate the Runtime API.
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
 //! let runtime_api = generator.generate_runtime(item_mod, derives, CratePath::default());

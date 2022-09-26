@@ -14,13 +14,24 @@ use std::collections::{
     HashSet,
 };
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct DerivesRegistry {
     default_derives: Derives,
     specific_type_derives: HashMap<syn::TypePath, Derives>,
 }
 
 impl DerivesRegistry {
+    /// Creates a new `DeviceRegistry` with the supplied `crate_path`.
+    ///
+    /// The `crate_path` denotes the `subxt` crate access path in the
+    /// generated code.
+    pub fn new(crate_path: &CratePath) -> Self {
+        Self {
+            default_derives: Derives::new(crate_path),
+            specific_type_derives: Default::default(),
+        }
+    }
+
     /// Insert derives to be applied to all generated types.
     pub fn extend_for_all(&mut self, derives: impl IntoIterator<Item = syn::Path>) {
         self.default_derives.derives.extend(derives)
@@ -36,7 +47,7 @@ impl DerivesRegistry {
         let type_derives = self
             .specific_type_derives
             .entry(ty)
-            .or_insert_with(|| Derives::default_with_crate_path(crate_path));
+            .or_insert_with(|| Derives::new(crate_path));
         type_derives.derives.extend(derives)
     }
 
@@ -56,13 +67,6 @@ impl DerivesRegistry {
         }
         Derives { derives: defaults }
     }
-
-    pub fn default_with_crate_path(crate_path: &CratePath) -> Self {
-        Self {
-            default_derives: Derives::default_with_crate_path(crate_path),
-            specific_type_derives: Default::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -78,6 +82,16 @@ impl FromIterator<syn::Path> for Derives {
 }
 
 impl Derives {
+    /// Creates a new instance of `Derives` with the `crate_path` prepended
+    /// to the set of default derives that reside in `subxt`.
+    pub fn new(crate_path: &CratePath) -> Self {
+        let mut derives = HashSet::new();
+        derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
+        derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));
+        derives.insert(syn::parse_quote!(Debug));
+        Self { derives }
+    }
+
     /// Add `#crate_path::ext::codec::CompactAs` to the derives.
     pub fn insert_codec_compact_as(&mut self, crate_path: &CratePath) {
         self.insert(parse_quote!(#crate_path::ext::codec::CompactAs));
@@ -91,22 +105,6 @@ impl Derives {
 
     pub fn insert(&mut self, derive: syn::Path) {
         self.derives.insert(derive);
-    }
-
-    /// Creates a default instance of `Derives` with the `crate_path` prepended
-    /// to the set of default derives that reside in `subxt`.
-    pub fn default_with_crate_path(crate_path: &CratePath) -> Self {
-        let mut derives = HashSet::new();
-        derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
-        derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));
-        derives.insert(syn::parse_quote!(Debug));
-        Self { derives }
-    }
-}
-
-impl Default for Derives {
-    fn default() -> Self {
-        Derives::default_with_crate_path(&CratePath::default())
     }
 }
 
