@@ -367,11 +367,11 @@ impl Module {
     }
 }
 
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct CratePath(syn::Path);
 
 impl CratePath {
-    /// Crate a new `CratePath` from a `syn::Path`.
+    /// Create a new `CratePath` from a `syn::Path`.
     pub fn new(path: syn::Path) -> Self {
         Self(path)
     }

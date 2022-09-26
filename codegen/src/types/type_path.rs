@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::CratePath;
+
 use proc_macro2::{
     Ident,
     TokenStream,
