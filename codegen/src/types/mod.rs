@@ -88,7 +88,7 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Generate a module containing all types defined in the supplied type registry.
-    pub fn generate_types_mod(&self, crate_path: &CratePath) -> Module {
+    pub fn generate_types_mod(&self) -> Module {
         let mut root_mod =
             Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
@@ -103,7 +103,6 @@ impl<'a> TypeGenerator<'a> {
                 ty.ty().path().namespace().to_vec(),
                 &self.types_mod_ident,
                 &mut root_mod,
-                crate_path,
             )
         }
 
@@ -117,7 +116,6 @@ impl<'a> TypeGenerator<'a> {
         path: Vec<String>,
         root_mod_ident: &Ident,
         module: &mut Module,
-        crate_path: &CratePath,
     ) {
         let joined_path = path.join("::");
         if self.type_substitutes.contains_key(&joined_path) {
@@ -135,17 +133,10 @@ impl<'a> TypeGenerator<'a> {
         if path.len() == 1 {
             child_mod.types.insert(
                 ty.path().clone(),
-                TypeDefGen::from_type(ty, self, crate_path),
+                TypeDefGen::from_type(ty, self, &self.crate_path),
             );
         } else {
-            self.insert_type(
-                ty,
-                id,
-                path[1..].to_vec(),
-                root_mod_ident,
-                child_mod,
-                crate_path,
-            )
+            self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
         }
     }
 

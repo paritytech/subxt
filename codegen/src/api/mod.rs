@@ -166,7 +166,7 @@ impl RuntimeGenerator {
             derives.clone(),
             crate_path.clone(),
         );
-        let types_mod = type_gen.generate_types_mod(&crate_path);
+        let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
             .metadata

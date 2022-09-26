@@ -46,7 +46,7 @@ fn generate_struct_with_primitives() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -93,7 +93,7 @@ fn generate_struct_with_a_struct_field() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -139,7 +139,7 @@ fn generate_tuple_struct() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -222,7 +222,7 @@ fn derive_compact_as_for_uint_wrapper_structs() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -287,7 +287,7 @@ fn generate_enum() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -346,7 +346,7 @@ fn compact_fields() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -403,7 +403,7 @@ fn compact_generic_parameter() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -445,7 +445,7 @@ fn generate_array_field() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -483,7 +483,7 @@ fn option_fields() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -524,7 +524,7 @@ fn box_fields_struct() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -565,7 +565,7 @@ fn box_fields_enum() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -606,7 +606,7 @@ fn range_fields() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -651,7 +651,7 @@ fn generics() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -700,7 +700,7 @@ fn generics_nested() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -752,7 +752,7 @@ fn generate_bitvec() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -806,7 +806,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -867,7 +867,7 @@ fn modules() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -925,7 +925,7 @@ fn dont_force_struct_names_camel_case() {
         DerivesRegistry::default_with_crate_path(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -967,7 +967,7 @@ fn apply_user_defined_derives_for_all_types() {
         derives,
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&CratePath::default());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -1033,7 +1033,7 @@ fn apply_user_defined_derives_for_specific_types() {
         derives,
         "::subxt_path".into(),
     );
-    let types = type_gen.generate_types_mod(&"::subxt_path".into());
+    let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
