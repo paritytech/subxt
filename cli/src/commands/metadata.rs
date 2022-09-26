@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::{
@@ -17,9 +18,11 @@ use jsonrpsee::{
     http_client::HttpClientBuilder,
     rpc_params,
 };
-use std::io::{ self, Write };
 use scale::Decode;
-use clap::Parser as ClapParser;
+use std::io::{
+    self,
+    Write,
+};
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -42,8 +45,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
 
     match opts.format.as_str() {
         "json" => {
-            let metadata =
-                <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+            let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
             let json = serde_json::to_string_pretty(&metadata)?;
             println!("{}", json);
             Ok(())

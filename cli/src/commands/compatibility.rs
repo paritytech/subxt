@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use clap::Parser as ClapParser;
 use color_eyre::eyre::{
     self,
     WrapErr,
@@ -23,7 +24,6 @@ use subxt_metadata::{
     get_metadata_hash,
     get_pallet_hash,
 };
-use clap::Parser as ClapParser;
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]

@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::client_transport::ws::Uri;
@@ -15,7 +16,6 @@ use std::{
     path::PathBuf,
 };
 use subxt_codegen::DerivesRegistry;
-use clap::Parser as ClapParser;
 
 /// Generate runtime API client code from metadata.
 ///
