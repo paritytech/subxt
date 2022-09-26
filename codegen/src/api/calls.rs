@@ -55,7 +55,6 @@ pub fn generate_calls(
         "Call",
         crate_path,
     );
-    let crate_path = crate_path.syn_path();
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
         .map(|(variant_name, struct_def)| {

@@ -80,7 +80,6 @@ impl FromIterator<syn::Path> for Derives {
 impl Derives {
     /// Add `#crate_path::ext::codec::CompactAs` to the derives.
     pub fn insert_codec_compact_as(&mut self, crate_path: &CratePath) {
-        let crate_path = crate_path.syn_path();
         self.insert(parse_quote!(#crate_path::ext::codec::CompactAs));
     }
 
@@ -97,7 +96,6 @@ impl Derives {
     /// Creates a default instance of `Derives` with the `crate_path` prepended
     /// to the set of default derives that reside in `subxt`.
     pub fn default_with_crate_path(crate_path: &CratePath) -> Self {
-        let crate_path = crate_path.syn_path();
         let mut derives = HashSet::new();
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));

@@ -54,7 +54,6 @@ pub fn generate_constants(
         return quote!()
     }
     let constants = &pallet.constants;
-    let crate_path = crate_path.syn_path();
 
     let constant_fns = constants.iter().map(|constant| {
         let fn_name = format_ident!("{}", constant.name.to_snake_case());

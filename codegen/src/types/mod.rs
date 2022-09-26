@@ -64,6 +64,8 @@ pub struct TypeGenerator<'a> {
     type_substitutes: HashMap<String, syn::TypePath>,
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
+    /// TODO
+    crate_path: CratePath,
 }
 
 impl<'a> TypeGenerator<'a> {
@@ -73,6 +75,7 @@ impl<'a> TypeGenerator<'a> {
         root_mod: &'static str,
         type_substitutes: HashMap<String, syn::TypePath>,
         derives: DerivesRegistry,
+        crate_path: CratePath,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
@@ -80,6 +83,7 @@ impl<'a> TypeGenerator<'a> {
             type_registry,
             type_substitutes,
             derives,
+            crate_path,
         }
     }
 
@@ -290,6 +294,7 @@ impl<'a> TypeGenerator<'a> {
                         parent_type_params,
                     )),
                     is_field,
+                    crate_path: self.crate_path.clone(),
                 }
             }
             TypeDef::BitSequence(bitseq) => {
@@ -304,6 +309,7 @@ impl<'a> TypeGenerator<'a> {
                         false,
                         parent_type_params,
                     )),
+                    crate_path: self.crate_path.clone(),
                 }
             }
         };
@@ -370,18 +376,13 @@ impl Module {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq)]
 pub struct CratePath(syn::Path);
 
 impl CratePath {
     /// Crate a new `CratePath` from a `syn::Path`.
     pub fn new(path: syn::Path) -> Self {
         Self(path)
-    }
-
-    /// Returns the crate path as a `syn::Path`.
-    pub fn syn_path(&self) -> &syn::Path {
-        &self.0
     }
 }
 
@@ -397,14 +398,10 @@ impl From<syn::Path> for CratePath {
     }
 }
 
-impl From<String> for CratePath {
-    fn from(crate_path: String) -> Self {
-        Self(syn::Path::from_string(&crate_path).unwrap_or_else(|err| {
-            panic!(
-                "failed converting {:?} to `syn::Path`: {:?}",
-                crate_path, err
-            );
-        }))
+impl ToTokens for CratePath {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let crate_path = &self.0;
+        tokens.extend(quote!(#crate_path))
     }
 }
 
@@ -416,5 +413,20 @@ impl From<&str> for CratePath {
                 crate_path, err
             );
         }))
+    }
+}
+
+impl From<String> for CratePath {
+    fn from(crate_path: String) -> Self {
+        CratePath::from(crate_path.as_str())
+    }
+}
+
+impl From<Option<String>> for CratePath {
+    fn from(maybe_crate_path: Option<String>) -> Self {
+        match maybe_crate_path {
+            None => CratePath::default(),
+            Some(crate_path) => crate_path.into(),
+        }
     }
 }

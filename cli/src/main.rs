@@ -321,8 +321,7 @@ fn codegen<I: Input>(
     let mut derives = DerivesRegistry::default();
     derives.extend_for_all(p.into_iter());
 
-    let runtime_api =
-        generator.generate_runtime(item_mod, derives, crate_path.map(Into::into));
+    let runtime_api = generator.generate_runtime(item_mod, derives, crate_path.into());
     println!("{}", runtime_api);
     Ok(())
 }

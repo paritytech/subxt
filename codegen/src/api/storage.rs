@@ -76,7 +76,6 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata<PortableForm>,
     crate_path: &CratePath,
 ) -> TokenStream2 {
-    let crate_path = crate_path.syn_path();
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
         StorageEntryType::Map {

@@ -56,7 +56,7 @@ pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
     derives: DerivesRegistry,
-    crate_path: Option<CratePath>,
+    crate_path: CratePath,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -103,18 +103,10 @@ impl RuntimeGenerator {
         &self,
         item_mod: syn::ItemMod,
         derives: DerivesRegistry,
-        crate_path: Option<CratePath>,
+        crate_path: CratePath,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
         let default_derives = derives.default_derives();
-
-        let crate_path = match crate_path {
-            Some(crate_path) => crate_path.syn_path().to_owned(),
-            None => {
-                let path = crate::CratePath::default();
-                path.syn_path().to_owned()
-            }
-        };
 
         // Some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
@@ -172,8 +164,8 @@ impl RuntimeGenerator {
             "runtime_types",
             type_substitutes,
             derives.clone(),
+            crate_path.clone(),
         );
-        let crate_path = CratePath::new(crate_path);
         let types_mod = type_gen.generate_types_mod(&crate_path);
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self

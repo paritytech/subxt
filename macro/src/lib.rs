@@ -146,11 +146,6 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         )
     }
 
-    subxt_codegen::generate_runtime_api(
-        item_mod,
-        &path,
-        derives_registry,
-        Some(crate_path),
-    )
-    .into()
+    subxt_codegen::generate_runtime_api(item_mod, &path, derives_registry, crate_path)
+        .into()
 }

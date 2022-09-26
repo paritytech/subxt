@@ -60,7 +60,6 @@ pub fn generate_events(
         "Event",
         crate_path,
     );
-    let crate_path = crate_path.syn_path();
     let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
         let pallet_name = &pallet.name;
         let event_struct = &struct_def.name;

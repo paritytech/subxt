@@ -76,7 +76,7 @@ impl CompositeDef {
                             | TypeDefPrimitive::U128
                     )
                 ) {
-                    derives.insert_codec_compact_as(&crate_path.clone())
+                    derives.insert_codec_compact_as(crate_path)
                 }
             }
         }
