@@ -391,8 +391,7 @@ impl From<syn::Path> for CratePath {
 
 impl ToTokens for CratePath {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let crate_path = &self.0;
-        tokens.extend(quote!(#crate_path))
+        self.0.to_tokens(tokens)
     }
 }
 
