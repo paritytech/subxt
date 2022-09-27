@@ -19,6 +19,7 @@ use crate::{
         CompositeDefFields,
         TypeGenerator,
     },
+    CratePath,
 };
 use codec::Decode;
 use frame_metadata::{
@@ -55,6 +56,7 @@ pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
     derives: DerivesRegistry,
+    crate_path: CratePath,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -71,7 +73,7 @@ where
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives)
+    generator.generate_runtime(item_mod, derives, crate_path)
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -101,6 +103,7 @@ impl RuntimeGenerator {
         &self,
         item_mod: syn::ItemMod,
         derives: DerivesRegistry,
+        crate_path: CratePath,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
         let default_derives = derives.default_derives();
@@ -109,41 +112,41 @@ impl RuntimeGenerator {
         let mut type_substitutes = [
             (
                 "bitvec::order::Lsb0",
-                parse_quote!(::subxt::ext::bitvec::order::Lsb0),
+                parse_quote!(#crate_path::ext::bitvec::order::Lsb0),
             ),
             (
                 "bitvec::order::Msb0",
-                parse_quote!(::subxt::ext::bitvec::order::Msb0),
+                parse_quote!(#crate_path::ext::bitvec::order::Msb0),
             ),
             (
                 "sp_core::crypto::AccountId32",
-                parse_quote!(::subxt::ext::sp_core::crypto::AccountId32),
+                parse_quote!(#crate_path::ext::sp_core::crypto::AccountId32),
             ),
             (
                 "primitive_types::H160",
-                parse_quote!(::subxt::ext::sp_core::H160),
+                parse_quote!(#crate_path::ext::sp_core::H160),
             ),
             (
                 "primitive_types::H256",
-                parse_quote!(::subxt::ext::sp_core::H256),
+                parse_quote!(#crate_path::ext::sp_core::H256),
             ),
             (
                 "primitive_types::H512",
-                parse_quote!(::subxt::ext::sp_core::H512),
+                parse_quote!(#crate_path::ext::sp_core::H512),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(::subxt::ext::sp_runtime::MultiAddress),
+                parse_quote!(#crate_path::ext::sp_runtime::MultiAddress),
             ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",
-                parse_quote!(::subxt::utils::WrapperKeepOpaque),
+                parse_quote!(#crate_path::utils::WrapperKeepOpaque),
             ),
             // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
             // can cause an issue with generated code that doesn't impl `Ord` by default.
             // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
             // suitable type params) avoids these issues.
-            ("BTreeMap", parse_quote!(::subxt::utils::KeyedVec)),
+            ("BTreeMap", parse_quote!(#crate_path::utils::KeyedVec)),
             ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()
@@ -161,6 +164,7 @@ impl RuntimeGenerator {
             "runtime_types",
             type_substitutes,
             derives.clone(),
+            crate_path.clone(),
         );
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
@@ -190,16 +194,23 @@ impl RuntimeGenerator {
         let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let calls =
-                calls::generate_calls(&self.metadata, &type_gen, pallet, types_mod_ident);
+            let calls = calls::generate_calls(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+                &crate_path,
+            );
 
-            let event = events::generate_events(&type_gen, pallet, types_mod_ident);
+            let event =
+                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path);
 
             let storage_mod = storage::generate_storage(
                 &self.metadata,
                 &type_gen,
                 pallet,
                 types_mod_ident,
+                &crate_path,
             );
 
             let constants_mod = constants::generate_constants(
@@ -207,6 +218,7 @@ impl RuntimeGenerator {
                 &type_gen,
                 pallet,
                 types_mod_ident,
+                &crate_path,
             );
 
             quote! {
@@ -338,6 +350,7 @@ pub fn generate_structs_from_variants<'a, F>(
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
+    crate_path: &CratePath,
 ) -> Vec<(String, CompositeDef)>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
@@ -363,6 +376,7 @@ where
                     Some(parse_quote!(pub)),
                     type_gen,
                     var.docs(),
+                    crate_path,
                 );
                 (var.name().to_string(), struct_def)
             })

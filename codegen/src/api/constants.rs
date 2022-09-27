@@ -2,7 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
+use crate::{
+    types::TypeGenerator,
+    CratePath,
+};
 use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletMetadata,
@@ -44,6 +47,7 @@ pub fn generate_constants(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
+    crate_path: &CratePath,
 ) -> TokenStream2 {
     // Early return if the pallet has no constants.
     if pallet.constants.is_empty() {
@@ -63,8 +67,8 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> ::subxt::constants::StaticConstantAddress<::subxt::metadata::DecodeStaticType<#return_ty>> {
-                ::subxt::constants::StaticConstantAddress::new(
+            pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#crate_path::metadata::DecodeStaticType<#return_ty>> {
+                #crate_path::constants::StaticConstantAddress::new(
                     #pallet_name,
                     #constant_name,
                     [#(#constant_hash,)*]

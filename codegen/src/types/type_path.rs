@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::CratePath;
+
 use proc_macro2::{
     Ident,
     TokenStream,
@@ -96,10 +98,12 @@ pub enum TypePathType {
     Compact {
         inner: Box<TypePath>,
         is_field: bool,
+        crate_path: CratePath,
     },
     BitVec {
         bit_order_type: Box<TypePath>,
         bit_store_type: Box<TypePath>,
+        crate_path: CratePath,
     },
 }
 
@@ -170,6 +174,7 @@ impl TypePathType {
             TypePathType::BitVec {
                 bit_order_type,
                 bit_store_type,
+                crate_path: _,
             } => {
                 bit_order_type.parent_type_params(acc);
                 bit_store_type.parent_type_params(acc);
@@ -222,21 +227,26 @@ impl TypePathType {
                     TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
                 })
             }
-            TypePathType::Compact { inner, is_field } => {
+            TypePathType::Compact {
+                inner,
+                is_field,
+                crate_path,
+            } => {
                 let path = if *is_field {
                     // compact fields can use the inner compact type directly and be annotated with
                     // the `compact` attribute e.g. `#[codec(compact)] my_compact_field: u128`
                     parse_quote! ( #inner )
                 } else {
-                    parse_quote! ( ::subxt::ext::codec::Compact<#inner> )
+                    parse_quote! ( #crate_path::ext::codec::Compact<#inner> )
                 };
                 syn::Type::Path(path)
             }
             TypePathType::BitVec {
                 bit_order_type,
                 bit_store_type,
+                crate_path,
             } => {
-                let type_path = parse_quote! { ::subxt::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
+                let type_path = parse_quote! { #crate_path::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
                 syn::Type::Path(type_path)
             }
         }
