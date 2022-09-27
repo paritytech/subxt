@@ -33,6 +33,10 @@ pub struct Opts {
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,
+    /// The `subxt` crate access path in the generated code.
+    /// Defaults to `::subxt`.
+    #[clap(long = "crate")]
+    crate_path: Option<String>,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
@@ -44,7 +48,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         let mut file = fs::File::open(file)?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
-        codegen(&mut &bytes[..], opts.derives)?;
+        codegen(&mut &bytes[..], opts.derives, opts.crate_path)?;
         return Ok(())
     }
 
@@ -54,13 +58,14 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             .expect("default url is valid")
     });
     let (_, bytes) = super::metadata::fetch_metadata(&url).await?;
-    codegen(&mut &bytes[..], opts.derives)?;
+    codegen(&mut &bytes[..], opts.derives, opts.crate_path)?;
     Ok(())
 }
 
 fn codegen<I: Input>(
     encoded: &mut I,
     raw_derives: Vec<String>,
+    crate_path: Option<String>,
 ) -> color_eyre::Result<()> {
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
     let generator = subxt_codegen::RuntimeGenerator::new(metadata);
@@ -72,10 +77,12 @@ fn codegen<I: Input>(
         .iter()
         .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
-    let mut derives = DerivesRegistry::default();
+
+    let crate_path = crate_path.map(Into::into).unwrap_or_default();
+    let mut derives = DerivesRegistry::new(&crate_path);
     derives.extend_for_all(p.into_iter());
 
-    let runtime_api = generator.generate_runtime(item_mod, derives);
+    let runtime_api = generator.generate_runtime(item_mod, derives, crate_path);
     println!("{}", runtime_api);
     Ok(())
 }

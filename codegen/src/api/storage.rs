@@ -2,7 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
+use crate::{
+    types::TypeGenerator,
+    CratePath,
+};
 use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletMetadata,
@@ -37,6 +40,7 @@ pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
+    crate_path: &CratePath,
 ) -> TokenStream2 {
     let storage = if let Some(ref storage) = pallet.storage {
         storage
@@ -47,7 +51,9 @@ pub fn generate_storage(
     let storage_fns: Vec<_> = storage
         .entries
         .iter()
-        .map(|entry| generate_storage_entry_fns(metadata, type_gen, pallet, entry))
+        .map(|entry| {
+            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)
+        })
         .collect();
 
     quote! {
@@ -68,6 +74,7 @@ fn generate_storage_entry_fns(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
+    crate_path: &CratePath,
 ) -> TokenStream2 {
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
@@ -90,7 +97,7 @@ fn generate_storage_entry_fns(
                         StorageHasher::Identity => "Identity",
                     };
                     let hasher = format_ident!("{}", hasher);
-                    quote!( ::subxt::storage::address::StorageHasher::#hasher )
+                    quote!( #crate_path::storage::address::StorageHasher::#hasher )
                 })
                 .collect::<Vec<_>>();
             match key_ty.type_def() {
@@ -114,7 +121,7 @@ fn generate_storage_entry_fns(
                             .into_iter()
                             .zip(&fields)
                             .map(|(hasher, (field_name, _))| {
-                                quote!( ::subxt::storage::address::StorageMapKey::new(#field_name.borrow(), #hasher) )
+                                quote!( #crate_path::storage::address::StorageMapKey::new(#field_name.borrow(), #hasher) )
                             });
                         quote! {
                             vec![ #( #keys ),* ]
@@ -127,7 +134,7 @@ fn generate_storage_entry_fns(
                         let items =
                             fields.iter().map(|(field_name, _)| quote!( #field_name ));
                         quote! {
-                            vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
+                            vec![ #crate_path::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
                         }
                     } else {
                         // If we hit this condition, we don't know how to handle the number of hashes vs fields
@@ -148,7 +155,7 @@ fn generate_storage_entry_fns(
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                        vec![ ::subxt::storage::address::StorageMapKey::new(_0.borrow(), #hasher) ]
+                        vec![ #crate_path::storage::address::StorageMapKey::new(_0.borrow(), #hasher) ]
                     };
                     (fields, key_impl)
                 }
@@ -195,7 +202,7 @@ fn generate_storage_entry_fns(
 
     // Is the entry iterable?
     let is_iterable_type = if is_map_type {
-        quote!(::subxt::storage::address::Yes)
+        quote!(#crate_path::storage::address::Yes)
     } else {
         quote!(())
     };
@@ -207,7 +214,7 @@ fn generate_storage_entry_fns(
 
     // Does the entry have a default value?
     let is_defaultable_type = if has_default_value {
-        quote!(::subxt::storage::address::Yes)
+        quote!(#crate_path::storage::address::Yes)
     } else {
         quote!(())
     };
@@ -220,8 +227,8 @@ fn generate_storage_entry_fns(
             #docs_token
             pub fn #fn_name_root(
                 &self,
-            ) -> ::subxt::storage::address::StaticStorageAddress::<::subxt::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
-                ::subxt::storage::address::StaticStorageAddress::new(
+            ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
+                #crate_path::storage::address::StaticStorageAddress::new(
                     #pallet_name,
                     #storage_name,
                     Vec::new(),
@@ -239,8 +246,8 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-        ) -> ::subxt::storage::address::StaticStorageAddress::<::subxt::metadata::DecodeStaticType<#storage_entry_value_ty>, ::subxt::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
-            ::subxt::storage::address::StaticStorageAddress::new(
+        ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, #crate_path::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
+            #crate_path::storage::address::StaticStorageAddress::new(
                 #pallet_name,
                 #storage_name,
                 #key_impl,
