@@ -16,11 +16,7 @@ pub use event_subscription::{
     EventSubscription,
     FinalizedEventSub,
 };
-pub use events_client::{
-    // Exposed only for testing:
-    subscribe_to_block_headers_filling_in_gaps,
-    EventsClient,
-};
+pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,
     Events,
