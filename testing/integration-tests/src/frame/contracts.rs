@@ -61,6 +61,7 @@ impl ContractsTestContext {
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
+                proof_size: 0,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code,
@@ -105,6 +106,7 @@ impl ContractsTestContext {
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
+                proof_size: 0,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code_hash,
@@ -139,6 +141,7 @@ impl ContractsTestContext {
             0, // value
             Weight {
                 ref_time: 500_000_000,
+                proof_size: 0,
             }, // gas_limit
             None, // storage_deposit_limit
             input_data,
