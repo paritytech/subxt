@@ -28,7 +28,7 @@ use std::{
 /// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
 /// without getting into issues with non-object-safe methods or no `async` in traits.
 #[derive(Clone)]
-pub struct RpcClient(Arc<dyn RpcClientT>);
+pub struct RpcClient(pub Arc<dyn RpcClientT>);
 
 impl RpcClient {
     pub(crate) fn new<R: RpcClientT>(client: R) -> Self {
