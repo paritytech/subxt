@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
+    blocks::subscribe_to_block_headers_filling_in_gaps,
     client::OnlineClientT,
     error::Error,
     events::{
@@ -11,7 +12,6 @@ use crate::{
         Events,
         FinalizedEventSub,
     },
-    rpc::Rpc,
     Config,
 };
 use derivative::Derivative;
@@ -176,7 +176,7 @@ where
     let sub = client.rpc().subscribe_finalized_blocks().await?;
 
     // Fill in any gaps between the block above and the finalized blocks reported.
-    let block_subscription = Rpc::subscribe_to_block_headers_filling_in_gaps(
+    let block_subscription = subscribe_to_block_headers_filling_in_gaps(
         client.rpc().clone(),
         last_finalized_block_number,
         sub,
