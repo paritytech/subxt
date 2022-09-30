@@ -16,7 +16,6 @@ use futures::{
     StreamExt,
 };
 use sp_runtime::traits::Header;
-use std::future::Future;
 
 /// A client for working with blocks.
 #[derive(Derivative)]
@@ -65,12 +64,9 @@ where
     /// ```
     pub async fn subscribe_finalized_headers(
         &self,
-    ) -> impl Future<
-        Output = Result<impl Stream<Item = Result<T::Header, Error>> + Send + '_, Error>,
-    > + Send
-           + 'static {
-        let client = self.client.clone();
-        async move { subscribe_finalized_headers(client).await }
+    ) -> Result<impl Stream<Item = Result<T::Header, Error>> + Send + 'static, Error>
+    {
+        subscribe_finalized_headers(self.client.clone()).await
     }
 }
 
@@ -98,7 +94,8 @@ where
         client.rpc().clone(),
         last_finalized_block_num,
         sub,
-    ))
+    )
+    .boxed())
 }
 
 /// Note: This is exposed for testing but is not considered stable and may change
