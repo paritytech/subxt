@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
+    blocks::BlocksClient,
     constants::ConstantsClient,
     events::EventsClient,
     rpc::RuntimeVersion,
@@ -42,6 +43,11 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Access constants.
     fn constants(&self) -> ConstantsClient<T, Self> {
         ConstantsClient::new(self.clone())
+    }
+
+    /// Work with blocks.
+    fn blocks(&self) -> BlocksClient<T, Self> {
+        BlocksClient::new(self.clone())
     }
 }
 

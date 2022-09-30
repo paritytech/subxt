@@ -7,6 +7,7 @@ use super::{
     OfflineClientT,
 };
 use crate::{
+    blocks::BlocksClient,
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
@@ -202,6 +203,11 @@ impl<T: Config> OnlineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Work with blocks.
+    pub fn blocks(&self) -> BlocksClient<T, Self> {
+        <Self as OfflineClientT<T>>::blocks(self)
     }
 }
 
