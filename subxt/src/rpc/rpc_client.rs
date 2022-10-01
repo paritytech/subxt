@@ -31,8 +31,8 @@ use std::{
 pub struct RpcClient(pub Arc<dyn RpcClientT>);
 
 impl RpcClient {
-    pub(crate) fn new<R: RpcClientT>(client: R) -> Self {
-        RpcClient(Arc::new(client))
+    pub(crate) fn new<R: RpcClientT>(client: Arc<R>) -> Self {
+        RpcClient(client)
     }
 
     /// Make an RPC request, given a method name and some parameters.
