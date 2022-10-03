@@ -29,13 +29,13 @@ use subxt_metadata::{
 #[derive(Debug, ClapParser)]
 pub struct Opts {
     /// Urls of the substrate nodes to verify for metadata compatibility.
-    #[clap(name = "nodes", long, use_delimiter = true, parse(try_from_str))]
+    #[clap(name = "nodes", long, use_value_delimiter = true, value_parser)]
     nodes: Vec<Uri>,
     /// Check the compatibility of metadata for a particular pallet.
     ///
     /// ### Note
     /// The validation will omit the full metadata check and focus instead on the pallet.
-    #[clap(long, parse(try_from_str))]
+    #[clap(long, value_parser)]
     pallet: Option<String>,
 }
 

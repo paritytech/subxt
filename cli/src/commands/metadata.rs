@@ -31,7 +31,7 @@ pub struct Opts {
     #[clap(
         name = "url",
         long,
-        parse(try_from_str),
+        value_parser,
         default_value = "http://localhost:9933"
     )]
     url: Uri,
