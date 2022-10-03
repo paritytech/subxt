@@ -42,6 +42,8 @@ const CONTRACT: &str = r#"
     )
 "#;
 
+const PROOF_SIZE: u64 = u64::MAX / 2;
+
 impl ContractsTestContext {
     async fn init() -> Self {
         let cxt = test_context().await;
@@ -81,7 +83,7 @@ impl ContractsTestContext {
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
-                proof_size: 0,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code,
@@ -126,7 +128,7 @@ impl ContractsTestContext {
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
-                proof_size: 0,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code_hash,
@@ -161,7 +163,7 @@ impl ContractsTestContext {
             0, // value
             Weight {
                 ref_time: 500_000_000,
-                proof_size: 0,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None, // storage_deposit_limit
             input_data,
