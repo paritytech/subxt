@@ -45,7 +45,10 @@ where
     ///
     /// # Note
     ///
+    /// This does not produce all the blocks from the chain, just the best blocks.
     /// The best block is selected by the consensus algorithm.
+    /// This calls under the hood the `chain_subscribeNewHeads` RPC method, if you need
+    /// a subscription of all the blocks please use the `chain_subscribeAllHeads` method.
     ///
     /// These blocks haven't necessarily been finalised yet. Prefer
     /// [`BlocksClient::subscribe_finalized_headers()`] if that is important.
