@@ -8,7 +8,6 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     events::EventsClient,
-    rpc::Subscription,
     Config,
 };
 use derivative::Derivative;
@@ -40,7 +39,7 @@ pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, Error>>;
 /// A Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and is exposed to be used in codegen.
 #[doc(hidden)]
-pub type EventSub<Item> = Subscription<Item>;
+pub type EventSub<Item> = BoxStream<'static, Result<Item, Error>>;
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
