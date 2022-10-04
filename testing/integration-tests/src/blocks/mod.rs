@@ -84,5 +84,6 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
         last_block_number = Some(block_number);
     }
 
+    assert!(last_block_number.is_some());
     Ok(())
 }
