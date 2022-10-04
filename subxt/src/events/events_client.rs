@@ -92,7 +92,6 @@ where
            + 'static
     where
         Client: Send + Sync + 'static,
-        T: Send + Sync,
     {
         let client = self.client.clone();
         async move { subscribe(client).await }
@@ -110,7 +109,6 @@ where
            + 'static
     where
         Client: Send + Sync + 'static,
-        T: Send + Sync,
     {
         let client = self.client.clone();
         async move { subscribe_finalized(client).await }

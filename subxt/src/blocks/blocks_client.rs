@@ -6,6 +6,7 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     rpc::Rpc,
+    utils::PhantomDataSendSync,
     Config,
 };
 use derivative::Derivative;
@@ -23,7 +24,7 @@ use std::future::Future;
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct BlocksClient<T, Client> {
     client: Client,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomDataSendSync<T>,
 }
 
 impl<T, Client> BlocksClient<T, Client> {
@@ -31,7 +32,7 @@ impl<T, Client> BlocksClient<T, Client> {
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomDataSendSync::new(),
         }
     }
 }
