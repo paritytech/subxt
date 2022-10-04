@@ -74,7 +74,7 @@ impl<T: Config> OnlineClient<T> {
         let client = jsonrpsee_helpers::ws_client(url.as_ref())
             .await
             .map_err(|e| crate::error::RpcError(e.to_string()))?;
-        OnlineClient::from_rpc_client(client).await
+        OnlineClient::from_rpc_client(Arc::new(client)).await
     }
 }
 
@@ -82,7 +82,7 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
     /// implementation to drive the connection.
     pub async fn from_rpc_client<R: RpcClientT>(
-        rpc_client: R,
+        rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::new(rpc_client);
 
