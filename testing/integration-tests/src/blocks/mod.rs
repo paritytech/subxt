@@ -64,7 +64,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 
     // This should spot any gaps in the middle and fill them back in.
     let all_finalized_blocks = subxt::blocks::subscribe_to_block_headers_filling_in_gaps(
-        ctx.client().rpc().clone(),
+        ctx.client(),
         None,
         some_finalized_blocks,
     );

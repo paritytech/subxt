@@ -5,7 +5,6 @@
 use crate::{
     client::OnlineClientT,
     error::Error,
-    rpc::Rpc,
     utils::PhantomDataSendSync,
     Config,
 };
@@ -93,29 +92,28 @@ where
     let sub = client.rpc().subscribe_finalized_blocks().await?;
 
     // Adjust the subscription stream to fill in any missing blocks.
-    Ok(subscribe_to_block_headers_filling_in_gaps(
-        client.rpc().clone(),
-        last_finalized_block_num,
-        sub,
+    Ok(
+        subscribe_to_block_headers_filling_in_gaps(client, last_finalized_block_num, sub)
+            .boxed(),
     )
-    .boxed())
 }
 
 /// Note: This is exposed for testing but is not considered stable and may change
 /// without notice in a patch release.
 #[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
-    client: Rpc<T>,
+pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
+    client: Client,
     mut last_block_num: Option<u64>,
     sub: S,
 ) -> impl Stream<Item = Result<T::Header, Error>> + Send
 where
     T: Config,
+    Client: OnlineClientT<T>,
     S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<Error> + Send + 'static,
 {
     sub.flat_map(move |s| {
-        let rpc = client.clone();
+        let client = client.clone();
 
         // Get the header, or return a stream containing just the error.
         let header = match s {
@@ -133,7 +131,7 @@ where
         // (which we already have the header info for):
         let previous_headers = stream::iter(start_block_num..end_block_num)
             .then(move |n| {
-                let rpc = rpc.clone();
+                let rpc = client.rpc().clone();
                 async move {
                     let hash = rpc.block_hash(Some(n.into())).await?;
                     let header = rpc.header(hash).await?;
