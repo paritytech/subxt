@@ -74,6 +74,16 @@
 //! )]
 //! pub mod polkadot {}
 //! ```
+//!
+//! ### Custom crate path
+//!
+//! In order to specify a custom crate path to be used for the code generation:
+//!
+//! ```ignore
+//! #[subxt::subxt(crate = "crate::path::to::subxt")]
+//! ```
+//!
+//! By default the path `::subxt` is used.
 
 #![deny(unused_crate_dependencies)]
 
@@ -95,6 +105,8 @@ struct RuntimeMetadataArgs {
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(multiple)]
     derive_for_type: Vec<DeriveForType>,
+    #[darling(default, rename = "crate")]
+    crate_path: Option<String>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -118,14 +130,22 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    let mut derives_registry = DerivesRegistry::default();
+    let crate_path = match args.crate_path {
+        Some(crate_path) => crate_path.into(),
+        None => subxt_codegen::CratePath::default(),
+    };
+    let mut derives_registry = DerivesRegistry::new(&crate_path);
     if let Some(derive_for_all) = args.derive_for_all_types {
         derives_registry.extend_for_all(derive_for_all.iter().cloned());
     }
     for derives in &args.derive_for_type {
-        derives_registry
-            .extend_for_type(derives.ty.clone(), derives.derive.iter().cloned())
+        derives_registry.extend_for_type(
+            derives.ty.clone(),
+            derives.derive.iter().cloned(),
+            &crate_path,
+        )
     }
 
-    subxt_codegen::generate_runtime_api(item_mod, &path, derives_registry).into()
+    subxt_codegen::generate_runtime_api(item_mod, &path, derives_registry, crate_path)
+        .into()
 }

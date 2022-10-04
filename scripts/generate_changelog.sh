@@ -61,7 +61,7 @@ function generate_changelog() {
 }
 
 # Get latest release tag.
-tag=$($GIT_BIN describe --match "v[0-9]*" --abbrev=0 origin/master) || log_error 'Failed to obtain the latest release tag'
+tag=$($GIT_BIN describe --tag --match "v[0-9]*" --abbrev=0 origin/master) || log_error 'Failed to obtain the latest release tag'
 log_info "Latest release tag: $tag"
 
 generate_changelog "$tag"

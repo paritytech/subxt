@@ -297,6 +297,40 @@ impl PalletMetadata {
     }
 }
 
+/// Metadata for specific field.
+#[derive(Clone, Debug)]
+pub struct EventFieldMetadata {
+    name: Option<String>,
+    type_name: Option<String>,
+    type_id: u32,
+}
+
+impl EventFieldMetadata {
+    /// Construct a new [`EventFieldMetadata`]
+    pub fn new(name: Option<String>, type_name: Option<String>, type_id: u32) -> Self {
+        EventFieldMetadata {
+            name,
+            type_name,
+            type_id,
+        }
+    }
+
+    /// Get the name of the field.
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_deref()
+    }
+
+    /// Get the type name of the field as it appears in the code
+    pub fn type_name(&self) -> Option<&str> {
+        self.type_name.as_deref()
+    }
+
+    /// Get the id of a type
+    pub fn type_id(&self) -> u32 {
+        self.type_id
+    }
+}
+
 /// Metadata for specific events.
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
@@ -304,7 +338,7 @@ pub struct EventMetadata {
     // behind an Arc to avoid lots of needless clones of it existing.
     pallet: Arc<str>,
     event: String,
-    fields: Vec<(Option<String>, u32)>,
+    fields: Vec<EventFieldMetadata>,
     docs: Vec<String>,
 }
 
@@ -319,8 +353,8 @@ impl EventMetadata {
         &self.event
     }
 
-    /// The names and types of each field in the event.
-    pub fn fields(&self) -> &[(Option<String>, u32)] {
+    /// The names, type names & types of each field in the event.
+    pub fn fields(&self) -> &[EventFieldMetadata] {
         &self.fields
     }
 
@@ -457,7 +491,13 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                             fields: variant
                                 .fields()
                                 .iter()
-                                .map(|f| (f.name().map(|n| n.to_owned()), f.ty().id()))
+                                .map(|f| {
+                                    EventFieldMetadata::new(
+                                        f.name().map(|n| n.to_owned()),
+                                        f.type_name().map(|n| n.to_owned()),
+                                        f.ty().id(),
+                                    )
+                                })
                                 .collect(),
                             docs: variant.docs().to_vec(),
                         },

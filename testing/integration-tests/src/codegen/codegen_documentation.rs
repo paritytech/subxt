@@ -4,6 +4,7 @@
 
 use regex::Regex;
 use subxt_codegen::{
+    CratePath,
     DerivesRegistry,
     RuntimeGenerator,
 };
@@ -42,7 +43,7 @@ fn metadata_docs() -> Vec<String> {
     docs
 }
 
-fn generate_runtime_interface() -> String {
+fn generate_runtime_interface(crate_path: CratePath) -> String {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let bytes = test_runtime::METADATA;
     let metadata: frame_metadata::RuntimeMetadataPrefixed =
@@ -53,14 +54,16 @@ fn generate_runtime_interface() -> String {
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let derives = DerivesRegistry::default();
-    generator.generate_runtime(item_mod, derives).to_string()
+    let derives = DerivesRegistry::new(&crate_path);
+    generator
+        .generate_runtime(item_mod, derives, crate_path)
+        .to_string()
 }
 
 fn interface_docs() -> Vec<String> {
     // Generate the runtime interface from the node's metadata.
     // Note: the API is generated on a single line.
-    let runtime_api = generate_runtime_interface();
+    let runtime_api = generate_runtime_interface(CratePath::default());
 
     // Documentation lines have the following format:
     //    # [ doc = "Upward message is invalid XCM."]

@@ -8,7 +8,7 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
-        runtime_types::frame_support::weights::weight_v2::Weight,
+        runtime_types::sp_weights::weight_v2::Weight,
         system,
     },
     test_context,
@@ -35,6 +35,15 @@ struct ContractsTestContext {
 type Hash = <SubstrateConfig as Config>::Hash;
 type AccountId = <SubstrateConfig as Config>::AccountId;
 
+const CONTRACT: &str = r#"
+    (module
+        (func (export "call"))
+        (func (export "deploy"))
+    )
+"#;
+
+const PROOF_SIZE: u64 = u64::MAX / 2;
+
 impl ContractsTestContext {
     async fn init() -> Self {
         let cxt = test_context().await;
@@ -47,20 +56,34 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
+    async fn upload_code(&self) -> Result<Hash, Error> {
+        let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+        let upload_tx = node_runtime::tx().contracts().upload_code(code, None);
+
+        let events = self
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&upload_tx, &self.signer)
+            .await?
+            .wait_for_finalized_success()
+            .await?;
+
+        let code_stored = events
+            .find_first::<events::CodeStored>()?
+            .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+        Ok(code_stored.code_hash)
+    }
+
     async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
         tracing::info!("instantiate_with_code:");
-        const CONTRACT: &str = r#"
-                (module
-                    (func (export "call"))
-                    (func (export "deploy"))
-                )
-            "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
         let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code,
@@ -105,6 +128,7 @@ impl ContractsTestContext {
             100_000_000_000_000_000, // endowment
             Weight {
                 ref_time: 500_000_000_000,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None,                    // storage_deposit_limit
             code_hash,
@@ -139,6 +163,7 @@ impl ContractsTestContext {
             0, // value
             Weight {
                 ref_time: 500_000_000,
+                proof_size: PROOF_SIZE,
             }, // gas_limit
             None, // storage_deposit_limit
             input_data,
@@ -170,9 +195,9 @@ async fn tx_instantiate_with_code() {
 #[tokio::test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
-    let (code_hash, _) = ctx.instantiate_with_code().await.unwrap();
+    let code_hash = ctx.upload_code().await.unwrap();
 
-    let instantiated = ctx.instantiate(code_hash, vec![], vec![1u8]).await;
+    let instantiated = ctx.instantiate(code_hash, vec![], vec![]).await;
 
     assert!(
         instantiated.is_ok(),
