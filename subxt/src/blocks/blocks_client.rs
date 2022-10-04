@@ -41,7 +41,7 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Subscribe to blocks headers.
+    /// Subscribe to block headers.
     ///
     /// # Note
     ///
