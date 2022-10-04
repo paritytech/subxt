@@ -76,7 +76,10 @@ use sp_runtime::{
     },
     ApplyExtrinsicResult,
 };
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -342,7 +345,7 @@ impl<T: Config> std::ops::Deref for Rpc<T> {
 
 impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
-    pub fn new<R: RpcClientT>(client: R) -> Self {
+    pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         Self {
             client: RpcClient::new(client),
             _marker: PhantomDataSendSync::new(),

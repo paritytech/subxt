@@ -25,10 +25,10 @@ use subxt_codegen::DerivesRegistry;
 #[derive(Debug, ClapParser)]
 pub struct Opts {
     /// The url of the substrate node to query for metadata for codegen.
-    #[clap(name = "url", long, parse(try_from_str))]
+    #[clap(name = "url", long, value_parser)]
     url: Option<Uri>,
     /// The path to the encoded metadata file.
-    #[clap(short, long, parse(from_os_str))]
+    #[clap(short, long, value_parser)]
     file: Option<PathBuf>,
     /// Additional derives
     #[clap(long = "derive")]
