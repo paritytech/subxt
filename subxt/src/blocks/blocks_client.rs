@@ -16,6 +16,7 @@ use futures::{
     StreamExt,
 };
 use sp_runtime::traits::Header;
+use std::future::Future;
 
 /// A client for working with blocks.
 #[derive(Derivative)]
@@ -46,11 +47,13 @@ where
     ///
     /// These blocks haven't necessarily been finalised yet. Prefer
     /// [`BlocksClient::subscribe_finalized_headers()`] if that is important.
-    pub async fn subscribe_headers(
+    pub fn subscribe_headers(
         &self,
-    ) -> Result<impl Stream<Item = Result<T::Header, Error>> + Send + 'static, Error>
-    {
-        self.client.rpc().subscribe_blocks().await
+    ) -> impl Future<Output = Result<impl Stream<Item = Result<T::Header, Error>>, Error>>
+           + Send
+           + 'static {
+        let client = self.client.clone();
+        async move { client.rpc().subscribe_blocks().await }
     }
 
     /// Subscribe to finalized blocks headers and ensure that all missing blocks are filled.
@@ -75,30 +78,41 @@ where
     /// client         | Block A | --- | Block B | --- | Block C |
     ///                                ^^^ filled
     /// ```
-    pub async fn subscribe_finalized_headers(
+    pub fn subscribe_finalized_headers(
         &self,
-    ) -> Result<impl Stream<Item = Result<T::Header, Error>> + Send + 'static, Error>
-    {
-        // Fetch the last finalised block details immediately, so that we'll get
-        // all blocks after this one.
-        let last_finalized_block_hash = self.client.rpc().finalized_head().await?;
-        let last_finalized_block_num = self
-            .client
-            .rpc()
-            .header(Some(last_finalized_block_hash))
-            .await?
-            .map(|h| (*h.number()).into());
-
-        let sub = self.client.rpc().subscribe_finalized_blocks().await?;
-
-        // Adjust the subscription stream to fill in any missing blocks.
-        Ok(subscribe_to_block_headers_filling_in_gaps(
-            self.client.rpc().clone(),
-            last_finalized_block_num,
-            sub,
-        )
-        .boxed())
+    ) -> impl Future<Output = Result<impl Stream<Item = Result<T::Header, Error>>, Error>>
+           + Send
+           + 'static {
+        let client = self.client.clone();
+        async move { subscribe_finalized_headers(client).await }
     }
+}
+
+async fn subscribe_finalized_headers<T, Client>(
+    client: Client,
+) -> Result<impl Stream<Item = Result<T::Header, Error>>, Error>
+where
+    T: Config,
+    Client: OnlineClientT<T>,
+{
+    // Fetch the last finalised block details immediately, so that we'll get
+    // all blocks after this one.
+    let last_finalized_block_hash = client.rpc().finalized_head().await?;
+    let last_finalized_block_num = client
+        .rpc()
+        .header(Some(last_finalized_block_hash))
+        .await?
+        .map(|h| (*h.number()).into());
+
+    let sub = client.rpc().subscribe_finalized_blocks().await?;
+
+    // Adjust the subscription stream to fill in any missing blocks.
+    Ok(subscribe_to_block_headers_filling_in_gaps(
+        client.rpc().clone(),
+        last_finalized_block_num,
+        sub,
+    )
+    .boxed())
 }
 
 /// Note: This is exposed for testing but is not considered stable and may change
