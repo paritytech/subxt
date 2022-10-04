@@ -42,9 +42,11 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Subscribe to block headers.
+    /// Subscribe to new best block headers.
     ///
     /// # Note
+    ///
+    /// The best block is selected by the consensus algorithm.
     ///
     /// These blocks haven't necessarily been finalised yet. Prefer
     /// [`BlocksClient::subscribe_finalized_headers()`] if that is important.
