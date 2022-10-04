@@ -56,27 +56,10 @@ where
         async move { client.rpc().subscribe_blocks().await }
     }
 
-    /// Subscribe to finalized blocks headers and ensure that all missing blocks are filled.
+    /// Subscribe to finalized block headers.
     ///
-    /// The Substrate's RPC does not guarantee that all finalized blocks are provided.
-    /// This function ensures that all missed blocks are fetched and returned in order.
-    ///
-    /// # Note
-    ///
-    /// The following is a possible scenario where Substrate does not generate an event
-    /// for the second block.
-    ///
-    /// ```sh
-    /// substrate      | Block A | --- | Block B | --- | Block C |
-    /// client         | Block A | ---             --- | Block C |
-    /// ```
-    ///
-    /// This function mitigates this by filling the gaps of missing blocks.
-    ///
-    /// ```sh
-    /// substrate      | Block A | --- | Block B | --- | Block C |
-    /// client         | Block A | --- | Block B | --- | Block C |
-    ///                                ^^^ filled
+    /// While the Substrate RPC method does not guarantee that all finalized block headers are
+    /// provided, this function does.
     /// ```
     pub fn subscribe_finalized_headers(
         &self,
