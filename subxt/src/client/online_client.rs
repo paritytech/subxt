@@ -380,9 +380,9 @@ mod jsonrpsee_helpers {
 
     /// Build WEB RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url).await?;
+        let (sender, receiver) = web::connect(url).await.unwrap();
         Ok(ClientBuilder::default()
             .max_notifs_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
+            .build_with_wasm(sender, receiver))
     }
 }
