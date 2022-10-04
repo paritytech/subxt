@@ -17,7 +17,6 @@ pub use event_subscription::{
     FinalizedEventSub,
 };
 pub use events_client::{
-    // Exposed only for testing:
     subscribe_to_block_headers_filling_in_gaps,
     EventsClient,
 };

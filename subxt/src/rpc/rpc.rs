@@ -76,8 +76,10 @@ use sp_runtime::{
     },
     ApplyExtrinsicResult,
 };
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
