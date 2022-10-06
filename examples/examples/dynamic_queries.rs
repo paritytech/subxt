@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 2. Dynamic constant access (the dynamic equivalent to the fetch_constants example).
 
     let constant_address = subxt::dynamic::constant("Balances", "ExistentialDeposit");
-    let existential_deposit = api.constants().at(&constant_address)?;
+    let existential_deposit = api.constants().at(&constant_address)?.to_value()?;
     println!("Existential Deposit: {}", existential_deposit);
 
     // 3. Dynamic storage access
@@ -67,7 +67,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let account = api
         .storage()
         .fetch_or_default(&storage_address, None)
-        .await?;
+        .await?
+        .to_value()?;
     println!("Bob's account details: {account}");
 
     // 4. Dynamic storage iteration (the dynamic equivalent to the fetch_all_accounts example).
@@ -75,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage_address = subxt::dynamic::storage_root("System", "Account");
     let mut iter = api.storage().iter(storage_address, 10, None).await?;
     while let Some((key, account)) = iter.next().await? {
-        println!("{}: {}", hex::encode(key), account);
+        println!("{}: {}", hex::encode(key), account.to_value()?);
     }
 
     Ok(())

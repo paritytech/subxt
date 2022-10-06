@@ -164,11 +164,35 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         .fetch_or_default(&bob_account_addr, None)
         .await?;
 
-    let alice_pre_free = alice_pre.at("data").at("free").unwrap().as_u128().unwrap();
-    let alice_post_free = alice_post.at("data").at("free").unwrap().as_u128().unwrap();
+    let alice_pre_free = alice_pre
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
+    let alice_post_free = alice_post
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
 
-    let bob_pre_free = bob_pre.at("data").at("free").unwrap().as_u128().unwrap();
-    let bob_post_free = bob_post.at("data").at("free").unwrap().as_u128().unwrap();
+    let bob_pre_free = bob_pre
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
+    let bob_post_free = bob_post
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
 
     assert!(alice_pre_free - 10_000 >= alice_post_free);
     assert_eq!(bob_pre_free + 10_000, bob_post_free);
