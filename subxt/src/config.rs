@@ -79,7 +79,7 @@ pub trait Config: 'static {
     type Signature: Verify + Encode + Send + Sync + 'static;
 
     /// Extrinsic type within blocks.
-    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize + Send;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
