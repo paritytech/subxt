@@ -167,6 +167,7 @@ impl quote::ToTokens for TypeDefGen {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum TypeDefGenKind {
     Struct(CompositeDef),

@@ -63,7 +63,7 @@ impl DecodeWithMetadata for DecodedValueThunk {
 
 impl DecodedValueThunk {
     /// Return the SCALE encoded bytes handed back from the node.
-    pub fn to_encoded(self) -> Vec<u8> {
+    pub fn into_encoded(self) -> Vec<u8> {
         self.scale_bytes
     }
     /// Return the SCALE encoded bytes handed back from the node without taking ownership of them.
