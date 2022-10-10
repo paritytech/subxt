@@ -10,6 +10,8 @@ mod codegen;
 mod utils;
 
 #[cfg(test)]
+mod blocks;
+#[cfg(test)]
 mod client;
 #[cfg(test)]
 mod events;

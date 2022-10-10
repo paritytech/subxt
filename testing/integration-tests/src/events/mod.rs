@@ -169,57 +169,6 @@ async fn balance_transfer_subscription() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
-async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    // This function is not publically available to use, but contains
-    // the key logic for filling in missing blocks, so we want to test it.
-    // This is used in `subscribe_finalized` to ensure no block headers are
-    // missed.
-    use subxt::events::subscribe_to_block_headers_filling_in_gaps;
-
-    // Manually subscribe to the next 6 finalized block headers, but deliberately
-    // filter out some in the middle so we get back b _ _ b _ b. This guarantees
-    // that there will be some gaps, even if there aren't any from the subscription.
-    let some_finalized_blocks = api
-        .rpc()
-        .subscribe_finalized_blocks()
-        .await?
-        .enumerate()
-        .take(6)
-        .filter(|(n, _)| {
-            let n = *n;
-            async move { n == 0 || n == 3 || n == 5 }
-        })
-        .map(|(_, h)| h);
-
-    // This should spot any gaps in the middle and fill them back in.
-    let all_finalized_blocks = subscribe_to_block_headers_filling_in_gaps(
-        ctx.client(),
-        None,
-        some_finalized_blocks,
-    );
-    futures::pin_mut!(all_finalized_blocks);
-
-    // Iterate the block headers, making sure we get them all in order.
-    let mut last_block_number = None;
-    while let Some(header) = all_finalized_blocks.next().await {
-        let header = header?;
-
-        use sp_runtime::traits::Header;
-        let block_number: u128 = (*header.number()).into();
-
-        if let Some(last) = last_block_number {
-            assert_eq!(last + 1, block_number);
-        }
-        last_block_number = Some(block_number);
-    }
-
-    Ok(())
-}
-
 // This is just a compile-time check that we can subscribe to events in
 // a context that requires the event subscription/filtering to be Send-able.
 // We test a typical use of EventSubscription and FilterEvents. We don't need
