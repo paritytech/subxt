@@ -49,8 +49,8 @@ sp-runtime = "6.0.0"
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
-# hack
-getrandom = { version = "0.2.7", features = ["js"] }
+[target.wasm32-unknown-unknown.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }
