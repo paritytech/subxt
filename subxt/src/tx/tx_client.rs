@@ -350,6 +350,12 @@ where
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
     }
+
+    /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
+    /// extrinsic bytes.
+    pub fn into_encoded(self) -> Vec<u8> {
+        self.encoded.0
+    }
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>

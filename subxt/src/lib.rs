@@ -135,6 +135,7 @@
 
 pub use subxt_macro::subxt;
 
+pub mod blocks;
 pub mod client;
 pub mod config;
 pub mod constants;
@@ -148,7 +149,7 @@ pub mod tx;
 pub mod utils;
 
 // Expose a few of the most common types at root,
-// but leave most types behind their respoctive modules.
+// but leave most types behind their respective modules.
 pub use crate::{
     client::{
         OfflineClient,

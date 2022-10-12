@@ -14,17 +14,10 @@ use crate::{
     Config,
 };
 use derivative::Derivative;
-use futures::{
-    future::Either,
-    stream,
-    Stream,
-    StreamExt,
-};
 use sp_core::{
     storage::StorageKey,
     twox_128,
 };
-use sp_runtime::traits::Header;
 use std::future::Future;
 
 /// A client for working with events.
@@ -96,7 +89,10 @@ where
     ) -> impl Future<
         Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
     > + Send
-           + 'static {
+           + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
         let client = self.client.clone();
         async move { subscribe(client).await }
     }
@@ -157,8 +153,8 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    let block_subscription = client.rpc().subscribe_blocks().await?;
-    Ok(EventSubscription::new(client, block_subscription))
+    let block_subscription = client.blocks().subscribe_headers().await?;
+    Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
 /// Subscribe to events from finalized blocks.
@@ -169,76 +165,8 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    // fetch the last finalised block details immediately, so that we'll get
-    // events for each block after this one.
-    let last_finalized_block_hash = client.rpc().finalized_head().await?;
-    let last_finalized_block_number = client
-        .rpc()
-        .header(Some(last_finalized_block_hash))
-        .await?
-        .map(|h| (*h.number()).into());
-
-    let sub = client.rpc().subscribe_finalized_blocks().await?;
-
-    // Fill in any gaps between the block above and the finalized blocks reported.
-    let block_subscription = subscribe_to_block_headers_filling_in_gaps(
-        client.clone(),
-        last_finalized_block_number,
-        sub,
-    );
-
+    let block_subscription = client.blocks().subscribe_finalized_headers().await?;
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
-}
-
-/// Note: This is exposed for testing but is not considered stable and may change
-/// without notice in a patch release.
-#[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
-    client: Client,
-    mut last_block_num: Option<u64>,
-    sub: S,
-) -> impl Stream<Item = Result<T::Header, Error>> + Send
-where
-    T: Config,
-    Client: OnlineClientT<T> + Send + Sync,
-    S: Stream<Item = Result<T::Header, E>> + Send,
-    E: Into<Error> + Send + 'static,
-{
-    sub.flat_map(move |s| {
-        let client = client.clone();
-
-        // Get the header, or return a stream containing just the error. Our EventSubscription
-        // stream will return `None` as soon as it hits an error like this.
-        let header = match s {
-            Ok(header) => header,
-            Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
-        };
-
-        // We want all previous details up to, but not including this current block num.
-        let end_block_num = (*header.number()).into();
-
-        // This is one after the last block we returned details for last time.
-        let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
-
-        // Iterate over all of the previous blocks we need headers for, ignoring the current block
-        // (which we already have the header info for):
-        let previous_headers = stream::iter(start_block_num..end_block_num)
-            .then(move |n| {
-                let client = client.clone();
-                async move {
-                    let hash = client.rpc().block_hash(Some(n.into())).await?;
-                    let header = client.rpc().header(hash).await?;
-                    Ok::<_, Error>(header)
-                }
-            })
-            .filter_map(|h| async { h.transpose() });
-
-        // On the next iteration, we'll get details starting just after this end block.
-        last_block_num = Some(end_block_num);
-
-        // Return a combination of any previous headers plus the new header.
-        Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
-    })
 }
 
 // The storage key needed to access events.
