@@ -16,4 +16,4 @@ members = [
 resolver = "2"
 
 [patch.crates-io]
-jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee", branch = "na-async-wasm-feature" }
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee", branch = "master" }

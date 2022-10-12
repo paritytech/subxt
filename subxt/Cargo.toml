@@ -54,6 +54,3 @@ getrandom = { version = "0.2.7", features = ["js"] }
 
 [dev-dependencies]
 tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }
-
-[patch.crates-io]
-jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee", branch = "na-async-wasm-feature" }
