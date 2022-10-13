@@ -5,12 +5,19 @@ edition = "2021"
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = "6.0.0"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate", default-features = false }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
+    "derive",
+    "full",
+    "bit-vec",
+] }
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
-sp-core = "6.0.0"
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate", default-features = false }
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
-jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport"] }
+jsonrpsee = { version = "0.15.1", features = [
+    "async-client",
+    "client-ws-transport",
+] }

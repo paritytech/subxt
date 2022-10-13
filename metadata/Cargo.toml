@@ -12,15 +12,18 @@ homepage = "https://www.parity.io/"
 description = "Command line utilities for checking metadata compatibility between nodes."
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
-frame-metadata = "15.0.0"
-scale-info = "2.0.0"
-sp-core = { version = "6.0.0"  }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
+    "derive",
+    "full",
+] }
+frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/" }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate" }
+scale-info = { version = "2.0.0", features = ["bit-vec"] }
+
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 criterion = "0.4"
-scale-info = { version = "2.0.0", features = ["bit-vec"] }
 
 [lib]
 # Without this, libtest cli opts interfere with criteron benches:

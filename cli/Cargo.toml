@@ -30,12 +30,16 @@ serde_json = "1.0.68"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
-frame-metadata = { version = "15.0.0", features = ["v14", "std"] }
+frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/" }
 # decode bytes into the metadata types
 scale = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 # generate the item mod for codegen
 syn = "1.0.80"
 # communicate with the substrate nodes
-jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "http-client"] }
+jsonrpsee = { version = "0.15.1", features = [
+    "async-client",
+    "client-ws-transport",
+    "http-client",
+] }
 # async runtime
 tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }

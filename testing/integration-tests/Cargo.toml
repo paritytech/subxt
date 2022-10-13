@@ -15,16 +15,20 @@ description = "Subxt integration tests that rely on the Substrate binary"
 default = ["subxt/integration-tests"]
 
 [dev-dependencies]
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate", default-features = false }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate", default-features = false }
 assert_matches = "1.5.0"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = [
+    "derive",
+    "full",
+    "bit-vec",
+] }
 frame-metadata = "15.0.0"
 futures = "0.3.13"
 hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-sp-core = { version = "6.0.0", default-features = false  }
-sp-keyring = "6.0.0"
-sp-runtime = "6.0.0"
 syn = "1.0.0"
 subxt = { version = "0.24.0", path = "../../subxt" }
 subxt-codegen = { version = "0.24.0", path = "../../codegen" }
