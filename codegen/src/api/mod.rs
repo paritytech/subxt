@@ -19,6 +19,10 @@ use crate::{
         CompositeDefFields,
         TypeGenerator,
     },
+    utils::{
+        fetch_metadata_bytes_blocking,
+        Uri,
+    },
     CratePath,
 };
 use codec::Decode;
@@ -50,9 +54,10 @@ use syn::parse_quote;
 /// * `item_mod` - The module declaration for which the API is implemented.
 /// * `path` - The path to the scale encoded metadata of the runtime node.
 /// * `derives` - Provide custom derives for the generated types.
+/// * `crate_path` - Path to the `subxt` crate.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
-pub fn generate_runtime_api<P>(
+pub fn generate_runtime_api_from_path<P>(
     item_mod: syn::ItemMod,
     path: P,
     derives: DerivesRegistry,
@@ -69,6 +74,48 @@ where
     file.read_to_end(&mut bytes)
         .unwrap_or_else(|e| abort_call_site!("Failed to read metadata file: {}", e));
 
+    generate_runtime_api_from_bytes(item_mod, &bytes, derives, crate_path)
+}
+
+/// Generates the API for interacting with a substrate runtime, using metadata
+/// that can be downloaded from a node at the provided URL.
+///
+/// # Arguments
+///
+/// * `item_mod` - The module declaration for which the API is implemented.
+/// * `url` - HTTP/WS URL to the substrate node you'd like to pull metadata from.
+/// * `derives` - Provide custom derives for the generated types.
+/// * `crate_path` - Path to the `subxt` crate.
+///
+/// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
+pub fn generate_runtime_api_from_url(
+    item_mod: syn::ItemMod,
+    url: &Uri,
+    derives: DerivesRegistry,
+    crate_path: CratePath,
+) -> TokenStream2 {
+    let bytes = fetch_metadata_bytes_blocking(url)
+        .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
+
+    generate_runtime_api_from_bytes(item_mod, &bytes, derives, crate_path)
+}
+
+/// Generates the API for interacting with a substrate runtime, using metadata bytes
+///
+/// # Arguments
+///
+/// * `item_mod` - The module declaration for which the API is implemented.
+/// * `url` - HTTP/WS URL to the substrate node you'd like to pull metadata from.
+/// * `derives` - Provide custom derives for the generated types.
+/// * `crate_path` - Path to the `subxt` crate.
+///
+/// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
+pub fn generate_runtime_api_from_bytes(
+    item_mod: syn::ItemMod,
+    bytes: &[u8],
+    derives: DerivesRegistry,
+    crate_path: CratePath,
+) -> TokenStream2 {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 

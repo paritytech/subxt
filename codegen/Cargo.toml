@@ -21,6 +21,9 @@ quote = "1.0.8"
 syn = "1.0.58"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 subxt-metadata = { version = "0.24.0", path = "../metadata" }
+jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "http-client"] }
+hex = "0.4.3"
+tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }

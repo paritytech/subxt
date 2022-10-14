@@ -111,7 +111,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
 }
 
 async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV14> {
-    let (_, bytes) = super::metadata::fetch_metadata(url).await?;
+    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
     if metadata.0 != META_RESERVED {

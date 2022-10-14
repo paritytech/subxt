@@ -45,9 +45,13 @@ mod api;
 mod ir;
 mod types;
 
+pub mod utils;
+
 pub use self::{
     api::{
-        generate_runtime_api,
+        generate_runtime_api_from_bytes,
+        generate_runtime_api_from_path,
+        generate_runtime_api_from_url,
         RuntimeGenerator,
     },
     types::{
