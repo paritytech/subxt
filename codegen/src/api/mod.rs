@@ -78,7 +78,8 @@ where
 }
 
 /// Generates the API for interacting with a substrate runtime, using metadata
-/// that can be downloaded from a node at the provided URL.
+/// that can be downloaded from a node at the provided URL. This function blocks
+/// while retrieving the metadata.
 ///
 /// # Arguments
 ///
@@ -100,7 +101,7 @@ pub fn generate_runtime_api_from_url(
     generate_runtime_api_from_bytes(item_mod, &bytes, derives, crate_path)
 }
 
-/// Generates the API for interacting with a substrate runtime, using metadata bytes
+/// Generates the API for interacting with a substrate runtime, using metadata bytes.
 ///
 /// # Arguments
 ///
@@ -131,8 +132,9 @@ pub struct RuntimeGenerator {
 impl RuntimeGenerator {
     /// Create a new runtime generator from the provided metadata.
     ///
-    /// **Note:** If you have a path to the metadata, prefer to use [generate_runtime_api]
-    /// for generating the runtime API.
+    /// **Note:** If you have the metadata path, URL or bytes to hand, prefer to use
+    /// one of the `generate_runtime_api_from_*` functions for generating the runtime API
+    /// from that.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
             RuntimeMetadata::V14(v14) => Self { metadata: v14 },
