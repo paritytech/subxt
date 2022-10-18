@@ -83,6 +83,8 @@ impl<T: Config> Events<T> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
     /// details. If an error occurs, all subsequent iterations return `None`.
+    // Dev note: The returned iterator is 'static + Send so that we can box it up and make
+    // use of it with our `FilterEvents` stuff.
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Result<EventDetails, Error>> + Send + Sync + 'static {

@@ -52,7 +52,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     // that there will be some gaps, even if there aren't any from the subscription.
     let some_finalized_blocks = api
         .rpc()
-        .subscribe_finalized_blocks()
+        .subscribe_finalized_block_headers()
         .await?
         .enumerate()
         .take(6)

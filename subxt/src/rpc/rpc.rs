@@ -70,10 +70,6 @@ use sp_core::{
     U256,
 };
 use sp_runtime::{
-    generic::{
-        Block,
-        SignedBlock,
-    },
     ApplyExtrinsicResult,
 };
 use std::{
@@ -98,9 +94,40 @@ pub enum NumberOrHex {
     Hex(U256),
 }
 
-/// Alias for the type of a block returned by `chain_getBlock`
-pub type ChainBlock<T> =
-    SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
+/// The response from `chain_getBlock`
+#[derive(Debug, Deserialize)]
+#[serde(bound = "T: Config")]
+pub struct ChainBlockResponse<T: Config> {
+    /// The block itself.
+    pub block: ChainBlock<T>,
+	/// Block justification.
+    pub justifications: Option<sp_runtime::Justifications>
+}
+
+/// Block details in the [`ChainBlockResponse`].
+#[derive(Debug, Deserialize)]
+pub struct ChainBlock<T: Config> {
+	/// The block header.
+    pub header: T::Header,
+	/// The accompanying extrinsics.
+    pub extrinsics: Vec<ChainBlockExtrinsic>,
+}
+
+/// Bytes representing an extrinsic in a [`ChainBlock`].
+#[derive(Debug)]
+pub struct ChainBlockExtrinsic(pub Vec<u8>);
+
+impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
+	fn deserialize<D>(de: D) -> Result<Self, D::Error>
+	where
+		D: ::serde::Deserializer<'a>,
+	{
+		let r = sp_core::bytes::deserialize(de)?;
+		let bytes = Decode::decode(&mut &r[..])
+			.map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
+        Ok(ChainBlockExtrinsic(bytes))
+	}
+}
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -498,7 +525,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, Error> {
+    ) -> Result<Option<ChainBlockResponse<T>>, Error> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -544,7 +571,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -558,7 +585,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
+    pub async fn subscribe_finalized_block_headers(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self

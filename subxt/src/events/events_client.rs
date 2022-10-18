@@ -44,6 +44,12 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain events at some block hash.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve events from older blocks,
+    /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
         block_hash: Option<T::Hash>,

@@ -16,7 +16,6 @@ use codec::{
 use core::fmt::Debug;
 use sp_runtime::traits::{
     AtLeast32Bit,
-    Extrinsic,
     Hash,
     Header,
     MaybeSerializeDeserialize,
@@ -78,9 +77,6 @@ pub trait Config: 'static {
     /// Signature type.
     type Signature: Verify + Encode + Send + Sync + 'static;
 
-    /// Extrinsic type within blocks.
-    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize + Send;
-
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
 }
@@ -104,7 +100,6 @@ impl Config for SubstrateConfig {
     type Header =
         sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
-    type Extrinsic = sp_runtime::OpaqueExtrinsic;
     type ExtrinsicParams = crate::tx::SubstrateExtrinsicParams<Self>;
 }
 
@@ -145,6 +140,5 @@ impl<T: Config, E: crate::tx::ExtrinsicParams<T::Index, T::Hash>> Config
     type Address = T::Address;
     type Header = T::Header;
     type Signature = T::Signature;
-    type Extrinsic = T::Extrinsic;
     type ExtrinsicParams = E;
 }
