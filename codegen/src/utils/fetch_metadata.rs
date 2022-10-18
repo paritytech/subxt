@@ -14,20 +14,21 @@ use jsonrpsee::{
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
 pub fn fetch_metadata_bytes_blocking(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
-    tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(fetch_metadata_bytes(url))
+    tokio_block_on(fetch_metadata_bytes(url))
 }
 
 /// Returns the raw, 0x prefixed metadata hex from the provided URL, blocking the current thread.
 pub fn fetch_metadata_hex_blocking(url: &Uri) -> Result<String, FetchMetadataError> {
+    tokio_block_on(fetch_metadata_hex(url))
+}
+
+// Block on some tokio runtime for sync contexts
+fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
         .unwrap()
-        .block_on(fetch_metadata_hex(url))
+        .block_on(fut)
 }
 
 /// Returns the metadata bytes from the provided URL.
@@ -40,7 +41,7 @@ pub async fn fetch_metadata_bytes(url: &Uri) -> Result<Vec<u8>, FetchMetadataErr
 /// Returns the raw, 0x prefixed metadata hex from the provided URL.
 pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError> {
     let hex_data = match url.scheme_str() {
-        Some("http") => fetch_metadata_http(url).await,
+        Some("http") | Some("https") => fetch_metadata_http(url).await,
         Some("ws") | Some("wss") => fetch_metadata_ws(url).await,
         invalid_scheme => {
             let scheme = invalid_scheme.unwrap_or("no scheme");
@@ -86,7 +87,7 @@ impl std::fmt::Display for FetchMetadataError {
             FetchMetadataError::InvalidScheme(s) => {
                 write!(
                     f,
-                    "'{s}' not supported, supported URl schemes are http, ws or wss."
+                    "'{s}' not supported, supported URI schemes are http, https, ws or wss."
                 )
             }
         }
