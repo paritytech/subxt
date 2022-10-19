@@ -23,7 +23,7 @@ pub use serde_json::value::RawValue;
 ///
 /// # Panics
 ///
-/// Implementations are free to panic if the `RawValue`'s passed to `request_raw` or 
+/// Implementations are free to panic if the `RawValue`'s passed to `request_raw` or
 /// `subscribe_raw` are not JSON arrays. Internally, we ensure that this is always the case.
 pub trait RpcClientT: Send + Sync + 'static {
     /// Make a raw request for which we expect a single response back from. Implementations
