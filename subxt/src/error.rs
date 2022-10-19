@@ -237,7 +237,9 @@ impl DispatchError {
 #[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 pub enum BlockError {
     /// The block
-    #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
+    #[error(
+        "Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)"
+    )]
     BlockHashNotFound(String),
 }
 

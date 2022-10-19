@@ -2,11 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::Block;
 use crate::{
     client::OnlineClientT,
     error::{
+        BlockError,
         Error,
-        BlockError
     },
     utils::PhantomDataSendSync,
     Config,
@@ -20,9 +21,6 @@ use futures::{
 };
 use sp_runtime::traits::Header;
 use std::future::Future;
-use super::{
-    Block
-};
 
 /// A client for working with blocks.
 #[derive(Derivative)]
@@ -51,7 +49,7 @@ where
     /// provided.
     pub fn at(
         &self,
-        block_hash: Option<T::Hash>
+        block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         let client = self.client.clone();
         async move {
@@ -70,7 +68,11 @@ where
 
             let res = match client.rpc().block(Some(block_hash)).await? {
                 Some(block) => block,
-                None => return Err(BlockError::BlockHashNotFound(hex::encode(block_hash)).into())
+                None => {
+                    return Err(
+                        BlockError::BlockHashNotFound(hex::encode(block_hash)).into()
+                    )
+                }
             };
 
             Ok(Block::new(block_hash, res, client))
@@ -83,9 +85,10 @@ where
     /// each block once it is finalized.
     pub fn subscribe_finalized(
         &self,
-    ) -> impl Future<Output = Result<impl Stream<Item = Result<Block<T, Client>, Error>>, Error>>
-        + Send
-        + 'static {
+    ) -> impl Future<
+        Output = Result<impl Stream<Item = Result<Block<T, Client>, Error>>, Error>,
+    > + Send
+           + 'static {
         let this = self.clone();
         async move {
             let client = this.client.clone();
@@ -97,14 +100,20 @@ where
                     async move {
                         let header = match header {
                             Ok(header) => header,
-                            Err(e) => return Err(e)
+                            Err(e) => return Err(e),
                         };
 
                         let block_hash = header.hash();
-                        let block_details = match client.rpc().block(Some(block_hash)).await? {
-                            Some(block) => block,
-                            None => return Err(BlockError::BlockHashNotFound(hex::encode(block_hash)).into())
-                        };
+                        let block_details =
+                            match client.rpc().block(Some(block_hash)).await? {
+                                Some(block) => block,
+                                None => {
+                                    return Err(BlockError::BlockHashNotFound(
+                                        hex::encode(block_hash),
+                                    )
+                                    .into())
+                                }
+                            };
 
                         Ok(Block::new(block_hash, block_details, client))
                     }
@@ -156,10 +165,12 @@ where
             let sub = client.rpc().subscribe_finalized_block_headers().await?;
 
             // Adjust the subscription stream to fill in any missing blocks.
-            Ok(
-                subscribe_to_block_headers_filling_in_gaps(client, last_finalized_block_num, sub)
-                    .boxed(),
+            Ok(subscribe_to_block_headers_filling_in_gaps(
+                client,
+                last_finalized_block_num,
+                sub,
             )
+            .boxed())
         }
     }
 }

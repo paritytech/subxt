@@ -69,9 +69,7 @@ use sp_core::{
     Bytes,
     U256,
 };
-use sp_runtime::{
-    ApplyExtrinsicResult,
-};
+use sp_runtime::ApplyExtrinsicResult;
 use std::{
     collections::HashMap,
     sync::Arc,
@@ -100,16 +98,16 @@ pub enum NumberOrHex {
 pub struct ChainBlockResponse<T: Config> {
     /// The block itself.
     pub block: ChainBlock<T>,
-	/// Block justification.
-    pub justifications: Option<sp_runtime::Justifications>
+    /// Block justification.
+    pub justifications: Option<sp_runtime::Justifications>,
 }
 
 /// Block details in the [`ChainBlockResponse`].
 #[derive(Debug, Deserialize)]
 pub struct ChainBlock<T: Config> {
-	/// The block header.
+    /// The block header.
     pub header: T::Header,
-	/// The accompanying extrinsics.
+    /// The accompanying extrinsics.
     pub extrinsics: Vec<ChainBlockExtrinsic>,
 }
 
@@ -118,15 +116,15 @@ pub struct ChainBlock<T: Config> {
 pub struct ChainBlockExtrinsic(pub Vec<u8>);
 
 impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
-	fn deserialize<D>(de: D) -> Result<Self, D::Error>
-	where
-		D: ::serde::Deserializer<'a>,
-	{
-		let r = sp_core::bytes::deserialize(de)?;
-		let bytes = Decode::decode(&mut &r[..])
-			.map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
+    fn deserialize<D>(de: D) -> Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'a>,
+    {
+        let r = sp_core::bytes::deserialize(de)?;
+        let bytes = Decode::decode(&mut &r[..])
+            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
         Ok(ChainBlockExtrinsic(bytes))
-	}
+    }
 }
 
 /// Wrapper for NumberOrHex to allow custom From impls
@@ -571,7 +569,9 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_block_headers(
+        &self,
+    ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(

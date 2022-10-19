@@ -3,42 +3,40 @@
 // see LICENSE for license details.
 
 use crate::{
-    Config,
-    error::{
-        Error,
-    },
     client::{
         OfflineClientT,
         OnlineClientT,
     },
-    rpc::{
-        ChainBlockResponse,
-    },
-    events
+    error::Error,
+    events,
+    rpc::ChainBlockResponse,
+    Config,
 };
 use derivative::Derivative;
+use futures::lock::Mutex as AsyncMutex;
 use sp_runtime::traits::Hash;
+use std::sync::Arc;
 
 /// A representation of a block from which you can obtain details
 /// including the block header, extrinsics and events for the block.
 pub struct Block<T: Config, C> {
     hash: T::Hash,
     details: ChainBlockResponse<T>,
+    cached_events: Arc<AsyncMutex<Option<events::Events<T>>>>,
     client: C,
 }
 
-impl <T, C> Block<T, C>
+impl<T, C> Block<T, C>
 where
     T: Config,
-    C: OfflineClientT<T>
+    C: OfflineClientT<T>,
 {
-    pub (crate) fn new(
-        hash: T::Hash,
-        details: ChainBlockResponse<T>,
-        client: C
-    ) -> Self {
+    pub(crate) fn new(hash: T::Hash, details: ChainBlockResponse<T>, client: C) -> Self {
         Block {
-            hash, details, client
+            hash,
+            details,
+            cached_events: Default::default(),
+            client,
         }
     }
 
@@ -53,16 +51,22 @@ where
     }
 
     /// Returns an iterator over the extrinsics in the block.
-    pub fn extrinsics<'a>(&'a self) -> impl Iterator<Item = Extrinsic<'a, T, C>> {
-        self.details.block.extrinsics.iter().enumerate().map(|(idx, e)| {
-            Extrinsic {
-                index: idx as u32,
-                bytes: &e.0,
-                client: self.client.clone(),
-                block_hash: self.hash,
-                _marker: std::marker::PhantomData
-            }
-        })
+    pub fn extrinsics(&self) -> impl Iterator<Item = Extrinsic<'_, T, C>> {
+        self.details
+            .block
+            .extrinsics
+            .iter()
+            .enumerate()
+            .map(|(idx, e)| {
+                Extrinsic {
+                    index: idx as u32,
+                    bytes: &e.0,
+                    client: self.client.clone(),
+                    block_hash: self.hash,
+                    cached_events: self.cached_events.clone(),
+                    _marker: std::marker::PhantomData,
+                }
+            })
     }
 }
 
@@ -72,13 +76,14 @@ pub struct Extrinsic<'a, T: Config, C> {
     bytes: &'a [u8],
     client: C,
     block_hash: T::Hash,
-    _marker: std::marker::PhantomData<T>
+    cached_events: Arc<AsyncMutex<Option<events::Events<T>>>>,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl <'a, T, C> Extrinsic<'a, T, C>
+impl<'a, T, C> Extrinsic<'a, T, C>
 where
     T: Config,
-    C: OfflineClientT<T>
+    C: OfflineClientT<T>,
 {
     /// The index of the extrinsic in the block.
     pub fn index(&self) -> u32 {
@@ -87,22 +92,31 @@ where
 
     /// The bytes of the extrinsic.
     pub fn bytes(&self) -> &'a [u8] {
-        &self.bytes
+        self.bytes
     }
 }
 
-impl <'a, T, C> Extrinsic<'a, T, C>
+impl<'a, T, C> Extrinsic<'a, T, C>
 where
     T: Config,
-    C: OnlineClientT<T>
+    C: OnlineClientT<T>,
 {
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
-        let ext_hash = T::Hashing::hash_of(&self.bytes);
-        let events = events::EventsClient::new(self.client.clone())
-            .at(Some(self.block_hash))
-            .await?;
+        // Acquire lock on the events cache. We either get back our events or we fetch and set them
+        // before unlocking, so only one fetch call should ever be made. We do this because the
+        // same events can be shared across all extrinsics in the block.
+        let lock = self.cached_events.lock().await;
+        let events = match &*lock {
+            Some(events) => events.clone(),
+            None => {
+                events::EventsClient::new(self.client.clone())
+                    .at(Some(self.block_hash))
+                    .await?
+            }
+        };
 
+        let ext_hash = T::Hashing::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
 }
@@ -119,16 +133,16 @@ pub struct ExtrinsicEvents<T: Config> {
     // The index of the extrinsic:
     idx: u32,
     // All of the events in the block:
-    events: events::Events<T>
+    events: events::Events<T>,
 }
 
 impl<T: Config> ExtrinsicEvents<T> {
-    pub (crate) fn new(
-        ext_hash: T::Hash,
-        idx: u32,
-        events: events::Events<T>
-    ) -> Self {
-        Self { ext_hash, idx, events }
+    pub(crate) fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
+        Self {
+            ext_hash,
+            idx,
+            events,
+        }
     }
 
     /// Return the hash of the block that the extrinsic is in.
@@ -162,7 +176,9 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
+    pub fn find<Ev: events::StaticEvent>(
+        &self,
+    ) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
         self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()

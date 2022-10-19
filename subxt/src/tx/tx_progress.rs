@@ -14,9 +14,7 @@ use crate::{
         RpcError,
         TransactionError,
     },
-    events::{
-        EventsClient,
-    },
+    events::EventsClient,
     rpc::{
         Subscription,
         SubstrateTxStatus,
@@ -142,7 +140,9 @@ where
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
     /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    pub async fn wait_for_finalized_success(
+        self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
@@ -338,7 +338,9 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.

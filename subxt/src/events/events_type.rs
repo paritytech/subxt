@@ -25,7 +25,7 @@ use std::sync::Arc;
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct Events<T: Config> {
     metadata: Metadata,
     block_hash: T::Hash,
