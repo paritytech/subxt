@@ -21,10 +21,10 @@ pub use serde_json::value::RawValue;
 /// generics), and want to avoid any unnecessary allocations in serializing/deserializing
 /// parameters.
 ///
-/// # Note
+/// # Panics
 ///
-/// Implementations are free to panic if the provided parameters are not a valid
-/// JSON Array.
+/// Implementations are free to panic if the `RawValue`'s passed to `request_raw` or 
+/// `subscribe_raw` are not JSON arrays. Internally, we ensure that this is always the case.
 pub trait RpcClientT: Send + Sync + 'static {
     /// Make a raw request for which we expect a single response back from. Implementations
     /// should expect that the params will either be `None`, or be an already-serialized
