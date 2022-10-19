@@ -89,10 +89,18 @@
 
 extern crate proc_macro;
 
+use std::str::FromStr;
+
 use darling::FromMeta;
 use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
-use subxt_codegen::DerivesRegistry;
+use proc_macro_error::{
+    abort_call_site,
+    proc_macro_error,
+};
+use subxt_codegen::{
+    utils::Uri,
+    DerivesRegistry,
+};
 use syn::{
     parse_macro_input,
     punctuated::Punctuated,
@@ -100,7 +108,10 @@ use syn::{
 
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
-    runtime_metadata_path: String,
+    #[darling(default)]
+    runtime_metadata_path: Option<String>,
+    #[darling(default)]
+    runtime_metadata_url: Option<String>,
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(multiple)]
@@ -126,10 +137,6 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         Err(e) => return TokenStream::from(e.write_errors()),
     };
 
-    let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
-    let root_path = std::path::Path::new(&root);
-    let path = root_path.join(args.runtime_metadata_path);
-
     let crate_path = match args.crate_path {
         Some(crate_path) => crate_path.into(),
         None => subxt_codegen::CratePath::default(),
@@ -146,6 +153,36 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         )
     }
 
-    subxt_codegen::generate_runtime_api(item_mod, &path, derives_registry, crate_path)
-        .into()
+    match (args.runtime_metadata_path, args.runtime_metadata_url) {
+        (Some(rest_of_path), None) => {
+            let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
+            let root_path = std::path::Path::new(&root);
+            let path = root_path.join(rest_of_path);
+            subxt_codegen::generate_runtime_api_from_path(
+                item_mod,
+                &path,
+                derives_registry,
+                crate_path,
+            )
+            .into()
+        }
+        (None, Some(url_string)) => {
+            let url = Uri::from_str(&url_string).unwrap_or_else(|_| {
+                abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
+            });
+            subxt_codegen::generate_runtime_api_from_url(
+                item_mod,
+                &url,
+                derives_registry,
+                crate_path,
+            )
+            .into()
+        }
+        (None, None) => {
+            abort_call_site!("One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided")
+        }
+        (Some(_), Some(_)) => {
+            abort_call_site!("Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided")
+        }
+    }
 }
