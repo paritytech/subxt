@@ -53,7 +53,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let pallet_name = evt.pallet_name();
                 let event_name = evt.variant_name();
-                let event_idx = evt.index();
 
                 println!("        {pallet_name}_{event_name}");
             }
