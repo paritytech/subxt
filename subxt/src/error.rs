@@ -243,6 +243,14 @@ pub enum BlockError {
     BlockHashNotFound(String),
 }
 
+impl BlockError {
+    /// Produce an error that a block with the given hash cannot be found.
+    pub fn block_hash_not_found(hash: impl AsRef<[u8]>) -> BlockError {
+        let hash = format!("0x{}", hex::encode(hash));
+        BlockError::BlockHashNotFound(hash)
+    }
+}
+
 /// Transaction error.
 #[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 pub enum TransactionError {

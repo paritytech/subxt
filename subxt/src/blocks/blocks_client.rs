@@ -68,11 +68,7 @@ where
 
             let res = match client.rpc().block(Some(block_hash)).await? {
                 Some(block) => block,
-                None => {
-                    return Err(
-                        BlockError::BlockHashNotFound(hex::encode(block_hash)).into()
-                    )
-                }
+                None => return Err(BlockError::block_hash_not_found(block_hash).into()),
             };
 
             Ok(Block::new(block_hash, res, client))
@@ -108,8 +104,8 @@ where
                             match client.rpc().block(Some(block_hash)).await? {
                                 Some(block) => block,
                                 None => {
-                                    return Err(BlockError::BlockHashNotFound(
-                                        hex::encode(block_hash),
+                                    return Err(BlockError::block_hash_not_found(
+                                        block_hash,
                                     )
                                     .into())
                                 }
