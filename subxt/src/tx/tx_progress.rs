@@ -107,7 +107,7 @@ where
                 _ => continue,
             }
         }
-        Err(RpcError("RPC subscription dropped".to_string()).into())
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
     /// Wait for the transaction to be finalized, and return a [`TxInBlock`]
@@ -133,7 +133,7 @@ where
                 _ => continue,
             }
         }
-        Err(RpcError("RPC subscription dropped".to_string()).into())
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
     /// Wait for the transaction to be finalized, and for the transaction events to indicate

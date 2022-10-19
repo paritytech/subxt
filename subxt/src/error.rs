@@ -102,10 +102,17 @@ impl From<DispatchError> for Error {
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,
-/// the error is any custom string.
+/// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
 #[error("RPC error: {0}")]
-pub struct RpcError(pub String);
+pub enum RpcError {
+    // Dev note: We need the error to be safely sent between threads
+    // for `subscribe_to_block_headers_filling_in_gaps` and friends.
+    /// Error related to the RPC client.
+    ClientError(Box<dyn std::error::Error + Send + 'static>),
+    /// Custom error.
+    Custom(String),
+}
 
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep

@@ -35,7 +35,7 @@ impl RpcClientT for Client {
             let params = prep_params_for_jsonrpsee(params)?;
             let res = ClientT::request(self, method, Some(params))
                 .await
-                .map_err(|e| RpcError(e.to_string()))?;
+                .map_err(|e| RpcError::ClientError(Box::new(e)))?;
             Ok(res)
         })
     }
@@ -55,8 +55,8 @@ impl RpcClientT for Client {
                 unsub,
             )
             .await
-            .map_err(|e| RpcError(e.to_string()))?
-            .map_err(|e| RpcError(e.to_string()))
+            .map_err(|e| RpcError::ClientError(Box::new(e)))?
+            .map_err(|e| RpcError::ClientError(Box::new(e)))
             .boxed();
             Ok(sub)
         })
@@ -77,7 +77,7 @@ fn prep_params_for_jsonrpsee(
     let arr = match val {
         Value::Array(arr) => Ok(arr),
         _ => {
-            Err(RpcError(format!(
+            Err(RpcError::Custom(format!(
                 "RPC Params are expected to be an array but got {params}"
             )))
         }
