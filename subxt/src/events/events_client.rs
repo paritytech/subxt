@@ -160,7 +160,7 @@ where
     Client: OnlineClientT<T>,
 {
     let block_subscription = client.blocks().subscribe_headers().await?;
-    Ok(EventSubscription::new(client, Box::pin(block_subscription)))
+    Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
@@ -172,7 +172,7 @@ where
     Client: OnlineClientT<T>,
 {
     let block_subscription = client.blocks().subscribe_finalized_headers().await?;
-    Ok(EventSubscription::new(client, Box::pin(block_subscription)))
+    Ok(EventSubscription::new(client, block_subscription))
 }
 
 // The storage key needed to access events.

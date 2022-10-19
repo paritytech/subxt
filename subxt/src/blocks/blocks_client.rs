@@ -20,7 +20,13 @@ use futures::{
     StreamExt,
 };
 use sp_runtime::traits::Header;
-use std::future::Future;
+use std::{
+    future::Future,
+    pin::Pin,
+};
+
+type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
+type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
 
 /// A client for working with blocks.
 #[derive(Derivative)]
@@ -81,10 +87,10 @@ where
     /// each block once it is finalized.
     pub fn subscribe_finalized(
         &self,
-    ) -> impl Future<
-        Output = Result<impl Stream<Item = Result<Block<T, Client>, Error>>, Error>,
-    > + Send
-           + 'static {
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
         let this = self.clone();
         async move {
             let client = this.client.clone();
@@ -114,7 +120,7 @@ where
                         Ok(Block::new(block_hash, block_details, client))
                     }
                 });
-            Ok(sub)
+            BlockStreamRes::Ok(Box::pin(sub))
         }
     }
 
@@ -131,11 +137,13 @@ where
     /// [`BlocksClient::subscribe_finalized_headers()`] if that is important.
     pub fn subscribe_headers(
         &self,
-    ) -> impl Future<Output = Result<impl Stream<Item = Result<T::Header, Error>>, Error>>
-           + Send
-           + 'static {
+    ) -> impl Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static
+    {
         let client = self.client.clone();
-        async move { client.rpc().subscribe_block_headers().await }
+        async move {
+            let sub = client.rpc().subscribe_block_headers().await?;
+            BlockStreamRes::Ok(Box::pin(sub))
+        }
     }
 
     /// Subscribe to finalized block headers.
@@ -144,9 +152,8 @@ where
     /// provided, this function does.
     pub fn subscribe_finalized_headers(
         &self,
-    ) -> impl Future<Output = Result<impl Stream<Item = Result<T::Header, Error>>, Error>>
-           + Send
-           + 'static {
+    ) -> impl Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static
+    {
         let client = self.client.clone();
         async move {
             // Fetch the last finalised block details immediately, so that we'll get
@@ -161,12 +168,14 @@ where
             let sub = client.rpc().subscribe_finalized_block_headers().await?;
 
             // Adjust the subscription stream to fill in any missing blocks.
-            Ok(subscribe_to_block_headers_filling_in_gaps(
-                client,
-                last_finalized_block_num,
-                sub,
+            BlockStreamRes::Ok(
+                subscribe_to_block_headers_filling_in_gaps(
+                    client,
+                    last_finalized_block_num,
+                    sub,
+                )
+                .boxed(),
             )
-            .boxed())
         }
     }
 }

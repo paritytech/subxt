@@ -22,6 +22,8 @@ use std::sync::Arc;
 pub struct Block<T: Config, C> {
     hash: T::Hash,
     details: ChainBlockResponse<T>,
+    // Since we obtain the same events for every extrinsic, let's
+    // cache them so that we only ever do that once:
     cached_events: Arc<AsyncMutex<Option<events::Events<T>>>>,
     client: C,
 }
