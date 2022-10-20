@@ -11,6 +11,7 @@ use jsonrpsee::{
     http_client::HttpClientBuilder,
     rpc_params,
 };
+use std::time::Duration;
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
 pub fn fetch_metadata_bytes_blocking(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
@@ -58,6 +59,7 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
         .map_err(|e| Error::Transport(e.into()))?;
 
     let client = ClientBuilder::default()
+        .request_timeout(Duration::from_secs(180))
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
@@ -65,7 +67,9 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
 }
 
 async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
-    let client = HttpClientBuilder::default().build(url.to_string())?;
+    let client = HttpClientBuilder::default()
+        .request_timeout(Duration::from_secs(180))
+        .build(url.to_string())?;
 
     Ok(client.request::<String>("state_getMetadata", None).await?)
 }
