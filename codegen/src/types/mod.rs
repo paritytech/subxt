@@ -367,13 +367,15 @@ impl Module {
     }
 
     /// Returns this `Module`s child `mod`s.
-    pub fn children(&self) -> &BTreeMap<Ident, Module> {
-        &self.children
+    pub fn children(&self) -> impl Iterator<Item = (&Ident, &Module)> {
+        self.children.iter()
     }
 
     /// Returns the generated types.
-    pub fn types(&self) -> &BTreeMap<scale_info::Path<PortableForm>, TypeDefGen> {
-        &self.types
+    pub fn types(
+        &self,
+    ) -> impl Iterator<Item = (&scale_info::Path<PortableForm>, &TypeDefGen)> {
+        self.types.iter()
     }
 
     /// Returns the root `mod` used for resolving type paths.
