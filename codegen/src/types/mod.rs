@@ -365,6 +365,21 @@ impl Module {
     pub fn ident(&self) -> &Ident {
         &self.name
     }
+
+    /// Returns this `Module`s child `mod`s.
+    pub fn children(&self) -> &BTreeMap<Ident, Module> {
+        &self.children
+    }
+
+    /// Returns the generated types.
+    pub fn types(&self) -> &BTreeMap<scale_info::Path<PortableForm>, TypeDefGen> {
+        &self.types
+    }
+
+    /// Returns the root `mod` used for resolving type paths.
+    pub fn root_mod(&self) -> &Ident {
+        &self.root_mod
+    }
 }
 
 #[derive(Debug, Clone)]
