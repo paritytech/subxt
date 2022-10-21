@@ -11,7 +11,7 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut sub = api.blocks().subscribe_best_headers().await?;
+    let mut sub = api.blocks().subscribe_best().await?;
 
     // Wait for the next set of headers, and check that the
     // associated block hash is the one we just finalized.
@@ -30,7 +30,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut sub = api.blocks().subscribe_finalized_headers().await?;
+    let mut sub = api.blocks().subscribe_finalized().await?;
 
     // Wait for the next set of headers, and check that the
     // associated block hash is the one we just finalized.
