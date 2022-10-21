@@ -31,8 +31,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Subscribe to any events that occur in finalized blocks:
-    let mut event_sub = api.events().subscribe_finalized().await?;
+    // Subscribe to (in this case, finalized) blocks.
+    let mut block_sub = api.blocks().subscribe_finalized().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
     tokio::task::spawn({
@@ -58,10 +58,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    // Our subscription will see the events emitted as a result of this:
-    while let Some(events) = event_sub.next().await {
-        let events = events?;
-        let block_hash = events.block_hash();
+    // Get each finalized block as it arrives.
+    while let Some(block) = block_sub.next().await {
+        let block = block?;
+
+        // Ask for the events for this block.
+        let events = block.events().await?;
+
+        let block_hash = block.hash();
 
         // We can dynamically decode events:
         println!("  Dynamic event details: {block_hash:?}:");

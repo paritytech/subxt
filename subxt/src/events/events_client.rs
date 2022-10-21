@@ -5,12 +5,7 @@
 use crate::{
     client::OnlineClientT,
     error::Error,
-    events::{
-        EventSub,
-        EventSubscription,
-        Events,
-        FinalizedEventSub,
-    },
+    events::Events,
     Config,
 };
 use derivative::Derivative;
@@ -79,93 +74,6 @@ where
                 .unwrap_or_else(Vec::new);
 
             Ok(Events::new(client.metadata(), block_hash, event_bytes))
-        }
-    }
-
-    /// Subscribe to events from all newly imported blocks.
-    ///
-    /// **Note:** these blocks haven't necessarily been finalised yet; prefer
-    /// [`EventsClient::subscribe_finalized()`] if that is important.
-    pub fn subscribe_all(
-        &self,
-    ) -> impl Future<
-        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
-    > + Send
-           + 'static
-    where
-        Client: Send + Sync + 'static,
-    {
-        let client = self.client.clone();
-        async move {
-            let block_subscription = client.blocks().subscribe_all_headers().await?;
-            Ok(EventSubscription::new(client, block_subscription))
-        }
-    }
-
-    /// Subscribe to events from all newly imported blocks that are added to the best fork.
-    ///
-    /// **Note:** these blocks haven't necessarily been finalised yet; prefer
-    /// [`EventsClient::subscribe_finalized()`] if that is important.
-    pub fn subscribe_best(
-        &self,
-    ) -> impl Future<
-        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
-    > + Send
-           + 'static
-    where
-        Client: Send + Sync + 'static,
-    {
-        let client = self.client.clone();
-        async move {
-            let block_subscription = client.blocks().subscribe_best_headers().await?;
-            Ok(EventSubscription::new(client, block_subscription))
-        }
-    }
-
-    /// Subscribe to events from all finalized blocks.
-    ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// use futures::StreamExt;
-    /// use subxt::{ OnlineClient, PolkadotConfig };
-    ///
-    /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
-    ///
-    /// let mut events = api.events().subscribe_finalized().await.unwrap();
-    ///
-    /// while let Some(ev) = events.next().await {
-    ///     // Obtain all events from this block.
-    ///     let ev = ev.unwrap();
-    ///     // Print block hash.
-    ///     println!("Event at block hash {:?}", ev.block_hash());
-    ///     // Iterate over all events.
-    ///     let mut iter = ev.iter();
-    ///     while let Some(event_details) = iter.next() {
-    ///         println!("Event details {:?}", event_details);
-    ///     }
-    /// }
-    /// # }
-    /// ```
-    pub fn subscribe_finalized(
-        &self,
-    ) -> impl Future<
-        Output = Result<
-            EventSubscription<T, Client, FinalizedEventSub<T::Header>>,
-            Error,
-        >,
-    > + Send
-           + 'static
-    where
-        Client: Send + Sync + 'static,
-    {
-        let client = self.client.clone();
-        async move {
-            let block_subscription =
-                client.blocks().subscribe_finalized_headers().await?;
-            Ok(EventSubscription::new(client, block_subscription))
         }
     }
 }

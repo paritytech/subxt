@@ -7,52 +7,106 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
-    error::Error,
+    error::{
+        Error,
+        BlockError,
+    },
     events,
     rpc::ChainBlockResponse,
     Config,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
-use sp_runtime::traits::Hash;
+use sp_runtime::traits::{ Hash, Header };
 use std::sync::Arc;
 
-/// A representation of a block from which you can obtain details
-/// including the block header, extrinsics and events for the block.
+/// A representation of a block.
 pub struct Block<T: Config, C> {
-    hash: T::Hash,
-    details: ChainBlockResponse<T>,
+    header: T::Header,
+    client: C,
     // Since we obtain the same events for every extrinsic, let's
     // cache them so that we only ever do that once:
-    cached_events: Arc<AsyncMutex<Option<events::Events<T>>>>,
-    client: C,
+    cached_events: CachedEvents<T>,
 }
+
+// A cache for our events so we don't fetch them more than once when
+// iterating over events for extrinsics.
+type CachedEvents<T> = Arc<AsyncMutex<Option<events::Events<T>>>>;
 
 impl<T, C> Block<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
 {
-    pub(crate) fn new(hash: T::Hash, details: ChainBlockResponse<T>, client: C) -> Self {
+    pub(crate) fn new(header: T::Header, client: C) -> Self {
         Block {
-            hash,
-            details,
-            cached_events: Default::default(),
+            header,
             client,
+            cached_events: Default::default(),
         }
     }
 
     /// Return the block hash.
     pub fn hash(&self) -> T::Hash {
-        self.hash
+        self.header.hash()
     }
 
-    /// Return the block header.
+    /// Return the block number.
+    pub fn number(&self) -> T::BlockNumber {
+        *self.header().number()
+    }
+
+    /// Return the entire block header.
     pub fn header(&self) -> &T::Header {
-        &self.details.block.header
+        &self.header
+    }
+}
+
+impl<T, C> Block<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
+    /// Return the events associated with the block, fetching them from the node if necessary.
+    pub async fn events(&self) -> Result<events::Events<T>, Error> {
+        get_events(&self.client, self.header.hash(), &self.cached_events).await
     }
 
-    /// Returns an iterator over the extrinsics in the block.
+    /// Fetch and return the block body.
+    pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
+        let block_hash = self.header.hash();
+        let block_details = match self.client.rpc().block(Some(block_hash)).await? {
+            Some(block) => block,
+            None => {
+                return Err(BlockError::block_hash_not_found(block_hash).into())
+            }
+        };
+
+        Ok(BlockBody::new(self.client.clone(), block_details, self.cached_events.clone()))
+    }
+}
+
+/// The body of a block.
+pub struct BlockBody<T: Config, C> {
+    details: ChainBlockResponse<T>,
+    client: C,
+    cached_events: CachedEvents<T>
+}
+
+impl <T, C> BlockBody<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    pub (crate) fn new(client: C, details: ChainBlockResponse<T>, cached_events: CachedEvents<T>) -> Self {
+        Self {
+            details,
+            client,
+            cached_events
+        }
+    }
+
+    /// Returns an iterator over the extrinsics in the block body.
     pub fn extrinsics(&self) -> impl Iterator<Item = Extrinsic<'_, T, C>> {
         self.details
             .block
@@ -64,7 +118,7 @@ where
                     index: idx as u32,
                     bytes: &e.0,
                     client: self.client.clone(),
-                    block_hash: self.hash,
+                    block_hash: self.details.block.header.hash(),
                     cached_events: self.cached_events.clone(),
                     _marker: std::marker::PhantomData,
                 }
@@ -105,19 +159,7 @@ where
 {
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
-        // Acquire lock on the events cache. We either get back our events or we fetch and set them
-        // before unlocking, so only one fetch call should ever be made. We do this because the
-        // same events can be shared across all extrinsics in the block.
-        let lock = self.cached_events.lock().await;
-        let events = match &*lock {
-            Some(events) => events.clone(),
-            None => {
-                events::EventsClient::new(self.client.clone())
-                    .at(Some(self.block_hash))
-                    .await?
-            }
-        };
-
+        let events = get_events(&self.client, self.block_hash, &self.cached_events).await?;
         let ext_hash = T::Hashing::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
@@ -203,4 +245,26 @@ impl<T: Config> ExtrinsicEvents<T> {
     pub fn has<Ev: events::StaticEvent>(&self) -> Result<bool, Error> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
+}
+
+// Return Events from the cache, or fetch from the node if needed.
+async fn get_events<C, T>(client: &C, block_hash: T::Hash, cached_events: &AsyncMutex<Option<events::Events<T>>>) -> Result<events::Events<T>, Error>
+where
+    T: Config,
+    C: OnlineClientT<T>
+{
+    // Acquire lock on the events cache. We either get back our events or we fetch and set them
+    // before unlocking, so only one fetch call should ever be made. We do this because the
+    // same events can be shared across all extrinsics in the block.
+    let lock = cached_events.lock().await;
+    let events = match &*lock {
+        Some(events) => events.clone(),
+        None => {
+            events::EventsClient::new(client.clone())
+                .at(Some(block_hash))
+                .await?
+        }
+    };
+
+    Ok(events)
 }

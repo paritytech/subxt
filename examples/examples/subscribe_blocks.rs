@@ -39,7 +39,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  Hash: {block_hash}");
         println!("  Extrinsics:");
 
-        for ext in block.extrinsics() {
+        let body = block.body().await?;
+        for ext in body.extrinsics() {
             let idx = ext.index();
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
