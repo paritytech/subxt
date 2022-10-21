@@ -156,29 +156,27 @@ where
 
 /// Take a promise that will return a subscription to some block headers,
 /// and return a subscription to some blocks based on this.
-fn header_sub_fut_to_block_sub<T, Client, S>(
+async fn header_sub_fut_to_block_sub<T, Client, S>(
     blocks_client: BlocksClient<T, Client>,
     sub: S,
-) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+) -> Result<BlockStream<Block<T, Client>>, Error>
 where
     T: Config,
     S: Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static,
     Client: OnlineClientT<T> + Send + Sync + 'static,
 {
-    async move {
-        let sub = sub.await?.then(move |header| {
-            let client = blocks_client.client.clone();
-            async move {
-                let header = match header {
-                    Ok(header) => header,
-                    Err(e) => return Err(e),
-                };
+    let sub = sub.await?.then(move |header| {
+        let client = blocks_client.client.clone();
+        async move {
+            let header = match header {
+                Ok(header) => header,
+                Err(e) => return Err(e),
+            };
 
-                Ok(Block::new(header, client))
-            }
-        });
-        BlockStreamRes::Ok(Box::pin(sub))
-    }
+            Ok(Block::new(header, client))
+        }
+    });
+    BlockStreamRes::Ok(Box::pin(sub))
 }
 
 /// Note: This is exposed for testing but is not considered stable and may change
