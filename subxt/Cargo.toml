@@ -48,3 +48,5 @@ sp-runtime = "6.0.0"
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
+[dev-dependencies]
+tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }
