@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // to select a single event type (note the 1-tuple) to filter out and return.
     let mut transfer_events = api
         .events()
-        .subscribe()
+        .subscribe_finalized()
         .await?
         .filter_events::<(polkadot::balances::events::Transfer,)>();
 

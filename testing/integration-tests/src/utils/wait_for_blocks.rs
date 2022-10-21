@@ -11,7 +11,7 @@ use subxt::{
 /// (the genesis block and another one) seems to be enough to allow tests
 /// like `dry_run_passes` to work properly.
 pub async fn wait_for_blocks<C: Config>(api: &impl OnlineClientT<C>) {
-    let mut sub = api.rpc().subscribe_block_headers().await.unwrap();
+    let mut sub = api.rpc().subscribe_all_block_headers().await.unwrap();
     sub.next().await;
     sub.next().await;
 }

@@ -53,6 +53,12 @@ where
 {
     /// Obtain block details given the provided block hash, or the latest block if `None` is
     /// provided.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve older blocks,
+    /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
         block_hash: Option<T::Hash>,
@@ -81,75 +87,79 @@ where
         }
     }
 
+    /// Subscribe to all new blocks imported by the node.
+    ///
+    /// **Note:** You probably want to use [`Self::subscribe_finalized()`] most of
+    /// the time.
+    pub fn subscribe_all(
+        &self,
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
+        header_sub_fut_to_block_sub(self.clone(), self.subscribe_all_headers())
+    }
+
+    /// Subscribe to all new blocks imported by the node onto the current best fork.
+    ///
+    /// **Note:** You probably want to use [`Self::subscribe_finalized()`] most of
+    /// the time.
+    pub fn subscribe_best(
+        &self,
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
+        header_sub_fut_to_block_sub(self.clone(), self.subscribe_best_headers())
+    }
+
     /// Subscribe to finalized blocks.
     ///
     /// This builds upon [`BlocksClient::subscribe_finalized_headers`] and returns details for
-    /// each block once it is finalized.
+    /// every block, in order, that has been finalized.
     pub fn subscribe_finalized(
         &self,
     ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
     where
         Client: Send + Sync + 'static,
     {
-        let this = self.clone();
-        async move {
-            let client = this.client.clone();
-            let sub = this
-                .subscribe_finalized_headers()
-                .await?
-                .then(move |header| {
-                    let client = client.clone();
-                    async move {
-                        let header = match header {
-                            Ok(header) => header,
-                            Err(e) => return Err(e),
-                        };
-
-                        let block_hash = header.hash();
-                        let block_details =
-                            match client.rpc().block(Some(block_hash)).await? {
-                                Some(block) => block,
-                                None => {
-                                    return Err(BlockError::block_hash_not_found(
-                                        block_hash,
-                                    )
-                                    .into())
-                                }
-                            };
-
-                        Ok(Block::new(block_hash, block_details, client))
-                    }
-                });
-            BlockStreamRes::Ok(Box::pin(sub))
-        }
+        header_sub_fut_to_block_sub(self.clone(), self.subscribe_finalized_headers())
     }
 
-    /// Subscribe to new best block headers.
+    /// Subscribe to headers for every new block that is imported by the node.
+    /// These headers might be for blocks not on the current best chain.
     ///
-    /// # Note
-    ///
-    /// This does not produce all the blocks from the chain, just the best blocks.
-    /// The best block is selected by the consensus algorithm.
-    /// This calls under the hood the `chain_subscribeNewHeads` RPC method, if you need
-    /// a subscription of all the blocks please use the `chain_subscribeAllHeads` method.
-    ///
-    /// These blocks haven't necessarily been finalised yet. Prefer
-    /// [`BlocksClient::subscribe_finalized_headers()`] if that is important.
-    pub fn subscribe_headers(
+    /// **Note:** You probably want to use [`Self::subscribe_finalized_headers()`] most
+    /// of the time.
+    pub fn subscribe_all_headers(
         &self,
     ) -> impl Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static
     {
         let client = self.client.clone();
         async move {
-            let sub = client.rpc().subscribe_block_headers().await?;
+            let sub = client.rpc().subscribe_all_block_headers().await?;
             BlockStreamRes::Ok(Box::pin(sub))
         }
     }
 
-    /// Subscribe to finalized block headers.
+    /// Subscribe to headers for each new block that is imported by the node and
+    /// added to the current best fork.
     ///
-    /// While the Substrate RPC method does not guarantee that all finalized block headers are
-    /// provided, this function does.
+    /// **Note:** You probably want to use [`Self::subscribe_finalized_headers()`] most
+    /// of the time.
+    pub fn subscribe_best_headers(
+        &self,
+    ) -> impl Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static
+    {
+        let client = self.client.clone();
+        async move {
+            let sub = client.rpc().subscribe_best_block_headers().await?;
+            BlockStreamRes::Ok(Box::pin(sub))
+        }
+    }
+
+    /// Subscribe to finalized block headers. This subscription returns every block that is part of
+    /// the finalized chain, in order, from the first finalized block seen at the time of calling this.
     pub fn subscribe_finalized_headers(
         &self,
     ) -> impl Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static
@@ -177,6 +187,41 @@ where
                 .boxed(),
             )
         }
+    }
+}
+
+/// Take a promise that will return a subscription to some block headers,
+/// and return a subscription to some blocks based on this.
+fn header_sub_fut_to_block_sub<T, Client, S>(
+    blocks_client: BlocksClient<T, Client>,
+    sub: S,
+) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+where
+    T: Config,
+    S: Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static,
+    Client: OnlineClientT<T> + Send + Sync + 'static,
+{
+    async move {
+        let sub = sub.await?.then(move |header| {
+            let client = blocks_client.client.clone();
+            async move {
+                let header = match header {
+                    Ok(header) => header,
+                    Err(e) => return Err(e),
+                };
+
+                let block_hash = header.hash();
+                let block_details = match client.rpc().block(Some(block_hash)).await? {
+                    Some(block) => block,
+                    None => {
+                        return Err(BlockError::block_hash_not_found(block_hash).into())
+                    }
+                };
+
+                Ok(Block::new(block_hash, block_details, client))
+            }
+        });
+        BlockStreamRes::Ok(Box::pin(sub))
     }
 }
 

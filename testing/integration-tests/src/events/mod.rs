@@ -21,7 +21,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut event_sub = api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe_best().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is not finalized yet.
@@ -61,7 +61,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::Error> {
 
     wait_for_blocks(&api).await;
 
-    let mut event_sub = api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe_best().await?;
 
     for i in 0..3 {
         let events = event_sub
@@ -90,7 +90,7 @@ async fn decoding_all_events_in_a_block_works() -> Result<(), subxt::Error> {
 
     wait_for_blocks(&api).await;
 
-    let mut event_sub = api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe_best().await?;
 
     tokio::spawn(async move {
         let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -135,7 +135,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::Error> {
     // Subscribe to balance transfer events, ignoring all else.
     let event_sub = api
         .events()
-        .subscribe()
+        .subscribe_best()
         .await?
         .filter_events::<(balances::events::Transfer,)>();
 
@@ -179,7 +179,7 @@ async fn check_events_are_sendable() {
     tokio::task::spawn(async {
         let ctx = test_context().await;
 
-        let mut event_sub = ctx.client().events().subscribe().await?;
+        let mut event_sub = ctx.client().events().subscribe_best().await?;
 
         while let Some(ev) = event_sub.next().await {
             // if `event_sub` doesn't implement Send, we can't hold
@@ -197,7 +197,7 @@ async fn check_events_are_sendable() {
         let mut event_sub = ctx
             .client()
             .events()
-            .subscribe()
+            .subscribe_all()
             .await?
             .filter_events::<(balances::events::Transfer,)>();
 

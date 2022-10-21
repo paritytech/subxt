@@ -31,8 +31,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Subscribe to any events that occur:
-    let mut event_sub = api.events().subscribe().await?;
+    // Subscribe to any events that occur in finalized blocks:
+    let mut event_sub = api.events().subscribe_finalized().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
     tokio::task::spawn({

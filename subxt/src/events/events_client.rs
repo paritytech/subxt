@@ -57,13 +57,72 @@ where
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
-        async move { at(client, block_hash).await }
+        async move {
+            // If block hash is not provided, get the hash
+            // for the latest block and use that.
+            let block_hash = match block_hash {
+                Some(hash) => hash,
+                None => {
+                    client
+                        .rpc()
+                        .block_hash(None)
+                        .await?
+                        .expect("didn't pass a block number; qed")
+                }
+            };
+
+            let event_bytes = client
+                .rpc()
+                .storage(&*system_events_key().0, Some(block_hash))
+                .await?
+                .map(|e| e.0)
+                .unwrap_or_else(Vec::new);
+
+            Ok(Events::new(client.metadata(), block_hash, event_bytes))
+        }
     }
 
-    /// Subscribe to all events from blocks.
+    /// Subscribe to events from all newly imported blocks.
     ///
     /// **Note:** these blocks haven't necessarily been finalised yet; prefer
     /// [`EventsClient::subscribe_finalized()`] if that is important.
+    pub fn subscribe_all(
+        &self,
+    ) -> impl Future<
+        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
+    > + Send
+           + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
+        let client = self.client.clone();
+        async move {
+            let block_subscription = client.blocks().subscribe_all_headers().await?;
+            Ok(EventSubscription::new(client, block_subscription))
+        }
+    }
+
+    /// Subscribe to events from all newly imported blocks that are added to the best fork.
+    ///
+    /// **Note:** these blocks haven't necessarily been finalised yet; prefer
+    /// [`EventsClient::subscribe_finalized()`] if that is important.
+    pub fn subscribe_best(
+        &self,
+    ) -> impl Future<
+        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
+    > + Send
+           + 'static
+    where
+        Client: Send + Sync + 'static,
+    {
+        let client = self.client.clone();
+        async move {
+            let block_subscription = client.blocks().subscribe_best_headers().await?;
+            Ok(EventSubscription::new(client, block_subscription))
+        }
+    }
+
+    /// Subscribe to events from all finalized blocks.
     ///
     /// # Example
     ///
@@ -75,7 +134,7 @@ where
     ///
     /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
-    /// let mut events = api.events().subscribe().await.unwrap();
+    /// let mut events = api.events().subscribe_finalized().await.unwrap();
     ///
     /// while let Some(ev) = events.next().await {
     ///     // Obtain all events from this block.
@@ -90,20 +149,6 @@ where
     /// }
     /// # }
     /// ```
-    pub fn subscribe(
-        &self,
-    ) -> impl Future<
-        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>,
-    > + Send
-           + 'static
-    where
-        Client: Send + Sync + 'static,
-    {
-        let client = self.client.clone();
-        async move { subscribe(client).await }
-    }
-
-    /// Subscribe to events from finalized blocks. See [`EventsClient::subscribe()`] for details.
     pub fn subscribe_finalized(
         &self,
     ) -> impl Future<
@@ -117,62 +162,12 @@ where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
-        async move { subscribe_finalized(client).await }
-    }
-}
-
-async fn at<T, Client>(
-    client: Client,
-    block_hash: Option<T::Hash>,
-) -> Result<Events<T>, Error>
-where
-    T: Config,
-    Client: OnlineClientT<T>,
-{
-    // If block hash is not provided, get the hash
-    // for the latest block and use that.
-    let block_hash = match block_hash {
-        Some(hash) => hash,
-        None => {
-            client
-                .rpc()
-                .block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed")
+        async move {
+            let block_subscription =
+                client.blocks().subscribe_finalized_headers().await?;
+            Ok(EventSubscription::new(client, block_subscription))
         }
-    };
-
-    let event_bytes = client
-        .rpc()
-        .storage(&*system_events_key().0, Some(block_hash))
-        .await?
-        .map(|e| e.0)
-        .unwrap_or_else(Vec::new);
-
-    Ok(Events::new(client.metadata(), block_hash, event_bytes))
-}
-
-async fn subscribe<T, Client>(
-    client: Client,
-) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, Error>
-where
-    T: Config,
-    Client: OnlineClientT<T>,
-{
-    let block_subscription = client.blocks().subscribe_headers().await?;
-    Ok(EventSubscription::new(client, block_subscription))
-}
-
-/// Subscribe to events from finalized blocks.
-async fn subscribe_finalized<T, Client>(
-    client: Client,
-) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, Error>
-where
-    T: Config,
-    Client: OnlineClientT<T>,
-{
-    let block_subscription = client.blocks().subscribe_finalized_headers().await?;
-    Ok(EventSubscription::new(client, block_subscription))
+    }
 }
 
 // The storage key needed to access events.

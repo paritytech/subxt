@@ -568,13 +568,16 @@ impl<T: Config> Rpc<T> {
         Ok(version)
     }
 
-    /// Subscribe to blocks.
-    pub async fn subscribe_block_headers(
+    /// Subscribe to all new best block headers.
+    pub async fn subscribe_best_block_headers(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
                 "chain_subscribeNewHeads",
                 rpc_params![],
                 "chain_unsubscribeNewHeads",
@@ -584,7 +587,31 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Subscribe to finalized blocks.
+    /// Subscribe to all new block headers.
+    pub async fn subscribe_all_block_headers(
+        &self,
+    ) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeAllHeads",
+                rpc_params![],
+                "chain_unsubscribeAllHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to finalized block headers.
+    ///
+    /// Note: this may not produce _every_ block in the finalized chain;
+    /// sometimes multiple blocks are finalized at once, and in this case only the
+    /// latest one is returned. the higher level APIs that use this "fill in" the
+    /// gaps for us.
     pub async fn subscribe_finalized_block_headers(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
