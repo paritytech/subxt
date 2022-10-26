@@ -204,6 +204,11 @@ impl<T: Config> ExtrinsicEvents<T> {
         self.events.block_hash()
     }
 
+    /// The index of the extrinsic that these events are produced from.
+    pub fn extrinsic_index(&self) -> u32 {
+        self.idx
+    }
+
     /// Return the hash of the extrinsic.
     pub fn extrinsic_hash(&self) -> T::Hash {
         self.ext_hash
