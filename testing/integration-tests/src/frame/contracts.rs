@@ -8,7 +8,10 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
-        runtime_types::sp_weights::weight_v2::Weight,
+        runtime_types::{
+            pallet_contracts::wasm::Determinism,
+            sp_weights::weight_v2::Weight,
+        },
         system,
     },
     test_context,
@@ -59,7 +62,11 @@ impl ContractsTestContext {
     async fn upload_code(&self) -> Result<Hash, Error> {
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let upload_tx = node_runtime::tx().contracts().upload_code(code, None);
+        let upload_tx = node_runtime::tx().contracts().upload_code(
+            code,
+            None,
+            Determinism::Deterministic,
+        );
 
         let events = self
             .client()

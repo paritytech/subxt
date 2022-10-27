@@ -127,13 +127,17 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
-    // unused_crate_dependencies,
-    // unused_extern_crates,
+    unused_crate_dependencies,
+    unused_extern_crates,
     clippy::all
 )]
 #![allow(clippy::type_complexity)]
 
 pub use subxt_macro::subxt;
+
+// Used to enable js feature for wasm.
+#[cfg(target_arch = "wasm32")]
+pub use getrandom as _;
 
 pub mod blocks;
 pub mod client;

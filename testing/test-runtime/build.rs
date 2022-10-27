@@ -60,7 +60,7 @@ async fn run() {
             // Thus, the connection might get rejected a few times.
             use client::ClientT;
             let res = match client::build(&format!("ws://localhost:{}", port)).await {
-                Ok(c) => c.request("state_getMetadata", None).await,
+                Ok(c) => c.request("state_getMetadata", client::rpc_params![]).await,
                 Err(e) => Err(e),
             };
 
@@ -174,7 +174,10 @@ mod client {
         },
     };
 
-    pub use jsonrpsee::core::client::ClientT;
+    pub use jsonrpsee::core::{
+        client::ClientT,
+        rpc_params,
+    };
 
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {

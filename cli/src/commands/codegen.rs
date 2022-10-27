@@ -4,12 +4,7 @@
 
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
-use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::client_transport::ws::Uri;
-use scale::{
-    Decode,
-    Input,
-};
 use std::{
     fs,
     io::Read,
@@ -48,7 +43,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         let mut file = fs::File::open(file)?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
-        codegen(&mut &bytes[..], opts.derives, opts.crate_path)?;
+        codegen(&bytes, opts.derives, opts.crate_path)?;
         return Ok(())
     }
 
@@ -57,18 +52,16 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             .parse::<Uri>()
             .expect("default url is valid")
     });
-    let (_, bytes) = super::metadata::fetch_metadata(&url).await?;
-    codegen(&mut &bytes[..], opts.derives, opts.crate_path)?;
+    let bytes = subxt_codegen::utils::fetch_metadata_bytes(&url).await?;
+    codegen(&bytes, opts.derives, opts.crate_path)?;
     Ok(())
 }
 
-fn codegen<I: Input>(
-    encoded: &mut I,
+fn codegen(
+    metadata_bytes: &[u8],
     raw_derives: Vec<String>,
     crate_path: Option<String>,
 ) -> color_eyre::Result<()> {
-    let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
-    let generator = subxt_codegen::RuntimeGenerator::new(metadata);
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
@@ -82,7 +75,12 @@ fn codegen<I: Input>(
     let mut derives = DerivesRegistry::new(&crate_path);
     derives.extend_for_all(p.into_iter());
 
-    let runtime_api = generator.generate_runtime(item_mod, derives, crate_path);
+    let runtime_api = subxt_codegen::generate_runtime_api_from_bytes(
+        item_mod,
+        metadata_bytes,
+        derives,
+        crate_path,
+    );
     println!("{}", runtime_api);
     Ok(())
 }

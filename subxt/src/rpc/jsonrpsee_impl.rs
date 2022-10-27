@@ -40,7 +40,7 @@ impl RpcClientT for Client {
         Box::pin(async move {
             let res = ClientT::request(self, method, Params(params))
                 .await
-                .map_err(|e| RpcError(e.to_string()))?;
+                .map_err(|e| RpcError::ClientError(Box::new(e)))?;
             Ok(res)
         })
     }
@@ -59,8 +59,8 @@ impl RpcClientT for Client {
                 unsub,
             )
             .await
-            .map_err(|e| RpcError(e.to_string()))?
-            .map_err(|e| RpcError(e.to_string()))
+            .map_err(|e| RpcError::ClientError(Box::new(e)))?
+            .map_err(|e| RpcError::ClientError(Box::new(e)))
             .boxed();
             Ok(sub)
         })

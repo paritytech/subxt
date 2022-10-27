@@ -16,9 +16,10 @@ fn init_tracing() {
 async fn wasm_ws_transport_works() {
     init_tracing();
 
-    let client = subxt::client::OnlineClient::<PolkadotConfig>::from_url("ws://127.0.0.1:9944")
-        .await
-        .unwrap();
+    let client =
+        subxt::client::OnlineClient::<PolkadotConfig>::from_url("ws://127.0.0.1:9944")
+            .await
+            .unwrap();
 
     let chain = client.rpc().system_chain().await.unwrap();
     assert_eq!(&chain, "polkadot");

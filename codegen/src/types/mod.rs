@@ -365,6 +365,23 @@ impl Module {
     pub fn ident(&self) -> &Ident {
         &self.name
     }
+
+    /// Returns this `Module`s child `mod`s.
+    pub fn children(&self) -> impl Iterator<Item = (&Ident, &Module)> {
+        self.children.iter()
+    }
+
+    /// Returns the generated types.
+    pub fn types(
+        &self,
+    ) -> impl Iterator<Item = (&scale_info::Path<PortableForm>, &TypeDefGen)> {
+        self.types.iter()
+    }
+
+    /// Returns the root `mod` used for resolving type paths.
+    pub fn root_mod(&self) -> &Ident {
+        &self.root_mod
+    }
 }
 
 #[derive(Debug, Clone)]
