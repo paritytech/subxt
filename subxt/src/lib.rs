@@ -135,7 +135,7 @@
 
 pub use subxt_macro::subxt;
 
-// Used to enable js feature for wasm.
+// Used to enable the js feature for wasm.
 #[cfg(target_arch = "wasm32")]
 pub use getrandom as _;
 
