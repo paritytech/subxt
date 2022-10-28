@@ -224,7 +224,8 @@ where
         Call: TxPayload,
     {
         // Get nonce from the node.
-        let account_nonce = self.client
+        let account_nonce = self
+            .client
             .rpc()
             .system_account_next_index(signer.account_id())
             .await?;

@@ -48,10 +48,7 @@ where
     pub fn new(signer: P) -> Self {
         let account_id =
             <T::Signature as Verify>::Signer::from(signer.public()).into_account();
-        Self {
-            account_id,
-            signer,
-        }
+        Self { account_id, signer }
     }
 
     /// Returns the [`Pair`] implementation used to construct this.
