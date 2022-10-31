@@ -141,7 +141,7 @@ pub struct Extrinsic<'a, T: Config, C> {
     bytes: &'a [u8],
     client: C,
     block_hash: T::Hash,
-    cached_events: Arc<AsyncMutex<Option<events::Events<T>>>>,
+    cached_events: CachedEvents<T>,
     _marker: std::marker::PhantomData<T>,
 }
 
