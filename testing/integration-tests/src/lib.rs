@@ -14,8 +14,6 @@ mod blocks;
 #[cfg(test)]
 mod client;
 #[cfg(test)]
-mod events;
-#[cfg(test)]
 mod frame;
 #[cfg(test)]
 mod metadata;

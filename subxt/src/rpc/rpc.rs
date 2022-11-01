@@ -69,13 +69,7 @@ use sp_core::{
     Bytes,
     U256,
 };
-use sp_runtime::{
-    generic::{
-        Block,
-        SignedBlock,
-    },
-    ApplyExtrinsicResult,
-};
+use sp_runtime::ApplyExtrinsicResult;
 use std::{
     collections::HashMap,
     sync::Arc,
@@ -98,9 +92,40 @@ pub enum NumberOrHex {
     Hex(U256),
 }
 
-/// Alias for the type of a block returned by `chain_getBlock`
-pub type ChainBlock<T> =
-    SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
+/// The response from `chain_getBlock`
+#[derive(Debug, Deserialize)]
+#[serde(bound = "T: Config")]
+pub struct ChainBlockResponse<T: Config> {
+    /// The block itself.
+    pub block: ChainBlock<T>,
+    /// Block justification.
+    pub justifications: Option<sp_runtime::Justifications>,
+}
+
+/// Block details in the [`ChainBlockResponse`].
+#[derive(Debug, Deserialize)]
+pub struct ChainBlock<T: Config> {
+    /// The block header.
+    pub header: T::Header,
+    /// The accompanying extrinsics.
+    pub extrinsics: Vec<ChainBlockExtrinsic>,
+}
+
+/// Bytes representing an extrinsic in a [`ChainBlock`].
+#[derive(Debug)]
+pub struct ChainBlockExtrinsic(pub Vec<u8>);
+
+impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
+    fn deserialize<D>(de: D) -> Result<Self, D::Error>
+    where
+        D: ::serde::Deserializer<'a>,
+    {
+        let r = sp_core::bytes::deserialize(de)?;
+        let bytes = Decode::decode(&mut &r[..])
+            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
+        Ok(ChainBlockExtrinsic(bytes))
+    }
+}
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -498,7 +523,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, Error> {
+    ) -> Result<Option<ChainBlockResponse<T>>, Error> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -543,11 +568,16 @@ impl<T: Config> Rpc<T> {
         Ok(version)
     }
 
-    /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+    /// Subscribe to all new best block headers.
+    pub async fn subscribe_best_block_headers(
+        &self,
+    ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
                 "chain_subscribeNewHeads",
                 rpc_params![],
                 "chain_unsubscribeNewHeads",
@@ -557,8 +587,32 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
+    /// Subscribe to all new block headers.
+    pub async fn subscribe_all_block_headers(
+        &self,
+    ) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeAllHeads",
+                rpc_params![],
+                "chain_unsubscribeAllHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to finalized block headers.
+    ///
+    /// Note: this may not produce _every_ block in the finalized chain;
+    /// sometimes multiple blocks are finalized at once, and in this case only the
+    /// latest one is returned. the higher level APIs that use this "fill in" the
+    /// gaps for us.
+    pub async fn subscribe_finalized_block_headers(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
         let subscription = self

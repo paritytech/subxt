@@ -63,6 +63,9 @@ pub enum Error {
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    /// Block related error.
+    #[error("Block error: {0}")]
+    Block(#[from] BlockError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
@@ -234,6 +237,24 @@ impl DispatchError {
                 error: err.error,
             },
         })
+    }
+}
+
+/// Block error
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+pub enum BlockError {
+    /// The block
+    #[error(
+        "Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)"
+    )]
+    BlockHashNotFound(String),
+}
+
+impl BlockError {
+    /// Produce an error that a block with the given hash cannot be found.
+    pub fn block_hash_not_found(hash: impl AsRef<[u8]>) -> BlockError {
+        let hash = format!("0x{}", hex::encode(hash));
+        BlockError::BlockHashNotFound(hash)
     }
 }
 

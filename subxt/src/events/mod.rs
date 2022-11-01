@@ -6,25 +6,13 @@
 //! The two main entry points into events are [`crate::OnlineClient::events()`]
 //! and calls like [crate::tx::TxProgress::wait_for_finalized_success()].
 
-mod event_subscription;
 mod events_client;
 mod events_type;
-mod filter_events;
 
-pub use event_subscription::{
-    EventSub,
-    EventSubscription,
-    FinalizedEventSub,
-};
 pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,
     Events,
-};
-pub use filter_events::{
-    EventFilter,
-    FilterEvents,
-    FilteredEventDetails,
 };
 
 use codec::{

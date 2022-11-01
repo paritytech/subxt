@@ -39,7 +39,6 @@ impl Config for MyConfig {
     type Address = <SubstrateConfig as Config>::Address;
     type Header = <SubstrateConfig as Config>::Header;
     type Signature = <SubstrateConfig as Config>::Signature;
-    type Extrinsic = <SubstrateConfig as Config>::Extrinsic;
     // ExtrinsicParams makes use of the index type, so we need to adjust it
     // too to align with our modified index type, above:
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
