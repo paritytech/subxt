@@ -81,6 +81,10 @@ enum Command {
     /// # Example (with code formatting)
     ///
     /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
+    ///
+    /// # Example with `derive_for_type` and `type_attr`.
+    ///
+    /// `subxt codegen --derive_for_type my_module::my_type=serde::Serialize`
     Codegen {
         /// The url of the substrate node to query for metadata for codegen.
         #[structopt(name = "url", long, parse(try_from_str))]
@@ -91,6 +95,11 @@ enum Command {
         /// Additional derives
         #[structopt(long = "derive")]
         derives: Vec<String>,
+        /// Additional derives for a given type.
+        ///
+        /// Example `--derive_for_type my_module::my_type=serde::Serialize`.
+        #[structopt(long = "derive_for_type", parse(try_from_str = derive_for_type_parser))]
+        derives_for_type: Vec<(syn::TypePath, syn::Path)>,
     },
     /// Verify metadata compatibility between substrate nodes.
     Compatibility {
@@ -104,6 +113,19 @@ enum Command {
         #[structopt(long, parse(try_from_str))]
         pallet: Option<String>,
     },
+}
+
+fn derive_for_type_parser(src: &str) -> Result<(syn::TypePath, syn::Path), String> {
+    let (ty, derive) = src
+        .split_once('=')
+        .ok_or::<String>( "Invalid pattern for `derive_for_type`. It should be `type=derive`, like `my_type=serde::Serialize`".into())?;
+
+    let ty = syn::parse_str(ty)
+        .map_err(|e| format!("Target type `{:?}` cannot be parsed: {:?}", ty, e))?;
+    let derive = syn::parse_str(derive)
+        .map_err(|e| format!("Derive `{:?}` cannot be parsed: {:?}", derive, e))?;
+
+    Ok((ty, derive))
 }
 
 #[tokio::main]
@@ -136,8 +158,13 @@ async fn main() -> color_eyre::Result<()> {
                 }
             }
         }
-        Command::Codegen { url, file, derives } => {
-            if let Some(file) = file.as_ref() {
+        Command::Codegen {
+            url,
+            file,
+            derives,
+            derives_for_type,
+        } => {
+            let bytes = if let Some(file) = file.as_ref() {
                 if url.is_some() {
                     eyre::bail!("specify one of `--url` or `--file` but not both")
                 };
@@ -145,18 +172,18 @@ async fn main() -> color_eyre::Result<()> {
                 let mut file = fs::File::open(file)?;
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes)?;
-                codegen(&mut &bytes[..], derives)?;
-                return Ok(())
-            }
+                bytes
+            } else {
+                let url = url.unwrap_or_else(|| {
+                    "http://localhost:9933"
+                        .parse::<Uri>()
+                        .expect("default url is valid")
+                });
+                let (_, bytes) = fetch_metadata(&url).await?;
+                bytes
+            };
 
-            let url = url.unwrap_or_else(|| {
-                "http://localhost:9933"
-                    .parse::<Uri>()
-                    .expect("default url is valid")
-            });
-            let (_, bytes) = fetch_metadata(&url).await?;
-            codegen(&mut &bytes[..], derives)?;
-            Ok(())
+            codegen(&mut &bytes[..], derives, derives_for_type)
         }
         Command::Compatibility { nodes, pallet } => {
             match pallet {
@@ -296,6 +323,7 @@ async fn fetch_metadata(url: &Uri) -> color_eyre::Result<(String, Vec<u8>)> {
 fn codegen<I: Input>(
     encoded: &mut I,
     raw_derives: Vec<String>,
+    derives_for_type: Vec<(syn::TypePath, syn::Path)>,
 ) -> color_eyre::Result<()> {
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
     let generator = subxt_codegen::RuntimeGenerator::new(metadata);
@@ -309,6 +337,10 @@ fn codegen<I: Input>(
         .collect::<Result<Vec<_>, _>>()?;
     let mut derives = DerivesRegistry::default();
     derives.extend_for_all(p.into_iter());
+
+    for (ty, derive) in derives_for_type.into_iter() {
+        derives.extend_for_type(ty, std::iter::once(derive))
+    }
 
     let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);
