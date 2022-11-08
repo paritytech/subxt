@@ -63,6 +63,9 @@ pub enum Error {
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    /// Block related error.
+    #[error("Block error: {0}")]
+    Block(#[from] BlockError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
@@ -102,10 +105,17 @@ impl From<DispatchError> for Error {
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,
-/// the error is any custom string.
+/// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
-#[error("RPC error: {0}")]
-pub struct RpcError(pub String);
+#[error("RPC error")]
+pub enum RpcError {
+    // Dev note: We need the error to be safely sent between threads
+    // for `subscribe_to_block_headers_filling_in_gaps` and friends.
+    /// Error related to the RPC client.
+    ClientError(Box<dyn std::error::Error + Send + 'static>),
+    /// The RPC subscription dropped.
+    SubscriptionDropped,
+}
 
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep
@@ -227,6 +237,24 @@ impl DispatchError {
                 error: err.error,
             },
         })
+    }
+}
+
+/// Block error
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+pub enum BlockError {
+    /// The block
+    #[error(
+        "Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)"
+    )]
+    BlockHashNotFound(String),
+}
+
+impl BlockError {
+    /// Produce an error that a block with the given hash cannot be found.
+    pub fn block_hash_not_found(hash: impl AsRef<[u8]>) -> BlockError {
+        let hash = format!("0x{}", hex::encode(hash));
+        BlockError::BlockHashNotFound(hash)
     }
 }
 

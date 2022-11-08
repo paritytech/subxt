@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    dynamic::DecodedValue,
+    dynamic::DecodedValueThunk,
     metadata::DecodeWithMetadata,
 };
 use std::borrow::Cow;
@@ -97,7 +97,7 @@ pub fn dynamic<'a>(
 }
 
 impl<'a> ConstantAddress for DynamicConstantAddress<'a> {
-    type Target = DecodedValue;
+    type Target = DecodedValueThunk;
 
     fn pallet_name(&self) -> &str {
         &self.pallet_name

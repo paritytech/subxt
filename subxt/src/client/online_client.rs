@@ -7,6 +7,7 @@ use super::{
     OfflineClientT,
 };
 use crate::{
+    blocks::BlocksClient,
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
@@ -73,8 +74,8 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
         let client = jsonrpsee_helpers::ws_client(url.as_ref())
             .await
-            .map_err(|e| crate::error::RpcError(e.to_string()))?;
-        OnlineClient::from_rpc_client(client).await
+            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+        OnlineClient::from_rpc_client(Arc::new(client)).await
     }
 }
 
@@ -82,7 +83,7 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
     /// implementation to drive the connection.
     pub async fn from_rpc_client<R: RpcClientT>(
-        rpc_client: R,
+        rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::new(rpc_client);
 
@@ -202,6 +203,11 @@ impl<T: Config> OnlineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Work with blocks.
+    pub fn blocks(&self) -> BlocksClient<T, Self> {
+        <Self as OfflineClientT<T>>::blocks(self)
     }
 }
 

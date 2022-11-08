@@ -10,6 +10,7 @@ mod type_def;
 mod type_def_params;
 mod type_path;
 
+use darling::FromMeta;
 use proc_macro2::{
     Ident,
     Span,
@@ -63,6 +64,8 @@ pub struct TypeGenerator<'a> {
     type_substitutes: HashMap<String, syn::TypePath>,
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
+    /// The `subxt` crate access path in the generated code.
+    crate_path: CratePath,
 }
 
 impl<'a> TypeGenerator<'a> {
@@ -72,6 +75,7 @@ impl<'a> TypeGenerator<'a> {
         root_mod: &'static str,
         type_substitutes: HashMap<String, syn::TypePath>,
         derives: DerivesRegistry,
+        crate_path: CratePath,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
@@ -79,6 +83,7 @@ impl<'a> TypeGenerator<'a> {
             type_registry,
             type_substitutes,
             derives,
+            crate_path,
         }
     }
 
@@ -126,9 +131,10 @@ impl<'a> TypeGenerator<'a> {
             .or_insert_with(|| Module::new(mod_ident, root_mod_ident.clone()));
 
         if path.len() == 1 {
-            child_mod
-                .types
-                .insert(ty.path().clone(), TypeDefGen::from_type(ty, self));
+            child_mod.types.insert(
+                ty.path().clone(),
+                TypeDefGen::from_type(ty, self, &self.crate_path),
+            );
         } else {
             self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
         }
@@ -279,6 +285,7 @@ impl<'a> TypeGenerator<'a> {
                         parent_type_params,
                     )),
                     is_field,
+                    crate_path: self.crate_path.clone(),
                 }
             }
             TypeDef::BitSequence(bitseq) => {
@@ -293,6 +300,7 @@ impl<'a> TypeGenerator<'a> {
                         false,
                         parent_type_params,
                     )),
+                    crate_path: self.crate_path.clone(),
                 }
             }
         };
@@ -356,5 +364,76 @@ impl Module {
     /// Returns the module ident.
     pub fn ident(&self) -> &Ident {
         &self.name
+    }
+
+    /// Returns this `Module`s child `mod`s.
+    pub fn children(&self) -> impl Iterator<Item = (&Ident, &Module)> {
+        self.children.iter()
+    }
+
+    /// Returns the generated types.
+    pub fn types(
+        &self,
+    ) -> impl Iterator<Item = (&scale_info::Path<PortableForm>, &TypeDefGen)> {
+        self.types.iter()
+    }
+
+    /// Returns the root `mod` used for resolving type paths.
+    pub fn root_mod(&self) -> &Ident {
+        &self.root_mod
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct CratePath(syn::Path);
+
+impl CratePath {
+    /// Create a new `CratePath` from a `syn::Path`.
+    pub fn new(path: syn::Path) -> Self {
+        Self(path)
+    }
+}
+
+impl Default for CratePath {
+    fn default() -> Self {
+        Self(syn::parse_quote!(::subxt))
+    }
+}
+
+impl From<syn::Path> for CratePath {
+    fn from(path: syn::Path) -> Self {
+        CratePath::new(path)
+    }
+}
+
+impl ToTokens for CratePath {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.0.to_tokens(tokens)
+    }
+}
+
+impl From<&str> for CratePath {
+    fn from(crate_path: &str) -> Self {
+        Self(syn::Path::from_string(crate_path).unwrap_or_else(|err| {
+            panic!(
+                "failed converting {:?} to `syn::Path`: {:?}",
+                crate_path, err
+            );
+        }))
+    }
+}
+
+impl From<String> for CratePath {
+    fn from(crate_path: String) -> Self {
+        CratePath::from(crate_path.as_str())
+    }
+}
+
+impl From<Option<String>> for CratePath {
+    fn from(maybe_crate_path: Option<String>) -> Self {
+        match maybe_crate_path {
+            None => CratePath::default(),
+            Some(crate_path) => crate_path.into(),
+        }
     }
 }

@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{
+    CratePath,
     Derives,
     Field,
     TypeDefParameters,
@@ -41,6 +42,7 @@ pub struct CompositeDef {
 
 impl CompositeDef {
     /// Construct a definition which will generate code for a standalone `struct`.
+    #[allow(clippy::too_many_arguments)]
     pub fn struct_def(
         ty: &Type<PortableForm>,
         ident: &str,
@@ -49,6 +51,7 @@ impl CompositeDef {
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
         docs: &[String],
+        crate_path: &CratePath,
     ) -> Self {
         let mut derives = type_gen.type_derives(ty);
         let fields: Vec<_> = fields_def.field_types().collect();
@@ -73,7 +76,7 @@ impl CompositeDef {
                             | TypeDefPrimitive::U128
                     )
                 ) {
-                    derives.insert_codec_compact_as()
+                    derives.insert_codec_compact_as(crate_path)
                 }
             }
         }

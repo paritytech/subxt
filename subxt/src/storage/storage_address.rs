@@ -5,7 +5,7 @@
 use super::storage_map_key::StorageMapKey;
 use crate::{
     dynamic::{
-        DecodedValue,
+        DecodedValueThunk,
         Value,
     },
     error::{
@@ -194,7 +194,7 @@ impl<'a, Encodable> StorageAddress for DynamicStorageAddress<'a, Encodable>
 where
     Encodable: EncodeWithMetadata,
 {
-    type Target = DecodedValue;
+    type Target = DecodedValueThunk;
 
     // For dynamic types, we have no static guarantees about any of
     // this stuff, so we just allow it and let it fail at runtime:

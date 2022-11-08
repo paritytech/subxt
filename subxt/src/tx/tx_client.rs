@@ -224,14 +224,11 @@ where
         Call: TxPayload,
     {
         // Get nonce from the node.
-        let account_nonce = if let Some(nonce) = signer.nonce() {
-            nonce
-        } else {
-            self.client
-                .rpc()
-                .system_account_next_index(signer.account_id())
-                .await?
-        };
+        let account_nonce = self
+            .client
+            .rpc()
+            .system_account_next_index(signer.account_id())
+            .await?;
 
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
     }
@@ -349,6 +346,12 @@ where
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
+    }
+
+    /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
+    /// extrinsic bytes.
+    pub fn into_encoded(self) -> Vec<u8> {
+        self.encoded.0
     }
 }
 
