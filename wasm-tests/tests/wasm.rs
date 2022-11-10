@@ -22,5 +22,5 @@ async fn wasm_ws_transport_works() {
             .unwrap();
 
     let chain = client.rpc().system_chain().await.unwrap();
-    assert_eq!(&chain, "polkadot");
+    assert_eq!(&chain, "Development");
 }
