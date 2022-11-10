@@ -61,7 +61,10 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 }
 
 // The default constructors assume Jsonrpsee.
-#[cfg(any(all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")), all(feature = "jsonrpsee-web", target_arch = "wasm32")))]
+#[cfg(any(
+    all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")),
+    all(feature = "jsonrpsee-web", target_arch = "wasm32")
+))]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
