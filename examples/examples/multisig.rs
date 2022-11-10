@@ -29,10 +29,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<SubstrateConfig>::new().await?;
 
-    // The call data of for the `Multisig::as_multi`.
+    // The call data for the `Multisig::as_multi` extrinsic.
     // This must be of type `RuntimeCall` and represents the `Assets::freeze_asset` method.
-    // Otherwise, could have been obtained using
-    // `substrate::tx().assets().freeze_asset(100)`
+    // Otherwise, could have been obtained using `substrate::tx().assets().freeze_asset(100)`
     let call = substrate::runtime_types::kitchensink_runtime::RuntimeCall::Assets(
         substrate::runtime_types::pallet_assets::pallet::Call::freeze_asset { id: 100 },
     );
@@ -57,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_weight,
     );
 
-    // Submit the transaction with default params:
+    // Submit the extrinsic with default params:
     let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
 
     println!("Multisig extrinsic submitted: {:?}", hash);
