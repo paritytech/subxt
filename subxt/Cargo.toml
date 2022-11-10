@@ -33,7 +33,7 @@ scale-value = "0.6.0"
 scale-decode = "0.4.0"
 futures = { version = "0.3.13", default-features = false }
 hex = "0.4.3"
-jsonrpsee = { version = "0.15.1", optional = true, features = ["jsonrpsee-types"] }
+jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
