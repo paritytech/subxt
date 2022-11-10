@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Create the inner balance transfer call.
-    let call_value = subxt::dynamic::tx(
+    let inner_tx = subxt::dynamic::tx(
         "Balances",
         "transfer",
         vec![
@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Value::unnamed_composite([Value::from_bytes(&signer_account_id)]),
             ),
             ("maybe_timepoint", Value::unnamed_variant("None", [])),
-            ("call", call_value.into_value()),
+            ("call", inner_tx.into_value()),
             (
                 "max_weight",
                 Value::named_composite([
