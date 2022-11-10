@@ -32,7 +32,7 @@ scale-value = "0.6.0"
 scale-decode = "0.4.0"
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "jsonrpsee-types"], optional = true }
+jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "jsonrpsee-types"], optional = true }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
