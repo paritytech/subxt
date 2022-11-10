@@ -11,7 +11,7 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut sub = api.blocks().subscribe_headers().await?;
+    let mut sub = api.blocks().subscribe_best().await?;
 
     // Wait for the next set of headers, and check that the
     // associated block hash is the one we just finalized.
@@ -30,7 +30,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut sub = api.blocks().subscribe_finalized_headers().await?;
+    let mut sub = api.blocks().subscribe_finalized().await?;
 
     // Wait for the next set of headers, and check that the
     // associated block hash is the one we just finalized.
@@ -52,7 +52,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     // that there will be some gaps, even if there aren't any from the subscription.
     let some_finalized_blocks = api
         .rpc()
-        .subscribe_finalized_blocks()
+        .subscribe_finalized_block_headers()
         .await?
         .enumerate()
         .take(6)

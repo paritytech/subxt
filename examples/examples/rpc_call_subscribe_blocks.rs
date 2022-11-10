@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
-        api.rpc().subscribe_finalized_blocks().await?;
+        api.rpc().subscribe_finalized_block_headers().await?;
 
     while let Some(Ok(block)) = blocks.next().await {
         println!(

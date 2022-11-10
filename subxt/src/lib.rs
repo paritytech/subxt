@@ -133,6 +133,11 @@
 )]
 #![allow(clippy::type_complexity)]
 
+// Suppress an unused dependency warning because tokio is
+// only used in example code snippets at the time of writing.
+#[cfg(test)]
+use tokio as _;
+
 pub use subxt_macro::subxt;
 
 // Used to enable the js feature for wasm.

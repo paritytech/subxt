@@ -14,14 +14,7 @@ use crate::{
         RpcError,
         TransactionError,
     },
-    events::{
-        self,
-        EventDetails,
-        Events,
-        EventsClient,
-        Phase,
-        StaticEvent,
-    },
+    events::EventsClient,
     rpc::{
         Subscription,
         SubstrateTxStatus,
@@ -147,7 +140,9 @@ where
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
     /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(self) -> Result<TxEvents<T>, Error> {
+    pub async fn wait_for_finalized_success(
+        self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
@@ -343,7 +338,9 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TxEvents<T>, Error> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
@@ -365,7 +362,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TxEvents<T>, Error> {
+    pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let block = self
             .client
             .rpc()
@@ -376,7 +373,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let extrinsic_idx = block.block.extrinsics
             .iter()
             .position(|ext| {
-                let hash = T::Hashing::hash_of(ext);
+                let hash = T::Hashing::hash_of(&ext.0);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our
@@ -387,77 +384,10 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .at(Some(self.block_hash))
             .await?;
 
-        Ok(TxEvents {
-            ext_hash: self.ext_hash,
-            ext_idx: extrinsic_idx as u32,
+        Ok(crate::blocks::ExtrinsicEvents::new(
+            self.ext_hash,
+            extrinsic_idx as u32,
             events,
-        })
-    }
-}
-
-/// This represents the events related to our transaction.
-/// We can iterate over the events, or look for a specific one.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-pub struct TxEvents<T: Config> {
-    ext_hash: T::Hash,
-    ext_idx: u32,
-    events: Events<T>,
-}
-
-impl<T: Config> TxEvents<T> {
-    /// Return the hash of the block that the transaction has made it into.
-    pub fn block_hash(&self) -> T::Hash {
-        self.events.block_hash()
-    }
-
-    /// Return the hash of the extrinsic.
-    pub fn extrinsic_hash(&self) -> T::Hash {
-        self.ext_hash
-    }
-
-    /// Return all of the events in the block that the transaction made it into.
-    pub fn all_events_in_block(&self) -> &events::Events<T> {
-        &self.events
-    }
-
-    /// Iterate over all of the raw events associated with this transaction.
-    ///
-    /// This works in the same way that [`events::Events::iter()`] does, with the
-    /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, Error>> + '_ {
-        self.events.iter().filter(|ev| {
-            ev.as_ref()
-                .map(|ev| ev.phase() == Phase::ApplyExtrinsic(self.ext_idx))
-                .unwrap_or(true) // Keep any errors.
-        })
-    }
-
-    /// Find all of the transaction events matching the event type provided as a generic parameter.
-    ///
-    /// This works in the same way that [`events::Events::find()`] does, with the
-    /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
-        self.iter().filter_map(|ev| {
-            ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
-                .transpose()
-        })
-    }
-
-    /// Iterate through the transaction events using metadata to dynamically decode and skip
-    /// them, and return the first event found which decodes to the provided `Ev` type.
-    ///
-    /// This works in the same way that [`events::Events::find_first()`] does, with the
-    /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
-        self.find::<Ev>().next().transpose()
-    }
-
-    /// Find an event in those associated with this transaction. Returns true if it was found.
-    ///
-    /// This works in the same way that [`events::Events::has()`] does, with the
-    /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
-        Ok(self.find::<Ev>().next().transpose()?.is_some())
+        ))
     }
 }

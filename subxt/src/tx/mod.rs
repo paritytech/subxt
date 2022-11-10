@@ -52,7 +52,6 @@ pub use self::{
         TxPayload,
     },
     tx_progress::{
-        TxEvents,
         TxInBlock,
         TxProgress,
         TxStatus,
