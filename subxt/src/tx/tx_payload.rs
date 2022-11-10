@@ -14,17 +14,30 @@ use crate::{
     metadata::Metadata,
 };
 use codec::Encode;
+use scale_value::{
+    Composite,
+    ValueDef,
+    Variant,
+};
 use std::borrow::Cow;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
 pub trait TxPayload {
     /// Encode call data to the provided output.
-    fn encode_call_data(
+    fn encode_call_data_to(
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error>;
+
+    /// Encode call data and return the output. This is a convenience
+    /// wrapper around [`TxPayload::encode_call_data_to`].
+    fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
+        let mut v = Vec::new();
+        self.encode_call_data_to(metadata, &mut v)?;
+        Ok(v)
+    }
 
     /// Returns the details needed to validate the call, which
     /// include a statically generated hash, the pallet name,
@@ -83,7 +96,7 @@ impl<CallData> StaticTxPayload<CallData> {
 }
 
 impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
-    fn encode_call_data(
+    fn encode_call_data_to(
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
@@ -113,32 +126,63 @@ impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
 pub struct DynamicTxPayload<'a> {
     pallet_name: Cow<'a, str>,
     call_name: Cow<'a, str>,
-    fields: Vec<Value<()>>,
+    fields: Composite<()>,
+}
+
+impl<'a> DynamicTxPayload<'a> {
+    /// Return the pallet name.
+    pub fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    /// Return the call name.
+    pub fn call_name(&self) -> &str {
+        &self.call_name
+    }
+
+    /// Convert the dynamic payload into a [`Value`]. This is useful
+    /// if you need to submit this as part of a larger call.
+    pub fn into_value(self) -> Value<()> {
+        let call = Value {
+            context: (),
+            value: ValueDef::Variant(Variant {
+                name: self.call_name.into_owned(),
+                values: self.fields,
+            }),
+        };
+
+        Value::unnamed_variant(self.pallet_name, [call])
+    }
 }
 
 /// Construct a new dynamic transaction payload to submit to a node.
 pub fn dynamic<'a>(
     pallet_name: impl Into<Cow<'a, str>>,
     call_name: impl Into<Cow<'a, str>>,
-    fields: Vec<Value<()>>,
+    fields: impl Into<Composite<()>>,
 ) -> DynamicTxPayload<'a> {
     DynamicTxPayload {
         pallet_name: pallet_name.into(),
         call_name: call_name.into(),
-        fields,
+        fields: fields.into(),
     }
 }
 
 impl<'a> TxPayload for DynamicTxPayload<'a> {
-    fn encode_call_data(
+    fn encode_call_data_to(
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
         let pallet = metadata.pallet(&self.pallet_name)?;
         let call_id = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;
-        let call_value =
-            Value::unnamed_variant(self.call_name.to_owned(), self.fields.clone());
+        let call_value = Value {
+            context: (),
+            value: ValueDef::Variant(Variant {
+                name: self.call_name.to_string(),
+                values: self.fields.clone(),
+            }),
+        };
 
         pallet.index().encode_to(out);
         scale_value::scale::encode_as_type(&call_value, call_id, metadata.types(), out)?;

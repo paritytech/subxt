@@ -79,7 +79,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     {
         let metadata = self.client.metadata();
         let mut bytes = Vec::new();
-        call.encode_call_data(&metadata, &mut bytes)?;
+        call.encode_call_data_to(&metadata, &mut bytes)?;
         Ok(bytes)
     }
 
@@ -101,7 +101,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             // transaction protocol version (4) (is not signed, so no 1 bit at the front).
             4u8.encode_to(&mut encoded_inner);
             // encode call data after this byte.
-            call.encode_call_data(&self.client.metadata(), &mut encoded_inner)?;
+            call.encode_call_data_to(&self.client.metadata(), &mut encoded_inner)?;
             // now, prefix byte length:
             let len = Compact(
                 u32::try_from(encoded_inner.len())
