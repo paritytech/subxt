@@ -36,6 +36,6 @@ scale = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 # generate the item mod for codegen
 syn = "1.0.80"
 # communicate with the substrate nodes
-jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport", "http-client"] }
+jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 # async runtime
 tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }

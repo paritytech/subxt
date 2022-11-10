@@ -42,11 +42,14 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@22c9328bcba27aa81a32b1bef27c7e3c78052531 # v2.0.1
 
-      - name: Build
-        uses: actions-rs/cargo@v1.0.3
+      - name: Install cargo-hack
+        uses: baptiste0928/cargo-install@v1
         with:
-          command: check
-          args: --all-targets --all-features --workspace
+          crate: cargo-hack
+          version: 0.5
+
+      - name: Cargo check all targets and features
+        run: cargo hack check --workspace --each-feature --all-targets
 
   fmt:
     name: Cargo fmt
@@ -165,3 +168,28 @@ jobs:
         with:
           command: clippy
           args: --all-targets -- -D warnings
+
+  wasm_tests:
+    name: Test wasm
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3.1.0
+
+    - name: Install
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Download Substrate
+      run: |
+        curl $SUBSTRATE_URL --output substrate --location
+        chmod +x substrate
+        mkdir -p ~/.local/bin
+        mv substrate ~/.local/bin
+
+    - name: Run WASM tests
+      run: |
+        substrate --dev --tmp > /dev/null 2>&1 &
+        wasm-pack test --headless --firefox
+        wasm-pack test --headless --chrome
+        pkill substrate
+      working-directory: wasm-tests

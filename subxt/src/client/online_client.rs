@@ -61,7 +61,7 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 }
 
 // The default constructors assume Jsonrpsee.
-#[cfg(any(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
+#[cfg(any(all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")), all(feature = "jsonrpsee-web", target_arch = "wasm32")))]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
@@ -346,7 +346,7 @@ impl Update {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee-ws", not(feature = "jsonrpsee-web")))]
+#[cfg(all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
@@ -385,7 +385,7 @@ mod jsonrpsee_helpers {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee-web", not(feature = "jsonrpsee-ws")))]
+#[cfg(all(feature = "jsonrpsee-web", target_arch = "wasm32"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,
@@ -398,7 +398,7 @@ mod jsonrpsee_helpers {
         },
     };
 
-    /// Build WEB RPC client from URL
+    /// Build web RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
         let (sender, receiver) = web::connect(url).await.unwrap();
         Ok(ClientBuilder::default()
