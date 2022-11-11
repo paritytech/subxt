@@ -242,7 +242,7 @@ async fn storage_current_era() -> Result<(), Error> {
 async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let reward_points_addr = node_runtime::storage().staking().eras_reward_points(&0);
+    let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
     let current_era_result = api.storage().fetch(&reward_points_addr, None).await;
     assert!(current_era_result.is_ok());
 
