@@ -68,7 +68,7 @@ where
 
             let event_bytes = client
                 .rpc()
-                .storage(&*system_events_key().0, Some(block_hash))
+                .storage(&system_events_key().0, Some(block_hash))
                 .await?
                 .map(|e| e.0)
                 .unwrap_or_else(Vec::new);

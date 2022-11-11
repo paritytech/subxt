@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
     println!("    account controlled by: {:?}", controller_acc);
 
-    let era_reward_addr = polkadot::storage().staking().eras_reward_points(&era.index);
+    let era_reward_addr = polkadot::storage().staking().eras_reward_points(era.index);
     let era_result = api.storage().fetch(&era_reward_addr, None).await?;
     println!("Era reward points: {:?}", era_result);
 
