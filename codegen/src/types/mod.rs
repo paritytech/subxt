@@ -109,6 +109,7 @@ impl<'a> TypeGenerator<'a> {
         root_mod
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     fn insert_type(
         &'a self,
         ty: Type<PortableForm>,
