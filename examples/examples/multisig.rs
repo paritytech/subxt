@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Now, build an outer call which this inner call will be a part of.
     // This sets up the multisig arrangement.
     let tx = polkadot::tx().multisig().as_multi(
-        // threashold
+        // threshold
         1,
         // other signatories
         vec![signer_account_id],
