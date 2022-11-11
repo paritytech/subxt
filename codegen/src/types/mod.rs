@@ -92,14 +92,13 @@ impl<'a> TypeGenerator<'a> {
         let mut root_mod =
             Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
-        for (id, ty) in self.type_registry.types().iter().enumerate() {
+        for ty in self.type_registry.types().iter() {
             if ty.ty().path().namespace().is_empty() {
                 // prelude types e.g. Option/Result have no namespace, so we don't generate them
                 continue
             }
             self.insert_type(
                 ty.ty().clone(),
-                id as u32,
                 ty.ty().path().namespace().to_vec(),
                 &self.types_mod_ident,
                 &mut root_mod,
@@ -109,11 +108,9 @@ impl<'a> TypeGenerator<'a> {
         root_mod
     }
 
-    #[allow(clippy::only_used_in_recursion)]
     fn insert_type(
         &'a self,
         ty: Type<PortableForm>,
-        id: u32,
         path: Vec<String>,
         root_mod_ident: &Ident,
         module: &mut Module,
@@ -137,7 +134,7 @@ impl<'a> TypeGenerator<'a> {
                 TypeDefGen::from_type(ty, self, &self.crate_path),
             );
         } else {
-            self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
+            self.insert_type(ty, path[1..].to_vec(), root_mod_ident, child_mod)
         }
     }
 
