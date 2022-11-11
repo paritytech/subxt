@@ -7,10 +7,10 @@ members = [
     "testing/test-runtime",
     "testing/integration-tests",
     "testing/ui-tests",
-    "testing/wasm-tests",
     "macro",
     "metadata",
     "subxt"
 ]
+exclude = ["testing/wasm-tests"]
 
 resolver = "2"
