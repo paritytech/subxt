@@ -12,11 +12,13 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    dynamic::Value,
     tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,42 +36,37 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Create the inner balance transfer call.
-    let inner_tx = subxt::dynamic::tx(
-        "Balances",
-        "transfer",
-        vec![
-            Value::unnamed_variant("Id", [Value::from_bytes(&dest)]),
-            Value::u128(123_456_789_012_345),
-        ],
+    //
+    // Note: This call, being manually constructed, will have a specific pallet and call index
+    // which is determined by the generated code. If you're trying to submit this to a node which
+    // has the pallets/calls at different indexes, it will fail. See `dynamic_multisig.rs` for a
+    // workaround in this case which will work regardless of pallet and call indexes.
+    let inner_tx = polkadot::runtime_types::polkadot_runtime::RuntimeCall::Balances(
+        polkadot::runtime_types::pallet_balances::pallet::Call::transfer {
+            dest: dest.into(),
+            value: 123_456_789_012_345,
+        },
     );
 
     // Now, build an outer call which this inner call will be a part of.
     // This sets up the multisig arrangement.
-    //
-    // Note: Since this is a dynamic call, we can either use named or unnamed
-    // arguments (if unnamed, the order matters).
-    let tx = subxt::dynamic::tx(
-        "Multisig",
-        "as_multi",
-        vec![
-            ("threshold", Value::u128(1)),
-            (
-                "other_signatories",
-                Value::unnamed_composite([Value::from_bytes(&signer_account_id)]),
-            ),
-            ("maybe_timepoint", Value::unnamed_variant("None", [])),
-            ("call", inner_tx.into_value()),
-            (
-                "max_weight",
-                Value::named_composite([
-                    ("ref_time", Value::u128(10000000000)),
-                    ("proof_size", Value::u128(1)),
-                ]),
-            ),
-        ],
+    let tx = polkadot::tx().multisig().as_multi(
+        // threashold
+        1,
+        // other signatories
+        vec![signer_account_id],
+        // maybe timepoint
+        None,
+        // call
+        inner_tx,
+        // max weight
+        polkadot::runtime_types::sp_weights::weight_v2::Weight {
+            ref_time: 10000000000,
+            proof_size: 1,
+        },
     );
 
-    // Submit it:
+    // Submit the extrinsic with default params:
     let encoded = hex::encode(&api.tx().call_data(&tx)?);
     println!("Call data: {encoded}");
     let tx_hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
