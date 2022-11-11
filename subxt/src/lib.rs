@@ -144,6 +144,9 @@ pub use subxt_macro::subxt;
 #[cfg(target_arch = "wasm32")]
 pub use getrandom as _;
 
+#[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
+std::compile_error!("Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive");
+
 pub mod blocks;
 pub mod client;
 pub mod config;

@@ -62,7 +62,7 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 
 // The default constructors assume Jsonrpsee.
 #[cfg(any(
-    all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")),
+    feature = "jsonrpsee-ws",
     all(feature = "jsonrpsee-web", target_arch = "wasm32")
 ))]
 impl<T: Config> OnlineClient<T> {
@@ -349,7 +349,7 @@ impl Update {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee-ws", not(target_arch = "wasm32")))]
+#[cfg(feature = "jsonrpsee-ws")]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{

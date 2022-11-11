@@ -48,8 +48,8 @@ jobs:
           crate: cargo-hack
           version: 0.5
 
-      - name: Cargo check all targets and features
-        run: cargo hack check --workspace --each-feature --all-targets
+      - name: Cargo check
+        run: cargo hack --exclude-all-features --each-feature check --all-targets --workspace
 
   fmt:
     name: Cargo fmt
@@ -192,4 +192,4 @@ jobs:
         wasm-pack test --headless --firefox
         wasm-pack test --headless --chrome
         pkill substrate
-      working-directory: wasm-tests
+      working-directory: testing/wasm-tests
