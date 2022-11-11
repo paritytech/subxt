@@ -51,7 +51,7 @@ impl DecodeWithMetadata for DecodedValueThunk {
         metadata: &Metadata,
     ) -> Result<Self::Target, Error> {
         let mut v = Vec::with_capacity(bytes.len());
-        v.extend_from_slice(*bytes);
+        v.extend_from_slice(bytes);
         *bytes = &[];
         Ok(DecodedValueThunk {
             type_id,

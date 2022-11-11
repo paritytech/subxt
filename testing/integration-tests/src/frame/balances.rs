@@ -101,12 +101,12 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let alice_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(&alice.account_id())],
+        vec![Value::from_bytes(alice.account_id())],
     );
     let bob_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(&bob.account_id())],
+        vec![Value::from_bytes(bob.account_id())],
     );
 
     let alice_pre = api
@@ -122,7 +122,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         "Balances",
         "transfer",
         vec![
-            Value::unnamed_variant("Id", vec![Value::from_bytes(&bob.account_id())]),
+            Value::unnamed_variant("Id", vec![Value::from_bytes(bob.account_id())]),
             Value::u128(10_000u128),
         ],
     );
@@ -145,11 +145,11 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let expected_fields = Composite::Named(vec![
         (
             "from".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(&alice.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(alice.account_id())]),
         ),
         (
             "to".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(&bob.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(bob.account_id())]),
         ),
         ("amount".into(), Value::u128(10_000)),
     ]);

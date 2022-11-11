@@ -57,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Example 2. Obtained keys:");
         for key in keys.iter() {
-            println!("Key: 0x{}", hex::encode(&key));
+            println!("Key: 0x{}", hex::encode(key));
 
             if let Some(storage_data) = api.storage().fetch_raw(&key.0, None).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // We know that the first key is a u32 (the `XcmVersion`) and is hashed by twox64_concat.
         // We can build a `StorageMapKey` that replicates that, and append those bytes to the above.
-        StorageMapKey::new(&2u32, StorageHasher::Twox64Concat).to_bytes(&mut query_key);
+        StorageMapKey::new(2u32, StorageHasher::Twox64Concat).to_bytes(&mut query_key);
 
         // The final query key is essentially the result of:
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Obtained keys:");
         for key in keys.iter() {
-            println!("Key: 0x{}", hex::encode(&key));
+            println!("Key: 0x{}", hex::encode(key));
 
             if let Some(storage_data) = api.storage().fetch_raw(&key.0, None).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
