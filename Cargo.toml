@@ -9,5 +9,8 @@ members = [
     "testing/ui-tests",
     "macro",
     "metadata",
-    "subxt",
+    "subxt"
 ]
+exclude = ["testing/wasm-tests"]
+
+resolver = "2"
