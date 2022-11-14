@@ -43,8 +43,8 @@ subxt-macro = { version = "0.24.0", path = "../macro" }
 subxt-metadata = { version = "0.24.0", path = "../metadata" }
 
 # todo: release these from substrate and use crates.io packages
-sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "aj/sp-runtime-parity-util-mem", package = "sp-core", default-features = false  }
-sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "aj/sp-runtime-parity-util-mem", package = "sp-runtime", default-features = false  }
+sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.33", package = "sp-core", default-features = false  }
+sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.33", package = "sp-runtime", default-features = false  }
 
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
