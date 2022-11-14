@@ -138,7 +138,7 @@ impl<'a> TxPayload for DynamicTxPayload<'a> {
         let pallet = metadata.pallet(&self.pallet_name)?;
         let call_id = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;
         let call_value =
-            Value::unnamed_variant(self.call_name.to_owned(), self.fields.clone());
+            Value::unnamed_variant(self.call_name.clone(), self.fields.clone());
 
         pallet.index().encode_to(out);
         scale_value::scale::encode_as_type(&call_value, call_id, metadata.types(), out)?;

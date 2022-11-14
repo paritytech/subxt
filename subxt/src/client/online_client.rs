@@ -61,7 +61,10 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 }
 
 // The default constructors assume Jsonrpsee.
-#[cfg(feature = "jsonrpsee")]
+#[cfg(any(
+    feature = "jsonrpsee-ws",
+    all(feature = "jsonrpsee-web", target_arch = "wasm32")
+))]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
@@ -72,7 +75,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let client = jsonrpsee_helpers::ws_client(url.as_ref())
+        let client = jsonrpsee_helpers::client(url.as_ref())
             .await
             .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
         OnlineClient::from_rpc_client(Arc::new(client)).await
@@ -346,7 +349,7 @@ impl Update {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(feature = "jsonrpsee")]
+#[cfg(feature = "jsonrpsee-ws")]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{
@@ -366,7 +369,7 @@ mod jsonrpsee_helpers {
     };
 
     /// Build WS RPC client from URL
-    pub async fn ws_client(url: &str) -> Result<Client, Error> {
+    pub async fn client(url: &str) -> Result<Client, Error> {
         let (sender, receiver) = ws_transport(url).await?;
         Ok(ClientBuilder::default()
             .max_notifs_per_subscription(4096)
@@ -381,5 +384,28 @@ mod jsonrpsee_helpers {
             .build(url)
             .await
             .map_err(|e| Error::Transport(e.into()))
+    }
+}
+
+// helpers for a jsonrpsee specific OnlineClient.
+#[cfg(all(feature = "jsonrpsee-web", target_arch = "wasm32"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::{
+            client::{
+                Client,
+                ClientBuilder,
+            },
+            Error,
+        },
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url).await.unwrap();
+        Ok(ClientBuilder::default()
+            .max_notifs_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
     }
 }
