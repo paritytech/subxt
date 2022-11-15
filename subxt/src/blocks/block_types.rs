@@ -223,7 +223,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails, Error>> + Send + Sync + 'static {
+    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails, Error>> + Send + Sync + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
