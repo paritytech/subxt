@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.25.0] - 2022-11-16
+
+This release fixes the `parity-util-mem` several version guard by updating substrate related dependencies which makes
+it possible to have other substrate dependencies in tree again.
+
+In addition the release has several API improvements in the dynamic transaction API along with that subxt now compiles down to WASM.
+
+Notable PRs merged:
+
+### Added
+
+- Add getters for `Module` ([#697](https://github.com/paritytech/subxt/pull/697))
+- add wasm support (#700)  ([#700](https://github.com/paritytech/subxt/pull/700))
+- Extend the new `api.blocks()` to be the primary way to subscribe and fetch blocks/extrinsics/events ([#691](https://github.com/paritytech/subxt/pull/691))
+- Add runtime_metadata_url to pull metadata directly from a node ([#689](https://github.com/paritytech/subxt/pull/689))
+- Implement `BlocksClient` for working with blocks ([#671](https://github.com/paritytech/subxt/pull/671))
+- Allow specifying the `subxt` crate path for generated code ([#664](https://github.com/paritytech/subxt/pull/664))
+- Allow taking out raw bytes from a SubmittableExtrinsic ([#683](https://github.com/paritytech/subxt/pull/683))
+- Add DecodedValueThunk to allow getting bytes back from dynamic queries ([#680](https://github.com/paritytech/subxt/pull/680))
+
+### Changed
+
+- Update substrate crates ([#709](https://github.com/paritytech/subxt/pull/709))
+- Make working with nested queries a touch easier ([#714](https://github.com/paritytech/subxt/pull/714))
+- Upgrade to scale-info 2.3 and fix errors ([#704](https://github.com/paritytech/subxt/pull/704))
+- No need to entangle Signer and nonce now ([#702](https://github.com/paritytech/subxt/pull/702))
+- error: `RpcError` with custom client error ([#694](https://github.com/paritytech/subxt/pull/694))
+- into_encoded() for consistency ([#685](https://github.com/paritytech/subxt/pull/685))
+- make subxt::Config::Extrinsic Send ([#681](https://github.com/paritytech/subxt/pull/681))
+- Refactor CLI tool to give room for growth ([#667](https://github.com/paritytech/subxt/pull/667))
+- expose jsonrpc-core client ([#672](https://github.com/paritytech/subxt/pull/672))
+- Upgrade clap to v4 ([#678](https://github.com/paritytech/subxt/pull/678))
+
+
 ## [0.24.0] - 2022-09-22
 
 This release has a bunch of smaller changes and fixes. The breaking changes are fairly minor and should be easy to address if encountered. Notable additions are:
