@@ -16,7 +16,7 @@ Notable PRs merged:
 ### Added
 
 - Add getters for `Module` ([#697](https://github.com/paritytech/subxt/pull/697))
-- add wasm support (#700)  ([#700](https://github.com/paritytech/subxt/pull/700))
+- add wasm support ([#700](https://github.com/paritytech/subxt/pull/700))
 - Extend the new `api.blocks()` to be the primary way to subscribe and fetch blocks/extrinsics/events ([#691](https://github.com/paritytech/subxt/pull/691))
 - Add runtime_metadata_url to pull metadata directly from a node ([#689](https://github.com/paritytech/subxt/pull/689))
 - Implement `BlocksClient` for working with blocks ([#671](https://github.com/paritytech/subxt/pull/671))
