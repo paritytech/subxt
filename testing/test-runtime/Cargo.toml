@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.33", package = "sp-runtime" }
+sp-runtime = "7.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
-sp-core = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.33", package = "sp-core", default-features = false  }
+sp-core = { version = "7.0.0", default-features = false  }
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }
