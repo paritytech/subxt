@@ -92,7 +92,7 @@ impl<'a> TypeGenerator<'a> {
         let mut root_mod =
             Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
-        for (_id, ty) in self.type_registry.types().iter().enumerate() {
+        for ty in self.type_registry.types().iter() {
             if ty.ty().path().namespace().is_empty() {
                 // prelude types e.g. Option/Result have no namespace, so we don't generate them
                 continue

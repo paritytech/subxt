@@ -72,7 +72,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
         bytes.extend(&sp_core::twox_128("KeyOwner".as_bytes())[..]);
         // twox64_concat a *tuple* of the args expected:
         let suffix = (KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8]).encode();
-        bytes.extend(&sp_core::twox_64(&suffix));
+        bytes.extend(sp_core::twox_64(&suffix));
         bytes.extend(&suffix);
         bytes
     };

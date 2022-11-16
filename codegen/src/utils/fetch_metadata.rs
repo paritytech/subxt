@@ -71,7 +71,7 @@ async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
         .request_timeout(Duration::from_secs(180))
         .build(url.to_string())?;
 
-    Ok(client.request::<String>("state_getMetadata", None).await?)
+    Ok(client.request("state_getMetadata", rpc_params![]).await?)
 }
 
 #[derive(Debug)]
