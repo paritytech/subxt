@@ -13,7 +13,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 3.  Check that you're happy with the current documentation.
 
     ```
-    cargo doc --open --all-features
+    cargo doc --open
     ```
 
     CI checks for broken internal links at the moment. Optionally you can also confirm that any external links
@@ -21,7 +21,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     ```
     cargo install cargo-deadlinks
-    cargo deadlinks --check-http -- --all-features
+    cargo deadlinks --check-http
     ```
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
@@ -59,7 +59,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     2.  Perform a final sanity check that everything looks ok.
 
         ```
-        cargo check --all-targets
+        cargo hack --exclude-all-features --each-feature check --all-targets --workspace
         cargo test --all-targets
         ```
 

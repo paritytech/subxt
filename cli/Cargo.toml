@@ -1,6 +1,6 @@
 [package]
 name = "subxt-cli"
-version = "0.24.0"
+version = "0.25.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -16,9 +16,9 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.24.0", path = "../codegen" }
+subxt-codegen = { version = "0.25.0", path = "../codegen" }
 # perform node compatibility
-subxt-metadata = { version = "0.24.0", path = "../metadata" }
+subxt-metadata = { version = "0.25.0", path = "../metadata" }
 # parse command line args
 clap = { version = "4.0.8", features = ["derive"] }
 # colourful error reports
