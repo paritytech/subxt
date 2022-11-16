@@ -37,7 +37,6 @@ Notable PRs merged:
 - expose jsonrpc-core client ([#672](https://github.com/paritytech/subxt/pull/672))
 - Upgrade clap to v4 ([#678](https://github.com/paritytech/subxt/pull/678))
 
-
 ## [0.24.0] - 2022-09-22
 
 This release has a bunch of smaller changes and fixes. The breaking changes are fairly minor and should be easy to address if encountered. Notable additions are:
