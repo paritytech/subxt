@@ -1,4 +1,4 @@
-                                                                                                                [package]
+[package]
 name = "subxt-cli"
 version = "0.25.0"
 authors = ["Parity Technologies <admin@parity.io>"]
