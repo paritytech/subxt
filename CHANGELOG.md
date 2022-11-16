@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.25.0] - 2022-11-16
 
 This release resolves the `parity-util-mem crate` several version guard by updating substrate related dependencies which makes
-it possible to have other substrate dependencies in tree again.
+it possible to have other substrate dependencies in tree again along with subxt.
 
 In addition the release has several API improvements in the dynamic transaction API along with that subxt now compiles down to WASM.
 
