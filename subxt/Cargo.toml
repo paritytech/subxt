@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.24.0"
+version = "0.25.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -40,8 +40,8 @@ thiserror = "1.0.24"
 tracing = "0.1.34"
 parking_lot = "0.12.0"
 
-subxt-macro = { version = "0.24.0", path = "../macro" }
-subxt-metadata = { version = "0.24.0", path = "../metadata" }
+subxt-macro = { version = "0.25.0", path = "../macro" }
+subxt-metadata = { version = "0.25.0", path = "../metadata" }
 
 sp-core = { version = "7.0.0", default-features = false  }
 sp-runtime = "7.0.0"
