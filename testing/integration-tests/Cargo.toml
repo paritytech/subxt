@@ -23,8 +23,7 @@ hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "7.0.0", default-features = false }
-# todo: release and update sp-keyring
-sp-keyring = { version = "6.0.0", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.33", package = "sp-keyring", default-features = false }
+sp-keyring = { version = "7.0.0", git = "https://github.com/paritytech/substrate", default-features = false }
 sp-runtime = "7.0.0"
 syn = "1.0.0"
 subxt = { version = "0.24.0", path = "../../subxt" }
