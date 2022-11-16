@@ -42,7 +42,7 @@ pub struct Opts {
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     let (ty, derive) = src
         .split_once('=')
-        .ok_or::<String>( "Invalid pattern for `derive-for-type`. It should be `type=derive`, like `my_type=serde::Serialize`".into())?;
+        .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive`, like `my_type=serde::Serialize`"))?;
 
     Ok((ty.to_string(), derive.to_string()))
 }
