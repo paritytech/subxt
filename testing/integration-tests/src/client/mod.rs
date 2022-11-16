@@ -203,7 +203,7 @@ async fn dry_run_fails() {
 
     if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
         assert_eq!(module_error.index, 6);
-        assert_eq!(module_error.error, 2);
+        assert_eq!(module_error.error, [2, 0, 0, 0]);
     } else {
         panic!("expected a module error when dryrunning");
     }
