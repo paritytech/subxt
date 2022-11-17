@@ -99,9 +99,16 @@ pub type KeyedVec<K, V> = Vec<(K, V)>;
 
 /// Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
 pub mod bits {
-    use codec::{Compact, Input};
+    use codec::{
+        Compact,
+        Input,
+    };
     use scale_bits::{
-        scale::format::{Format, OrderFormat, StoreFormat},
+        scale::format::{
+            Format,
+            OrderFormat,
+            StoreFormat,
+        },
         Bits,
     };
     use std::marker::PhantomData;
@@ -178,7 +185,7 @@ pub mod bits {
             let Compact(bits) = <Compact<u32>>::decode(input)?;
             // Otherwise it is impossible to store it on 32bit machine.
             if bits as usize > ARCH32BIT_BITSLICE_MAX_BITS {
-                return Err("Attempt to decode a BitVec with too many bits".into());
+                return Err("Attempt to decode a BitVec with too many bits".into())
             }
             // NOTE: Replace with `bits.div_ceil(Store::BITS)` if `int_roundings` is stabilised
             let bytes_needed =
@@ -216,4 +223,10 @@ pub mod bits {
     }
 }
 
-pub use bits::{BitOrder, BitStore, DecodedBits, Lsb0, Msb0};
+pub use bits::{
+    BitOrder,
+    BitStore,
+    DecodedBits,
+    Lsb0,
+    Msb0,
+};
