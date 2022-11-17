@@ -26,10 +26,10 @@ jsonrpsee-ws = ["jsonrpsee/async-client", "jsonrpsee/client-ws-transport"]
 jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"]
 
 [dependencies]
-bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-scale-info = { version = "2.0.0", features = ["bit-vec"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
+scale-info = "2.0.0"
 scale-value = "0.6.0"
+scale-bits = "0.3"
 scale-decode = "0.4.0"
 futures = { version = "0.3.13", default-features = false }
 hex = "0.4.3"

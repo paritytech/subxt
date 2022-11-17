@@ -38145,9 +38145,9 @@ pub mod api {
                     Debug,
                 )]
                 pub struct AvailabilityBitfield(
-                    pub  ::subxt::ext::bitvec::vec::BitVec<
+                    pub  ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
                 );
                 #[derive(
@@ -38163,9 +38163,9 @@ pub mod api {
                     pub validity_votes: ::std::vec::Vec<
                         runtime_types::polkadot_primitives::v2::ValidityAttestation,
                     >,
-                    pub validator_indices: ::subxt::ext::bitvec::vec::BitVec<
+                    pub validator_indices: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
                 }
                 #[derive(
@@ -38255,13 +38255,13 @@ pub mod api {
                     Debug,
                 )]
                 pub struct DisputeState<_0> {
-                    pub validators_for: ::subxt::ext::bitvec::vec::BitVec<
+                    pub validators_for: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
-                    pub validators_against: ::subxt::ext::bitvec::vec::BitVec<
+                    pub validators_against: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
                     pub start: _0,
                     pub concluded_at: ::core::option::Option<_0>,
@@ -40088,13 +40088,13 @@ pub mod api {
                     pub hash: runtime_types::polkadot_core_primitives::CandidateHash,
                     pub descriptor:
                         runtime_types::polkadot_primitives::v2::CandidateDescriptor<_0>,
-                    pub availability_votes: ::subxt::ext::bitvec::vec::BitVec<
+                    pub availability_votes: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
-                    pub backers: ::subxt::ext::bitvec::vec::BitVec<
+                    pub backers: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
                     pub relay_parent_number: _1,
                     pub backed_in_number: _1,
@@ -40263,13 +40263,13 @@ pub mod api {
                     Debug,
                 )]
                 pub struct PvfCheckActiveVoteState<_0> {
-                    pub votes_accept: ::subxt::ext::bitvec::vec::BitVec<
+                    pub votes_accept: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
-                    pub votes_reject: ::subxt::ext::bitvec::vec::BitVec<
+                    pub votes_reject: ::subxt::utils::bits::DecodedBits<
                         ::core::primitive::u8,
-                        ::subxt::ext::bitvec::order::Lsb0,
+                        ::subxt::utils::bits::Lsb0,
                     >,
                     pub age: _0,
                     pub created_at: _0,
