@@ -169,7 +169,8 @@ pub mod bits {
         }
     }
 
-    /// `scale_bits::Bits` generic over the bit store (`u8`/`u16`/`u32`/`u64`) and bit order (LSB, MSB) types.
+    /// `scale_bits::Bits` generic over the bit store (`u8`/`u16`/`u32`/`u64`) and bit order (LSB, MSB)
+    /// used for SCALE encoding/decoding. Uses `scale_bits::Bits`-default `u8` and LSB format underneath.
     #[derive(Debug, Clone, PartialEq, Eq)]
     pub struct DecodedBits<Store: BitStore, Order: BitOrder>(
         pub Bits,
@@ -188,14 +189,20 @@ pub mod bits {
                 return Err("Attempt to decode a BitVec with too many bits".into())
             }
             // NOTE: Replace with `bits.div_ceil(Store::BITS)` if `int_roundings` is stabilised
-            let bytes_needed =
+            let elements =
                 (bits / Store::BITS) as usize + (bits % Store::BITS != 0) as usize;
+            let bytes_needed = elements * Store::BITS.saturating_div(u8::BITS) as usize;
 
             // NOTE: We could reduce allocations if it would be possible to directly
             // decode from an `Input` type using a custom format (rather than default <u8, Lsb0>)
             // for the `Bits` type.
-            let mut storage = Vec::with_capacity(bytes_needed);
-            input.read(&mut storage)?;
+            let mut storage = codec::Encode::encode(&Compact(bits));
+            dbg!(&storage[..]);
+            let prefix_len = storage.len();
+            storage.reserve_exact(bytes_needed);
+            storage.extend(vec![0; bytes_needed]);
+            input.read(&mut storage[prefix_len..])?;
+            dbg!(&storage[..]);
 
             let decoder = scale_bits::decode_using_format_from(
                 &storage,
