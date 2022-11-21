@@ -2,6 +2,7 @@
 name = "wasm-test"
 version = "0.1.0"
 edition = "2021"
+publish = false
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.24"
