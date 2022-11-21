@@ -54,6 +54,10 @@ impl ItemMod {
             })
             .collect()
     }
+
+    pub fn rust_items<'a>(&'a self) -> impl Iterator<Item = &'a syn::Item> {
+        self.items.iter().filter_map(Item::as_rust)
+    }
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -61,6 +65,15 @@ impl ItemMod {
 pub enum Item {
     Rust(syn::Item),
     Subxt(SubxtItem),
+}
+
+impl Item {
+    pub fn as_rust(&self) -> Option<&syn::Item> {
+        match self {
+            Item::Rust(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 
 impl From<syn::Item> for Item {

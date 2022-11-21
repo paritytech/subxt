@@ -300,7 +300,7 @@ impl RuntimeGenerator {
             }
         };
 
-        let mod_ident = item_mod_ir.ident;
+        let mod_ident = &item_mod_ir.ident;
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
@@ -322,9 +322,14 @@ impl RuntimeGenerator {
             })
             .collect();
 
+        let rust_items: Vec<_> = item_mod_ir.rust_items().collect();
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
+                // Preserve any Rust items that were previously defined in the adorned module
+                #( #rust_items ) *
+
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
                 // Identify the pallets composing the static metadata by name.

@@ -50,4 +50,5 @@ fn ui_tests() {
 fn ui_fail() {
     let t = trybuild::TestCases::new();
     t.compile_fail("src/incorrect/*.rs");
+    t.pass("src/correct/*.rs");
 }
