@@ -178,6 +178,18 @@ pub mod bits {
         pub PhantomData<Order>,
     );
 
+    impl<Store: BitStore, Order: BitOrder> DecodedBits<Store, Order> {
+        /// Extracts the underlying `scale_bits::Bits` value.
+        pub fn into_bits(self) -> Bits {
+            self.0
+        }
+
+        /// References the underlying `scale_bits::Bits` value.
+        pub fn to_bits(&self) -> &Bits {
+            &self.0
+        }
+    }
+
     impl<Store: BitStore, Order: BitOrder> core::iter::FromIterator<bool>
         for DecodedBits<Store, Order>
     {
