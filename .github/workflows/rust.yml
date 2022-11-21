@@ -176,8 +176,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
 
-    - name: Install
+    - name: Install wasm-pack
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Install firefox
+      uses: browser-actions/setup-firefox@latest
+
+    - name: Install chrome
+      uses: browser-actions/setup-chrome@latest
 
     - name: Download Substrate
       run: |
