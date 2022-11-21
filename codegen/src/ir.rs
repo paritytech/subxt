@@ -26,16 +26,13 @@ impl From<syn::ItemMod> for ItemMod {
                 abort!(module, "out-of-line subxt modules are not supported",)
             }
         };
-        let items = items
-            .into_iter()
-            .map(<Item as From<syn::Item>>::from)
-            .collect::<Vec<_>>();
+
         Self {
             vis: module.vis,
             mod_token: module.mod_token,
             ident: module.ident,
             brace,
-            items,
+            items: items.into_iter().map(From::from).collect(),
         }
     }
 }
