@@ -162,7 +162,7 @@ pub mod bits {
     order!(BitOrder; Lsb0, Msb0);
 
     /// Constructs a run-time format parameters based on the corresponding type-level parameters.
-    pub fn bit_format<Store: BitStore, Order: BitOrder>() -> Format {
+    fn bit_format<Store: BitStore, Order: BitOrder>() -> Format {
         Format {
             order: Order::FORMAT,
             store: Store::FORMAT,
