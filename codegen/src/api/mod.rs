@@ -204,9 +204,7 @@ impl RuntimeGenerator {
         })
         .collect::<HashMap<_, _>>();
 
-        for (path, substitute) in item_mod_ir.type_substitutes().iter() {
-            type_substitutes.insert(path.to_string(), substitute.clone());
-        }
+        type_substitutes.extend(item_mod_ir.type_substitutes().into_iter());
 
         let type_gen = TypeGenerator::new(
             &self.metadata.types,
