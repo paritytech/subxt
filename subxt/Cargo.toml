@@ -53,4 +53,7 @@ derivative = "2.2.0"
 getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
+bitvec = "1"
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
+scale-info = { version = "2.0.0", features = ["bit-vec"] }
 tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }

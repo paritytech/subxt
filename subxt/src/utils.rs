@@ -178,6 +178,14 @@ pub mod bits {
         pub PhantomData<Order>,
     );
 
+    impl<Store: BitStore, Order: BitOrder> core::iter::FromIterator<bool>
+        for DecodedBits<Store, Order>
+    {
+        fn from_iter<T: IntoIterator<Item = bool>>(iter: T) -> Self {
+            DecodedBits(Bits::from_iter(iter), PhantomData, PhantomData)
+        }
+    }
+
     impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Order> {
         fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
             /// Equivalent of `BitSlice::MAX_BITS` on 32bit machine.
@@ -237,3 +245,76 @@ pub use bits::{
     Lsb0,
     Msb0,
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bitvec::vec::BitVec;
+    use core::fmt::Debug;
+
+    // NOTE: We don't use `bitvec::order` types in our implementation, since we
+    // don't want to depend on `bitvec`. Rather than reimplementing the unsafe
+    // trait on our types here for testing purposes, we simply convert and
+    // delegate to `bitvec`'s own types.
+    trait ToBitVec {
+        type Order: bitvec::order::BitOrder;
+    }
+    impl ToBitVec for Lsb0 {
+        type Order = bitvec::order::Lsb0;
+    }
+    impl ToBitVec for Msb0 {
+        type Order = bitvec::order::Msb0;
+    }
+
+    fn scales_like_bitvec_and_roundtrips<
+        'a,
+        Store: BitStore + bitvec::store::BitStore + PartialEq,
+        Order: BitOrder + ToBitVec + Debug + PartialEq,
+    >(
+        input: impl IntoIterator<Item = &'a bool>,
+    ) where
+        BitVec<Store, <Order as ToBitVec>::Order>: Encode + Decode,
+    {
+        let input: Vec<_> = input.into_iter().copied().collect();
+
+        let decoded_bits = DecodedBits::<Store, Order>::from_iter(input.clone());
+        let bitvec = BitVec::<Store, <Order as ToBitVec>::Order>::from_iter(input);
+
+        let decoded_bits_encoded = Encode::encode(&decoded_bits);
+        let bitvec_encoded = Encode::encode(&bitvec);
+        assert_eq!(decoded_bits_encoded, bitvec_encoded);
+
+        let decoded_bits_decoded =
+            DecodedBits::<Store, Order>::decode(&mut &decoded_bits_encoded[..])
+                .expect("SCALE-encoding DecodedBits to roundtrip");
+        let bitvec_decoded =
+            BitVec::<Store, <Order as ToBitVec>::Order>::decode(&mut &bitvec_encoded[..])
+                .expect("SCALE-encoding BitVec to roundtrip");
+        assert_eq!(decoded_bits, decoded_bits_decoded);
+        assert_eq!(bitvec, bitvec_decoded);
+    }
+
+    #[test]
+    fn decoded_bitvec_scales_and_roundtrips() {
+        let test_cases = [
+            vec![],
+            vec![true],
+            vec![false],
+            vec![true, false, true],
+            vec![true, false, true, false, false, false, false, false, true],
+            [vec![true; 5], vec![false; 5], vec![true; 1], vec![false; 3]].concat(),
+            [vec![true; 9], vec![false; 9], vec![true; 9], vec![false; 9]].concat(),
+        ];
+
+        for test_case in &test_cases {
+            scales_like_bitvec_and_roundtrips::<u8, Lsb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u16, Lsb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u32, Lsb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u64, Lsb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u8, Msb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u16, Msb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u32, Msb0>(test_case);
+            scales_like_bitvec_and_roundtrips::<u64, Msb0>(test_case);
+        }
+    }
+}
