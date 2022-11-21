@@ -55,7 +55,7 @@ impl ItemMod {
             .collect()
     }
 
-    pub fn rust_items<'a>(&'a self) -> impl Iterator<Item = &'a syn::Item> {
+    pub fn rust_items(&self) -> impl Iterator<Item = &syn::Item> {
         self.items.iter().filter_map(Item::as_rust)
     }
 }
