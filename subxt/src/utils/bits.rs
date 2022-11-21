@@ -77,9 +77,9 @@ fn bit_format<Store: BitStore, Order: BitOrder>() -> Format {
 /// used for SCALE encoding/decoding. Uses `scale_bits::Bits`-default `u8` and LSB format underneath.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DecodedBits<Store: BitStore, Order: BitOrder>(
-    pub Bits,
-    pub PhantomData<Store>,
-    pub PhantomData<Order>,
+    Bits,
+    PhantomData<Store>,
+    PhantomData<Order>,
 );
 
 impl<Store: BitStore, Order: BitOrder> DecodedBits<Store, Order> {
