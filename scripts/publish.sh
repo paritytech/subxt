@@ -93,7 +93,7 @@ for CRATE_DIR in ${ORDER[@]}; do
 	cd - > /dev/null
 done
 
-echo "Tagging jsonrpsee@$VERSION"
+echo "Tagging subxt@$VERSION"
 set -x
 git tag -a v$VERSION -m "Version $VERSION"
 sleep 3
