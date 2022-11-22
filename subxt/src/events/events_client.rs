@@ -55,14 +55,26 @@ where
         async move {
             // If block hash is not provided, get the hash
             // for the latest block and use that.
-            let block_hash = match block_hash {
-                Some(hash) => hash,
+            let (block_hash, metadata) = match block_hash {
+                Some(hash) => {
+                    // If the block hash is provided, the hash can be of an older
+                    // block where the metadata was different. Fetch the metadata
+                    // at the specific block to ensure proper dynamic decoding of
+                    // events.
+                    (hash, client.rpc().metadata(Some(hash)).await?)
+                }
                 None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("didn't pass a block number; qed")
+                    // If the block hash was not provided, the metadata is
+                    // extracted from the client and is presumed to be up to
+                    // date (ie client should subscribe to the runtime upgrades).
+                    (
+                        client
+                            .rpc()
+                            .block_hash(None)
+                            .await?
+                            .expect("didn't pass a block number; qed"),
+                        client.metadata(),
+                    )
                 }
             };
 
@@ -73,7 +85,7 @@ where
                 .map(|e| e.0)
                 .unwrap_or_else(Vec::new);
 
-            Ok(Events::new(client.metadata(), block_hash, event_bytes))
+            Ok(Events::new(metadata, block_hash, event_bytes))
         }
     }
 }
