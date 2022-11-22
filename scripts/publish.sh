@@ -95,6 +95,6 @@ done
 
 echo "Tagging subxt@$VERSION"
 set -x
-git tag -a v$VERSION -m "Version $VERSION"
+git tag -s -a v$VERSION -m "Version $VERSION"
 sleep 3
 git push --tags
