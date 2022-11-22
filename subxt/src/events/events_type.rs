@@ -9,7 +9,9 @@ use super::{
     StaticEvent,
 };
 use crate::{
+    client::OnlineClientT,
     error::Error,
+    events::events_client::get_event_bytes,
     metadata::EventMetadata,
     Config,
     Metadata,
@@ -62,6 +64,50 @@ impl<T: Config> Events<T> {
             start_idx,
             num_events,
         }
+    }
+
+    /// Obtain the events from a block hash, custom metadata and provided client.
+    ///
+    /// This method gives users the ability to inspect the events of older blocks,
+    /// where the metadata changed. For those cases, the user is responsible for
+    /// providing a valid metadata.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///  use subxt::{ OnlineClient, PolkadotConfig, events::Events };
+    ///
+    ///  let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+    ///
+    ///  // Get the hash of an older block.
+    ///  let block_hash = client
+    ///     .rpc()
+    ///     .block_hash(Some(1u32.into()))
+    ///     .await?
+    ///     .expect("didn't pass a block number; qed");
+    ///  // Fetch the metadata of the given block.
+    ///  let metadata = client.rpc().metadata(Some(block_hash)).await?;
+    ///  // Fetch the events from the client.
+    ///  let events = Events::new_from_client(metadata, block_hash, client);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Note
+    ///
+    /// Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    pub async fn new_from_client<Client>(
+        metadata: Metadata,
+        block_hash: T::Hash,
+        client: Client,
+    ) -> Result<Self, Error>
+    where
+        Client: OnlineClientT<T>,
+    {
+        let event_bytes = get_event_bytes(&client, Some(block_hash)).await?;
+        Ok(Events::new(metadata, block_hash, event_bytes))
     }
 
     /// The number of events.
