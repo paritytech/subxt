@@ -66,7 +66,7 @@ impl<T: Config> Events<T> {
         }
     }
 
-    /// Obtain the events from a block hash, custom metadata and provided client.
+    /// Obtain the events from a block hash given custom metadata and a client.
     ///
     /// This method gives users the ability to inspect the events of older blocks,
     /// where the metadata changed. For those cases, the user is responsible for
