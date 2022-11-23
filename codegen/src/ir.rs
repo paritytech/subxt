@@ -26,16 +26,13 @@ impl From<syn::ItemMod> for ItemMod {
                 abort!(module, "out-of-line subxt modules are not supported",)
             }
         };
-        let items = items
-            .into_iter()
-            .map(<Item as From<syn::Item>>::from)
-            .collect::<Vec<_>>();
+
         Self {
             vis: module.vis,
             mod_token: module.mod_token,
             ident: module.ident,
             brace,
-            items,
+            items: items.into_iter().map(From::from).collect(),
         }
     }
 }
@@ -57,6 +54,10 @@ impl ItemMod {
             })
             .collect()
     }
+
+    pub fn rust_items(&self) -> impl Iterator<Item = &syn::Item> {
+        self.items.iter().filter_map(Item::as_rust)
+    }
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -64,6 +65,15 @@ impl ItemMod {
 pub enum Item {
     Rust(syn::Item),
     Subxt(SubxtItem),
+}
+
+impl Item {
+    pub fn as_rust(&self) -> Option<&syn::Item> {
+        match self {
+            Item::Rust(item) => Some(item),
+            _ => None,
+        }
+    }
 }
 
 impl From<syn::Item> for Item {

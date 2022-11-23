@@ -25,6 +25,8 @@ fn ui_tests() {
     let mut m = MetadataTestRunner::default();
     let t = trybuild::TestCases::new();
 
+    t.pass("src/correct/*.rs");
+
     // Check that storage maps with no keys are handled properly.
     t.pass(&m.path_to_ui_test_for_metadata(
         "storage_map_no_keys",
