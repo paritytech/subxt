@@ -322,7 +322,7 @@ impl RuntimeGenerator {
             })
             .collect();
 
-        let rust_items: Vec<_> = item_mod_ir.rust_items().collect();
+        let rust_items = item_mod_ir.rust_items();
 
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
