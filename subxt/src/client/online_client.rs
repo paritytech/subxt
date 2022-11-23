@@ -93,7 +93,7 @@ impl<T: Config> OnlineClient<T> {
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
-            rpc.metadata(),
+            rpc.metadata(None),
         )
         .await;
 
@@ -310,7 +310,7 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let metadata = match self.client.rpc().metadata().await {
+        let metadata = match self.client.rpc().metadata(None).await {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };

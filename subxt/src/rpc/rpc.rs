@@ -443,10 +443,10 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, Error> {
+    pub async fn metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
         let bytes: Bytes = self
             .client
-            .request("state_getMetadata", rpc_params![])
+            .request("state_getMetadata", rpc_params![at])
             .await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
