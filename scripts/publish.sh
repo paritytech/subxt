@@ -12,8 +12,8 @@ ORDER=(metadata codegen macro subxt cli)
 function read_toml () {
 	NAME=""
 	VERSION=""
-	# There can be multiple "name = ..." lines, so make sure to only catch the first one after the "[package]" section
-	NAME=$(grep -Pzo "\[package\]\\n([^name].*\\n)*name\ *=\ *\"(.*)\"" ./Cargo.toml | tr -d '\000' | grep -a name | sed -e 's/.*"\(.*\)"/\1/')
+	# Extract and parse the "name = ..." line that belongs to the [package] section
+	NAME=$(grep -e "\[package\]" -e 'name*=*' ./Cargo.toml | grep -A1 "\[package\]" | tail -n 1 |  sed -e 's/.*"\(.*\)"/\1/')
 	VERSION=$(grep "^version" ./Cargo.toml | sed -e 's/.*"\(.*\)"/\1/')
 }
 function remote_version () {
