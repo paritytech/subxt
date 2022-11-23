@@ -160,7 +160,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             let path = root_path.join(rest_of_path);
             subxt_codegen::generate_runtime_api_from_path(
                 item_mod,
-                &path,
+                path,
                 derives_registry,
                 crate_path,
             )

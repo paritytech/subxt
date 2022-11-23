@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("\nExample 1. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
-            println!("Key: 0x{}", hex::encode(&key));
+            println!("Key: 0x{}", hex::encode(key));
             println!("  Value: {}", value);
         }
     }

@@ -28,21 +28,21 @@ fn ui_tests() {
     t.pass("src/correct/*.rs");
 
     // Check that storage maps with no keys are handled properly.
-    t.pass(&m.path_to_ui_test_for_metadata(
+    t.pass(m.path_to_ui_test_for_metadata(
         "storage_map_no_keys",
         storage::metadata_storage_map_no_keys(),
     ));
 
     // Test that the codegen can handle the different types of DispatchError.
-    t.pass(&m.path_to_ui_test_for_metadata(
+    t.pass(m.path_to_ui_test_for_metadata(
         "named_field_dispatch_error",
         dispatch_errors::metadata_named_field_dispatch_error(),
     ));
-    t.pass(&m.path_to_ui_test_for_metadata(
+    t.pass(m.path_to_ui_test_for_metadata(
         "legacy_dispatch_error",
         dispatch_errors::metadata_legacy_dispatch_error(),
     ));
-    t.pass(&m.path_to_ui_test_for_metadata(
+    t.pass(m.path_to_ui_test_for_metadata(
         "array_dispatch_error",
         dispatch_errors::metadata_array_dispatch_error(),
     ));

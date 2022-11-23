@@ -80,7 +80,7 @@ async fn run() {
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let metadata_path = Path::new(&out_dir).join("metadata.scale");
-    fs::write(&metadata_path, &metadata_bytes.0).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, metadata_bytes.0).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
@@ -101,7 +101,7 @@ async fn run() {
             .expect("Path to metadata should be stringifiable")
     );
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
-    fs::write(&runtime_path, runtime_api_contents)
+    fs::write(runtime_path, runtime_api_contents)
         .expect("Couldn't write runtime rust output");
 
     let substrate_path =
