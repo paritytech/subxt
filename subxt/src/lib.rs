@@ -111,7 +111,6 @@
 
 #![deny(
     bad_style,
-    const_err,
     improper_ctypes,
     missing_docs,
     non_shorthand_field_patterns,
