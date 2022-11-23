@@ -3,6 +3,7 @@ name = "subxt-macro"
 version = "0.25.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
+publish = true
 autotests = false
 
 license = "Apache-2.0 OR GPL-3.0"
