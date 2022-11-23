@@ -13,14 +13,6 @@ use codec::{
 };
 use derivative::Derivative;
 
-pub use bits::{
-    BitOrder,
-    BitStore,
-    DecodedBits,
-    Lsb0,
-    Msb0,
-};
-
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
 #[derive(Clone, Debug, Eq, PartialEq)]
