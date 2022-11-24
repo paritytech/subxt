@@ -41,6 +41,7 @@
 
 use super::{
     rpc_params,
+    subscription_events::FollowEvent,
     RpcClient,
     RpcClientT,
     Subscription,
@@ -600,6 +601,23 @@ impl<T: Config> Rpc<T> {
                 "chain_subscribeAllHeads",
                 rpc_params![],
                 "chain_unsubscribeAllHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to the chain head follow for newly added block hashes.
+    pub async fn subscribe_chainhead_follow(
+        &self,
+        runtime_updates: bool,
+    ) -> Result<Subscription<FollowEvent<T::Hash>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_follow",
+                rpc_params![runtime_updates],
+                "chainHead_unstable_unfollow",
             )
             .await?;
 
