@@ -177,9 +177,9 @@ pub use crate::{
 
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {
-    pub use bitvec;
     pub use codec;
     pub use frame_metadata;
+    pub use scale_bits;
     pub use scale_value;
     pub use sp_core;
     pub use sp_runtime;

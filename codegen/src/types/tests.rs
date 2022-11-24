@@ -745,10 +745,22 @@ fn generate_bitvec() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
+    let substitutes = [
+        (
+            String::from("bitvec::order::Lsb0"),
+            parse_quote!(::subxt_path::utils::bits::Lsb0),
+        ),
+        (
+            String::from("bitvec::order::Msb0"),
+            parse_quote!(::subxt_path::utils::bits::Msb0),
+        ),
+    ]
+    .into();
+
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
-        Default::default(),
+        substitutes,
         DerivesRegistry::new(&"::subxt_path".into()),
         "::subxt_path".into(),
     );
@@ -762,8 +774,8 @@ fn generate_bitvec() {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, Debug)]
                 pub struct S {
-                    pub lsb: ::subxt_path::ext::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
-                    pub msb: ::subxt_path::ext::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
+                    pub lsb: ::subxt_path::utils::bits::DecodedBits<::core::primitive::u8, ::subxt_path::utils::bits::Lsb0>,
+                    pub msb: ::subxt_path::utils::bits::DecodedBits<::core::primitive::u16, ::subxt_path::utils::bits::Msb0>,
                 }
             }
         }

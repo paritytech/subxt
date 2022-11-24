@@ -4,6 +4,8 @@
 
 //! Miscellaneous utility helpers.
 
+pub mod bits;
+
 use codec::{
     Decode,
     DecodeAll,

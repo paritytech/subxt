@@ -246,7 +246,7 @@ impl TypePathType {
                 bit_store_type,
                 crate_path,
             } => {
-                let type_path = parse_quote! { #crate_path::ext::bitvec::vec::BitVec<#bit_store_type, #bit_order_type> };
+                let type_path = parse_quote! { #crate_path::utils::bits::DecodedBits<#bit_store_type, #bit_order_type> };
                 syn::Type::Path(type_path)
             }
         }
