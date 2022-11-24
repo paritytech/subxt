@@ -10,9 +10,7 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_keyring::AccountKeyring;
 use subxt::{
-    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -24,9 +22,6 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
@@ -37,7 +32,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(event) = follow_sub.next().await {
         let event = event?;
 
-        println!("event: {:?}", event);
+        println!(
+            "sub_id: {:?} event: {:?}",
+            follow_sub.subscription_id(),
+            event
+        );
     }
 
     Ok(())
