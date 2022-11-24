@@ -115,7 +115,8 @@ impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Orde
         }
         // NOTE: Replace with `bits.div_ceil(Store::BITS)` if `int_roundings` is stabilised
         let elements = (bits / Store::BITS) + u32::from(bits % Store::BITS != 0);
-        let bytes_needed = (elements * Store::BITS.saturating_div(u8::BITS)) as usize;
+        let bytes_in_elem = Store::BITS.saturating_div(u8::BITS);
+        let bytes_needed = (elements * bytes_in_elem) as usize;
 
         // NOTE: We could reduce allocations if it would be possible to directly
         // decode from an `Input` type using a custom format (rather than default <u8, Lsb0>)
