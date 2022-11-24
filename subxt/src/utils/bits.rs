@@ -122,12 +122,10 @@ impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Orde
         // decode from an `Input` type using a custom format (rather than default <u8, Lsb0>)
         // for the `Bits` type.
         let mut storage = codec::Encode::encode(&Compact(bits));
-        dbg!(&storage[..]);
         let prefix_len = storage.len();
         storage.reserve_exact(bytes_needed);
         storage.extend(vec![0; bytes_needed]);
         input.read(&mut storage[prefix_len..])?;
-        dbg!(&storage[..]);
 
         let decoder =
             scale_bits::decode_using_format_from(&storage, bit_format::<Store, Order>())?;
