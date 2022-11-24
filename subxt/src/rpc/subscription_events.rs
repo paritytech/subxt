@@ -8,7 +8,7 @@ use crate::rpc::RuntimeVersion;
 use serde::Deserialize;
 
 /// The operation could not be processed due to an error.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorEvent {
     /// Reason of the error.
@@ -20,7 +20,7 @@ pub struct ErrorEvent {
 /// This event is generated for:
 ///   - the first announced block by the follow subscription
 ///   - blocks that suffered a change in runtime compared with their parents
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeVersionEvent {
     /// The runtime version.
@@ -29,7 +29,7 @@ pub struct RuntimeVersionEvent {
 
 /// The runtime event generated if the `follow` subscription
 /// has set the `runtime_updates` flag.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "type")]
 pub enum RuntimeEvent {
@@ -48,7 +48,7 @@ pub enum RuntimeEvent {
 ///
 /// If the `runtime_updates` flag is set, then this event contains
 /// the `RuntimeEvent`, otherwise the `RuntimeEvent` is not present.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Initialized<Hash> {
     /// The hash of the latest finalized block.
@@ -63,7 +63,7 @@ pub struct Initialized<Hash> {
 }
 
 /// Indicate a new non-finalized block.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewBlock<Hash> {
     /// The hash of the new block.
@@ -80,7 +80,7 @@ pub struct NewBlock<Hash> {
 }
 
 /// Indicate the block hash of the new best block.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BestBlockChanged<Hash> {
     /// The block hash of the new best block.
@@ -88,7 +88,7 @@ pub struct BestBlockChanged<Hash> {
 }
 
 /// Indicate the finalized and pruned block hashes.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Finalized<Hash> {
     /// Block hashes that are finalized.
@@ -107,7 +107,7 @@ pub struct Finalized<Hash> {
 ///      is now the one from this event. The block was
 ///      announced priorly with the `NewBlock` event.
 /// 4. Finalized - State the finalized and pruned blocks.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "event")]
 pub enum FollowEvent<Hash> {
