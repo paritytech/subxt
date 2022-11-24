@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 //! Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
+
 use codec::{
     Compact,
     Input,
