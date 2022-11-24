@@ -16,6 +16,7 @@ use subxt::{
         RpcClientT,
         RpcFuture,
         RpcSubscription,
+        RpcSubscriptionId,
     },
     OnlineClient,
     PolkadotConfig,
@@ -54,7 +55,7 @@ impl RpcClientT for MyLoggingClient {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription> {
+    ) -> RpcFuture<'a, (RpcSubscription, Option<RpcSubscriptionId>)> {
         writeln!(
             self.log.lock().unwrap(),
             "{sub}({}) (unsub: {unsub})",
@@ -68,7 +69,8 @@ impl RpcClientT for MyLoggingClient {
         let res = RawValue::from_string("[]".to_string()).unwrap();
         let stream = futures::stream::once(async move { Ok(res) });
         let stream: Pin<Box<dyn futures::Stream<Item = _> + Send>> = Box::pin(stream);
-        Box::pin(std::future::ready(Ok(stream)))
+        // This subscription does not provide an ID.
+        Box::pin(std::future::ready(Ok((stream, None))))
     }
 }
 
