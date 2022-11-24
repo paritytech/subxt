@@ -90,7 +90,7 @@ impl<Store: BitStore, Order: BitOrder> DecodedBits<Store, Order> {
     }
 
     /// References the underlying `scale_bits::Bits` value.
-    pub fn to_bits(&self) -> &Bits {
+    pub fn as_bits(&self) -> &Bits {
         &self.0
     }
 }
@@ -106,16 +106,16 @@ impl<Store: BitStore, Order: BitOrder> core::iter::FromIterator<bool>
 impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Order> {
     fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
         /// Equivalent of `BitSlice::MAX_BITS` on 32bit machine.
-        const ARCH32BIT_BITSLICE_MAX_BITS: usize = 0x1fff_ffff;
+        const ARCH32BIT_BITSLICE_MAX_BITS: u32 = 0x1fff_ffff;
 
         let Compact(bits) = <Compact<u32>>::decode(input)?;
         // Otherwise it is impossible to store it on 32bit machine.
-        if bits as usize > ARCH32BIT_BITSLICE_MAX_BITS {
+        if bits > ARCH32BIT_BITSLICE_MAX_BITS {
             return Err("Attempt to decode a BitVec with too many bits".into())
         }
         // NOTE: Replace with `bits.div_ceil(Store::BITS)` if `int_roundings` is stabilised
-        let elements = (bits / Store::BITS) as usize + (bits % Store::BITS != 0) as usize;
-        let bytes_needed = elements * Store::BITS.saturating_div(u8::BITS) as usize;
+        let elements = (bits / Store::BITS) + u32::from(bits % Store::BITS != 0);
+        let bytes_needed = (elements * Store::BITS.saturating_div(u8::BITS)) as usize;
 
         // NOTE: We could reduce allocations if it would be possible to directly
         // decode from an `Input` type using a custom format (rather than default <u8, Lsb0>)
