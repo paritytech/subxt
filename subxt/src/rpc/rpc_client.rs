@@ -5,6 +5,7 @@
 use super::{
     RpcClientT,
     RpcSubscription,
+    RpcSubscriptionId,
 };
 use crate::error::Error;
 use futures::{
@@ -60,8 +61,8 @@ impl RpcClient {
         params: RpcParams,
         unsub: &str,
     ) -> Result<Subscription<Res>, Error> {
-        let sub = self.0.subscribe_raw(sub, params.build(), unsub).await?;
-        Ok(Subscription::new(sub))
+        let (sub, sub_id) = self.0.subscribe_raw(sub, params.build(), unsub).await?;
+        Ok(Subscription::new(sub, sub_id))
     }
 }
 
@@ -166,6 +167,7 @@ impl RpcParams {
 /// [`StreamExt`] extension trait.
 pub struct Subscription<Res> {
     inner: RpcSubscription,
+    sub_id: Option<RpcSubscriptionId>,
     _marker: std::marker::PhantomData<Res>,
 }
 
@@ -179,11 +181,17 @@ impl<Res> std::fmt::Debug for Subscription<Res> {
 }
 
 impl<Res> Subscription<Res> {
-    fn new(inner: RpcSubscription) -> Self {
+    fn new(inner: RpcSubscription, sub_id: Option<RpcSubscriptionId>) -> Self {
         Self {
             inner,
+            sub_id,
             _marker: std::marker::PhantomData,
         }
+    }
+
+    /// Obtain the ID associated with this subscription.
+    pub fn subscription_id(&self) -> Option<&RpcSubscriptionId> {
+        self.sub_id.as_ref()
     }
 }
 
