@@ -59,6 +59,8 @@ mod rpc;
 mod rpc_client;
 mod rpc_client_t;
 
+pub mod subscription_events;
+
 // Expose the `Rpc` struct and any associated types.
 pub use rpc::*;
 
