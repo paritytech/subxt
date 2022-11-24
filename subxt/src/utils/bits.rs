@@ -22,7 +22,7 @@ macro_rules! store {
         ($ident: ident; $(($ty: ident, $wrapped: ty)),*) => {
             /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
             ///
-            /// Used to decode bit sequences in runtime by providing `scale_bits::StoreFormat` using
+            /// Used to decode bit sequences by providing `scale_bits::StoreFormat` using
             /// `bitvec`-like type type parameters.
             pub trait $ident {
                 /// Corresponding `scale_bits::StoreFormat` value.
