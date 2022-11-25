@@ -23,6 +23,29 @@ use sp_runtime::traits::{
 };
 use std::sync::Arc;
 
+/// A representation of a block obtained from the `chainHead_follow` subscription.
+pub struct FollowBlock<T: Config, C> {
+    /// The hash of the block.
+    hash: T::Hash,
+    /// The ID of the subscription that produced this block.
+    subscription_id: String,
+    /// The client to communicate with the chain.
+    client: C,
+}
+
+impl<T, C> FollowBlock<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    pub(crate) fn new(hash: T::Hash, subscription_id: String, client: C) -> Self {
+        Self {
+            hash,
+            subscription_id,
+            client,
+        }
+    }
+}
 /// A representation of a block.
 pub struct Block<T: Config, C> {
     header: T::Header,

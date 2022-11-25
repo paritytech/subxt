@@ -2,13 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::Block;
+use super::{
+    block_types::FollowBlock,
+    Block,
+};
 use crate::{
     client::OnlineClientT,
     error::{
         BlockError,
         Error,
     },
+    rpc::subscription_events::FollowEvent,
     utils::PhantomDataSendSync,
     Config,
 };
@@ -151,6 +155,57 @@ where
                 .boxed(),
             )
         })
+    }
+
+    /// Subscribe to finalized blocks using `chainHead_follow`.
+    pub fn subscribe_chainhead_finalized(
+        &self,
+        runtime_updates: bool,
+    ) -> impl Future<Output = Result<BlockStream<FollowBlock<T, Client>>, Error>>
+           + Send
+           + 'static {
+        let client = self.client.clone();
+
+        async move {
+            let sub = client
+                .rpc()
+                .subscribe_chainhead_follow(runtime_updates)
+                .await?;
+
+            let subscription_id = match sub.subscription_id() {
+                Some(id) => id.clone(),
+                None => return Err(Error::Other("Subscription without ID".into())),
+            };
+
+            // Flatten the finalized events and map them into a `FollowBlock`.
+            Ok(sub
+                .flat_map(move |event| {
+                    let subscription_id = subscription_id.clone();
+                    let client = client.clone();
+
+                    let event = match event {
+                        Ok(event) => event,
+                        Err(e) => return Either::Left(stream::once(async { Err(e) })),
+                    };
+
+                    let blocks = match event {
+                        FollowEvent::Finalized(finalized) => {
+                            finalized.finalized_block_hashes
+                        }
+                        _ => vec![],
+                    };
+                    let blocks = blocks.into_iter().map(move |hash| {
+                        Ok(FollowBlock::new(
+                            hash,
+                            subscription_id.clone(),
+                            client.clone(),
+                        ))
+                    });
+
+                    Either::Right(stream::iter(blocks))
+                })
+                .boxed())
+        }
     }
 }
 
