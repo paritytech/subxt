@@ -12,9 +12,16 @@ use crate::{
         Error,
     },
     events,
-    rpc::ChainBlockResponse,
+    rpc::{
+        subscription_events::{
+            ChainHeadEvent,
+            ChainHeadResult,
+        },
+        ChainBlockResponse,
+    },
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
 use sp_runtime::traits::{
@@ -45,7 +52,46 @@ where
             client,
         }
     }
+
+    /// Return the block hash.
+    pub fn hash(&self) -> T::Hash {
+        self.hash.clone()
+    }
 }
+
+impl<T, C> FollowBlock<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
+    pub async fn body(&self) -> Result<Vec<Vec<u8>>, Error> {
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_body(self.hash, self.subscription_id.clone())
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            println!("Got event: {:?}", event);
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+
+                    let extrinsics: Vec<Vec<u8>> = Decode::decode(&mut &bytes[..])?;
+                    Ok(extrinsics)
+                }
+                _ => Err(Error::Other("Failed to fetch the block body".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to fetch the block body".into()))
+    }
+}
+
 /// A representation of a block.
 pub struct Block<T: Config, C> {
     header: T::Header,
