@@ -624,6 +624,24 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
+    /// Subscribe to the chain head body.
+    pub async fn subscribe_chainhead_body(
+        &self,
+        hash: T::Hash,
+        subscription_id: String,
+    ) -> Result<Subscription<FollowEvent<T::Hash>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_body",
+                rpc_params![subscription_id, hash],
+                "chainHead_unstable_stopBody",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
     /// Subscribe to finalized block headers.
     ///
     /// Note: this may not produce _every_ block in the finalized chain;
