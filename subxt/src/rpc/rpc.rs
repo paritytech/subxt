@@ -41,7 +41,10 @@
 
 use super::{
     rpc_params,
-    subscription_events::FollowEvent,
+    subscription_events::{
+        ChainHeadEvent,
+        FollowEvent,
+    },
     RpcClient,
     RpcClientT,
     Subscription,
@@ -629,7 +632,7 @@ impl<T: Config> Rpc<T> {
         &self,
         hash: T::Hash,
         subscription_id: String,
-    ) -> Result<Subscription<FollowEvent<T::Hash>>, Error> {
+    ) -> Result<Subscription<ChainHeadEvent<String>>, Error> {
         let subscription = self
             .client
             .subscribe(
