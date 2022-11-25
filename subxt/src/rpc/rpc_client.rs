@@ -5,6 +5,7 @@
 use super::{
     RpcClientT,
     RpcSubscription,
+    RpcSubscriptionId,
 };
 use crate::error::Error;
 use futures::{
@@ -185,6 +186,11 @@ impl<Res> Subscription<Res> {
             _marker: std::marker::PhantomData,
         }
     }
+
+    /// Obtain the ID associated with this subscription.
+    pub fn subscription_id(&self) -> Option<&RpcSubscriptionId> {
+        self.inner.id.as_ref()
+    }
 }
 
 impl<Res: DeserializeOwned> Subscription<Res> {
@@ -203,7 +209,7 @@ impl<Res: DeserializeOwned> Stream for Subscription<Res> {
         mut self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        let res = futures::ready!(self.inner.poll_next_unpin(cx));
+        let res = futures::ready!(self.inner.stream.poll_next_unpin(cx));
 
         // Decode the inner RawValue to the type we're expecting and map
         // any errors to the right shape:

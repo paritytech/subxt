@@ -12,14 +12,18 @@ use futures::stream::{
     StreamExt,
     TryStreamExt,
 };
-use jsonrpsee::core::{
-    client::{
-        Client,
-        ClientT,
-        SubscriptionClientT,
+use jsonrpsee::{
+    core::{
+        client::{
+            Client,
+            ClientT,
+            SubscriptionClientT,
+            SubscriptionKind,
+        },
+        traits::ToRpcParams,
+        Error as JsonRpseeError,
     },
-    traits::ToRpcParams,
-    Error as JsonRpseeError,
+    types::SubscriptionId,
 };
 use serde_json::value::RawValue;
 
@@ -52,17 +56,26 @@ impl RpcClientT for Client {
         unsub: &'a str,
     ) -> RpcFuture<'a, RpcSubscription> {
         Box::pin(async move {
-            let sub = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
+            let stream = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
                 self,
                 sub,
                 Params(params),
                 unsub,
             )
             .await
-            .map_err(|e| RpcError::ClientError(Box::new(e)))?
-            .map_err(|e| RpcError::ClientError(Box::new(e)))
-            .boxed();
-            Ok(sub)
+            .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+
+            let id = match stream.kind() {
+                SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
+                    Some(id.clone().into_owned())
+                }
+                _ => None,
+            };
+
+            let stream = stream
+                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .boxed();
+            Ok(RpcSubscription { stream, id })
         })
     }
 }
