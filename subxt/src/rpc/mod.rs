@@ -68,6 +68,7 @@ pub use rpc_client_t::{
     RpcFuture,
     RpcSubscription,
     RpcSubscriptionId,
+    RpcSubscriptionStream,
 };
 
 pub use rpc_client::{

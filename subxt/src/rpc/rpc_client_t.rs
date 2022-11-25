@@ -52,15 +52,23 @@ pub trait RpcClientT: Send + Sync + 'static {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, (RpcSubscription, Option<RpcSubscriptionId>)>;
+    ) -> RpcFuture<'a, RpcSubscription>;
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
 pub type RpcFuture<'a, T> =
     Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
+/// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
+pub struct RpcSubscription {
+    /// The subscription stream.
+    pub stream: RpcSubscriptionStream,
+    /// The ID associated with the subscription.
+    pub id: Option<RpcSubscriptionId>,
+}
+
 /// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscription =
+pub type RpcSubscriptionStream =
     Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>;
 
 /// The ID associated with the [`RpcClientT`]'s `subscription`.

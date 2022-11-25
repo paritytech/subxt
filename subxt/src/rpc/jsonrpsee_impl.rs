@@ -6,7 +6,6 @@ use super::{
     RpcClientT,
     RpcFuture,
     RpcSubscription,
-    RpcSubscriptionId,
 };
 use crate::error::RpcError;
 use futures::stream::{
@@ -55,9 +54,9 @@ impl RpcClientT for Client {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, (RpcSubscription, Option<RpcSubscriptionId>)> {
+    ) -> RpcFuture<'a, RpcSubscription> {
         Box::pin(async move {
-            let sub = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
+            let stream = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
                 self,
                 sub,
                 Params(params),
@@ -66,15 +65,17 @@ impl RpcClientT for Client {
             .await
             .map_err(|e| RpcError::ClientError(Box::new(e)))?;
 
-            let sub_id = match sub.kind() {
+            let id = match stream.kind() {
                 SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
                     Some(id.clone().into_owned())
                 }
                 _ => None,
             };
 
-            let sub = sub.map_err(|e| RpcError::ClientError(Box::new(e))).boxed();
-            Ok((sub, sub_id))
+            let stream = stream
+                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .boxed();
+            Ok(RpcSubscription { stream, id })
         })
     }
 }
