@@ -34,6 +34,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let body = event.body().await?;
         println!("[hash={:?}] body={:?}", event.hash(), body);
+
+        let header = event.header().await?;
+        println!("[hash={:?}] header={:?}", event.hash(), header);
     }
 
     // Subscribe to the `chainHead_follow` method.

@@ -64,11 +64,12 @@ where
     T: Config,
     C: OnlineClientT<T>,
 {
+    /// Fetch the body (vector of extrinsics) of this block.
     pub async fn body(&self) -> Result<Vec<Vec<u8>>, Error> {
         let mut sub = self
             .client
             .rpc()
-            .subscribe_chainhead_body(self.hash, self.subscription_id.clone())
+            .subscribe_chainhead_body(self.subscription_id.clone(), self.hash)
             .await?;
 
         if let Some(event) = sub.next().await {
@@ -89,6 +90,30 @@ where
         }
 
         Err(Error::Other("Failed to fetch the block body".into()))
+    }
+
+    /// Fetch the header of this block.
+    pub async fn header(&self) -> Result<T::Header, Error> {
+        let header = self
+            .client
+            .rpc()
+            .get_chainhead_header(self.subscription_id.clone(), self.hash)
+            .await?;
+
+        let header = match header {
+            Some(header) => header,
+            None => {
+                return Err(Error::Other(
+                    "Chain does not contain the header of this block".into(),
+                ))
+            }
+        };
+
+        let bytes = hex::decode(header.trim_start_matches("0x"))
+            .map_err(|err| Error::Other(err.to_string()))?;
+
+        let header: T::Header = Decode::decode(&mut &bytes[..])?;
+        Ok(header)
     }
 }
 
