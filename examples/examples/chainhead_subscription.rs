@@ -10,12 +10,13 @@
 //! polkadot --dev --tmp
 //! ```
 
+use codec::Encode;
+use futures::StreamExt;
+use sp_keyring::AccountKeyring;
 use subxt::{
     OnlineClient,
     PolkadotConfig,
 };
-
-use futures::StreamExt;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -27,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let mut follow_sub = api.blocks().subscribe_chainhead_finalized(false).await?;
+    let mut follow_sub = api.blocks().subscribe_chainhead_finalized(true).await?;
     // Handle all subscriptions from the `chainHead_follow`.
     while let Some(block) = follow_sub.next().await {
         let block = block?;
@@ -46,6 +47,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             era.index,
             era.start
         );
+
+        let call_params = AccountKeyring::Alice.to_account_id().encode();
+        let call = block
+            .call("AccountNonceApi_account_nonce".into(), &call_params)
+            .await?;
+        println!("[hash={:?}] call={:?}", block.hash(), call);
     }
 
     // Subscribe to the `chainHead_follow` method.

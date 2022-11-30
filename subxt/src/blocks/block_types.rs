@@ -174,6 +174,41 @@ where
 
         Err(Error::Other("Failed to fetch the block body".into()))
     }
+
+    /// Fetch the body (vector of extrinsics) of this block.
+    pub async fn call(
+        &self,
+        function: String,
+        call_parameters: &[u8],
+    ) -> Result<Vec<u8>, Error> {
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_call(
+                self.subscription_id.clone(),
+                self.hash,
+                function,
+                call_parameters,
+            )
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            println!("Got event: {:?}", event);
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+                    Ok(bytes)
+                }
+                _ => Err(Error::Other("Failed to fetch the block body".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to fetch the block body".into()))
+    }
 }
 
 /// A representation of a block.
