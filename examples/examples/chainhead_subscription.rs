@@ -28,6 +28,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
+    let genesis = api.rpc().get_chainhead_genesis_hash().await?;
+    println!("Genesis: {:?}", genesis);
+
     let mut follow_sub = api.blocks().subscribe_chainhead_finalized(true).await?;
     // Handle all subscriptions from the `chainHead_follow`.
     while let Some(block) = follow_sub.next().await {

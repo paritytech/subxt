@@ -81,8 +81,6 @@ where
         if let Some(event) = sub.next().await {
             let event = event?;
 
-            println!("Got event: {:?}", event);
-
             return match event {
                 ChainHeadEvent::Done(ChainHeadResult { result }) => {
                     let bytes = hex::decode(result.trim_start_matches("0x"))
@@ -148,8 +146,6 @@ where
         if let Some(event) = sub.next().await {
             let event = event?;
 
-            println!("Got event: {:?}", event);
-
             return match event {
                 ChainHeadEvent::Done(ChainHeadResult { result }) => {
                     let result = match result {
@@ -194,8 +190,6 @@ where
 
         if let Some(event) = sub.next().await {
             let event = event?;
-
-            println!("Got event: {:?}", event);
 
             return match event {
                 ChainHeadEvent::Done(ChainHeadResult { result }) => {

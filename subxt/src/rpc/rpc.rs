@@ -662,6 +662,21 @@ impl<T: Config> Rpc<T> {
         Ok(header)
     }
 
+    /// Get the chain head genesis hash.
+    pub async fn get_chainhead_genesis_hash(
+        &self,
+    ) -> Result<T::Hash, Error> {
+        let hash = self
+            .client
+            .request(
+                "chainHead_unstable_genesisHash",
+                rpc_params![],
+            )
+            .await?;
+
+        Ok(hash)
+    }
+
     /// Subscribe to the chain head storage.
     pub async fn subscribe_chainhead_storage(
         &self,
