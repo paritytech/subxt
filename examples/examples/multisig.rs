@@ -11,13 +11,15 @@
 //! ```
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    tx::PairSigner,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(
+    runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+    substitute_type(
+        type = "sp_runtime::per_things::Perbill<T, A>",
+        with = "::sp_runtime::Perbill"
+    )
+)]
 pub mod polkadot {}
 
 #[tokio::main]

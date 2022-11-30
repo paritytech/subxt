@@ -7,6 +7,7 @@ use subxt_codegen::{
     CratePath,
     DerivesRegistry,
     RuntimeGenerator,
+    TypeSubstitutes,
 };
 
 fn metadata_docs() -> Vec<String> {
@@ -55,8 +56,9 @@ fn generate_runtime_interface(crate_path: CratePath) -> String {
         pub mod api {}
     );
     let derives = DerivesRegistry::new(&crate_path);
+    let type_substitutes = TypeSubstitutes::new(&crate_path);
     generator
-        .generate_runtime(item_mod, derives, crate_path)
+        .generate_runtime(item_mod, derives, type_substitutes, crate_path)
         .to_string()
 }
 

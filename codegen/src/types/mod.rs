@@ -4,6 +4,7 @@
 
 mod composite_def;
 mod derives;
+mod substitutes;
 #[cfg(test)]
 mod tests;
 mod type_def;
@@ -11,44 +12,19 @@ mod type_def_params;
 mod type_path;
 
 use darling::FromMeta;
-use proc_macro2::{
-    Ident,
-    Span,
-    TokenStream,
-};
+use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::abort_call_site;
-use quote::{
-    quote,
-    ToTokens,
-};
-use scale_info::{
-    form::PortableForm,
-    PortableRegistry,
-    Type,
-    TypeDef,
-};
-use std::collections::{
-    BTreeMap,
-    HashMap,
-};
+use quote::{quote, ToTokens};
+use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
+use std::collections::BTreeMap;
 
 pub use self::{
-    composite_def::{
-        CompositeDef,
-        CompositeDefFieldType,
-        CompositeDefFields,
-    },
-    derives::{
-        Derives,
-        DerivesRegistry,
-    },
+    composite_def::{CompositeDef, CompositeDefFieldType, CompositeDefFields},
+    derives::{Derives, DerivesRegistry},
+    substitutes::TypeSubstitutes,
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,
-    type_path::{
-        TypeParameter,
-        TypePath,
-        TypePathType,
-    },
+    type_path::{TypeParameter, TypePath, TypePathType},
 };
 
 pub type Field = scale_info::Field<PortableForm>;
@@ -61,7 +37,7 @@ pub struct TypeGenerator<'a> {
     /// Registry of type definitions to be transformed into Rust type definitions.
     type_registry: &'a PortableRegistry,
     /// User defined overrides for generated types.
-    type_substitutes: HashMap<String, syn::TypePath>,
+    type_substitutes: TypeSubstitutes,
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
     /// The `subxt` crate access path in the generated code.
@@ -73,7 +49,7 @@ impl<'a> TypeGenerator<'a> {
     pub fn new(
         type_registry: &'a PortableRegistry,
         root_mod: &'static str,
-        type_substitutes: HashMap<String, syn::TypePath>,
+        type_substitutes: TypeSubstitutes,
         derives: DerivesRegistry,
         crate_path: CratePath,
     ) -> Self {
@@ -89,53 +65,39 @@ impl<'a> TypeGenerator<'a> {
 
     /// Generate a module containing all types defined in the supplied type registry.
     pub fn generate_types_mod(&self) -> Module {
-        let mut root_mod =
-            Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
+        let root_mod_ident = &self.types_mod_ident;
+        let mut root_mod = Module::new(root_mod_ident.clone(), root_mod_ident.clone());
 
-        for ty in self.type_registry.types().iter() {
-            if ty.ty().path().namespace().is_empty() {
-                // prelude types e.g. Option/Result have no namespace, so we don't generate them
-                continue
+        for ty in self.type_registry.types() {
+            let path = ty.ty().path();
+            // Don't generate a type if it was substituted - the target type might
+            // not be in the type registry + our resolution already performs the substitution.
+            if self.type_substitutes.for_path(path).is_some() {
+                continue;
             }
-            self.insert_type(
-                ty.ty().clone(),
-                ty.ty().path().namespace().to_vec(),
-                &self.types_mod_ident,
-                &mut root_mod,
-            )
+
+            let namespace = path.namespace();
+            // prelude types e.g. Option/Result have no namespace, so we don't generate them
+            if namespace.is_empty() { continue; }
+
+            // Lazily create submodules for the encountered namespace path, if they don't exist
+            let innermost_module = namespace
+                .iter()
+                .map(|segment| Ident::new(segment, Span::call_site()))
+                .fold(&mut root_mod, |module, ident| {
+                    module
+                        .children
+                        .entry(ident.clone())
+                        .or_insert_with(|| Module::new(ident, root_mod_ident.clone()))
+                });
+
+            innermost_module.types.insert(
+                path.clone(),
+                TypeDefGen::from_type(ty.ty(), self, &self.crate_path),
+            );
         }
 
         root_mod
-    }
-
-    fn insert_type(
-        &'a self,
-        ty: Type<PortableForm>,
-        path: Vec<String>,
-        root_mod_ident: &Ident,
-        module: &mut Module,
-    ) {
-        let joined_path = path.join("::");
-        if self.type_substitutes.contains_key(&joined_path) {
-            return
-        }
-
-        let segment = path.first().expect("path has at least one segment");
-        let mod_ident = Ident::new(segment, Span::call_site());
-
-        let child_mod = module
-            .children
-            .entry(mod_ident.clone())
-            .or_insert_with(|| Module::new(mod_ident, root_mod_ident.clone()));
-
-        if path.len() == 1 {
-            child_mod.types.insert(
-                ty.path().clone(),
-                TypeDefGen::from_type(ty, self, &self.crate_path),
-            );
-        } else {
-            self.insert_type(ty, path[1..].to_vec(), root_mod_ident, child_mod)
-        }
     }
 
     /// # Panics
@@ -208,7 +170,7 @@ impl<'a> TypeGenerator<'a> {
             )
         }
 
-        let params = ty
+        let params: Vec<_> = ty
             .type_params()
             .iter()
             .filter_map(|f| {
@@ -220,13 +182,16 @@ impl<'a> TypeGenerator<'a> {
 
         let ty = match ty.type_def() {
             TypeDef::Composite(_) | TypeDef::Variant(_) => {
-                let joined_path = ty.path().segments().join("::");
-                if let Some(substitute_type_path) =
-                    self.type_substitutes.get(&joined_path)
+                if let Some((path, params)) = self
+                    .type_substitutes
+                    .for_path_with_params(ty.path(), &params)
                 {
                     TypePathType::Path {
-                        path: substitute_type_path.clone(),
-                        params,
+                        path: syn::TypePath {
+                            qself: None,
+                            path: path.clone(),
+                        },
+                        params: params.to_vec(),
                     }
                 } else {
                     TypePathType::from_type_def_path(
