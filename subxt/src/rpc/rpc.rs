@@ -43,6 +43,7 @@ use super::{
     rpc_params,
     subscription_events::{
         ChainHeadEvent,
+        ChainHeadResult,
         FollowEvent,
     },
     RpcClient,
@@ -610,7 +611,7 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Subscribe to the chain head follow for newly added block hashes.
+    /// Subscribe to `chainHead_follow` directly to obtain all reported blocks.
     pub async fn subscribe_chainhead_follow(
         &self,
         runtime_updates: bool,
@@ -627,7 +628,8 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Subscribe to the chain head body.
+    /// Subscribe to `chainHead_body` directly to obtain events regarding the
+    /// block's body.
     pub async fn subscribe_chainhead_body(
         &self,
         subscription_id: String,
@@ -645,8 +647,38 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Get the chain head header.
-    pub async fn get_chainhead_header(
+    /// Subscribe to `chainHead_body` events and fetch the block's body.
+    ///
+    /// # Note
+    ///
+    /// This is a wrapper over [`subscribe_chainhead_body`].
+    pub async fn fetch_chainhead_body(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<Vec<Vec<u8>>, Error> {
+        let mut sub = self.subscribe_chainhead_body(subscription_id, hash).await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+
+                    let extrinsics: Vec<Vec<u8>> = Decode::decode(&mut &bytes[..])?;
+                    Ok(extrinsics)
+                }
+                _ => Err(Error::Other("Failed to fetch the block body".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to fetch the block body".into()))
+    }
+
+    /// Get the block's body using the `chainHead_header` method.
+    pub async fn chainhead_header(
         &self,
         subscription_id: String,
         hash: T::Hash,
@@ -662,22 +694,46 @@ impl<T: Config> Rpc<T> {
         Ok(header)
     }
 
-    /// Get the chain head genesis hash.
-    pub async fn get_chainhead_genesis_hash(
+    /// Parse `chaiHead_header` response and return the block's header.
+    ///
+    /// # Note
+    ///
+    /// This is a wrapper over `chainhead_header`.
+    pub async fn fetch_chainhead_header(
         &self,
-    ) -> Result<T::Hash, Error> {
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<T::Header, Error> {
+        let header = self.chainhead_header(subscription_id, hash).await?;
+
+        let header = match header {
+            Some(header) => header,
+            None => {
+                return Err(Error::Other(
+                    "Chain does not contain the header of this block".into(),
+                ))
+            }
+        };
+
+        let bytes = hex::decode(header.trim_start_matches("0x"))
+            .map_err(|err| Error::Other(err.to_string()))?;
+
+        let header: T::Header = Decode::decode(&mut &bytes[..])?;
+        Ok(header)
+    }
+
+    /// Get the chain head genesis hash.
+    pub async fn chainhead_genesis_hash(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
-            .request(
-                "chainHead_unstable_genesisHash",
-                rpc_params![],
-            )
+            .request("chainHead_unstable_genesisHash", rpc_params![])
             .await?;
 
         Ok(hash)
     }
 
-    /// Subscribe to the chain head storage.
+    /// Subscribe to `chainHead_storage` directly to obtain events regarding the
+    /// block's storage.
     pub async fn subscribe_chainhead_storage(
         &self,
         subscription_id: String,
@@ -697,7 +753,46 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
-    /// Subscribe to the chain head call.
+    /// Subscribe to `chainHead_storage` events and return the storage at the
+    /// provided key.
+    ///
+    /// # Note
+    ///
+    /// This is a wrapper over [`subscribe_chainhead_storage`].
+    pub async fn fetch_chainhead_storage(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        key: &[u8],
+        child_key: Option<&[u8]>,
+    ) -> Result<Option<Vec<u8>>, Error> {
+        let mut sub = self
+            .subscribe_chainhead_storage(subscription_id, hash, key, child_key)
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let result = match result {
+                        Some(result) => result,
+                        None => return Ok(None),
+                    };
+
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+                    Ok(Some(bytes))
+                }
+                _ => Err(Error::Other("Failed to fetch the block storage".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to fetch the block storage".into()))
+    }
+
+    /// Subscribe to `chainHead_call` directly to obtain events regarding the
+    /// runtime API call.
     pub async fn subscribe_chainhead_call(
         &self,
         subscription_id: String,
@@ -715,6 +810,39 @@ impl<T: Config> Rpc<T> {
             .await?;
 
         Ok(subscription)
+    }
+
+    /// Subscribe to `chainHead_call` events and return the result of the provided
+    /// runtime API call.
+    ///
+    /// # Note
+    ///
+    /// This is a wrapper over [`subscribe_chainhead_call`].
+    pub async fn fetch_chainhead_call(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        function: String,
+        call_parameters: &[u8],
+    ) -> Result<Vec<u8>, Error> {
+        let mut sub = self
+            .subscribe_chainhead_call(subscription_id, hash, function, call_parameters)
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+                    Ok(bytes)
+                }
+                _ => Err(Error::Other("Failed to execute runtime API call".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to execute runtime API call".into()))
     }
 
     /// Subscribe to finalized block headers.
@@ -842,6 +970,11 @@ impl<T: Config> Rpc<T> {
 }
 
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    let bytes_ref = bytes.as_ref();
+    if bytes_ref.is_empty() {
+        return "".into()
+    }
+
     format!("0x{}", hex::encode(bytes.as_ref()))
 }
 

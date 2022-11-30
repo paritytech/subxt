@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let genesis = api.rpc().get_chainhead_genesis_hash().await?;
+    let genesis = api.rpc().chainhead_genesis_hash().await?;
     println!("Genesis: {:?}", genesis);
 
     let mut follow_sub = api.blocks().subscribe_chainhead_finalized(true).await?;
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let call_params = AccountKeyring::Alice.to_account_id().encode();
         let call = block
-            .call("AccountNonceApi_account_nonce".into(), &call_params)
+            .call("AccountNonceApi_account_nonce".into(), Some(&call_params))
             .await?;
         println!("[hash={:?}] call={:?}", block.hash(), call);
     }

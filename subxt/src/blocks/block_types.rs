@@ -27,7 +27,6 @@ use crate::{
     },
     Config,
 };
-use codec::Decode;
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
 use sp_runtime::traits::{
@@ -72,52 +71,18 @@ where
 {
     /// Fetch the body (vector of extrinsics) of this block.
     pub async fn body(&self) -> Result<Vec<Vec<u8>>, Error> {
-        let mut sub = self
-            .client
+        self.client
             .rpc()
-            .subscribe_chainhead_body(self.subscription_id.clone(), self.hash)
-            .await?;
-
-        if let Some(event) = sub.next().await {
-            let event = event?;
-
-            return match event {
-                ChainHeadEvent::Done(ChainHeadResult { result }) => {
-                    let bytes = hex::decode(result.trim_start_matches("0x"))
-                        .map_err(|err| Error::Other(err.to_string()))?;
-
-                    let extrinsics: Vec<Vec<u8>> = Decode::decode(&mut &bytes[..])?;
-                    Ok(extrinsics)
-                }
-                _ => Err(Error::Other("Failed to fetch the block body".into())),
-            }
-        }
-
-        Err(Error::Other("Failed to fetch the block body".into()))
+            .fetch_chainhead_body(self.subscription_id.clone(), self.hash)
+            .await
     }
 
     /// Fetch the header of this block.
     pub async fn header(&self) -> Result<T::Header, Error> {
-        let header = self
-            .client
+        self.client
             .rpc()
-            .get_chainhead_header(self.subscription_id.clone(), self.hash)
-            .await?;
-
-        let header = match header {
-            Some(header) => header,
-            None => {
-                return Err(Error::Other(
-                    "Chain does not contain the header of this block".into(),
-                ))
-            }
-        };
-
-        let bytes = hex::decode(header.trim_start_matches("0x"))
-            .map_err(|err| Error::Other(err.to_string()))?;
-
-        let header: T::Header = Decode::decode(&mut &bytes[..])?;
-        Ok(header)
+            .fetch_chainhead_header(self.subscription_id.clone(), self.hash)
+            .await
     }
 
     /// Fetch the header of this block.
@@ -132,10 +97,10 @@ where
         let metadata = self.client.metadata();
         let key_bytes = utils::storage_address_bytes(key, &metadata)?;
 
-        let mut sub = self
+        let storage_bytes = self
             .client
             .rpc()
-            .subscribe_chainhead_storage(
+            .fetch_chainhead_storage(
                 self.subscription_id.clone(),
                 self.hash,
                 &key_bytes,
@@ -143,40 +108,28 @@ where
             )
             .await?;
 
-        if let Some(event) = sub.next().await {
-            let event = event?;
-
-            return match event {
-                ChainHeadEvent::Done(ChainHeadResult { result }) => {
-                    let result = match result {
-                        Some(result) => result,
-                        None => return Ok(None),
-                    };
-
-                    let bytes = hex::decode(result.trim_start_matches("0x"))
-                        .map_err(|err| Error::Other(err.to_string()))?;
-
-                    let storage = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
-                        &mut &*bytes,
-                        key.pallet_name(),
-                        key.entry_name(),
-                        &metadata,
-                    )?;
-                    Ok(Some(storage))
-                }
-                _ => Err(Error::Other("Failed to fetch the block body".into())),
-            }
+        if let Some(bytes) = storage_bytes {
+            let storage =
+                <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
+                    &mut &*bytes,
+                    key.pallet_name(),
+                    key.entry_name(),
+                    &metadata,
+                )?;
+            Ok(Some(storage))
+        } else {
+            Ok(None)
         }
-
-        Err(Error::Other("Failed to fetch the block body".into()))
     }
 
     /// Fetch the body (vector of extrinsics) of this block.
     pub async fn call(
         &self,
         function: String,
-        call_parameters: &[u8],
+        call_parameters: Option<&[u8]>,
     ) -> Result<Vec<u8>, Error> {
+        let call_parameters = call_parameters.unwrap_or(Default::default());
+
         let mut sub = self
             .client
             .rpc()
@@ -197,11 +150,17 @@ where
                         .map_err(|err| Error::Other(err.to_string()))?;
                     Ok(bytes)
                 }
-                _ => Err(Error::Other("Failed to fetch the block body".into())),
+                _ => {
+                    Err(Error::Other(
+                        "Failed to execute the runtime API call".into(),
+                    ))
+                }
             }
         }
 
-        Err(Error::Other("Failed to fetch the block body".into()))
+        Err(Error::Other(
+            "Failed to execute the runtime API call".into(),
+        ))
     }
 }
 
