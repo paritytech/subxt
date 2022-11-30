@@ -29,14 +29,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut follow_sub = api.blocks().subscribe_chainhead_finalized(false).await?;
     // Handle all subscriptions from the `chainHead_follow`.
-    while let Some(event) = follow_sub.next().await {
-        let event = event?;
+    while let Some(block) = follow_sub.next().await {
+        let block = block?;
 
-        let body = event.body().await?;
-        println!("[hash={:?}] body={:?}", event.hash(), body);
+        let body = block.body().await?;
+        println!("[hash={:?}] body={:?}", block.hash(), body);
 
-        let header = event.header().await?;
-        println!("[hash={:?}] header={:?}", event.hash(), header);
+        let header = block.header().await?;
+        println!("[hash={:?}] header={:?}", block.hash(), header);
+
+        let active_era_addr = polkadot::storage().staking().active_era();
+        let era = block.storage(&active_era_addr).await?.unwrap();
+        println!(
+            "[hash={:?}] storage index: {:?}, start: {:?}",
+            block.hash(),
+            era.index,
+            era.start
+        );
     }
 
     // Subscribe to the `chainHead_follow` method.

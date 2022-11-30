@@ -12,12 +12,18 @@ use crate::{
         Error,
     },
     events,
+    metadata::DecodeWithMetadata,
     rpc::{
         subscription_events::{
             ChainHeadEvent,
             ChainHeadResult,
         },
         ChainBlockResponse,
+    },
+    storage::{
+        address::Yes,
+        utils,
+        StorageAddress,
     },
     Config,
 };
@@ -114,6 +120,59 @@ where
 
         let header: T::Header = Decode::decode(&mut &bytes[..])?;
         Ok(header)
+    }
+
+    /// Fetch the header of this block.
+    pub async fn storage<'a, Address>(
+        &self,
+        key: &'a Address,
+    ) -> Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>
+    where
+        Address: StorageAddress<IsFetchable = Yes> + 'a,
+    {
+        // Look up the return type ID to enable DecodeWithMetadata:
+        let metadata = self.client.metadata();
+        let key_bytes = utils::storage_address_bytes(key, &metadata)?;
+
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_storage(
+                self.subscription_id.clone(),
+                self.hash,
+                &key_bytes,
+                None,
+            )
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            println!("Got event: {:?}", event);
+
+            return match event {
+                ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                    let result = match result {
+                        Some(result) => result,
+                        None => return Ok(None),
+                    };
+
+                    let bytes = hex::decode(result.trim_start_matches("0x"))
+                        .map_err(|err| Error::Other(err.to_string()))?;
+
+                    let storage = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
+                        &mut &*bytes,
+                        key.pallet_name(),
+                        key.entry_name(),
+                        &metadata,
+                    )?;
+                    Ok(Some(storage))
+                }
+                _ => Err(Error::Other("Failed to fetch the block body".into())),
+            }
+        }
+
+        Err(Error::Other("Failed to fetch the block body".into()))
     }
 }
 

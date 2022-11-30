@@ -662,6 +662,25 @@ impl<T: Config> Rpc<T> {
         Ok(header)
     }
 
+    /// Subscribe to the chain head storage.
+    pub async fn subscribe_chainhead_storage(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        key: &[u8],
+        child_key: Option<&[u8]>,
+    ) -> Result<Subscription<ChainHeadEvent<Option<String>>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_storage",
+                rpc_params![subscription_id, hash, to_hex(key), child_key.map(to_hex)],
+                "chainHead_unstable_stopStorage",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
     /// Subscribe to finalized block headers.
     ///
     /// Note: this may not produce _every_ block in the finalized chain;
