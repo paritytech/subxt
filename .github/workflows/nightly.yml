@@ -45,7 +45,7 @@ jobs:
       # If the previous step fails, create a new Github issue
       # to nofity us about it.
       - if: ${{ failure() }}
-        uses: JasonEtco/create-an-issue@9e6213aec58987fa7d2f4deb8b256b99e63107a2 # v2.6.0
+        uses: JasonEtco/create-an-issue@77399b6110ef82b94c1c9f9f615acf9e604f7f56 # v2.8.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
