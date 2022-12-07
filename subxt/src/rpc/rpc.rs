@@ -45,6 +45,7 @@ use super::{
         ChainHeadEvent,
         ChainHeadResult,
         FollowEvent,
+        RuntimeEvent,
     },
     RpcClient,
     RpcClientT,
@@ -60,7 +61,10 @@ use codec::{
     Decode,
     Encode,
 };
-use frame_metadata::RuntimeMetadataPrefixed;
+use frame_metadata::{
+    OpaqueMetadata,
+    RuntimeMetadataPrefixed,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -843,6 +847,78 @@ impl<T: Config> Rpc<T> {
         }
 
         Err(Error::Other("Failed to execute runtime API call".into()))
+    }
+
+    /// Call into the runtime API to fetch the metadata and the runtime event.
+    pub async fn fetch_chainhead_call_metadata_runtime(
+        &self,
+    ) -> Result<(Metadata, RuntimeVersion), Error> {
+        let (bytes, event) = {
+            let mut sub = self.subscribe_chainhead_follow(true).await?;
+
+            let subscription_id_rpc = match sub.subscription_id() {
+                Some(id) => id.clone(),
+                None => return Err(Error::Other("Subscription without ID".into())),
+            };
+            println!("Recv from jsonrpsee: {:?}", subscription_id_rpc);
+
+            // TODO: Jsonrpsee needs update.
+            let subscription_id = "A".to_string();
+
+            let event = match sub.next().await {
+                Some(event) => event,
+                None => return Err(Error::Other("Subscription without ID".into())),
+            };
+
+            let event = event?;
+
+            let event = match event {
+                FollowEvent::Initialized(init) => init,
+                _ => {
+                    return Err(Error::Other(
+                        "Unexpected event from chainHead_follow".into(),
+                    ))
+                }
+            };
+
+            let bytes = self
+                .fetch_chainhead_call(
+                    subscription_id,
+                    event.finalized_block_hash,
+                    "Metadata_metadata".into(),
+                    &vec![],
+                )
+                .await?;
+
+            println!("Dropping subscription");
+            // Manually cancel the susbcription
+            // {"id": 1, "method": "eth_unsubscribe", "params": ["0xcd0c3e8af590364c09d0fa6a1210faf5"]}
+
+            let result: bool = self
+                .client
+                .request(
+                    "chainHead_unstable_unfollow",
+                    rpc_params![subscription_id_rpc],
+                )
+                .await?;
+            println!("Subscription dropped with result={:?}", result);
+            drop(sub);
+
+            (bytes, event)
+        };
+
+        let metadata: OpaqueMetadata = Decode::decode(&mut &bytes[..])?;
+        let bytes = metadata.0;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+
+        let runtime_version = match event.finalized_block_runtime {
+            Some(RuntimeEvent::Valid(event)) => event.spec,
+            _ => return Err(Error::Other("Expected runtime event".into())),
+        };
+
+        Ok((metadata, runtime_version))
     }
 
     /// Subscribe to finalized block headers.

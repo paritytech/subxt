@@ -409,18 +409,10 @@ pub enum InvalidMetadataError {
     TypeDefNotVariant(u32),
 }
 
-impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
+impl TryFrom<RuntimeMetadataV14> for Metadata {
     type Error = InvalidMetadataError;
 
-    fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
-        if metadata.0 != META_RESERVED {
-            return Err(InvalidMetadataError::InvalidPrefix)
-        }
-        let metadata = match metadata.1 {
-            RuntimeMetadata::V14(meta) => meta,
-            _ => return Err(InvalidMetadataError::InvalidVersion),
-        };
-
+    fn try_from(metadata: RuntimeMetadataV14) -> Result<Self, Self::Error> {
         let get_type_def_variant = |type_id: u32| {
             let ty = metadata
                 .types
@@ -544,6 +536,31 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 cached_storage_hashes: Default::default(),
             }),
         })
+    }
+}
+
+impl TryFrom<RuntimeMetadata> for Metadata {
+    type Error = InvalidMetadataError;
+
+    fn try_from(metadata: RuntimeMetadata) -> Result<Self, Self::Error> {
+        let metadata = match metadata {
+            RuntimeMetadata::V14(meta) => meta,
+            _ => return Err(InvalidMetadataError::InvalidVersion),
+        };
+
+        metadata.try_into()
+    }
+}
+
+impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
+    type Error = InvalidMetadataError;
+
+    fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
+        if metadata.0 != META_RESERVED {
+            return Err(InvalidMetadataError::InvalidPrefix)
+        }
+
+        metadata.1.try_into()
     }
 }
 

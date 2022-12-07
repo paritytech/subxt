@@ -31,7 +31,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let genesis = api.rpc().chainhead_genesis_hash().await?;
     println!("Genesis: {:?}", genesis);
 
-    let mut follow_sub = api.blocks().subscribe_chainhead_finalized(true).await?;
+    let mut follow_sub = api.blocks().subscribe_chainhead_finalized(false).await?;
+    println!("Following subscription...");
     // Handle all subscriptions from the `chainHead_follow`.
     while let Some(block) = follow_sub.next().await {
         let block = block?;
@@ -55,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let call = block
             .call("AccountNonceApi_account_nonce".into(), Some(&call_params))
             .await?;
-        println!("[hash={:?}] call={:?}", block.hash(), call);
+        // println!("[hash={:?}] call={:?}", block.hash(), call);
     }
 
     // Subscribe to the `chainHead_follow` method.

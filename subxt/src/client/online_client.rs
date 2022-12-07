@@ -90,18 +90,18 @@ impl<T: Config> OnlineClient<T> {
     ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::new(rpc_client);
 
-        let (genesis_hash, runtime_version, metadata) = future::join3(
-            rpc.genesis_hash(),
-            rpc.runtime_version(None),
-            rpc.metadata(None),
+        let (genesis_hash, result) = future::join(
+            rpc.chainhead_genesis_hash(),
+            rpc.fetch_chainhead_call_metadata_runtime(),
         )
         .await;
+        let (metadata, runtime_version) = result?;
 
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
                 genesis_hash: genesis_hash?,
-                runtime_version: runtime_version?,
-                metadata: metadata?,
+                runtime_version,
+                metadata,
             })),
             rpc,
         })
