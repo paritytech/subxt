@@ -891,8 +891,7 @@ impl<T: Config> Rpc<T> {
                 .await?;
 
             println!("Dropping subscription");
-            // Manually cancel the susbcription
-            // {"id": 1, "method": "eth_unsubscribe", "params": ["0xcd0c3e8af590364c09d0fa6a1210faf5"]}
+            drop(sub);
 
             let result: bool = self
                 .client
@@ -902,7 +901,6 @@ impl<T: Config> Rpc<T> {
                 )
                 .await?;
             println!("Subscription dropped with result={:?}", result);
-            drop(sub);
 
             (bytes, event)
         };
