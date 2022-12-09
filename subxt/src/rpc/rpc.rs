@@ -890,17 +890,13 @@ impl<T: Config> Rpc<T> {
                 )
                 .await?;
 
-            println!("Dropping subscription");
-            drop(sub);
-
-            let result: bool = self
+            let _result: bool = self
                 .client
                 .request(
                     "chainHead_unstable_unfollow",
                     rpc_params![subscription_id_rpc],
                 )
                 .await?;
-            println!("Subscription dropped with result={:?}", result);
 
             (bytes, event)
         };
