@@ -65,6 +65,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
         println!("[hash={:?}] call={:?}", block.hash(), call);
 
+        println!("Events:");
+        let events = block.events().await?;
+        for event in events.iter() {
+            let event = event?;
+            let pallet = event.pallet_name();
+            let variant = event.variant_name();
+            println!(
+                "    {pallet}::{variant} event"
+            );
+        }
+
         // Unpin the block as last step.
         block.unpin().await?;
     }

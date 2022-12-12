@@ -11,7 +11,10 @@ use crate::{
         BlockError,
         Error,
     },
-    events,
+    events::{
+        self,
+        Events,
+    },
     metadata::DecodeWithMetadata,
     rpc::{
         subscription_events::{
@@ -29,6 +32,7 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
+use sp_core::twox_128;
 use sp_runtime::traits::{
     Hash,
     Header,
@@ -85,7 +89,32 @@ where
             .await
     }
 
-    /// Fetch the header of this block.
+    /// Fetch the block's events
+    pub async fn events(&self) -> Result<Events<T>, Error> {
+        let mut storage_key = twox_128(b"System").to_vec();
+        storage_key.extend(twox_128(b"Events").to_vec());
+        let Some(event_bytes) = self.storage_raw(&storage_key).await? else {
+            return Err(Error::Other(
+                "Failed to fetch System::Events storage".into()
+            ))
+        };
+
+        Ok(Events::new(
+            self.client.metadata(),
+            self.hash.clone(),
+            event_bytes,
+        ))
+    }
+
+    /// Fetch the raw storage bytes of this block at the provided key.
+    pub async fn storage_raw<'a>(&self, key: &'a [u8]) -> Result<Option<Vec<u8>>, Error> {
+        self.client
+            .rpc()
+            .fetch_chainhead_storage(self.subscription_id.clone(), self.hash, &key, None)
+            .await
+    }
+
+    /// Fetch the storage of this block at the provided key.
     pub async fn storage<'a, Address>(
         &self,
         key: &'a Address,
