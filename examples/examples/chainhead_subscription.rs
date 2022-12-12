@@ -64,20 +64,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .call("AccountNonceApi_account_nonce".into(), Some(&call_params))
             .await?;
         println!("[hash={:?}] call={:?}", block.hash(), call);
-    }
 
-    // Subscribe to the `chainHead_follow` method.
-    let mut follow_sub = api.rpc().subscribe_chainhead_follow(false).await?;
-
-    // Handle all subscriptions from the `chainHead_follow`.
-    while let Some(event) = follow_sub.next().await {
-        let event = event?;
-
-        println!(
-            "sub_id: {:?} event: {:?}",
-            follow_sub.subscription_id(),
-            event
-        );
+        // Unpin the block as last step.
+        block.unpin().await?;
     }
 
     Ok(())

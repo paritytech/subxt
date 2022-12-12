@@ -162,6 +162,22 @@ where
             "Failed to execute the runtime API call".into(),
         ))
     }
+
+    /// Unpin this block.
+    ///
+    /// # Note
+    ///
+    /// Call this method when you are no longer interested in making queries
+    /// against this block.
+    ///
+    /// Failing to call this method will eventually terminate the subscription.
+    pub async fn unpin(self) -> Result<(), Error> {
+        self.client
+            .rpc()
+            .chainhead_unpin(self.subscription_id, self.hash)
+            .await?;
+        Ok(())
+    }
 }
 
 /// A representation of a block.

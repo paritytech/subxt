@@ -698,6 +698,22 @@ impl<T: Config> Rpc<T> {
         Ok(header)
     }
 
+    /// Unpin a block reported by the `chainHead_follow` subscription.
+    pub async fn chainhead_unpin(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<(), Error> {
+        self.client
+            .request(
+                "chainHead_unstable_unpin",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        Ok(())
+    }
+
     /// Parse `chaiHead_header` response and return the block's header.
     ///
     /// # Note
