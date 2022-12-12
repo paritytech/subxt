@@ -872,14 +872,11 @@ impl<T: Config> Rpc<T> {
         let (bytes, event) = {
             let mut sub = self.subscribe_chainhead_follow(true).await?;
 
-            let subscription_id_rpc = match sub.subscription_id() {
+            let subscription_id = match sub.subscription_id() {
                 Some(id) => id.clone(),
                 None => return Err(Error::Other("Subscription without ID".into())),
             };
-            println!("Recv from jsonrpsee: {:?}", subscription_id_rpc);
-
-            // TODO: Jsonrpsee needs update.
-            let subscription_id = "A".to_string();
+            println!("RPC Subscription ID: {:?}", subscription_id);
 
             let event = match sub.next().await {
                 Some(event) => event,
@@ -899,7 +896,7 @@ impl<T: Config> Rpc<T> {
 
             let bytes = self
                 .fetch_chainhead_call(
-                    subscription_id,
+                    subscription_id.clone(),
                     event.finalized_block_hash,
                     "Metadata_metadata".into(),
                     &vec![],
@@ -910,7 +907,7 @@ impl<T: Config> Rpc<T> {
                 .client
                 .request(
                     "chainHead_unstable_unfollow",
-                    rpc_params![subscription_id_rpc],
+                    rpc_params![subscription_id],
                 )
                 .await?;
 

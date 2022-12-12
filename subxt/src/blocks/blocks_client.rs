@@ -172,13 +172,10 @@ where
                 .subscribe_chainhead_follow(runtime_updates)
                 .await?;
 
-            let _subscription_id = match sub.subscription_id() {
+            let subscription_id = match sub.subscription_id() {
                 Some(id) => id.clone(),
                 None => return Err(Error::Other("Subscription without ID".into())),
             };
-
-            // TODO: Jsonrpsee needs update.
-            let subscription_id = "A".to_string();
 
             // Flatten the finalized events and map them into a `FollowBlock`.
             Ok(sub
