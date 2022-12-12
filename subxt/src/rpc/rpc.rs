@@ -858,7 +858,13 @@ impl<T: Config> Rpc<T> {
                         .map_err(|err| Error::Other(err.to_string()))?;
                     Ok(bytes)
                 }
-                _ => Err(Error::Other("Failed to execute runtime API call".into())),
+                event => {
+                    println!(
+                        "Substrate failed to execute the runtime API call. Event={:?}",
+                        event
+                    );
+                    return Err(Error::Other("Failed to execute runtime API call".into()))
+                }
             }
         }
 
@@ -905,10 +911,7 @@ impl<T: Config> Rpc<T> {
 
             let _result: bool = self
                 .client
-                .request(
-                    "chainHead_unstable_unfollow",
-                    rpc_params![subscription_id],
-                )
+                .request("chainHead_unstable_unfollow", rpc_params![subscription_id])
                 .await?;
 
             (bytes, event)
