@@ -71,9 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let event = event?;
             let pallet = event.pallet_name();
             let variant = event.variant_name();
-            println!(
-                "    {pallet}::{variant} event"
-            );
+            println!("    {pallet}::{variant} event");
         }
 
         // Unpin the block as last step.

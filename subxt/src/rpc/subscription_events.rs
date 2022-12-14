@@ -150,3 +150,246 @@ pub enum ChainHeadEvent<T> {
     /// The provided subscription ID is stale or invalid.
     Disjoint,
 }
+
+/// The transaction was broadcasted to a number of peers.
+///
+/// # Note
+///
+/// The RPC does not guarantee that the peers have received the
+/// transaction.
+///
+/// When the number of peers is zero, the event guarantees that
+/// shutting down the local node will lead to the transaction
+/// not being included in the chain.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionBroadcasted {
+    /// The number of peers the transaction was broadcasted to.
+    #[serde(with = "as_string")]
+    pub num_peers: usize,
+}
+
+/// The transaction was included in a block of the chain.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionBlock<Hash> {
+    /// The hash of the block the transaction was included into.
+    pub hash: Hash,
+    /// The index (zero-based) of the transaction within the body of the block.
+    #[serde(with = "as_string")]
+    pub index: usize,
+}
+
+/// The transaction could not be processed due to an error.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionError {
+    /// Reason of the error.
+    pub error: String,
+}
+
+/// The transaction was dropped because of exceeding limits.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionDropped {
+    /// True if the transaction was broadcasted to other peers and
+    /// may still be included in the block.
+    pub broadcasted: bool,
+    /// Reason of the event.
+    pub error: String,
+}
+
+/// Possible transaction status events.
+///
+/// The status events can be grouped based on their kinds as:
+///
+/// 1. Runtime validated the transaction:
+/// 		- `Validated`
+///
+/// 2. Inside the `Ready` queue:
+/// 		- `Broadcast`
+///
+/// 3. Leaving the pool:
+/// 		- `BestChainBlockIncluded`
+/// 		- `Invalid`
+///
+/// 4. Block finalized:
+/// 		- `Finalized`
+///
+/// 5. At any time:
+/// 		- `Dropped`
+/// 		- `Error`
+///
+/// The subscription's stream is considered finished whenever the following events are
+/// received: `Finalized`, `Error`, `Invalid` or `Dropped`. However, the user is allowed
+/// to unsubscribe at any moment.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+// We need to manually specify the trait bounds for the `Hash` trait to ensure `into` and
+// `from` still work.
+#[serde(bound(deserialize = "Hash: Deserialize<'de> + Clone"))]
+#[serde(from = "TransactionEventIR<Hash>")]
+pub enum TransactionEvent<Hash> {
+    /// The transaction was validated by the runtime.
+    Validated,
+    /// The transaction was broadcasted to a number of peers.
+    Broadcasted(TransactionBroadcasted),
+    /// The transaction was included in a best block of the chain.
+    ///
+    /// # Note
+    ///
+    /// This may contain `None` if the block is no longer a best
+    /// block of the chain.
+    BestChainBlockIncluded(Option<TransactionBlock<Hash>>),
+    /// The transaction was included in a finalized block.
+    Finalized(TransactionBlock<Hash>),
+    /// The transaction could not be processed due to an error.
+    Error(TransactionError),
+    /// The transaction is marked as invalid.
+    Invalid(TransactionError),
+    /// The client was not capable of keeping track of this transaction.
+    Dropped(TransactionDropped),
+}
+
+/// Intermediate representation (IR) for the transaction events
+/// that handles block events only.
+///
+/// The block events require a JSON compatible interpretation similar to:
+///
+/// ```json
+/// { event: "EVENT", block: { hash: "0xFF", index: 0 } }
+/// ```
+///
+/// This IR is introduced to circumvent that the block events need to
+/// be serialized/deserialized with "tag" and "content", while other
+/// events only require "tag".
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "event", content = "block")]
+enum TransactionEventBlockIR<Hash> {
+    /// The transaction was included in the best block of the chain.
+    BestChainBlockIncluded(Option<TransactionBlock<Hash>>),
+    /// The transaction was included in a finalized block of the chain.
+    Finalized(TransactionBlock<Hash>),
+}
+
+/// Intermediate representation (IR) for the transaction events
+/// that handles non-block events only.
+///
+/// The non-block events require a JSON compatible interpretation similar to:
+///
+/// ```json
+/// { event: "EVENT", num_peers: 0 }
+/// ```
+///
+/// This IR is introduced to circumvent that the block events need to
+/// be serialized/deserialized with "tag" and "content", while other
+/// events only require "tag".
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "event")]
+enum TransactionEventNonBlockIR {
+    Validated,
+    Broadcasted(TransactionBroadcasted),
+    Error(TransactionError),
+    Invalid(TransactionError),
+    Dropped(TransactionDropped),
+}
+
+/// Intermediate representation (IR) used for serialization/deserialization of the
+/// [`TransactionEvent`] in a JSON compatible format.
+///
+/// Serde cannot mix `#[serde(tag = "event")]` with `#[serde(tag = "event", content = "block")]`
+/// for specific enum variants. Therefore, this IR is introduced to circumvent this
+/// restriction, while exposing a simplified [`TransactionEvent`] for users of the
+/// rust ecosystem.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(bound(deserialize = "Hash: Deserialize<'de>"))]
+#[serde(rename_all = "camelCase")]
+#[serde(untagged)]
+enum TransactionEventIR<Hash> {
+    Block(TransactionEventBlockIR<Hash>),
+    NonBlock(TransactionEventNonBlockIR),
+}
+
+impl<Hash> From<TransactionEvent<Hash>> for TransactionEventIR<Hash> {
+    fn from(value: TransactionEvent<Hash>) -> Self {
+        match value {
+            TransactionEvent::Validated => {
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Validated)
+            }
+            TransactionEvent::Broadcasted(event) => {
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Broadcasted(
+                    event,
+                ))
+            }
+            TransactionEvent::BestChainBlockIncluded(event) => {
+                TransactionEventIR::Block(
+                    TransactionEventBlockIR::BestChainBlockIncluded(event),
+                )
+            }
+            TransactionEvent::Finalized(event) => {
+                TransactionEventIR::Block(TransactionEventBlockIR::Finalized(event))
+            }
+            TransactionEvent::Error(event) => {
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Error(event))
+            }
+            TransactionEvent::Invalid(event) => {
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Invalid(event))
+            }
+            TransactionEvent::Dropped(event) => {
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Dropped(event))
+            }
+        }
+    }
+}
+
+impl<Hash> From<TransactionEventIR<Hash>> for TransactionEvent<Hash> {
+    fn from(value: TransactionEventIR<Hash>) -> Self {
+        match value {
+            TransactionEventIR::NonBlock(status) => {
+                match status {
+                    TransactionEventNonBlockIR::Validated => TransactionEvent::Validated,
+                    TransactionEventNonBlockIR::Broadcasted(event) => {
+                        TransactionEvent::Broadcasted(event)
+                    }
+                    TransactionEventNonBlockIR::Error(event) => {
+                        TransactionEvent::Error(event)
+                    }
+                    TransactionEventNonBlockIR::Invalid(event) => {
+                        TransactionEvent::Invalid(event)
+                    }
+                    TransactionEventNonBlockIR::Dropped(event) => {
+                        TransactionEvent::Dropped(event)
+                    }
+                }
+            }
+            TransactionEventIR::Block(block) => {
+                match block {
+                    TransactionEventBlockIR::Finalized(event) => {
+                        TransactionEvent::Finalized(event)
+                    }
+                    TransactionEventBlockIR::BestChainBlockIncluded(event) => {
+                        TransactionEvent::BestChainBlockIncluded(event)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Serialize and deserialize helper as string.
+mod as_string {
+    use super::*;
+    use serde::{
+        Deserializer,
+        Serializer,
+    };
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(
+        deserializer: D,
+    ) -> Result<usize, D::Error> {
+        String::deserialize(deserializer)?
+            .parse()
+            .map_err(|e| serde::de::Error::custom(format!("Parsing failed: {}", e)))
+    }
+}
