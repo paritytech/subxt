@@ -130,7 +130,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         use subxt::tx::TxStatus::*;
 
         // Made it into a block, but not finalized.
-        if let InBlock(details) = ev {
+        if let InBlock(Some(details)) = ev {
             println!(
                 "Transaction {:?} made it into block {:?}",
                 details.extrinsic_hash(),

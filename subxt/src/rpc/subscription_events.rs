@@ -380,10 +380,7 @@ impl<Hash> From<TransactionEventIR<Hash>> for TransactionEvent<Hash> {
 /// Serialize and deserialize helper as string.
 mod as_string {
     use super::*;
-    use serde::{
-        Deserializer,
-        Serializer,
-    };
+    use serde::Deserializer;
 
     pub fn deserialize<'de, D: Deserializer<'de>>(
         deserializer: D,

@@ -46,6 +46,7 @@ use super::{
         ChainHeadResult,
         FollowEvent,
         RuntimeEvent,
+        TransactionEvent,
     },
     RpcClient,
     RpcClientT,
@@ -984,15 +985,15 @@ impl<T: Config> Rpc<T> {
     pub async fn watch_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>, Error> {
+    ) -> Result<Subscription<TransactionEvent<T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let subscription = self
             .client
             .subscribe(
-                "author_submitAndWatchExtrinsic",
+                "transaction_unstable_submitAndWatch",
                 params,
-                "author_unwatchExtrinsic",
+                "transaction_unstable_unwatch",
             )
             .await?;
         Ok(subscription)
