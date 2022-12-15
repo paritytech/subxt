@@ -6,12 +6,12 @@ publish = false
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = "7.0.0"
+sp-runtime = "8.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
-sp-core = { version = "7.0.0", default-features = false  }
+sp-core = { version = "8.0.0", default-features = false  }
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }
