@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = "7.0.0"
+sp-runtime = "8.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
