@@ -23,7 +23,7 @@ futures = "0.3.13"
 hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-sp-core = { version = "7.0.0", default-features = false }
+sp-core = { version = "9.0.0", default-features = false }
 sp-keyring = "7.0.0"
 sp-runtime = "7.0.0"
 syn = "1.0.0"
