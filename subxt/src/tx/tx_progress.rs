@@ -334,6 +334,11 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         self.ext_hash
     }
 
+    /// Return the index of the extrinsic that was submitted.
+    pub fn extrinsic_index(&self) -> usize {
+        self.index
+    }
+
     /// Fetch the events associated with this transaction. If the transaction
     /// was successful (ie no `ExtrinsicFailed`) events were found, then we return
     /// the events associated with it. If the transaction was not successful, or
