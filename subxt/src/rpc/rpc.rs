@@ -973,12 +973,40 @@ impl<T: Config> Rpc<T> {
         extrinsic: X,
     ) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
+        // The substrate TX pool uses the `T::Hashing ` on the encoded extrinsic slice
+        // to obtain the hash of the extrinsic.
+        // Prior to the `transaction_unstable_submitAndWatch` method, the RPC relied
+        // on the old `author_submitExtrinsic` method to submit an extrinsic.
+        // The author method return the extrinsic hash as a result.
+        use sp_core::Hasher;
+        let extrinsic_hash = T::Hashing::hash(&bytes.0);
+
         let params = rpc_params![bytes];
-        let xt_hash = self
+        let mut subscription: Subscription<TransactionEvent<T::Hash>> = self
             .client
-            .request("author_submitExtrinsic", params)
+            .subscribe(
+                "transaction_unstable_submitAndWatch",
+                params,
+                "transaction_unstable_unwatch",
+            )
             .await?;
-        Ok(xt_hash)
+
+        let event = match subscription.next().await {
+            Some(event) => event,
+            _ => return Err(Error::Other("Subscription dropped".into())),
+        };
+
+        // The `Validated` event means that the transaction is valid and
+        // ready to enter the TX pool. In this case, return the hash of the extrinsic
+        // similar to `author_submitExtrinsic`.
+        match event? {
+            TransactionEvent::Validated => Ok(extrinsic_hash),
+            TransactionEvent::Error(reason) | TransactionEvent::Invalid(reason) => {
+                Err(Error::Other(reason.error))
+            }
+            TransactionEvent::Dropped(dropped) => Err(Error::Other(dropped.error)),
+            _ => Err(Error::Other("Unexpected subscription event".into())),
+        }
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
