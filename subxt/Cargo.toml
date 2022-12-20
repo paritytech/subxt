@@ -45,7 +45,7 @@ subxt-macro = { version = "0.25.0", path = "../macro" }
 subxt-metadata = { version = "0.25.0", path = "../metadata" }
 
 sp-core = { version = "7.0.0", default-features = false  }
-sp-runtime = "7.0.0"
+sp-runtime = "11.0.0"
 
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
