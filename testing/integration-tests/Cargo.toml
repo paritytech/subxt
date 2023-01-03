@@ -24,7 +24,7 @@ hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "10.0.0", default-features = false }
-sp-keyring = "11.0.0"
+sp-keyring = { version = "11.0.0", default-features = false }
 sp-runtime = { version = "11.0.0", default-features = false }
 syn = "1.0.0"
 subxt = { version = "0.25.0", path = "../../subxt" }
