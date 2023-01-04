@@ -17,6 +17,7 @@ use crate::{
     utils::{
         Encoded,
         PhantomDataSendSync,
+        hasher::Hasher,
     },
     Config,
 };
@@ -165,7 +166,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             additional_and_extra_params.encode_extra_to(&mut bytes);
             additional_and_extra_params.encode_additional_to(&mut bytes);
             if bytes.len() > 256 {
-                signer.sign(&sp_core::blake2_256(&bytes))
+                signer.sign(T::Hashing::hash_of(&bytes).as_ref())
             } else {
                 signer.sign(&bytes)
             }
@@ -365,7 +366,6 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
-        use crate::utils::hasher::Hasher;
         let ext_hash = T::Hashing::hash_of(&self.encoded);
 
         // Submit and watch for transaction progress.

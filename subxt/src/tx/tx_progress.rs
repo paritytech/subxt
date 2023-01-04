@@ -27,8 +27,6 @@ use futures::{
     StreamExt,
 };
 
-pub use sp_runtime::traits::SignedExtension;
-
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]

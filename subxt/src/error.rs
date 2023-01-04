@@ -19,8 +19,6 @@ pub use scale_value::scale::{
     DecodeError,
     EncodeError,
 };
-pub use sp_core::crypto::SecretStringError;
-pub use sp_runtime::transaction_validity::TransactionValidityError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -39,12 +37,6 @@ pub enum Error {
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
-    /// Secret string error.
-    #[error("Secret String Error")]
-    SecretString(SecretStringError),
-    /// Extrinsic validity error
-    #[error("Transaction Validity Error: {0:?}")]
-    Invalid(TransactionValidityError),
     /// Invalid metadata error
     #[error("Invalid Metadata: {0}")]
     InvalidMetadata(#[from] InvalidMetadataError),
@@ -72,18 +64,6 @@ pub enum Error {
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-impl From<SecretStringError> for Error {
-    fn from(error: SecretStringError) -> Self {
-        Error::SecretString(error)
-    }
-}
-
-impl From<TransactionValidityError> for Error {
-    fn from(error: TransactionValidityError) -> Self {
-        Error::Invalid(error)
-    }
 }
 
 impl From<&str> for Error {

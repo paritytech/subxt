@@ -14,9 +14,6 @@ use codec::{
     EncodeLike,
 };
 use core::fmt::Debug;
-use sp_runtime::traits::{
-    Verify,
-};
 use crate::utils::hasher::{
     Hasher,
     BlakeTwo256,
@@ -80,7 +77,7 @@ pub trait Config: 'static {
         + serde::de::DeserializeOwned;
 
     /// Signature type.
-    type Signature: Verify + Encode + Send + Sync + 'static;
+    type Signature: Encode + Send + Sync + 'static;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;

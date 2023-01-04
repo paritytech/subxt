@@ -39,7 +39,7 @@ pub struct PairSigner<T: Config, P: Pair> {
 impl<T, P> PairSigner<T, P>
 where
     T: Config,
-    T::Signature: From<P::Signature>,
+    T::Signature: From<P::Signature> + Verify,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P: Pair,
