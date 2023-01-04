@@ -9,7 +9,10 @@ use crate::{
         BlockError,
         Error,
     },
-    utils::PhantomDataSendSync,
+    utils::{
+        PhantomDataSendSync,
+        header::Header,
+    },
     Config,
 };
 use derivative::Derivative;
@@ -19,7 +22,6 @@ use futures::{
     Stream,
     StreamExt,
 };
-use sp_runtime::traits::Header;
 use std::{
     future::Future,
     pin::Pin,
@@ -137,7 +139,7 @@ where
                 .rpc()
                 .header(Some(last_finalized_block_hash))
                 .await?
-                .map(|h| (*h.number()).into());
+                .map(|h| h.number().into());
 
             let sub = client.rpc().subscribe_finalized_block_headers().await?;
 
@@ -203,7 +205,7 @@ where
         };
 
         // We want all previous details up to, but not including this current block num.
-        let end_block_num = (*header.number()).into();
+        let end_block_num = header.number().into();
 
         // This is one after the last block we returned details for last time.
         let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);

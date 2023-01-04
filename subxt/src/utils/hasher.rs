@@ -6,8 +6,13 @@
 
 use codec::Encode;
 
-/// Output from BlakeTwo256 hashing.
-pub use primitive_types::H256;
+/// Output from hashing functions. These are used in codegen as well
+/// as below.
+pub use primitive_types::{
+    H160,
+    H256,
+    H512,
+};
 
 /// Represents a type that can hash some value to some output.
 /// Adapted from `sp_runtime::traits::Hash` and `sp_runtime::traits::Hasher`.
@@ -26,6 +31,7 @@ pub trait Hasher {
 }
 
 /// A type that can hash values using the blaks2_256 algorithm.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Encode)]
 pub struct BlakeTwo256;
 impl Hasher for BlakeTwo256 {
     type Output = primitive_types::H256;

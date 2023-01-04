@@ -11,16 +11,16 @@ use crate::{
         BlockError,
         Error,
     },
-    utils::hasher::Hasher,
+    utils::{
+        hasher::Hasher,
+        header::Header,
+    },
     events,
     rpc::ChainBlockResponse,
     Config,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
-use sp_runtime::traits::{
-    Header,
-};
 use std::sync::Arc;
 
 /// A representation of a block.
@@ -56,7 +56,7 @@ where
 
     /// Return the block number.
     pub fn number(&self) -> T::BlockNumber {
-        *self.header().number()
+        self.header().number()
     }
 
     /// Return the entire block header.

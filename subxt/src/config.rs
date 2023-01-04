@@ -15,13 +15,16 @@ use codec::{
 };
 use core::fmt::Debug;
 use sp_runtime::traits::{
-    Header,
     Verify,
 };
 use crate::utils::hasher::{
     Hasher,
     BlakeTwo256,
     H256
+};
+use crate::utils::header::{
+    SubstrateHeader,
+    Header
 };
 
 /// Runtime types.
@@ -72,7 +75,8 @@ pub trait Config: 'static {
 
     /// The block header.
     type Header: Parameter
-        + Header<Number = Self::BlockNumber, Hash = Self::Hash>
+        + Header<Number = Self::BlockNumber, Hasher = Self::Hashing>
+        + Member
         + serde::de::DeserializeOwned;
 
     /// Signature type.
@@ -102,8 +106,7 @@ impl Config for SubstrateConfig {
     type Hashing = BlakeTwo256;
     type AccountId = sp_runtime::AccountId32;
     type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-    type Header =
-        sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
+    type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
     type ExtrinsicParams = crate::tx::SubstrateExtrinsicParams<Self>;
 }
