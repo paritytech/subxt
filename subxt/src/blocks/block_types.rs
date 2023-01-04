@@ -11,6 +11,7 @@ use crate::{
         BlockError,
         Error,
     },
+    utils::hasher::Hasher,
     events,
     rpc::ChainBlockResponse,
     Config,
@@ -18,7 +19,6 @@ use crate::{
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
 use sp_runtime::traits::{
-    Hash,
     Header,
 };
 use std::sync::Arc;

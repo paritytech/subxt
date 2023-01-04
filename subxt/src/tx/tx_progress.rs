@@ -26,7 +26,6 @@ use futures::{
     Stream,
     StreamExt,
 };
-use sp_runtime::traits::Hash;
 
 pub use sp_runtime::traits::SignedExtension;
 
@@ -373,6 +372,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let extrinsic_idx = block.block.extrinsics
             .iter()
             .position(|ext| {
+                use crate::utils::hasher::Hasher;
                 let hash = T::Hashing::hash_of(&ext.0);
                 hash == self.ext_hash
             })

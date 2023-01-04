@@ -26,7 +26,6 @@ use codec::{
 };
 use derivative::Derivative;
 use sp_runtime::{
-    traits::Hash,
     ApplyExtrinsicResult,
 };
 
@@ -366,6 +365,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
+        use crate::utils::hasher::Hasher;
         let ext_hash = T::Hashing::hash_of(&self.encoded);
 
         // Submit and watch for transaction progress.

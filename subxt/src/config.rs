@@ -15,12 +15,13 @@ use codec::{
 };
 use core::fmt::Debug;
 use sp_runtime::traits::{
-    AtLeast32Bit,
-    Hash,
     Header,
-    MaybeSerializeDeserialize,
-    Member,
     Verify,
+};
+use crate::utils::hasher::{
+    Hasher,
+    BlakeTwo256,
+    H256
 };
 
 /// Runtime types.
@@ -34,7 +35,6 @@ pub trait Config: 'static {
         + Member
         + serde::de::DeserializeOwned
         + Default
-        + AtLeast32Bit
         + Copy
         + scale_info::TypeInfo
         + Into<u64>;
@@ -44,14 +44,15 @@ pub trait Config: 'static {
         + Member
         + Default
         + Copy
-        + core::hash::Hash
-        + core::str::FromStr
+        + std::hash::Hash
+        + std::str::FromStr
         + Into<u64>;
 
     /// The output of the `Hashing` function.
     type Hash: Parameter
         + Member
-        + MaybeSerializeDeserialize
+        + serde::Serialize
+        + serde::de::DeserializeOwned
         + Ord
         + Default
         + Copy
@@ -61,7 +62,7 @@ pub trait Config: 'static {
         + scale_info::TypeInfo;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hashing: Hash<Output = Self::Hash>;
+    type Hashing: Hasher<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
     type AccountId: Parameter + Member + serde::Serialize;
@@ -81,9 +82,13 @@ pub trait Config: 'static {
     type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
 }
 
-/// Parameter trait copied from `substrate::frame_support`
+/// Parameter trait copied from `substrate::frame_support`.
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
+
+/// A type that can be used in runtime structures. Copied from `sp_runtime::traits`.
+pub trait Member: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static {}
+impl<T: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static> Member for T {}
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
@@ -93,8 +98,8 @@ pub enum SubstrateConfig {}
 impl Config for SubstrateConfig {
     type Index = u32;
     type BlockNumber = u32;
-    type Hash = sp_core::H256;
-    type Hashing = sp_runtime::traits::BlakeTwo256;
+    type Hash = H256;
+    type Hashing = BlakeTwo256;
     type AccountId = sp_runtime::AccountId32;
     type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
     type Header =

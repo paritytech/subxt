@@ -32,8 +32,8 @@ enum TypeBeingHashed {
 }
 
 /// Hashing function utilized internally.
-fn hash(bytes: &[u8]) -> [u8; 32] {
-    sp_core::hashing::twox_256(bytes)
+fn hash(data: &[u8]) -> [u8; 32] {
+    sp_core_hashing::twox_256(data)
 }
 
 /// XOR two hashes together. If we have two pseudorandom hashes, then this will
