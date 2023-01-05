@@ -19,3 +19,5 @@ futures = "0.3.13"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 hex = "0.4.3"
 tracing-subscriber = "0.3.11"
+sp-core = { version = "7.0.0", default-features = false }
+sp-runtime = { version = "7.0.0" }

@@ -16,6 +16,10 @@ use codec::{
 };
 use derivative::Derivative;
 
+pub use account_id::AccountId32;
+pub use multi_address::MultiAddress;
+pub use multi_signature::MultiSignature;
+
 // Used in codegen
 #[doc(hidden)]
 pub use primitive_types::{

@@ -16,15 +16,15 @@ use crate::{
         DecodeWithMetadata,
         Metadata,
     },
+    rpc::{
+        StorageData,
+        StorageKey
+    },
     Config,
 };
 use derivative::Derivative;
 use frame_metadata::StorageEntryType;
 use scale_info::form::PortableForm;
-use sp_core::storage::{
-    StorageData,
-    StorageKey,
-};
 use std::{
     future::Future,
     marker::PhantomData,

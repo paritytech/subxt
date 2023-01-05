@@ -16,7 +16,7 @@ pub use storage_client::{
 };
 
 // Re-export as this is used in the public API:
-pub use sp_core::storage::StorageKey;
+pub use crate::rpc::StorageKey;
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.

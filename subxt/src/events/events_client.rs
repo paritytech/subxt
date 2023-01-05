@@ -6,12 +6,10 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     events::Events,
+    rpc::StorageKey,
     Config,
 };
 use derivative::Derivative;
-use sp_core::{
-    storage::StorageKey,
-};
 use std::future::Future;
 
 /// A client for working with events.

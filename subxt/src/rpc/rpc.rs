@@ -60,20 +60,12 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageData,
-        StorageKey,
-    },
-    Bytes,
-    U256,
-};
 use sp_runtime::ApplyExtrinsicResult;
 use std::{
     collections::HashMap,
     sync::Arc,
 };
+use primitive_types::U256;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -90,6 +82,24 @@ pub enum NumberOrHex {
     Number(u64),
     /// Hex representation of the number.
     Hex(U256),
+}
+
+/// Hex-serialized shim for `Vec<u8>`.
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize, Hash, PartialOrd, Ord, Debug)]
+pub struct Bytes(
+    #[serde(with = "impl_serde::serialize")]
+    pub Vec<u8>
+);
+impl std::ops::Deref for Bytes {
+	type Target = [u8];
+	fn deref(&self) -> &[u8] {
+		&self.0[..]
+	}
+}
+impl From<Vec<u8>> for Bytes {
+	fn from(s: Vec<u8>) -> Self {
+		Bytes(s)
+	}
 }
 
 /// The response from `chain_getBlock`
@@ -120,7 +130,7 @@ impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
     where
         D: ::serde::Deserializer<'a>,
     {
-        let r = sp_core::bytes::deserialize(de)?;
+        let r = impl_serde::serialize::deserialize(de)?;
         let bytes = Decode::decode(&mut &r[..])
             .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
         Ok(ChainBlockExtrinsic(bytes))
@@ -328,6 +338,30 @@ pub struct BlockStats {
     /// This information can also be acquired by downloading the whole block. This merely
     /// saves some complexity on the client side.
     pub num_extrinsics: u64,
+}
+
+/// Storage key.
+#[derive(Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode)]
+pub struct StorageKey(
+	#[serde(with = "impl_serde::serialize")]
+    pub Vec<u8>,
+);
+
+/// Storage data.
+#[derive(Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode)]
+pub struct StorageData(
+	#[serde(with = "impl_serde::serialize")]
+    pub Vec<u8>,
+);
+
+/// Storage change set
+#[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct StorageChangeSet<Hash> {
+	/// Block hash
+	pub block: Hash,
+	/// A list of changes
+	pub changes: Vec<(StorageKey, Option<StorageData>)>,
 }
 
 /// Health struct returned by the RPC
