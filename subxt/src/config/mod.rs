@@ -18,6 +18,7 @@ use codec::{
     EncodeLike,
 };
 use core::fmt::Debug;
+use serde::Serialize;
 
 pub use substrate::SubstrateConfig;
 pub use polkadot::PolkadotConfig;
@@ -60,12 +61,21 @@ pub trait Config: 'static {
         + AsMut<[u8]>
         + scale_info::TypeInfo;
 
+    /// The account ID type.
+    type AccountId: Clone + Serialize;
+
+    /// The address type.
+    type Address: Encode + From<Self::AccountId>;
+
+    /// The signature type.
+    type Signature: Encode;
+
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hashing: Hasher<Output = Self::Hash>;
+    type Hasher: Hasher<Output = Self::Hash>;
 
     /// The block header.
     type Header: Parameter
-        + Header<Number = Self::BlockNumber, Hasher = Self::Hashing>
+        + Header<Number = Self::BlockNumber, Hasher = Self::Hasher>
         + Member
         + serde::de::DeserializeOwned;
 
@@ -139,7 +149,10 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;
-    type Hashing = T::Hashing;
+    type AccountId = T::AccountId;
+    type Address = T::Address;
+    type Signature = T::Signature;
+    type Hasher = T::Hasher;
     type Header = T::Header;
     type ExtrinsicParams = E;
 }

@@ -169,7 +169,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             additional_and_extra_params.encode_extra_to(&mut bytes);
             additional_and_extra_params.encode_additional_to(&mut bytes);
             if bytes.len() > 256 {
-                signer.sign(T::Hashing::hash_of(&bytes).as_ref())
+                signer.sign(T::Hasher::hash_of(&bytes).as_ref())
             } else {
                 signer.sign(&bytes)
             }
@@ -374,7 +374,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hashing::hash_of(&self.encoded);
+        let ext_hash = T::Hasher::hash_of(&self.encoded);
 
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(&self.encoded).await?;

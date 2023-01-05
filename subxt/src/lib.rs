@@ -181,6 +181,4 @@ pub mod ext {
     pub use frame_metadata;
     pub use scale_bits;
     pub use scale_value;
-    pub use sp_core;
-    pub use sp_runtime;
 }

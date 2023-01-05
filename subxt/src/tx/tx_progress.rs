@@ -371,7 +371,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let hash = T::Hashing::hash_of(&ext.0);
+                let hash = T::Hasher::hash_of(&ext.0);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our

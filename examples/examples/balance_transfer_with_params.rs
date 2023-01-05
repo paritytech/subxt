@@ -20,7 +20,7 @@ use subxt::{
             Era
         }
     },
-    tx::PolkadotSigner,
+    tx::PairSigner,
     OnlineClient,
 };
 
@@ -31,7 +31,7 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     // Create a client to use:

@@ -23,14 +23,13 @@ mod tx_client;
 mod tx_payload;
 mod tx_progress;
 
-pub use self::signer::{
-    SubstrateSigner,
-    PolkadotSigner
-};
+// The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
+// feature if we want to avoid needing sp_core and sp_runtime.
+#[cfg(feature = "substrate-extra")]
+pub use self::signer::PairSigner;
 
 pub use self::{
     signer::{
-        PairSigner,
         Signer,
     },
     tx_client::{

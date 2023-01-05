@@ -35,58 +35,45 @@ pub trait Signer {
     fn sign(&self, signer_payload: &[u8]) -> Self::Signature;
 }
 
-pub use pair_signer::{
-    PairSigner,
-    SubstrateSigner,
-    PolkadotSigner,
-};
+#[cfg(feature = "substrate-extra")]
+pub use pair_signer::PairSigner;
 
 // A signer suitable for substrate based chains. At the moment, this relies on
 // types defined in sp_core and sp_runtime.
+#[cfg(feature = "substrate-extra")]
 mod pair_signer {
     use super::Signer;
-    use serde::Serialize;
-    use codec::Encode;
+    use crate::Config;
     use sp_core::Pair as PairT;
     use sp_runtime::traits::{
         IdentifyAccount,
         Verify,
     };
-
-    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
-    /// This is suitable for Substrate based chains; see [`PairSigner`] for a generic
-    /// type that can be configured with the correct `AccountId`, `Address` and `Signature`
-    /// types for your specific chain.
-    pub type SubstrateSigner<Pair> = PairSigner<
-        sp_runtime::AccountId32,
-        sp_runtime::MultiAddress<sp_runtime::AccountId32, u32>,
-        sp_runtime::MultiSignature,
-        Pair,
-    >;
-
-    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
-    /// This is suitable for signing things on Polkadot.
-    pub type PolkadotSigner<Pair> = SubstrateSigner<Pair>;
+    use sp_runtime::{
+        MultiSignature as SpMultiSignature,
+        AccountId32 as SpAccountId32,
+    };
 
     /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
     #[derive(Clone, Debug)]
-    pub struct PairSigner<AccountId, Address, Signature, Pair> {
-        account_id: AccountId,
+    pub struct PairSigner<T: Config, Pair> {
+        account_id: T::AccountId,
         signer: Pair,
-        _types: std::marker::PhantomData<(Address, Signature)>
     }
 
-    impl<AccountId, Address, Signature, Pair> PairSigner<AccountId, Address, Signature, Pair>
+    impl<T, Pair> PairSigner<T, Pair>
     where
+        T: Config,
+        T::AccountId: From<SpAccountId32>,
         Pair: PairT,
-        Signature: From<Pair::Signature> + Verify,
-        <Signature as Verify>::Signer: From<Pair::Public> + IdentifyAccount<AccountId = AccountId>
+        SpMultiSignature: From<Pair::Signature> + Verify,
+        <SpMultiSignature as Verify>::Signer: From<Pair::Public> + IdentifyAccount<AccountId = SpAccountId32>
     {
         /// Creates a new [`Signer`] from a [`Pair`].
         pub fn new(signer: Pair) -> Self {
             let account_id =
-                <Signature as Verify>::Signer::from(signer.public()).into_account();
-            Self { account_id, signer, _types: std::marker::PhantomData }
+                <SpMultiSignature as Verify>::Signer::from(signer.public()).into_account();
+            Self { account_id: account_id.into(), signer }
         }
 
         /// Returns the [`Pair`] implementation used to construct this.
@@ -95,22 +82,24 @@ mod pair_signer {
         }
 
         /// Return the account ID.
-        pub fn account_id(&self) -> &AccountId {
+        pub fn account_id(&self) -> &T::AccountId {
             &self.account_id
         }
     }
 
-    impl<AccountId, Address, Signature, Pair> Signer for PairSigner<AccountId, Address, Signature, Pair>
+    impl<T, Pair> Signer for PairSigner<T, Pair>
     where
-        AccountId: Serialize + Into<Address> + Clone + 'static,
+        T: Config,
         Pair: PairT + 'static,
-        Address: Encode,
-        Signature: Encode,
-        Pair::Signature: Into<Signature> + 'static,
+        // use SpMultiSignature as a bridge; our substrate Pair
+        // must be convertible into that, which then must convert
+        // into the Signature type we've configured.
+        Pair::Signature: Into<SpMultiSignature> + 'static,
+        SpMultiSignature: Into<T::Signature>,
     {
-        type AccountId = AccountId;
-        type Address = Address;
-        type Signature = Signature;
+        type AccountId = T::AccountId;
+        type Address = T::Address;
+        type Signature = T::Signature;
 
         fn account_id(&self) -> &Self::AccountId {
             &self.account_id
@@ -121,7 +110,24 @@ mod pair_signer {
         }
 
         fn sign(&self, signer_payload: &[u8]) -> Self::Signature {
-            self.signer.sign(signer_payload).into()
+            self.signer.sign(signer_payload).into().into()
+        }
+    }
+
+    // Add these impls to allow our own AccountId32 and MultiSignature to be
+    // used in Config, and this PairSigner to still work.
+    impl From<SpAccountId32> for crate::utils::account_id::AccountId32 {
+        fn from(value: SpAccountId32) -> Self {
+            Self(value.into())
+        }
+    }
+    impl From<SpMultiSignature> for crate::utils::multi_signature::MultiSignature {
+        fn from(value: SpMultiSignature) -> Self {
+            match value {
+                SpMultiSignature::Ed25519(s) => Self::Ed25519(s.0),
+                SpMultiSignature::Sr25519(s) => Self::Sr25519(s.0),
+                SpMultiSignature::Ecdsa(s) => Self::Ecdsa(s.0),
+            }
         }
     }
 }

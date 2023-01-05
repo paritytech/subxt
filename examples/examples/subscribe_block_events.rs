@@ -14,7 +14,7 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
-    tx::PolkadotSigner,
+    tx::PairSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tokio::task::spawn({
         let api = api.clone();
         async move {
-            let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
+            let signer = PairSigner::new(AccountKeyring::Alice.pair());
             let mut transfer_amount = 1_000_000_000;
 
             // Make small balance transfers from Alice to Bob in a loop:

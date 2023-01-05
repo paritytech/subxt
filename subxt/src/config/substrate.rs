@@ -26,6 +26,11 @@ pub use primitive_types::{
 	H256,
 	U256,
 };
+pub use crate::utils::{
+	account_id::AccountId32,
+	multi_address::MultiAddress,
+	multi_signature::MultiSignature
+};
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
@@ -36,7 +41,10 @@ impl Config for SubstrateConfig {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = H256;
-    type Hashing = BlakeTwo256;
+	type AccountId = AccountId32;
+	type Address = MultiAddress<Self::AccountId, u32>;
+	type Signature = MultiSignature;
+    type Hasher = BlakeTwo256;
     type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }

@@ -5,6 +5,9 @@
 //! Miscellaneous utility helpers.
 
 pub mod bits;
+pub mod account_id;
+pub mod multi_address;
+pub mod multi_signature;
 
 use codec::{
     Decode,
