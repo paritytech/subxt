@@ -5,79 +5,123 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-use crate::Config;
-use sp_core::Pair;
-use sp_runtime::traits::{
-    IdentifyAccount,
-    Verify,
-};
+use codec::Encode;
+use serde::Serialize;
 
 /// Signing transactions requires a [`Signer`]. This is responsible for
 /// providing the "from" account that the transaction is being signed by,
 /// as well as actually signing a SCALE encoded payload.
-pub trait Signer<T: Config> {
+pub trait Signer {
+    /// This is used to obtain the next available nonce from the node RPC. As such,
+    /// we need to be able to serialize it appropriately for this call.
+    type AccountId: Serialize;
+
+    /// The "from" address is encoded into extrinsics.
+    type Address: Encode;
+
+    /// This is the result of signing an extrinsic payload, and is encoded into extrinsics.
+    type Signature: Encode;
+
     /// Return the "from" account ID.
-    fn account_id(&self) -> &T::AccountId;
+    fn account_id(&self) -> &Self::AccountId;
 
     /// Return the "from" address.
-    fn address(&self) -> T::Address;
+    fn address(&self) -> Self::Address;
 
     /// Takes a signer payload for an extrinsic, and returns a signature based on it.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
-    fn sign(&self, signer_payload: &[u8]) -> T::Signature;
+    fn sign(&self, signer_payload: &[u8]) -> Self::Signature;
 }
 
-/// A [`Signer`] implementation that can be constructed from an [`Pair`].
-#[derive(Clone, Debug)]
-pub struct PairSigner<T: Config, P: Pair> {
-    account_id: T::AccountId,
-    signer: P,
-}
+pub use pair_signer::{
+    PairSigner,
+    SubstrateSigner,
+    PolkadotSigner,
+};
 
-impl<T, P> PairSigner<T, P>
-where
-    T: Config,
-    T::Signature: From<P::Signature> + Verify,
-    <T::Signature as Verify>::Signer:
-        From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    P: Pair,
-{
-    /// Creates a new [`Signer`] from a [`Pair`].
-    pub fn new(signer: P) -> Self {
-        let account_id =
-            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
-        Self { account_id, signer }
+// A signer suitable for substrate based chains. At the moment, this relies on
+// types defined in sp_core and sp_runtime.
+mod pair_signer {
+    use super::Signer;
+    use serde::Serialize;
+    use codec::Encode;
+    use sp_core::Pair as PairT;
+    use sp_runtime::traits::{
+        IdentifyAccount,
+        Verify,
+    };
+
+    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
+    /// This is suitable for Substrate based chains; see [`PairSigner`] for a generic
+    /// type that can be configured with the correct `AccountId`, `Address` and `Signature`
+    /// types for your specific chain.
+    pub type SubstrateSigner<Pair> = PairSigner<
+        sp_runtime::AccountId32,
+        sp_runtime::MultiAddress<sp_runtime::AccountId32, u32>,
+        sp_runtime::MultiSignature,
+        Pair,
+    >;
+
+    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
+    /// This is suitable for signing things on Polkadot.
+    pub type PolkadotSigner<Pair> = SubstrateSigner<Pair>;
+
+    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
+    #[derive(Clone, Debug)]
+    pub struct PairSigner<AccountId, Address, Signature, Pair> {
+        account_id: AccountId,
+        signer: Pair,
+        _types: std::marker::PhantomData<(Address, Signature)>
     }
 
-    /// Returns the [`Pair`] implementation used to construct this.
-    pub fn signer(&self) -> &P {
-        &self.signer
+    impl<AccountId, Address, Signature, Pair> PairSigner<AccountId, Address, Signature, Pair>
+    where
+        Pair: PairT,
+        Signature: From<Pair::Signature> + Verify,
+        <Signature as Verify>::Signer: From<Pair::Public> + IdentifyAccount<AccountId = AccountId>
+    {
+        /// Creates a new [`Signer`] from a [`Pair`].
+        pub fn new(signer: Pair) -> Self {
+            let account_id =
+                <Signature as Verify>::Signer::from(signer.public()).into_account();
+            Self { account_id, signer, _types: std::marker::PhantomData }
+        }
+
+        /// Returns the [`Pair`] implementation used to construct this.
+        pub fn signer(&self) -> &Pair {
+            &self.signer
+        }
+
+        /// Return the account ID.
+        pub fn account_id(&self) -> &AccountId {
+            &self.account_id
+        }
     }
 
-    /// Return the account ID.
-    pub fn account_id(&self) -> &T::AccountId {
-        &self.account_id
-    }
-}
+    impl<AccountId, Address, Signature, Pair> Signer for PairSigner<AccountId, Address, Signature, Pair>
+    where
+        AccountId: Serialize + Into<Address> + Clone + 'static,
+        Pair: PairT + 'static,
+        Address: Encode,
+        Signature: Encode,
+        Pair::Signature: Into<Signature> + 'static,
+    {
+        type AccountId = AccountId;
+        type Address = Address;
+        type Signature = Signature;
 
-impl<T, P> Signer<T> for PairSigner<T, P>
-where
-    T: Config,
-    T::AccountId: Into<T::Address> + Clone + 'static,
-    P: Pair + 'static,
-    P::Signature: Into<T::Signature> + 'static,
-{
-    fn account_id(&self) -> &T::AccountId {
-        &self.account_id
-    }
+        fn account_id(&self) -> &Self::AccountId {
+            &self.account_id
+        }
 
-    fn address(&self) -> T::Address {
-        self.account_id.clone().into()
-    }
+        fn address(&self) -> Self::Address {
+            self.account_id.clone().into()
+        }
 
-    fn sign(&self, signer_payload: &[u8]) -> T::Signature {
-        self.signer.sign(signer_payload).into()
+        fn sign(&self, signer_payload: &[u8]) -> Self::Signature {
+            self.signer.sign(signer_payload).into()
+        }
     }
 }

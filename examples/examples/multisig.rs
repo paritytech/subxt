@@ -12,7 +12,7 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    tx::PairSigner,
+    tx::PolkadotSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // My account.
     let signer_account = AccountKeyring::Alice;
     let signer_account_id = signer_account.to_account_id();
-    let signer = PairSigner::new(signer_account.pair());
+    let signer = PolkadotSigner::new(signer_account.pair());
 
     // Transfer balance to this destination:
     let dest = AccountKeyring::Bob.to_account_id();

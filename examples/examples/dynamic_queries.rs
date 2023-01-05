@@ -15,7 +15,7 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     dynamic::Value,
-    tx::PairSigner,
+    tx::PolkadotSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 1. Dynamic Balance Transfer (the dynamic equivalent to the balance_transfer example).
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id();
 
     // Create a transaction to submit:

@@ -37,10 +37,7 @@ impl Config for SubstrateConfig {
     type BlockNumber = u32;
     type Hash = H256;
     type Hashing = BlakeTwo256;
-    type AccountId = sp_runtime::AccountId32;
-    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
     type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
-    type Signature = sp_runtime::MultiSignature;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }
 
@@ -51,6 +48,9 @@ pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
 /// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
 /// This is what you provide to methods like `sign_and_submit()`.
 pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
+
+// Because Era is one of the args to our extrinsic params.
+pub use super::extrinsic_params::Era;
 
 /// A tip payment made in the form of a specific asset.
 #[derive(Copy, Clone, Debug, Default, Encode)]

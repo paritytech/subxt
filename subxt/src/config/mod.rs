@@ -63,20 +63,11 @@ pub trait Config: 'static {
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     type Hashing: Hasher<Output = Self::Hash>;
 
-    /// The user account identifier type for the runtime.
-    type AccountId: Parameter + Member + serde::Serialize;
-
-    /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
-    type Address: Codec + Clone + PartialEq;
-
     /// The block header.
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hasher = Self::Hashing>
         + Member
         + serde::de::DeserializeOwned;
-
-    /// Signature type.
-    type Signature: Encode + Send + Sync + 'static;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
@@ -149,9 +140,6 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;
     type Hashing = T::Hashing;
-    type AccountId = T::AccountId;
-    type Address = T::Address;
     type Header = T::Header;
-    type Signature = T::Signature;
     type ExtrinsicParams = E;
 }

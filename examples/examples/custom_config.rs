@@ -10,11 +10,9 @@ use subxt::{
     config::{
         Config,
         SubstrateConfig,
+        substrate::SubstrateExtrinsicParams,
     },
-    tx::{
-        PairSigner,
-        SubstrateExtrinsicParams,
-    },
+    tx::PolkadotSigner,
     OnlineClient,
 };
 
@@ -35,10 +33,7 @@ impl Config for MyConfig {
     type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
     type Hash = <SubstrateConfig as Config>::Hash;
     type Hashing = <SubstrateConfig as Config>::Hashing;
-    type AccountId = <SubstrateConfig as Config>::AccountId;
-    type Address = <SubstrateConfig as Config>::Address;
     type Header = <SubstrateConfig as Config>::Header;
-    type Signature = <SubstrateConfig as Config>::Signature;
     // ExtrinsicParams makes use of the index type, so we need to adjust it
     // too to align with our modified index type, above:
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
@@ -46,7 +41,7 @@ impl Config for MyConfig {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     // Create a client to use:

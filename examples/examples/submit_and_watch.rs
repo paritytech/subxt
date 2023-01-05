@@ -13,7 +13,7 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    tx::PairSigner,
+    tx::PolkadotSigner,
     OnlineClient,
     PolkadotConfig,
 };
@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// to wait for the transaction to make it into a finalized block, and also ensure that the
 /// transaction was successful according to the associated events.
 async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;
@@ -65,7 +65,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
 /// waiting for the transaction to be finalized separately from obtaining and checking
 /// for success on the events.
 async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Error>> {
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;
@@ -113,7 +113,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
 /// `wait_for_finalized` entirely and stream the transaction progress events, handling
 /// them more manually.
 async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;

@@ -18,6 +18,7 @@ use codec::{
 };
 use core::fmt::Debug;
 use derivative::Derivative;
+use serde::{ Serialize, Deserialize };
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are signed and used in transactions.
@@ -77,8 +78,9 @@ pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
 /// construct a [`BaseExtrinsicParams`] value. This implements [`Default`], which allows
 /// [`BaseExtrinsicParams`] to be used with convenience methods like `sign_and_submit_default()`.
 ///
-/// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
-/// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+/// Prefer to use [`super::substrate::SubstrateExtrinsicParamsBuilder`] for a version of this
+/// tailored towards Substrate, or [`super::polkadot::PolkadotExtrinsicParamsBuilder`] for a
+/// version tailored to Polkadot.
 #[derive(Derivative)]
 #[derivative(
     Debug(bound = "Tip: Debug"),
@@ -174,8 +176,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash
 
 // Dev note: This and related bits taken from `sp_runtime::generic::Era`
 /// An era to describe the longevity of a transaction.
-#[derive(PartialEq, Eq, Clone, Copy, sp_core::RuntimeDebug)]
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum Era {
 	/// The transaction is valid forever. The genesis hash must be present in the signed content.
 	Immortal,

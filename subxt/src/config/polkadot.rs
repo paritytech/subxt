@@ -25,6 +25,9 @@ pub type PolkadotExtrinsicParams<T> = BaseExtrinsicParams<T, PlainTip>;
 /// This is what you provide to methods like `sign_and_submit()`.
 pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, PlainTip>;
 
+// Because Era is one of the args to our extrinsic params.
+pub use super::extrinsic_params::Era;
+
 /// A tip payment.
 #[derive(Copy, Clone, Debug, Default, Encode)]
 pub struct PlainTip {

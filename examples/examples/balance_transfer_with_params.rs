@@ -12,14 +12,16 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    tx::{
-        Era,
-        PairSigner,
-        PlainTip,
-        PolkadotExtrinsicParamsBuilder as Params,
+    config::{
+        PolkadotConfig,
+        polkadot::{
+            PolkadotExtrinsicParamsBuilder as Params,
+            PlainTip,
+            Era
+        }
     },
+    tx::PolkadotSigner,
     OnlineClient,
-    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -29,7 +31,7 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PolkadotSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     // Create a client to use:

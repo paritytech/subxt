@@ -481,9 +481,9 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the current nonce for the given account ID.
-    pub async fn system_account_next_index(
+    pub async fn system_account_next_index<AccountId: Serialize>(
         &self,
-        account: &T::AccountId,
+        account: &AccountId,
     ) -> Result<T::Index, Error> {
         self.client
             .request("system_accountNextIndex", rpc_params![account])

@@ -23,6 +23,11 @@ mod tx_client;
 mod tx_payload;
 mod tx_progress;
 
+pub use self::signer::{
+    SubstrateSigner,
+    PolkadotSigner
+};
+
 pub use self::{
     signer::{
         PairSigner,

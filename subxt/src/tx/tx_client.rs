@@ -10,7 +10,7 @@ use crate::{
     },
     error::Error,
     tx::{
-        Signer,
+        Signer as SignerT,
         TxProgress,
     },
     utils::{
@@ -123,15 +123,16 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates a raw signed extrinsic without submitting it.
-    pub fn create_signed_with_nonce<Call>(
+    pub fn create_signed_with_nonce<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         account_nonce: T::Index,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -216,14 +217,15 @@ where
     C: OnlineClientT<T>,
 {
     /// Creates a raw signed extrinsic, without submitting it.
-    pub async fn create_signed<Call>(
+    pub async fn create_signed<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT,
     {
         // Get nonce from the node.
         let account_nonce = self
@@ -240,13 +242,14 @@ where
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch_default<Call>(
+    pub async fn sign_and_submit_then_watch_default<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
@@ -257,14 +260,15 @@ where
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch<Call>(
+    pub async fn sign_and_submit_then_watch<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -282,13 +286,14 @@ where
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit_default<Call>(
+    pub async fn sign_and_submit_default<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
+        Signer: SignerT,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
@@ -302,14 +307,15 @@ where
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit<Call>(
+    pub async fn sign_and_submit<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
+        Signer: SignerT,
     {
         self.create_signed(call, signer, other_params)
             .await?
