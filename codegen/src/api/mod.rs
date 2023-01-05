@@ -177,15 +177,15 @@ impl RuntimeGenerator {
             ),
             (
                 "primitive_types::H160",
-                parse_quote!(#crate_path::utils::hasher::H160),
+                parse_quote!(#crate_path::utils::H160),
             ),
             (
                 "primitive_types::H256",
-                parse_quote!(#crate_path::utils::hasher::H256),
+                parse_quote!(#crate_path::utils::H256),
             ),
             (
                 "primitive_types::H512",
-                parse_quote!(#crate_path::utils::hasher::H512),
+                parse_quote!(#crate_path::utils::H512),
             ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",

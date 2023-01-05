@@ -13,6 +13,14 @@ use codec::{
 };
 use derivative::Derivative;
 
+// Used in codegen
+#[doc(hidden)]
+pub use primitive_types::{
+    H160,
+    H256,
+    H512
+};
+
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
 #[derive(Clone, Debug, Eq, PartialEq)]
