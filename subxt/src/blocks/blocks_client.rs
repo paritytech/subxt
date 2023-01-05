@@ -9,11 +9,10 @@ use crate::{
         BlockError,
         Error,
     },
-    utils::{
-        PhantomDataSendSync,
-        header::Header,
+    config::{
+        Config,
+        Header,
     },
-    Config,
 };
 use derivative::Derivative;
 use futures::{
@@ -26,6 +25,7 @@ use std::{
     future::Future,
     pin::Pin,
 };
+use crate::utils::PhantomDataSendSync;
 
 type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;

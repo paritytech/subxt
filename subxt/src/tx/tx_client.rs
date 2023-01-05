@@ -10,16 +10,18 @@ use crate::{
     },
     error::Error,
     tx::{
-        ExtrinsicParams,
         Signer,
         TxProgress,
     },
     utils::{
         Encoded,
         PhantomDataSendSync,
-        hasher::Hasher,
     },
-    Config,
+    config::{
+        Config,
+        ExtrinsicParams,
+        Hasher,
+    },
 };
 use codec::{
     Compact,

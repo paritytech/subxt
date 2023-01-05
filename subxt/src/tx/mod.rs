@@ -18,25 +18,12 @@
 //! [SubstrateExtrinsicParams] and [PolkadotExtrinsicParams] structs which pick an
 //! appropriate shape for Substrate/Polkadot chains respectively.
 
-mod params;
 mod signer;
 mod tx_client;
 mod tx_payload;
 mod tx_progress;
 
 pub use self::{
-    params::{
-        AssetTip,
-        BaseExtrinsicParams,
-        BaseExtrinsicParamsBuilder,
-        Era,
-        ExtrinsicParams,
-        PlainTip,
-        PolkadotExtrinsicParams,
-        PolkadotExtrinsicParamsBuilder,
-        SubstrateExtrinsicParams,
-        SubstrateExtrinsicParamsBuilder,
-    },
     signer::{
         PairSigner,
         Signer,

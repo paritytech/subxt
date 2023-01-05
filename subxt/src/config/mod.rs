@@ -8,21 +8,20 @@
 //! default Substrate node implementation, and [`PolkadotConfig`] for a
 //! Polkadot node.
 
+pub mod extrinsic_params;
+pub mod substrate;
+pub mod polkadot;
+
 use codec::{
     Codec,
     Encode,
     EncodeLike,
 };
 use core::fmt::Debug;
-use crate::utils::hasher::{
-    Hasher,
-    BlakeTwo256,
-    H256
-};
-use crate::utils::header::{
-    SubstrateHeader,
-    Header
-};
+
+pub use substrate::SubstrateConfig;
+pub use polkadot::PolkadotConfig;
+pub use extrinsic_params::ExtrinsicParams;
 
 /// Runtime types.
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
@@ -80,7 +79,7 @@ pub trait Config: 'static {
     type Signature: Encode + Send + Sync + 'static;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: crate::tx::ExtrinsicParams<Self::Index, Self::Hash>;
+    type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
 }
 
 /// Parameter trait copied from `substrate::frame_support`.
@@ -91,28 +90,37 @@ impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 pub trait Member: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static {}
 impl<T: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static> Member for T {}
 
-/// Default set of commonly used types by Substrate runtimes.
-// Note: We only use this at the type level, so it should be impossible to
-// create an instance of it.
-pub enum SubstrateConfig {}
+/// This represents the hasher used by a node to hash things like block headers
+/// and extrinsics.
+pub trait Hasher {
+    /// The type given back from the hash operation
+    type Output;
 
-impl Config for SubstrateConfig {
-    type Index = u32;
-    type BlockNumber = u32;
-    type Hash = H256;
-    type Hashing = BlakeTwo256;
-    type AccountId = sp_runtime::AccountId32;
-    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-    type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
-    type Signature = sp_runtime::MultiSignature;
-    type ExtrinsicParams = crate::tx::SubstrateExtrinsicParams<Self>;
+    /// Hash some bytes to the given output type.
+    fn hash(s: &[u8]) -> Self::Output;
+
+    /// Hash some SCALE encodable type to the given output type.
+    fn hash_of<S: Encode>(s: &S) -> Self::Output {
+        let out = s.encode();
+        Self::hash(&out)
+    }
 }
 
-/// Default set of commonly used types by Polkadot nodes.
-pub type PolkadotConfig = WithExtrinsicParams<
-    SubstrateConfig,
-    crate::tx::PolkadotExtrinsicParams<SubstrateConfig>,
->;
+/// This represents the block header type used by a node.
+pub trait Header: Sized + Encode {
+    /// The block number type for this header.
+    type Number;
+    /// The hasher used to hash this header.
+    type Hasher: Hasher;
+
+    /// Return the block number of this header.
+    fn number(&self) -> Self::Number;
+
+    /// Hash this header.
+    fn hash(&self) -> <Self::Hasher as Hasher>::Output {
+        Self::Hasher::hash_of(self)
+    }
+}
 
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
 /// additional and extra parameters to pass to an extrinsic (see [`crate::tx::ExtrinsicParams`]),
@@ -129,12 +137,12 @@ pub type PolkadotConfig = WithExtrinsicParams<
 /// ```
 pub struct WithExtrinsicParams<
     T: Config,
-    E: crate::tx::ExtrinsicParams<T::Index, T::Hash>,
+    E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>,
 > {
     _marker: std::marker::PhantomData<(T, E)>,
 }
 
-impl<T: Config, E: crate::tx::ExtrinsicParams<T::Index, T::Hash>> Config
+impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     for WithExtrinsicParams<T, E>
 {
     type Index = T::Index;

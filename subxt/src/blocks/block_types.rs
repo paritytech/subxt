@@ -11,13 +11,13 @@ use crate::{
         BlockError,
         Error,
     },
-    utils::{
-        hasher::Hasher,
-        header::Header,
+    config::{
+        Config,
+        Hasher,
+        Header
     },
     events,
     rpc::ChainBlockResponse,
-    Config,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;

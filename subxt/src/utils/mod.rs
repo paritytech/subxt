@@ -5,8 +5,6 @@
 //! Miscellaneous utility helpers.
 
 pub mod bits;
-pub mod hasher;
-pub mod header;
 
 use codec::{
     Decode,

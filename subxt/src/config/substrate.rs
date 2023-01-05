@@ -2,45 +2,100 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! A trait for types representing block headers and a substrate header type.
+//! Substrate specific configuration
 
-use codec::{ Decode, Encode };
-use serde::{ Serialize, Deserialize };
-use crate::utils::hasher::Hasher;
+use codec::{
+	Encode,
+	Decode,
+};
+use serde::{
+	Serialize,
+	Deserialize,
+};
+use super::extrinsic_params::{
+    BaseExtrinsicParams,
+    BaseExtrinsicParamsBuilder,
+};
+use super::{
+	Config,
+	Hasher,
+	Header,
+};
 
-/// Header numbers can be converted from and to this type.
-pub use primitive_types::U256;
+pub use primitive_types::{
+	H256,
+	U256,
+};
 
-/// A trait which block headers should implement in order
-pub trait Header: Sized + Encode {
-    /// The block number type for this header.
-    type Number;
-    /// The hasher used to hash this header.
-    type Hasher: Hasher;
+/// Default set of commonly used types by Substrate runtimes.
+// Note: We only use this at the type level, so it should be impossible to
+// create an instance of it.
+pub enum SubstrateConfig {}
 
-    /// Return the block number of this header.
-    fn number(&self) -> Self::Number;
+impl Config for SubstrateConfig {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = H256;
+    type Hashing = BlakeTwo256;
+    type AccountId = sp_runtime::AccountId32;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
+    type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
+    type Signature = sp_runtime::MultiSignature;
+    type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
+}
 
-    /// Hash this header.
-    fn hash(&self) -> <Self::Hasher as Hasher>::Output {
-        Self::Hasher::hash_of(self)
+/// A struct representing the signed extra and additional parameters required
+/// to construct a transaction for the default substrate node.
+pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
+
+/// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
+/// This is what you provide to methods like `sign_and_submit()`.
+pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
+
+/// A tip payment made in the form of a specific asset.
+#[derive(Copy, Clone, Debug, Default, Encode)]
+pub struct AssetTip {
+    #[codec(compact)]
+    tip: u128,
+    asset: Option<u32>,
+}
+
+impl AssetTip {
+    /// Create a new tip of the amount provided.
+    pub fn new(amount: u128) -> Self {
+        AssetTip {
+            tip: amount,
+            asset: None,
+        }
+    }
+
+    /// Designate the tip as being of a particular asset class.
+    /// If this is not set, then the native currency is used.
+    pub fn of_asset(mut self, asset: u32) -> Self {
+        self.asset = Some(asset);
+        self
     }
 }
 
-impl <N: Copy + Into<U256> + TryFrom<U256> + Encode, H: Hasher + Encode> Header for SubstrateHeader<N, H>
-where
-    N: Copy + Into<U256> + TryFrom<U256> + Encode,
-    H: Hasher + Encode,
-    SubstrateHeader<N, H>: Encode
-{
-    type Number = N;
-    type Hasher = H;
-    fn number(&self) -> Self::Number {
-        self.number
+impl From<u128> for AssetTip {
+    fn from(n: u128) -> Self {
+        AssetTip::new(n)
+    }
+}
+
+/// A type that can hash values using the blaks2_256 algorithm.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Encode)]
+pub struct BlakeTwo256;
+
+impl Hasher for BlakeTwo256 {
+    type Output = H256;
+    fn hash(s: &[u8]) -> Self::Output {
+        sp_core_hashing::blake2_256(s).into()
     }
 }
 
 /// A generic Substrate header type, adapted from `sp_runtime::generic::Header`.
+/// The block number and hasher can be configured to adapt this for other nodes.
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
@@ -56,6 +111,19 @@ pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
 	pub extrinsics_root: H::Output,
 	/// A chain-specific digest of data useful for light clients or referencing auxiliary data.
 	pub digest: Digest,
+}
+
+impl <N: Copy + Into<U256> + TryFrom<U256> + Encode, H: Hasher + Encode> Header for SubstrateHeader<N, H>
+where
+    N: Copy + Into<U256> + TryFrom<U256> + Encode,
+    H: Hasher + Encode,
+    SubstrateHeader<N, H>: Encode
+{
+    type Number = N;
+    type Hasher = H;
+    fn number(&self) -> Self::Number {
+        self.number
+    }
 }
 
 /// Generic header digest. From `sp_runtime::generic::digest`.
