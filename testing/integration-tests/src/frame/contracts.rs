@@ -18,7 +18,7 @@ use crate::{
     TestContext,
 };
 use sp_core::sr25519::Pair;
-use sp_runtime::MultiAddress;
+use subxt::utils::MultiAddress;
 use subxt::{
     tx::{
         PairSigner,

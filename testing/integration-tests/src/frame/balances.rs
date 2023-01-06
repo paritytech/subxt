@@ -18,7 +18,7 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use sp_runtime::{
+use subxt::utils::{
     AccountId32,
     MultiAddress,
 };
@@ -271,7 +271,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     let locks_addr = node_runtime::storage()
         .balances()
-        .locks(&AccountKeyring::Bob.to_account_id());
+        .locks(&AccountKeyring::Bob.to_account_id().into());
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
@@ -330,12 +330,11 @@ async fn transfer_error() {
 #[tokio::test]
 async fn transfer_implicit_subscription() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id();
-    let bob_addr = bob.clone().into();
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_bob_tx = node_runtime::tx().balances().transfer(bob_addr, 10_000);
+    let to_bob_tx = node_runtime::tx().balances().transfer(bob.clone().into(), 10_000);
 
     let event = api
         .tx()
@@ -353,7 +352,7 @@ async fn transfer_implicit_subscription() {
         event,
         balances::events::Transfer {
             from: alice.account_id().clone(),
-            to: bob.clone(),
+            to: bob.into(),
             amount: 10_000
         }
     );

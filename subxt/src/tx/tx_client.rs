@@ -22,13 +22,15 @@ use crate::{
         ExtrinsicParams,
         Hasher,
     },
-    rpc::DryRunResult,
 };
 use codec::{
     Compact,
     Encode,
 };
 use derivative::Derivative;
+
+// This is returned from an API below, so expose it here.
+pub use crate::rpc::DryRunResult;
 
 /// A client for working with transactions.
 #[derive(Derivative)]

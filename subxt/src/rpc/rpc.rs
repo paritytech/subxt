@@ -67,10 +67,11 @@ use std::{
 use primitive_types::U256;
 
 /// Signal what the result of doing a dry run of an extrinsic is.
+pub type DryRunResult = Result<(), DryRunError>;
+
+/// An error dry running an extrinsic.
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub enum DryRunResult {
-    /// Everything was successful
-    Success,
+pub enum DryRunError {
     /// The extrinsic will not be included in the block
     TransactionValidityError,
     /// The extrinsic will be included in the block, but the call failed to dispatch.
@@ -799,9 +800,9 @@ impl<T: Config> Rpc<T> {
         // and ignore the rest.
         let res = <Result<Result<(), ()>, ()>>::decode(&mut &*result_bytes.0)?;
         let dry_run_result = match res {
-            Ok(Ok(())) => DryRunResult::Success,
-            Ok(Err(())) => DryRunResult::DispatchError,
-            Err(()) => DryRunResult::TransactionValidityError
+            Ok(Ok(())) => Ok(()),
+            Ok(Err(())) => Err(DryRunError::DispatchError),
+            Err(()) => Err(DryRunError::TransactionValidityError)
         };
 
         Ok(dry_run_result)
