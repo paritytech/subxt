@@ -8,7 +8,7 @@
 /// Generate by:
 ///
 /// - run `polkadot --dev --tmp` node locally
-/// - `cargo run --release -p subxt-cli -- codegen | rustfmt > integration-tests/src/codegen/polkadot.rs`
+/// - `cargo run -p subxt-cli -- codegen | rustfmt > testing/integration-tests/src/codegen/polkadot.rs`
 #[rustfmt::skip]
 #[allow(clippy::all)]
 mod polkadot;
