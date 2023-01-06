@@ -198,53 +198,55 @@ enum DigestItemType {
 }
 impl Encode for DigestItem {
     fn encode(&self) -> Vec<u8> {
-		let mut v = Vec::new();
+        let mut v = Vec::new();
 
         match self {
-			Self::Consensus(val, data) => {
-				DigestItemType::Consensus.encode_to(&mut v);
-				(val, data).encode_to(&mut v);
-			},
-			Self::Seal(val, sig) => {
-				DigestItemType::Seal.encode_to(&mut v);
-				(val, sig).encode_to(&mut v);
-			},
-			Self::PreRuntime(val, data) => {
-				DigestItemType::PreRuntime.encode_to(&mut v);
-				(val, data).encode_to(&mut v);
-			},
-			Self::Other(val) => {
-				DigestItemType::Other.encode_to(&mut v);
-				val.encode_to(&mut v);
-			},
-			Self::RuntimeEnvironmentUpdated => {
-				DigestItemType::RuntimeEnvironmentUpdated.encode_to(&mut v);
-			},
+            Self::Consensus(val, data) => {
+                DigestItemType::Consensus.encode_to(&mut v);
+                (val, data).encode_to(&mut v);
+            }
+            Self::Seal(val, sig) => {
+                DigestItemType::Seal.encode_to(&mut v);
+                (val, sig).encode_to(&mut v);
+            }
+            Self::PreRuntime(val, data) => {
+                DigestItemType::PreRuntime.encode_to(&mut v);
+                (val, data).encode_to(&mut v);
+            }
+            Self::Other(val) => {
+                DigestItemType::Other.encode_to(&mut v);
+                val.encode_to(&mut v);
+            }
+            Self::RuntimeEnvironmentUpdated => {
+                DigestItemType::RuntimeEnvironmentUpdated.encode_to(&mut v);
+            }
         }
 
         v
     }
 }
 impl Decode for DigestItem {
-	fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
-		let item_type: DigestItemType = Decode::decode(input)?;
-		match item_type {
-			DigestItemType::PreRuntime => {
-				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
-				Ok(Self::PreRuntime(vals.0, vals.1))
-			},
-			DigestItemType::Consensus => {
-				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
-				Ok(Self::Consensus(vals.0, vals.1))
-			},
-			DigestItemType::Seal => {
-				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
-				Ok(Self::Seal(vals.0, vals.1))
-			},
-			DigestItemType::Other => Ok(Self::Other(Decode::decode(input)?)),
-			DigestItemType::RuntimeEnvironmentUpdated => Ok(Self::RuntimeEnvironmentUpdated),
-		}
-	}
+    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        let item_type: DigestItemType = Decode::decode(input)?;
+        match item_type {
+            DigestItemType::PreRuntime => {
+                let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+                Ok(Self::PreRuntime(vals.0, vals.1))
+            }
+            DigestItemType::Consensus => {
+                let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+                Ok(Self::Consensus(vals.0, vals.1))
+            }
+            DigestItemType::Seal => {
+                let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+                Ok(Self::Seal(vals.0, vals.1))
+            }
+            DigestItemType::Other => Ok(Self::Other(Decode::decode(input)?)),
+            DigestItemType::RuntimeEnvironmentUpdated => {
+                Ok(Self::RuntimeEnvironmentUpdated)
+            }
+        }
+    }
 }
 
 /// Consensus engine unique ID. From `sp_runtime::ConsensusEngineId`.

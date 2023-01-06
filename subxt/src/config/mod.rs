@@ -130,8 +130,7 @@ pub trait Header: Sized + Encode {
 /// # Example
 ///
 /// ```
-/// use subxt::config::{ SubstrateConfig, WithExtrinsicParams };
-/// use subxt::tx::PolkadotExtrinsicParams;
+/// use subxt::config::{ SubstrateConfig, WithExtrinsicParams, polkadot::PolkadotExtrinsicParams };
 ///
 /// // This is how PolkadotConfig is implemented:
 /// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
