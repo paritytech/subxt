@@ -25,12 +25,37 @@ pub enum MultiSignature {
 
 // Improve compat with the substrate version if we're using those crates:
 #[cfg(feature = "substrate-compat")]
-impl From<sp_runtime::MultiSignature> for MultiSignature {
-    fn from(value: sp_runtime::MultiSignature) -> Self {
-        match value {
-            sp_runtime::MultiSignature::Ed25519(s) => Self::Ed25519(s.0),
-            sp_runtime::MultiSignature::Sr25519(s) => Self::Sr25519(s.0),
-            sp_runtime::MultiSignature::Ecdsa(s) => Self::Ecdsa(s.0),
+mod substrate_impls {
+    use super::*;
+
+    impl From<sp_runtime::MultiSignature> for MultiSignature {
+        fn from(value: sp_runtime::MultiSignature) -> Self {
+            match value {
+                sp_runtime::MultiSignature::Ed25519(s) => Self::Ed25519(s.0),
+                sp_runtime::MultiSignature::Sr25519(s) => Self::Sr25519(s.0),
+                sp_runtime::MultiSignature::Ecdsa(s) => Self::Ecdsa(s.0),
+            }
+        }
+    }
+
+    impl From<sp_core::ed25519::Signature> for MultiSignature {
+        fn from(value: sp_core::ed25519::Signature) -> Self {
+            let sig: sp_runtime::MultiSignature = value.into();
+            sig.into()
+        }
+    }
+
+    impl From<sp_core::sr25519::Signature> for MultiSignature {
+        fn from(value: sp_core::sr25519::Signature) -> Self {
+            let sig: sp_runtime::MultiSignature = value.into();
+            sig.into()
+        }
+    }
+
+    impl From<sp_core::ecdsa::Signature> for MultiSignature {
+        fn from(value: sp_core::ecdsa::Signature) -> Self {
+            let sig: sp_runtime::MultiSignature = value.into();
+            sig.into()
         }
     }
 }

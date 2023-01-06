@@ -53,11 +53,12 @@ mod pair_signer {
     impl<T, Pair> PairSigner<T, Pair>
     where
         T: Config,
-        T::AccountId: From<SpAccountId32>,
         Pair: PairT,
-        SpMultiSignature: From<Pair::Signature> + Verify,
-        <SpMultiSignature as Verify>::Signer:
-            From<Pair::Public> + IdentifyAccount<AccountId = SpAccountId32>,
+        // We go via an sp_runtime::MultiSignature. We can probably generalise this
+        // by implementing some of these traits on our built-in MultiSignature and then
+        // requiring them on all T::Signatures, to avoid any go-between.
+        <SpMultiSignature as Verify>::Signer: From<Pair::Public>,
+        T::AccountId: From<SpAccountId32>,
     {
         /// Creates a new [`Signer`] from an [`sp_core::Pair`].
         pub fn new(signer: Pair) -> Self {
@@ -83,12 +84,8 @@ mod pair_signer {
     impl<T, Pair> Signer<T> for PairSigner<T, Pair>
     where
         T: Config,
-        Pair: PairT + 'static,
-        // use SpMultiSignature as a bridge; our substrate Pair
-        // must be convertible into that, which then must convert
-        // into the Signature type we've configured.
-        Pair::Signature: Into<SpMultiSignature> + 'static,
-        SpMultiSignature: Into<T::Signature>,
+        Pair: PairT,
+        Pair::Signature: Into<T::Signature>,
     {
         fn account_id(&self) -> &T::AccountId {
             &self.account_id
@@ -99,7 +96,7 @@ mod pair_signer {
         }
 
         fn sign(&self, signer_payload: &[u8]) -> T::Signature {
-            self.signer.sign(signer_payload).into().into()
+            self.signer.sign(signer_payload).into()
         }
     }
 }
