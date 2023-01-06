@@ -18,7 +18,7 @@ use crate::{
     },
     rpc::{
         StorageData,
-        StorageKey
+        StorageKey,
     },
     Config,
 };

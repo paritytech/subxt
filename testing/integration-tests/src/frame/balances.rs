@@ -18,13 +18,15 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use subxt::utils::{
-    AccountId32,
-    MultiAddress,
-};
-use subxt::error::{
-    DispatchError,
-    Error,
+use subxt::{
+    error::{
+        DispatchError,
+        Error,
+    },
+    utils::{
+        AccountId32,
+        MultiAddress,
+    },
 };
 
 #[tokio::test]
@@ -334,7 +336,9 @@ async fn transfer_implicit_subscription() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_bob_tx = node_runtime::tx().balances().transfer(bob.clone().into(), 10_000);
+    let to_bob_tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.clone().into(), 10_000);
 
     let event = api
         .tx()

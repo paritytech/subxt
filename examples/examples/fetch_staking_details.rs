@@ -10,16 +10,16 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_keyring::AccountKeyring;
-use subxt::{
-    OnlineClient,
-    PolkadotConfig,
-};
 use sp_core::{
     sr25519,
     Pair,
 };
-use subxt::utils::AccountId32;
+use sp_keyring::AccountKeyring;
+use subxt::{
+    utils::AccountId32,
+    OnlineClient,
+    PolkadotConfig,
+};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}

@@ -4,8 +4,8 @@
 
 //! Miscellaneous utility helpers.
 
-pub mod bits;
 pub mod account_id;
+pub mod bits;
 pub mod multi_address;
 pub mod multi_signature;
 
@@ -25,7 +25,7 @@ pub use multi_signature::MultiSignature;
 pub use primitive_types::{
     H160,
     H256,
-    H512
+    H512,
 };
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of

@@ -11,9 +11,9 @@
 //! ```
 
 use subxt::{
+    config::Header,
     OnlineClient,
     PolkadotConfig,
-    config::Header,
 };
 
 #[tokio::main]
@@ -24,8 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
-    let mut blocks =
-        api.rpc().subscribe_finalized_block_headers().await?;
+    let mut blocks = api.rpc().subscribe_finalized_block_headers().await?;
 
     while let Some(Ok(block)) = blocks.next().await {
         println!(

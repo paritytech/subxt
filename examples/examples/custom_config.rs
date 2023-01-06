@@ -8,9 +8,9 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     config::{
+        substrate::SubstrateExtrinsicParams,
         Config,
         SubstrateConfig,
-        substrate::SubstrateExtrinsicParams,
     },
     tx::PairSigner,
     OnlineClient,

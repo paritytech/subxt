@@ -34,13 +34,13 @@ mod pair_signer {
     use super::Signer;
     use crate::Config;
     use sp_core::Pair as PairT;
-    use sp_runtime::traits::{
-        IdentifyAccount,
-        Verify,
-    };
     use sp_runtime::{
-        MultiSignature as SpMultiSignature,
+        traits::{
+            IdentifyAccount,
+            Verify,
+        },
         AccountId32 as SpAccountId32,
+        MultiSignature as SpMultiSignature,
     };
 
     /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
@@ -56,13 +56,17 @@ mod pair_signer {
         T::AccountId: From<SpAccountId32>,
         Pair: PairT,
         SpMultiSignature: From<Pair::Signature> + Verify,
-        <SpMultiSignature as Verify>::Signer: From<Pair::Public> + IdentifyAccount<AccountId = SpAccountId32>
+        <SpMultiSignature as Verify>::Signer:
+            From<Pair::Public> + IdentifyAccount<AccountId = SpAccountId32>,
     {
         /// Creates a new [`Signer`] from a [`Pair`].
         pub fn new(signer: Pair) -> Self {
-            let account_id =
-                <SpMultiSignature as Verify>::Signer::from(signer.public()).into_account();
-            Self { account_id: account_id.into(), signer }
+            let account_id = <SpMultiSignature as Verify>::Signer::from(signer.public())
+                .into_account();
+            Self {
+                account_id: account_id.into(),
+                signer,
+            }
         }
 
         /// Returns the [`Pair`] implementation used to construct this.

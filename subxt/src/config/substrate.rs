@@ -4,32 +4,32 @@
 
 //! Substrate specific configuration
 
+use super::{
+    extrinsic_params::{
+        BaseExtrinsicParams,
+        BaseExtrinsicParamsBuilder,
+    },
+    Config,
+    Hasher,
+    Header,
+};
 use codec::{
-	Encode,
-	Decode,
+    Decode,
+    Encode,
 };
 use serde::{
-	Serialize,
-	Deserialize,
-};
-use super::extrinsic_params::{
-    BaseExtrinsicParams,
-    BaseExtrinsicParamsBuilder,
-};
-use super::{
-	Config,
-	Hasher,
-	Header,
+    Deserialize,
+    Serialize,
 };
 
-pub use primitive_types::{
-	H256,
-	U256,
-};
 pub use crate::utils::{
-	account_id::AccountId32,
-	multi_address::MultiAddress,
-	multi_signature::MultiSignature
+    account_id::AccountId32,
+    multi_address::MultiAddress,
+    multi_signature::MultiSignature,
+};
+pub use primitive_types::{
+    H256,
+    U256,
 };
 
 /// Default set of commonly used types by Substrate runtimes.
@@ -41,9 +41,9 @@ impl Config for SubstrateConfig {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = H256;
-	type AccountId = AccountId32;
-	type Address = MultiAddress<Self::AccountId, u32>;
-	type Signature = MultiSignature;
+    type AccountId = AccountId32;
+    type Address = MultiAddress<Self::AccountId, u32>;
+    type Signature = MultiSignature;
     type Hasher = BlakeTwo256;
     type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
@@ -107,25 +107,29 @@ impl Hasher for BlakeTwo256 {
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
-	/// The parent hash.
-	pub parent_hash: H::Output,
-	/// The block number.
-	#[serde(serialize_with = "serialize_number", deserialize_with = "deserialize_number")]
-	#[codec(compact)]
-	pub number: N,
-	/// The state trie merkle root
-	pub state_root: H::Output,
-	/// The merkle root of the extrinsics.
-	pub extrinsics_root: H::Output,
-	/// A chain-specific digest of data useful for light clients or referencing auxiliary data.
-	pub digest: Digest,
+    /// The parent hash.
+    pub parent_hash: H::Output,
+    /// The block number.
+    #[serde(
+        serialize_with = "serialize_number",
+        deserialize_with = "deserialize_number"
+    )]
+    #[codec(compact)]
+    pub number: N,
+    /// The state trie merkle root
+    pub state_root: H::Output,
+    /// The merkle root of the extrinsics.
+    pub extrinsics_root: H::Output,
+    /// A chain-specific digest of data useful for light clients or referencing auxiliary data.
+    pub digest: Digest,
 }
 
-impl <N: Copy + Into<U256> + TryFrom<U256> + Encode, H: Hasher + Encode> Header for SubstrateHeader<N, H>
+impl<N: Copy + Into<U256> + TryFrom<U256> + Encode, H: Hasher + Encode> Header
+    for SubstrateHeader<N, H>
 where
     N: Copy + Into<U256> + TryFrom<U256> + Encode,
     H: Hasher + Encode,
-    SubstrateHeader<N, H>: Encode
+    SubstrateHeader<N, H>: Encode,
 {
     type Number = N;
     type Hasher = H;
@@ -135,89 +139,93 @@ where
 }
 
 /// Generic header digest. From `sp_runtime::generic::digest`.
-#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Default)]
+#[derive(
+    Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Default,
+)]
 pub struct Digest {
     /// A list of digest items.
-    pub logs: Vec<DigestItem>
+    pub logs: Vec<DigestItem>,
 }
 
 /// Digest item that is able to encode/decode 'system' digest items and
 /// provide opaque access to other items. From `sp_runtime::generic::digest`.
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
 pub enum DigestItem {
-	/// A pre-runtime digest.
-	///
-	/// These are messages from the consensus engine to the runtime, although
-	/// the consensus engine can (and should) read them itself to avoid
-	/// code and state duplication. It is erroneous for a runtime to produce
-	/// these, but this is not (yet) checked.
-	///
-	/// NOTE: the runtime is not allowed to panic or fail in an `on_initialize`
-	/// call if an expected `PreRuntime` digest is not present. It is the
-	/// responsibility of a external block verifier to check this. Runtime API calls
-	/// will initialize the block without pre-runtime digests, so initialization
-	/// cannot fail when they are missing.
-	PreRuntime(ConsensusEngineId, Vec<u8>),
+    /// A pre-runtime digest.
+    ///
+    /// These are messages from the consensus engine to the runtime, although
+    /// the consensus engine can (and should) read them itself to avoid
+    /// code and state duplication. It is erroneous for a runtime to produce
+    /// these, but this is not (yet) checked.
+    ///
+    /// NOTE: the runtime is not allowed to panic or fail in an `on_initialize`
+    /// call if an expected `PreRuntime` digest is not present. It is the
+    /// responsibility of a external block verifier to check this. Runtime API calls
+    /// will initialize the block without pre-runtime digests, so initialization
+    /// cannot fail when they are missing.
+    PreRuntime(ConsensusEngineId, Vec<u8>),
 
-	/// A message from the runtime to the consensus engine. This should *never*
-	/// be generated by the native code of any consensus engine, but this is not
-	/// checked (yet).
-	Consensus(ConsensusEngineId, Vec<u8>),
+    /// A message from the runtime to the consensus engine. This should *never*
+    /// be generated by the native code of any consensus engine, but this is not
+    /// checked (yet).
+    Consensus(ConsensusEngineId, Vec<u8>),
 
-	/// Put a Seal on it. This is only used by native code, and is never seen
-	/// by runtimes.
-	Seal(ConsensusEngineId, Vec<u8>),
+    /// Put a Seal on it. This is only used by native code, and is never seen
+    /// by runtimes.
+    Seal(ConsensusEngineId, Vec<u8>),
 
-	/// Some other thing. Unsupported and experimental.
-	Other(Vec<u8>),
+    /// Some other thing. Unsupported and experimental.
+    Other(Vec<u8>),
 
-	/// An indication for the light clients that the runtime execution
-	/// environment is updated.
-	///
-	/// Currently this is triggered when:
-	/// 1. Runtime code blob is changed or
-	/// 2. `heap_pages` value is changed.
-	RuntimeEnvironmentUpdated,
+    /// An indication for the light clients that the runtime execution
+    /// environment is updated.
+    ///
+    /// Currently this is triggered when:
+    /// 1. Runtime code blob is changed or
+    /// 2. `heap_pages` value is changed.
+    RuntimeEnvironmentUpdated,
 }
 
 /// Consensus engine unique ID. From `sp_runtime::ConsensusEngineId`.
 pub type ConsensusEngineId = [u8; 4];
 
 impl serde::Serialize for DigestItem {
-	fn serialize<S>(&self, seq: S) -> Result<S::Ok, S::Error>
-	where
-		S: serde::Serializer,
-	{
-		self.using_encoded(|bytes| impl_serde::serialize::serialize(bytes, seq))
-	}
+    fn serialize<S>(&self, seq: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.using_encoded(|bytes| impl_serde::serialize::serialize(bytes, seq))
+    }
 }
 
 impl<'a> serde::Deserialize<'a> for DigestItem {
-	fn deserialize<D>(de: D) -> Result<Self, D::Error>
-	where
-		D: serde::Deserializer<'a>,
-	{
-		let r = impl_serde::serialize::deserialize(de)?;
-		Decode::decode(&mut &r[..])
-			.map_err(|e| serde::de::Error::custom(format!("Decode error: {}", e)))
-	}
+    fn deserialize<D>(de: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'a>,
+    {
+        let r = impl_serde::serialize::deserialize(de)?;
+        Decode::decode(&mut &r[..])
+            .map_err(|e| serde::de::Error::custom(format!("Decode error: {}", e)))
+    }
 }
 
 fn serialize_number<S, T: Copy + Into<U256> + TryFrom<U256>>(
-	val: &T,
-	s: S,
+    val: &T,
+    s: S,
 ) -> Result<S::Ok, S::Error>
 where
-	S: serde::Serializer,
+    S: serde::Serializer,
 {
-	let u256: U256 = (*val).into();
-	serde::Serialize::serialize(&u256, s)
+    let u256: U256 = (*val).into();
+    serde::Serialize::serialize(&u256, s)
 }
 
-fn deserialize_number<'a, D, T: Copy + Into<U256> + TryFrom<U256>>(d: D) -> Result<T, D::Error>
+fn deserialize_number<'a, D, T: Copy + Into<U256> + TryFrom<U256>>(
+    d: D,
+) -> Result<T, D::Error>
 where
-	D: serde::Deserializer<'a>,
+    D: serde::Deserializer<'a>,
 {
-	let u256: U256 = serde::Deserialize::deserialize(d)?;
-	TryFrom::try_from(u256).map_err(|_| serde::de::Error::custom("Try from failed"))
+    let u256: U256 = serde::Deserialize::deserialize(d)?;
+    TryFrom::try_from(u256).map_err(|_| serde::de::Error::custom("Try from failed"))
 }

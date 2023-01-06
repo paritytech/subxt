@@ -13,12 +13,12 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     config::{
-        PolkadotConfig,
         polkadot::{
-            PolkadotExtrinsicParamsBuilder as Params,
+            Era,
             PlainTip,
-            Era
-        }
+            PolkadotExtrinsicParamsBuilder as Params,
+        },
+        PolkadotConfig,
     },
     tx::PairSigner,
     OnlineClient,

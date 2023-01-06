@@ -9,8 +9,8 @@
 //! Polkadot node.
 
 pub mod extrinsic_params;
-pub mod substrate;
 pub mod polkadot;
+pub mod substrate;
 
 use codec::{
     Codec,
@@ -20,9 +20,9 @@ use codec::{
 use core::fmt::Debug;
 use serde::Serialize;
 
-pub use substrate::SubstrateConfig;
-pub use polkadot::PolkadotConfig;
 pub use extrinsic_params::ExtrinsicParams;
+pub use polkadot::PolkadotConfig;
+pub use substrate::SubstrateConfig;
 
 /// Runtime types.
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo

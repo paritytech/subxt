@@ -7,14 +7,14 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
-    error::{
-        BlockError,
-        Error,
-    },
     config::{
         Config,
         Hasher,
-        Header
+        Header,
+    },
+    error::{
+        BlockError,
+        Error,
     },
     events,
     rpc::ChainBlockResponse,

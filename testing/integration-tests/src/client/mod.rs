@@ -17,7 +17,10 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{error::DispatchError, rpc::DryRunError};
+use subxt::{
+    error::DispatchError,
+    rpc::DryRunError,
+};
 
 #[tokio::test]
 async fn insert_key() {

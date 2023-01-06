@@ -18,12 +18,12 @@ use crate::{
     TestContext,
 };
 use sp_core::sr25519::Pair;
-use subxt::utils::MultiAddress;
 use subxt::{
     tx::{
         PairSigner,
         TxProgress,
     },
+    utils::MultiAddress,
     Config,
     Error,
     OnlineClient,

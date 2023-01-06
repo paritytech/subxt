@@ -8,6 +8,11 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
+    config::{
+        Config,
+        ExtrinsicParams,
+        Hasher,
+    },
     error::Error,
     tx::{
         Signer as SignerT,
@@ -16,11 +21,6 @@ use crate::{
     utils::{
         Encoded,
         PhantomDataSendSync,
-    },
-    config::{
-        Config,
-        ExtrinsicParams,
-        Hasher,
     },
 };
 use codec::{
@@ -132,7 +132,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT<T>
+        Signer: SignerT<T>,
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -268,7 +268,7 @@ where
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT<T>
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -397,10 +397,7 @@ where
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
     /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
-    pub async fn dry_run(
-        &self,
-        at: Option<T::Hash>,
-    ) -> Result<DryRunResult, Error> {
+    pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
     }
 }

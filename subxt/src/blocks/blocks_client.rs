@@ -5,14 +5,15 @@
 use super::Block;
 use crate::{
     client::OnlineClientT,
-    error::{
-        BlockError,
-        Error,
-    },
     config::{
         Config,
         Header,
     },
+    error::{
+        BlockError,
+        Error,
+    },
+    utils::PhantomDataSendSync,
 };
 use derivative::Derivative;
 use futures::{
@@ -25,7 +26,6 @@ use std::{
     future::Future,
     pin::Pin,
 };
-use crate::utils::PhantomDataSendSync;
 
 type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;

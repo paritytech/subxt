@@ -29,9 +29,7 @@ mod tx_progress;
 pub use self::signer::PairSigner;
 
 pub use self::{
-    signer::{
-        Signer,
-    },
+    signer::Signer,
     tx_client::{
         SubmittableExtrinsic,
         TxClient,
