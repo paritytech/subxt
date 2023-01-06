@@ -24,12 +24,12 @@ pub trait Signer<T: Config> {
     fn sign(&self, signer_payload: &[u8]) -> T::Signature;
 }
 
-#[cfg(feature = "substrate-extra")]
+#[cfg(feature = "substrate-compat")]
 pub use pair_signer::PairSigner;
 
 // A signer suitable for substrate based chains. This provides compatibility with Substrate
 // packages like sp_keyring and such, and so relies on sp_core and sp_runtime to be included.
-#[cfg(feature = "substrate-extra")]
+#[cfg(feature = "substrate-compat")]
 mod pair_signer {
     use super::Signer;
     use crate::Config;

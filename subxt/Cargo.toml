@@ -14,11 +14,11 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-default = ["jsonrpsee-ws", "substrate-extra"]
+default = ["jsonrpsee-ws", "substrate-compat"]
 
 # Activate this feature to pull in extra Substrate dependencies which make it
 # possible to provide a proper extrinsic Signer implementation (PairSigner).
-substrate-extra = [
+substrate-compat = [
     "sp-core",
     "sp-runtime"
 ]
@@ -59,9 +59,9 @@ sp-core-hashing = "6.0.0"
 base58 = { version = "0.2.0" }
 blake2 = { version = "0.10.4", default-features = false }
 
-# These are only included is "substrate-extra" is enabled.
-sp-core = { version = "7.0.0", default-features = false, optional = true }
-sp-runtime = { version = "7.0.0", optional = true }
+# These are only included is "substrate-compat" is enabled.
+sp-core = { version = "10.0.0", default-features = false, optional = true }
+sp-runtime = { version = "11.0.0", optional = true }
 
 frame-metadata = "15.0.0"
 derivative = "2.2.0"

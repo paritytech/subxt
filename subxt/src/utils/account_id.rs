@@ -147,7 +147,7 @@ impl std::str::FromStr for AccountId32 {
 }
 
 // Improve compat with the substrate version if we're using those crates:
-#[cfg(feature = "substrate-extra")]
+#[cfg(feature = "substrate-compat")]
 mod substrate_impls {
     use super::*;
 

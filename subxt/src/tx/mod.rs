@@ -16,7 +16,7 @@ mod tx_progress;
 
 // The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
 // feature if we want to avoid needing sp_core and sp_runtime.
-#[cfg(feature = "substrate-extra")]
+#[cfg(feature = "substrate-compat")]
 pub use self::signer::PairSigner;
 
 pub use self::{

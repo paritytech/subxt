@@ -24,7 +24,7 @@ pub enum MultiSignature {
 }
 
 // Improve compat with the substrate version if we're using those crates:
-#[cfg(feature = "substrate-extra")]
+#[cfg(feature = "substrate-compat")]
 impl From<sp_runtime::MultiSignature> for MultiSignature {
     fn from(value: sp_runtime::MultiSignature) -> Self {
         match value {
