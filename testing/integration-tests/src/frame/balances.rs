@@ -272,9 +272,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locks_addr = node_runtime::storage()
-        .balances()
-        .locks(bob);
+    let locks_addr = node_runtime::storage().balances().locks(bob);
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 

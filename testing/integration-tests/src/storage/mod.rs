@@ -8,8 +8,8 @@ use crate::{
     test_context,
     utils::wait_for_blocks,
 };
-use subxt::utils::AccountId32;
 use sp_keyring::AccountKeyring;
+use subxt::utils::AccountId32;
 
 #[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
@@ -112,9 +112,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
         .await?;
 
     // The actual test; look up this approval in storage:
-    let addr = node_runtime::storage()
-        .assets()
-        .approvals(99, alice, bob);
+    let addr = node_runtime::storage().assets().approvals(99, alice, bob);
     let entry = api.storage().fetch(&addr, None).await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
