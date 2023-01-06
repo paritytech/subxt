@@ -47,7 +47,7 @@ impl AccountId32 {
         // prefix <= 63 just take up one byte at the start:
         let mut v = vec![SUBSTRATE_SS58_PREFIX];
         // then push the account ID bytes.
-        v.extend(&self.0);
+        v.extend(self.0);
         // then push a 2 byte checksum of what we have so far.
         let r = ss58hash(&v);
         v.extend(&r[0..2]);

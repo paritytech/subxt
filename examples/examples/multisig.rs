@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     // Submit the extrinsic with default params:
-    let encoded = hex::encode(&api.tx().call_data(&tx)?);
+    let encoded = hex::encode(api.tx().call_data(&tx)?);
     println!("Call data: {encoded}");
     let tx_hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
     println!("Submitted tx with hash {tx_hash}");
