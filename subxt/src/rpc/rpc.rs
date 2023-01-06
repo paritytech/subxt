@@ -363,6 +363,11 @@ pub struct StorageKey(
 	#[serde(with = "impl_serde::serialize")]
     pub Vec<u8>,
 );
+impl AsRef<[u8]> for StorageKey {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
 
 /// Storage data.
 #[derive(Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode)]
@@ -370,6 +375,11 @@ pub struct StorageData(
 	#[serde(with = "impl_serde::serialize")]
     pub Vec<u8>,
 );
+impl AsRef<[u8]> for StorageData {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
 
 /// Storage change set
 #[derive(Serialize, Deserialize, PartialEq, Eq)]

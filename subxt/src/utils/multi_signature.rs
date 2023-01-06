@@ -19,3 +19,15 @@ pub enum MultiSignature {
 	/// An ECDSA/SECP256k1 signature (a 512-bit value, plus 8 bits for recovery ID).
 	Ecdsa([u8; 65]),
 }
+
+// Improve compat with the substrate version if we're using those crates:
+#[cfg(feature = "substrate-extra")]
+impl From<sp_runtime::MultiSignature> for MultiSignature {
+	fn from(value: sp_runtime::MultiSignature) -> Self {
+		match value {
+			sp_runtime::MultiSignature::Ed25519(s) => Self::Ed25519(s.0),
+			sp_runtime::MultiSignature::Sr25519(s) => Self::Sr25519(s.0),
+			sp_runtime::MultiSignature::Ecdsa(s) => Self::Ecdsa(s.0),
+		}
+	}
+}

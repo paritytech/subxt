@@ -29,3 +29,26 @@ impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, Accoun
 		Self::Id(a)
 	}
 }
+
+// Improve compat with the substrate versions if we're using those crates:
+#[cfg(feature = "substrate-extra")]
+impl <N> From<sp_runtime::AccountId32> for MultiAddress<super::AccountId32, N> {
+	fn from(value: sp_runtime::AccountId32) -> Self {
+		let val: super::AccountId32 = value.into();
+		val.into()
+	}
+}
+#[cfg(feature = "substrate-extra")]
+impl <Id, N> From<sp_runtime::MultiAddress<Id, N>> for MultiAddress<super::AccountId32, N>
+where Id: Into<super::AccountId32>
+{
+	fn from(value: sp_runtime::MultiAddress<Id, N>) -> Self {
+		match value {
+			sp_runtime::MultiAddress::Id(v) => Self::Id(v.into()),
+			sp_runtime::MultiAddress::Index(v) => Self::Index(v),
+			sp_runtime::MultiAddress::Raw(v) => Self::Raw(v),
+			sp_runtime::MultiAddress::Address32(v) => Self::Address32(v),
+			sp_runtime::MultiAddress::Address20(v) => Self::Address20(v),
+		}
+	}
+}

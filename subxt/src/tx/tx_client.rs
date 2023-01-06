@@ -130,7 +130,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT
+        Signer: SignerT<T>
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -223,7 +223,7 @@ where
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT,
+        Signer: SignerT<T>,
     {
         // Get nonce from the node.
         let account_nonce = self
@@ -247,7 +247,7 @@ where
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT,
+        Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
@@ -266,7 +266,7 @@ where
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
-        Signer: SignerT
+        Signer: SignerT<T>
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -291,7 +291,7 @@ where
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
-        Signer: SignerT,
+        Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
@@ -313,7 +313,7 @@ where
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
-        Signer: SignerT,
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?

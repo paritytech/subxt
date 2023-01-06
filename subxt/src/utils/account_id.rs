@@ -138,3 +138,27 @@ impl std::str::FromStr for AccountId32 {
         AccountId32::from_ss58check(s)
     }
 }
+
+// Improve compat with the substrate version if we're using those crates:
+#[cfg(feature = "substrate-extra")]
+mod substrate_impls {
+	use super::*;
+
+	impl From<sp_runtime::AccountId32> for AccountId32 {
+		fn from(value: sp_runtime::AccountId32) -> Self {
+			Self(value.into())
+		}
+	}
+	impl From<sp_core::sr25519::Public> for AccountId32 {
+		fn from(value: sp_core::sr25519::Public) -> Self {
+			let acc: sp_runtime::AccountId32 = value.into();
+			acc.into()
+		}
+	}
+	impl From<sp_core::ed25519::Public> for AccountId32 {
+		fn from(value: sp_core::ed25519::Public) -> Self {
+			let acc: sp_runtime::AccountId32 = value.into();
+			acc.into()
+		}
+	}
+}

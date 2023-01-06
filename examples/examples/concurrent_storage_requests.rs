@@ -24,7 +24,7 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let addr = AccountKeyring::Bob.to_account_id();
+    let addr = AccountKeyring::Bob.to_account_id().into();
 
     // Construct storage addresses to access:
     let staking_bonded = polkadot::storage().staking().bonded(&addr);
