@@ -19,8 +19,8 @@ default = ["jsonrpsee-ws", "substrate-extra"]
 # Activate this feature to pull in extra Substrate dependencies which make it
 # possible to provide a proper extrinsic Signer implementation (PairSigner).
 substrate-extra = [
-    # "sp-core",
-    # "sp-runtime"
+    "sp-core",
+    "sp-runtime"
 ]
 
 # Activate this to expose functionality only used for integration testing.
@@ -39,7 +39,7 @@ scale-info = "2.0.0"
 scale-value = "0.6.0"
 scale-bits = "0.3"
 scale-decode = "0.4.0"
-futures = { version = "0.3.13", default-features = false }
+futures = { version = "0.3.13", default-features = false, features = ["std"] }
 hex = "0.4.3"
 jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
 serde = { version = "1.0.124", features = ["derive"] }
@@ -59,8 +59,9 @@ sp-core-hashing = "6.0.0"
 base58 = { version = "0.2.0" }
 blake2 = { version = "0.10.4", default-features = false }
 
-sp-core = { version = "7.0.0", default-features = false }
-sp-runtime = { version = "7.0.0" }
+# These are only included is "substrate-extra" is enabled.
+sp-core = { version = "7.0.0", default-features = false, optional = true }
+sp-runtime = { version = "7.0.0", optional = true }
 
 frame-metadata = "15.0.0"
 derivative = "2.2.0"

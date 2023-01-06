@@ -22,15 +22,13 @@ use crate::{
         ExtrinsicParams,
         Hasher,
     },
+    rpc::DryRunResult,
 };
 use codec::{
     Compact,
     Encode,
 };
 use derivative::Derivative;
-use sp_runtime::{
-    ApplyExtrinsicResult,
-};
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -400,7 +398,7 @@ where
     pub async fn dry_run(
         &self,
         at: Option<T::Hash>,
-    ) -> Result<ApplyExtrinsicResult, Error> {
+    ) -> Result<DryRunResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
     }
 }

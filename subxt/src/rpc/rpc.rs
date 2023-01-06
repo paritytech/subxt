@@ -60,12 +60,22 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use sp_runtime::ApplyExtrinsicResult;
 use std::{
     collections::HashMap,
     sync::Arc,
 };
 use primitive_types::U256;
+
+/// Signal what the result of doing a dry run of an extrinsic is.
+#[derive(Clone, PartialEq, Eq, Debug)]
+pub enum DryRunResult {
+    /// Everything was successful
+    Success,
+    /// The extrinsic will not be included in the block
+    TransactionValidityError,
+    /// The extrinsic will be included in the block, but the call failed to dispatch.
+    DispatchError
+}
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -109,7 +119,7 @@ pub struct ChainBlockResponse<T: Config> {
     /// The block itself.
     pub block: ChainBlock<T>,
     /// Block justification.
-    pub justifications: Option<sp_runtime::Justifications>,
+    pub justifications: Option<Vec<Justification>>,
 }
 
 /// Block details in the [`ChainBlockResponse`].
@@ -120,6 +130,13 @@ pub struct ChainBlock<T: Config> {
     /// The accompanying extrinsics.
     pub extrinsics: Vec<ChainBlockExtrinsic>,
 }
+
+/// An abstraction over justification for a block's validity under a consensus algorithm.
+pub type Justification = (ConsensusEngineId, EncodedJustification);
+/// Consensus engine unique ID.
+pub type ConsensusEngineId = [u8; 4];
+/// The encoded justification specific to a consensus engine.
+pub type EncodedJustification = Vec<u8>;
 
 /// Bytes representing an extrinsic in a [`ChainBlock`].
 #[derive(Debug)]
@@ -750,17 +767,34 @@ impl<T: Config> Rpc<T> {
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
-    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
+    /// Returns a [`DryRunResult`], which is the result of performing the dry run.
     pub async fn dry_run(
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<ApplyExtrinsicResult, Error> {
+    ) -> Result<DryRunResult, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
-        let data: ApplyExtrinsicResult =
-            codec::Decode::decode(&mut result_bytes.0.as_slice())?;
-        Ok(data)
+        // dryRun returns an ApplyExtrinsicResult, which is basically a
+        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
+        //
+        // - if `Ok(inner)`, the transaction will be included in the block
+        // - if `Ok(Ok(()))`, the transaction will be included and the call will be dispatched
+        //   successfully
+        // - if `Ok(Err(e))`, the transaction will be included but there is some error dispatching
+        //   the call to the module.
+        //
+        // The errors get a bit involved and have been known to change over time. At the moment
+        // then, we can keep things simple here and just decode the Result portion (ie the initial bytes)
+        // and ignore the rest.
+        let res = <Result<Result<(), ()>, ()>>::decode(&mut &*result_bytes.0)?;
+        let dry_run_result = match res {
+            Ok(Ok(())) => DryRunResult::Success,
+            Ok(Err(())) => DryRunResult::DispatchError,
+            Err(()) => DryRunResult::TransactionValidityError
+        };
+
+        Ok(dry_run_result)
     }
 }
 
