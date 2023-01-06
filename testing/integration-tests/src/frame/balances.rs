@@ -252,8 +252,9 @@ async fn storage_total_issuance() {
 
 #[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob = pair_signer(AccountKeyring::Bob.pair());
-    let charlie = AccountKeyring::Charlie.to_account_id();
+    let bob_signer = pair_signer(AccountKeyring::Bob.pair());
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
+    let charlie: AccountId32 = AccountKeyring::Charlie.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -264,7 +265,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     );
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, &bob)
+        .sign_and_submit_then_watch_default(&tx, &bob_signer)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -273,7 +274,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     let locks_addr = node_runtime::storage()
         .balances()
-        .locks(&AccountKeyring::Bob.to_account_id().into());
+        .locks(bob);
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
@@ -356,7 +357,7 @@ async fn transfer_implicit_subscription() {
         event,
         balances::events::Transfer {
             from: alice.account_id().clone(),
-            to: bob.into(),
+            to: bob,
             amount: 10_000
         }
     );

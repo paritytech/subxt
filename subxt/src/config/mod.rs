@@ -124,8 +124,8 @@ pub trait Header: Sized + Encode {
 }
 
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
-/// additional and extra parameters to pass to an extrinsic (see [`crate::tx::ExtrinsicParams`]),
-/// and returns a type implementing [`Config`] with those new `ExtrinsicParams`.
+/// additional and extra parameters to pass to an extrinsic (see [`ExtrinsicParams`]),
+/// and returns a type implementing [`Config`] with those new [`ExtrinsicParams`].
 ///
 /// # Example
 ///

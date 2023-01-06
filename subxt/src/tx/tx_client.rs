@@ -396,7 +396,7 @@ where
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
-    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
+    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
     pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
     }

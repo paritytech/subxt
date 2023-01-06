@@ -8,6 +8,7 @@ use crate::{
     test_context,
     utils::wait_for_blocks,
 };
+use subxt::utils::AccountId32;
 use sp_keyring::AccountKeyring;
 
 #[tokio::test]
@@ -32,7 +33,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let signer = pair_signer(AccountKeyring::Alice.pair());
-    let alice = AccountKeyring::Alice.to_account_id();
+    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
 
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
@@ -43,7 +44,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
         .await?;
 
     // Look up the nonce for the user (we expect it to be 1).
-    let nonce_addr = node_runtime::storage().system().account(&alice.into());
+    let nonce_addr = node_runtime::storage().system().account(alice);
     let entry = api.storage().fetch_or_default(&nonce_addr, None).await?;
     assert_eq!(entry.nonce, 1);
 
@@ -90,8 +91,8 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     // we "approveTransfer" of some of this asset class. This gives us an
     // entry in the `Approvals` StorageNMap that we can try to look up.
     let signer = pair_signer(AccountKeyring::Alice.pair());
-    let alice = AccountKeyring::Alice.to_account_id();
-    let bob = AccountKeyring::Bob.to_account_id();
+    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
 
     let tx1 = node_runtime::tx()
         .assets()
@@ -113,7 +114,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     // The actual test; look up this approval in storage:
     let addr = node_runtime::storage()
         .assets()
-        .approvals(99, &alice.into(), &bob.into());
+        .approvals(99, alice, bob);
     let entry = api.storage().fetch(&addr, None).await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())

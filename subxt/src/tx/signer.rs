@@ -59,7 +59,7 @@ mod pair_signer {
         <SpMultiSignature as Verify>::Signer:
             From<Pair::Public> + IdentifyAccount<AccountId = SpAccountId32>,
     {
-        /// Creates a new [`Signer`] from a [`Pair`].
+        /// Creates a new [`Signer`] from an [`sp_core::Pair`].
         pub fn new(signer: Pair) -> Self {
             let account_id = <SpMultiSignature as Verify>::Signer::from(signer.public())
                 .into_account();
@@ -69,7 +69,7 @@ mod pair_signer {
             }
         }
 
-        /// Returns the [`Pair`] implementation used to construct this.
+        /// Returns the [`sp_core::Pair`] implementation used to construct this.
         pub fn signer(&self) -> &Pair {
             &self.signer
         }
