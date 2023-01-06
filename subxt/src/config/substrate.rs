@@ -149,7 +149,7 @@ pub struct Digest {
 
 /// Digest item that is able to encode/decode 'system' digest items and
 /// provide opaque access to other items. From `sp_runtime::generic::digest`.
-#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DigestItem {
     /// A pre-runtime digest.
     ///
@@ -184,6 +184,67 @@ pub enum DigestItem {
     /// 1. Runtime code blob is changed or
     /// 2. `heap_pages` value is changed.
     RuntimeEnvironmentUpdated,
+}
+
+// From sp_runtime::generic, DigestItem enum indexes are encoded using this:
+#[repr(u32)]
+#[derive(Encode, Decode)]
+enum DigestItemType {
+    Other = 0u32,
+    Consensus = 4u32,
+    Seal = 5u32,
+    PreRuntime = 6u32,
+    RuntimeEnvironmentUpdated = 8u32,
+}
+impl Encode for DigestItem {
+    fn encode(&self) -> Vec<u8> {
+		let mut v = Vec::new();
+
+        match self {
+			Self::Consensus(val, data) => {
+				DigestItemType::Consensus.encode_to(&mut v);
+				(val, data).encode_to(&mut v);
+			},
+			Self::Seal(val, sig) => {
+				DigestItemType::Seal.encode_to(&mut v);
+				(val, sig).encode_to(&mut v);
+			},
+			Self::PreRuntime(val, data) => {
+				DigestItemType::PreRuntime.encode_to(&mut v);
+				(val, data).encode_to(&mut v);
+			},
+			Self::Other(val) => {
+				DigestItemType::Other.encode_to(&mut v);
+				val.encode_to(&mut v);
+			},
+			Self::RuntimeEnvironmentUpdated => {
+				DigestItemType::RuntimeEnvironmentUpdated.encode_to(&mut v);
+			},
+        }
+
+        v
+    }
+}
+impl Decode for DigestItem {
+	fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+		let item_type: DigestItemType = Decode::decode(input)?;
+		match item_type {
+			DigestItemType::PreRuntime => {
+				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+				Ok(Self::PreRuntime(vals.0, vals.1))
+			},
+			DigestItemType::Consensus => {
+				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+				Ok(Self::Consensus(vals.0, vals.1))
+			},
+			DigestItemType::Seal => {
+				let vals: (ConsensusEngineId, Vec<u8>) = Decode::decode(input)?;
+				Ok(Self::Seal(vals.0, vals.1))
+			},
+			DigestItemType::Other => Ok(Self::Other(Decode::decode(input)?)),
+			DigestItemType::RuntimeEnvironmentUpdated => Ok(Self::RuntimeEnvironmentUpdated),
+		}
+	}
 }
 
 /// Consensus engine unique ID. From `sp_runtime::ConsensusEngineId`.
