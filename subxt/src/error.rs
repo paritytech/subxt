@@ -111,10 +111,10 @@ pub enum RpcError {
     // Dev note: We need the error to be safely sent between threads
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
-    #[error("{0}")]
+    #[error("RPC error: {0}")]
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
     /// The RPC subscription dropped.
-    #[error("Subscription dropped.")]
+    #[error("RPC error: Subscription dropped.")]
     SubscriptionDropped,
 }
 
