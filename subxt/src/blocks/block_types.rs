@@ -11,7 +11,10 @@ use crate::{
         BlockError,
         Error,
     },
-    events::{self, Events},
+    events::{
+        self,
+        Events,
+    },
     metadata::DecodeWithMetadata,
     rpc::{
         types::{
@@ -67,18 +70,24 @@ where
 }
 
 /// Error resulted from the [`ChainHeadBlock`] methods.
+#[derive(Debug, thiserror::Error)]
 pub enum ChainHeadError {
     /// The resources requested are inaccessible.
     ///
     /// Resubmitting the request later might succeed.
+    #[error("Inaccessible: {0}")]
     Inaccessible(String),
     /// The chain encountered an error. This is definitive.
+    #[error("Error: {0}")]
     Error(String),
     /// The provided subscription ID is stale or invalid.
+    #[error("Disjoint")]
     Disjoint,
     /// The RPC target node does not contain the given resource.
+    #[error("Resource does not exist on the RPC target node")]
     ResourceNonExistent,
     /// An error occurred internally. This is definitive.
+    #[error("Other: {0}")]
     Other(String),
 }
 
