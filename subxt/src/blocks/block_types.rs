@@ -310,6 +310,7 @@ where
             let event = event?;
 
             let bytes = Vec::<u8>::try_from(event)?;
+            return Ok(bytes)
         }
 
         Err(ChainHeadError::Other(
