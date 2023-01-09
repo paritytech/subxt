@@ -41,6 +41,10 @@
 
 use super::{
     rpc_params,
+    types::{
+        ChainHeadEvent,
+        FollowEvent,
+    },
     RpcClient,
     RpcClientT,
     Subscription,
@@ -624,6 +628,162 @@ impl<T: Config> Rpc<T> {
             )
             .await?;
         Ok(subscription)
+    }
+
+    /// Subscribe to `chainHead_follow` to obtain all reported blocks by the chain.
+    ///
+    /// The subscription ID can be used to make queries for the block's body
+    /// [`subscribe_chainhead_body`], block's header ([`chainhead_header`]),
+    /// block's storage ([`subscribe_chainhead_storage`]) and submitting
+    /// runtime API calls at this block ([`subscribe_chainhead_call`]).
+    ///
+    /// # Note
+    ///
+    /// When the user is no longer interested in a block, the user is responsible
+    /// for calling the [`chainhead_unpin`] method on each. Failure to do so will result
+    /// in the subscription being dropped by the chain.
+    pub async fn subscribe_chainhead_follow(
+        &self,
+        runtime_updates: bool,
+    ) -> Result<Subscription<FollowEvent<T::Hash>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_follow",
+                rpc_params![runtime_updates],
+                "chainHead_unstable_unfollow",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to `chainHead_body` to obtain events regarding the block's body.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`subscribe_chainhead_follow`].
+    pub async fn subscribe_chainhead_body(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<Subscription<ChainHeadEvent<String>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_body",
+                rpc_params![subscription_id, hash],
+                "chainHead_unstable_stopBody",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Get the block's body using the `chainHead_header` method.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`subscribe_chainhead_follow`].
+    pub async fn chainhead_header(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<Option<String>, Error> {
+        let header = self
+            .client
+            .request(
+                "chainHead_unstable_header",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        Ok(header)
+    }
+
+    /// Subscribe to `chainHead_storage` to obtain events regarding the
+    /// block's storage.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`subscribe_chainhead_follow`].
+    pub async fn subscribe_chainhead_storage(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        key: &[u8],
+        child_key: Option<&[u8]>,
+    ) -> Result<Subscription<ChainHeadEvent<Option<String>>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_storage",
+                rpc_params![subscription_id, hash, to_hex(key), child_key.map(to_hex)],
+                "chainHead_unstable_stopStorage",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to `chainHead_call` to obtain events regarding the
+    /// runtime API call.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`subscribe_chainhead_follow`].
+    pub async fn subscribe_chainhead_call(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        function: String,
+        call_parameters: &[u8],
+    ) -> Result<Subscription<ChainHeadEvent<String>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_call",
+                rpc_params![subscription_id, hash, function, to_hex(call_parameters)],
+                "chainHead_unstable_stopCall",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Unpin a block reported by the `chainHead_follow` subscription.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`subscribe_chainhead_follow`].
+    pub async fn chainhead_unpin(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<(), Error> {
+        self.client
+            .request(
+                "chainHead_unstable_unpin",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    /// Get genesis hash obtained from the `chainHead_genesisHash` method.
+    pub async fn chainhead_genesis_hash(&self) -> Result<T::Hash, Error> {
+        let hash = self
+            .client
+            .request("chainHead_unstable_genesisHash", rpc_params![])
+            .await?;
+
+        Ok(hash)
     }
 
     /// Subscribe to runtime version updates that produce changes in the metadata.
