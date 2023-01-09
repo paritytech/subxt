@@ -435,7 +435,7 @@ impl<T: Config> Rpc<T> {
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
-    /// Returns a [`DryRunResult`], which is the result of performing the dry run.
+    /// Returns a [`types::DryRunResult`], which is the result of performing the dry run.
     pub async fn dry_run(
         &self,
         encoded_signed: &[u8],
