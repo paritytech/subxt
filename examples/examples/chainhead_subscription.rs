@@ -15,7 +15,7 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
     OnlineClient,
-    SubstrateConfig
+    SubstrateConfig,
 };
 
 #[tokio::main]
