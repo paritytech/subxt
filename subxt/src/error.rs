@@ -114,7 +114,7 @@ pub enum RpcError {
     #[error("RPC error: {0}")]
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
     /// The RPC subscription dropped.
-    #[error("RPC error: Subscription dropped.")]
+    #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
 }
 
