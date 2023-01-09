@@ -12,12 +12,18 @@ use crate::{
         Error,
     },
     events,
+    metadata::DecodeWithMetadata,
     rpc::{
         types::{
             ChainHeadEvent,
             ChainHeadResult,
         },
         ChainBlockResponse,
+    },
+    storage::{
+        address::Yes,
+        utils,
+        StorageAddress,
     },
     Config,
 };
@@ -100,6 +106,30 @@ impl TryFrom<ChainHeadEvent<String>> for Vec<u8> {
     }
 }
 
+impl TryFrom<ChainHeadEvent<Option<String>>> for Option<Vec<u8>> {
+    type Error = ChainHeadError;
+
+    fn try_from(event: ChainHeadEvent<Option<String>>) -> Result<Self, Self::Error> {
+        match event {
+            ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                let result = match result {
+                    Some(result) => result,
+                    None => return Ok(None),
+                };
+
+                let res: Vec<u8> =
+                    ChainHeadEvent::Done(ChainHeadResult { result }).try_into()?;
+                Ok(Some(res))
+            }
+            ChainHeadEvent::Inaccessible(err) => {
+                Err(ChainHeadError::Inaccessible(err.error))
+            }
+            ChainHeadEvent::Error(err) => Err(ChainHeadError::Error(err.error)),
+            ChainHeadEvent::Disjoint => Err(ChainHeadError::Disjoint),
+        }
+    }
+}
+
 impl<T, C> ChainHeadBlock<T, C>
 where
     T: Config,
@@ -115,6 +145,43 @@ where
     pub async fn header(&self) -> Result<T::Header, ChainHeadError> {
         self.fetch_header(self.subscription_id.clone(), self.hash)
             .await
+    }
+
+    /// Fetch the raw storage bytes of this block at the provided key.
+    pub async fn storage_raw<'a>(
+        &self,
+        key: &'a [u8],
+    ) -> Result<Option<Vec<u8>>, ChainHeadError> {
+        self.fetch_storage(self.subscription_id.clone(), self.hash, &key, None)
+            .await
+    }
+
+    /// Fetch the storage of this block at the provided key.
+    pub async fn storage<'a, Address>(
+        &self,
+        key: &'a Address,
+    ) -> Result<Option<<Address::Target as DecodeWithMetadata>::Target>, ChainHeadError>
+    where
+        Address: StorageAddress<IsFetchable = Yes> + 'a,
+    {
+        // Look up the return type ID to enable DecodeWithMetadata:
+        let metadata = self.client.metadata();
+        let key_bytes = utils::storage_address_bytes(key, &metadata)?;
+
+        let storage_bytes = self.storage_raw(&key_bytes).await?;
+        let bytes = match storage_bytes {
+            Some(bytes) => bytes,
+            None => return Ok(None),
+        };
+
+        let storage =
+            <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
+                &mut &*bytes,
+                key.pallet_name(),
+                key.entry_name(),
+                &metadata,
+            )?;
+        Ok(Some(storage))
     }
 
     /// Wrapper to fetch the block's body from the `chainHead_body` subscription.
@@ -139,7 +206,9 @@ where
             return Ok(extrinsics)
         }
 
-        Err(Error::Other("Failed to fetch the block body".into()).into())
+        Err(ChainHeadError::Other(
+            "Failed to fetch the block body".into(),
+        ))
     }
 
     /// Wrapper to fetch the block's header from the `chainHead_header` method.
@@ -165,6 +234,32 @@ where
         let header: T::Header =
             Decode::decode(&mut &bytes[..]).map_err(Into::<Error>::into)?;
         Ok(header)
+    }
+
+    /// Wrapper to fetch the block's storage from the `chainHead_storage` subscription.
+    async fn fetch_storage(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+        key: &[u8],
+        child_key: Option<&[u8]>,
+    ) -> Result<Option<Vec<u8>>, ChainHeadError> {
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_storage(subscription_id, hash, key, child_key)
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            let bytes = Option::<Vec<u8>>::try_from(event)?;
+            return Ok(bytes)
+        }
+
+        Err(ChainHeadError::Other(
+            "Failed to fetch the block storage".into(),
+        ))
     }
 }
 
