@@ -193,6 +193,22 @@ where
         self.fetch_call(function, call_parameters).await
     }
 
+    /// Unpin this block.
+    ///
+    /// # Note
+    ///
+    /// Call this method when you are no longer interested in making queries
+    /// against this block.
+    ///
+    /// Failing to call this method will eventually terminate the subscription.
+    pub async fn unpin(self) -> Result<(), Error> {
+        self.client
+            .rpc()
+            .chainhead_unpin(self.subscription_id, self.hash)
+            .await?;
+        Ok(())
+    }
+
     /// Wrapper to fetch the block's body from the `chainHead_body` subscription.
     async fn fetch_body(
         &self,
