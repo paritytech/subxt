@@ -184,6 +184,15 @@ where
         Ok(Some(storage))
     }
 
+    /// Execute a runtime API call at this block.
+    pub async fn call(
+        &self,
+        function: String,
+        call_parameters: Option<&[u8]>,
+    ) -> Result<Vec<u8>, ChainHeadError> {
+        self.fetch_call(function, call_parameters).await
+    }
+
     /// Wrapper to fetch the block's body from the `chainHead_body` subscription.
     async fn fetch_body(
         &self,
@@ -259,6 +268,36 @@ where
 
         Err(ChainHeadError::Other(
             "Failed to fetch the block storage".into(),
+        ))
+    }
+
+    /// Execute a runtime API call at this block.
+    async fn fetch_call(
+        &self,
+        function: String,
+        call_parameters: Option<&[u8]>,
+    ) -> Result<Vec<u8>, ChainHeadError> {
+        let call_parameters = call_parameters.unwrap_or(Default::default());
+
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_call(
+                self.subscription_id.clone(),
+                self.hash,
+                function,
+                call_parameters,
+            )
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            let bytes = Vec::<u8>::try_from(event)?;
+        }
+
+        Err(ChainHeadError::Other(
+            "Failed to execute the runtime API call".into(),
         ))
     }
 }
