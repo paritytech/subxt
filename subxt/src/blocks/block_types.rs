@@ -11,7 +11,7 @@ use crate::{
         BlockError,
         Error,
     },
-    events,
+    events::{self, Events},
     metadata::DecodeWithMetadata,
     rpc::{
         types::{
@@ -30,6 +30,7 @@ use crate::{
 use codec::Decode;
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
+use sp_core::twox_128;
 use sp_runtime::traits::{
     Hash,
     Header,
@@ -207,6 +208,23 @@ where
             .chainhead_unpin(self.subscription_id, self.hash)
             .await?;
         Ok(())
+    }
+
+    /// Fetch the block's events.
+    pub async fn events(&self) -> Result<Events<T>, ChainHeadError> {
+        let mut storage_key = twox_128(b"System").to_vec();
+        storage_key.extend(twox_128(b"Events").to_vec());
+        let Some(event_bytes) = self.storage_raw(&storage_key).await? else {
+            return Err(ChainHeadError::Other(
+                "Failed to fetch System::Events storage".into()
+            ))
+        };
+
+        Ok(Events::new(
+            self.client.metadata(),
+            self.hash.clone(),
+            event_bytes,
+        ))
     }
 
     /// Wrapper to fetch the block's body from the `chainHead_body` subscription.
