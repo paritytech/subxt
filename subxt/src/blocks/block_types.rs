@@ -12,9 +12,16 @@ use crate::{
         Error,
     },
     events,
-    rpc::ChainBlockResponse,
+    rpc::{
+        types::{
+            ChainHeadEvent,
+            ChainHeadResult,
+        },
+        ChainBlockResponse,
+    },
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
 use sp_runtime::traits::{
@@ -22,6 +29,68 @@ use sp_runtime::traits::{
     Header,
 };
 use std::sync::Arc;
+
+/// A representation of a block obtained from the `chainHead_follow` subscription.
+pub struct ChainHeadBlock<T: Config, C> {
+    /// The hash of the block.
+    hash: T::Hash,
+    /// The ID of the subscription that produced this block.
+    subscription_id: String,
+    /// The client to communicate with the chain.
+    client: C,
+}
+
+impl<T, C> ChainHeadBlock<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    pub(crate) fn new(hash: T::Hash, subscription_id: String, client: C) -> Self {
+        Self {
+            hash,
+            subscription_id,
+            client,
+        }
+    }
+
+    /// Return the block hash.
+    pub fn hash(&self) -> T::Hash {
+        self.hash.clone()
+    }
+}
+
+/// Error resulted from the [`ChainHeadBlock`] methods.
+pub enum ChainHeadError {
+    /// The resources requested are inaccessible.
+    ///
+    /// Resubmitting the request later might succeed.
+    Inaccessible(String),
+    /// The chain encountered an error. This is definitive.
+    Error(String),
+    /// The provided subscription ID is stale or invalid.
+    Disjoint,
+    /// An error occurred internally. This is definitive.
+    Other(String),
+}
+
+impl TryFrom<ChainHeadEvent<String>> for Vec<u8> {
+    type Error = ChainHeadError;
+
+    fn try_from(event: ChainHeadEvent<String>) -> Result<Self, Self::Error> {
+        match event {
+            ChainHeadEvent::Done(ChainHeadResult { result }) => {
+                let bytes = hex::decode(result.trim_start_matches("0x"))
+                    .map_err(|err| ChainHeadError::Other(err.to_string()))?;
+                Ok(bytes)
+            }
+            ChainHeadEvent::Inaccessible(err) => {
+                Err(ChainHeadError::Inaccessible(err.error))
+            }
+            ChainHeadEvent::Error(err) => Err(ChainHeadError::Error(err.error)),
+            ChainHeadEvent::Disjoint => Err(ChainHeadError::Disjoint),
+        }
+    }
+}
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {
