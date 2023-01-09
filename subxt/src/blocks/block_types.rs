@@ -73,6 +73,12 @@ pub enum ChainHeadError {
     Other(String),
 }
 
+impl From<Error> for ChainHeadError {
+    fn from(error: Error) -> Self {
+        ChainHeadError::Other(error.to_string())
+    }
+}
+
 impl TryFrom<ChainHeadEvent<String>> for Vec<u8> {
     type Error = ChainHeadError;
 
@@ -89,6 +95,43 @@ impl TryFrom<ChainHeadEvent<String>> for Vec<u8> {
             ChainHeadEvent::Error(err) => Err(ChainHeadError::Error(err.error)),
             ChainHeadEvent::Disjoint => Err(ChainHeadError::Disjoint),
         }
+    }
+}
+
+impl<T, C> ChainHeadBlock<T, C>
+where
+    T: Config,
+    C: OnlineClientT<T>,
+{
+    /// Wrapper to fetch the block's body from the `chainHead_body` subscription.
+    async fn fetch_body(
+        &self,
+        subscription_id: String,
+        hash: T::Hash,
+    ) -> Result<Vec<Vec<u8>>, ChainHeadError> {
+        let mut sub = self
+            .client
+            .rpc()
+            .subscribe_chainhead_body(subscription_id, hash)
+            .await?;
+
+        if let Some(event) = sub.next().await {
+            let event = event?;
+
+            let bytes = Vec::<u8>::try_from(event)?;
+
+            let extrinsics: Vec<Vec<u8>> =
+                Decode::decode(&mut &bytes[..]).map_err(Into::<Error>::into)?;
+            return Ok(extrinsics)
+        }
+
+        Err(Error::Other("Failed to fetch the block body".into()).into())
+    }
+
+    /// Fetch the body (vector of extrinsics) of this block.
+    pub async fn body(&self) -> Result<Vec<Vec<u8>>, ChainHeadError> {
+        self.fetch_body(self.subscription_id.clone(), self.hash)
+            .await
     }
 }
 
