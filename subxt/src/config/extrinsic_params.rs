@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! This module contains a trait which controls the parameters that can must
+//! This module contains a trait which controls the parameters that must
 //! be provided in order to successfully construct an extrinsic. A basic
 //! implementation of the trait is provided ([`BaseExtrinsicParams`]) which is
 //! used by the provided Substrate and Polkadot configuration.

@@ -163,3 +163,39 @@ mod substrate_impls {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use sp_core::crypto::Ss58Codec;
+    use sp_keyring::AccountKeyring;
+
+    #[test]
+    fn ss58_is_compatible_with_substrate_impl() {
+        let keyrings = vec![
+            AccountKeyring::Alice,
+            AccountKeyring::Bob,
+            AccountKeyring::Charlie,
+        ];
+
+        for keyring in keyrings {
+            let substrate_account = keyring.to_account_id();
+            let local_account: AccountId32 = substrate_account.clone().into();
+
+            // Both should encode to ss58 the same way:
+            let substrate_ss58 = substrate_account.to_ss58check();
+            assert_eq!(substrate_ss58, local_account.to_ss58check());
+
+            // Both should decode from ss58 back to the same:
+            assert_eq!(
+                sp_core::crypto::AccountId32::from_ss58check(&substrate_ss58).unwrap(),
+                substrate_account
+            );
+            assert_eq!(
+                AccountId32::from_ss58check(&substrate_ss58).unwrap(),
+                local_account
+            );
+        }
+    }
+}

@@ -31,6 +31,30 @@ pub enum DryRunError {
     DispatchError,
 }
 
+/// dryRun returns an ApplyExtrinsicResult, which is basically a
+/// `Result<Result<(), DispatchError>, TransactionValidityError>`. We want to convert this to
+/// a [`DryRunResult`].
+///
+/// - if `Ok(inner)`, the transaction will be included in the block
+/// - if `Ok(Ok(()))`, the transaction will be included and the call will be dispatched
+///   successfully
+/// - if `Ok(Err(e))`, the transaction will be included but there is some error dispatching
+///   the call to the module.
+///
+/// The errors get a bit involved and have been known to change over time. At the moment
+/// then, we will keep things simple here and just decode the Result portion (ie the initial bytes)
+/// and ignore the rest.
+pub(crate) fn decode_dry_run_result<I: codec::Input>(
+    input: &mut I,
+) -> Result<DryRunResult, codec::Error> {
+    let res = match <Result<Result<(), ()>, ()>>::decode(input)? {
+        Ok(Ok(())) => Ok(()),
+        Ok(Err(())) => Err(DryRunError::DispatchError),
+        Err(()) => Err(DryRunError::TransactionValidityError),
+    };
+    Ok(res)
+}
+
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
 ///
@@ -310,7 +334,17 @@ pub struct BlockStats {
 
 /// Storage key.
 #[derive(
-    Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode,
+    Serialize,
+    Deserialize,
+    Hash,
+    PartialOrd,
+    Ord,
+    PartialEq,
+    Eq,
+    Clone,
+    Encode,
+    Decode,
+    Debug,
 )]
 pub struct StorageKey(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 impl AsRef<[u8]> for StorageKey {
@@ -321,7 +355,17 @@ impl AsRef<[u8]> for StorageKey {
 
 /// Storage data.
 #[derive(
-    Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode,
+    Serialize,
+    Deserialize,
+    Hash,
+    PartialOrd,
+    Ord,
+    PartialEq,
+    Eq,
+    Clone,
+    Encode,
+    Decode,
+    Debug,
 )]
 pub struct StorageData(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 impl AsRef<[u8]> for StorageData {
@@ -331,7 +375,7 @@ impl AsRef<[u8]> for StorageData {
 }
 
 /// Storage change set
-#[derive(Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageChangeSet<Hash> {
     /// Block hash
@@ -352,4 +396,163 @@ pub struct Health {
     ///
     /// Might be false for local chains or when running without discovery.
     pub should_have_peers: bool,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    /// A util function to assert the result of serialization and deserialization is the same.
+    pub fn assert_deser<T>(s: &str, expected: T)
+    where
+        T: std::fmt::Debug
+            + serde::ser::Serialize
+            + serde::de::DeserializeOwned
+            + PartialEq,
+    {
+        assert_eq!(serde_json::from_str::<T>(s).unwrap(), expected);
+        assert_eq!(serde_json::to_string(&expected).unwrap(), s);
+    }
+
+    // Check that some A can be serialized and then deserialized into some B.
+    pub fn assert_ser_deser<A, B>(a: &A, b: &B)
+    where
+        A: serde::Serialize,
+        B: serde::de::DeserializeOwned + PartialEq + std::fmt::Debug,
+    {
+        let json = serde_json::to_string(a).expect("serializing failed");
+        let new_b: B = serde_json::from_str(&json).expect("deserializing failed");
+
+        assert_eq!(b, &new_b);
+    }
+
+    #[test]
+    fn runtime_version_is_substrate_compatible() {
+        use sp_version::RuntimeVersion as SpRuntimeVersion;
+
+        let substrate_runtime_version = SpRuntimeVersion {
+            spec_version: 123,
+            transaction_version: 456,
+            ..Default::default()
+        };
+
+        let json = serde_json::to_string(&substrate_runtime_version)
+            .expect("serializing failed");
+        let val: RuntimeVersion =
+            serde_json::from_str(&json).expect("deserializing failed");
+
+        // We ignore any other properties.
+        assert_eq!(val.spec_version, 123);
+        assert_eq!(val.transaction_version, 456);
+    }
+
+    #[test]
+    fn runtime_version_handles_arbitrary_params() {
+        let val: RuntimeVersion = serde_json::from_str(
+            r#"{
+                "specVersion": 123,
+                "transactionVersion": 456,
+                "foo": true,
+                "wibble": [1,2,3]
+            }"#,
+        )
+        .expect("deserializing failed");
+
+        let mut m = std::collections::HashMap::new();
+        m.insert("foo".to_owned(), serde_json::json!(true));
+        m.insert("wibble".to_owned(), serde_json::json!([1, 2, 3]));
+
+        assert_eq!(
+            val,
+            RuntimeVersion {
+                spec_version: 123,
+                transaction_version: 456,
+                other: m
+            }
+        );
+    }
+
+    #[test]
+    fn number_or_hex_deserializes_from_either_repr() {
+        assert_deser(r#""0x1234""#, NumberOrHex::Hex(0x1234.into()));
+        assert_deser(r#""0x0""#, NumberOrHex::Hex(0.into()));
+        assert_deser(r#"5"#, NumberOrHex::Number(5));
+        assert_deser(r#"10000"#, NumberOrHex::Number(10000));
+        assert_deser(r#"0"#, NumberOrHex::Number(0));
+        assert_deser(r#"1000000000000"#, NumberOrHex::Number(1000000000000));
+    }
+
+    #[test]
+    fn dry_run_result_is_substrate_compatible() {
+        use sp_runtime::{
+            transaction_validity::{
+                InvalidTransaction as SpInvalidTransaction,
+                TransactionValidityError as SpTransactionValidityError,
+            },
+            ApplyExtrinsicResult as SpApplyExtrinsicResult,
+            DispatchError as SpDispatchError,
+        };
+
+        let pairs = vec![
+            // All ok
+            (SpApplyExtrinsicResult::Ok(Ok(())), Ok(())),
+            // Some transaction error
+            (
+                SpApplyExtrinsicResult::Err(SpTransactionValidityError::Invalid(
+                    SpInvalidTransaction::BadProof,
+                )),
+                Err(DryRunError::TransactionValidityError),
+            ),
+            // Some dispatch error
+            (
+                SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
+                Err(DryRunError::DispatchError),
+            ),
+        ];
+
+        for (actual, expected) in pairs {
+            let encoded = actual.encode();
+            assert_eq!(decode_dry_run_result(&mut &*encoded).unwrap(), expected);
+        }
+    }
+
+    #[test]
+    fn justification_is_substrate_compatible() {
+        use sp_runtime::Justification as SpJustification;
+
+        // As much as anything, this just checks that the Justification type
+        // is still a tuple as given.
+        assert_ser_deser::<SpJustification, Justification>(
+            &([1, 2, 3, 4], vec![5, 6, 7, 8]),
+            &([1, 2, 3, 4], vec![5, 6, 7, 8]),
+        );
+    }
+
+    #[test]
+    fn storage_types_are_substrate_compatible() {
+        use sp_core::storage::{
+            StorageChangeSet as SpStorageChangeSet,
+            StorageData as SpStorageData,
+            StorageKey as SpStorageKey,
+        };
+
+        assert_ser_deser(
+            &SpStorageKey(vec![1, 2, 3, 4, 5]),
+            &StorageKey(vec![1, 2, 3, 4, 5]),
+        );
+        assert_ser_deser(
+            &SpStorageData(vec![1, 2, 3, 4, 5]),
+            &StorageData(vec![1, 2, 3, 4, 5]),
+        );
+        assert_ser_deser(
+            &SpStorageChangeSet {
+                block: 1u64,
+                changes: vec![(SpStorageKey(vec![1]), Some(SpStorageData(vec![2])))],
+            },
+            &StorageChangeSet {
+                block: 1u64,
+                changes: vec![(StorageKey(vec![1]), Some(StorageData(vec![2])))],
+            },
+        );
+    }
 }

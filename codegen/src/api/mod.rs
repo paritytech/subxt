@@ -169,11 +169,11 @@ impl RuntimeGenerator {
             ),
             (
                 "sp_core::crypto::AccountId32",
-                parse_quote!(#crate_path::utils::account_id::AccountId32),
+                parse_quote!(#crate_path::utils::AccountId32),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(#crate_path::utils::multi_address::MultiAddress),
+                parse_quote!(#crate_path::utils::MultiAddress),
             ),
             (
                 "primitive_types::H160",

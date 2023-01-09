@@ -444,85 +444,10 @@ impl<T: Config> Rpc<T> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: types::Bytes =
             self.client.request("system_dryRun", params).await?;
-        // dryRun returns an ApplyExtrinsicResult, which is basically a
-        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
-        //
-        // - if `Ok(inner)`, the transaction will be included in the block
-        // - if `Ok(Ok(()))`, the transaction will be included and the call will be dispatched
-        //   successfully
-        // - if `Ok(Err(e))`, the transaction will be included but there is some error dispatching
-        //   the call to the module.
-        //
-        // The errors get a bit involved and have been known to change over time. At the moment
-        // then, we can keep things simple here and just decode the Result portion (ie the initial bytes)
-        // and ignore the rest.
-        let res = <Result<Result<(), ()>, ()>>::decode(&mut &*result_bytes.0)?;
-        let dry_run_result = match res {
-            Ok(Ok(())) => Ok(()),
-            Ok(Err(())) => Err(types::DryRunError::DispatchError),
-            Err(()) => Err(types::DryRunError::TransactionValidityError),
-        };
-
-        Ok(dry_run_result)
+        Ok(types::decode_dry_run_result(&mut &*result_bytes.0)?)
     }
 }
 
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    /// A util function to assert the result of serialization and deserialization is the same.
-    pub(crate) fn assert_deser<T>(s: &str, expected: T)
-    where
-        T: std::fmt::Debug
-            + serde::ser::Serialize
-            + serde::de::DeserializeOwned
-            + PartialEq,
-    {
-        assert_eq!(serde_json::from_str::<T>(s).unwrap(), expected);
-        assert_eq!(serde_json::to_string(&expected).unwrap(), s);
-    }
-
-    #[test]
-    fn test_deser_runtime_version() {
-        let val: types::RuntimeVersion = serde_json::from_str(
-            r#"{
-            "specVersion": 123,
-            "transactionVersion": 456,
-            "foo": true,
-            "wibble": [1,2,3]
-        }"#,
-        )
-        .expect("deserializing failed");
-
-        let mut m = std::collections::HashMap::new();
-        m.insert("foo".to_owned(), serde_json::json!(true));
-        m.insert("wibble".to_owned(), serde_json::json!([1, 2, 3]));
-
-        assert_eq!(
-            val,
-            types::RuntimeVersion {
-                spec_version: 123,
-                transaction_version: 456,
-                other: m
-            }
-        );
-    }
-
-    #[test]
-    fn should_serialize_and_deserialize() {
-        assert_deser(r#""0x1234""#, types::NumberOrHex::Hex(0x1234.into()));
-        assert_deser(r#""0x0""#, types::NumberOrHex::Hex(0.into()));
-        assert_deser(r#"5"#, types::NumberOrHex::Number(5));
-        assert_deser(r#"10000"#, types::NumberOrHex::Number(10000));
-        assert_deser(r#"0"#, types::NumberOrHex::Number(0));
-        assert_deser(
-            r#"1000000000000"#,
-            types::NumberOrHex::Number(1000000000000),
-        );
-    }
 }
