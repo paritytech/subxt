@@ -19,7 +19,7 @@ use sp_core::{
 use sp_keyring::AccountKeyring;
 use subxt::{
     error::DispatchError,
-    rpc::DryRunError,
+    rpc::types::DryRunError,
 };
 
 #[tokio::test]

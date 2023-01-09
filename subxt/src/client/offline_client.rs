@@ -6,7 +6,7 @@ use crate::{
     blocks::BlocksClient,
     constants::ConstantsClient,
     events::EventsClient,
-    rpc::RuntimeVersion,
+    rpc::types::RuntimeVersion,
     storage::StorageClient,
     tx::TxClient,
     Config,

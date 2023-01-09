@@ -103,12 +103,6 @@ pub enum FromSs58Error {
     InvalidChecksum,
     #[error("Invalid SS58 prefix byte.")]
     InvalidPrefix,
-    #[error("Invalid SS58 format.")]
-    InvalidFormat,
-    #[error("Invalid derivation path.")]
-    InvalidPath,
-    #[error("Disallowed SS58 Address Format for this datatype.")]
-    FormatNotAllowed,
 }
 
 // We do this just to get a checksum to help verify the validity of the address in to_ss58check

@@ -30,7 +30,7 @@ use codec::{
 use derivative::Derivative;
 
 // This is returned from an API below, so expose it here.
-pub use crate::rpc::DryRunResult;
+pub use crate::rpc::types::DryRunResult;
 
 /// A client for working with transactions.
 #[derive(Derivative)]

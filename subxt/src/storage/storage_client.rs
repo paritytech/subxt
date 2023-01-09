@@ -16,7 +16,7 @@ use crate::{
         DecodeWithMetadata,
         Metadata,
     },
-    rpc::{
+    rpc::types::{
         StorageData,
         StorageKey,
     },

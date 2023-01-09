@@ -17,7 +17,7 @@ use crate::{
         Error,
     },
     events,
-    rpc::ChainBlockResponse,
+    rpc::types::ChainBlockResponse,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;

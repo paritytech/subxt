@@ -6,7 +6,7 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     events::Events,
-    rpc::StorageKey,
+    rpc::types::StorageKey,
     Config,
 };
 use derivative::Derivative;

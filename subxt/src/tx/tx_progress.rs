@@ -15,7 +15,7 @@ use crate::{
         TransactionError,
     },
     events::EventsClient,
-    rpc::{
+    rpc::types::{
         Subscription,
         SubstrateTxStatus,
     },
