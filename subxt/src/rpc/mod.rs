@@ -59,6 +59,9 @@ mod rpc;
 mod rpc_client;
 mod rpc_client_t;
 
+// Expose our RPC types here.
+pub mod types;
+
 // Expose the `Rpc` struct and any associated types.
 pub use rpc::*;
 
