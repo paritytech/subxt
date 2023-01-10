@@ -23,9 +23,9 @@ futures = "0.3.13"
 hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-sp-core = { version = "10.0.0", default-features = false }
-sp-keyring = "11.0.0"
-sp-runtime = "11.0.0"
+sp-core = { version = "11.0.0", default-features = false }
+sp-keyring = "12.0.0"
+sp-runtime = "12.0.0"
 syn = "1.0.0"
 subxt = { version = "0.25.0", path = "../../subxt" }
 subxt-codegen = { version = "0.25.0", path = "../../codegen" }
