@@ -453,16 +453,17 @@ impl<T: Config> Rpc<T> {
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
     ///
-    /// The subscription ID can be used to make queries for the block's body
-    /// [`chainhead_unstable_body`], block's header ([`chainhead_unstable_header`]),
-    /// block's storage ([`chainhead_unstable_storage`]) and submitting
-    /// runtime API calls at this block ([`chainhead_unstable_call`]).
+    /// The subscription ID can be used to make queries for the
+    /// block's body [`chainhead_unstable_body`](Rpc::chainhead_unstable_follow),
+    /// block's header ([`chainhead_unstable_header`](Rpc::chainhead_unstable_header)),
+    /// block's storage ([`chainhead_unstable_storage`](Rpc::chainhead_unstable_storage)) and submitting
+    /// runtime API calls at this block ([`chainhead_unstable_call`](Rpc::chainhead_unstable_call)).
     ///
     /// # Note
     ///
     /// When the user is no longer interested in a block, the user is responsible
-    /// for calling the [`chainhead_unstable_unpin`] method on each. Failure to do so will result
-    /// in the subscription being dropped by the chain.
+    /// for calling the [`chainhead_unstable_unpin`](Rpc::chainhead_unstable_unpin) method on each.
+    /// Failure to do so will result in the subscription being dropped by the chain.
     pub async fn chainhead_unstable_follow(
         &self,
         runtime_updates: bool,
@@ -484,7 +485,7 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`].
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
     pub async fn chainhead_unstable_body(
         &self,
         subscription_id: String,
@@ -507,7 +508,7 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`].
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
     pub async fn chainhead_unstable_header(
         &self,
         subscription_id: String,
@@ -530,7 +531,7 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`].
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
     pub async fn chainhead_unstable_storage(
         &self,
         subscription_id: String,
@@ -556,7 +557,7 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`].
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
     pub async fn chainhead_unstable_call(
         &self,
         subscription_id: String,
@@ -581,8 +582,7 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow
-    /// `].
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
     pub async fn chainhead_unstable_unpin(
         &self,
         subscription_id: String,
