@@ -15,7 +15,7 @@ use crate::{
         TransactionError,
     },
     events::EventsClient,
-    rpc::{
+    rpc::types::{
         Subscription,
         SubstrateTxStatus,
     },
@@ -26,9 +26,6 @@ use futures::{
     Stream,
     StreamExt,
 };
-use sp_runtime::traits::Hash;
-
-pub use sp_runtime::traits::SignedExtension;
 
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
@@ -373,7 +370,8 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let extrinsic_idx = block.block.extrinsics
             .iter()
             .position(|ext| {
-                let hash = T::Hashing::hash_of(&ext.0);
+                use crate::config::Hasher;
+                let hash = T::Hasher::hash_of(&ext.0);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our

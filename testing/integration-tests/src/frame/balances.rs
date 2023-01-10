@@ -18,13 +18,15 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use sp_runtime::{
-    AccountId32,
-    MultiAddress,
-};
-use subxt::error::{
-    DispatchError,
-    Error,
+use subxt::{
+    error::{
+        DispatchError,
+        Error,
+    },
+    utils::{
+        AccountId32,
+        MultiAddress,
+    },
 };
 
 #[tokio::test]
@@ -250,8 +252,9 @@ async fn storage_total_issuance() {
 
 #[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob = pair_signer(AccountKeyring::Bob.pair());
-    let charlie = AccountKeyring::Charlie.to_account_id();
+    let bob_signer = pair_signer(AccountKeyring::Bob.pair());
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
+    let charlie: AccountId32 = AccountKeyring::Charlie.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -262,16 +265,14 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     );
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, &bob)
+        .sign_and_submit_then_watch_default(&tx, &bob_signer)
         .await?
         .wait_for_finalized_success()
         .await?
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locks_addr = node_runtime::storage()
-        .balances()
-        .locks(AccountKeyring::Bob.to_account_id());
+    let locks_addr = node_runtime::storage().balances().locks(bob);
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
@@ -330,12 +331,13 @@ async fn transfer_error() {
 #[tokio::test]
 async fn transfer_implicit_subscription() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id();
-    let bob_addr = bob.clone().into();
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_bob_tx = node_runtime::tx().balances().transfer(bob_addr, 10_000);
+    let to_bob_tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.clone().into(), 10_000);
 
     let event = api
         .tx()
@@ -353,7 +355,7 @@ async fn transfer_implicit_subscription() {
         event,
         balances::events::Transfer {
             from: alice.account_id().clone(),
-            to: bob.clone(),
+            to: bob,
             amount: 10_000
         }
     );

@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use codec::Encode;
-pub use sp_runtime::traits::SignedExtension;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
@@ -37,16 +36,16 @@ impl StorageMapKey {
 pub(super) fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
     match hasher {
         StorageHasher::Identity => bytes.extend(input),
-        StorageHasher::Blake2_128 => bytes.extend(sp_core::blake2_128(input)),
+        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
         StorageHasher::Blake2_128Concat => {
-            bytes.extend(sp_core::blake2_128(input));
+            bytes.extend(sp_core_hashing::blake2_128(input));
             bytes.extend(input);
         }
-        StorageHasher::Blake2_256 => bytes.extend(sp_core::blake2_256(input)),
-        StorageHasher::Twox128 => bytes.extend(sp_core::twox_128(input)),
-        StorageHasher::Twox256 => bytes.extend(sp_core::twox_256(input)),
+        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
+        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
+        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
         StorageHasher::Twox64Concat => {
-            bytes.extend(sp_core::twox_64(input));
+            bytes.extend(sp_core_hashing::twox_64(input));
             bytes.extend(input);
         }
     }

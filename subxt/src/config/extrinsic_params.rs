@@ -2,19 +2,26 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! This module contains a trait which controls the parameters that must
+//! be provided in order to successfully construct an extrinsic. A basic
+//! implementation of the trait is provided ([`BaseExtrinsicParams`]) which is
+//! used by the provided Substrate and Polkadot configuration.
+
 use crate::{
     utils::Encoded,
     Config,
 };
 use codec::{
     Compact,
+    Decode,
     Encode,
 };
 use core::fmt::Debug;
 use derivative::Derivative;
-
-// We require Era as a param below, so make it available from here.
-pub use sp_runtime::generic::Era;
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are signed and used in transactions.
@@ -48,22 +55,6 @@ pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
     fn encode_additional_to(&self, v: &mut Vec<u8>);
 }
 
-/// A struct representing the signed extra and additional parameters required
-/// to construct a transaction for the default substrate node.
-pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
-
-/// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
-/// This is what you provide to methods like `sign_and_submit()`.
-pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
-
-/// A struct representing the signed extra and additional parameters required
-/// to construct a transaction for a polkadot node.
-pub type PolkadotExtrinsicParams<T> = BaseExtrinsicParams<T, PlainTip>;
-
-/// A builder which leads to [`PolkadotExtrinsicParams`] being constructed.
-/// This is what you provide to methods like `sign_and_submit()`.
-pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, PlainTip>;
-
 /// An implementation of [`ExtrinsicParams`] that is suitable for constructing
 /// extrinsics that can be sent to a node with the same signed extra and additional
 /// parameters as a Polkadot/Substrate node. The way that tip payments are specified
@@ -90,8 +81,9 @@ pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
 /// construct a [`BaseExtrinsicParams`] value. This implements [`Default`], which allows
 /// [`BaseExtrinsicParams`] to be used with convenience methods like `sign_and_submit_default()`.
 ///
-/// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
-/// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+/// Prefer to use [`super::substrate::SubstrateExtrinsicParamsBuilder`] for a version of this
+/// tailored towards Substrate, or [`super::polkadot::PolkadotExtrinsicParamsBuilder`] for a
+/// version tailored to Polkadot.
 #[derive(Derivative)]
 #[derivative(
     Debug(bound = "Tip: Debug"),
@@ -185,53 +177,94 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash
     }
 }
 
-/// A tip payment.
-#[derive(Copy, Clone, Debug, Default, Encode)]
-pub struct PlainTip {
-    #[codec(compact)]
-    tip: u128,
+// Dev note: This and related bits taken from `sp_runtime::generic::Era`
+/// An era to describe the longevity of a transaction.
+#[derive(PartialEq, Eq, Clone, Copy, Debug, Serialize, Deserialize)]
+pub enum Era {
+    /// The transaction is valid forever. The genesis hash must be present in the signed content.
+    Immortal,
+
+    /// Period and phase are encoded:
+    /// - The period of validity from the block hash found in the signing material.
+    /// - The phase in the period that this transaction's lifetime begins (and, importantly,
+    /// implies which block hash is included in the signature material). If the `period` is
+    /// greater than 1 << 12, then it will be a factor of the times greater than 1<<12 that
+    /// `period` is.
+    ///
+    /// When used on `FRAME`-based runtimes, `period` cannot exceed `BlockHashCount` parameter
+    /// of `system` module.
+    Mortal(Period, Phase),
 }
 
-impl PlainTip {
-    /// Create a new tip of the amount provided.
-    pub fn new(amount: u128) -> Self {
-        PlainTip { tip: amount }
+/// Era period
+pub type Period = u64;
+
+/// Era phase
+pub type Phase = u64;
+
+// E.g. with period == 4:
+// 0         10        20        30        40
+// 0123456789012345678901234567890123456789012
+//              |...|
+//    authored -/   \- expiry
+// phase = 1
+// n = Q(current - phase, period) + phase
+impl Era {
+    /// Create a new era based on a period (which should be a power of two between 4 and 65536
+    /// inclusive) and a block number on which it should start (or, for long periods, be shortly
+    /// after the start).
+    ///
+    /// If using `Era` in the context of `FRAME` runtime, make sure that `period`
+    /// does not exceed `BlockHashCount` parameter passed to `system` module, since that
+    /// prunes old blocks and renders transactions immediately invalid.
+    pub fn mortal(period: u64, current: u64) -> Self {
+        let period = period
+            .checked_next_power_of_two()
+            .unwrap_or(1 << 16)
+            .clamp(4, 1 << 16);
+        let phase = current % period;
+        let quantize_factor = (period >> 12).max(1);
+        let quantized_phase = phase / quantize_factor * quantize_factor;
+
+        Self::Mortal(period, quantized_phase)
+    }
+
+    /// Create an "immortal" transaction.
+    pub fn immortal() -> Self {
+        Self::Immortal
     }
 }
 
-impl From<u128> for PlainTip {
-    fn from(n: u128) -> Self {
-        PlainTip::new(n)
-    }
-}
-
-/// A tip payment made in the form of a specific asset.
-#[derive(Copy, Clone, Debug, Default, Encode)]
-pub struct AssetTip {
-    #[codec(compact)]
-    tip: u128,
-    asset: Option<u32>,
-}
-
-impl AssetTip {
-    /// Create a new tip of the amount provided.
-    pub fn new(amount: u128) -> Self {
-        AssetTip {
-            tip: amount,
-            asset: None,
+// Both copied from `sp_runtime::generic::Era`; this is the wire interface and so
+// it's really the most important bit here.
+impl Encode for Era {
+    fn encode_to<T: codec::Output + ?Sized>(&self, output: &mut T) {
+        match self {
+            Self::Immortal => output.push_byte(0),
+            Self::Mortal(period, phase) => {
+                let quantize_factor = (*period >> 12).max(1);
+                let encoded = (period.trailing_zeros() - 1).clamp(1, 15) as u16
+                    | ((phase / quantize_factor) << 4) as u16;
+                encoded.encode_to(output);
+            }
         }
     }
-
-    /// Designate the tip as being of a particular asset class.
-    /// If this is not set, then the native currency is used.
-    pub fn of_asset(mut self, asset: u32) -> Self {
-        self.asset = Some(asset);
-        self
-    }
 }
-
-impl From<u128> for AssetTip {
-    fn from(n: u128) -> Self {
-        AssetTip::new(n)
+impl Decode for Era {
+    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        let first = input.read_byte()?;
+        if first == 0 {
+            Ok(Self::Immortal)
+        } else {
+            let encoded = first as u64 + ((input.read_byte()? as u64) << 8);
+            let period = 2 << (encoded % (1 << 4));
+            let quantize_factor = (period >> 12).max(1);
+            let phase = (encoded >> 4) * quantize_factor;
+            if period >= 4 && phase < period {
+                Ok(Self::Mortal(period, phase))
+            } else {
+                Err("Invalid period and phase".into())
+            }
+        }
     }
 }

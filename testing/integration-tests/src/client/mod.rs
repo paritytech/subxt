@@ -17,7 +17,10 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-use subxt::error::DispatchError;
+use subxt::{
+    error::DispatchError,
+    rpc::types::DryRunError,
+};
 
 #[tokio::test]
 async fn insert_key() {
@@ -162,8 +165,7 @@ async fn dry_run_passes() {
         .dry_run(None)
         .await
         .expect("dryrunning failed")
-        .expect("expected dryrunning to be successful")
-        .unwrap();
+        .expect("dry run should be successful");
 
     signed_extrinsic
         .submit_and_watch()
@@ -198,15 +200,9 @@ async fn dry_run_fails() {
     let dry_run_res = signed_extrinsic
         .dry_run(None)
         .await
-        .expect("dryrunning failed")
-        .expect("expected dryrun transaction to be valid");
+        .expect("dryrunning failed");
 
-    if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
-        assert_eq!(module_error.index, 6);
-        assert_eq!(module_error.error, [2, 0, 0, 0]);
-    } else {
-        panic!("expected a module error when dryrunning");
-    }
+    assert_eq!(dry_run_res, Err(DryRunError::DispatchError));
 
     let res = signed_extrinsic
         .submit_and_watch()

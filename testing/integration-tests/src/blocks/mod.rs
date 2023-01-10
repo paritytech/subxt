@@ -75,8 +75,8 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     while let Some(header) = all_finalized_blocks.next().await {
         let header = header?;
 
-        use sp_runtime::traits::Header;
-        let block_number: u128 = (*header.number()).into();
+        use subxt::config::Header;
+        let block_number: u128 = header.number().into();
 
         if let Some(last) = last_block_number {
             assert_eq!(last + 1, block_number);

@@ -169,23 +169,23 @@ impl RuntimeGenerator {
             ),
             (
                 "sp_core::crypto::AccountId32",
-                parse_quote!(#crate_path::ext::sp_core::crypto::AccountId32),
-            ),
-            (
-                "primitive_types::H160",
-                parse_quote!(#crate_path::ext::sp_core::H160),
-            ),
-            (
-                "primitive_types::H256",
-                parse_quote!(#crate_path::ext::sp_core::H256),
-            ),
-            (
-                "primitive_types::H512",
-                parse_quote!(#crate_path::ext::sp_core::H512),
+                parse_quote!(#crate_path::utils::AccountId32),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(#crate_path::ext::sp_runtime::MultiAddress),
+                parse_quote!(#crate_path::utils::MultiAddress),
+            ),
+            (
+                "primitive_types::H160",
+                parse_quote!(#crate_path::utils::H160),
+            ),
+            (
+                "primitive_types::H256",
+                parse_quote!(#crate_path::utils::H256),
+            ),
+            (
+                "primitive_types::H512",
+                parse_quote!(#crate_path::utils::H512),
             ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",

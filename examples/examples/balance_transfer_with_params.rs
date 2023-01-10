@@ -12,14 +12,16 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    tx::{
-        Era,
-        PairSigner,
-        PlainTip,
-        PolkadotExtrinsicParamsBuilder as Params,
+    config::{
+        polkadot::{
+            Era,
+            PlainTip,
+            PolkadotExtrinsicParamsBuilder as Params,
+        },
+        PolkadotConfig,
     },
+    tx::PairSigner,
     OnlineClient,
-    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]

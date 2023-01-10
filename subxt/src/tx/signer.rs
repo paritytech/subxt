@@ -6,11 +6,6 @@
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 use crate::Config;
-use sp_core::Pair;
-use sp_runtime::traits::{
-    IdentifyAccount,
-    Verify,
-};
 
 /// Signing transactions requires a [`Signer`]. This is responsible for
 /// providing the "from" account that the transaction is being signed by,
@@ -29,55 +24,79 @@ pub trait Signer<T: Config> {
     fn sign(&self, signer_payload: &[u8]) -> T::Signature;
 }
 
-/// A [`Signer`] implementation that can be constructed from an [`Pair`].
-#[derive(Clone, Debug)]
-pub struct PairSigner<T: Config, P: Pair> {
-    account_id: T::AccountId,
-    signer: P,
-}
+#[cfg(feature = "substrate-compat")]
+pub use pair_signer::PairSigner;
 
-impl<T, P> PairSigner<T, P>
-where
-    T: Config,
-    T::Signature: From<P::Signature>,
-    <T::Signature as Verify>::Signer:
-        From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    P: Pair,
-{
-    /// Creates a new [`Signer`] from a [`Pair`].
-    pub fn new(signer: P) -> Self {
-        let account_id =
-            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
-        Self { account_id, signer }
+// A signer suitable for substrate based chains. This provides compatibility with Substrate
+// packages like sp_keyring and such, and so relies on sp_core and sp_runtime to be included.
+#[cfg(feature = "substrate-compat")]
+mod pair_signer {
+    use super::Signer;
+    use crate::Config;
+    use sp_core::Pair as PairT;
+    use sp_runtime::{
+        traits::{
+            IdentifyAccount,
+            Verify,
+        },
+        AccountId32 as SpAccountId32,
+        MultiSignature as SpMultiSignature,
+    };
+
+    /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
+    #[derive(Clone, Debug)]
+    pub struct PairSigner<T: Config, Pair> {
+        account_id: T::AccountId,
+        signer: Pair,
     }
 
-    /// Returns the [`Pair`] implementation used to construct this.
-    pub fn signer(&self) -> &P {
-        &self.signer
+    impl<T, Pair> PairSigner<T, Pair>
+    where
+        T: Config,
+        Pair: PairT,
+        // We go via an sp_runtime::MultiSignature. We can probably generalise this
+        // by implementing some of these traits on our built-in MultiSignature and then
+        // requiring them on all T::Signatures, to avoid any go-between.
+        <SpMultiSignature as Verify>::Signer: From<Pair::Public>,
+        T::AccountId: From<SpAccountId32>,
+    {
+        /// Creates a new [`Signer`] from an [`sp_core::Pair`].
+        pub fn new(signer: Pair) -> Self {
+            let account_id = <SpMultiSignature as Verify>::Signer::from(signer.public())
+                .into_account();
+            Self {
+                account_id: account_id.into(),
+                signer,
+            }
+        }
+
+        /// Returns the [`sp_core::Pair`] implementation used to construct this.
+        pub fn signer(&self) -> &Pair {
+            &self.signer
+        }
+
+        /// Return the account ID.
+        pub fn account_id(&self) -> &T::AccountId {
+            &self.account_id
+        }
     }
 
-    /// Return the account ID.
-    pub fn account_id(&self) -> &T::AccountId {
-        &self.account_id
-    }
-}
+    impl<T, Pair> Signer<T> for PairSigner<T, Pair>
+    where
+        T: Config,
+        Pair: PairT,
+        Pair::Signature: Into<T::Signature>,
+    {
+        fn account_id(&self) -> &T::AccountId {
+            &self.account_id
+        }
 
-impl<T, P> Signer<T> for PairSigner<T, P>
-where
-    T: Config,
-    T::AccountId: Into<T::Address> + Clone + 'static,
-    P: Pair + 'static,
-    P::Signature: Into<T::Signature> + 'static,
-{
-    fn account_id(&self) -> &T::AccountId {
-        &self.account_id
-    }
+        fn address(&self) -> T::Address {
+            self.account_id.clone().into()
+        }
 
-    fn address(&self) -> T::Address {
-        self.account_id.clone().into()
-    }
-
-    fn sign(&self, signer_payload: &[u8]) -> T::Signature {
-        self.signer.sign(signer_payload).into()
+        fn sign(&self, signer_payload: &[u8]) -> T::Signature {
+            self.signer.sign(signer_payload).into()
+        }
     }
 }

@@ -12,10 +12,12 @@ use crate::{
     error::Error,
     events::EventsClient,
     rpc::{
+        types::{
+            RuntimeVersion,
+            Subscription,
+        },
         Rpc,
         RpcClientT,
-        RuntimeVersion,
-        Subscription,
     },
     storage::StorageClient,
     tx::TxClient,

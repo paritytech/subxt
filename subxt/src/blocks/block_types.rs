@@ -7,20 +7,20 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
+    config::{
+        Config,
+        Hasher,
+        Header,
+    },
     error::{
         BlockError,
         Error,
     },
     events,
-    rpc::ChainBlockResponse,
-    Config,
+    rpc::types::ChainBlockResponse,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
-use sp_runtime::traits::{
-    Hash,
-    Header,
-};
 use std::sync::Arc;
 
 /// A representation of a block.
@@ -56,7 +56,7 @@ where
 
     /// Return the block number.
     pub fn number(&self) -> T::BlockNumber {
-        *self.header().number()
+        self.header().number()
     }
 
     /// Return the entire block header.
@@ -170,7 +170,7 @@ where
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
         let events =
             get_events(&self.client, self.block_hash, &self.cached_events).await?;
-        let ext_hash = T::Hashing::hash_of(&self.bytes);
+        let ext_hash = T::Hasher::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
 }

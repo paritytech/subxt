@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // threshold
         1,
         // other signatories
-        vec![signer_account_id],
+        vec![signer_account_id.into()],
         // maybe timepoint
         None,
         // call

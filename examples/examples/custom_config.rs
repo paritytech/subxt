@@ -8,13 +8,11 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     config::{
+        substrate::SubstrateExtrinsicParams,
         Config,
         SubstrateConfig,
     },
-    tx::{
-        PairSigner,
-        SubstrateExtrinsicParams,
-    },
+    tx::PairSigner,
     OnlineClient,
 };
 
@@ -34,10 +32,10 @@ impl Config for MyConfig {
     type Index = u64;
     type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
     type Hash = <SubstrateConfig as Config>::Hash;
-    type Hashing = <SubstrateConfig as Config>::Hashing;
+    type Hasher = <SubstrateConfig as Config>::Hasher;
+    type Header = <SubstrateConfig as Config>::Header;
     type AccountId = <SubstrateConfig as Config>::AccountId;
     type Address = <SubstrateConfig as Config>::Address;
-    type Header = <SubstrateConfig as Config>::Header;
     type Signature = <SubstrateConfig as Config>::Signature;
     // ExtrinsicParams makes use of the index type, so we need to adjust it
     // too to align with our modified index type, above:

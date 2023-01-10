@@ -4,7 +4,10 @@
 
 //! Miscellaneous utility helpers.
 
+pub mod account_id;
 pub mod bits;
+pub mod multi_address;
+pub mod multi_signature;
 
 use codec::{
     Decode,
@@ -12,6 +15,18 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
+
+pub use account_id::AccountId32;
+pub use multi_address::MultiAddress;
+pub use multi_signature::MultiSignature;
+
+// Used in codegen
+#[doc(hidden)]
+pub use primitive_types::{
+    H160,
+    H256,
+    H512,
+};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload

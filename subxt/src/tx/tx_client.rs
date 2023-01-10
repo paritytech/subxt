@@ -8,27 +8,29 @@ use crate::{
         OfflineClientT,
         OnlineClientT,
     },
+    config::{
+        Config,
+        ExtrinsicParams,
+        Hasher,
+    },
     error::Error,
     tx::{
-        ExtrinsicParams,
-        Signer,
+        Signer as SignerT,
         TxProgress,
     },
     utils::{
         Encoded,
         PhantomDataSendSync,
     },
-    Config,
 };
 use codec::{
     Compact,
     Encode,
 };
 use derivative::Derivative;
-use sp_runtime::{
-    traits::Hash,
-    ApplyExtrinsicResult,
-};
+
+// This is returned from an API below, so expose it here.
+pub use crate::rpc::types::DryRunResult;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -121,15 +123,16 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates a raw signed extrinsic without submitting it.
-    pub fn create_signed_with_nonce<Call>(
+    pub fn create_signed_with_nonce<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         account_nonce: T::Index,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -166,7 +169,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             additional_and_extra_params.encode_extra_to(&mut bytes);
             additional_and_extra_params.encode_additional_to(&mut bytes);
             if bytes.len() > 256 {
-                signer.sign(&sp_core::blake2_256(&bytes))
+                signer.sign(T::Hasher::hash_of(&bytes).as_ref())
             } else {
                 signer.sign(&bytes)
             }
@@ -214,14 +217,15 @@ where
     C: OnlineClientT<T>,
 {
     /// Creates a raw signed extrinsic, without submitting it.
-    pub async fn create_signed<Call>(
+    pub async fn create_signed<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
     {
         // Get nonce from the node.
         let account_nonce = self
@@ -238,13 +242,14 @@ where
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch_default<Call>(
+    pub async fn sign_and_submit_then_watch_default<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
@@ -255,14 +260,15 @@ where
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch<Call>(
+    pub async fn sign_and_submit_then_watch<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -280,13 +286,14 @@ where
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit_default<Call>(
+    pub async fn sign_and_submit_default<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
@@ -300,14 +307,15 @@ where
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit<Call>(
+    pub async fn sign_and_submit<Call, Signer>(
         &self,
         call: &Call,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -366,7 +374,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hashing::hash_of(&self.encoded);
+        let ext_hash = T::Hasher::hash_of(&self.encoded);
 
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(&self.encoded).await?;
@@ -388,11 +396,8 @@ where
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
-    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
-    pub async fn dry_run(
-        &self,
-        at: Option<T::Hash>,
-    ) -> Result<ApplyExtrinsicResult, Error> {
+    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
         self.client.rpc().dry_run(self.encoded(), at).await
     }
 }

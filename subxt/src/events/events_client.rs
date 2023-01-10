@@ -6,13 +6,10 @@ use crate::{
     client::OnlineClientT,
     error::Error,
     events::Events,
+    rpc::types::StorageKey,
     Config,
 };
 use derivative::Derivative;
-use sp_core::{
-    storage::StorageKey,
-    twox_128,
-};
 use std::future::Future;
 
 /// A client for working with events.
@@ -74,8 +71,8 @@ where
 
 // The storage key needed to access events.
 fn system_events_key() -> StorageKey {
-    let mut storage_key = twox_128(b"System").to_vec();
-    storage_key.extend(twox_128(b"Events").to_vec());
+    let mut storage_key = sp_core_hashing::twox_128(b"System").to_vec();
+    storage_key.extend(sp_core_hashing::twox_128(b"Events").to_vec());
     StorageKey(storage_key)
 }
 
