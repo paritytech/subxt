@@ -17,7 +17,13 @@ use crate::{
         Error,
     },
     events,
+    metadata::DecodeWithMetadata,
     rpc::types::ChainBlockResponse,
+    storage::{
+        address::Yes,
+        StorageAddress,
+        StorageClient,
+    },
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
@@ -88,6 +94,18 @@ where
             block_details,
             self.cached_events.clone(),
         ))
+    }
+
+    /// Fetch a decoded value from the storage of this block.
+    pub async fn storage<'a, Address>(
+        &self,
+        address: &'a Address,
+    ) -> Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>
+    where
+        Address: StorageAddress<IsFetchable = Yes> + 'a,
+    {
+        let storage_client = StorageClient::new(self.client.clone());
+        storage_client.fetch(address, Some(self.hash())).await
     }
 }
 
