@@ -271,7 +271,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     let locks_addr = node_runtime::storage()
         .balances()
-        .locks(&AccountKeyring::Bob.to_account_id());
+        .locks(AccountKeyring::Bob.to_account_id());
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
