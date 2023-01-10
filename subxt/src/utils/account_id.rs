@@ -181,7 +181,9 @@ mod test {
 
         for keyring in keyrings {
             let substrate_account = keyring.to_account_id();
-            let local_account: AccountId32 = substrate_account.clone().into();
+            // Avoid "From" impl hidden behind "substrate-compat" feature so that this test
+            // can work either way:
+            let local_account = AccountId32(substrate_account.clone().into());
 
             // Both should encode to ss58 the same way:
             let substrate_ss58 = substrate_account.to_ss58check();
