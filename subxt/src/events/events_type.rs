@@ -593,7 +593,7 @@ mod tests {
         // construst an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::ApplyExtrinsic(123), event.clone())],
         );
 
@@ -604,7 +604,8 @@ mod tests {
             .expect("event should be extracted OK");
 
         // This is the line we're testing:
-        let decoded_event = ev.as_root_event::<AllEvents<Event>>()
+        let decoded_event = ev
+            .as_root_event::<AllEvents<Event>>()
             .expect("can decode event into root enum again");
 
         // It should equal the event we put in:
