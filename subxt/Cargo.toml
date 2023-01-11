@@ -76,5 +76,5 @@ scale-info = { version = "2.0.0", features = ["bit-vec"] }
 tokio = { version = "1.8", features = ["macros", "time", "rt-multi-thread"] }
 sp-core = { version = "11.0.0", default-features = false }
 sp-runtime = { version = "12.0.0" }
-sp-keyring = "12.0.0"
+sp-keyring = "13.0.0"
 sp-version = "10.0.0"
