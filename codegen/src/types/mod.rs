@@ -12,19 +12,42 @@ mod type_def_params;
 mod type_path;
 
 use darling::FromMeta;
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{
+    Ident,
+    Span,
+    TokenStream,
+};
 use proc_macro_error::abort_call_site;
-use quote::{quote, ToTokens};
-use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
+use quote::{
+    quote,
+    ToTokens,
+};
+use scale_info::{
+    form::PortableForm,
+    PortableRegistry,
+    Type,
+    TypeDef,
+};
 use std::collections::BTreeMap;
 
 pub use self::{
-    composite_def::{CompositeDef, CompositeDefFieldType, CompositeDefFields},
-    derives::{Derives, DerivesRegistry},
+    composite_def::{
+        CompositeDef,
+        CompositeDefFieldType,
+        CompositeDefFields,
+    },
+    derives::{
+        Derives,
+        DerivesRegistry,
+    },
     substitutes::TypeSubstitutes,
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,
-    type_path::{TypeParameter, TypePath, TypePathType},
+    type_path::{
+        TypeParameter,
+        TypePath,
+        TypePathType,
+    },
 };
 
 pub type Field = scale_info::Field<PortableForm>;
@@ -73,12 +96,14 @@ impl<'a> TypeGenerator<'a> {
             // Don't generate a type if it was substituted - the target type might
             // not be in the type registry + our resolution already performs the substitution.
             if self.type_substitutes.for_path(path).is_some() {
-                continue;
+                continue
             }
 
             let namespace = path.namespace();
             // prelude types e.g. Option/Result have no namespace, so we don't generate them
-            if namespace.is_empty() { continue; }
+            if namespace.is_empty() {
+                continue
+            }
 
             // Lazily create submodules for the encountered namespace path, if they don't exist
             let innermost_module = namespace

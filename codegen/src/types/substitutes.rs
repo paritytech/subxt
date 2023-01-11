@@ -4,9 +4,14 @@
 
 use crate::CratePath;
 use proc_macro_error::abort;
-use std::borrow::Cow;
-use std::collections::HashMap;
-use syn::{parse_quote, spanned::Spanned as _};
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+};
+use syn::{
+    parse_quote,
+    spanned::Spanned as _,
+};
 
 use super::TypePath;
 
