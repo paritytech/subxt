@@ -18,7 +18,10 @@ use crate::{
     },
     events,
     metadata::DecodeWithMetadata,
-    rpc::types::ChainBlockResponse,
+    rpc::types::{
+        self,
+        ChainBlockResponse,
+    },
     storage::{
         address::Yes,
         StorageAddress,
@@ -106,6 +109,18 @@ where
     {
         let storage_client = StorageClient::new(self.client.clone());
         storage_client.fetch(address, Some(self.hash())).await
+    }
+
+    /// Execute a runtime API call at this block.
+    pub async fn call(
+        &self,
+        function: String,
+        call_parameters: Option<&[u8]>,
+    ) -> Result<types::Bytes, Error> {
+        self.client
+            .rpc()
+            .call(function, call_parameters, Some(self.hash()))
+            .await
     }
 }
 

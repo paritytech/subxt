@@ -11,6 +11,11 @@ use crate::{
         wait_for_blocks,
     },
 };
+use codec::Decode;
+use frame_metadata::{
+    OpaqueMetadata,
+    RuntimeMetadataPrefixed,
+};
 use sp_core::{
     sr25519::Pair as Sr25519Pair,
     storage::well_known_keys,
@@ -139,6 +144,31 @@ async fn fetch_system_info() {
     assert_eq!(api.rpc().system_chain().await.unwrap(), "Development");
     assert_eq!(api.rpc().system_name().await.unwrap(), "Substrate Node");
     assert!(!api.rpc().system_version().await.unwrap().is_empty());
+}
+
+#[tokio::test]
+async fn rpc_runtime_api_call() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Call into the runtime of the chain to get the Metadata.
+    let metadata_bytes = api
+        .rpc()
+        .call("Metadata_metadata".into(), None, None)
+        .await
+        .unwrap();
+    let metadata: OpaqueMetadata = Decode::decode(&mut &metadata_bytes[..]).unwrap();
+    let bytes = metadata.0;
+    let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..]).unwrap();
+    let metadata_call = match meta.1 {
+        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
+        _ => panic!("Metadata V14 unavailable"),
+    };
+
+    // Compare the runtime API call against the `state_getMetadata`.
+    let metadata = api.rpc().metadata(None).await.unwrap();
+    let metadata = metadata.runtime_metadata();
+    assert_eq!(&metadata_call, metadata);
 }
 
 #[tokio::test]
