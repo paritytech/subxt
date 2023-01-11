@@ -202,7 +202,7 @@ fn type_args(path_args: &syn::PathArguments) -> impl Iterator<Item = &syn::Path>
         _ => None,
     };
 
-    args_opt.into_iter().flat_map(|x| x).filter_map(|arg| {
+    args_opt.into_iter().flatten().filter_map(|arg| {
         match arg {
             syn::GenericArgument::Type(syn::Type::Path(type_path)) => {
                 Some(&type_path.path)
