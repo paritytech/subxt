@@ -203,7 +203,7 @@ pub struct EventDetails {
     start_idx: usize,
     // start of the event (ie pallet/variant index and then the fields and topic after).
     event_start_idx: usize,
-    // start of the fields (ie after phase nad pallet/variant index).
+    // start of the fields (ie after phase and pallet/variant index).
     event_fields_start_idx: usize,
     // end of the fields.
     event_fields_end_idx: usize,
