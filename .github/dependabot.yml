@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: monthly
+      interval: weekly
     ignore:
     # these need to be updated together, so dependabot PRs 
     # are just noise. So, ignore them:
@@ -15,4 +15,4 @@ updates:
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: monthly
+      interval: weekly
