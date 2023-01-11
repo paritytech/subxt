@@ -454,7 +454,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
     ///
     /// The subscription ID can be used to make queries for the
-    /// block's body [`chainhead_unstable_body`](Rpc::chainhead_unstable_follow),
+    /// block's body ([`chainhead_unstable_body`](Rpc::chainhead_unstable_follow)),
     /// block's header ([`chainhead_unstable_header`](Rpc::chainhead_unstable_header)),
     /// block's storage ([`chainhead_unstable_storage`](Rpc::chainhead_unstable_storage)) and submitting
     /// runtime API calls at this block ([`chainhead_unstable_call`](Rpc::chainhead_unstable_call)).
