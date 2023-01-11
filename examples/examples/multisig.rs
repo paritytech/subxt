@@ -17,13 +17,7 @@ use subxt::{
     PolkadotConfig,
 };
 
-#[subxt::subxt(
-    runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
-    substitute_type(
-        type = "sp_runtime::per_things::Perbill<T, A>",
-        with = "::sp_runtime::Perbill"
-    )
-)]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
