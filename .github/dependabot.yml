@@ -3,8 +3,16 @@ updates:
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: monthly
+    ignore:
+    # these need to be updated together, so dependabot PRs 
+    # are just noise. So, ignore them:
+    - package-name: sp-core
+    - package-name: sp-keyring
+    - package-name: sp-runtime
+    - package-name: sp-core-hashing
+    - package-name: sp-version
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: daily
+      interval: monthly
