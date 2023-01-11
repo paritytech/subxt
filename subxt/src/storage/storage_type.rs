@@ -2,14 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    storage_address::{
-        StorageAddress,
-        Yes,
-    },
-    storage_type::Storage,
+use super::storage_address::{
+    StorageAddress,
+    Yes,
 };
-
 use crate::{
     client::{
         OfflineClientT,
@@ -37,22 +33,24 @@ use std::{
 /// Query the runtime storage.
 #[derive(Derivative)]
 #[derivative(Clone(bound = "Client: Clone"))]
-pub struct StorageClient<T, Client> {
+pub struct Storage<T: Config, Client> {
     client: Client,
+    block_hash: T::Hash,
     _marker: PhantomData<T>,
 }
 
-impl<T, Client> StorageClient<T, Client> {
-    /// Create a new [`StorageClient`]
-    pub fn new(client: Client) -> Self {
+impl<T: Config, Client> Storage<T, Client> {
+    /// Create a new [`Storage`]
+    pub(crate) fn new(client: Client, block_hash: T::Hash) -> Self {
         Self {
             client,
+            block_hash,
             _marker: PhantomData,
         }
     }
 }
 
-impl<T, Client> StorageClient<T, Client>
+impl<T, Client> Storage<T, Client>
 where
     T: Config,
     Client: OfflineClientT<T>,
@@ -77,53 +75,27 @@ where
     }
 }
 
-impl<T, Client> StorageClient<T, Client>
+impl<T, Client> Storage<T, Client>
 where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Obtain storage at some block hash.
-    pub fn at(
-        &self,
-        block_hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<Storage<T, Client>, Error>> + Send + 'static {
-        // Clone and pass the client in like this so that we can explicitly
-        // return a Future that's Send + 'static, rather than tied to &self.
-        let client = self.client.clone();
-        async move {
-            // If block hash is not provided, get the hash
-            // for the latest block and use that.
-            let block_hash = match block_hash {
-                Some(hash) => hash,
-                None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("didn't pass a block number; qed")
-                }
-            };
-
-            Ok(Storage::new(client, block_hash))
-        }
-    }
-
     /// Fetch the raw encoded value at the address/key given.
     pub fn fetch_raw<'a>(
         &self,
         key: &'a [u8],
-        hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'a {
         let client = self.client.clone();
+        let block_hash = self.block_hash;
         // Ensure that the returned future doesn't have a lifetime tied to api.storage(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
-            let data = client.rpc().storage(key, hash).await?;
+            let data = client.rpc().storage(key, Some(block_hash)).await?;
             Ok(data.map(|d| d.0))
         }
     }
 
-    /// Fetch a decoded value from storage at a given address and optional block hash.
+    /// Fetch a decoded value from storage at a given address.
     ///
     /// # Example
     ///
@@ -143,7 +115,7 @@ where
     /// // Fetch just the keys, returning up to 10 keys.
     /// let value = api
     ///     .storage()
-    ///     .fetch(&address, None)
+    ///     .fetch(&address)
     ///     .await
     ///     .unwrap();
     ///
@@ -153,7 +125,6 @@ where
     pub fn fetch<'a, Address>(
         &self,
         address: &'a Address,
-        hash: Option<T::Hash>,
     ) -> impl Future<
         Output = Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>,
     > + 'a
@@ -161,6 +132,7 @@ where
         Address: StorageAddress<IsFetchable = Yes> + 'a,
     {
         let client = self.clone();
+        let block_hash = self.block_hash;
         async move {
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
@@ -174,7 +146,7 @@ where
             if let Some(data) = client
                 .client
                 .storage()
-                .fetch_raw(&lookup_bytes, hash)
+                .fetch_raw(&lookup_bytes, Some(block_hash))
                 .await?
             {
                 let val = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
@@ -194,18 +166,18 @@ where
     pub fn fetch_or_default<'a, Address>(
         &self,
         address: &'a Address,
-        hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<<Address::Target as DecodeWithMetadata>::Target, Error>>
            + 'a
     where
         Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
     {
         let client = self.client.clone();
+        let block_hash = self.block_hash;
         async move {
             let pallet_name = address.pallet_name();
             let storage_name = address.entry_name();
             // Metadata validation happens via .fetch():
-            if let Some(data) = client.storage().fetch(address, hash).await? {
+            if let Some(data) = client.storage().fetch(address, Some(block_hash)).await? {
                 Ok(data)
             } else {
                 let metadata = client.metadata();
@@ -235,13 +207,13 @@ where
         key: &'a [u8],
         count: u32,
         start_key: Option<&'a [u8]>,
-        hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'a {
         let client = self.client.clone();
+        let block_hash = self.block_hash;
         async move {
             let keys = client
                 .rpc()
-                .storage_keys_paged(key, count, start_key, hash)
+                .storage_keys_paged(key, count, start_key, Some(block_hash))
                 .await?;
             Ok(keys)
         }
@@ -279,32 +251,18 @@ where
         &self,
         address: Address,
         page_size: u32,
-        hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<KeyIter<T, Client, Address::Target>, Error>> + 'static
     where
         Address: StorageAddress<IsIterable = Yes> + 'static,
     {
         let client = self.clone();
+        let block_hash = self.block_hash;
         async move {
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
             client.validate(&address)?;
-
-            // Fetch a concrete block hash to iterate over. We do this so that if new blocks
-            // are produced midway through iteration, we continue to iterate at the block
-            // we started with and not the new block.
-            let hash = if let Some(hash) = hash {
-                hash
-            } else {
-                client
-                    .client
-                    .rpc()
-                    .block_hash(None)
-                    .await?
-                    .expect("didn't pass a block number; qed")
-            };
 
             let metadata = client.client.metadata();
 
@@ -325,7 +283,7 @@ where
                 address_root_bytes,
                 metadata,
                 return_type_id,
-                block_hash: hash,
+                block_hash,
                 count: page_size,
                 start_key: None,
                 buffer: Default::default(),
@@ -337,7 +295,7 @@ where
 
 /// Iterates over key value pairs in a map.
 pub struct KeyIter<T: Config, Client, ReturnTy> {
-    client: StorageClient<T, Client>,
+    client: Storage<T, Client>,
     address_root_bytes: Vec<u8>,
     return_type_id: u32,
     metadata: Metadata,
@@ -374,7 +332,6 @@ where
                         &self.address_root_bytes,
                         self.count,
                         start_key.as_ref().map(|k| &*k.0),
-                        Some(self.block_hash),
                     )
                     .await?;
 
