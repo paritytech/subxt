@@ -150,7 +150,13 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .await?;
 
     let ledger_addr = node_runtime::storage().staking().ledger(alice.account_id());
-    let ledger = api.storage().fetch(&ledger_addr, None).await?.unwrap();
+    let ledger = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch(&ledger_addr)
+        .await?
+        .unwrap();
     assert_eq!(alice_stash.account_id(), &ledger.stash);
 
     let chill_tx = node_runtime::tx().staking().chill();
@@ -232,7 +238,9 @@ async fn storage_current_era() -> Result<(), Error> {
     let current_era_addr = node_runtime::storage().staking().current_era();
     let _current_era = api
         .storage()
-        .fetch(&current_era_addr, None)
+        .at(None)
+        .await?
+        .fetch(&current_era_addr)
         .await?
         .expect("current era always exists");
     Ok(())
@@ -243,7 +251,12 @@ async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
-    let current_era_result = api.storage().fetch(&reward_points_addr, None).await;
+    let current_era_result = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch(&reward_points_addr)
+        .await;
     assert!(current_era_result.is_ok());
 
     Ok(())

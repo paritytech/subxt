@@ -66,7 +66,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let account = api
         .storage()
-        .fetch_or_default(&storage_address, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&storage_address)
         .await?
         .to_value()?;
     println!("Bob's account details: {account}");
@@ -74,7 +76,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 4. Dynamic storage iteration (the dynamic equivalent to the fetch_all_accounts example).
 
     let storage_address = subxt::dynamic::storage_root("System", "Account");
-    let mut iter = api.storage().iter(storage_address, 10, None).await?;
+    let mut iter = api
+        .storage()
+        .at(None)
+        .await?
+        .iter(storage_address, 10)
+        .await?;
     while let Some((key, account)) = iter.next().await? {
         println!("{}: {}", hex::encode(key), account.to_value()?);
     }

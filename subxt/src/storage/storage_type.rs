@@ -55,23 +55,14 @@ where
     T: Config,
     Client: OfflineClientT<T>,
 {
-    /// Run the validation logic against some storage address you'd like to access. Returns `Ok(())`
-    /// if the address is valid (or if it's not possible to check since the address has no validation hash).
-    /// Return an error if the address was not valid or something went wrong trying to validate it (ie
-    /// the pallet or storage entry in question do not exist at all).
+    /// Run the validation logic against some storage address you'd like to access.
+    ///
+    /// Method has the same meaning as [`StorageClient::validate`](super::storage_client::StorageClient::validate).
     pub fn validate<Address: StorageAddress>(
         &self,
         address: &Address,
     ) -> Result<(), Error> {
-        if let Some(hash) = address.validation_hash() {
-            validate_storage(
-                address.pallet_name(),
-                address.entry_name(),
-                hash,
-                &self.client.metadata(),
-            )?;
-        }
-        Ok(())
+        validate_storage_address(address, &self.client.metadata())
     }
 }
 
@@ -115,6 +106,9 @@ where
     /// // Fetch just the keys, returning up to 10 keys.
     /// let value = api
     ///     .storage()
+    ///     .at(None)
+    ///     .await
+    ///     .unwrap()
     ///     .fetch(&address)
     ///     .await
     ///     .unwrap();
@@ -132,7 +126,6 @@ where
         Address: StorageAddress<IsFetchable = Yes> + 'a,
     {
         let client = self.clone();
-        let block_hash = self.block_hash;
         async move {
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
@@ -143,12 +136,7 @@ where
             // Look up the return type ID to enable DecodeWithMetadata:
             let metadata = client.client.metadata();
             let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
-            if let Some(data) = client
-                .client
-                .storage()
-                .fetch_raw(&lookup_bytes, Some(block_hash))
-                .await?
-            {
+            if let Some(data) = client.fetch_raw(&lookup_bytes).await? {
                 let val = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
                     &mut &*data,
                     address.pallet_name(),
@@ -171,16 +159,15 @@ where
     where
         Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
     {
-        let client = self.client.clone();
-        let block_hash = self.block_hash;
+        let client = self.clone();
         async move {
             let pallet_name = address.pallet_name();
             let storage_name = address.entry_name();
             // Metadata validation happens via .fetch():
-            if let Some(data) = client.storage().fetch(address, Some(block_hash)).await? {
+            if let Some(data) = client.fetch(address).await? {
                 Ok(data)
             } else {
-                let metadata = client.metadata();
+                let metadata = client.client.metadata();
 
                 // We have to dig into metadata already, so no point using the optimised `decode_storage_with_metadata` call.
                 let pallet_metadata = metadata.pallet(pallet_name)?;
@@ -237,7 +224,10 @@ where
     /// // Iterate over keys and values at that address.
     /// let mut iter = api
     ///     .storage()
-    ///     .iter(address, 10, None)
+    ///     .at(None)
+    ///     .await
+    ///     .unwrap()
+    ///     .iter(address, 10)
     ///     .await
     ///     .unwrap();
     ///
@@ -358,6 +348,17 @@ where
             }
         }
     }
+}
+
+/// Validate a storage address against the metadata.
+pub(crate) fn validate_storage_address<Address: StorageAddress>(
+    address: &Address,
+    metadata: &Metadata,
+) -> Result<(), Error> {
+    if let Some(hash) = address.validation_hash() {
+        validate_storage(address.pallet_name(), address.entry_name(), hash, metadata)?;
+    }
+    Ok(())
 }
 
 /// Validate a storage entry against the metadata.

@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let address = polkadot::storage().system().account_root();
 
-    let mut iter = api.storage().iter(address, 10, None).await?;
+    let mut iter = api.storage().at(None).await?.iter(address, 10).await?;
 
     while let Some((key, account)) = iter.next().await? {
         println!("{}: {}", hex::encode(key), account.data.free);

@@ -116,7 +116,10 @@ async fn fetch_keys() {
     let addr = node_runtime::storage().system().account_root();
     let keys = api
         .storage()
-        .fetch_keys(&addr.to_root_bytes(), 4, None, None)
+        .at(None)
+        .await
+        .unwrap()
+        .fetch_keys(&addr.to_root_bytes(), 4, None)
         .await
         .unwrap();
     assert_eq!(keys.len(), 4)
@@ -128,7 +131,14 @@ async fn test_iter() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_root();
-    let mut iter = api.storage().iter(addr, 10, None).await.unwrap();
+    let mut iter = api
+        .storage()
+        .at(None)
+        .await
+        .unwrap()
+        .iter(addr, 10)
+        .await
+        .unwrap();
     let mut i = 0;
     while iter.next().await.unwrap().is_some() {
         i += 1;

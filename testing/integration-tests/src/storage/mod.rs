@@ -21,7 +21,12 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     wait_for_blocks(&api).await;
 
     let addr = node_runtime::storage().timestamp().now();
-    let entry = api.storage().fetch_or_default(&addr, None).await?;
+    let entry = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch_or_default(&addr)
+        .await?;
     assert!(entry > 0);
 
     Ok(())
@@ -45,7 +50,12 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
 
     // Look up the nonce for the user (we expect it to be 1).
     let nonce_addr = node_runtime::storage().system().account(alice);
-    let entry = api.storage().fetch_or_default(&nonce_addr, None).await?;
+    let entry = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch_or_default(&nonce_addr)
+        .await?;
     assert_eq!(entry.nonce, 1);
 
     Ok(())
@@ -113,7 +123,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
 
     // The actual test; look up this approval in storage:
     let addr = node_runtime::storage().assets().approvals(99, alice, bob);
-    let entry = api.storage().fetch(&addr, None).await?;
+    let entry = api.storage().at(None).await?.fetch(&addr).await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
 }
