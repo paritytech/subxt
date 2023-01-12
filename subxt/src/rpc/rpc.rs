@@ -176,7 +176,7 @@ impl<T: Config> Rpc<T> {
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
     ) -> Result<types::Bytes, Error> {
-        let call_parameters = call_parameters.unwrap_or(Default::default());
+        let call_parameters = call_parameters.unwrap_or_default();
 
         let bytes: types::Bytes = self
             .client
