@@ -19,6 +19,7 @@ use crate::{
         Rpc,
         RpcClientT,
     },
+    runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
     Config,
@@ -213,6 +214,11 @@ impl<T: Config> OnlineClient<T> {
     /// Work with blocks.
     pub fn blocks(&self) -> BlocksClient<T, Self> {
         <Self as OfflineClientT<T>>::blocks(self)
+    }
+
+    /// Work with runtime API.
+    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        <Self as OfflineClientT<T>>::runtime_api(self)
     }
 }
 
