@@ -91,7 +91,7 @@ where
         ))
     }
 
-    /// Execute a runtime API calls at this block.
+    /// Execute a runtime API call at this block.
     pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
         Ok(RuntimeApi::new(self.client.clone(), self.hash()))
     }
