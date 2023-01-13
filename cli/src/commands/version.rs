@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use clap::Parser as ClapParser;
 
 /// Prints version information
@@ -9,5 +11,29 @@ use clap::Parser as ClapParser;
 pub struct Opts {}
 
 pub fn run(_opts: Opts) {
-    println!("subxt-cli {}", clap::crate_version!());
+    let commit = match Command::new("git")
+        .args(&["rev-parse", "--short=11", "HEAD"])
+        .output()
+    {
+        Ok(o) if o.status.success() => {
+            let sha = String::from_utf8_lossy(&o.stdout).trim().to_owned();
+            sha
+        }
+        Ok(o) => {
+            println!("cargo:warning=Git command failed with status: {}", o.status);
+            "unknown".to_string()
+        }
+        Err(err) => {
+            println!("cargo:warning=Failed to execute git command: {}", err);
+            "unknown".to_string()
+        }
+    };
+
+    println!("subxt-cli {}", get_version(&commit));
+}
+
+fn get_version(impl_commit: &str) -> String {
+    let commit_dash = if impl_commit.is_empty() { "" } else { "-" };
+
+    format!("{}{}{}", clap::crate_version!(), commit_dash, impl_commit)
 }
