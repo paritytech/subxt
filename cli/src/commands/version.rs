@@ -29,7 +29,7 @@ pub fn run(_opts: Opts) {
         }
     };
 
-    println!("subxt-cli {}", get_version(&commit));
+    println!("{} {}", clap::crate_name!(), get_version(&commit));
 }
 
 fn get_version(impl_commit: &str) -> String {
