@@ -3,21 +3,17 @@
 Utilities for working with substrate metadata for `subxt`
 
 ```
-USAGE:
-subxt <SUBCOMMAND>
+Usage: subxt <COMMAND>
 
-FLAGS:
--h, --help
-Prints help information
+Commands:
+  metadata       Download metadata from a substrate node, for use with `subxt` codegen
+  codegen        Generate runtime API client code from metadata
+  compatibility  Verify metadata compatibility between substrate nodes
+  version        Prints version information
+  help           Print this message or the help of the given subcommand(s)
 
-    -V, --version
-            Prints version information
-
-
-SUBCOMMANDS:
-codegen     Generate runtime API client code from metadata
-help        Prints this message or the help of the given subcommand(s)
-metadata    Download metadata from a substrate node, for use with `subxt` codegen
+Options:
+  -h, --help  Print help information
 ```
 
 ## Metadata

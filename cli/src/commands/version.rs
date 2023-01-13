@@ -1,6 +1,6 @@
 use clap::Parser as ClapParser;
 
-/// Version subcommand
+/// Prints version information
 ///
 /// This subcommand is implemented for backward compatibility reasons.
 /// Its behavior should be the same as that of the `--version` flag which
