@@ -3,6 +3,11 @@
 // see LICENSE for license details.
 
 use crate::test_context;
+use codec::{
+    Compact,
+    Decode,
+};
+use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
 
 // Check that we can subscribe to non-finalized blocks.
@@ -85,5 +90,32 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     }
 
     assert!(last_block_number.is_some());
+    Ok(())
+}
+
+// Check that we can subscribe to non-finalized blocks.
+#[tokio::test]
+async fn runtime_api_call() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut sub = api.blocks().subscribe_best().await?;
+
+    let block = sub.next().await.unwrap()?;
+    let rt = block.runtime_api().await?;
+
+    let bytes = rt.call_raw("Metadata_metadata".into(), None).await?;
+    let cursor = &mut &*bytes;
+    let _ = <Compact<u32>>::decode(cursor)?;
+    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+    let metadata_call = match meta.1 {
+        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
+        _ => panic!("Metadata V14 unavailable"),
+    };
+
+    // Compare the runtime API call against the `state_getMetadata`.
+    let metadata = api.rpc().metadata(None).await?;
+    let metadata = metadata.runtime_metadata();
+    assert_eq!(&metadata_call, metadata);
     Ok(())
 }
