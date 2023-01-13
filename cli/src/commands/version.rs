@@ -12,7 +12,7 @@ pub struct Opts {}
 
 pub fn run(_opts: Opts) {
     let commit = match Command::new("git")
-        .args(&["rev-parse", "--short=11", "HEAD"])
+        .args(["rev-parse", "--short=11", "HEAD"])
         .output()
     {
         Ok(o) if o.status.success() => {
