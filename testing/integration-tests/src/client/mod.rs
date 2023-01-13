@@ -323,7 +323,7 @@ async fn chainhead_unstable_body() {
     let body = api.rpc().block(Some(hash)).await.unwrap().unwrap();
     let extrinsics: Vec<Vec<u8>> =
         body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
-    let expected = format!("0x{}", hex::encode(&extrinsics.encode()));
+    let expected = format!("0x{}", hex::encode(extrinsics.encode()));
 
     assert_matches!(event,
         ChainHeadEvent::Done(done) if done.result == expected
@@ -344,7 +344,7 @@ async fn chainhead_unstable_header() {
     let sub_id = blocks.subscription_id().unwrap().clone();
 
     let header = api.rpc().header(Some(hash)).await.unwrap().unwrap();
-    let expected = format!("0x{}", hex::encode(&header.encode()));
+    let expected = format!("0x{}", hex::encode(header.encode()));
 
     let header = api
         .rpc()
