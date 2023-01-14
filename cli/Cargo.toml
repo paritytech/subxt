@@ -40,3 +40,6 @@ syn = "1.0.80"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 # async runtime
 tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }
+# log 
+log = "0.4.17"
+env_logger = "0.10.0"

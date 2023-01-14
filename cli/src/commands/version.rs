@@ -1,6 +1,7 @@
 use std::process::Command;
 
 use clap::Parser as ClapParser;
+use log::warn;
 
 /// Prints version information
 ///
@@ -20,11 +21,11 @@ pub fn run(_opts: Opts) {
             sha
         }
         Ok(o) => {
-            println!("cargo:warning=Git command failed with status: {}", o.status);
+            warn!("Git command failed with status: {}", o.status);
             "unknown".to_string()
         }
         Err(err) => {
-            println!("cargo:warning=Failed to execute git command: {}", err);
+            warn!("Failed to execute git command: {}", err);
             "unknown".to_string()
         }
     };
