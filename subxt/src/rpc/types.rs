@@ -114,7 +114,7 @@ pub type ConsensusEngineId = [u8; 4];
 pub type EncodedJustification = Vec<u8>;
 
 /// Bytes representing an extrinsic in a [`ChainBlock`].
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ChainBlockExtrinsic(pub Vec<u8>);
 
 impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
