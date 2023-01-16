@@ -23,11 +23,9 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
-
-      - name: Substrate Version
-        run: ~/.local/bin/substrate --version
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
