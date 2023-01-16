@@ -129,8 +129,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
+      # - name: Rust Cache
+        # uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Cargo test
         uses: actions-rs/cargo@v1.0.3
@@ -202,3 +202,31 @@ jobs:
         wasm-pack test --headless --chrome
         pkill substrate
       working-directory: testing/wasm-tests
+
+  ui_tests:
+    name: Cargo test UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            ./substrate --version
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
+
+      - name: Cargo test
+        run: cargo test --all-features
