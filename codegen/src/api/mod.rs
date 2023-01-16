@@ -154,6 +154,7 @@ impl RuntimeGenerator {
         derives: DerivesRegistry,
         crate_path: CratePath,
     ) -> TokenStream2 {
+        let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::from(item_mod);
         let default_derives = derives.default_derives();
 
@@ -325,7 +326,9 @@ impl RuntimeGenerator {
         let rust_items = item_mod_ir.rust_items();
 
         quote! {
+            #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
+            #[allow(clippy::*)]
             pub mod #mod_ident {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *
