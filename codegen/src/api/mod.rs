@@ -328,7 +328,7 @@ impl RuntimeGenerator {
         quote! {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
-            #[allow(clippy::*)]
+            #[allow(clippy::all)]
             pub mod #mod_ident {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *
