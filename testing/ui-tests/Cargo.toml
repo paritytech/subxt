@@ -9,7 +9,7 @@ publish = false
 [dependencies]
 
 [dev-dependencies]
-trybuild = "1.0.63"
+trybuild = "=1.0.75"
 scale-info = { version = "2.3.0", features = ["bit-vec"] }
 frame-metadata = "15.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
