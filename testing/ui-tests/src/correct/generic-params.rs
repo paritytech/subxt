@@ -12,7 +12,7 @@ pub struct Generic<T>(T);
 pub struct Second<T, U>(U, PhantomData<T>);
 
 #[subxt::subxt(
-    runtime_metadata_path = "../../../artifacts/polkadot_metadata.scale",
+    runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
     substitute_type(
         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
         with = "crate::CustomAddress"
@@ -21,7 +21,7 @@ pub struct Second<T, U>(U, PhantomData<T>);
 pub mod node_runtime {}
 
 #[subxt::subxt(
-    runtime_metadata_path = "../../../artifacts/polkadot_metadata.scale",
+    runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
     substitute_type(
         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
         with = "crate::Generic<A>"
@@ -30,7 +30,7 @@ pub mod node_runtime {}
 pub mod node_runtime2 {}
 
 #[subxt::subxt(
-    runtime_metadata_path = "../../../artifacts/polkadot_metadata.scale",
+    runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
     substitute_type(
         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
         with = "crate::Generic<B>"
@@ -39,7 +39,7 @@ pub mod node_runtime2 {}
 pub mod node_runtime3 {}
 
 #[subxt::subxt(
-    runtime_metadata_path = "../../../artifacts/polkadot_metadata.scale",
+    runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
     substitute_type(
         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
         with = "crate::Second<B, A>"
