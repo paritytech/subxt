@@ -264,7 +264,7 @@ async fn rpc_state_call() {
     // Call into the runtime of the chain to get the Metadata.
     let metadata_bytes = api
         .rpc()
-        .state_call("Metadata_metadata".into(), None, None)
+        .state_call("Metadata_metadata", None, None)
         .await
         .unwrap();
 

@@ -41,7 +41,7 @@ where
     /// Execute a raw runtime API call.
     pub fn call_raw<'a>(
         &self,
-        function: String,
+        function: &'a str,
         call_parameters: Option<&'a [u8]>,
     ) -> impl Future<Output = Result<Vec<u8>, Error>> + 'a {
         let client = self.client.clone();

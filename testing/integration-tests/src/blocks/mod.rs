@@ -104,7 +104,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let block = sub.next().await.unwrap()?;
     let rt = block.runtime_api().await?;
 
-    let bytes = rt.call_raw("Metadata_metadata".into(), None).await?;
+    let bytes = rt.call_raw("Metadata_metadata", None).await?;
     let cursor = &mut &*bytes;
     let _ = <Compact<u32>>::decode(cursor)?;
     let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;

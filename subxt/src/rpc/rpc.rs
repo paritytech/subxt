@@ -374,7 +374,7 @@ impl<T: Config> Rpc<T> {
     /// Execute a runtime API call.
     pub async fn state_call(
         &self,
-        function: String,
+        function: &str,
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
     ) -> Result<types::Bytes, Error> {

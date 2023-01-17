@@ -117,9 +117,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let bytes = rpc
-            .state_call("Metadata_metadata".into(), None, None)
-            .await?;
+        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
         let cursor = &mut &*bytes;
         let _ = <Compact<u32>>::decode(cursor)?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
