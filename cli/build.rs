@@ -7,7 +7,7 @@ fn main() {
 
 fn output_git_short_hash() {
     let output = Command::new("git")
-        .args(&["rev-parse", "--short=11", "HEAD"])
+        .args(["rev-parse", "--short=11", "HEAD"])
         .output()
         .expect("'git' command should exist and run successfully");
 
