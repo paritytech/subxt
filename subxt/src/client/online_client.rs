@@ -62,6 +62,18 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
+/// The default RPC client that's used (based on [`jsonrpsee`]).
+#[cfg(any(
+    feature = "jsonrpsee-ws",
+    all(feature = "jsonrpsee-web", target_arch = "wasm32")
+))]
+pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT, Error> {
+    let client = jsonrpsee_helpers::client(url.as_ref())
+        .await
+        .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+    Ok(client)
+}
+
 // The default constructors assume Jsonrpsee.
 #[cfg(any(
     feature = "jsonrpsee-ws",
@@ -71,49 +83,14 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
     pub async fn new() -> Result<OnlineClient<T>, Error> {
-        OnlineClient::new_at(None).await
-    }
-
-    /// Construct a new [`OnlineClient`] using default settings which
-    /// point to a locally running node on `ws://127.0.0.1:9944`.
-    ///
-    /// # Warning
-    ///
-    /// - If you use this function, subxt will be unable to work with blocks that aren't
-    ///   compatible with the metadata at the provided block hash, and if the block hash is
-    ///   not recent, things like subscribing to the head of the chain and submitting
-    ///   transactions will likely fail or encounter errors.
-    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
-    ///   to instantiate a client at such a block.
-    pub async fn new_at(block_hash: Option<T::Hash>) -> Result<OnlineClient<T>, Error> {
         let url = "ws://127.0.0.1:9944";
-        OnlineClient::from_url_at(url, block_hash).await
+        OnlineClient::from_url(url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        OnlineClient::from_url_at(url, None).await
-    }
-
-    /// Construct a new [`OnlineClient`], providing a URL to connect to and a block
-    /// hash from which to load metadata and runtime information.
-    ///
-    /// # Warning
-    ///
-    /// - If you use this function, subxt will be unable to work with blocks that aren't
-    ///   compatible with the metadata at the provided block hash, and if the block hash is
-    ///   not recent, things like subscribing to the head of the chain and submitting
-    ///   transactions will likely fail or encounter errors.
-    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
-    ///   to instantiate a client at such a block.
-    pub async fn from_url_at(
-        url: impl AsRef<str>,
-        block_hash: Option<T::Hash>,
-    ) -> Result<OnlineClient<T>, Error> {
-        let client = jsonrpsee_helpers::client(url.as_ref())
-            .await
-            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
-        OnlineClient::from_rpc_client_at(Arc::new(client), block_hash).await
+        let client = default_rpc_client(url).await?;
+        OnlineClient::from_rpc_client(Arc::new(client)).await
     }
 }
 
@@ -123,30 +100,11 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
-        OnlineClient::from_rpc_client_at(rpc_client, None).await
-    }
-
-    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
-    /// implementation to drive the connection, as well as a block hash from which to
-    /// obtain the metadata information from.
-    ///
-    /// # Warning
-    ///
-    /// - If you use this function, subxt will be unable to work with blocks that aren't
-    ///   compatible with the metadata at the provided block hash, and if the block hash is
-    ///   not recent, things like subscribing to the head of the chain and submitting
-    ///   transactions will likely fail or encounter errors.
-    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
-    ///   to instantiate a client at such a block.
-    pub async fn from_rpc_client_at<R: RpcClientT>(
-        rpc_client: Arc<R>,
-        block_hash: Option<T::Hash>,
-    ) -> Result<OnlineClient<T>, Error> {
         let rpc = Rpc::<T>::new(rpc_client.clone());
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
-            rpc.runtime_version(block_hash),
-            rpc.metadata(block_hash),
+            rpc.runtime_version(None),
+            rpc.metadata(None),
         )
         .await;
 
@@ -237,16 +195,49 @@ impl<T: Config> OnlineClient<T> {
         inner.metadata.clone()
     }
 
+    /// Change the [`Metadata`] used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting custom metadata may leave Subxt unable to work with certain blocks,
+    /// subscribe to latest blocks or submit valid transactions.
+    pub fn set_metadata(&self, metadata: Metadata) {
+        let mut inner = self.inner.write();
+        inner.metadata = metadata;
+    }
+
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
         let inner = self.inner.read();
         inner.genesis_hash
     }
 
+    /// Change the genesis hash used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting a custom genesis hash may leave Subxt unable to
+    /// submit valid transactions.
+    pub fn set_genesis_hash(&self, genesis_hash: T::Hash) {
+        let mut inner = self.inner.write();
+        inner.genesis_hash = genesis_hash;
+    }
+
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read();
         inner.runtime_version.clone()
+    }
+
+    /// Change the [`RuntimeVersion`] used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting a custom runtime version may leave Subxt unable to
+    /// submit valid transactions.
+    pub fn set_runtime_version(&self, runtime_version: RuntimeVersion) {
+        let mut inner = self.inner.write();
+        inner.runtime_version = runtime_version;
     }
 
     /// Return an RPC client to make raw requests with.
