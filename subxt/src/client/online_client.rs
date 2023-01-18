@@ -79,9 +79,12 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// # Warning
     ///
-    /// If you use this function, you take responsibility for knowing which blocks this
-    /// client will be capable of interacting with successfully. For example, subscriptions
-    /// to recent blocks and submitting transactions may fail.
+    /// - If you use this function, subxt will be unable to work with blocks that aren't
+    ///   compatible with the metadata at the provided block hash, and if the block hash is
+    ///   not recent, things like subscribing to the head of the chain and submitting
+    ///   transactions will likely fail or encounter errors.
+    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
+    ///   to instantiate a client at such a block.
     pub async fn new_at(block_hash: Option<T::Hash>) -> Result<OnlineClient<T>, Error> {
         let url = "ws://127.0.0.1:9944";
         OnlineClient::from_url_at(url, block_hash).await
@@ -97,9 +100,12 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// # Warning
     ///
-    /// If you use this function, you take responsibility for knowing which blocks this
-    /// client will be capable of interacting with successfully. For example, subscriptions
-    /// to recent blocks and submitting transactions may fail.
+    /// - If you use this function, subxt will be unable to work with blocks that aren't
+    ///   compatible with the metadata at the provided block hash, and if the block hash is
+    ///   not recent, things like subscribing to the head of the chain and submitting
+    ///   transactions will likely fail or encounter errors.
+    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
+    ///   to instantiate a client at such a block.
     pub async fn from_url_at(
         url: impl AsRef<str>,
         block_hash: Option<T::Hash>,
@@ -126,9 +132,12 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// # Warning
     ///
-    /// If you use this function, you take responsibility for knowing which blocks this
-    /// client will be capable of interacting with successfully. For example, subscriptions
-    /// to recent blocks and submitting transactions may fail.
+    /// - If you use this function, subxt will be unable to work with blocks that aren't
+    ///   compatible with the metadata at the provided block hash, and if the block hash is
+    ///   not recent, things like subscribing to the head of the chain and submitting
+    ///   transactions will likely fail or encounter errors.
+    /// - Subxt does not support blocks using pre-V14 metadata and will error if you attempt
+    ///   to instantiate a client at such a block.
     pub async fn from_rpc_client_at<R: RpcClientT>(
         rpc_client: Arc<R>,
         block_hash: Option<T::Hash>,
