@@ -123,7 +123,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // high level API.
     ///
-    /// let update_task = client.subscribe_to_updates();
+    /// let update_task = client.updater();
     /// tokio::spawn(async move {
     ///     update_task.perform_runtime_updates().await;
     /// });
@@ -131,7 +131,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // low level API.
     ///
-    /// let updater = client.subscribe_to_updates();
+    /// let updater = client.updater();
     /// tokio::spawn(async move {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
@@ -150,7 +150,7 @@ impl<T: Config> OnlineClient<T> {
     /// });
     /// # }
     /// ```
-    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
+    pub fn updater(&self) -> ClientRuntimeUpdater<T> {
         ClientRuntimeUpdater(self.clone())
     }
 
@@ -234,7 +234,7 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
     }
 }
 
-/// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
+/// Client wrapper for performing runtime updates. See [`OnlineClient::updater()`]
 /// for example usage.
 pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 
