@@ -71,16 +71,43 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
     pub async fn new() -> Result<OnlineClient<T>, Error> {
+        OnlineClient::new_at(None).await
+    }
+
+    /// Construct a new [`OnlineClient`] using default settings which
+    /// point to a locally running node on `ws://127.0.0.1:9944`.
+    ///
+    /// # Warning
+    ///
+    /// If you use this function, you take responsibility for knowing which blocks this
+    /// client will be capable of interacting with successfully. For example, subscriptions
+    /// to recent blocks and submitting transactions may fail.
+    pub async fn new_at(block_hash: Option<T::Hash>) -> Result<OnlineClient<T>, Error> {
         let url = "ws://127.0.0.1:9944";
-        OnlineClient::from_url(url).await
+        OnlineClient::from_url_at(url, block_hash).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+        OnlineClient::from_url_at(url, None).await
+    }
+
+    /// Construct a new [`OnlineClient`], providing a URL to connect to and a block
+    /// hash from which to load metadata and runtime information.
+    ///
+    /// # Warning
+    ///
+    /// If you use this function, you take responsibility for knowing which blocks this
+    /// client will be capable of interacting with successfully. For example, subscriptions
+    /// to recent blocks and submitting transactions may fail.
+    pub async fn from_url_at(
+        url: impl AsRef<str>,
+        block_hash: Option<T::Hash>,
+    ) -> Result<OnlineClient<T>, Error> {
         let client = jsonrpsee_helpers::client(url.as_ref())
             .await
             .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
-        OnlineClient::from_rpc_client(Arc::new(client)).await
+        OnlineClient::from_rpc_client_at(Arc::new(client), block_hash).await
     }
 }
 
@@ -90,22 +117,66 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
-        let rpc = Rpc::new(rpc_client);
+        OnlineClient::from_rpc_client_at(rpc_client, None).await
+    }
 
+    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
+    /// implementation to drive the connection, as well as a block hash from which to
+    /// obtain the metadata information from.
+    ///
+    /// # Warning
+    ///
+    /// If you use this function, you take responsibility for knowing which blocks this
+    /// client will be capable of interacting with successfully. For example, subscriptions
+    /// to recent blocks and submitting transactions may fail.
+    pub async fn from_rpc_client_at<R: RpcClientT>(
+        rpc_client: Arc<R>,
+        block_hash: Option<T::Hash>,
+    ) -> Result<OnlineClient<T>, Error> {
+        let rpc = Rpc::<T>::new(rpc_client.clone());
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
-            rpc.runtime_version(None),
-            rpc.metadata(None),
+            // This _could_ always be the latest runtime version, but offhand it makes sense to keep
+            // it consistent with the block hash provided, so that if we were to ask for it, we'd see
+            // it at that point.
+            rpc.runtime_version(block_hash),
+            rpc.metadata(block_hash),
         )
         .await;
 
+        OnlineClient::from_rpc_client_with(
+            genesis_hash?,
+            runtime_version?,
+            metadata?,
+            rpc_client,
+        )
+    }
+
+    /// Construct a new [`OnlineClient`] by providing all of the underlying details needed
+    /// to make it work.
+    ///
+    /// # Warning
+    ///
+    /// This is considered the most primitive and also error prone way to
+    /// instantiate a client; the genesis hash, metadata and runtime version provided will
+    /// entirely determine which node and blocks this client will be able to interact with,
+    /// and whether it will be able to successfully do things like submit transactions.
+    ///
+    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
+    /// a client.
+    pub fn from_rpc_client_with<R: RpcClientT>(
+        genesis_hash: T::Hash,
+        runtime_version: RuntimeVersion,
+        metadata: Metadata,
+        rpc_client: Arc<R>,
+    ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
-                genesis_hash: genesis_hash?,
-                runtime_version: runtime_version?,
-                metadata: metadata?,
+                genesis_hash,
+                runtime_version,
+                metadata,
             })),
-            rpc,
+            rpc: Rpc::new(rpc_client),
         })
     }
 
