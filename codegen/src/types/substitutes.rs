@@ -17,8 +17,13 @@ use super::TypePath;
 
 #[derive(Debug)]
 pub struct TypeSubstitutes {
-    inner: HashMap<PathSegments, syn::Path>,
-    params: HashMap<PathSegments, TypeParamMapping>,
+    substitutes: HashMap<PathSegments, Substitute>,
+}
+
+#[derive(Debug)]
+struct Substitute {
+    path: syn::Path,
+    param_mapping: TypeParamMapping,
 }
 
 #[derive(Debug)]
@@ -83,50 +88,62 @@ impl TypeSubstitutes {
             (path_segments!(BTreeSet), parse_quote!(::std::vec::Vec)),
         ];
 
+        let default_substitutes = defaults
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    k,
+                    Substitute {
+                        path: v,
+                        param_mapping: TypeParamMapping::None,
+                    },
+                )
+            })
+            .collect();
+
         Self {
-            inner: defaults.into_iter().collect(),
-            params: Default::default(),
+            substitutes: default_substitutes,
         }
     }
 
     pub fn extend(&mut self, elems: impl IntoIterator<Item = (syn::Path, AbsolutePath)>) {
-        self.inner
+        self.substitutes
             .extend(elems.into_iter().map(|(path, AbsolutePath(mut with))| {
                 let Some(syn::PathSegment { arguments: src_path_args, ..}) = path.segments.last() else { abort!(path.span(), "Empty path") };
                 let Some(syn::PathSegment { arguments: target_path_args, ..}) = with.segments.last_mut() else { abort!(with.span(), "Empty path") };
 
                 let source_args: Vec<_> = type_args(src_path_args).collect();
-                // If the type parameters on the source type are not specified, then this means that
-                // the type is either not generic or the user wants to pass through all the parameters
-                let type_params = if source_args.is_empty() {
+
+                let param_mapping = if source_args.is_empty() {
+                    // If the type parameters on the source type are not specified, then this means that
+                    // the type is either not generic or the user wants to pass through all the parameters
                     TypeParamMapping::None
                 } else {
+                    // Describe the mapping in terms of "which source param idx is used for each target param".
+                    // So, for each target param, find the matching source param index.
                     let mapping = type_args(target_path_args)
-                    .filter_map(|arg|
+                        .filter_map(|arg|
                             source_args
                                 .iter()
-                                .enumerate()
-                                .find(|(_, &src)| src == arg)
-                                .map(|(src_idx, _)|
+                                .position(|&src| src == arg)
+                                .map(|src_idx|
                                     u8::try_from(src_idx).expect("type arguments to be fewer than 256; qed"),
                                 )
-                    ).collect();
-
+                        ).collect();
                     TypeParamMapping::Specified(mapping)
                 };
 
-                self.params.insert(PathSegments::from(&path), type_params);
                 // NOTE: Params are late bound and held separately, so clear them
                 // here to not mess pretty printing this path and params together
                 *target_path_args = syn::PathArguments::None;
 
-                (PathSegments::from(&path), with)
+                (PathSegments::from(&path), Substitute { path: with, param_mapping })
             }));
     }
 
     /// Given a source type path, return a substituted type path if a substitution is defined.
     pub fn for_path(&self, path: impl Into<PathSegments>) -> Option<&syn::Path> {
-        self.inner.get(&path.into())
+        self.substitutes.get(&path.into()).map(|s| &s.path)
     }
 
     /// Given a source type path and the resolved, supplied type parameters,
@@ -141,10 +158,10 @@ impl TypeSubstitutes {
         // 2. Omitting certain generics
         fn reorder_params<'a>(
             params: &'a [TypePath],
-            mapping: Option<&TypeParamMapping>,
+            mapping: &TypeParamMapping,
         ) -> Cow<'a, [TypePath]> {
             match mapping {
-                Some(TypeParamMapping::Specified(mapping)) => {
+                TypeParamMapping::Specified(mapping) => {
                     Cow::Owned(
                         mapping
                             .iter()
@@ -159,9 +176,9 @@ impl TypeSubstitutes {
 
         let path = path.into();
 
-        self.inner
+        self.substitutes
             .get(&path)
-            .map(|sub| (sub, reorder_params(params, self.params.get(&path))))
+            .map(|sub| (&sub.path, reorder_params(params, &sub.param_mapping)))
     }
 }
 
