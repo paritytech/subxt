@@ -56,7 +56,7 @@ where
                         .rpc()
                         .block_hash(None)
                         .await?
-                        .expect("didn't pass a block number; qed")
+                        .expect("substrate RPC returns the best block when no block number is provided; qed")
                 }
             };
 
