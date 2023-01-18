@@ -7,6 +7,7 @@ use crate::{
     constants::ConstantsClient,
     events::EventsClient,
     rpc::types::RuntimeVersion,
+    runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
     Config,
@@ -48,6 +49,11 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Work with blocks.
     fn blocks(&self) -> BlocksClient<T, Self> {
         BlocksClient::new(self.clone())
+    }
+
+    /// Work with runtime API.
+    fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        RuntimeApiClient::new(self.clone())
     }
 }
 
