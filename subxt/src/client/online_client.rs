@@ -145,9 +145,6 @@ impl<T: Config> OnlineClient<T> {
         let rpc = Rpc::<T>::new(rpc_client.clone());
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
-            // This _could_ always be the latest runtime version, but offhand it makes sense to keep
-            // it consistent with the block hash provided, so that if we were to ask for it, we'd see
-            // it at that point.
             rpc.runtime_version(block_hash),
             rpc.metadata(block_hash),
         )
