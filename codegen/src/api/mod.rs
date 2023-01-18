@@ -122,8 +122,9 @@ pub fn generate_runtime_api_from_url(
 /// # Arguments
 ///
 /// * `item_mod` - The module declaration for which the API is implemented.
-/// * `url` - HTTP/WS URL to the substrate node you'd like to pull metadata from.
+/// * `bytes` - The raw metadata bytes.
 /// * `derives` - Provide custom derives for the generated types.
+/// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
