@@ -481,8 +481,8 @@ impl<T: Config> Rpc<T> {
     /// # Note
     ///
     /// When the user is no longer interested in a block, the user is responsible
-    /// for calling the [`chainhead_unstable_unpin`](Rpc::chainhead_unstable_unpin) method on each.
-    /// Failure to do so will result in the subscription being dropped by the chain.
+    /// for calling the [`chainhead_unstable_unpin`](Rpc::chainhead_unstable_unpin) method.
+    /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
     pub async fn chainhead_unstable_follow(
         &self,
         runtime_updates: bool,
