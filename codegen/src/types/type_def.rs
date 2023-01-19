@@ -42,11 +42,11 @@ pub struct TypeDefGen {
 impl TypeDefGen {
     /// Construct a type definition for codegen from the given [`scale_info::Type`].
     pub fn from_type(
-        ty: Type<PortableForm>,
+        ty: &Type<PortableForm>,
         type_gen: &TypeGenerator,
         crate_path: &CratePath,
     ) -> Self {
-        let derives = type_gen.type_derives(&ty);
+        let derives = type_gen.type_derives(ty);
 
         let type_params = ty
             .type_params()
@@ -80,7 +80,7 @@ impl TypeDefGen {
                 );
                 type_params.update_unused(fields.field_types());
                 let composite_def = CompositeDef::struct_def(
-                    &ty,
+                    ty,
                     &type_name,
                     type_params.clone(),
                     fields,

@@ -169,7 +169,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             additional_and_extra_params.encode_extra_to(&mut bytes);
             additional_and_extra_params.encode_additional_to(&mut bytes);
             if bytes.len() > 256 {
-                signer.sign(T::Hasher::hash_of(&bytes).as_ref())
+                signer.sign(T::Hasher::hash_of(&Encoded(bytes)).as_ref())
             } else {
                 signer.sign(&bytes)
             }

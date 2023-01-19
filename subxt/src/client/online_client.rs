@@ -19,12 +19,18 @@ use crate::{
         Rpc,
         RpcClientT,
     },
+    runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
     Config,
     Metadata,
 };
+use codec::{
+    Compact,
+    Decode,
+};
 use derivative::Derivative;
+use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -62,6 +68,18 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
+/// The default RPC client that's used (based on [`jsonrpsee`]).
+#[cfg(any(
+    feature = "jsonrpsee-ws",
+    all(feature = "jsonrpsee-web", target_arch = "wasm32")
+))]
+pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT, Error> {
+    let client = jsonrpsee_helpers::client(url.as_ref())
+        .await
+        .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+    Ok(client)
+}
+
 // The default constructors assume Jsonrpsee.
 #[cfg(any(
     feature = "jsonrpsee-ws",
@@ -77,9 +95,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let client = jsonrpsee_helpers::client(url.as_ref())
-            .await
-            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+        let client = default_rpc_client(url).await?;
         OnlineClient::from_rpc_client(Arc::new(client)).await
     }
 }
@@ -90,23 +106,57 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
-        let rpc = Rpc::new(rpc_client);
-
+        let rpc = Rpc::<T>::new(rpc_client.clone());
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
-            rpc.metadata(None),
+            OnlineClient::fetch_metadata(&rpc),
         )
         .await;
 
+        OnlineClient::from_rpc_client_with(
+            genesis_hash?,
+            runtime_version?,
+            metadata?,
+            rpc_client,
+        )
+    }
+
+    /// Construct a new [`OnlineClient`] by providing all of the underlying details needed
+    /// to make it work.
+    ///
+    /// # Warning
+    ///
+    /// This is considered the most primitive and also error prone way to
+    /// instantiate a client; the genesis hash, metadata and runtime version provided will
+    /// entirely determine which node and blocks this client will be able to interact with,
+    /// and whether it will be able to successfully do things like submit transactions.
+    ///
+    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
+    /// a client.
+    pub fn from_rpc_client_with<R: RpcClientT>(
+        genesis_hash: T::Hash,
+        runtime_version: RuntimeVersion,
+        metadata: Metadata,
+        rpc_client: Arc<R>,
+    ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
-                genesis_hash: genesis_hash?,
-                runtime_version: runtime_version?,
-                metadata: metadata?,
+                genesis_hash,
+                runtime_version,
+                metadata,
             })),
-            rpc,
+            rpc: Rpc::new(rpc_client),
         })
+    }
+
+    /// Fetch the metadata from substrate using the runtime API.
+    async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
+        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
+        let cursor = &mut &*bytes;
+        let _ = <Compact<u32>>::decode(cursor)?;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        Ok(meta.try_into()?)
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -123,7 +173,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // high level API.
     ///
-    /// let update_task = client.subscribe_to_updates();
+    /// let update_task = client.updater();
     /// tokio::spawn(async move {
     ///     update_task.perform_runtime_updates().await;
     /// });
@@ -131,7 +181,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // low level API.
     ///
-    /// let updater = client.subscribe_to_updates();
+    /// let updater = client.updater();
     /// tokio::spawn(async move {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
@@ -150,7 +200,7 @@ impl<T: Config> OnlineClient<T> {
     /// });
     /// # }
     /// ```
-    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
+    pub fn updater(&self) -> ClientRuntimeUpdater<T> {
         ClientRuntimeUpdater(self.clone())
     }
 
@@ -160,16 +210,49 @@ impl<T: Config> OnlineClient<T> {
         inner.metadata.clone()
     }
 
+    /// Change the [`Metadata`] used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting custom metadata may leave Subxt unable to work with certain blocks,
+    /// subscribe to latest blocks or submit valid transactions.
+    pub fn set_metadata(&self, metadata: Metadata) {
+        let mut inner = self.inner.write();
+        inner.metadata = metadata;
+    }
+
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
         let inner = self.inner.read();
         inner.genesis_hash
     }
 
+    /// Change the genesis hash used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting a custom genesis hash may leave Subxt unable to
+    /// submit valid transactions.
+    pub fn set_genesis_hash(&self, genesis_hash: T::Hash) {
+        let mut inner = self.inner.write();
+        inner.genesis_hash = genesis_hash;
+    }
+
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read();
         inner.runtime_version.clone()
+    }
+
+    /// Change the [`RuntimeVersion`] used in this client.
+    ///
+    /// # Warning
+    ///
+    /// Setting a custom runtime version may leave Subxt unable to
+    /// submit valid transactions.
+    pub fn set_runtime_version(&self, runtime_version: RuntimeVersion) {
+        let mut inner = self.inner.write();
+        inner.runtime_version = runtime_version;
     }
 
     /// Return an RPC client to make raw requests with.
@@ -214,6 +297,11 @@ impl<T: Config> OnlineClient<T> {
     pub fn blocks(&self) -> BlocksClient<T, Self> {
         <Self as OfflineClientT<T>>::blocks(self)
     }
+
+    /// Work with runtime API.
+    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        <Self as OfflineClientT<T>>::runtime_api(self)
+    }
 }
 
 impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
@@ -234,7 +322,7 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
     }
 }
 
-/// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
+/// Client wrapper for performing runtime updates. See [`OnlineClient::updater()`]
 /// for example usage.
 pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 

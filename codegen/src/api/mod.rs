@@ -18,6 +18,7 @@ use crate::{
         CompositeDef,
         CompositeDefFields,
         TypeGenerator,
+        TypeSubstitutes,
     },
     utils::{
         fetch_metadata_bytes_blocking,
@@ -39,7 +40,6 @@ use quote::{
     quote,
 };
 use std::{
-    collections::HashMap,
     fs,
     io::Read,
     path,
@@ -54,6 +54,7 @@ use syn::parse_quote;
 /// * `item_mod` - The module declaration for which the API is implemented.
 /// * `path` - The path to the scale encoded metadata of the runtime node.
 /// * `derives` - Provide custom derives for the generated types.
+/// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
@@ -61,6 +62,7 @@ pub fn generate_runtime_api_from_path<P>(
     item_mod: syn::ItemMod,
     path: P,
     derives: DerivesRegistry,
+    type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
 ) -> TokenStream2
 where
@@ -74,7 +76,13 @@ where
     file.read_to_end(&mut bytes)
         .unwrap_or_else(|e| abort_call_site!("Failed to read metadata file: {}", e));
 
-    generate_runtime_api_from_bytes(item_mod, &bytes, derives, crate_path)
+    generate_runtime_api_from_bytes(
+        item_mod,
+        &bytes,
+        derives,
+        type_substitutes,
+        crate_path,
+    )
 }
 
 /// Generates the API for interacting with a substrate runtime, using metadata
@@ -86,6 +94,7 @@ where
 /// * `item_mod` - The module declaration for which the API is implemented.
 /// * `url` - HTTP/WS URL to the substrate node you'd like to pull metadata from.
 /// * `derives` - Provide custom derives for the generated types.
+/// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
@@ -93,12 +102,19 @@ pub fn generate_runtime_api_from_url(
     item_mod: syn::ItemMod,
     url: &Uri,
     derives: DerivesRegistry,
+    type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
 ) -> TokenStream2 {
     let bytes = fetch_metadata_bytes_blocking(url)
         .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
 
-    generate_runtime_api_from_bytes(item_mod, &bytes, derives, crate_path)
+    generate_runtime_api_from_bytes(
+        item_mod,
+        &bytes,
+        derives,
+        type_substitutes,
+        crate_path,
+    )
 }
 
 /// Generates the API for interacting with a substrate runtime, using metadata bytes.
@@ -106,8 +122,9 @@ pub fn generate_runtime_api_from_url(
 /// # Arguments
 ///
 /// * `item_mod` - The module declaration for which the API is implemented.
-/// * `url` - HTTP/WS URL to the substrate node you'd like to pull metadata from.
+/// * `bytes` - The raw metadata bytes.
 /// * `derives` - Provide custom derives for the generated types.
+/// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
@@ -115,13 +132,14 @@ pub fn generate_runtime_api_from_bytes(
     item_mod: syn::ItemMod,
     bytes: &[u8],
     derives: DerivesRegistry,
+    type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
 ) -> TokenStream2 {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives, crate_path)
+    generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -152,59 +170,12 @@ impl RuntimeGenerator {
         &self,
         item_mod: syn::ItemMod,
         derives: DerivesRegistry,
+        type_substitutes: TypeSubstitutes,
         crate_path: CratePath,
     ) -> TokenStream2 {
+        let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::from(item_mod);
         let default_derives = derives.default_derives();
-
-        // Some hardcoded default type substitutes, can be overridden by user
-        let mut type_substitutes = [
-            (
-                "bitvec::order::Lsb0",
-                parse_quote!(#crate_path::utils::bits::Lsb0),
-            ),
-            (
-                "bitvec::order::Msb0",
-                parse_quote!(#crate_path::utils::bits::Msb0),
-            ),
-            (
-                "sp_core::crypto::AccountId32",
-                parse_quote!(#crate_path::utils::AccountId32),
-            ),
-            (
-                "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(#crate_path::utils::MultiAddress),
-            ),
-            (
-                "primitive_types::H160",
-                parse_quote!(#crate_path::utils::H160),
-            ),
-            (
-                "primitive_types::H256",
-                parse_quote!(#crate_path::utils::H256),
-            ),
-            (
-                "primitive_types::H512",
-                parse_quote!(#crate_path::utils::H512),
-            ),
-            (
-                "frame_support::traits::misc::WrapperKeepOpaque",
-                parse_quote!(#crate_path::utils::WrapperKeepOpaque),
-            ),
-            // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
-            // can cause an issue with generated code that doesn't impl `Ord` by default.
-            // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
-            // suitable type params) avoids these issues.
-            ("BTreeMap", parse_quote!(#crate_path::utils::KeyedVec)),
-            ("BTreeSet", parse_quote!(::std::vec::Vec)),
-        ]
-        .iter()
-        .map(|(path, substitute): &(&str, syn::TypePath)| {
-            (path.to_string(), substitute.clone())
-        })
-        .collect::<HashMap<_, _>>();
-
-        type_substitutes.extend(item_mod_ir.type_substitutes().into_iter());
 
         let type_gen = TypeGenerator::new(
             &self.metadata.types,
@@ -325,7 +296,9 @@ impl RuntimeGenerator {
         let rust_items = item_mod_ir.rust_items();
 
         quote! {
+            #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
+            #[allow(clippy::all)]
             pub mod #mod_ident {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *

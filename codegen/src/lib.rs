@@ -21,7 +21,7 @@
 //! use std::fs;
 //! use codec::Decode;
 //! use frame_metadata::RuntimeMetadataPrefixed;
-//! use subxt_codegen::{CratePath, DerivesRegistry};
+//! use subxt_codegen::{CratePath, DerivesRegistry, TypeSubstitutes};
 //!
 //! let encoded = fs::read("../artifacts/polkadot_metadata.scale").unwrap();
 //!
@@ -33,9 +33,11 @@
 //! );
 //! // Default module derivatives.
 //! let mut derives = DerivesRegistry::new(&CratePath::default());
+//! // Default type substitutes.
+//! let substs = TypeSubstitutes::new(&CratePath::default());
 //! // Generate the Runtime API.
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
-//! let runtime_api = generator.generate_runtime(item_mod, derives, CratePath::default());
+//! let runtime_api = generator.generate_runtime(item_mod, derives, substs, CratePath::default());
 //! println!("{}", runtime_api);
 //! ```
 
@@ -60,5 +62,6 @@ pub use self::{
         DerivesRegistry,
         Module,
         TypeGenerator,
+        TypeSubstitutes,
     },
 };

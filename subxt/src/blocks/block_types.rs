@@ -17,10 +17,8 @@ use crate::{
         Error,
     },
     events,
-    rpc::types::{
-        self,
-        ChainBlockResponse,
-    },
+    rpc::types::ChainBlockResponse,
+    runtime_api::RuntimeApi,
     storage::Storage,
 };
 use derivative::Derivative;
@@ -101,15 +99,8 @@ where
     }
 
     /// Execute a runtime API call at this block.
-    pub async fn call(
-        &self,
-        function: String,
-        call_parameters: Option<&[u8]>,
-    ) -> Result<types::Bytes, Error> {
-        self.client
-            .rpc()
-            .call(function, call_parameters, Some(self.hash()))
-            .await
+    pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
+        Ok(RuntimeApi::new(self.client.clone(), self.hash()))
     }
 }
 

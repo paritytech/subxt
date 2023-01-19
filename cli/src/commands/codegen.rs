@@ -10,7 +10,10 @@ use std::{
     io::Read,
     path::PathBuf,
 };
-use subxt_codegen::DerivesRegistry;
+use subxt_codegen::{
+    DerivesRegistry,
+    TypeSubstitutes,
+};
 
 /// Generate runtime API client code from metadata.
 ///
@@ -95,10 +98,13 @@ fn codegen(
         derives.extend_for_type(ty, std::iter::once(derive), &crate_path)
     }
 
+    let type_substitutes = TypeSubstitutes::new(&crate_path);
+
     let runtime_api = subxt_codegen::generate_runtime_api_from_bytes(
         item_mod,
         metadata_bytes,
         derives,
+        type_substitutes,
         crate_path,
     );
     println!("{}", runtime_api);
