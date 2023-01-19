@@ -11,9 +11,11 @@ use crate::{
         wait_for_blocks,
     },
 };
+use assert_matches::assert_matches;
 use codec::{
     Compact,
     Decode,
+    Encode,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::{
@@ -24,7 +26,15 @@ use sp_core::{
 use sp_keyring::AccountKeyring;
 use subxt::{
     error::DispatchError,
-    rpc::types::DryRunError,
+    rpc::types::{
+        ChainHeadEvent,
+        DryRunError,
+        FollowEvent,
+        Initialized,
+        RuntimeEvent,
+        RuntimeVersionEvent,
+    },
+    utils::AccountId32,
 };
 
 #[tokio::test]
@@ -280,4 +290,178 @@ async fn rpc_state_call() {
     let metadata = api.rpc().metadata(None).await.unwrap();
     let metadata = metadata.runtime_metadata();
     assert_eq!(&metadata_call, metadata);
+}
+
+#[tokio::test]
+async fn chainhead_unstable_follow() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Check subscription with runtime updates set on false.
+    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    // The initialized event should contain the finalized block hash.
+    let finalized_block_hash = api.rpc().finalized_head().await.unwrap();
+    assert_eq!(
+        event,
+        FollowEvent::Initialized(Initialized {
+            finalized_block_hash,
+            finalized_block_runtime: None,
+        })
+    );
+
+    // Expect subscription to produce runtime versions.
+    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    // The initialized event should contain the finalized block hash.
+    let finalized_block_hash = api.rpc().finalized_head().await.unwrap();
+    let runtime_version = ctx.client().runtime_version();
+
+    assert_matches!(
+        event,
+        FollowEvent::Initialized(init) => {
+            assert_eq!(init.finalized_block_hash, finalized_block_hash);
+            assert_eq!(init.finalized_block_runtime, Some(RuntimeEvent::Valid(RuntimeVersionEvent {
+                spec: runtime_version,
+            })));
+        }
+    );
+}
+
+#[tokio::test]
+async fn chainhead_unstable_body() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+    let sub_id = blocks.subscription_id().unwrap().clone();
+
+    // Subscribe to fetch the block's body.
+    let mut sub = api
+        .rpc()
+        .chainhead_unstable_body(sub_id, hash)
+        .await
+        .unwrap();
+    let event = sub.next().await.unwrap().unwrap();
+
+    // Expected block's extrinsics scale encoded and hex encoded.
+    let body = api.rpc().block(Some(hash)).await.unwrap().unwrap();
+    let extrinsics: Vec<Vec<u8>> =
+        body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
+    let expected = format!("0x{}", hex::encode(extrinsics.encode()));
+
+    assert_matches!(event,
+        ChainHeadEvent::Done(done) if done.result == expected
+    );
+}
+
+#[tokio::test]
+async fn chainhead_unstable_header() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+    let sub_id = blocks.subscription_id().unwrap().clone();
+
+    let header = api.rpc().header(Some(hash)).await.unwrap().unwrap();
+    let expected = format!("0x{}", hex::encode(header.encode()));
+
+    let header = api
+        .rpc()
+        .chainhead_unstable_header(sub_id, hash)
+        .await
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(header, expected);
+}
+
+#[tokio::test]
+async fn chainhead_unstable_storage() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+    let sub_id = blocks.subscription_id().unwrap().clone();
+
+    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
+    let addr = node_runtime::storage().system().account(alice).to_bytes();
+    let mut sub = api
+        .rpc()
+        .chainhead_unstable_storage(sub_id, hash, &addr, None)
+        .await
+        .unwrap();
+    let event = sub.next().await.unwrap().unwrap();
+
+    assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.result.is_some());
+}
+
+#[tokio::test]
+async fn chainhead_unstable_call() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+    let sub_id = blocks.subscription_id().unwrap().clone();
+
+    let alice_id = AccountKeyring::Alice.to_account_id();
+    let mut sub = api
+        .rpc()
+        .chainhead_unstable_call(
+            sub_id,
+            hash,
+            "AccountNonceApi_account_nonce".into(),
+            &alice_id.encode(),
+        )
+        .await
+        .unwrap();
+    let event = sub.next().await.unwrap().unwrap();
+
+    assert_matches!(event, ChainHeadEvent::<String>::Done(_));
+}
+
+#[tokio::test]
+async fn chainhead_unstable_unpin() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
+    let event = blocks.next().await.unwrap().unwrap();
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+    let sub_id = blocks.subscription_id().unwrap().clone();
+
+    assert!(api
+        .rpc()
+        .chainhead_unstable_unpin(sub_id.clone(), hash)
+        .await
+        .is_ok());
+    // The block was already unpinned.
+    assert!(api
+        .rpc()
+        .chainhead_unstable_unpin(sub_id, hash)
+        .await
+        .is_err());
 }
