@@ -242,7 +242,7 @@ async fn submit_large_extrinsic() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
     // 2 MiB blob of data.
-    let bytes: Vec<u8> = (0..2 * 1024 * 1024).map(|i: u32| i as u8).collect();
+    let bytes = vec![0_u8; 2 * 1024 * 1024];
     // The preimage pallet allows storing and managing large byte-blobs.
     let tx = node_runtime::tx().preimage().note_preimage(bytes);
 
