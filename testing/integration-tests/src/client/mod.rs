@@ -235,6 +235,33 @@ async fn dry_run_fails() {
 }
 
 #[tokio::test]
+async fn submit_large_extrinsic() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+
+    // 2 MiB blob of data.
+    let bytes = vec![0_u8; 2 * 1024 * 1024];
+    // The preimage pallet allows storing and managing large byte-blobs.
+    let tx = node_runtime::tx().preimage().note_preimage(bytes);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
+}
+
+#[tokio::test]
 async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let ctx = test_context().await;
     let api = ctx.client();
