@@ -10,7 +10,10 @@ use codec::{
     Decode,
     Encode,
 };
-use serde::Serialize;
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into
@@ -124,6 +127,16 @@ impl Serialize for AccountId32 {
         S: serde::Serializer,
     {
         serializer.serialize_str(&self.to_ss58check())
+    }
+}
+
+impl<'de> Deserialize<'de> for AccountId32 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        AccountId32::from_ss58check(&String::deserialize(deserializer)?)
+            .map_err(|e| serde::de::Error::custom(format!("{:?}", e)))
     }
 }
 

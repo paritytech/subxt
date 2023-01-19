@@ -19,12 +19,18 @@ use crate::{
         Rpc,
         RpcClientT,
     },
+    runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
     Config,
     Metadata,
 };
+use codec::{
+    Compact,
+    Decode,
+};
 use derivative::Derivative;
+use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -95,7 +101,7 @@ impl<T: Config> OnlineClient<T> {
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
-            rpc.metadata(None),
+            OnlineClient::fetch_metadata(&rpc),
         )
         .await;
 
@@ -107,6 +113,15 @@ impl<T: Config> OnlineClient<T> {
             })),
             rpc,
         })
+    }
+
+    /// Fetch the metadata from substrate using the runtime API.
+    async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
+        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
+        let cursor = &mut &*bytes;
+        let _ = <Compact<u32>>::decode(cursor)?;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        Ok(meta.try_into()?)
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -123,7 +138,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // high level API.
     ///
-    /// let update_task = client.subscribe_to_updates();
+    /// let update_task = client.updater();
     /// tokio::spawn(async move {
     ///     update_task.perform_runtime_updates().await;
     /// });
@@ -131,7 +146,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// // low level API.
     ///
-    /// let updater = client.subscribe_to_updates();
+    /// let updater = client.updater();
     /// tokio::spawn(async move {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
@@ -150,7 +165,7 @@ impl<T: Config> OnlineClient<T> {
     /// });
     /// # }
     /// ```
-    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
+    pub fn updater(&self) -> ClientRuntimeUpdater<T> {
         ClientRuntimeUpdater(self.clone())
     }
 
@@ -214,6 +229,11 @@ impl<T: Config> OnlineClient<T> {
     pub fn blocks(&self) -> BlocksClient<T, Self> {
         <Self as OfflineClientT<T>>::blocks(self)
     }
+
+    /// Work with runtime API.
+    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        <Self as OfflineClientT<T>>::runtime_api(self)
+    }
 }
 
 impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
@@ -234,7 +254,7 @@ impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
     }
 }
 
-/// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
+/// Client wrapper for performing runtime updates. See [`OnlineClient::updater()`]
 /// for example usage.
 pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 

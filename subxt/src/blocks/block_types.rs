@@ -18,6 +18,7 @@ use crate::{
     },
     events,
     rpc::types::ChainBlockResponse,
+    runtime_api::RuntimeApi,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
@@ -88,6 +89,11 @@ where
             block_details,
             self.cached_events.clone(),
         ))
+    }
+
+    /// Execute a runtime API call at this block.
+    pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
+        Ok(RuntimeApi::new(self.client.clone(), self.hash()))
     }
 }
 

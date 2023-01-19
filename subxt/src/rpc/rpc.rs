@@ -375,6 +375,25 @@ impl<T: Config> Rpc<T> {
         Ok(xt_hash)
     }
 
+    /// Execute a runtime API call.
+    pub async fn state_call(
+        &self,
+        function: &str,
+        call_parameters: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<types::Bytes, Error> {
+        let call_parameters = call_parameters.unwrap_or_default();
+
+        let bytes: types::Bytes = self
+            .client
+            .request(
+                "state_call",
+                rpc_params![function, to_hex(call_parameters), at],
+            )
+            .await?;
+        Ok(bytes)
+    }
+
     /// Create and submit an extrinsic and return a subscription to the events triggered.
     pub async fn watch_extrinsic<X: Encode>(
         &self,

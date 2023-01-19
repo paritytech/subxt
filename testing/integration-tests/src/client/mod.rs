@@ -12,6 +12,12 @@ use crate::{
     },
 };
 use assert_matches::assert_matches;
+use codec::{
+    Compact,
+    Decode,
+    Encode,
+};
+use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::{
     sr25519::Pair as Sr25519Pair,
     storage::well_known_keys,
@@ -30,8 +36,6 @@ use subxt::{
     },
     utils::AccountId32,
 };
-
-use codec::Encode;
 
 #[tokio::test]
 async fn insert_key() {
@@ -260,6 +264,32 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 
     // Make sure our encoding is the same as the encoding polkadot UI created.
     assert_eq!(actual_tx_bytes, expected_tx_bytes);
+}
+
+#[tokio::test]
+async fn rpc_state_call() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Call into the runtime of the chain to get the Metadata.
+    let metadata_bytes = api
+        .rpc()
+        .state_call("Metadata_metadata", None, None)
+        .await
+        .unwrap();
+
+    let cursor = &mut &*metadata_bytes;
+    let _ = <Compact<u32>>::decode(cursor).unwrap();
+    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor).unwrap();
+    let metadata_call = match meta.1 {
+        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
+        _ => panic!("Metadata V14 unavailable"),
+    };
+
+    // Compare the runtime API call against the `state_getMetadata`.
+    let metadata = api.rpc().metadata(None).await.unwrap();
+    let metadata = metadata.runtime_metadata();
+    assert_eq!(&metadata_call, metadata);
 }
 
 #[tokio::test]

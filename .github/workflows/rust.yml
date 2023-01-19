@@ -29,6 +29,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -86,6 +87,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -119,6 +121,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -149,6 +152,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -192,6 +196,7 @@ jobs:
       run: |
         curl $SUBSTRATE_URL --output substrate --location
         chmod +x substrate
+        ./substrate --version
         mkdir -p ~/.local/bin
         mv substrate ~/.local/bin
 

@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Start a new tokio task to perform the runtime updates while
     // utilizing the API for other use cases.
-    let update_client = api.subscribe_to_updates();
+    let update_client = api.updater();
     tokio::spawn(async move {
         let result = update_client.perform_runtime_updates().await;
         println!("Runtime update failed with result={:?}", result);
