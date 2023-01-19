@@ -7,6 +7,7 @@ use subxt_codegen::{
     CratePath,
     DerivesRegistry,
     RuntimeGenerator,
+    TypeSubstitutes,
 };
 
 fn load_test_metadata() -> frame_metadata::RuntimeMetadataPrefixed {
@@ -56,8 +57,9 @@ fn generate_runtime_interface(crate_path: CratePath) -> String {
         pub mod api {}
     );
     let derives = DerivesRegistry::new(&crate_path);
+    let type_substitutes = TypeSubstitutes::new(&crate_path);
     generator
-        .generate_runtime(item_mod, derives, crate_path)
+        .generate_runtime(item_mod, derives, type_substitutes, crate_path)
         .to_string()
 }
 
@@ -124,8 +126,9 @@ fn check_root_attrs_preserved() {
     // Generate a runtime interface from the provided metadata.
     let generator = RuntimeGenerator::new(metadata);
     let derives = DerivesRegistry::new(&CratePath::default());
+    let type_substitutes = TypeSubstitutes::new(&CratePath::default());
     let generated_code = generator
-        .generate_runtime(item_mod, derives, CratePath::default())
+        .generate_runtime(item_mod, derives, type_substitutes, CratePath::default())
         .to_string();
 
     let doc_str_loc = generated_code

@@ -31,11 +31,9 @@
 //! ```ignore
 //! #[subxt::subxt(
 //!     runtime_metadata_path = "polkadot_metadata.scale",
+//!     substitute_type(type = "sp_arithmetic::per_things::Perbill", with = "sp_runtime::Perbill")
 //! )]
-//! pub mod polkadot {
-//!     #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
-//!     use sp_runtime::Perbill;
-//! }
+//! pub mod polkadot {}
 //! ```
 //!
 //! This will replace the generated type and any usages with the specified type at the `use` import.
@@ -94,16 +92,19 @@ use std::str::FromStr;
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use proc_macro_error::{
+    abort,
     abort_call_site,
     proc_macro_error,
 };
 use subxt_codegen::{
     utils::Uri,
     DerivesRegistry,
+    TypeSubstitutes,
 };
 use syn::{
     parse_macro_input,
     punctuated::Punctuated,
+    spanned::Spanned as _,
 };
 
 #[derive(Debug, FromMeta)]
@@ -116,6 +117,8 @@ struct RuntimeMetadataArgs {
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(multiple)]
     derive_for_type: Vec<DeriveForType>,
+    #[darling(multiple)]
+    substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
     crate_path: Option<String>,
 }
@@ -125,6 +128,13 @@ struct DeriveForType {
     #[darling(rename = "type")]
     ty: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
+}
+
+#[derive(Debug, FromMeta)]
+struct SubstituteType {
+    #[darling(rename = "type")]
+    ty: syn::Path,
+    with: syn::Path,
 }
 
 #[proc_macro_attribute]
@@ -142,6 +152,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         None => subxt_codegen::CratePath::default(),
     };
     let mut derives_registry = DerivesRegistry::new(&crate_path);
+
     if let Some(derive_for_all) = args.derive_for_all_types {
         derives_registry.extend_for_all(derive_for_all.iter().cloned());
     }
@@ -153,6 +164,19 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         )
     }
 
+    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    type_substitutes.extend(args.substitute_type.into_iter().map(
+        |SubstituteType { ty, with }| {
+            (
+                ty,
+                with.try_into()
+                    .unwrap_or_else(|(node, msg): (syn::Path, String)| {
+                        abort!(node.span(), msg)
+                    }),
+            )
+        },
+    ));
+
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
@@ -162,6 +186,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 item_mod,
                 path,
                 derives_registry,
+                type_substitutes,
                 crate_path,
             )
             .into()
@@ -174,6 +199,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 item_mod,
                 &url,
                 derives_registry,
+                type_substitutes,
                 crate_path,
             )
             .into()
