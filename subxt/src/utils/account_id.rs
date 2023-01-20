@@ -169,13 +169,13 @@ mod substrate_impls {
 
     impl From<sp_core::sr25519::Public> for AccountId32 {
         fn from(value: sp_core::sr25519::Public) -> Self {
-            let acc: sp_runtime::AccountId32 = value.into();
+            let acc: sp_runtime::AccountId32 = value.0.into();
             acc.into()
         }
     }
     impl From<sp_core::ed25519::Public> for AccountId32 {
         fn from(value: sp_core::ed25519::Public) -> Self {
-            let acc: sp_runtime::AccountId32 = value.into();
+            let acc: sp_runtime::AccountId32 = value.0.into();
             acc.into()
         }
     }
