@@ -3377,9 +3377,9 @@ dependencies = [
 
 [[package]]
 name = "sp-version"
-version = "10.0.0"
+version = "12.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cd5ddc34360c0497480ddb134d93c2adcfdaa344f30a0db601f05c2af2a6eae"
+checksum = "624e01682f02fc4ef54df9523854c1f37e4a777258f446e746eb624e95152516"
 dependencies = [
  "impl-serde",
  "parity-scale-codec",
@@ -3387,7 +3387,7 @@ dependencies = [
  "scale-info",
  "serde",
  "sp-core-hashing-proc-macro",
- "sp-runtime 12.0.0",
+ "sp-runtime 14.0.0",
  "sp-std",
  "sp-version-proc-macro",
  "thiserror",
@@ -3557,7 +3557,6 @@ dependencies = [
  "sp-core 12.0.0",
  "sp-core-hashing",
  "sp-keyring 14.0.0",
- "sp-runtime 12.0.0",
  "sp-runtime 14.0.0",
  "sp-version",
  "subxt-macro",
