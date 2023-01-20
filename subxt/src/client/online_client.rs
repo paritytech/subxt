@@ -30,7 +30,10 @@ use codec::{
     Decode,
 };
 use derivative::Derivative;
-use frame_metadata::RuntimeMetadataPrefixed;
+use frame_metadata::{
+    OpaqueMetadata,
+    RuntimeMetadataPrefixed,
+};
 use futures::future;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -153,10 +156,20 @@ impl<T: Config> OnlineClient<T> {
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
         let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
-        let cursor = &mut &*bytes;
-        let _ = <Compact<u32>>::decode(cursor)?;
-        let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
-        Ok(meta.try_into()?)
+
+        let decoded: (Vec<String>, OpaqueMetadata) = Decode::decode(&mut &*bytes)?;
+
+        let bytes = decoded.1 .0;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+
+        println!("Availb methods {:?}", decoded.0);
+
+        // let cursor = &mut &*bytes;
+        // let _ = <Compact<u32>>::decode(cursor)?;
+        // let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        Ok(metadata)
     }
 
     /// Create an object which can be used to keep the runtime up to date
