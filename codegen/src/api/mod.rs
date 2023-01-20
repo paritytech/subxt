@@ -9,6 +9,7 @@ mod constants;
 mod events;
 mod storage;
 
+use scale_info::form::PortableForm;
 use subxt_metadata::get_metadata_per_pallet_hash;
 
 use super::DerivesRegistry;
@@ -31,6 +32,7 @@ use frame_metadata::{
     v15::RuntimeMetadataV15,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
+    TraitMetadata,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -147,6 +149,43 @@ pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV15,
 }
 
+fn generate_runtime_call_api(
+    type_gen: &TypeGenerator,
+    runtime: &Vec<TraitMetadata<PortableForm>>,
+) -> TokenStream2 {
+    let mut result = quote!();
+
+    for trait_ in runtime {
+        for method in &trait_.methods {
+            let fn_name = format!("{}{}", trait_.name, method.name);
+
+            let mut params = Vec::new();
+            for input in &method.inputs {
+                let name = &input.name;
+                let ty = input.ty;
+                let ty = type_gen.resolve_type_path(ty.id());
+                let param = quote!( #name: #ty );
+                params.push(param);
+            }
+
+            let output = method.output;
+            let output = type_gen.resolve_type_path(output.id());
+
+            let fn_ = quote!(
+                pub fn #fn_name( &self, #( #params, )* ) -> #output {
+                    // call into RPC.
+                }
+            );
+
+            result.extend(fn_);
+        }
+    }
+
+    println!("Code gen would generate: {}", result);
+
+    result
+}
+
 impl RuntimeGenerator {
     /// Create a new runtime generator from the provided metadata.
     ///
@@ -184,6 +223,9 @@ impl RuntimeGenerator {
             derives.clone(),
             crate_path.clone(),
         );
+        let runtime_api_fns =
+            generate_runtime_call_api(&type_gen, &self.metadata.runtime);
+
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
@@ -326,6 +368,10 @@ impl RuntimeGenerator {
 
                 pub fn tx() -> TransactionApi {
                     TransactionApi
+                }
+
+                pub mod runtime_api {
+                    #runtime_api_fns
                 }
 
                 pub struct ConstantsApi;
