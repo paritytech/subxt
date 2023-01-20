@@ -222,13 +222,23 @@ async fn tx_call() {
         .contracts()
         .contract_info_of(&contract);
 
-    let contract_info = cxt.client().storage().fetch(&info_addr, None).await;
+    let contract_info = cxt
+        .client()
+        .storage()
+        .at(None)
+        .await
+        .unwrap()
+        .fetch(&info_addr)
+        .await;
     assert!(contract_info.is_ok());
 
     let keys = cxt
         .client()
         .storage()
-        .fetch_keys(&info_addr.to_bytes(), 10, None, None)
+        .at(None)
+        .await
+        .unwrap()
+        .fetch_keys(&info_addr.to_bytes(), 10, None)
         .await
         .unwrap()
         .iter()

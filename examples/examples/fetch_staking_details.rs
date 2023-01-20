@@ -32,7 +32,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     let active_era_addr = polkadot::storage().staking().active_era();
-    let era = api.storage().fetch(&active_era_addr, None).await?.unwrap();
+    let era = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch(&active_era_addr)
+        .await?
+        .unwrap();
     println!(
         "Staking active era: index: {:?}, start: {:?}",
         era.index, era.start
@@ -52,13 +58,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let controller_acc_addr = polkadot::storage().staking().bonded(&alice_stash_id);
     let controller_acc = api
         .storage()
-        .fetch(&controller_acc_addr, None)
+        .at(None)
+        .await?
+        .fetch(&controller_acc_addr)
         .await?
         .unwrap();
     println!("    account controlled by: {:?}", controller_acc);
 
     let era_reward_addr = polkadot::storage().staking().eras_reward_points(era.index);
-    let era_result = api.storage().fetch(&era_reward_addr, None).await?;
+    let era_result = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch(&era_reward_addr)
+        .await?;
     println!("Era reward points: {:?}", era_result);
 
     Ok(())

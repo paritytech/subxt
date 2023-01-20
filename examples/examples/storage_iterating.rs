@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
 
-        let mut iter = api.storage().iter(key_addr, 10, None).await?;
+        let mut iter = api.storage().at(None).await?.iter(key_addr, 10).await?;
 
         println!("\nExample 1. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
@@ -52,14 +52,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Fetch at most 10 keys from below the prefix XcmPallet' VersionNotifiers.
         let keys = api
             .storage()
-            .fetch_keys(&key_addr.to_root_bytes(), 10, None, None)
+            .at(None)
+            .await?
+            .fetch_keys(&key_addr.to_root_bytes(), 10, None)
             .await?;
 
         println!("Example 2. Obtained keys:");
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(key));
 
-            if let Some(storage_data) = api.storage().fetch_raw(&key.0, None).await? {
+            if let Some(storage_data) =
+                api.storage().at(None).await?.fetch_raw(&key.0).await?
+            {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn
@@ -86,13 +90,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
         println!("\nExample 3\nQuery key: 0x{}", hex::encode(&query_key));
 
-        let keys = api.storage().fetch_keys(&query_key, 10, None, None).await?;
+        let keys = api
+            .storage()
+            .at(None)
+            .await?
+            .fetch_keys(&query_key, 10, None)
+            .await?;
 
         println!("Obtained keys:");
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(key));
 
-            if let Some(storage_data) = api.storage().fetch_raw(&key.0, None).await? {
+            if let Some(storage_data) =
+                api.storage().at(None).await?.fetch_raw(&key.0).await?
+            {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn

@@ -42,11 +42,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_pre = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
@@ -75,11 +79,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
@@ -113,11 +121,15 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let alice_pre = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = subxt::dynamic::tx(
@@ -159,11 +171,15 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let alice_pre_free = alice_pre
@@ -214,7 +230,9 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = node_runtime::tx()
@@ -233,7 +251,9 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
@@ -246,7 +266,14 @@ async fn storage_total_issuance() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().balances().total_issuance();
-    let total_issuance = api.storage().fetch_or_default(&addr, None).await.unwrap();
+    let total_issuance = api
+        .storage()
+        .at(None)
+        .await
+        .unwrap()
+        .fetch_or_default(&addr)
+        .await
+        .unwrap();
     assert_ne!(total_issuance, 0);
 }
 
@@ -274,7 +301,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     let locks_addr = node_runtime::storage().balances().locks(bob);
 
-    let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
+    let locks = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch_or_default(&locks_addr)
+        .await?;
 
     assert_eq!(
         locks.0,

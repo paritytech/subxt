@@ -19,6 +19,7 @@ use crate::{
     events,
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
+    storage::Storage,
 };
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
@@ -89,6 +90,12 @@ where
             block_details,
             self.cached_events.clone(),
         ))
+    }
+
+    /// Work with storage.
+    pub fn storage(&self) -> Storage<T, C> {
+        let block_hash = self.hash();
+        Storage::new(self.client.clone(), block_hash)
     }
 
     /// Execute a runtime API call at this block.

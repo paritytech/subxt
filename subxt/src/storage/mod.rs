@@ -7,12 +7,15 @@
 mod storage_address;
 mod storage_client;
 mod storage_map_key;
+mod storage_type;
 
 pub mod utils;
 
-pub use storage_client::{
+pub use storage_client::StorageClient;
+
+pub use storage_type::{
     KeyIter,
-    StorageClient,
+    Storage,
 };
 
 // Re-export as this is used in the public API in this module:

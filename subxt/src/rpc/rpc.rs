@@ -173,6 +173,25 @@ impl<T: Config> Rpc<T> {
         Ok(metadata)
     }
 
+    /// Execute a runtime API call.
+    pub async fn call(
+        &self,
+        function: String,
+        call_parameters: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<types::Bytes, Error> {
+        let call_parameters = call_parameters.unwrap_or_default();
+
+        let bytes: types::Bytes = self
+            .client
+            .request(
+                "state_call",
+                rpc_params![function, to_hex(call_parameters), at],
+            )
+            .await?;
+        Ok(bytes)
+    }
+
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<types::SystemProperties, Error> {
         self.client
