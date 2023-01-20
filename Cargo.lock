@@ -960,13 +960,22 @@ checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 [[package]]
 name = "frame-metadata"
 version = "15.0.0"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+]
+
+[[package]]
+name = "frame-metadata"
+version = "15.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df6bb8542ef006ef0de09a5c4420787d79823c0ed7924225822362fd2bf2ff2d"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
  "scale-info",
- "serde",
 ]
 
 [[package]]
@@ -1498,7 +1507,7 @@ name = "integration-tests"
 version = "0.25.0"
 dependencies = [
  "assert_matches",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -2599,7 +2608,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16a5e7810815bd295da73e4216d1dfbced3c7c7c7054d70fa5f6e4c58123fff4"
 dependencies = [
  "either",
- "frame-metadata",
+ "frame-metadata 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
@@ -3328,7 +3337,7 @@ dependencies = [
  "bitvec",
  "blake2",
  "derivative",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "futures",
  "getrandom 0.2.8",
  "hex",
@@ -3361,7 +3370,7 @@ version = "0.25.0"
 dependencies = [
  "clap 4.1.1",
  "color-eyre",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -3379,7 +3388,7 @@ version = "0.25.0"
 dependencies = [
  "bitvec",
  "darling",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "heck",
  "hex",
  "jsonrpsee",
@@ -3425,7 +3434,7 @@ version = "0.25.0"
 dependencies = [
  "bitvec",
  "criterion",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "parity-scale-codec",
  "scale-info",
  "sp-core-hashing",
@@ -3801,7 +3810,7 @@ checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 name = "ui-tests"
 version = "0.25.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "parity-scale-codec",
  "scale-info",
  "subxt",

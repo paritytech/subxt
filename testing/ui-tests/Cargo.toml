@@ -11,6 +11,6 @@ publish = false
 [dev-dependencies]
 trybuild = "1.0.76"
 scale-info = { version = "2.3.0", features = ["bit-vec"] }
-frame-metadata = "15.0.0"
+frame-metadata = { version = "15.0.0", path = "/home/lexnv/remote-builds/frame-metadata/frame-metadata", features = ["v15", "std"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 subxt = { path = "../../subxt" }
