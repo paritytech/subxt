@@ -6,7 +6,7 @@ pub mod dispatch_error;
 mod metadata_test_runner;
 
 use frame_metadata::{
-    v14::RuntimeMetadataV14,
+    v15::RuntimeMetadataV15,
     ExtrinsicMetadata,
     PalletMetadata,
     PalletStorageMetadata,
@@ -36,7 +36,7 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<
         signed_extensions: vec![],
     };
 
-    // Construct metadata manually from our types (See `RuntimeMetadataV14::new()`).
+    // Construct metadata manually from our types (See `RuntimeMetadataV15::new()`).
     // Add any extra types we need to the registry.
     let mut registry = scale_info::Registry::new();
     let pallets = registry.map_into_portable(pallets);
@@ -46,7 +46,7 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<
     // Metadata needs to contain this DispatchError, since codegen looks for it.
     registry.register_type(&meta_type::<DispatchError>());
 
-    let metadata = RuntimeMetadataV14 {
+    let metadata = RuntimeMetadataV15 {
         types: registry.into(),
         pallets,
         extrinsic,

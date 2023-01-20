@@ -10,7 +10,7 @@ use crate::{
     CratePath,
 };
 use frame_metadata::{
-    v14::RuntimeMetadataV14,
+    v15::RuntimeMetadataV15,
     PalletMetadata,
 };
 use heck::{
@@ -35,7 +35,7 @@ use scale_info::form::PortableForm;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,

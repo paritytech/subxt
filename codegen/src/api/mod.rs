@@ -28,7 +28,7 @@ use crate::{
 };
 use codec::Decode;
 use frame_metadata::{
-    v14::RuntimeMetadataV14,
+    v15::RuntimeMetadataV15,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
 };
@@ -144,7 +144,7 @@ pub fn generate_runtime_api_from_bytes(
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
 }
 
 impl RuntimeGenerator {
@@ -155,7 +155,7 @@ impl RuntimeGenerator {
     /// from that.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
-            RuntimeMetadata::V14(v14) => Self { metadata: v14 },
+            RuntimeMetadata::V15(v15) => Self { metadata: v15 },
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         }
     }

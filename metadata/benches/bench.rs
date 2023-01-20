@@ -5,9 +5,9 @@
 use codec::Decode;
 use criterion::*;
 use frame_metadata::{
-    RuntimeMetadata::V14,
+    RuntimeMetadata::V15,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
+    RuntimeMetadataV15,
 };
 use scale_info::{
     form::PortableForm,
@@ -26,14 +26,14 @@ use subxt_metadata::{
     get_storage_hash,
 };
 
-fn load_metadata() -> RuntimeMetadataV14 {
+fn load_metadata() -> RuntimeMetadataV15 {
     let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))
         .expect("Cannot read metadata blob");
     let meta: RuntimeMetadataPrefixed =
         Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
     match meta.1 {
-        V14(v14) => v14,
+        V15(v15) => v15,
         _ => panic!("Unsupported metadata version {:?}", meta.1),
     }
 }

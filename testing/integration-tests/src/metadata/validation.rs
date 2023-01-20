@@ -13,7 +13,7 @@ use frame_metadata::{
     PalletMetadata,
     PalletStorageMetadata,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
+    RuntimeMetadataV15,
     StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,
@@ -35,7 +35,7 @@ use subxt::{
 };
 
 async fn metadata_to_api(
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
     ctx: &TestContext,
 ) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
@@ -57,7 +57,7 @@ async fn full_metadata_check() {
     assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata: RuntimeMetadataV15 = api.metadata().runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
     let api = metadata_to_api(metadata, &ctx).await;
@@ -79,7 +79,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata: RuntimeMetadataV15 = api.metadata().runtime_metadata().clone();
 
     let mut existential = metadata
         .pallets
@@ -112,8 +112,8 @@ fn default_pallet() -> PalletMetadata {
     }
 }
 
-fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
-    RuntimeMetadataV14::new(
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+    RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
             ty: meta_type::<()>(),

@@ -309,7 +309,7 @@ async fn rpc_state_call() {
     let _ = <Compact<u32>>::decode(cursor).unwrap();
     let meta: RuntimeMetadataPrefixed = Decode::decode(cursor).unwrap();
     let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
+        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
         _ => panic!("Metadata V14 unavailable"),
     };
 

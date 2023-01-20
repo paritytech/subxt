@@ -404,11 +404,11 @@ pub(crate) mod test_utils {
     };
     use codec::Encode;
     use frame_metadata::{
-        v14::{
+        v15::{
             ExtrinsicMetadata,
             PalletEventMetadata,
             PalletMetadata,
-            RuntimeMetadataV14,
+            RuntimeMetadataV15,
         },
         RuntimeMetadataPrefixed,
     };
@@ -464,8 +464,8 @@ pub(crate) mod test_utils {
             signed_extensions: vec![],
         };
 
-        let v14 = RuntimeMetadataV14::new(pallets, extrinsic, meta_type::<()>());
-        let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
+        let v15 = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let runtime_metadata: RuntimeMetadataPrefixed = v15.into();
 
         Metadata::try_from(runtime_metadata).unwrap()
     }

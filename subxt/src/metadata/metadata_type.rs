@@ -8,7 +8,7 @@ use frame_metadata::{
     PalletConstantMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
+    RuntimeMetadataV15,
     StorageEntryMetadata,
     META_RESERVED,
 };
@@ -77,7 +77,7 @@ pub enum MetadataError {
 // We hide the innards behind an Arc so that it's easy to clone and share.
 #[derive(Debug)]
 struct MetadataInner {
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     // Errors are hashed by pallet index.
@@ -153,7 +153,7 @@ impl Metadata {
     }
 
     /// Return the runtime metadata.
-    pub fn runtime_metadata(&self) -> &RuntimeMetadataV14 {
+    pub fn runtime_metadata(&self) -> &RuntimeMetadataV15 {
         &self.inner.metadata
     }
 
@@ -417,7 +417,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(InvalidMetadataError::InvalidPrefix)
         }
         let metadata = match metadata.1 {
-            RuntimeMetadata::V14(meta) => meta,
+            RuntimeMetadata::V15(meta) => meta,
             _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
@@ -596,7 +596,7 @@ mod tests {
             error: None,
         };
 
-        let metadata = RuntimeMetadataV14::new(
+        let metadata = RuntimeMetadataV15::new(
             vec![pallet],
             ExtrinsicMetadata {
                 ty: meta_type::<()>(),

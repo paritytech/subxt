@@ -10,7 +10,7 @@ use color_eyre::eyre::{
 use frame_metadata::{
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
+    RuntimeMetadataV15,
     META_RESERVED,
 };
 use jsonrpsee::client_transport::ws::Uri;
@@ -110,7 +110,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
     Ok(())
 }
 
-async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV14> {
+async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV15> {
     let bytes = subxt_codegen::utils::fetch_metadata_bytes(url).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
@@ -124,7 +124,7 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
     }
 
     match metadata.1 {
-        RuntimeMetadata::V14(v14) => Ok(v14),
+        RuntimeMetadata::V15(v15) => Ok(v15),
         _ => {
             Err(eyre::eyre!(
                 "Node {:?} with unsupported metadata version: {:?}",
