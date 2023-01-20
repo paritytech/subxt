@@ -161,11 +161,7 @@ mod substrate_impls {
 
 
 
-    impl From<sp_runtime::AccountId32> for AccountId32{
-        fn from(value: sp_core::crypto::AccountId32) -> Self {
-            value.into()
-        }
-    }
+
 
     impl From<sp_core::sr25519::Public> for AccountId32 {
         fn from(value: sp_core::sr25519::Public) -> Self {
