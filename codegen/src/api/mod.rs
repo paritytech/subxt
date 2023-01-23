@@ -155,9 +155,14 @@ fn generate_runtime_call_api(
 ) -> TokenStream2 {
     let mut result = quote!();
 
+    println!("inside runtime: {:?}", runtime);
+
     for trait_ in runtime {
         for method in &trait_.methods {
-            let fn_name = format!("{}{}", trait_.name, method.name);
+            let trait_name = trait_.name.clone();
+            let method_name = method.name.clone();
+
+            let fn_name = format_ident!("{}_{}", trait_.name, method.name);
 
             let mut params = Vec::new();
             for input in &method.inputs {
@@ -172,7 +177,7 @@ fn generate_runtime_call_api(
             let output = type_gen.resolve_type_path(output.id());
 
             let fn_ = quote!(
-                pub fn #fn_name( &self, #( #params, )* ) -> #output {
+                pub fn #fn_name( #( #params, )* ) -> #output {
                     // call into RPC.
                 }
             );
