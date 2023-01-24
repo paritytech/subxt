@@ -75,11 +75,8 @@ We also assume that ongoing work done is being merged directly to the `master` b
         ```
         (cd metadata && cargo publish) && \
             (cd codegen && cargo publish) && \
-            sleep 10 && \
             (cd macro && cargo publish) && \
-            sleep 10 && \
             (cd subxt && cargo publish) && \
-            sleep 10 && \
             (cd cli && cargo publish);
         ```
 
