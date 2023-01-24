@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.25.0"
+version = "0.26.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 publish = true
@@ -50,8 +50,8 @@ parking_lot = "0.12.0"
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
-subxt-macro = { version = "0.25.0", path = "../macro" }
-subxt-metadata = { version = "0.25.0", path = "../metadata" }
+subxt-macro = { version = "0.26.0", path = "../macro" }
+subxt-metadata = { version = "0.26.0", path = "../metadata" }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { version = "0.4.0" }
