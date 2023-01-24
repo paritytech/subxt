@@ -10,7 +10,7 @@ This release adds a number of improvements, most notably:
 
 - We make Substrate dependencies optional ([#760](https://github.com/paritytech/subxt/pull/760)), which makes WASM builds both smaller and more reliable. To do this, we re-implement some core types like `AccountId32`, `MultiAddress` and `MultiSignature` internally.
 - Allow access to storage entries ([#774](https://github.com/paritytech/subxt/pull/774)) and runtime API's ([#777](https://github.com/paritytech/subxt/pull/777)) from some block. This is part of a move towards a more "block centric" interface, which will better align with the newly available `chainHead` style RPC interface.
-- Add RPC methods for the new `chainHead` style interface. These are currently unstable, but will allow users to start experimenting with this new API if their nodes support it.
+- Add RPC methods for the new `chainHead` style interface (see https://paritytech.github.io/json-rpc-interface-spec/). These are currently unstable, but will allow users to start experimenting with this new API if their nodes support it.
 - More advanced type substitution is now possible in the codegen interface ([#735](https://github.com/paritytech/subxt/pull/735)).
 
 This release introduces a number of breaking changes that can be generally be fixed with mechanical tweaks to your code. The notable changes are described below.
