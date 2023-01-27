@@ -194,8 +194,7 @@ async fn tx_instantiate_with_code() {
 
     assert!(
         result.is_ok(),
-        "Error calling instantiate_with_code and receiving CodeStored and Instantiated Events: {:?}",
-        result
+        "Error calling instantiate_with_code and receiving CodeStored and Instantiated Events: {result:?}"
     );
 }
 
@@ -208,8 +207,7 @@ async fn tx_instantiate() {
 
     assert!(
         instantiated.is_ok(),
-        "Error instantiating contract: {:?}",
-        instantiated
+        "Error instantiating contract: {instantiated:?}"
     );
 }
 
@@ -244,9 +242,9 @@ async fn tx_call() {
         .iter()
         .map(|key| hex::encode(&key.0))
         .collect::<Vec<_>>();
-    println!("keys post: {:?}", keys);
+    println!("keys post: {keys:?}");
 
     let executed = cxt.call(contract, vec![]).await;
 
-    assert!(executed.is_ok(), "Error calling contract: {:?}", executed);
+    assert!(executed.is_ok(), "Error calling contract: {executed:?}");
 }

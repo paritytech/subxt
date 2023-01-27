@@ -169,7 +169,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         }
         // Report other statuses we see.
         else {
-            println!("Current transaction status: {:?}", ev);
+            println!("Current transaction status: {ev:?}");
         }
     }
 

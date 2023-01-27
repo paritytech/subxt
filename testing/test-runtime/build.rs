@@ -33,7 +33,7 @@ async fn run() {
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
-        .arg(format!("--ws-port={}", port))
+        .arg(format!("--ws-port={port}"))
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
@@ -42,7 +42,7 @@ async fn run() {
             See https://github.com/paritytech/subxt/tree/master#integration-testing")
         }
         Err(e) => {
-            panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
+            panic!("Cannot spawn substrate command '{substrate_bin}': {e}")
         }
     };
 
@@ -53,13 +53,13 @@ async fn run() {
 
         loop {
             if retries >= MAX_RETRIES {
-                panic!("Cannot connect to substrate node after {} retries", retries);
+                panic!("Cannot connect to substrate node after {retries} retries");
             }
 
             // It might take a while for substrate node that spin up the RPC server.
             // Thus, the connection might get rejected a few times.
             use client::ClientT;
-            let res = match client::build(&format!("ws://localhost:{}", port)).await {
+            let res = match client::build(&format!("ws://localhost:{port}")).await {
                 Ok(c) => c.request("state_getMetadata", client::rpc_params![]).await,
                 Err(e) => Err(e),
             };
@@ -114,7 +114,7 @@ async fn run() {
         substrate_path.to_string_lossy()
     );
     // Re-build if we point to a different substrate binary:
-    println!("cargo:rerun-if-env-changed={}", SUBSTRATE_BIN_ENV_VAR);
+    println!("cargo:rerun-if-env-changed={SUBSTRATE_BIN_ENV_VAR}");
     // Re-build if this file changes:
     println!("cargo:rerun-if-changed=build.rs");
 }

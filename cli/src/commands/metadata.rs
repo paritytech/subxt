@@ -37,11 +37,11 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
             let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
             let json = serde_json::to_string_pretty(&metadata)?;
-            println!("{}", json);
+            println!("{json}");
             Ok(())
         }
         "hex" => {
-            println!("{}", hex_data);
+            println!("{hex_data}");
             Ok(())
         }
         "bytes" => {

@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Look it up:
     let existential_deposit = api.constants().at(&address)?;
 
-    println!("Existential Deposit: {}", existential_deposit);
+    println!("Existential Deposit: {existential_deposit}");
 
     Ok(())
 }

@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let update_client = api.updater();
     tokio::spawn(async move {
         let result = update_client.perform_runtime_updates().await;
-        println!("Runtime update failed with result={:?}", result);
+        println!("Runtime update failed with result={result:?}");
     });
 
     // If this client is kept in use a while, it'll update its metadata and such
