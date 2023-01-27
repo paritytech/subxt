@@ -268,7 +268,7 @@ impl<'a> serde::Deserialize<'a> for DigestItem {
     {
         let r = impl_serde::serialize::deserialize(de)?;
         Decode::decode(&mut &r[..])
-            .map_err(|e| serde::de::Error::custom(format!("Decode error: {}", e)))
+            .map_err(|e| serde::de::Error::custom(format!("Decode error: {e}")))
     }
 }
 

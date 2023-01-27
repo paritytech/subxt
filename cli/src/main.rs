@@ -46,7 +46,7 @@ async fn main() -> color_eyre::Result<()> {
     let opts = CliOpts::parse();
 
     match &opts.subcmd {
-        SubCommand::Metadata(cmd_opts) => commands::metadata::run(&opts, &cmd_opts).await,
+        SubCommand::Metadata(cmd_opts) => commands::metadata::run(&opts, cmd_opts).await,
         SubCommand::Codegen(cmd_opts) => commands::codegen::run(&opts, cmd_opts).await,
         SubCommand::Compatibility(cmd_opts) => {
             commands::compatibility::run(&opts, cmd_opts).await

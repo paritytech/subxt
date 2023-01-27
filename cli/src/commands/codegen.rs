@@ -103,6 +103,6 @@ fn codegen(
         type_substitutes,
         crate_path,
     );
-    println!("{}", runtime_api);
+    println!("{runtime_api}");
     Ok(())
 }
