@@ -14,13 +14,14 @@ Use the [`subxt-cli`](./cli) tool to download the metadata for your target runti
 ```bash
 cargo install subxt-cli
 ```
-2. Save the encoded metadata to a file:
+2. Set the URL you want to use, you may skip this step and the default `http://localhost:9933/` will be used:
+```
+export SUBXT_URL=<your endpoint>
+```
+3. Save the encoded metadata to a file:
 ```bash
 subxt metadata -f bytes > metadata.scale
 ```
-
-This defaults to querying the metadata of a locally running node on the default `http://localhost:9933/`. If querying
-a different node then the `metadata` command accepts a `--url` argument.
 
 ## Subxt Documentation
 
