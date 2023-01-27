@@ -30,7 +30,6 @@ impl Config for MyConfig {
     // polkadot runtime used, so some operations will fail. Normally when using a custom `Config`
     // impl types MUST match exactly those used in the actual runtime.
     type Index = u64;
-    type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
     type Hash = <SubstrateConfig as Config>::Hash;
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;

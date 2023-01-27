@@ -57,7 +57,7 @@ where
     }
 
     /// Return the block number.
-    pub fn number(&self) -> T::BlockNumber {
+    pub fn number(&self) -> <T::Header as crate::config::Header>::Number {
         self.header().number()
     }
 

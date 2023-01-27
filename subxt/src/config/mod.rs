@@ -13,12 +13,14 @@ pub mod polkadot;
 pub mod substrate;
 
 use codec::{
-    Codec,
+    Decode,
     Encode,
-    EncodeLike,
 };
 use core::fmt::Debug;
-use serde::Serialize;
+use serde::{
+    de::DeserializeOwned,
+    Serialize,
+};
 
 pub use extrinsic_params::ExtrinsicParams;
 pub use polkadot::PolkadotConfig;
@@ -31,65 +33,38 @@ pub use substrate::SubstrateConfig;
 pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
-    type Index: Parameter
-        + Member
-        + serde::de::DeserializeOwned
-        + Default
-        + Copy
-        + scale_info::TypeInfo
-        + Into<u64>;
-
-    /// The block number type used by the runtime.
-    type BlockNumber: Parameter
-        + Member
-        + Default
-        + Copy
-        + std::hash::Hash
-        + std::str::FromStr
-        + Into<u64>;
+    type Index: Debug + Copy + DeserializeOwned + Into<u64>;
 
     /// The output of the `Hashing` function.
-    type Hash: Parameter
-        + Member
-        + serde::Serialize
-        + serde::de::DeserializeOwned
-        + Ord
-        + Default
+    type Hash: Debug
         + Copy
-        + std::hash::Hash
+        + Send
+        + Sync
+        + Decode
         + AsRef<[u8]>
-        + AsMut<[u8]>
-        + scale_info::TypeInfo;
+        + Serialize
+        + DeserializeOwned
+        + Encode
+        + PartialEq;
 
     /// The account ID type.
-    type AccountId: Clone + Serialize;
+    type AccountId: Debug + Clone + Serialize;
 
     /// The address type.
-    type Address: Encode + From<Self::AccountId>;
+    type Address: Debug + Encode + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Encode;
+    type Signature: Debug + Encode;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hasher: Hasher<Output = Self::Hash>;
+    type Hasher: Debug + Hasher<Output = Self::Hash>;
 
     /// The block header.
-    type Header: Parameter
-        + Header<Number = Self::BlockNumber, Hasher = Self::Hasher>
-        + Member
-        + serde::de::DeserializeOwned;
+    type Header: Debug + Header<Hasher = Self::Hasher> + Send + DeserializeOwned;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
 }
-
-/// Parameter trait copied from `substrate::frame_support`.
-pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
-impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
-
-/// A type that can be used in runtime structures. Copied from `sp_runtime::traits`.
-pub trait Member: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static {}
-impl<T: Send + Sync + Sized + Debug + Eq + PartialEq + Clone + 'static> Member for T {}
 
 /// This represents the hasher used by a node to hash things like block headers
 /// and extrinsics.
@@ -110,7 +85,7 @@ pub trait Hasher {
 /// This represents the block header type used by a node.
 pub trait Header: Sized + Encode {
     /// The block number type for this header.
-    type Number;
+    type Number: Into<u64>;
     /// The hasher used to hash this header.
     type Hasher: Hasher;
 
@@ -146,7 +121,6 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     for WithExtrinsicParams<T, E>
 {
     type Index = T::Index;
-    type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;
     type AccountId = T::AccountId;
     type Address = T::Address;
