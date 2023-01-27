@@ -124,7 +124,7 @@ impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
     {
         let r = impl_serde::serialize::deserialize(de)?;
         let bytes = Decode::decode(&mut &r[..])
-            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {}", e)))?;
+            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {e}")))?;
         Ok(ChainBlockExtrinsic(bytes))
     }
 }
@@ -778,7 +778,7 @@ mod as_string {
     ) -> Result<usize, D::Error> {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e| serde::de::Error::custom(format!("Parsing failed: {}", e)))
+            .map_err(|e| serde::de::Error::custom(format!("Parsing failed: {e}")))
     }
 }
 

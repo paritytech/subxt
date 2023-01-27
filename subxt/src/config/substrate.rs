@@ -39,13 +39,12 @@ pub enum SubstrateConfig {}
 
 impl Config for SubstrateConfig {
     type Index = u32;
-    type BlockNumber = u32;
     type Hash = H256;
     type AccountId = AccountId32;
     type Address = MultiAddress<Self::AccountId, u32>;
     type Signature = MultiSignature;
     type Hasher = BlakeTwo256;
-    type Header = SubstrateHeader<Self::BlockNumber, BlakeTwo256>;
+    type Header = SubstrateHeader<u32, BlakeTwo256>;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }
 
@@ -124,10 +123,9 @@ pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
     pub digest: Digest,
 }
 
-impl<N: Copy + Into<U256> + TryFrom<U256> + Encode, H: Hasher + Encode> Header
-    for SubstrateHeader<N, H>
+impl<N, H> Header for SubstrateHeader<N, H>
 where
-    N: Copy + Into<U256> + TryFrom<U256> + Encode,
+    N: Copy + Into<u64> + Into<U256> + TryFrom<U256> + Encode,
     H: Hasher + Encode,
     SubstrateHeader<N, H>: Encode,
 {
@@ -268,14 +266,11 @@ impl<'a> serde::Deserialize<'a> for DigestItem {
     {
         let r = impl_serde::serialize::deserialize(de)?;
         Decode::decode(&mut &r[..])
-            .map_err(|e| serde::de::Error::custom(format!("Decode error: {}", e)))
+            .map_err(|e| serde::de::Error::custom(format!("Decode error: {e}")))
     }
 }
 
-fn serialize_number<S, T: Copy + Into<U256> + TryFrom<U256>>(
-    val: &T,
-    s: S,
-) -> Result<S::Ok, S::Error>
+fn serialize_number<S, T: Copy + Into<U256>>(val: &T, s: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {
@@ -283,9 +278,7 @@ where
     serde::Serialize::serialize(&u256, s)
 }
 
-fn deserialize_number<'a, D, T: Copy + Into<U256> + TryFrom<U256>>(
-    d: D,
-) -> Result<T, D::Error>
+fn deserialize_number<'a, D, T: TryFrom<U256>>(d: D) -> Result<T, D::Error>
 where
     D: serde::Deserializer<'a>,
 {

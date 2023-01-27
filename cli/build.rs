@@ -23,12 +23,12 @@ fn output_git_short_hash() {
             Cow::from("unknown")
         }
         Err(err) => {
-            println!("cargo:warning=Failed to execute git command: {}", err);
+            println!("cargo:warning=Failed to execute git command: {err}");
             Cow::from("unknown")
         }
     };
 
-    println!("cargo:rustc-env=GIT_HASH={}", git_hash);
+    println!("cargo:rustc-env=GIT_HASH={git_hash}");
     println!("cargo:rerun-if-changed=../.git/HEAD");
     println!("cargo:rerun-if-changed=../.git/refs");
     println!("cargo:rerun-if-changed=build.rs");

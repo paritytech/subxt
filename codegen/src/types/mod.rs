@@ -131,7 +131,7 @@ impl<'a> TypeGenerator<'a> {
     pub fn resolve_type(&self, id: u32) -> Type<PortableForm> {
         self.type_registry
             .resolve(id)
-            .unwrap_or_else(|| panic!("No type with id {} found", id))
+            .unwrap_or_else(|| panic!("No type with id {id} found"))
             .clone()
     }
 
@@ -403,10 +403,7 @@ impl ToTokens for CratePath {
 impl From<&str> for CratePath {
     fn from(crate_path: &str) -> Self {
         Self(syn::Path::from_string(crate_path).unwrap_or_else(|err| {
-            panic!(
-                "failed converting {:?} to `syn::Path`: {:?}",
-                crate_path, err
-            );
+            panic!("failed converting {crate_path:?} to `syn::Path`: {err:?}");
         }))
     }
 }

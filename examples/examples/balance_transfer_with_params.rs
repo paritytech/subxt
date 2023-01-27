@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // submit the transaction:
     let hash = api.tx().sign_and_submit(&tx, &signer, tx_params).await?;
 
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    println!("Balance transfer extrinsic submitted: {hash}");
 
     Ok(())
 }

@@ -45,14 +45,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let alice_id = AccountKeyring::Alice.to_account_id();
-    println!("  Alice account id:        {:?}", alice_id);
+    println!("  Alice account id:        {alice_id:?}");
 
     // Get Alice' Stash account ID
     let alice_stash_id: AccountId32 = sr25519::Pair::from_string("//Alice//stash", None)
         .expect("Could not obtain stash signer pair")
         .public()
         .into();
-    println!("  Alice//stash account id: {:?}", alice_stash_id);
+    println!("  Alice//stash account id: {alice_stash_id:?}");
 
     // Map from all locked "stash" accounts to the controller account.
     let controller_acc_addr = polkadot::storage().staking().bonded(&alice_stash_id);
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .fetch(&controller_acc_addr)
         .await?
         .unwrap();
-    println!("    account controlled by: {:?}", controller_acc);
+    println!("    account controlled by: {controller_acc:?}");
 
     let era_reward_addr = polkadot::storage().staking().eras_reward_points(era.index);
     let era_result = api
@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .fetch(&era_reward_addr)
         .await?;
-    println!("Era reward points: {:?}", era_result);
+    println!("Era reward points: {era_result:?}");
 
     Ok(())
 }

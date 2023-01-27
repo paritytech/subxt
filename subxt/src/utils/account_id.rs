@@ -136,7 +136,7 @@ impl<'de> Deserialize<'de> for AccountId32 {
         D: serde::Deserializer<'de>,
     {
         AccountId32::from_ss58check(&String::deserialize(deserializer)?)
-            .map_err(|e| serde::de::Error::custom(format!("{:?}", e)))
+            .map_err(|e| serde::de::Error::custom(format!("{e:?}")))
     }
 }
 

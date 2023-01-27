@@ -46,13 +46,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // submit the transaction with default params:
     let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    println!("Balance transfer extrinsic submitted: {hash}");
 
     // 2. Dynamic constant access (the dynamic equivalent to the fetch_constants example).
 
     let constant_address = subxt::dynamic::constant("Balances", "ExistentialDeposit");
     let existential_deposit = api.constants().at(&constant_address)?.to_value()?;
-    println!("Existential Deposit: {}", existential_deposit);
+    println!("Existential Deposit: {existential_deposit}");
 
     // 3. Dynamic storage access
 

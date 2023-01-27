@@ -30,7 +30,6 @@ impl Config for MyConfig {
     // polkadot runtime used, so some operations will fail. Normally when using a custom `Config`
     // impl types MUST match exactly those used in the actual runtime.
     type Index = u64;
-    type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
     type Hash = <SubstrateConfig as Config>::Hash;
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;
@@ -58,7 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // submit the transaction with default params:
     let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
 
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    println!("Balance transfer extrinsic submitted: {hash}");
 
     Ok(())
 }

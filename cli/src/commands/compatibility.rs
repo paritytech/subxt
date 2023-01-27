@@ -64,7 +64,7 @@ async fn handle_pallet_metadata(nodes: &[Uri], name: &str) -> color_eyre::Result
             Some(pallet_metadata) => {
                 let hash = get_pallet_hash(&metadata.types, pallet_metadata);
                 let hex_hash = hex::encode(hash);
-                println!("Node {:?} has pallet metadata hash {:?}", node, hex_hash);
+                println!("Node {node:?} has pallet metadata hash {hex_hash:?}");
 
                 compatibility
                     .pallet_present
@@ -93,7 +93,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
         let metadata = fetch_runtime_metadata(node).await?;
         let hash = get_metadata_hash(&metadata);
         let hex_hash = hex::encode(hash);
-        println!("Node {:?} has metadata hash {:?}", node, hex_hash,);
+        println!("Node {node:?} has metadata hash {hex_hash:?}",);
 
         compatibility_map
             .entry(hex_hash)

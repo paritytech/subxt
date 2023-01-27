@@ -27,7 +27,7 @@ use subxt::error::{
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
-    sr25519::Pair::from_string(&format!("//{}", seed), None)
+    sr25519::Pair::from_string(&format!("//{seed}"), None)
         .expect("static values are valid; qed")
 }
 
