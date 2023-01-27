@@ -370,8 +370,8 @@ impl RuntimeGenerator {
 }
 
 /// Return a vector of tuples of variant names and corresponding struct definitions.
-pub fn generate_structs_from_variants<'a, F>(
-    type_gen: &'a TypeGenerator,
+pub fn generate_structs_from_variants<F>(
+    type_gen: &TypeGenerator,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,

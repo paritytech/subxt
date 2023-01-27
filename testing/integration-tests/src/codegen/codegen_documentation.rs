@@ -106,8 +106,7 @@ fn check_documentation() {
     for raw in raw_docs.iter() {
         assert!(
             runtime_docs.contains(raw),
-            "Documentation not present in runtime API: {}",
-            raw
+            "Documentation not present in runtime API: {raw}"
         );
     }
 }

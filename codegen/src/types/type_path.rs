@@ -127,7 +127,7 @@ impl TypePathType {
                     "BTreeSet" => parse_quote!(::std::collections::BTreeSet),
                     "Range" => parse_quote!(::core::ops::Range),
                     "RangeInclusive" => parse_quote!(::core::ops::RangeInclusive),
-                    ident => panic!("Unknown prelude type '{}'", ident),
+                    ident => panic!("Unknown prelude type '{ident}'"),
                 }
             }
             _ => {

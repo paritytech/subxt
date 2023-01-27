@@ -40,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("\nExample 1. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
             println!("Key: 0x{}", hex::encode(key));
-            println!("  Value: {}", value);
+            println!("  Value: {value}");
         }
     }
 
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // - polkadot.rs generated file under `version_notifiers()` fn
                 // - metadata in json format
                 let value = u64::decode(&mut &*storage_data)?;
-                println!("  Value: {}", value);
+                println!("  Value: {value}");
             }
         }
     }
@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // - polkadot.rs generated file under `version_notifiers()` fn
                 // - metadata in json format
                 let value = u64::decode(&mut &storage_data[..])?;
-                println!("  Value: {}", value);
+                println!("  Value: {value}");
             }
         }
     }

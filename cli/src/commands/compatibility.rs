@@ -96,7 +96,6 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
         let hash = get_metadata_hash(&metadata);
         let hex_hash = hex::encode(hash);
         println!("Node {node:?} has metadata hash {hex_hash:?}");
-
         compatibility_map
             .entry(hex_hash)
             .or_insert_with(Vec::new)
