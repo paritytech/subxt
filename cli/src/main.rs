@@ -5,8 +5,13 @@
 #![deny(unused_crate_dependencies)]
 
 mod commands;
-use clap::Parser as ClapParser;
-use clap::{crate_authors, crate_version, ColorChoice, Parser};
+use clap::{
+    crate_authors,
+    crate_version,
+    ColorChoice,
+    Parser as ClapParser,
+    Parser,
+};
 use subxt_codegen::utils::Uri;
 
 /// Subxt utilities for interacting with Substrate based nodes.

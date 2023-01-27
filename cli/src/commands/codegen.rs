@@ -52,7 +52,7 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
 
 pub async fn run(opts: &CliOpts, cmd_opts: &CodegenOpts) -> color_eyre::Result<()> {
     let bytes = if let Some(file) = cmd_opts.file.as_ref() {
-              let mut file = fs::File::open(file)?;
+        let mut file = fs::File::open(file)?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
         bytes
@@ -60,7 +60,12 @@ pub async fn run(opts: &CliOpts, cmd_opts: &CodegenOpts) -> color_eyre::Result<(
         subxt_codegen::utils::fetch_metadata_bytes(&opts.url).await?
     };
 
-    codegen(&bytes, cmd_opts.derives.clone(), cmd_opts.derives_for_type.clone(), cmd_opts.crate_path.clone())?;
+    codegen(
+        &bytes,
+        cmd_opts.derives.clone(),
+        cmd_opts.derives_for_type.clone(),
+        cmd_opts.crate_path.clone(),
+    )?;
     Ok(())
 }
 
