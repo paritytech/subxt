@@ -3,8 +3,6 @@
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
-use color_eyre::eyre;
-use jsonrpsee::client_transport::ws::Uri;
 use std::{
     fs,
     io::Read,
@@ -15,27 +13,29 @@ use subxt_codegen::{
     TypeSubstitutes,
 };
 
+use crate::CliOpts;
+
 /// Generate runtime API client code from metadata.
 ///
 /// # Example (with code formatting)
 ///
 /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
 #[derive(Debug, ClapParser)]
-pub struct Opts {
-    /// The url of the substrate node to query for metadata for codegen.
-    #[clap(name = "url", long, value_parser)]
-    url: Option<Uri>,
+pub struct CodegenOpts {
     /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser)]
+    #[clap(short, long, value_parser, conflicts_with = "url")]
     file: Option<PathBuf>,
+
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,
+
     /// Additional derives for a given type.
     ///
     /// Example `--derive-for-type my_module::my_type=serde::Serialize`.
     #[clap(long = "derive-for-type", value_parser = derive_for_type_parser)]
     derives_for_type: Vec<(String, String)>,
+
     /// The `subxt` crate access path in the generated code.
     /// Defaults to `::subxt`.
     #[clap(long = "crate")]
@@ -50,26 +50,17 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     Ok((ty.to_string(), derive.to_string()))
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let bytes = if let Some(file) = opts.file.as_ref() {
-        if opts.url.is_some() {
-            eyre::bail!("specify one of `--url` or `--file` but not both")
-        };
-
-        let mut file = fs::File::open(file)?;
+pub async fn run(opts: &CliOpts, cmd_opts: &CodegenOpts) -> color_eyre::Result<()> {
+    let bytes = if let Some(file) = cmd_opts.file.as_ref() {
+              let mut file = fs::File::open(file)?;
         let mut bytes = Vec::new();
         file.read_to_end(&mut bytes)?;
         bytes
     } else {
-        let url = opts.url.unwrap_or_else(|| {
-            "http://localhost:9933"
-                .parse::<Uri>()
-                .expect("default url is valid")
-        });
-        subxt_codegen::utils::fetch_metadata_bytes(&url).await?
+        subxt_codegen::utils::fetch_metadata_bytes(&opts.url).await?
     };
 
-    codegen(&bytes, opts.derives, opts.derives_for_type, opts.crate_path)?;
+    codegen(&bytes, cmd_opts.derives.clone(), cmd_opts.derives_for_type.clone(), cmd_opts.crate_path.clone())?;
     Ok(())
 }
 

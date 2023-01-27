@@ -25,9 +25,11 @@ use subxt_metadata::{
     get_pallet_hash,
 };
 
+use crate::CliOpts;
+
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
-pub struct Opts {
+pub struct CompatOpts {
     /// Urls of the substrate nodes to verify for metadata compatibility.
     #[clap(name = "nodes", long, use_value_delimiter = true, value_parser)]
     nodes: Vec<Uri>,
@@ -39,12 +41,12 @@ pub struct Opts {
     pallet: Option<String>,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    match opts.pallet {
+pub async fn run(_opts: &CliOpts, cmd_opts: &CompatOpts) -> color_eyre::Result<()> {
+    match &cmd_opts.pallet {
         Some(pallet) => {
-            handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str()).await
+            handle_pallet_metadata(cmd_opts.nodes.as_slice(), pallet.as_str()).await
         }
-        None => handle_full_metadata(opts.nodes.as_slice()).await,
+        None => handle_full_metadata(cmd_opts.nodes.as_slice()).await,
     }
 }
 

@@ -6,25 +6,46 @@
 
 mod commands;
 use clap::Parser as ClapParser;
+use clap::{crate_authors, crate_version, ColorChoice, Parser};
+use subxt_codegen::utils::Uri;
 
 /// Subxt utilities for interacting with Substrate based nodes.
 #[derive(Debug, ClapParser)]
-enum Command {
-    Metadata(commands::metadata::Opts),
-    Codegen(commands::codegen::Opts),
-    Compatibility(commands::compatibility::Opts),
-    Version(commands::version::Opts),
+pub enum SubCommand {
+    Metadata(commands::metadata::MetadataOpts),
+    Codegen(commands::codegen::CodegenOpts),
+    Compatibility(commands::compatibility::CompatOpts),
+    Version(commands::version::Version),
+}
+
+#[derive(Debug, Parser)]
+#[clap(version = crate_version!(), author = crate_authors!(), color=ColorChoice::Always)]
+pub struct CliOpts {
+    #[clap(subcommand)]
+    pub subcmd: SubCommand,
+
+    /// The url of the substrate node connect to
+    #[clap(
+        name = "url",
+        long,
+        value_parser,
+        default_value = "http://localhost:9933",
+        env = "SUBXT_URL"
+    )]
+    url: Uri,
 }
 
 #[tokio::main]
 async fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
-    let args = Command::parse();
+    let opts = CliOpts::parse();
 
-    match args {
-        Command::Metadata(opts) => commands::metadata::run(opts).await,
-        Command::Codegen(opts) => commands::codegen::run(opts).await,
-        Command::Compatibility(opts) => commands::compatibility::run(opts).await,
-        Command::Version(opts) => commands::version::run(opts),
+    match &opts.subcmd {
+        SubCommand::Metadata(cmd_opts) => commands::metadata::run(&opts, &cmd_opts).await,
+        SubCommand::Codegen(cmd_opts) => commands::codegen::run(&opts, cmd_opts).await,
+        SubCommand::Compatibility(cmd_opts) => {
+            commands::compatibility::run(&opts, cmd_opts).await
+        }
+        SubCommand::Version(cmd_opts) => commands::version::run(&opts, cmd_opts),
     }
 }

@@ -5,7 +5,6 @@
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee::client_transport::ws::Uri;
 use scale::Decode;
 use std::io::{
     self,
@@ -13,26 +12,20 @@ use std::io::{
 };
 use subxt_codegen::utils::fetch_metadata_hex;
 
+use crate::CliOpts;
+
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
-pub struct Opts {
-    /// The url of the substrate node to query for metadata.
-    #[clap(
-        name = "url",
-        long,
-        value_parser,
-        default_value = "http://localhost:9933"
-    )]
-    url: Uri,
+pub struct MetadataOpts {
     /// The format of the metadata to display: `json`, `hex` or `bytes`.
     #[clap(long, short, default_value = "bytes")]
     format: String,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: &CliOpts, cmd_opts: &MetadataOpts) -> color_eyre::Result<()> {
     let hex_data = fetch_metadata_hex(&opts.url).await?;
 
-    match opts.format.as_str() {
+    match cmd_opts.format.as_str() {
         "json" => {
             let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
             let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
@@ -51,7 +44,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         _ => {
             Err(eyre::eyre!(
                 "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
-                opts.format
+                cmd_opts.format
             ))
         }
     }
