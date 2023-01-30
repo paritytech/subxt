@@ -24,7 +24,7 @@ scale-info = "2.0.0"
 subxt-metadata = { version = "0.26.0", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
-tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.25", features = ["macros", "rt-multi-thread"] }
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
