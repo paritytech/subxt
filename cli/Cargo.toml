@@ -21,7 +21,7 @@ subxt-codegen = { version = "0.26.0", path = "../codegen" }
 # perform node compatibility
 subxt-metadata = { version = "0.26.0", path = "../metadata" }
 # parse command line args
-clap = { version = "4.0.8", features = ["derive", "cargo", "env"] }
+clap = { version = "4.1.4", features = ["derive", "cargo"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
@@ -39,4 +39,4 @@ syn = "1.0.80"
 # communicate with the substrate nodes
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 # async runtime
-tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.25", features = ["rt-multi-thread", "macros", "time"] }
