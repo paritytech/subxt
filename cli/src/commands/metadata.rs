@@ -10,20 +10,33 @@ use std::io::{
     self,
     Write,
 };
-use subxt_codegen::utils::fetch_metadata_hex;
+use subxt_codegen::utils::{
+    fetch_metadata_hex,
+    Uri,
+};
 
 use crate::CliOpts;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
 pub struct MetadataOpts {
+    /// The url of the substrate node connect to
+    #[clap(
+        name = "url",
+        long,
+        value_parser,
+        default_value = "http://localhost:9933",
+        env = "SUBXT_URL"
+    )]
+    url: Uri,
+
     /// The format of the metadata to display: `json`, `hex` or `bytes`.
     #[clap(long, short, default_value = "bytes")]
     format: String,
 }
 
-pub async fn run(opts: &CliOpts, cmd_opts: &MetadataOpts) -> color_eyre::Result<()> {
-    let hex_data = fetch_metadata_hex(&opts.url).await?;
+pub async fn run(_opts: &CliOpts, cmd_opts: &MetadataOpts) -> color_eyre::Result<()> {
+    let hex_data = fetch_metadata_hex(&cmd_opts.url).await?;
 
     match cmd_opts.format.as_str() {
         "json" => {

@@ -6,13 +6,13 @@ use clap::Parser as ClapParser;
 use std::{
     fs,
     io::Read,
-    path::PathBuf,
 };
 use subxt_codegen::{
     DerivesRegistry,
     TypeSubstitutes,
 };
 
+use super::source::Source;
 use crate::CliOpts;
 
 /// Generate runtime API client code from metadata.
@@ -22,9 +22,15 @@ use crate::CliOpts;
 /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
 #[derive(Debug, ClapParser)]
 pub struct CodegenOpts {
-    /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser, conflicts_with = "url")]
-    file: Option<PathBuf>,
+    /// The url of the substrate node connect to or the local path of the metadata
+    #[clap(
+        name = "source",
+        short,
+        long,
+        default_value = "http://localhost:9933",
+        env = "SUBXT_URL"
+    )]
+    source: Source,
 
     /// Additional derives
     #[clap(long = "derive")]
@@ -50,14 +56,15 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     Ok((ty.to_string(), derive.to_string()))
 }
 
-pub async fn run(opts: &CliOpts, cmd_opts: &CodegenOpts) -> color_eyre::Result<()> {
-    let bytes = if let Some(file) = cmd_opts.file.as_ref() {
-        let mut file = fs::File::open(file)?;
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes)?;
-        bytes
-    } else {
-        subxt_codegen::utils::fetch_metadata_bytes(&opts.url).await?
+pub async fn run(_opts: &CliOpts, cmd_opts: &CodegenOpts) -> color_eyre::Result<()> {
+    let bytes = match &cmd_opts.source {
+        Source::File(file) => {
+            let mut file = fs::File::open(file)?;
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes)?;
+            bytes
+        }
+        Source::Url(url) => subxt_codegen::utils::fetch_metadata_bytes(url).await?,
     };
 
     codegen(

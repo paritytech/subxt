@@ -5,4 +5,5 @@
 pub mod codegen;
 pub mod compatibility;
 pub mod metadata;
+mod source;
 pub mod version;

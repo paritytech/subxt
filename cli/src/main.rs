@@ -12,7 +12,6 @@ use clap::{
     Parser as ClapParser,
     Parser,
 };
-use subxt_codegen::utils::Uri;
 
 /// Subxt utilities for interacting with Substrate based nodes.
 #[derive(Debug, ClapParser)]
@@ -28,16 +27,6 @@ pub enum SubCommand {
 pub struct CliOpts {
     #[clap(subcommand)]
     pub subcmd: SubCommand,
-
-    /// The url of the substrate node connect to
-    #[clap(
-        name = "url",
-        long,
-        value_parser,
-        default_value = "http://localhost:9933",
-        env = "SUBXT_URL"
-    )]
-    url: Uri,
 }
 
 #[tokio::main]
