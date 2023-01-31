@@ -15,6 +15,10 @@ use subxt_codegen::{
 use super::source::Source;
 use crate::CliOpts;
 
+fn source_parser(s: &str) -> Result<Source, String> {
+    Source::try_from(s)
+}
+
 /// Generate runtime API client code from metadata.
 ///
 /// # Example (with code formatting)
@@ -28,8 +32,8 @@ pub struct CodegenOpts {
         short,
         long,
         default_value = "http://localhost:9933",
-        env = "SUBXT_URL"
-    )]
+        env = "SUBXT_URL",
+        value_parser = source_parser )]
     source: Source,
 
     /// Additional derives

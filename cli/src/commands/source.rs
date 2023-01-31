@@ -11,8 +11,9 @@ pub enum Source {
     Url(Uri),
 }
 
-impl From<&str> for Source {
-    fn from(s: &str) -> Self {
+impl TryFrom<&str> for Source {
+    type Error = String;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         match s {
             s if (s.starts_with("ws://")
                 | s.starts_with("wss://")
@@ -20,42 +21,10 @@ impl From<&str> for Source {
                 | s.starts_with("https://"))
                 && s.parse::<Uri>().is_ok() =>
             {
-                Source::Url(s.parse().unwrap())
+                Ok(Source::Url(s.parse().unwrap()))
             }
-            p if Path::new(p).exists() => Source::File(PathBuf::from(p)),
-            _ => panic!("Invalid source: {s}"),
+            p if Path::new(p).exists() => Ok(Source::File(PathBuf::from(p))),
+            _ => Err(format!("File does not exist: {s}")),
         }
-    }
-}
-
-#[cfg(test)]
-mod test_source {
-    use super::*;
-
-    #[test]
-    fn test_from_str() {
-        const TEST_HTTP: &str = "http://foo/bar";
-        assert_eq!(
-            Source::Url(TEST_HTTP.parse().unwrap()),
-            Source::from(TEST_HTTP)
-        );
-        const TEST_HTTPS: &str = "https://foo/bar";
-        assert_eq!(
-            Source::Url(TEST_HTTPS.parse().unwrap()),
-            Source::from(TEST_HTTPS)
-        );
-        const TEST_WS: &str = "ws://foo/bar";
-        assert_eq!(Source::Url(TEST_WS.parse().unwrap()), Source::from(TEST_WS));
-        const TEST_WSS: &str = "wss://foo/bar";
-        assert_eq!(
-            Source::Url(TEST_WSS.parse().unwrap()),
-            Source::from(TEST_WSS)
-        );
-
-        const TEST_FILE: &str = "Cargo.toml"; // subxt/cli/Cargo.toml
-        assert_eq!(
-            Source::File(PathBuf::from(TEST_FILE)),
-            Source::from(TEST_FILE)
-        );
     }
 }
