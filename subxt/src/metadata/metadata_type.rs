@@ -5,10 +5,10 @@
 use super::hash_cache::HashCache;
 use codec::Error as CodecError;
 use frame_metadata::{
+    v15::RuntimeMetadataV15,
     PalletConstantMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV15,
     StorageEntryMetadata,
     META_RESERVED,
 };

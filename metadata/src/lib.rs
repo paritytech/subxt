@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use frame_metadata::{
+    v15::RuntimeMetadataV15,
     ExtrinsicMetadata,
-    RuntimeMetadataV15,
     StorageEntryMetadata,
     StorageEntryType,
 };
@@ -247,7 +247,7 @@ fn get_storage_entry_hash(
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
 pub fn get_storage_hash(
-    metadata: &RuntimeMetadataV15,
+    metadata: &frame_metadata::v15::RuntimeMetadataV15,
     pallet_name: &str,
     storage_name: &str,
 ) -> Result<[u8; 32], NotFound> {

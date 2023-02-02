@@ -29,10 +29,12 @@ use crate::{
 };
 use codec::Decode;
 use frame_metadata::{
-    v15::RuntimeMetadataV15,
+    v15::{
+        RuntimeMetadataV15,
+        TraitMetadata,
+    },
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    TraitMetadata,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;

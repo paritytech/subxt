@@ -109,6 +109,8 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_rpc_client<R: RpcClientT>(
         rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
+        println!("CONSTRUCT CLIENT");
+
         let rpc = Rpc::<T>::new(rpc_client.clone());
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
@@ -155,20 +157,36 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
+        use codec::Encode;
 
-        let decoded: (Vec<String>, OpaqueMetadata) = Decode::decode(&mut &*bytes)?;
 
-        let bytes = decoded.1 .0;
+        let param = 15u32.encode();
+        let bytes = rpc
+            .state_call("Metadata_metadata_at_version", Some(&param), None)
+            .await?;
+    
+        // println!("GOT BYTES: {:?}", bytes);
+
+        let decoded: Option<OpaqueMetadata> = Decode::decode(&mut &*bytes)?;
+
+        println!("Decoded opaque");
+
+        let decoded = decoded.unwrap();
+        let bytes = &decoded.0;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
 
-        let metadata: Metadata = meta.try_into()?;
+        // let metadata: Metadata = meta.try_into()?;
 
-        println!("Availb methods {:?}", decoded.0);
+        // println!("Availb methods {:?}", decoded.0);
 
         // let cursor = &mut &*bytes;
         // let _ = <Compact<u32>>::decode(cursor)?;
-        // let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        // let meta: frame_metadata::RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+
+        println!("METADATA {:#?}", meta);
+
+        let metadata: Metadata = meta.try_into()?;
+
         Ok(metadata)
     }
 
