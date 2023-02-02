@@ -18,7 +18,7 @@ default = ["subxt/integration-tests"]
 [dev-dependencies]
 assert_matches = "1.5.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-frame-metadata = { version = "15.0.0", path = "/home/lexnv/remote-builds/frame-metadata/frame-metadata", features = ["v14", "v15-unstable", "std"] }
+frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/", branch = "lexnv/md_v15_test", default-features = false, features = ["std", "v14", "v15-unstable"] }
 futures = "0.3.13"
 hex = "0.4.3"
 regex = "1.5.0"

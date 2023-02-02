@@ -14,7 +14,7 @@ description = "Command line utilities for checking metadata compatibility betwee
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
-frame-metadata = { version = "15.0.0", path = "/home/lexnv/remote-builds/frame-metadata/frame-metadata", features = ["v14", "v15-unstable", "std"] }
+frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/", branch = "lexnv/md_v15_test", default-features = false, features = ["std", "v14", "v15-unstable"] }
 scale-info = "2.0.0"
 sp-core-hashing = "6.0.0"
 
