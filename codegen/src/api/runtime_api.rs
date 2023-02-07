@@ -48,6 +48,9 @@ fn generate_trait_api(
         let params = inputs.iter().map(|(param, _)| param);
         let encoded = inputs.iter().map(|(_, encoded)| encoded);
 
+        let method_target = format_ident!("{}_target", &method.name);
+        let output = type_gen.resolve_type_path(method.output.id());
+
         quote!(
             #( #[doc = #docs ] )*
             pub fn #method_name( #( #params, )* ) -> #crate_path::runtime_api::RuntimeAPIPayload {
@@ -60,6 +63,8 @@ fn generate_trait_api(
                     [0; 32],
                 )
             }
+
+            pub type #method_target = #output;
         )
     }).collect();
 

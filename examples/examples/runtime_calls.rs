@@ -24,7 +24,7 @@ use subxt::{
     OnlineClient,
 };
 
-use codec::Encode;
+use codec::Decode;
 
 #[subxt::subxt(runtime_metadata_url = "http://localhost:9933")]
 pub mod polkadot {}
@@ -40,6 +40,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
 
     println!("Result: {:?}", bytes);
+    let result: polkadot::runtime_api::Core::version_target =
+        Decode::decode(&mut &bytes[..])?;
+
+    println!("Result is: {:?}", result);
 
     Ok(())
 }
