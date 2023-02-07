@@ -56298,6 +56298,9 @@ pub mod api {
         use super::runtime_types;
         #[doc = " The `Core` runtime api that every Substrate runtime needs to implement."]
         pub mod Core {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Returns the version of the runtime."]
             pub fn version() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56307,6 +56310,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type version_target = runtime_types::sp_version::RuntimeVersion;
             #[doc = " Execute the given block."]
             pub fn execute_block(
                 block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: kitchensink_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_asset_tx_payment :: ChargeAssetTxPayment ,) > >,
@@ -56319,6 +56323,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type execute_block_target = ();
             #[doc = " Initialize a block with the given header."]
             pub fn initialize_block(
                 header: runtime_types::sp_runtime::generic::header::Header<
@@ -56334,9 +56339,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type initialize_block_target = ();
         }
         #[doc = " The `Metadata` api trait that returns metadata for the runtime."]
         pub mod Metadata {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Returns the metadata of a runtime."]
             pub fn metadata() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56346,6 +56355,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type metadata_target = runtime_types::sp_core::OpaqueMetadata;
             #[doc = " Returns the metadata at a given version."]
             pub fn metadata_at_version(
                 version: ::core::primitive::u32,
@@ -56358,6 +56368,8 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type metadata_at_version_target =
+                ::core::option::Option<runtime_types::sp_core::OpaqueMetadata>;
             #[doc = " Returns the supported versions of metadata."]
             #[doc = ""]
             #[doc = " This can be used to call `metadata_at_version`."]
@@ -56369,9 +56381,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type metadata_versions_target = ::std::vec::Vec<::core::primitive::u32>;
         }
         #[doc = " The `BlockBuilder` api trait that provides the required functionality for building a block."]
         pub mod BlockBuilder {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Apply the given extrinsic."]
             #[doc = ""]
             #[doc = " Returns an inclusion outcome which specifies if this extrinsic is included in"]
@@ -56387,6 +56403,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type apply_extrinsic_target = ::core::result::Result<
+                ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
+                runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
+            >;
             #[doc = " Finish the current block."]
             pub fn finalize_block() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56396,6 +56416,11 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type finalize_block_target =
+                runtime_types::sp_runtime::generic::header::Header<
+                    ::core::primitive::u32,
+                    runtime_types::sp_runtime::traits::BlakeTwo256,
+                >;
             #[doc = " Generate inherent extrinsics. The inherent data will vary from chain to chain."]
             pub fn inherent_extrinsics(
                 inherent: runtime_types::sp_inherents::InherentData,
@@ -56408,6 +56433,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type inherent_extrinsics_target = :: std :: vec :: Vec < runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: kitchensink_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_asset_tx_payment :: ChargeAssetTxPayment ,) > > ;
             #[doc = " Check that the inherents are valid. The inherent data will vary from chain to chain."]
             pub fn check_inherents(
                 block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: kitchensink_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_asset_tx_payment :: ChargeAssetTxPayment ,) > >,
@@ -56422,9 +56448,14 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type check_inherents_target =
+                runtime_types::sp_inherents::CheckInherentsResult;
         }
         #[doc = " The `TaggedTransactionQueue` api trait for interfering with the transaction queue."]
         pub mod TaggedTransactionQueue {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Validate the transaction."]
             #[doc = ""]
             #[doc = " This method is invoked by the transaction pool to learn details about given transaction."]
@@ -56449,9 +56480,16 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type validate_transaction_target = ::core::result::Result<
+                runtime_types::sp_runtime::transaction_validity::ValidTransaction,
+                runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
+            >;
         }
         #[doc = " The offchain worker api."]
         pub mod OffchainWorkerApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Starts the off-chain task for given block header."]
             pub fn offchain_worker(
                 header: runtime_types::sp_runtime::generic::header::Header<
@@ -56467,6 +56505,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type offchain_worker_target = ();
         }
         #[doc = " APIs for integrating the GRANDPA finality gadget into runtimes."]
         #[doc = " This should be implemented on the runtime side."]
@@ -56478,6 +56517,9 @@ pub mod api {
         #[doc = ""]
         #[doc = " The consensus protocol will coordinate the handoff externally."]
         pub mod GrandpaApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Get the current GRANDPA authorities and weights. This should not change except"]
             #[doc = " for when changes are scheduled and the corresponding delay has passed."]
             #[doc = ""]
@@ -56492,6 +56534,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type grandpa_authorities_target = ::std::vec::Vec<(
+                runtime_types::sp_finality_grandpa::app::Public,
+                ::core::primitive::u64,
+            )>;
             #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
             #[doc = " must provide the equivocation proof and a key ownership proof"]
             #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
@@ -56516,6 +56562,8 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type submit_report_equivocation_unsigned_extrinsic_target =
+                ::core::option::Option<()>;
             #[doc = " Generates a proof of key ownership for the given authority in the"]
             #[doc = " given set. An example usage of this module is coupled with the"]
             #[doc = " session historical module to prove that a given authority key is"]
@@ -56540,6 +56588,9 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type generate_key_ownership_proof_target = ::core::option::Option<
+                runtime_types::sp_finality_grandpa::OpaqueKeyOwnershipProof,
+            >;
             #[doc = " Get current GRANDPA authority set id."]
             pub fn current_set_id() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56549,9 +56600,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type current_set_id_target = ::core::primitive::u64;
         }
         #[doc = " Runtime api for accessing information about nomination pools."]
         pub mod NominationPoolsApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Returns the pending rewards for the member that the AccountId was given for."]
             pub fn pending_rewards(
                 member: ::subxt::utils::AccountId32,
@@ -56564,9 +56619,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type pending_rewards_target = ::core::primitive::u128;
         }
         #[doc = " API necessary for block authorship with BABE."]
         pub mod BabeApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Return the configuration for BABE."]
             pub fn configuration() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56576,6 +56635,8 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type configuration_target =
+                runtime_types::sp_consensus_babe::BabeConfiguration;
             #[doc = " Returns the slot that started the current epoch."]
             pub fn current_epoch_start() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56585,6 +56646,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type current_epoch_start_target = runtime_types::sp_consensus_slots::Slot;
             #[doc = " Returns information regarding the current epoch."]
             pub fn current_epoch() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56594,6 +56656,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type current_epoch_target = runtime_types::sp_consensus_babe::Epoch;
             #[doc = " Returns information regarding the next epoch (which was already"]
             #[doc = " previously announced)."]
             pub fn next_epoch() -> ::subxt::runtime_api::RuntimeAPIPayload {
@@ -56604,6 +56667,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type next_epoch_target = runtime_types::sp_consensus_babe::Epoch;
             #[doc = " Generates a proof of key ownership for the given authority in the"]
             #[doc = " current epoch. An example usage of this module is coupled with the"]
             #[doc = " session historical module to prove that a given authority key is"]
@@ -56628,6 +56692,9 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type generate_key_ownership_proof_target = ::core::option::Option<
+                runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof,
+            >;
             #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
             #[doc = " must provide the equivocation proof and a key ownership proof"]
             #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
@@ -56655,12 +56722,17 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type submit_report_equivocation_unsigned_extrinsic_target =
+                ::core::option::Option<()>;
         }
         #[doc = " The authority discovery api."]
         #[doc = ""]
         #[doc = " This api is used by the `client/authority-discovery` module to retrieve identifiers"]
         #[doc = " of the current and next authority set."]
         pub mod AuthorityDiscoveryApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Retrieve authority identifiers of the current and next authority set."]
             pub fn authorities() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56670,9 +56742,14 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type authorities_target =
+                ::std::vec::Vec<runtime_types::sp_authority_discovery::app::Public>;
         }
         #[doc = " The API to query account nonce (aka transaction index)."]
         pub mod AccountNonceApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Get current account nonce of given `AccountId`."]
             pub fn account_nonce(
                 account: ::subxt::utils::AccountId32,
@@ -56685,9 +56762,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type account_nonce_target = ::core::primitive::u32;
         }
         #[doc = " The API used to dry-run contract interactions."]
         pub mod ContractsApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Perform a call from a specified account to a given contract."]
             #[doc = ""]
             #[doc = " See [`crate::Pallet::bare_call`]."]
@@ -56714,6 +56795,14 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type call_target =
+                runtime_types::pallet_contracts_primitives::ContractResult<
+                    ::core::result::Result<
+                        runtime_types::pallet_contracts_primitives::ExecReturnValue,
+                        runtime_types::sp_runtime::DispatchError,
+                    >,
+                    ::core::primitive::u128,
+                >;
             #[doc = " Instantiate a new contract."]
             #[doc = ""]
             #[doc = " See `[crate::Pallet::bare_instantiate]`."]
@@ -56744,6 +56833,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type instantiate_target = runtime_types :: pallet_contracts_primitives :: ContractResult < :: core :: result :: Result < runtime_types :: pallet_contracts_primitives :: InstantiateReturnValue < :: subxt :: utils :: AccountId32 > , runtime_types :: sp_runtime :: DispatchError > , :: core :: primitive :: u128 > ;
             #[doc = " Upload new code without instantiating a contract from it."]
             #[doc = ""]
             #[doc = " See [`crate::Pallet::bare_upload_code`]."]
@@ -56764,6 +56854,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type upload_code_target = ::core::result::Result<
+                runtime_types::pallet_contracts_primitives::CodeUploadReturnValue<
+                    ::subxt::utils::H256,
+                    ::core::primitive::u128,
+                >,
+                runtime_types::sp_runtime::DispatchError,
+            >;
             #[doc = " Query a given storage key in a given contract."]
             #[doc = ""]
             #[doc = " Returns `Ok(Some(Vec<u8>))` if the storage value exists under the given key in the"]
@@ -56782,8 +56879,15 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type get_storage_target = ::core::result::Result<
+                ::core::option::Option<::std::vec::Vec<::core::primitive::u8>>,
+                runtime_types::pallet_contracts_primitives::ContractAccessError,
+            >;
         }
         pub mod TransactionPaymentApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             pub fn query_info(
                 uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: kitchensink_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_asset_tx_payment :: ChargeAssetTxPayment ,) >,
                 len: ::core::primitive::u32,
@@ -56797,6 +56901,11 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_info_target =
+                runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
+                    ::core::primitive::u128,
+                    runtime_types::sp_weights::weight_v2::Weight,
+                >;
             pub fn query_fee_details(
                 uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > , runtime_types :: kitchensink_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_asset_tx_payment :: ChargeAssetTxPayment ,) >,
                 len: ::core::primitive::u32,
@@ -56810,6 +56919,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_fee_details_target =
+                runtime_types::pallet_transaction_payment::types::FeeDetails<
+                    ::core::primitive::u128,
+                >;
             pub fn query_weight_to_fee(
                 weight: runtime_types::sp_weights::weight_v2::Weight,
             ) -> ::subxt::runtime_api::RuntimeAPIPayload {
@@ -56821,6 +56934,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_weight_to_fee_target = ::core::primitive::u128;
             pub fn query_length_to_fee(
                 length: ::core::primitive::u32,
             ) -> ::subxt::runtime_api::RuntimeAPIPayload {
@@ -56832,8 +56946,12 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_length_to_fee_target = ::core::primitive::u128;
         }
         pub mod TransactionPaymentCallApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Query information of a dispatch class, weight, and fee of a given encoded `Call`."]
             pub fn query_call_info(
                 call: runtime_types::kitchensink_runtime::RuntimeCall,
@@ -56848,6 +56966,11 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_call_info_target =
+                runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
+                    ::core::primitive::u128,
+                    runtime_types::sp_weights::weight_v2::Weight,
+                >;
             #[doc = " Query fee details of a given encoded `Call`."]
             pub fn query_call_fee_details(
                 call: runtime_types::kitchensink_runtime::RuntimeCall,
@@ -56862,6 +56985,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_call_fee_details_target =
+                runtime_types::pallet_transaction_payment::types::FeeDetails<
+                    ::core::primitive::u128,
+                >;
             #[doc = " Query the output of the current `WeightToFee` given some input."]
             pub fn query_weight_to_fee(
                 weight: runtime_types::sp_weights::weight_v2::Weight,
@@ -56874,6 +57001,7 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_weight_to_fee_target = ::core::primitive::u128;
             #[doc = " Query the output of the current `LengthToFee` given some input."]
             pub fn query_length_to_fee(
                 length: ::core::primitive::u32,
@@ -56886,9 +57014,13 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type query_length_to_fee_target = ::core::primitive::u128;
         }
         #[doc = " API to interact with MMR pallet."]
         pub mod MmrApi {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Return the on-chain MMR root hash."]
             pub fn mmr_root() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56898,6 +57030,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type mmr_root_target = ::core::result::Result<
+                ::subxt::utils::H256,
+                runtime_types::sp_mmr_primitives::Error,
+            >;
             #[doc = " Return the number of MMR blocks in the chain."]
             pub fn mmr_leaf_count() -> ::subxt::runtime_api::RuntimeAPIPayload {
                 let mut result = Vec::new();
@@ -56907,6 +57043,10 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type mmr_leaf_count_target = ::core::result::Result<
+                ::core::primitive::u64,
+                runtime_types::sp_mmr_primitives::Error,
+            >;
             #[doc = " Generate MMR proof for a series of block numbers. If `best_known_block_number = Some(n)`,"]
             #[doc = " use historical MMR state at given block height `n`. Else, use current MMR state."]
             pub fn generate_proof(
@@ -56922,6 +57062,15 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type generate_proof_target = ::core::result::Result<
+                (
+                    ::std::vec::Vec<
+                        runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf,
+                    >,
+                    runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                ),
+                runtime_types::sp_mmr_primitives::Error,
+            >;
             #[doc = " Verify MMR proof against on-chain MMR for a batch of leaves."]
             #[doc = ""]
             #[doc = " Note this function will use on-chain MMR root hash and check if the proof matches the hash."]
@@ -56942,6 +57091,8 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type verify_proof_target =
+                ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>;
             #[doc = " Verify MMR proof against given root hash for a batch of leaves."]
             #[doc = ""]
             #[doc = " Note this function does not require any on-chain storage - the"]
@@ -56966,9 +57117,14 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type verify_proof_stateless_target =
+                ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>;
         }
         #[doc = " Session keys runtime api."]
         pub mod SessionKeys {
+            use super::root_mod;
+            use super::runtime_types;
+            use ::subxt::ext::codec::Encode;
             #[doc = " Generate a set of session keys with optionally using the given seed."]
             #[doc = " The keys should be stored within the keystore exposed via runtime"]
             #[doc = " externalities."]
@@ -56987,6 +57143,8 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type generate_session_keys_target =
+                ::std::vec::Vec<::core::primitive::u8>;
             #[doc = " Decode the given public session keys."]
             #[doc = ""]
             #[doc = " Returns the list of public raw public keys + key type."]
@@ -57001,6 +57159,12 @@ pub mod api {
                     [0; 32],
                 )
             }
+            pub type decode_session_keys_target = ::core::option::Option<
+                ::std::vec::Vec<(
+                    ::std::vec::Vec<::core::primitive::u8>,
+                    runtime_types::sp_core::crypto::KeyTypeId,
+                )>,
+            >;
         }
     }
 }
