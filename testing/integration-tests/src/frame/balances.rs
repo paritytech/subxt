@@ -18,13 +18,15 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use sp_runtime::{
-    AccountId32,
-    MultiAddress,
-};
-use subxt::error::{
-    DispatchError,
-    Error,
+use subxt::{
+    error::{
+        DispatchError,
+        Error,
+    },
+    utils::{
+        AccountId32,
+        MultiAddress,
+    },
 };
 
 #[tokio::test]
@@ -40,11 +42,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_pre = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
@@ -73,11 +79,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
@@ -101,28 +111,32 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let alice_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(&alice.account_id())],
+        vec![Value::from_bytes(alice.account_id())],
     );
     let bob_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(&bob.account_id())],
+        vec![Value::from_bytes(bob.account_id())],
     );
 
     let alice_pre = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = subxt::dynamic::tx(
         "Balances",
         "transfer",
         vec![
-            Value::unnamed_variant("Id", vec![Value::from_bytes(&bob.account_id())]),
+            Value::unnamed_variant("Id", vec![Value::from_bytes(bob.account_id())]),
             Value::u128(10_000u128),
         ],
     );
@@ -145,11 +159,11 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let expected_fields = Composite::Named(vec![
         (
             "from".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(&alice.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(alice.account_id())]),
         ),
         (
             "to".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(&bob.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(bob.account_id())]),
         ),
         ("amount".into(), Value::u128(10_000)),
     ]);
@@ -157,18 +171,46 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .fetch_or_default(&alice_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
-    let alice_pre_free = alice_pre.at("data").at("free").unwrap().as_u128().unwrap();
-    let alice_post_free = alice_post.at("data").at("free").unwrap().as_u128().unwrap();
+    let alice_pre_free = alice_pre
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
+    let alice_post_free = alice_post
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
 
-    let bob_pre_free = bob_pre.at("data").at("free").unwrap().as_u128().unwrap();
-    let bob_post_free = bob_post.at("data").at("free").unwrap().as_u128().unwrap();
+    let bob_pre_free = bob_pre
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
+    let bob_post_free = bob_post
+        .to_value()?
+        .at("data")
+        .at("free")
+        .unwrap()
+        .as_u128()
+        .unwrap();
 
     assert!(alice_pre_free - 10_000 >= alice_post_free);
     assert_eq!(bob_pre_free + 10_000, bob_post_free);
@@ -188,7 +230,9 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_pre = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     let tx = node_runtime::tx()
@@ -207,7 +251,9 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_post = api
         .storage()
-        .fetch_or_default(&bob_account_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&bob_account_addr)
         .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
@@ -220,14 +266,22 @@ async fn storage_total_issuance() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().balances().total_issuance();
-    let total_issuance = api.storage().fetch_or_default(&addr, None).await.unwrap();
+    let total_issuance = api
+        .storage()
+        .at(None)
+        .await
+        .unwrap()
+        .fetch_or_default(&addr)
+        .await
+        .unwrap();
     assert_ne!(total_issuance, 0);
 }
 
 #[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob = pair_signer(AccountKeyring::Bob.pair());
-    let charlie = AccountKeyring::Charlie.to_account_id();
+    let bob_signer = pair_signer(AccountKeyring::Bob.pair());
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
+    let charlie: AccountId32 = AccountKeyring::Charlie.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -238,18 +292,21 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     );
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, &bob)
+        .sign_and_submit_then_watch_default(&tx, &bob_signer)
         .await?
         .wait_for_finalized_success()
         .await?
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locks_addr = node_runtime::storage()
-        .balances()
-        .locks(&AccountKeyring::Bob.to_account_id());
+    let locks_addr = node_runtime::storage().balances().locks(bob);
 
-    let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
+    let locks = api
+        .storage()
+        .at(None)
+        .await?
+        .fetch_or_default(&locks_addr)
+        .await?;
 
     assert_eq!(
         locks.0,
@@ -306,12 +363,13 @@ async fn transfer_error() {
 #[tokio::test]
 async fn transfer_implicit_subscription() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id();
-    let bob_addr = bob.clone().into();
+    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_bob_tx = node_runtime::tx().balances().transfer(bob_addr, 10_000);
+    let to_bob_tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.clone().into(), 10_000);
 
     let event = api
         .tx()
@@ -329,7 +387,7 @@ async fn transfer_implicit_subscription() {
         event,
         balances::events::Transfer {
             from: alice.account_id().clone(),
-            to: bob.clone(),
+            to: bob,
             amount: 10_000
         }
     );

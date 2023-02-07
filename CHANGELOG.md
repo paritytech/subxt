@@ -4,6 +4,213 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.26.0] - 2022-01-24
+
+This release adds a number of improvements, most notably:
+
+- We make Substrate dependencies optional ([#760](https://github.com/paritytech/subxt/pull/760)), which makes WASM builds both smaller and more reliable. To do this, we re-implement some core types like `AccountId32`, `MultiAddress` and `MultiSignature` internally.
+- Allow access to storage entries ([#774](https://github.com/paritytech/subxt/pull/774)) and runtime API's ([#777](https://github.com/paritytech/subxt/pull/777)) from some block. This is part of a move towards a more "block centric" interface, which will better align with the newly available `chainHead` style RPC interface.
+- Add RPC methods for the new `chainHead` style interface (see https://paritytech.github.io/json-rpc-interface-spec/). These are currently unstable, but will allow users to start experimenting with this new API if their nodes support it.
+- More advanced type substitution is now possible in the codegen interface ([#735](https://github.com/paritytech/subxt/pull/735)).
+
+This release introduces a number of breaking changes that can be generally be fixed with mechanical tweaks to your code. The notable changes are described below.
+
+### Make Storage API more Block-centric
+
+See [#774](https://github.com/paritytech/subxt/pull/774). This PR makes the Storage API more consistent with the Events API, and allows access to it from a given block as part of a push to provide a more block centric API that will hopefully be easier to understand, and will align with the new RPC `chainHead` style RPC interface.
+
+Before, your code will look like:
+
+```rust
+let a = api.storage().fetch(&staking_bonded, None).await?;
+```
+
+After, it should look like:
+
+```rust
+let a = api.storage().at(None).await?.fetch(&staking_bonded).await?;
+```
+
+Essentially, the final parameter for choosing which block to call some method at has been moved out of the storage method itself and is now provided to instantiate the storage API, either explicitly via an `.at(optional_block_hash)` as above, or implicitly when calling `block.storage()` to access the same storage methods for some block.
+
+An alternate way to access the same storage (primarily used if you have subscribed to blocks or otherwise are working with some block) now is:
+
+```rust
+let block = api.blocks().at(None).await?
+let a = block.storage().fetch(&staking_bonded, None).await?;
+```
+
+### More advanced type substitution in codegen
+
+See [#735](https://github.com/paritytech/subxt/pull/735). Previously, you could perform basic type substitution like this:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "../polkadot_metadata.scale")]
+pub mod node_runtime {
+    #[subxt::subxt(substitute_type = "sp_arithmetic::per_things::Foo")]
+    use crate::Foo;
+}
+```
+
+This example would use `crate::Foo` every time an `sp_arithmetic::per_things::Foo` was encountered in the codegen. However, this was limited; the substitute type had to have the name number and order of generic parameters for this to work.
+
+We've changed the interface above into:
+
+```rust
+#[subxt::subxt(
+    runtime_metadata_path = "../polkadot_metadata.scale",
+    substitute_type(
+        type = "sp_arithmetic::per_things::Foo<A, B, C>",
+        with = "crate::Foo<C>"
+    )
+)]
+pub mod node_runtime {}
+```
+
+In this example, we can (optionally) specify the generic parameters we expect to see on the original type ("type"), and then of those, decide which should be present on the substitute type ("with"). If no parameters are provided at all, we'll get the same behaviour as before. This allows much more flexibility when defining substitute types.
+
+### Optional Substrate dependencies
+
+See [#760](https://github.com/paritytech/subxt/pull/760). Subxt now has a "substrate-compat" feature (enabled by default, and disabled for WASM builds). At present, enabling this feature simply exposes the `PairSigner` (which was always available before), allowing transactions to be signed via Substrate signer logic (as before). When disabled, you (currently) must bring your own signer implementation, but in return we can avoid bringing in a substantial number of Substrate dependencies in the process.
+
+Regardless, this change also tidied up and moved various bits and pieces around to be consistent with this goal. To address some common moves, previously we'd have:
+
+```rust
+use subxt::{
+    ext::{
+        sp_core::{ sr25519, Pair },
+        sp_runtime::{ AccountId32, generic::Header },
+    },
+    tx::{
+        Era,
+        PlainTip,
+        PolkadotExtrinsicParamsBuilder
+    }
+};
+```
+
+And now this would look more like:
+
+```rust
+// `sp_core` and `sp_runtime` are no longer exposed via `ext`; add the crates yourself at matching versions to use:
+use sp_core::{
+    sr25519,
+    Pair,
+};
+use subxt::{
+    // You'll often want to use the "built-in" `AccountId32` now instead of the `sp_runtime` version:
+    utils::AccountId32,
+    // traits used in our `Config` trait are now provided directly in this module:
+    config::Header,
+    // Polkadot and Substrate specific Config types are now in the relevant Config section:
+    config::polkadot::{
+        Era,
+        PlainTip,
+        PolkadotExtrinsicParamsBuilder
+    }
+}
+```
+
+Additionally, the `type Hashing` in the `Config` trait is now called `Hasher`, to clarify what it is, and types returned directly from the RPC calls now all live in `crate::rpc::types`, rather than sometimes living in Substrate crates.
+
+Some other note worthy PRs that were merged since the last release:
+
+### Added
+
+- Add block-centric Storage API ([#774](https://github.com/paritytech/subxt/pull/774))
+- Add `chainHead` RPC methods ([#766](https://github.com/paritytech/subxt/pull/766))
+- Allow for remapping type parameters in type substitutions ([#735](https://github.com/paritytech/subxt/pull/735))
+- Add ability to set custom metadata etc on OnlineClient ([#794](https://github.com/paritytech/subxt/pull/794))
+- Add `Cargo.lock` for deterministic builds ([#795](https://github.com/paritytech/subxt/pull/795))
+- Add API to execute runtime calls ([#777](https://github.com/paritytech/subxt/pull/777))
+- Add bitvec-like generic support to the scale-bits type for use in codegen ([#718](https://github.com/paritytech/subxt/pull/718))
+- Add `--derive-for-type` to cli ([#708](https://github.com/paritytech/subxt/pull/708))
+
+### Changed
+
+- rename subscribe_to_updates() to updater() ([#792](https://github.com/paritytech/subxt/pull/792))
+- Expose `Update` ([#791](https://github.com/paritytech/subxt/pull/791))
+- Expose version info in CLI tool with build-time obtained git hash ([#787](https://github.com/paritytech/subxt/pull/787))
+- Implement deserialize on AccountId32 ([#773](https://github.com/paritytech/subxt/pull/773))
+- Codegen: Preserve attrs and add #[allow(clippy::all)] ([#784](https://github.com/paritytech/subxt/pull/784))
+- make ChainBlockExtrinsic cloneable ([#778](https://github.com/paritytech/subxt/pull/778))
+- Make sp_core and sp_runtime dependencies optional, and bump to latest ([#760](https://github.com/paritytech/subxt/pull/760))
+- Make verbose rpc error display ([#758](https://github.com/paritytech/subxt/pull/758))
+- rpc: Expose the `subscription ID` for `RpcClientT` ([#733](https://github.com/paritytech/subxt/pull/733))
+- events: Fetch metadata at arbitrary blocks ([#727](https://github.com/paritytech/subxt/pull/727))
+
+### Fixed
+
+- Fix decoding events via `.as_root_event()` and add test ([#767](https://github.com/paritytech/subxt/pull/767))
+- Retain Rust code items from `mod` decorated with `subxt` attribute ([#721](https://github.com/paritytech/subxt/pull/721))
+
+## [0.25.0] - 2022-11-16
+
+This release resolves the `parity-util-mem crate` several version guard by updating substrate related dependencies which makes
+it possible to have other substrate dependencies in tree again along with subxt.
+
+In addition the release has several API improvements in the dynamic transaction API along with that subxt now compiles down to WASM.
+
+Notable PRs merged:
+
+### Added
+
+- Add getters for `Module` ([#697](https://github.com/paritytech/subxt/pull/697))
+- add wasm support ([#700](https://github.com/paritytech/subxt/pull/700))
+- Extend the new `api.blocks()` to be the primary way to subscribe and fetch blocks/extrinsics/events ([#691](https://github.com/paritytech/subxt/pull/691))
+- Add runtime_metadata_url to pull metadata directly from a node ([#689](https://github.com/paritytech/subxt/pull/689))
+- Implement `BlocksClient` for working with blocks ([#671](https://github.com/paritytech/subxt/pull/671))
+- Allow specifying the `subxt` crate path for generated code ([#664](https://github.com/paritytech/subxt/pull/664))
+- Allow taking out raw bytes from a SubmittableExtrinsic ([#683](https://github.com/paritytech/subxt/pull/683))
+- Add DecodedValueThunk to allow getting bytes back from dynamic queries ([#680](https://github.com/paritytech/subxt/pull/680))
+
+### Changed
+
+- Update substrate crates ([#709](https://github.com/paritytech/subxt/pull/709))
+- Make working with nested queries a touch easier ([#714](https://github.com/paritytech/subxt/pull/714))
+- Upgrade to scale-info 2.3 and fix errors ([#704](https://github.com/paritytech/subxt/pull/704))
+- No need to entangle Signer and nonce now ([#702](https://github.com/paritytech/subxt/pull/702))
+- error: `RpcError` with custom client error ([#694](https://github.com/paritytech/subxt/pull/694))
+- into_encoded() for consistency ([#685](https://github.com/paritytech/subxt/pull/685))
+- make subxt::Config::Extrinsic Send ([#681](https://github.com/paritytech/subxt/pull/681))
+- Refactor CLI tool to give room for growth ([#667](https://github.com/paritytech/subxt/pull/667))
+- expose jsonrpc-core client ([#672](https://github.com/paritytech/subxt/pull/672))
+- Upgrade clap to v4 ([#678](https://github.com/paritytech/subxt/pull/678))
+
+## [0.24.0] - 2022-09-22
+
+This release has a bunch of smaller changes and fixes. The breaking changes are fairly minor and should be easy to address if encountered. Notable additions are:
+- Allowing the underlying RPC implementation to be swapped out ([#634](https://github.com/paritytech/subxt/pull/634)). This makes `jsonrpsee` an optional dependency, and opens the door for Subxt to be integrated into things like light clients, since we can decide how to handle RPC calls.
+- A low level "runtime upgrade" API is exposed, giving more visibility into when node updates happen in case your application needs to handle them.
+- `scale-value` and `scale-decode` dependencies are bumped. The main effect of this is that `bitvec` is no longer used under the hood in the core of Subxt, which helps to remove one hurdle on the way to being able to compile it to WASM.
+
+Notable PRs merged:
+
+### Added
+
+- feat: add low-level `runtime upgrade API` ([#657](https://github.com/paritytech/subxt/pull/657))
+- Add accessor for `StaticTxPayload::call_data` ([#660](https://github.com/paritytech/subxt/pull/660))
+- Store type name of a field in event metadata, and export EventFieldMetadata ([#656](https://github.com/paritytech/subxt/pull/656) and [#654](https://github.com/paritytech/subxt/pull/654))
+- Allow generalising over RPC implementation ([#634](https://github.com/paritytech/subxt/pull/634))
+- Add conversion and default functions for `NumberOrHex` ([#636](https://github.com/paritytech/subxt/pull/636))
+- Allow creating/submitting unsigned transactions, too. ([#625](https://github.com/paritytech/subxt/pull/625))
+- Add Staking Miner and Introspector to usage list ([#647](https://github.com/paritytech/subxt/pull/647))
+
+### Changed
+
+- Bump scale-value and scale-decode ([#659](https://github.com/paritytech/subxt/pull/659))
+- Tweak 0.23 notes and add another test for events ([#618](https://github.com/paritytech/subxt/pull/618))
+- Specialize metadata errors ([#633](https://github.com/paritytech/subxt/pull/633))
+- Simplify the TxPayload trait a little ([#638](https://github.com/paritytech/subxt/pull/638))
+- Remove unnecessary `async` ([#645](https://github.com/paritytech/subxt/pull/645))
+- Use 'sp_core::Hxxx' for all hash types ([#623](https://github.com/paritytech/subxt/pull/623))
+
+### Fixed
+
+- Fix `history_depth` testing ([#662](https://github.com/paritytech/subxt/pull/662))
+- Fix codegen for `codec::Compact` as type parameters ([#651](https://github.com/paritytech/subxt/pull/651))
+- Support latest substrate release ([#653](https://github.com/paritytech/subxt/pull/653))
+
 ## [0.23.0] - 2022-08-11
 
 This is one of the most significant releases to date in Subxt, and carries with it a number of significant breaking changes, but in exchange, a number of significant improvements. The most significant PR is [#593](https://github.com/paritytech/subxt/pull/593); the fundamental change that this makes is to separate creating a query/transaction/address from submitting it. This gives us flexibility when creating queries; they can be either dynamically or statically generated, but also flexibility in our client, enabling methods to be exposed for online or offline use.

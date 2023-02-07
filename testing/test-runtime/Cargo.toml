@@ -1,16 +1,16 @@
 [package]
 name = "test-runtime"
-version = "0.23.0"
+version = "0.26.0"
 edition = "2021"
+publish = false
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = "6.0.0"
+sp-runtime = { git = "https://github.com/tidelabs/substrate", branch = "tidechain-dev" }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
-sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
-tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
-which = "4.2.2"
-jsonrpsee = { version = "0.15.1", features = ["async-client", "client-ws-transport"] }
+tokio = { version = "1.25", features = ["macros", "rt-multi-thread"] }
+which = "4.4.0"
+jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }

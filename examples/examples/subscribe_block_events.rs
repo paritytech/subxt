@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot v0.9.28-9ffe6e9e3da.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.28/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -31,13 +31,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Subscribe to just balance transfer events, making use of `filter_events`
-    // to select a single event type (note the 1-tuple) to filter out and return.
-    let mut transfer_events = api
-        .events()
-        .subscribe()
-        .await?
-        .filter_events::<(polkadot::balances::events::Transfer,)>();
+    // Subscribe to (in this case, finalized) blocks.
+    let mut block_sub = api.blocks().subscribe_finalized().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
     tokio::task::spawn({
@@ -63,9 +58,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    // Our subscription will see all of the transfer events emitted as a result of this:
-    while let Some(transfer_event) = transfer_events.next().await {
-        println!("Balance transfer event: {transfer_event:?}");
+    // Get each finalized block as it arrives.
+    while let Some(block) = block_sub.next().await {
+        let block = block?;
+
+        // Ask for the events for this block.
+        let events = block.events().await?;
+
+        let block_hash = block.hash();
+
+        // We can dynamically decode events:
+        println!("  Dynamic event details: {block_hash:?}:");
+        for event in events.iter() {
+            let event = event?;
+            let is_balance_transfer = event
+                .as_event::<polkadot::balances::events::Transfer>()?
+                .is_some();
+            let pallet = event.pallet_name();
+            let variant = event.variant_name();
+            println!(
+                "    {pallet}::{variant} (is balance transfer? {is_balance_transfer})"
+            );
+        }
+
+        // Or we can find the first transfer event, ignoring any others:
+        let transfer_event =
+            events.find_first::<polkadot::balances::events::Transfer>()?;
+
+        if let Some(ev) = transfer_event {
+            println!("  - Balance transfer success: value: {:?}", ev.amount);
+        } else {
+            println!("  - No balance transfer event found in this block");
+        }
     }
 
     Ok(())

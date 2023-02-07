@@ -55,13 +55,15 @@ function generate_changelog() {
         pr_link="$REMOTE_LINK$pr_number"
         # Generate the link as markdown.
         pr_md_link=" ([#$pr_number]($pr_link))"
-        # Print the changelog line as `- commit-title pr-link`.
-        echo "$line" | awk -v var="$pr_md_link" '{NF--; printf "- "; printf; print var}'
+        # Print every word from the commit title, except the last word.
+        # The last word is the PR id that is already included by the pr-link.
+        # The changelog line is `- commit-title pr-link`.
+        echo "$line" | awk -v link="$pr_md_link" '{ printf "- "; for(i=1;i<=NF-1;i++) { printf $i" "} print link}'
     done <<< "$prs"
 }
 
 # Get latest release tag.
-tag=$($GIT_BIN describe --match "v[0-9]*" --abbrev=0 origin/master) || log_error 'Failed to obtain the latest release tag'
+tag=$($GIT_BIN describe --tag --match "v[0-9]*" --abbrev=0 origin/master) || log_error 'Failed to obtain the latest release tag'
 log_info "Latest release tag: $tag"
 
 generate_changelog "$tag"

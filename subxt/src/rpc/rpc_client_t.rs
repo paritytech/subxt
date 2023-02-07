@@ -20,6 +20,11 @@ pub use serde_json::value::RawValue;
 /// the caller. This is the case because we want the methods to be object-safe (which prohibits
 /// generics), and want to avoid any unnecessary allocations in serializing/deserializing
 /// parameters.
+///
+/// # Panics
+///
+/// Implementations are free to panic if the `RawValue`'s passed to `request_raw` or
+/// `subscribe_raw` are not JSON arrays. Internally, we ensure that this is always the case.
 pub trait RpcClientT: Send + Sync + 'static {
     /// Make a raw request for which we expect a single response back from. Implementations
     /// should expect that the params will either be `None`, or be an already-serialized
@@ -54,6 +59,17 @@ pub trait RpcClientT: Send + Sync + 'static {
 pub type RpcFuture<'a, T> =
     Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
+/// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
+pub struct RpcSubscription {
+    /// The subscription stream.
+    pub stream: RpcSubscriptionStream,
+    /// The ID associated with the subscription.
+    pub id: Option<RpcSubscriptionId>,
+}
+
 /// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscription =
+pub type RpcSubscriptionStream =
     Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>;
+
+/// The ID associated with the [`RpcClientT`]'s `subscription`.
+pub type RpcSubscriptionId = String;

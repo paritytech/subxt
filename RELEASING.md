@@ -13,7 +13,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 3.  Check that you're happy with the current documentation.
 
     ```
-    cargo doc --open --all-features
+    cargo doc --open
     ```
 
     CI checks for broken internal links at the moment. Optionally you can also confirm that any external links
@@ -21,14 +21,20 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     ```
     cargo install cargo-deadlinks
-    cargo deadlinks --check-http -- --all-features
+    cargo deadlinks --check-http
     ```
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
 4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-metadata`, `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `integration-tests`, `test-runtime`, `ui-tests`.
 
-5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
+5.  Ensure the `Cargo.lock` file is up to date.
+
+    ```
+    cargo generate-lockfile
+    ```
+
+6.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
     First, if there have been any significant changes, add a description of those changes to the top of the
@@ -44,11 +50,11 @@ We also assume that ongoing work done is being merged directly to the `master` b
     provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Fixed", "Added" and "Changed" sections, and make any
     other adjustments that you feel are necessary for clarity.
 
-6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
+7.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
 
-7.  Once the branch has been reviewed and passes CI, merge it.
+8.  Once the branch has been reviewed and passes CI, merge it.
 
-8.  Now, we're ready to publish the release to crates.io.
+9.  Now, we're ready to publish the release to crates.io.
 
     1.  Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
 
@@ -59,7 +65,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     2.  Perform a final sanity check that everything looks ok.
 
         ```
-        cargo check --all-targets
+        cargo hack --exclude-all-features --each-feature check --all-targets --workspace
         cargo test --all-targets
         ```
 
@@ -69,18 +75,15 @@ We also assume that ongoing work done is being merged directly to the `master` b
         ```
         (cd metadata && cargo publish) && \
             (cd codegen && cargo publish) && \
-            sleep 10 && \
             (cd macro && cargo publish) && \
-            sleep 10 && \
             (cd subxt && cargo publish) && \
-            sleep 10 && \
             (cd cli && cargo publish);
         ```
 
         If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
         you may just need to wait a little longer and then run the remaining portion of that command.
 
-9.  If the release was successful, tag the commit that we released in the `master` branch with the
+10. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
 
     ```

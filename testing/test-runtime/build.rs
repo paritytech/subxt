@@ -33,7 +33,7 @@ async fn run() {
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
-        .arg(format!("--ws-port={}", port))
+        .arg(format!("--ws-port={port}"))
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
@@ -42,25 +42,25 @@ async fn run() {
             See https://github.com/paritytech/subxt/tree/master#integration-testing")
         }
         Err(e) => {
-            panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
+            panic!("Cannot spawn substrate command '{substrate_bin}': {e}")
         }
     };
 
     // Download metadata from binary; retry until successful, or a limit is hit.
-    let metadata_bytes: sp_core::Bytes = {
+    let metadata_bytes: subxt::rpc::types::Bytes = {
         const MAX_RETRIES: usize = 6;
         let mut retries = 0;
 
         loop {
             if retries >= MAX_RETRIES {
-                panic!("Cannot connect to substrate node after {} retries", retries);
+                panic!("Cannot connect to substrate node after {retries} retries");
             }
 
             // It might take a while for substrate node that spin up the RPC server.
             // Thus, the connection might get rejected a few times.
             use client::ClientT;
-            let res = match client::build(&format!("ws://localhost:{}", port)).await {
-                Ok(c) => c.request("state_getMetadata", None).await,
+            let res = match client::build(&format!("ws://localhost:{port}")).await {
+                Ok(c) => c.request("state_getMetadata", client::rpc_params![]).await,
                 Err(e) => Err(e),
             };
 
@@ -80,7 +80,7 @@ async fn run() {
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let metadata_path = Path::new(&out_dir).join("metadata.scale");
-    fs::write(&metadata_path, &metadata_bytes.0).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, metadata_bytes.0).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
@@ -89,19 +89,20 @@ async fn run() {
         r#"
         #[subxt::subxt(
             runtime_metadata_path = "{}",
-            derive_for_all_types = "Eq, PartialEq"
+            derive_for_all_types = "Eq, PartialEq",
+            substitute_type(
+                type = "sp_arithmetic::per_things::Perbill",
+                with = "::sp_runtime::Perbill"
+            )
         )]
-        pub mod node_runtime {{
-            #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
-            use ::sp_runtime::Perbill;
-        }}
+        pub mod node_runtime {{}}
     "#,
         metadata_path
             .to_str()
             .expect("Path to metadata should be stringifiable")
     );
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
-    fs::write(&runtime_path, runtime_api_contents)
+    fs::write(runtime_path, runtime_api_contents)
         .expect("Couldn't write runtime rust output");
 
     let substrate_path =
@@ -113,7 +114,7 @@ async fn run() {
         substrate_path.to_string_lossy()
     );
     // Re-build if we point to a different substrate binary:
-    println!("cargo:rerun-if-env-changed={}", SUBSTRATE_BIN_ENV_VAR);
+    println!("cargo:rerun-if-env-changed={SUBSTRATE_BIN_ENV_VAR}");
     // Re-build if this file changes:
     println!("cargo:rerun-if-changed=build.rs");
 }
@@ -174,7 +175,10 @@ mod client {
         },
     };
 
-    pub use jsonrpsee::core::client::ClientT;
+    pub use jsonrpsee::core::{
+        client::ClientT,
+        rpc_params,
+    };
 
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {

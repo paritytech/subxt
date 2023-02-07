@@ -59,7 +59,10 @@ mod rpc;
 mod rpc_client;
 mod rpc_client_t;
 
-// Expose the `Rpc` struct and any associated types.
+// Expose our RPC types here.
+pub mod types;
+
+// Expose the `Rpc` struct.
 pub use rpc::*;
 
 pub use rpc_client_t::{
@@ -67,6 +70,8 @@ pub use rpc_client_t::{
     RpcClientT,
     RpcFuture,
     RpcSubscription,
+    RpcSubscriptionId,
+    RpcSubscriptionStream,
 };
 
 pub use rpc_client::{

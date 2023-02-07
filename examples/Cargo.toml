@@ -1,6 +1,6 @@
 [package]
 name = "subxt-examples"
-version = "0.23.0"
+version = "0.26.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 publish = false
@@ -13,9 +13,11 @@ description = "Subxt example usage"
 
 [dev-dependencies]
 subxt = { path = "../subxt" }
-tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }
-sp-keyring = "6.0.0"
-futures = "0.3.13"
+tokio = { version = "1.25", features = ["rt-multi-thread", "macros", "time"] }
+sp-keyring = { git = "https://github.com/tidelabs/substrate", branch = "tidechain-dev", default-features = false }
+futures = "0.3.26"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 hex = "0.4.3"
 tracing-subscriber = "0.3.11"
+sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain-dev", default-features = false }
+sp-runtime = { git = "https://github.com/tidelabs/substrate", branch = "tidechain-dev", default-features = false }

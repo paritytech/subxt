@@ -29,6 +29,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -40,13 +41,16 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
-      - name: Build
-        uses: actions-rs/cargo@v1.0.3
+      - name: Install cargo-hack
+        uses: baptiste0928/cargo-install@v1
         with:
-          command: check
-          args: --all-targets --all-features --workspace
+          crate: cargo-hack
+          version: 0.5
+
+      - name: Cargo check
+        run: cargo hack --exclude-all-features --each-feature check --all-targets --workspace
 
   fmt:
     name: Cargo fmt
@@ -64,7 +68,7 @@ jobs:
             components: rustfmt
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Cargo fmt
         uses: actions-rs/cargo@v1.0.3
@@ -83,6 +87,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -94,7 +99,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Check internal documentation links
         run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
@@ -116,6 +121,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -127,7 +133,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Cargo test
         uses: actions-rs/cargo@v1.0.3
@@ -146,6 +152,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -158,10 +165,45 @@ jobs:
             override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Run clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: --all-targets -- -D warnings
+
+  wasm_tests:
+    name: Test wasm
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3.1.0
+
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Install firefox
+      uses: browser-actions/setup-firefox@latest
+
+    - name: Install chrome
+      uses: browser-actions/setup-chrome@latest
+
+    - name: Rust Cache
+      uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
+
+    - name: Download Substrate
+      run: |
+        curl $SUBSTRATE_URL --output substrate --location
+        chmod +x substrate
+        ./substrate --version
+        mkdir -p ~/.local/bin
+        mv substrate ~/.local/bin
+
+    - name: Run WASM tests
+      run: |
+        substrate --dev --tmp > /dev/null 2>&1 &
+        wasm-pack test --headless --firefox
+        wasm-pack test --headless --chrome
+        pkill substrate
+      working-directory: testing/wasm-tests

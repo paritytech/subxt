@@ -9,7 +9,9 @@ use super::{
     StaticEvent,
 };
 use crate::{
+    client::OnlineClientT,
     error::Error,
+    events::events_client::get_event_bytes,
     metadata::EventMetadata,
     Config,
     Metadata,
@@ -25,7 +27,7 @@ use std::sync::Arc;
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct Events<T: Config> {
     metadata: Metadata,
     block_hash: T::Hash,
@@ -64,6 +66,50 @@ impl<T: Config> Events<T> {
         }
     }
 
+    /// Obtain the events from a block hash given custom metadata and a client.
+    ///
+    /// This method gives users the ability to inspect the events of older blocks,
+    /// where the metadata changed. For those cases, the user is responsible for
+    /// providing a valid metadata.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # #[tokio::main]
+    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///  use subxt::{ OnlineClient, PolkadotConfig, events::Events };
+    ///
+    ///  let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+    ///
+    ///  // Get the hash of an older block.
+    ///  let block_hash = client
+    ///     .rpc()
+    ///     .block_hash(Some(1u32.into()))
+    ///     .await?
+    ///     .expect("didn't pass a block number; qed");
+    ///  // Fetch the metadata of the given block.
+    ///  let metadata = client.rpc().metadata(Some(block_hash)).await?;
+    ///  // Fetch the events from the client.
+    ///  let events = Events::new_from_client(metadata, block_hash, client);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Note
+    ///
+    /// Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    pub async fn new_from_client<Client>(
+        metadata: Metadata,
+        block_hash: T::Hash,
+        client: Client,
+    ) -> Result<Self, Error>
+    where
+        Client: OnlineClientT<T>,
+    {
+        let event_bytes = get_event_bytes(&client, Some(block_hash)).await?;
+        Ok(Events::new(metadata, block_hash, event_bytes))
+    }
+
     /// The number of events.
     pub fn len(&self) -> u32 {
         self.num_events
@@ -83,6 +129,8 @@ impl<T: Config> Events<T> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
     /// details. If an error occurs, all subsequent iterations return `None`.
+    // Dev note: The returned iterator is 'static + Send so that we can box it up and make
+    // use of it with our `FilterEvents` stuff.
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Result<EventDetails, Error>> + Send + Sync + 'static {
@@ -153,10 +201,12 @@ pub struct EventDetails {
     all_bytes: Arc<[u8]>,
     // start of the bytes (phase, pallet/variant index and then fields and then topic to follow).
     start_idx: usize,
-    // start of the fields (ie after phase nad pallet/variant index).
-    fields_start_idx: usize,
+    // start of the event (ie pallet/variant index and then the fields and topic after).
+    event_start_idx: usize,
+    // start of the fields (ie after phase and pallet/variant index).
+    event_fields_start_idx: usize,
     // end of the fields.
-    fields_end_idx: usize,
+    event_fields_end_idx: usize,
     // end of everything (fields + topics)
     end_idx: usize,
     metadata: Metadata,
@@ -173,10 +223,13 @@ impl EventDetails {
         let input = &mut &all_bytes[start_idx..];
 
         let phase = Phase::decode(input)?;
+
+        let event_start_idx = all_bytes.len() - input.len();
+
         let pallet_index = u8::decode(input)?;
         let variant_index = u8::decode(input)?;
 
-        let fields_start_idx = all_bytes.len() - input.len();
+        let event_fields_start_idx = all_bytes.len() - input.len();
 
         // Get metadata for the event:
         let event_metadata = metadata.event(pallet_index, variant_index)?;
@@ -198,7 +251,7 @@ impl EventDetails {
         }
 
         // the end of the field bytes.
-        let fields_end_idx = all_bytes.len() - input.len();
+        let event_fields_end_idx = all_bytes.len() - input.len();
 
         // topics come after the event data in EventRecord. They aren't used for
         // anything at the moment, so just decode and throw them away.
@@ -211,8 +264,9 @@ impl EventDetails {
             phase,
             index,
             start_idx,
-            fields_start_idx,
-            fields_end_idx,
+            event_start_idx,
+            event_fields_start_idx,
+            event_fields_end_idx,
             end_idx,
             all_bytes,
             metadata,
@@ -233,14 +287,14 @@ impl EventDetails {
     pub fn pallet_index(&self) -> u8 {
         // Note: never panics; we expect these bytes to exist
         // in order that the EventDetails could be created.
-        self.all_bytes[self.fields_start_idx - 2]
+        self.all_bytes[self.event_fields_start_idx - 2]
     }
 
     /// The index of the event variant that the event originated from.
     pub fn variant_index(&self) -> u8 {
         // Note: never panics; we expect these bytes to exist
         // in order that the EventDetails could be created.
-        self.all_bytes[self.fields_start_idx - 1]
+        self.all_bytes[self.event_fields_start_idx - 1]
     }
 
     /// The name of the pallet from whence the Event originated.
@@ -271,7 +325,7 @@ impl EventDetails {
 
     /// Return the bytes representing the fields stored in this event.
     pub fn field_bytes(&self) -> &[u8] {
-        &self.all_bytes[self.fields_start_idx..self.fields_end_idx]
+        &self.all_bytes[self.event_fields_start_idx..self.event_fields_end_idx]
     }
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
@@ -336,7 +390,7 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: Decode>(&self) -> Result<E, CodecError> {
-        E::decode(&mut self.bytes())
+        E::decode(&mut &self.all_bytes[self.event_start_idx..self.event_fields_end_idx])
     }
 }
 
@@ -455,6 +509,7 @@ mod tests {
             event_record,
             events,
             events_raw,
+            AllEvents,
         },
         *,
     };
@@ -470,7 +525,7 @@ mod tests {
     /// [`RawEventDetails`] can be annoying to test, because it contains
     /// type info in the decoded field Values. Strip that here so that
     /// we can compare fields more easily.
-    #[derive(Debug, PartialEq, Clone)]
+    #[derive(Debug, PartialEq, Eq, Clone)]
     pub struct TestRawEventDetails {
         pub phase: Phase,
         pub index: u32,
@@ -522,6 +577,39 @@ mod tests {
         assert_eq!(actual.variant_name(), expected.variant);
         assert_eq!(actual.variant_index(), expected.variant_index);
         assert_eq!(actual_fields_no_context, expected.fields);
+    }
+
+    #[test]
+    fn statically_decode_single_root_event() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8, bool, Vec<String>),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let event = Event::A(1, true, vec!["Hi".into()]);
+        let events = events::<Event>(
+            metadata,
+            vec![event_record(Phase::ApplyExtrinsic(123), event.clone())],
+        );
+
+        let ev = events
+            .iter()
+            .next()
+            .expect("one event expected")
+            .expect("event should be extracted OK");
+
+        // This is the line we're testing:
+        let decoded_event = ev
+            .as_root_event::<AllEvents<Event>>()
+            .expect("can decode event into root enum again");
+
+        // It should equal the event we put in:
+        assert_eq!(decoded_event, AllEvents::Test(event));
     }
 
     #[test]

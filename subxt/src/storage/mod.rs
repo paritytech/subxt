@@ -7,16 +7,19 @@
 mod storage_address;
 mod storage_client;
 mod storage_map_key;
+mod storage_type;
 
 pub mod utils;
 
-pub use storage_client::{
+pub use storage_client::StorageClient;
+
+pub use storage_type::{
     KeyIter,
-    StorageClient,
+    Storage,
 };
 
-// Re-export as this is used in the public API:
-pub use sp_core::storage::StorageKey;
+// Re-export as this is used in the public API in this module:
+pub use crate::rpc::types::StorageKey;
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.

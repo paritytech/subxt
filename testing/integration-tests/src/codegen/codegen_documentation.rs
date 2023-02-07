@@ -4,15 +4,20 @@
 
 use regex::Regex;
 use subxt_codegen::{
+    CratePath,
     DerivesRegistry,
     RuntimeGenerator,
+    TypeSubstitutes,
 };
+
+fn load_test_metadata() -> frame_metadata::RuntimeMetadataPrefixed {
+    let bytes = test_runtime::METADATA;
+    codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata")
+}
 
 fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
-    let bytes = test_runtime::METADATA;
-    let meta: frame_metadata::RuntimeMetadataPrefixed =
-        codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+    let meta = load_test_metadata();
     let metadata = match meta.1 {
         frame_metadata::RuntimeMetadata::V14(v14) => v14,
         _ => panic!("Unsupported metadata version {:?}", meta.1),
@@ -42,25 +47,26 @@ fn metadata_docs() -> Vec<String> {
     docs
 }
 
-fn generate_runtime_interface() -> String {
+fn generate_runtime_interface(crate_path: CratePath) -> String {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
-    let bytes = test_runtime::METADATA;
-    let metadata: frame_metadata::RuntimeMetadataPrefixed =
-        codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+    let metadata = load_test_metadata();
 
     // Generate a runtime interface from the provided metadata.
     let generator = RuntimeGenerator::new(metadata);
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let derives = DerivesRegistry::default();
-    generator.generate_runtime(item_mod, derives).to_string()
+    let derives = DerivesRegistry::new(&crate_path);
+    let type_substitutes = TypeSubstitutes::new(&crate_path);
+    generator
+        .generate_runtime(item_mod, derives, type_substitutes, crate_path)
+        .to_string()
 }
 
 fn interface_docs() -> Vec<String> {
     // Generate the runtime interface from the node's metadata.
     // Note: the API is generated on a single line.
-    let runtime_api = generate_runtime_interface();
+    let runtime_api = generate_runtime_interface(CratePath::default());
 
     // Documentation lines have the following format:
     //    # [ doc = "Upward message is invalid XCM."]
@@ -100,8 +106,40 @@ fn check_documentation() {
     for raw in raw_docs.iter() {
         assert!(
             runtime_docs.contains(raw),
-            "Documentation not present in runtime API: {}",
-            raw
+            "Documentation not present in runtime API: {raw}"
         );
     }
+}
+
+#[test]
+fn check_root_attrs_preserved() {
+    let metadata = load_test_metadata();
+
+    // Test that the root docs/attr are preserved.
+    let item_mod = syn::parse_quote!(
+        /// Some root level documentation
+        #[some_root_attribute]
+        pub mod api {}
+    );
+
+    // Generate a runtime interface from the provided metadata.
+    let generator = RuntimeGenerator::new(metadata);
+    let derives = DerivesRegistry::new(&CratePath::default());
+    let type_substitutes = TypeSubstitutes::new(&CratePath::default());
+    let generated_code = generator
+        .generate_runtime(item_mod, derives, type_substitutes, CratePath::default())
+        .to_string();
+
+    let doc_str_loc = generated_code
+        .find("Some root level documentation")
+        .expect("root docs should be preserved");
+    let attr_loc = generated_code.find("some_root_attribute") // '#' is space separated in generated output.
+        .expect("root attr should be preserved");
+    let mod_start = generated_code
+        .find("pub mod api")
+        .expect("'pub mod api' expected");
+
+    // These things should be before the mod start
+    assert!(doc_str_loc < mod_start);
+    assert!(attr_loc < mod_start);
 }

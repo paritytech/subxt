@@ -23,6 +23,7 @@ jobs:
         run: |
             curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
+            ./substrate --version
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -34,7 +35,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@6720f05bc48b77f96918929a9019fb2203ff71f8 # v2.0.0
+        uses: Swatinem/rust-cache@359a70e43a0bb8a13953b04a90f76428b4959bb6 # v2.2.0
 
       - name: Cargo test
         uses: actions-rs/cargo@v1.0.3
@@ -45,7 +46,7 @@ jobs:
       # If the previous step fails, create a new Github issue
       # to nofity us about it.
       - if: ${{ failure() }}
-        uses: JasonEtco/create-an-issue@9e6213aec58987fa7d2f4deb8b256b99e63107a2 # v2.6.0
+        uses: JasonEtco/create-an-issue@e27dddc79c92bc6e4562f268fffa5ed752639abd # v2.9.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

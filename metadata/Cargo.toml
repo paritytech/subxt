@@ -1,8 +1,9 @@
 [package]
 name = "subxt-metadata"
-version = "0.23.0"
+version = "0.26.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
+publish = true
 autotests = false
 
 license = "Apache-2.0 OR GPL-3.0"
@@ -15,7 +16,7 @@ description = "Command line utilities for checking metadata compatibility betwee
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
 frame-metadata = "15.0.0"
 scale-info = "2.0.0"
-sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
+sp-core-hashing = { git = "https://github.com/tidelabs/substrate", branch = "tidechain-dev" }
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }

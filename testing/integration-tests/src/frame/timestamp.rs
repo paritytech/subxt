@@ -14,7 +14,10 @@ async fn storage_get_current_timestamp() {
 
     let timestamp = api
         .storage()
-        .fetch(&node_runtime::storage().timestamp().now(), None)
+        .at(None)
+        .await
+        .unwrap()
+        .fetch(&node_runtime::storage().timestamp().now())
         .await;
 
     assert!(timestamp.is_ok())

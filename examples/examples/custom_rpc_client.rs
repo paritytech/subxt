@@ -68,7 +68,8 @@ impl RpcClientT for MyLoggingClient {
         let res = RawValue::from_string("[]".to_string()).unwrap();
         let stream = futures::stream::once(async move { Ok(res) });
         let stream: Pin<Box<dyn futures::Stream<Item = _> + Send>> = Box::pin(stream);
-        Box::pin(std::future::ready(Ok(stream)))
+        // This subscription does not provide an ID.
+        Box::pin(std::future::ready(Ok(RpcSubscription { stream, id: None })))
     }
 }
 
@@ -88,7 +89,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Pass this into our OnlineClient to instantiate it. This will lead to some
     // RPC calls being made to fetch chain details/metadata, which will immediately
     // fail..
-    let _ = OnlineClient::<PolkadotConfig>::from_rpc_client(rpc_client).await;
+    let _ = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(rpc_client)).await;
 
     // But, we can see that the calls were made via our custom RPC client:
     println!("Log of calls made:\n\n{}", log.lock().unwrap().as_str());

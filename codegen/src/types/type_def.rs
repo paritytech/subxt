@@ -5,6 +5,7 @@
 use super::{
     CompositeDef,
     CompositeDefFields,
+    CratePath,
     Derives,
     TypeDefParameters,
     TypeGenerator,
@@ -40,8 +41,12 @@ pub struct TypeDefGen {
 
 impl TypeDefGen {
     /// Construct a type definition for codegen from the given [`scale_info::Type`].
-    pub fn from_type(ty: Type<PortableForm>, type_gen: &TypeGenerator) -> Self {
-        let derives = type_gen.type_derives(&ty);
+    pub fn from_type(
+        ty: &Type<PortableForm>,
+        type_gen: &TypeGenerator,
+        crate_path: &CratePath,
+    ) -> Self {
+        let derives = type_gen.type_derives(ty);
 
         let type_params = ty
             .type_params()
@@ -75,13 +80,14 @@ impl TypeDefGen {
                 );
                 type_params.update_unused(fields.field_types());
                 let composite_def = CompositeDef::struct_def(
-                    &ty,
+                    ty,
                     &type_name,
                     type_params.clone(),
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
                     ty.docs(),
+                    crate_path,
                 );
                 TypeDefGenKind::Struct(composite_def)
             }
@@ -161,6 +167,7 @@ impl quote::ToTokens for TypeDefGen {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum TypeDefGenKind {
     Struct(CompositeDef),

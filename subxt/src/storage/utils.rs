@@ -18,8 +18,8 @@ pub fn write_storage_address_root_bytes<Address: StorageAddress>(
     addr: &Address,
     out: &mut Vec<u8>,
 ) {
-    out.extend(&sp_core::twox_128(addr.pallet_name().as_bytes()));
-    out.extend(&sp_core::twox_128(addr.entry_name().as_bytes()));
+    out.extend(sp_core_hashing::twox_128(addr.pallet_name().as_bytes()));
+    out.extend(sp_core_hashing::twox_128(addr.entry_name().as_bytes()));
 }
 
 /// Outputs the [`storage_address_root_bytes`] as well as any additional bytes that represent

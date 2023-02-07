@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot v0.9.28-9ffe6e9e3da.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.28/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -24,7 +24,7 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let addr = AccountKeyring::Bob.to_account_id();
+    let addr = AccountKeyring::Bob.to_account_id().into();
 
     // Construct storage addresses to access:
     let staking_bonded = polkadot::storage().staking().bonded(&addr);
@@ -32,8 +32,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // For storage requests, we can join futures together to
     // await multiple futures concurrently:
-    let a_fut = api.storage().fetch(&staking_bonded, None);
-    let b_fut = api.storage().fetch(&staking_ledger, None);
+    let a_fut = api.storage().at(None).await?.fetch(&staking_bonded);
+    let b_fut = api.storage().at(None).await?.fetch(&staking_ledger);
     let (a, b) = join!(a_fut, b_fut);
 
     println!("{a:?}, {b:?}");

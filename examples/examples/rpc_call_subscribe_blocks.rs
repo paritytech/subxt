@@ -2,20 +2,16 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot v0.9.28-9ffe6e9e3da.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.28/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
 use subxt::{
-    ext::sp_runtime::{
-        generic::Header,
-        traits::BlakeTwo256,
-    },
-    rpc::Subscription,
+    config::Header,
     OnlineClient,
     PolkadotConfig,
 };
@@ -28,8 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
-    let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
-        api.rpc().subscribe_finalized_blocks().await?;
+    let mut blocks = api.rpc().subscribe_finalized_block_headers().await?;
 
     while let Some(Ok(block)) = blocks.next().await {
         println!(

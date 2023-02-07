@@ -388,6 +388,7 @@ pub struct EventFieldMetadata {
 }
 
 impl EventFieldMetadata {
+    /// Construct a new [`EventFieldMetadata`]
     pub fn new(name: Option<String>, type_name: Option<String>, type_id: u32) -> Self {
         EventFieldMetadata {
             name,
@@ -401,7 +402,7 @@ impl EventFieldMetadata {
         self.name.as_deref()
     }
 
-    // Get the type name of the field as it appears in the code
+    /// Get the type name of the field as it appears in the code
     pub fn type_name(&self) -> Option<&str> {
         self.type_name.as_deref()
     }

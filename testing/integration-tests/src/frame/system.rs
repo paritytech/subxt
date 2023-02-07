@@ -24,7 +24,9 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
     let account_info = api
         .storage()
-        .fetch_or_default(&account_info_addr, None)
+        .at(None)
+        .await?
+        .fetch_or_default(&account_info_addr)
         .await;
 
     assert_matches!(account_info, Ok(_));

@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot v0.9.28-9ffe6e9e3da.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.28/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -46,13 +46,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // submit the transaction with default params:
     let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    println!("Balance transfer extrinsic submitted: {hash}");
 
     // 2. Dynamic constant access (the dynamic equivalent to the fetch_constants example).
 
     let constant_address = subxt::dynamic::constant("Balances", "ExistentialDeposit");
-    let existential_deposit = api.constants().at(&constant_address)?;
-    println!("Existential Deposit: {}", existential_deposit);
+    let existential_deposit = api.constants().at(&constant_address)?.to_value()?;
+    println!("Existential Deposit: {existential_deposit}");
 
     // 3. Dynamic storage access
 
@@ -66,16 +66,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let account = api
         .storage()
-        .fetch_or_default(&storage_address, None)
-        .await?;
+        .at(None)
+        .await?
+        .fetch_or_default(&storage_address)
+        .await?
+        .to_value()?;
     println!("Bob's account details: {account}");
 
     // 4. Dynamic storage iteration (the dynamic equivalent to the fetch_all_accounts example).
 
     let storage_address = subxt::dynamic::storage_root("System", "Account");
-    let mut iter = api.storage().iter(storage_address, 10, None).await?;
+    let mut iter = api
+        .storage()
+        .at(None)
+        .await?
+        .iter(storage_address, 10)
+        .await?;
     while let Some((key, account)) = iter.next().await? {
-        println!("{}: {}", hex::encode(key), account);
+        println!("{}: {}", hex::encode(key), account.to_value()?);
     }
 
     Ok(())

@@ -19,8 +19,6 @@ pub use scale_value::scale::{
     DecodeError,
     EncodeError,
 };
-pub use sp_core::crypto::SecretStringError;
-pub use sp_runtime::transaction_validity::TransactionValidityError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -39,12 +37,6 @@ pub enum Error {
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
-    /// Secret string error.
-    #[error("Secret String Error")]
-    SecretString(SecretStringError),
-    /// Extrinsic validity error
-    #[error("Transaction Validity Error: {0:?}")]
-    Invalid(TransactionValidityError),
     /// Invalid metadata error
     #[error("Invalid Metadata: {0}")]
     InvalidMetadata(#[from] InvalidMetadataError),
@@ -63,24 +55,15 @@ pub enum Error {
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    /// Block related error.
+    #[error("Block error: {0}")]
+    Block(#[from] BlockError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-impl From<SecretStringError> for Error {
-    fn from(error: SecretStringError) -> Self {
-        Error::SecretString(error)
-    }
-}
-
-impl From<TransactionValidityError> for Error {
-    fn from(error: TransactionValidityError) -> Self {
-        Error::Invalid(error)
-    }
 }
 
 impl From<&str> for Error {
@@ -102,10 +85,18 @@ impl From<DispatchError> for Error {
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,
-/// the error is any custom string.
+/// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
-#[error("RPC error: {0}")]
-pub struct RpcError(pub String);
+pub enum RpcError {
+    // Dev note: We need the error to be safely sent between threads
+    // for `subscribe_to_block_headers_filling_in_gaps` and friends.
+    /// Error related to the RPC client.
+    #[error("RPC error: {0}")]
+    ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
+    /// The RPC subscription dropped.
+    #[error("RPC error: subscription dropped.")]
+    SubscriptionDropped,
+}
 
 /// This is our attempt to decode a runtime DispatchError. We either
 /// successfully decode it into a [`ModuleError`], or we fail and keep
@@ -227,6 +218,24 @@ impl DispatchError {
                 error: err.error,
             },
         })
+    }
+}
+
+/// Block error
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+pub enum BlockError {
+    /// The block
+    #[error(
+        "Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)"
+    )]
+    BlockHashNotFound(String),
+}
+
+impl BlockError {
+    /// Produce an error that a block with the given hash cannot be found.
+    pub fn block_hash_not_found(hash: impl AsRef<[u8]>) -> BlockError {
+        let hash = format!("0x{}", hex::encode(hash));
+        BlockError::BlockHashNotFound(hash)
     }
 }
 
