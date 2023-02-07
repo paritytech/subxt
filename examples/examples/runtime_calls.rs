@@ -18,7 +18,7 @@ use subxt::{
             PlainTip,
             PolkadotExtrinsicParamsBuilder as Params,
         },
-        PolkadotConfig,
+        SubstrateConfig,
     },
     tx::PairSigner,
     OnlineClient,
@@ -32,7 +32,7 @@ pub mod polkadot {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
-    let api = OnlineClient::<PolkadotConfig>::new().await?;
+    let api = OnlineClient::<SubstrateConfig>::new().await?;
 
     let api_tx = polkadot::runtime_api::Core::version();
     println!("RuntimeApi payload: {:?}", api_tx);
@@ -60,6 +60,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         result
     );
 
+    let alice = AccountKeyring::Alice.to_account_id().into();
+    let api_tx = polkadot::runtime_api::AccountNonceApi::account_nonce(alice);
+    println!("RuntimeApi payload: {:?}", api_tx);
+
+    let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
+    println!("Result: {:?}", bytes);
+
+    let result: polkadot::runtime_api::AccountNonceApi::account_nonce_target =
+        Decode::decode(&mut &bytes[..])?;
+    println!(
+        "Result for polkadot::runtime_api::AccountNonceApi::account_nonce: {:?}\n\n",
+        result
+    );
+
+    // Send from Alice to Bob.
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let dest = AccountKeyring::Bob.to_account_id().into();
+    let tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345);
+    let _hash = api
+        .tx()
+        .sign_and_submit_then_watch_default(&tx, &signer)
+        .await?
+        .wait_for_finalized()
+        .await?;
+
+    // Check nonce again.
     let alice = AccountKeyring::Alice.to_account_id().into();
     let api_tx = polkadot::runtime_api::AccountNonceApi::account_nonce(alice);
     println!("RuntimeApi payload: {:?}", api_tx);
