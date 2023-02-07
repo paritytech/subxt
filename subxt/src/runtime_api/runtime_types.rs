@@ -13,6 +13,8 @@ use std::{
     marker::PhantomData,
 };
 
+use super::RuntimeAPIPayload;
+
 /// Execute runtime API calls.
 #[derive(Derivative)]
 #[derivative(Clone(bound = "Client: Clone"))]
@@ -49,6 +51,28 @@ where
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
+            let data = client
+                .rpc()
+                .state_call(function, call_parameters, Some(block_hash))
+                .await?;
+            Ok(data.0)
+        }
+    }
+
+    /// Execute a runtime API call for the given payload.
+    pub fn call(
+        &self,
+        payload: RuntimeAPIPayload,
+    ) -> impl Future<Output = Result<Vec<u8>, Error>> {
+        let client = self.client.clone();
+        let block_hash = self.block_hash;
+        // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
+        // which is a temporary thing we'll be throwing away quickly:
+        async move {
+            let payload = payload;
+            let function = payload.func_name();
+            let call_parameters = Some(payload.param_data());
+
             let data = client
                 .rpc()
                 .state_call(function, call_parameters, Some(block_hash))

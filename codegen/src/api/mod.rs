@@ -7,10 +7,13 @@
 mod calls;
 mod constants;
 mod events;
+mod runtime_api;
 mod storage;
 
 use scale_info::form::PortableForm;
 use subxt_metadata::get_metadata_per_pallet_hash;
+
+use self::runtime_api::generate_runtime_api;
 
 use super::DerivesRegistry;
 use crate::{
@@ -139,7 +142,11 @@ pub fn generate_runtime_api_from_bytes(
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
 ) -> TokenStream2 {
-    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
+    let decoded: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &*bytes)
+        .unwrap_or_else(|e| abort_call_site!("Failed to decode opaque metadata: {}", e));
+    let decoded = decoded.unwrap();
+    let bytes = &decoded.0;
+    let metadata: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
@@ -156,8 +163,6 @@ fn generate_runtime_call_api(
     runtime: &Vec<TraitMetadata<PortableForm>>,
 ) -> TokenStream2 {
     let mut result = quote!();
-
-    println!("inside runtime: {:?}", runtime);
 
     for trait_ in runtime {
         for method in &trait_.methods {
@@ -187,8 +192,6 @@ fn generate_runtime_call_api(
             result.extend(fn_);
         }
     }
-
-    println!("Code gen would generate: {}", result);
 
     result
 }
@@ -246,6 +249,10 @@ impl RuntimeGenerator {
                 )
             })
             .collect::<Vec<_>>();
+
+        // Generate the runtime API.
+        let runtime_api =
+            generate_runtime_api(&self.metadata, &type_gen, types_mod_ident, &crate_path);
 
         // Pallet names and their length are used to create PALLETS array.
         // The array is used to identify the pallets composing the metadata for
@@ -377,9 +384,9 @@ impl RuntimeGenerator {
                     TransactionApi
                 }
 
-                pub mod runtime_api {
-                    #runtime_api_fns
-                }
+                // pub mod runtime_api {
+                //     #runtime_api_fns
+                // }
 
                 pub struct ConstantsApi;
                 impl ConstantsApi {
@@ -417,6 +424,9 @@ impl RuntimeGenerator {
                         Ok(())
                     }
                 }
+
+                /// Runtime API.
+                #runtime_api
             }
         }
     }

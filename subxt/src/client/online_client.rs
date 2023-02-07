@@ -159,29 +159,15 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
         use codec::Encode;
 
-
         let param = 15u32.encode();
         let bytes = rpc
             .state_call("Metadata_metadata_at_version", Some(&param), None)
             .await?;
-    
-        // println!("GOT BYTES: {:?}", bytes);
 
         let decoded: Option<OpaqueMetadata> = Decode::decode(&mut &*bytes)?;
-
-        println!("Decoded opaque");
-
         let decoded = decoded.unwrap();
         let bytes = &decoded.0;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
-
-        // let metadata: Metadata = meta.try_into()?;
-
-        // println!("Availb methods {:?}", decoded.0);
-
-        // let cursor = &mut &*bytes;
-        // let _ = <Compact<u32>>::decode(cursor)?;
-        // let meta: frame_metadata::RuntimeMetadataPrefixed = Decode::decode(cursor)?;
 
         println!("METADATA {:#?}", meta);
 

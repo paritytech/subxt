@@ -24,14 +24,22 @@ use subxt::{
     OnlineClient,
 };
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+use codec::Encode;
+
+#[subxt::subxt(runtime_metadata_url = "http://localhost:9933")]
 pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    polkadot::runtime_api::Metadata_metadata();
+    let api_tx = polkadot::runtime_api::Core::version();
+    println!("RuntimeApi payload: {:?}", api_tx);
+
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+    let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
+
+    println!("Result: {:?}", bytes);
 
     Ok(())
 }

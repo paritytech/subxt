@@ -8,9 +8,9 @@ use color_eyre::eyre::{
     WrapErr,
 };
 use frame_metadata::{
+    v15::RuntimeMetadataV15,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV15,
     META_RESERVED,
 };
 use jsonrpsee::client_transport::ws::Uri;

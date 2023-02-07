@@ -63,7 +63,16 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
-    Ok(client.request("state_getMetadata", rpc_params![]).await?)
+    use codec::Encode;
+    let bytes = 15u32.encode();
+    let param = format!("0x{}", hex::encode(&bytes));
+
+    Ok(client
+        .request(
+            "state_call",
+            rpc_params!["Metadata_metadata_at_version", &param],
+        )
+        .await?)
 }
 
 async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
@@ -71,7 +80,16 @@ async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
         .request_timeout(Duration::from_secs(180))
         .build(url.to_string())?;
 
-    Ok(client.request("state_getMetadata", rpc_params![]).await?)
+    use codec::Encode;
+    let bytes = 15u32.encode();
+    let param = format!("0x{}", hex::encode(&bytes));
+
+    Ok(client
+        .request(
+            "state_call",
+            rpc_params!["Metadata_metadata_at_version", &param],
+        )
+        .await?)
 }
 
 #[derive(Debug)]
