@@ -14,11 +14,11 @@ The main breaking change is fairly small: [#804](https://github.com/paritytech/s
 
 - Add find last function ([#821](https://github.com/paritytech/subxt/pull/821))
 - Doc: first item is current version comment ([#817](https://github.com/paritytech/subxt/pull/817))
-- Remove sleeps from release checklist; no longer needed ([#803](https://github.com/paritytech/subxt/pull/803))
 
 ## Changed
 
 - Remove unneeded Config bounds and BlockNumber associated type ([#804](https://github.com/paritytech/subxt/pull/804))
+- Remove sleeps from release checklist; no longer needed ([#803](https://github.com/paritytech/subxt/pull/803))
 
 ## [0.26.0] - 2022-01-24
 
