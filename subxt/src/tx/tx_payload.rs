@@ -58,6 +58,7 @@ pub struct ValidationDetails<'a> {
 }
 
 /// This represents a statically generated transaction payload.
+#[derive(Clone, Debug)]
 pub struct StaticTxPayload<CallData> {
     pallet_name: &'static str,
     call_name: &'static str,
@@ -123,6 +124,7 @@ impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
 }
 
 /// This represents a dynamically generated transaction payload.
+#[derive(Clone, Debug)]
 pub struct DynamicTxPayload<'a> {
     pallet_name: Cow<'a, str>,
     call_name: Cow<'a, str>,

@@ -1,6 +1,6 @@
 [package]
 name = "subxt-codegen"
-version = "0.26.0"
+version = "0.27.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 publish = true
@@ -21,7 +21,7 @@ proc-macro-error = "1.0.4"
 quote = "1.0.8"
 syn = "1.0.58"
 scale-info = "2.0.0"
-subxt-metadata = { version = "0.26.0", path = "../metadata" }
+subxt-metadata = { version = "0.27.0", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
 tokio = { version = "1.25", features = ["macros", "rt-multi-thread"] }
