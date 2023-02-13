@@ -10,6 +10,8 @@ This is a fairly small release, primarily to bump substrate dependencies to thei
 
 The main breaking change is fairly small: [#804](https://github.com/paritytech/subxt/pull/804). Here, the `BlockNumber` associated type has been removed from `Config` entirely, since it wasn't actually needed anywhere in Subxt. Additionally, the constraints on each of those associated types in `Config` were made more precise, primarily to tidy things up (but this should result in types more easily being able to meet the requirements here). If you use custom `Config`, the fix is simply to remove the `BlockNumber` type. If you also use the `Config` trait in your own functions and depend on those constraints, you may be able to define a custom `MyConfig` type which builds off `Config` and adds back any additional bounds that you want.
 
+Note worthy PRs merged since the last release:
+
 ## Added
 
 - Add find last function ([#821](https://github.com/paritytech/subxt/pull/821))
@@ -18,7 +20,6 @@ The main breaking change is fairly small: [#804](https://github.com/paritytech/s
 ## Changed
 
 - Remove unneeded Config bounds and BlockNumber associated type ([#804](https://github.com/paritytech/subxt/pull/804))
-- Remove sleeps from release checklist; no longer needed ([#803](https://github.com/paritytech/subxt/pull/803))
 
 ## [0.26.0] - 2022-01-24
 
