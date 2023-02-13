@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.27.0] - 2022-02-13
+
+This is a fairly small release, primarily to bump substrate dependencies to their latest versions.
+
+The main breaking change is fairly small: [#804](https://github.com/paritytech/subxt/pull/804). Here, the `BlockNumber` associated type has been removed from `Config` entirely, since it wasn't actually needed anywhere in Subxt. Additionally, the constraints on each of those associated types in `Config` were made more precise, primarily to tidy things up (but this should result in types more easily being able to meet the requirements here). If you use custom `Config`, the fix is simply to remove the `BlockNumber` type. If you also use the `Config` trait in your own functions and depend on those constraints, you may be able to define a custom `MyConfig` type which builds off `Config` and adds back any additional bounds that you want.
+
+## Added
+
+- Add find last function ([#821](https://github.com/paritytech/subxt/pull/821))
+- Doc: first item is current version comment ([#817](https://github.com/paritytech/subxt/pull/817))
+- Remove sleeps from release checklist; no longer needed ([#803](https://github.com/paritytech/subxt/pull/803))
+
+## Changed
+
+- Remove unneeded Config bounds and BlockNumber associated type ([#804](https://github.com/paritytech/subxt/pull/804))
+
 ## [0.26.0] - 2022-01-24
 
 This release adds a number of improvements, most notably:
