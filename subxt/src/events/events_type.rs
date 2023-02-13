@@ -187,6 +187,12 @@ impl<T: Config> Events<T> {
         self.find::<Ev>().next().transpose()
     }
 
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them, and return the last event found which decodes to the provided `Ev` type.
+    pub fn find_last<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+        self.find::<Ev>().last().transpose()
+    }
+
     /// Find an event that decodes to the type provided. Returns true if it was found.
     pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())

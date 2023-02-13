@@ -366,6 +366,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to runtime version updates that produce changes in the metadata.
+    /// The first item emitted by the stream is the current runtime version.
     pub async fn subscribe_runtime_version(
         &self,
     ) -> Result<Subscription<types::RuntimeVersion>, Error> {

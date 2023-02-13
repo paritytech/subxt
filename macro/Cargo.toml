@@ -1,6 +1,6 @@
 [package]
 name = "subxt-macro"
-version = "0.26.0"
+version = "0.27.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 publish = true
@@ -16,8 +16,8 @@ description = "Generate types and helpers for interacting with Substrate runtime
 proc-macro = true
 
 [dependencies]
-darling = "0.14.0"
+darling = "0.14.3"
 proc-macro-error = "1.0.4"
 syn = "1.0.58"
 
-subxt-codegen = { path = "../codegen", version = "0.26.0" }
+subxt-codegen = { path = "../codegen", version = "0.27.0" }

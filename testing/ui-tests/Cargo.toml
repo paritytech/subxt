@@ -1,6 +1,6 @@
 [package]
 name = "ui-tests"
-version = "0.26.0"
+version = "0.27.0"
 edition = "2021"
 publish = false
 
@@ -9,7 +9,7 @@ publish = false
 [dependencies]
 
 [dev-dependencies]
-trybuild = "1.0.76"
+trybuild = "1.0.77"
 scale-info = { version = "2.3.0", features = ["bit-vec"] }
 frame-metadata = "15.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
