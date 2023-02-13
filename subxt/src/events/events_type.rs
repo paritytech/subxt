@@ -242,7 +242,7 @@ impl EventDetails {
         // Skip over the bytes belonging to this event.
         for field_metadata in event_metadata.fields() {
             // Skip over the bytes for this field:
-            scale_decode::decode(
+            scale_decode::visitor::decode_with_visitor(
                 input,
                 field_metadata.type_id(),
                 &metadata.runtime_metadata().types,

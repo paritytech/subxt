@@ -182,4 +182,6 @@ pub mod ext {
     pub use frame_metadata;
     pub use scale_bits;
     pub use scale_value;
+    pub use scale_encode;
+    pub use scale_decode;
 }

@@ -18,7 +18,7 @@ use serde::{
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into
 /// that type.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, scale_encode::EncodeAsType, scale_decode::DecodeAsType)]
 pub struct AccountId32(pub [u8; 32]);
 
 impl AsRef<[u8]> for AccountId32 {
