@@ -269,7 +269,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     /// Iterate through the transaction events using metadata to dynamically decode and skip
     /// them, and return the last event found which decodes to the provided `Ev` type.
     ///
-    /// This works in the same way that [`events::Events::find_first()`] does, with the
+    /// This works in the same way that [`events::Events::find_last()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
     pub fn find_last<Ev: events::StaticEvent>(&self) -> Result<Option<Ev>, Error> {
         self.find::<Ev>().last().transpose()
