@@ -14,6 +14,8 @@ use codec::{
 use scale_value::Composite;
 
 use crate::{
+    dynamic::DecodedValueThunk,
+    metadata::DecodeWithMetadata,
     Error,
     Metadata,
 };
@@ -64,7 +66,7 @@ impl<ReturnTy> RuntimeAPIPayload<ReturnTy> {
 /// RuntimeApiPayload
 pub trait RuntimeApiPayload {
     /// The return type into which the result of the call is interpreted.
-    type Target;
+    type Target: DecodeWithMetadata;
 
     // TODO: Could do with some lifetimes.
     /// The function name of the runtime API.
@@ -90,32 +92,31 @@ pub struct StaticRuntimeApiPayload<ArgData, ReturnTy> {
     _marker: PhantomData<ReturnTy>,
 }
 
-impl<ArgData, ReturnTy> RuntimeApiPayload for StaticRuntimeApiPayload<ArgData, ReturnTy>
-where
-    ArgData: Encode,
-    ReturnTy: Decode,
-{
-    type Target = ReturnTy;
+// impl<ArgData, ReturnTy> RuntimeApiPayload for StaticRuntimeApiPayload<ArgData, ReturnTy>
+// where
+//     ArgData: Encode,
+//     ReturnTy: Decode,
+// {
+//     type Target = ReturnTy;
 
-    fn func_name(&self) -> String {
-        self.func_name.into()
-    }
+//     fn func_name(&self) -> String {
+//         self.func_name.into()
+//     }
 
-    fn encode_args_to(
-        &self,
-        _metadata: &Metadata,
-        out: &mut Vec<u8>,
-    ) -> Result<(), Error> {
-        self.data.encode_to(out);
-        Ok(())
-    }
-}
+//     fn encode_args_to(
+//         &self,
+//         _metadata: &Metadata,
+//         out: &mut Vec<u8>,
+//     ) -> Result<(), Error> {
+//         self.data.encode_to(out);
+//         Ok(())
+//     }
+// }
 
 /// DynamicRuntimeApiPayload
-pub struct DynamicRuntimeApiPayload<ReturnTy> {
+pub struct DynamicRuntimeApiPayload {
     func_name: &'static str,
     fields: Composite<()>,
-    _marker: PhantomData<ReturnTy>,
 }
 
 // impl<'a, ReturnTy> DynamicRuntimeApiPayload<'a, ReturnTy> {
@@ -125,22 +126,18 @@ pub struct DynamicRuntimeApiPayload<ReturnTy> {
 // }
 
 /// Construct a dynamic runtime API call.
-pub fn dynamic<ReturnTy>(
+pub fn dynamic(
     func_name: &'static str,
     fields: impl Into<Composite<()>>,
-) -> DynamicRuntimeApiPayload<ReturnTy> {
+) -> DynamicRuntimeApiPayload {
     DynamicRuntimeApiPayload {
         func_name: func_name.into(),
         fields: fields.into(),
-        _marker: PhantomData,
     }
 }
 
-impl<ReturnTy> RuntimeApiPayload for DynamicRuntimeApiPayload<ReturnTy>
-where
-    ReturnTy: Decode,
-{
-    type Target = ReturnTy;
+impl RuntimeApiPayload for DynamicRuntimeApiPayload {
+    type Target = DecodedValueThunk;
 
     fn encode_args_to(
         &self,

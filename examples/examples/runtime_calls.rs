@@ -55,11 +55,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Result: {:?}", bytes);
 
     let alice = AccountKeyring::Alice.to_account_id();
-    let api_tx = dynamic::<polkadot::runtime_api::AccountNonceApi::account_nonce_target>(
+    // let api_tx = dynamic::<polkadot::runtime_api::AccountNonceApi::account_nonce_target>(
+    let api_tx = dynamic(
         "AccountNonceApi_account_nonce",
         vec![Value::from_bytes(&alice)],
     );
-    let bytes = api.runtime_api().at(None).await?.dyn_call(api_tx).await?;
+    let bytes = api
+        .runtime_api()
+        .at(None)
+        .await?
+        .dyn_call(api_tx)
+        .await?
+        .to_value()?;
     println!("Result: {:?}", bytes);
 
     // Send from Alice to Bob.

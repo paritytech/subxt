@@ -5,6 +5,7 @@
 use crate::{
     client::OnlineClientT,
     error::Error,
+    metadata::DecodeWithMetadata,
     Config,
 };
 use codec::Decode;
@@ -96,10 +97,9 @@ where
     pub fn dyn_call<DynCall>(
         &self,
         payload: DynCall,
-    ) -> impl Future<Output = Result<DynCall::Target, Error>>
+    ) -> impl Future<Output = Result<<DynCall::Target as DecodeWithMetadata>::Target, Error>>
     where
         DynCall: RuntimeApiPayload,
-        <DynCall as RuntimeApiPayload>::Target: Decode,
     {
         let client = self.client.clone();
         let block_hash = self.block_hash;
@@ -119,7 +119,13 @@ where
                 .state_call(&function, call_parameters, Some(block_hash))
                 .await?;
 
-            let result: DynCall::Target = Decode::decode(&mut &data.0[..])?;
+            let result_ty = client.metadata().runtime_fn(&function)?.return_ty_id();
+            let result = <DynCall::Target as DecodeWithMetadata>::decode_with_metadata(
+                &mut &data.0[..],
+                result_ty,
+                &client.metadata(),
+            )?;
+            // let result: DynCall::Target = Decode::decode(&mut &data.0[..])?;
             Ok(result)
         }
     }
