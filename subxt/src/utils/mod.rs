@@ -4,14 +4,14 @@
 
 //! Miscellaneous utility helpers.
 
-pub mod account_id;
+mod account_id;
+mod multi_address;
+mod multi_signature;
+mod wrapper_opaque;
 pub mod bits;
-pub mod multi_address;
-pub mod multi_signature;
 
 use codec::{
     Decode,
-    DecodeAll,
     Encode,
 };
 use derivative::Derivative;
@@ -19,6 +19,7 @@ use derivative::Derivative;
 pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
+pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
 #[doc(hidden)]
@@ -36,51 +37,6 @@ pub struct Encoded(pub Vec<u8>);
 impl codec::Encode for Encoded {
     fn encode(&self) -> Vec<u8> {
         self.0.to_owned()
-    }
-}
-
-/// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
-///
-/// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
-/// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Derivative, Encode, Decode)]
-#[derivative(
-    Debug(bound = ""),
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-pub struct WrapperKeepOpaque<T> {
-    data: Vec<u8>,
-    _phantom: PhantomDataSendSync<T>,
-}
-
-impl<T: Decode> WrapperKeepOpaque<T> {
-    /// Try to decode the wrapped type from the inner `data`.
-    ///
-    /// Returns `None` if the decoding failed.
-    pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
-    }
-
-    /// Returns the length of the encoded `T`.
-    pub fn encoded_len(&self) -> usize {
-        self.data.len()
-    }
-
-    /// Returns the encoded data.
-    pub fn encoded(&self) -> &[u8] {
-        &self.data
-    }
-
-    /// Create from the given encoded `data`.
-    pub fn from_encoded(data: Vec<u8>) -> Self {
-        Self {
-            data,
-            _phantom: PhantomDataSendSync::new(),
-        }
     }
 }
 
