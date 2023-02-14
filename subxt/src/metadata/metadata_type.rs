@@ -85,6 +85,7 @@ struct MetadataInner {
     // Type of the DispatchError type, which is what comes back if
     // an extrinsic fails.
     dispatch_error_ty: Option<u32>,
+    runtime: HashMap<String, RuntimeFnMetadata>,
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -101,6 +102,14 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    /// Returns a reference to [`RuntimeFnMetadata`].
+    pub fn runtime_fn(&self, name: &str) -> Result<&RuntimeFnMetadata, MetadataError> {
+        self.inner
+            .runtime
+            .get(name)
+            .ok_or(MetadataError::PalletNotFound)
+    }
+
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &str) -> Result<&PalletMetadata, MetadataError> {
         self.inner
@@ -237,6 +246,35 @@ impl Metadata {
         *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
+    }
+}
+
+/// Metadata for a specific runtime API function.
+#[derive(Clone, Debug)]
+pub struct RuntimeFnMetadata {
+    /// The name of the runtime function (trait_method).
+    name: String,
+    // TODO: This could be `(param name, ty_id)` for resolving.
+    /// The type ID of the parameters in order of definition.
+    params_ty_id: Vec<u32>,
+    /// The type ID of the return type.
+    return_ty_id: u32,
+}
+
+impl RuntimeFnMetadata {
+    /// Get the name of the runtime fn.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Get the type IDs of the parameters.
+    pub fn params_ty_ids(&self) -> &[u32] {
+        &self.params_ty_id
+    }
+
+    /// Get the type ID of the return type.
+    pub fn return_ty_id(&self) -> u32 {
+        self.return_ty_id
     }
 }
 
@@ -421,6 +459,38 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
+        let runtime: HashMap<String, RuntimeFnMetadata> = metadata
+            .runtime
+            .iter()
+            .map(|trait_metadata| {
+                let trait_name = &trait_metadata.name;
+
+                trait_metadata
+                    .methods
+                    .iter()
+                    .map(|method_metadata| {
+                        let name = format!("{}_{}", trait_name, method_metadata.name);
+
+                        let params_ty_id: Vec<_> = method_metadata
+                            .inputs
+                            .iter()
+                            .map(|input| input.ty.id())
+                            .collect();
+                        let return_ty_id = method_metadata.output.id();
+
+                        let metadata = RuntimeFnMetadata {
+                            name: name.clone(),
+                            params_ty_id,
+                            return_ty_id,
+                        };
+
+                        (name, metadata)
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .flatten()
+            .collect();
+
         let get_type_def_variant = |type_id: u32| {
             let ty = metadata
                 .types
@@ -538,6 +608,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 events,
                 errors,
                 dispatch_error_ty,
+                runtime,
                 cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
