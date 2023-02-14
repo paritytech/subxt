@@ -20,6 +20,8 @@ use subxt::{
         },
         SubstrateConfig,
     },
+    dynamic::Value,
+    runtime_api::dynamic,
     tx::PairSigner,
     OnlineClient,
 };
@@ -49,8 +51,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let alice = AccountKeyring::Alice.to_account_id().into();
     let api_tx = polkadot::runtime_api::AccountNonceApi::account_nonce(alice);
     println!("RuntimeApi payload: {:?}", api_tx);
-
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
+    println!("Result: {:?}", bytes);
+
+    let alice = AccountKeyring::Alice.to_account_id();
+    let api_tx = dynamic::<polkadot::runtime_api::AccountNonceApi::account_nonce_target>(
+        "AccountNonceApi_account_nonce",
+        vec![Value::from_bytes(&alice)],
+    );
+    let bytes = api.runtime_api().at(None).await?.dyn_call(api_tx).await?;
     println!("Result: {:?}", bytes);
 
     // Send from Alice to Bob.

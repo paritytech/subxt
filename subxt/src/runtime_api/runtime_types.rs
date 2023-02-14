@@ -14,7 +14,13 @@ use std::{
     marker::PhantomData,
 };
 
-use super::RuntimeAPIPayload;
+use super::{
+    runtime_payload::{
+        DynamicRuntimeApiPayload,
+        RuntimeApiPayload,
+    },
+    RuntimeAPIPayload,
+};
 
 /// Execute runtime API calls.
 #[derive(Derivative)]
@@ -74,6 +80,7 @@ where
             let payload = payload;
             let function = payload.func_name();
             let call_parameters = Some(payload.param_data());
+            println!("StaticCall: {:?}", call_parameters);
 
             let data = client
                 .rpc()
@@ -81,6 +88,38 @@ where
                 .await?;
 
             let result: ReturnTy = Decode::decode(&mut &data.0[..])?;
+            Ok(result)
+        }
+    }
+
+    /// Dynamic call.
+    pub fn dyn_call<DynCall>(
+        &self,
+        payload: DynCall,
+    ) -> impl Future<Output = Result<DynCall::Target, Error>>
+    where
+        DynCall: RuntimeApiPayload,
+        <DynCall as RuntimeApiPayload>::Target: Decode,
+    {
+        let client = self.client.clone();
+        let block_hash = self.block_hash;
+
+        // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
+        // which is a temporary thing we'll be throwing away quickly:
+        async move {
+            let payload = payload;
+            let function = payload.func_name();
+
+            let bytes = payload.encode_args(&client.metadata())?;
+            let call_parameters = Some(bytes.as_slice());
+            println!("DynCall: {:?}", call_parameters);
+
+            let data = client
+                .rpc()
+                .state_call(&function, call_parameters, Some(block_hash))
+                .await?;
+
+            let result: DynCall::Target = Decode::decode(&mut &data.0[..])?;
             Ok(result)
         }
     }

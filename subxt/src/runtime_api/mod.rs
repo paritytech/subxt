@@ -9,5 +9,5 @@ mod runtime_payload;
 mod runtime_types;
 
 pub use runtime_client::RuntimeApiClient;
-pub use runtime_payload::RuntimeAPIPayload;
+pub use runtime_payload::{RuntimeApiPayload, RuntimeAPIPayload, dynamic, DynamicRuntimeApiPayload, StaticRuntimeApiPayload};
 pub use runtime_types::RuntimeApi;
