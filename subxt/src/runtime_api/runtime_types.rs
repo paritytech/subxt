@@ -7,6 +7,7 @@ use crate::{
     error::Error,
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use std::{
     future::Future,
@@ -60,12 +61,13 @@ where
     }
 
     /// Execute a runtime API call for the given payload.
-    pub fn call(
+    pub fn call<ReturnTy: Decode>(
         &self,
-        payload: RuntimeAPIPayload,
-    ) -> impl Future<Output = Result<Vec<u8>, Error>> {
+        payload: RuntimeAPIPayload<ReturnTy>,
+    ) -> impl Future<Output = Result<ReturnTy, Error>> {
         let client = self.client.clone();
         let block_hash = self.block_hash;
+
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
@@ -77,7 +79,9 @@ where
                 .rpc()
                 .state_call(function, call_parameters, Some(block_hash))
                 .await?;
-            Ok(data.0)
+
+            let result: ReturnTy = Decode::decode(&mut &data.0[..])?;
+            Ok(result)
         }
     }
 }

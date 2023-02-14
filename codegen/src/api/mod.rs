@@ -10,7 +10,6 @@ mod events;
 mod runtime_api;
 mod storage;
 
-use scale_info::form::PortableForm;
 use subxt_metadata::get_metadata_per_pallet_hash;
 
 use self::runtime_api::generate_runtime_api;
@@ -32,10 +31,7 @@ use crate::{
 };
 use codec::Decode;
 use frame_metadata::{
-    v15::{
-        RuntimeMetadataV15,
-        TraitMetadata,
-    },
+    v15::RuntimeMetadataV15,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
 };
@@ -158,44 +154,6 @@ pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV15,
 }
 
-fn generate_runtime_call_api(
-    type_gen: &TypeGenerator,
-    runtime: &Vec<TraitMetadata<PortableForm>>,
-) -> TokenStream2 {
-    let mut result = quote!();
-
-    for trait_ in runtime {
-        for method in &trait_.methods {
-            let trait_name = trait_.name.clone();
-            let method_name = method.name.clone();
-
-            let fn_name = format_ident!("{}_{}", trait_.name, method.name);
-
-            let mut params = Vec::new();
-            for input in &method.inputs {
-                let name = &input.name;
-                let ty = input.ty;
-                let ty = type_gen.resolve_type_path(ty.id());
-                let param = quote!( #name: #ty );
-                params.push(param);
-            }
-
-            let output = method.output;
-            let output = type_gen.resolve_type_path(output.id());
-
-            let fn_ = quote!(
-                pub fn #fn_name( #( #params, )* ) -> #output {
-                    // call into RPC.
-                }
-            );
-
-            result.extend(fn_);
-        }
-    }
-
-    result
-}
-
 impl RuntimeGenerator {
     /// Create a new runtime generator from the provided metadata.
     ///
@@ -233,8 +191,6 @@ impl RuntimeGenerator {
             derives.clone(),
             crate_path.clone(),
         );
-        let runtime_api_fns =
-            generate_runtime_call_api(&type_gen, &self.metadata.runtime);
 
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();

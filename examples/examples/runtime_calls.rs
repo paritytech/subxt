@@ -40,25 +40,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
     println!("Result: {:?}", bytes);
 
-    let result: polkadot::runtime_api::Core::version_target =
-        Decode::decode(&mut &bytes[..])?;
-    println!(
-        "Result for polkadot::runtime_api::Core::version(): {:?}\n\n",
-        result
-    );
-
     let api_tx = polkadot::runtime_api::Metadata::metadata_versions();
     println!("RuntimeApi payload: {:?}", api_tx);
 
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
     println!("Result: {:?}", bytes);
-
-    let result: polkadot::runtime_api::Metadata::metadata_versions_target =
-        Decode::decode(&mut &bytes[..])?;
-    println!(
-        "Result for polkadot::runtime_api::Metadata::metadata_versions(): {:?}\n\n",
-        result
-    );
 
     let alice = AccountKeyring::Alice.to_account_id().into();
     let api_tx = polkadot::runtime_api::AccountNonceApi::account_nonce(alice);
@@ -66,13 +52,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
     println!("Result: {:?}", bytes);
-
-    let result: polkadot::runtime_api::AccountNonceApi::account_nonce_target =
-        Decode::decode(&mut &bytes[..])?;
-    println!(
-        "Result for polkadot::runtime_api::AccountNonceApi::account_nonce: {:?}\n\n",
-        result
-    );
 
     // Send from Alice to Bob.
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
@@ -94,13 +73,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let bytes = api.runtime_api().at(None).await?.call(api_tx).await?;
     println!("Result: {:?}", bytes);
-
-    let result: polkadot::runtime_api::AccountNonceApi::account_nonce_target =
-        Decode::decode(&mut &bytes[..])?;
-    println!(
-        "Result for polkadot::runtime_api::AccountNonceApi::account_nonce: {:?}\n\n",
-        result
-    );
 
     Ok(())
 }

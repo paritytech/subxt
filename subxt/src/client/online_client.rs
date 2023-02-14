@@ -25,10 +25,7 @@ use crate::{
     Config,
     Metadata,
 };
-use codec::{
-    Compact,
-    Decode,
-};
+use codec::Decode;
 use derivative::Derivative;
 use frame_metadata::{
     OpaqueMetadata,

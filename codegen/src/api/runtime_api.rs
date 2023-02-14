@@ -53,7 +53,7 @@ fn generate_trait_api(
 
         quote!(
             #( #[doc = #docs ] )*
-            pub fn #method_name( #( #params, )* ) -> #crate_path::runtime_api::RuntimeAPIPayload {
+            pub fn #method_name( #( #params, )* ) -> #crate_path::runtime_api::RuntimeAPIPayload<#output> {
                 let mut #vec_acc = Vec::new();
                 #( #encoded; )*
 
