@@ -2632,11 +2632,12 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.4"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f90d901260b7aece1614123e3cb563205391892e0288be5b02a6f23e9e4819c2"
+checksum = "15839fdbaebbf53f6d65f66499e4a9d0dfa825aaf8b4de11918ec8419c65f6d5"
 dependencies = [
  "parity-scale-codec",
+ "primitive-types",
  "scale-bits",
  "scale-encode-derive",
  "scale-info",
@@ -2645,9 +2646,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.4"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71f4ea62e38e266ac1ac49c0541c0b0acdc77982946362de07fef740e7e56ec5"
+checksum = "f257f7a9366ca5f0431e6e4b1d415a7befb56b41ab8eb97267fed8ddd852bf9d"
 dependencies = [
  "darling",
  "proc-macro-crate",

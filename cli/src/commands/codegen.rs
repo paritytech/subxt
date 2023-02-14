@@ -23,8 +23,11 @@ use subxt_codegen::{
 #[derive(Debug, ClapParser)]
 pub struct Opts {
     /// The url of the substrate node to query for metadata for codegen.
-    #[clap(flatten)]
-    metadata_opts: MetadataOpts,
+    #[clap(name = "url", long, value_parser)]
+    url: Option<Uri>,
+    /// The path to the encoded metadata file.
+    #[clap(short, long, value_parser)]
+    file: Option<PathBuf>,
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,
@@ -39,17 +42,6 @@ pub struct Opts {
     crate_path: Option<String>,
 }
 
-#[derive(Debug, Clone, clap::Args)]
-pub struct MetadataOpts {
-    /// The url of the substrate node to query for metadata.
-    #[clap(name = "url", long, value_parser, env = "SUBXT_METADATA_URL", conflicts_with = "file")]
-    url: Option<Uri>,
-    /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser, env = "SUBXT_METADATA_PATH", conflicts_with = "url")]
-    file: Option<PathBuf>,
-}
-
-
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     let (ty, derive) = src
         .split_once('=')
@@ -59,7 +51,25 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    print!("{opts:?}");
+    let bytes = if let Some(file) = opts.file.as_ref() {
+        if opts.url.is_some() {
+            eyre::bail!("specify one of `--url` or `--file` but not both")
+        };
+
+        let mut file = fs::File::open(file)?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)?;
+        bytes
+    } else {
+        let url = opts.url.unwrap_or_else(|| {
+            "http://localhost:9933"
+                .parse::<Uri>()
+                .expect("default url is valid")
+        });
+        subxt_codegen::utils::fetch_metadata_bytes(&url).await?
+    };
+
+    codegen(&bytes, opts.derives, opts.derives_for_type, opts.crate_path)?;
     Ok(())
 }
 
