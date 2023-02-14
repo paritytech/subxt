@@ -92,11 +92,12 @@ impl<Store, Order> DecodedBits<Store, Order> {
     }
 }
 
-impl<Store, Order> core::iter::FromIterator<bool>
-    for DecodedBits<Store, Order>
-{
+impl<Store, Order> core::iter::FromIterator<bool> for DecodedBits<Store, Order> {
     fn from_iter<T: IntoIterator<Item = bool>>(iter: T) -> Self {
-        DecodedBits { bits: Bits::from_iter(iter), _marker: PhantomData }
+        DecodedBits {
+            bits: Bits::from_iter(iter),
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -129,7 +130,10 @@ impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Orde
         let bits = decoder.collect::<Result<Vec<_>, _>>()?;
         let bits = Bits::from_iter(bits);
 
-        Ok(DecodedBits { bits, _marker: PhantomData })
+        Ok(DecodedBits {
+            bits,
+            _marker: PhantomData,
+        })
     }
 }
 
@@ -149,7 +153,7 @@ impl<Store: BitStore, Order: BitOrder> codec::Encode for DecodedBits<Store, Orde
 
 #[doc(hidden)]
 pub struct DecodedBitsVisitor<S, O>(std::marker::PhantomData<(S, O)>);
-impl <Store, Order> scale_decode::Visitor for DecodedBitsVisitor<Store, Order> {
+impl<Store, Order> scale_decode::Visitor for DecodedBitsVisitor<Store, Order> {
     type Value<'scale, 'info> = DecodedBits<Store, Order>;
     type Error = scale_decode::Error;
 
@@ -158,21 +162,39 @@ impl <Store, Order> scale_decode::Visitor for DecodedBitsVisitor<Store, Order> {
         input: &mut &'scale [u8],
         type_id: scale_decode::visitor::TypeId,
         types: &'info scale_info::PortableRegistry,
-    ) -> scale_decode::visitor::DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
-        let res = scale_decode::visitor::decode_with_visitor(input, type_id.0, types, Bits::into_visitor())
-            .map(|bits| DecodedBits { bits, _marker: PhantomData });
+    ) -> scale_decode::visitor::DecodeAsTypeResult<
+        Self,
+        Result<Self::Value<'scale, 'info>, Self::Error>,
+    > {
+        let res = scale_decode::visitor::decode_with_visitor(
+            input,
+            type_id.0,
+            types,
+            Bits::into_visitor(),
+        )
+        .map(|bits| {
+            DecodedBits {
+                bits,
+                _marker: PhantomData,
+            }
+        });
         scale_decode::visitor::DecodeAsTypeResult::Decoded(res)
     }
 }
-impl <Store, Order> scale_decode::IntoVisitor for DecodedBits<Store, Order> {
+impl<Store, Order> scale_decode::IntoVisitor for DecodedBits<Store, Order> {
     type Visitor = DecodedBitsVisitor<Store, Order>;
     fn into_visitor() -> Self::Visitor {
         DecodedBitsVisitor(PhantomData)
     }
 }
 
-impl <Store, Order> scale_encode::EncodeAsType for DecodedBits<Store, Order> {
-    fn encode_as_type_to(&self, type_id: u32, types: &scale_info::PortableRegistry, out: &mut Vec<u8>) -> Result<(), scale_encode::Error> {
+impl<Store, Order> scale_encode::EncodeAsType for DecodedBits<Store, Order> {
+    fn encode_as_type_to(
+        &self,
+        type_id: u32,
+        types: &scale_info::PortableRegistry,
+        out: &mut Vec<u8>,
+    ) -> Result<(), scale_encode::Error> {
         self.bits.encode_as_type_to(type_id, types, out)
     }
 }

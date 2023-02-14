@@ -71,13 +71,16 @@ impl DerivesRegistry {
 #[derive(Debug, Clone)]
 pub struct Derives {
     derives: HashSet<syn::Path>,
-    attributes: HashSet<syn::Attribute>
+    attributes: HashSet<syn::Attribute>,
 }
 
 impl FromIterator<syn::Path> for Derives {
     fn from_iter<T: IntoIterator<Item = Path>>(iter: T) -> Self {
         let derives = iter.into_iter().collect();
-        Self { derives, attributes: HashSet::new() }
+        Self {
+            derives,
+            attributes: HashSet::new(),
+        }
     }
 }
 
@@ -89,17 +92,26 @@ impl Derives {
         let mut attributes = HashSet::new();
 
         derives.insert(syn::parse_quote!(#crate_path::ext::scale_encode::EncodeAsType));
-        let encode_crate_path = quote::quote!{ #crate_path::ext::scale_encode }.to_string();
-        attributes.insert(syn::parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]));
+        let encode_crate_path =
+            quote::quote! { #crate_path::ext::scale_encode }.to_string();
+        attributes.insert(
+            syn::parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
+        );
         derives.insert(syn::parse_quote!(#crate_path::ext::scale_decode::DecodeAsType));
-        let decode_crate_path = quote::quote!{ #crate_path::ext::scale_decode }.to_string();
-        attributes.insert(syn::parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]));
+        let decode_crate_path =
+            quote::quote! { #crate_path::ext::scale_decode }.to_string();
+        attributes.insert(
+            syn::parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
+        );
 
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));
         derives.insert(syn::parse_quote!(Debug));
 
-        Self { derives, attributes }
+        Self {
+            derives,
+            attributes,
+        }
     }
 
     /// Extend this set of `Derives` from another.

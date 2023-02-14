@@ -39,7 +39,7 @@ scale-info = "2.0.0"
 scale-value = { git = "https://github.com/paritytech/scale-value", branch = "jsdw-scale-decode-as-type" }
 scale-bits = "0.3"
 scale-decode = { git = "https://github.com/paritytech/scale-decode", branch = "jsdw-decode-as-type" }
-scale-encode = "0.0.7"
+scale-encode = "0.0.11"
 futures = { version = "0.3.26", default-features = false, features = ["std"] }
 hex = "0.4.3"
 jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
@@ -56,7 +56,7 @@ subxt-metadata = { version = "0.27.0", path = "../metadata" }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { version = "0.4.0" }
-primitive-types = { version = "0.12.0", default-features = false, features = ["codec", "scale-info", "serde"] }
+primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 sp-core-hashing = "6.0.0"
 
 # For ss58 encoding AccountId32 to serialize them properly:

@@ -965,9 +965,9 @@ checksum = "4443176a9f2c162692bd3d352d745ef9413eec5782a80d8fd6f8a1ac692a07f7"
 
 [[package]]
 name = "fastrand"
-version = "1.8.0"
+version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7a407cfaa3385c4ae6b23e84623d48c2798d06e3e6a1878f7f59f17b3f86499"
+checksum = "e51093e27b0797c359783294ca4f0a911c270184cb10f85783b118614a1501be"
 dependencies = [
  "instant",
 ]
@@ -1570,7 +1570,6 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-keyring",
- "sp-runtime",
  "subxt",
  "subxt-codegen",
  "syn",
@@ -1921,14 +1920,14 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5d732bc30207a6423068df043e3d02e0735b155ad7ce1a6f76fe2baa5b158de"
+checksum = "5b9d9a46eff5b4ff64b45a9e316a6d1e0bc719ef429cbec4dc630684212bfdf9"
 dependencies = [
  "libc",
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "windows-sys 0.42.0",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -2609,9 +2608,10 @@ dependencies = [
 [[package]]
 name = "scale-decode"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#5b5947bab1227fbcc0466d0f833a7a8707caa62a"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3e0d88f3539344f46c15bfbe23b9c3cb8fe9bdbd"
 dependencies = [
  "parity-scale-codec",
+ "primitive-types",
  "scale-bits",
  "scale-decode-derive",
  "scale-info",
@@ -2621,7 +2621,7 @@ dependencies = [
 [[package]]
 name = "scale-decode-derive"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#5b5947bab1227fbcc0466d0f833a7a8707caa62a"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3e0d88f3539344f46c15bfbe23b9c3cb8fe9bdbd"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2632,9 +2632,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.7"
+version = "0.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15839fdbaebbf53f6d65f66499e4a9d0dfa825aaf8b4de11918ec8419c65f6d5"
+checksum = "b95677054fca3564fb08de43f1208128c986a2abe3e186262385a715aed8ae66"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2646,9 +2646,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.7"
+version = "0.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f257f7a9366ca5f0431e6e4b1d415a7befb56b41ab8eb97267fed8ddd852bf9d"
+checksum = "a0c18acd44b9da8bbeec4dbbdc798e9f28990dc1445f1a5ba3de048c0e44a797"
 dependencies = [
  "darling",
  "proc-macro-crate",
