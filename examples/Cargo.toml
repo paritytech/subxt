@@ -1,6 +1,6 @@
 [package]
 name = "subxt-examples"
-version = "0.27.0"
+version = "0.27.1"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 publish = false
