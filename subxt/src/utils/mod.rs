@@ -5,10 +5,10 @@
 //! Miscellaneous utility helpers.
 
 mod account_id;
+pub mod bits;
 mod multi_address;
 mod multi_signature;
 mod wrapper_opaque;
-pub mod bits;
 
 use codec::{
     Decode,

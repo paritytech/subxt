@@ -9,9 +9,12 @@ use codec::{
     DecodeAll,
     Encode,
 };
-use scale_encode::EncodeAsType;
-use scale_decode::{ Visitor, IntoVisitor };
 use derivative::Derivative;
+use scale_decode::{
+    IntoVisitor,
+    Visitor,
+};
+use scale_encode::EncodeAsType;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
@@ -41,7 +44,10 @@ impl<T> WrapperKeepOpaque<T> {
     /// Try to decode the wrapped type from the inner `data`.
     ///
     /// Returns `None` if the decoding failed.
-    pub fn try_decode(&self) -> Option<T> where T: Decode {
+    pub fn try_decode(&self) -> Option<T>
+    where
+        T: Decode,
+    {
         T::decode_all(&mut &self.data[..]).ok()
     }
 
@@ -64,22 +70,29 @@ impl<T> WrapperKeepOpaque<T> {
     }
 
     /// Create from some raw value by encoding it.
-    pub fn from_value(value: T) -> Self where T: Encode {
+    pub fn from_value(value: T) -> Self
+    where
+        T: Encode,
+    {
         Self {
             data: value.encode(),
-            _phantom: PhantomDataSendSync::new()
+            _phantom: PhantomDataSendSync::new(),
         }
     }
 }
 
-impl <T> EncodeAsType for WrapperKeepOpaque<T> {
+impl<T> EncodeAsType for WrapperKeepOpaque<T> {
     fn encode_as_type_to(
         &self,
         type_id: u32,
         types: &scale_info::PortableRegistry,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
-        use scale_encode::error::{ Error, ErrorKind, Kind };
+        use scale_encode::error::{
+            Error,
+            ErrorKind,
+            Kind,
+        };
 
         let Some(ty) = types.resolve(type_id) else {
             return Err(Error::new(ErrorKind::TypeNotFound(type_id)))
@@ -92,7 +105,10 @@ impl <T> EncodeAsType for WrapperKeepOpaque<T> {
 
         // Check that the name also lines up.
         if ty.path().ident().as_deref() != Some("WrapperKeepOpaque") {
-            return Err(Error::new(ErrorKind::WrongShape { actual: Kind::Struct, expected: type_id }))
+            return Err(Error::new(ErrorKind::WrongShape {
+                actual: Kind::Struct,
+                expected: type_id,
+            }))
         }
 
         // Just blat the bytes out..
@@ -102,7 +118,7 @@ impl <T> EncodeAsType for WrapperKeepOpaque<T> {
 }
 
 pub struct WrapperKeepOpaqueVisitor<T>(std::marker::PhantomData<T>);
-impl <T> Visitor for WrapperKeepOpaqueVisitor<T> {
+impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
     type Value<'scale, 'info> = WrapperKeepOpaque<T>;
     type Error = scale_decode::Error;
 
@@ -111,17 +127,28 @@ impl <T> Visitor for WrapperKeepOpaqueVisitor<T> {
         value: &mut scale_decode::visitor::types::Composite<'scale, 'info>,
         type_id: scale_decode::visitor::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
-        use scale_decode::error::{ Error, ErrorKind };
+        use scale_decode::error::{
+            Error,
+            ErrorKind,
+        };
 
         if value.path().ident().as_deref() != Some("WrapperKeepOpaque") {
-            return Err(Error::new(ErrorKind::Custom("Type to decode is not 'WrapperTypeKeepOpaque'".into())))
+            return Err(Error::new(ErrorKind::Custom(
+                "Type to decode is not 'WrapperTypeKeepOpaque'".into(),
+            )))
         }
         if value.remaining() != 2 {
-            return Err(Error::new(ErrorKind::WrongLength { actual: type_id.0, actual_len: value.remaining(), expected_len: 2 }))
+            return Err(Error::new(ErrorKind::WrongLength {
+                actual: type_id.0,
+                actual_len: value.remaining(),
+                expected_len: 2,
+            }))
         }
 
         // The field to decode is a compact len followed by bytes. Decode the length, then grab the bytes.
-        let Compact(len) = value.decode_item(Compact::<u32>::into_visitor()).expect("length checked")?;
+        let Compact(len) = value
+            .decode_item(Compact::<u32>::into_visitor())
+            .expect("length checked")?;
         let field = value.next().expect("length checked")?;
 
         // Sanity check that the compact length we decoded lines up with the number of bytes encoded inthe next field.
@@ -131,12 +158,12 @@ impl <T> Visitor for WrapperKeepOpaqueVisitor<T> {
 
         Ok(WrapperKeepOpaque {
             data: field.bytes().to_vec(),
-            _phantom: PhantomDataSendSync::new()
+            _phantom: PhantomDataSendSync::new(),
         })
     }
 }
 
-impl <T> IntoVisitor for WrapperKeepOpaque<T> {
+impl<T> IntoVisitor for WrapperKeepOpaque<T> {
     type Visitor = WrapperKeepOpaqueVisitor<T>;
     fn into_visitor() -> Self::Visitor {
         WrapperKeepOpaqueVisitor(std::marker::PhantomData)
@@ -155,7 +182,13 @@ mod test {
     impl<T: scale_info::TypeInfo + 'static> scale_info::TypeInfo for WrapperKeepOpaque<T> {
         type Identity = Self;
         fn type_info() -> scale_info::Type {
-            use scale_info::{ Path, Type, build::Fields, TypeParameter, meta_type };
+            use scale_info::{
+                build::Fields,
+                meta_type,
+                Path,
+                Type,
+                TypeParameter,
+            };
 
             Type::builder()
                 .path(Path::new("WrapperKeepOpaque", module_path!()))
@@ -169,7 +202,8 @@ mod test {
     }
 
     /// Given a type definition, return type ID and registry representing it.
-    fn make_type<T: scale_info::TypeInfo + 'static>() -> (u32, scale_info::PortableRegistry) {
+    fn make_type<T: scale_info::TypeInfo + 'static>(
+    ) -> (u32, scale_info::PortableRegistry) {
         let m = scale_info::MetaType::new::<T>();
         let mut types = scale_info::Registry::new();
         let id = types.register_type(&m);
@@ -179,33 +213,52 @@ mod test {
 
     fn roundtrips_like_scale_codec<T>(t: T)
     where
-        T: EncodeAsType + DecodeAsType + Encode + Decode + PartialEq + std::fmt::Debug + scale_info::TypeInfo + 'static
+        T: EncodeAsType
+            + DecodeAsType
+            + Encode
+            + Decode
+            + PartialEq
+            + std::fmt::Debug
+            + scale_info::TypeInfo
+            + 'static,
     {
         let (type_id, types) = make_type::<T>();
 
         let scale_codec_encoded = t.encode();
         let encode_as_type_encoded = t.encode_as_type(type_id, &types).unwrap();
 
-        assert_eq!(scale_codec_encoded, encode_as_type_encoded, "encoded bytes should match");
+        assert_eq!(
+            scale_codec_encoded, encode_as_type_encoded,
+            "encoded bytes should match"
+        );
 
         let decode_as_type_bytes = &mut &*scale_codec_encoded;
         let decoded_as_type = T::decode_as_type(decode_as_type_bytes, type_id, &types)
             .expect("decode-as-type decodes");
 
         let decode_scale_codec_bytes = &mut &*scale_codec_encoded;
-        let decoded_scale_codec = T::decode(decode_scale_codec_bytes)
-            .expect("scale-codec decodes");
+        let decoded_scale_codec =
+            T::decode(decode_scale_codec_bytes).expect("scale-codec decodes");
 
-        assert!(decode_as_type_bytes.is_empty(), "no bytes should remain in decode-as-type impl");
-        assert!(decode_scale_codec_bytes.is_empty(), "no bytes should remain in codec-decode impl");
+        assert!(
+            decode_as_type_bytes.is_empty(),
+            "no bytes should remain in decode-as-type impl"
+        );
+        assert!(
+            decode_scale_codec_bytes.is_empty(),
+            "no bytes should remain in codec-decode impl"
+        );
 
-        assert_eq!(decoded_as_type, decoded_scale_codec, "decoded values should match");
+        assert_eq!(
+            decoded_as_type, decoded_scale_codec,
+            "decoded values should match"
+        );
     }
 
     #[test]
     fn wrapper_keep_opaque_roundtrips_ok() {
         roundtrips_like_scale_codec(WrapperKeepOpaque::from_value(123u64));
         roundtrips_like_scale_codec(WrapperKeepOpaque::from_value(true));
-        roundtrips_like_scale_codec(WrapperKeepOpaque::from_value(vec![1u8,2,3,4]));
+        roundtrips_like_scale_codec(WrapperKeepOpaque::from_value(vec![1u8, 2, 3, 4]));
     }
 }

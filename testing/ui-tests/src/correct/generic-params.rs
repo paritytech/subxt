@@ -4,11 +4,19 @@ use codec::{Decode, Encode};
 
 use subxt::utils::AccountId32;
 
-#[derive(Encode, Decode, Debug)]
+#[derive(Encode, Decode, subxt::ext::scale_encode::EncodeAsType, subxt::ext::scale_decode::DecodeAsType, Debug)]
+#[encode_as_type(crate_path = "subxt::ext::scale_encode")]
+#[decode_as_type(crate_path = "subxt::ext::scale_decode")]
 pub struct CustomAddress(u16);
-#[derive(Encode, Decode, Debug)]
+
+#[derive(Encode, Decode, subxt::ext::scale_encode::EncodeAsType, subxt::ext::scale_decode::DecodeAsType, Debug)]
+#[encode_as_type(crate_path = "subxt::ext::scale_encode")]
+#[decode_as_type(crate_path = "subxt::ext::scale_decode")]
 pub struct Generic<T>(T);
-#[derive(Encode, Decode, Debug)]
+
+#[derive(Encode, Decode, subxt::ext::scale_encode::EncodeAsType, subxt::ext::scale_decode::DecodeAsType, Debug)]
+#[encode_as_type(crate_path = "subxt::ext::scale_encode")]
+#[decode_as_type(crate_path = "subxt::ext::scale_decode")]
 pub struct Second<T, U>(U, PhantomData<T>);
 
 #[subxt::subxt(
