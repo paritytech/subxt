@@ -27,10 +27,12 @@ pub use extrinsic_params::{
     ExtrinsicParams,
 };
 pub use polkadot::{
+    PlainTip,
     PolkadotConfig,
     PolkadotExtrinsicParams,
 };
 pub use substrate::{
+    AssetTip,
     SubstrateConfig,
     SubstrateExtrinsicParams,
 };
