@@ -3,6 +3,7 @@ name = "subxt"
 version = "0.27.1"
 authors = { workspace = true }
 edition = { workspace = true }
+rust-version = { workspace = true }
 publish = true
 
 license = { workspace = true }
