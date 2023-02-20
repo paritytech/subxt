@@ -22,9 +22,18 @@ use serde::{
     Serialize,
 };
 
-pub use extrinsic_params::ExtrinsicParams;
-pub use polkadot::PolkadotConfig;
-pub use substrate::SubstrateConfig;
+pub use extrinsic_params::{
+    BaseExtrinsicParams,
+    ExtrinsicParams,
+};
+pub use polkadot::{
+    PolkadotConfig,
+    PolkadotExtrinsicParams,
+};
+pub use substrate::{
+    SubstrateConfig,
+    SubstrateExtrinsicParams,
+};
 
 /// Runtime types.
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
