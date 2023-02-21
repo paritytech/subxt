@@ -1,14 +1,15 @@
 [package]
 name = "subxt-cli"
-version = "0.27.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+version = "0.27.1"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = "Apache-2.0 OR GPL-3.0"
-repository = "https://github.com/paritytech/subxt"
+license.workspace = true
+repository.workspace = true
 documentation = "https://docs.rs/subxt-cli"
-homepage = "https://www.parity.io/"
+homepage.workspace = true
 description = "Command line utilities for working with subxt codegen"
 
 [[bin]]
@@ -17,11 +18,11 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.27.0", path = "../codegen" }
+subxt-codegen = { version = "0.27.1", path = "../codegen" }
 # perform node compatibility
-subxt-metadata = { version = "0.27.0", path = "../metadata" }
+subxt-metadata = { version = "0.27.1", path = "../metadata" }
 # parse command line args
-clap = { version = "4.1.4", features = ["derive", "cargo"] }
+clap = { version = "4.1.6", features = ["derive", "cargo"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata

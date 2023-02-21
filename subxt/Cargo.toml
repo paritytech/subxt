@@ -1,15 +1,16 @@
 [package]
 name = "subxt"
-version = "0.27.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+version = "0.27.1"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = "Apache-2.0 OR GPL-3.0"
+license.workspace = true
 readme = "../README.md"
-repository = "https://github.com/paritytech/subxt"
-documentation = "https://docs.rs/subxt"
-homepage = "https://www.parity.io/"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
@@ -51,8 +52,8 @@ parking_lot = "0.12.0"
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
-subxt-macro = { version = "0.27.0", path = "../macro" }
-subxt-metadata = { version = "0.27.0", path = "../metadata" }
+subxt-macro = { version = "0.27.1", path = "../macro" }
+subxt-metadata = { version = "0.27.1", path = "../metadata" }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { version = "0.4.0" }

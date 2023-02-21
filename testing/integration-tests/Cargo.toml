@@ -1,15 +1,15 @@
 [package]
 name = "integration-tests"
-version = "0.27.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+version = "0.27.1"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = false
 
-license = "Apache-2.0 OR GPL-3.0"
-readme = "../README.md"
-repository = "https://github.com/paritytech/subxt"
-documentation = "https://docs.rs/subxt"
-homepage = "https://www.parity.io/"
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
 description = "Subxt integration tests that rely on the Substrate binary"
 
 [features]
@@ -26,8 +26,8 @@ scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "16.0.0", default-features = false }
 sp-keyring = "18.0.0"
 syn = "1.0.0"
-subxt = { version = "0.27.0", path = "../../subxt" }
-subxt-codegen = { version = "0.27.0", path = "../../codegen" }
+subxt = { version = "0.27.1", path = "../../subxt" }
+subxt-codegen = { version = "0.27.1", path = "../../codegen" }
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.25", features = ["macros", "time"] }
 tracing = "0.1.34"
