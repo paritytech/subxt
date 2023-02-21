@@ -1,15 +1,15 @@
 [package]
 name = "integration-tests"
 version = "0.27.1"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = false
 
-license = "Apache-2.0 OR GPL-3.0"
-readme = "../README.md"
-repository = "https://github.com/paritytech/subxt"
-documentation = "https://docs.rs/subxt"
-homepage = "https://www.parity.io/"
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
 description = "Subxt integration tests that rely on the Substrate binary"
 
 [features]

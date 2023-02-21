@@ -1,14 +1,15 @@
 [package]
 name = "subxt-cli"
 version = "0.27.1"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = "Apache-2.0 OR GPL-3.0"
-repository = "https://github.com/paritytech/subxt"
+license.workspace = true
+repository.workspace = true
 documentation = "https://docs.rs/subxt-cli"
-homepage = "https://www.parity.io/"
+homepage.workspace = true
 description = "Command line utilities for working with subxt codegen"
 
 [[bin]]
