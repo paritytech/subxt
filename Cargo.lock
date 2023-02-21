@@ -2632,9 +2632,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.11"
+version = "0.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b95677054fca3564fb08de43f1208128c986a2abe3e186262385a715aed8ae66"
+checksum = "b415d798277870984d39315a48b8cf9bfd44b304a3d88544400edf133435fc40"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2646,9 +2646,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.11"
+version = "0.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0c18acd44b9da8bbeec4dbbdc798e9f28990dc1445f1a5ba3de048c0e44a797"
+checksum = "3b81a6f686d76f6d7e71765af351debd582f89037414a64a4bd4e072ff2179c6"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2686,13 +2686,14 @@ dependencies = [
 [[package]]
 name = "scale-value"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/scale-value?branch=jsdw-scale-decode-as-type#1fbc5a589cbb022c7e250f887d3c9dbc606bc32f"
+source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#7872209ec66de5c7e88f0a74782079a6fd16101c"
 dependencies = [
  "either",
  "frame-metadata",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
+ "scale-encode",
  "scale-info",
  "serde",
  "thiserror",

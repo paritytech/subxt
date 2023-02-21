@@ -51,7 +51,7 @@ pub enum Error {
     DecodeValue(#[from] DecodeError),
     /// Error encoding from a [`crate::dynamic::Value`].
     #[error("Error encoding from dynamic value: {0}")]
-    EncodeValue(#[from] EncodeError<()>),
+    EncodeValue(#[from] EncodeError),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
