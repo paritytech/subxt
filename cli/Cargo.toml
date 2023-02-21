@@ -1,15 +1,15 @@
 [package]
 name = "subxt-cli"
 version = "0.27.1"
-authors = { workspace = true }
-edition = { workspace = true }
-rust-version = { workspace = true }
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = { workspace = true }
-repository = { workspace = true }
+license.workspace = true
+repository.workspace = true
 documentation = "https://docs.rs/subxt-cli"
-homepage = { workspace = true }
+homepage.workspace = true
 description = "Command line utilities for working with subxt codegen"
 
 [[bin]]

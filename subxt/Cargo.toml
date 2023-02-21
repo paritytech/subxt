@@ -1,16 +1,16 @@
 [package]
 name = "subxt"
 version = "0.27.1"
-authors = { workspace = true }
-edition = { workspace = true }
-rust-version = { workspace = true }
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = { workspace = true }
+license.workspace = true
 readme = "../README.md"
-repository = { workspace = true }
-documentation = { workspace = true }
-homepage = { workspace = true }
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 

@@ -1,15 +1,15 @@
 [package]
 name = "subxt-codegen"
 version = "0.27.1"
-authors = { workspace = true }
-edition = { workspace = true }
-rust-version = { workspace = true }
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 publish = true
 
-license = { workspace = true }
-repository = { workspace = true }
+license.workspace = true
+repository.workspace = true
 documentation = "https://docs.rs/subxt-codegen"
-homepage = { workspace = true }
+homepage.workspace = true
 description = "Generate an API for interacting with a substrate node from FRAME metadata"
 
 [dependencies]
