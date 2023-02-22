@@ -377,7 +377,8 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
         .pallets
         .iter()
         .map(|pallet| {
-            let hash = get_pallet_hash(&metadata.types, pallet);
+            // let hash = get_pallet_hash(&metadata.types, pallet);
+            let hash = [0u8; 32];
             (&*pallet.name, hash)
         })
         .collect();
@@ -425,12 +426,13 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
             let in_pallet = pallets
                 .iter()
                 .any(|pallet_ref| pallet_ref.as_ref() == pallet.name);
-            if in_pallet {
-                let hash = get_pallet_hash(&metadata.types, pallet);
-                Some((&*pallet.name, hash))
-            } else {
-                None
-            }
+            None
+            // if in_pallet {
+            // let hash = get_pallet_hash(&metadata.types, pallet);
+            //     Some((&*pallet.name, hash))
+            // } else {
+            //     None
+            // }
         })
         .collect();
 

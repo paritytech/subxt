@@ -141,7 +141,9 @@ pub fn generate_runtime_api_from_bytes(
     let decoded: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &*bytes)
         .unwrap_or_else(|e| abort_call_site!("Failed to decode opaque metadata: {}", e));
     let decoded = decoded.unwrap();
+
     let bytes = &decoded.0;
+
     let metadata: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 

@@ -31,7 +31,7 @@ serde_json = "1.0.68"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
-frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/", branch = "lexnv/md_v15_test", default-features = false, features = ["std", "v14", "v15-unstable"] }
+frame-metadata = { version = "15.0.0", path = "/home/lexnv/workspace/frame-metadata/frame-metadata", default-features = false, features = ["std", "v14", "v15-unstable"] }
 # decode bytes into the metadata types
 scale = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 # generate the item mod for codegen

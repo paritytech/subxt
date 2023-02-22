@@ -7,8 +7,10 @@ use crate::{
     CratePath,
 };
 use frame_metadata::{
-    v15::RuntimeMetadataV15,
-    PalletMetadata,
+    v15::{
+        PalletMetadata,
+        RuntimeMetadataV15,
+    },
     StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,
