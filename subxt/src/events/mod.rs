@@ -14,7 +14,7 @@ pub use events_type::{
     EventDetails,
     Events,
 };
-
+use scale_decode::DecodeAsFields;
 use codec::{
     Decode,
     Encode,
@@ -26,7 +26,7 @@ use codec::{
 ///
 /// The trait is utilized to decode emitted events from a block, via obtaining the
 /// form of the `Event` from the metadata.
-pub trait StaticEvent: Decode {
+pub trait StaticEvent: DecodeAsFields {
     /// Pallet name.
     const PALLET: &'static str;
     /// Event name.

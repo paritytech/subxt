@@ -67,7 +67,7 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#crate_path::metadata::DecodeStaticType<#return_ty>> {
+            pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#return_ty> {
                 #crate_path::constants::StaticConstantAddress::new(
                     #pallet_name,
                     #constant_name,

@@ -247,6 +247,7 @@ pub struct PalletMetadata {
     name: String,
     call_indexes: HashMap<String, u8>,
     call_ty_id: Option<u32>,
+    event_ty_id: Option<u32>,
     storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
     constants: HashMap<String, PalletConstantMetadata<PortableForm>>,
 }
@@ -266,6 +267,12 @@ impl PalletMetadata {
     /// representing the different possible calls.
     pub fn call_ty_id(&self) -> Option<u32> {
         self.call_ty_id
+    }
+
+    /// If events exist for this pallet, this returns the type ID of the variant
+    /// representing the different possible events.
+    pub fn event_ty_id(&self) -> Option<u32> {
+        self.event_ty_id
     }
 
     /// Attempt to resolve a call into an index in this pallet, failing
@@ -338,7 +345,7 @@ pub struct EventMetadata {
     // behind an Arc to avoid lots of needless clones of it existing.
     pallet: Arc<str>,
     event: String,
-    fields: Vec<EventFieldMetadata>,
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
     docs: Vec<String>,
 }
 
@@ -354,7 +361,7 @@ impl EventMetadata {
     }
 
     /// The names, type names & types of each field in the event.
-    pub fn fields(&self) -> &[EventFieldMetadata] {
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
         &self.fields
     }
 
@@ -437,6 +444,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .iter()
             .map(|pallet| {
                 let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
+                let event_ty_id = pallet.event.as_ref().map(|e| e.ty.id());
 
                 let call_indexes =
                     pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
@@ -468,6 +476,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                     name: pallet.name.to_string(),
                     call_indexes,
                     call_ty_id,
+                    event_ty_id,
                     storage,
                     constants,
                 };
@@ -488,17 +497,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                         EventMetadata {
                             pallet: pallet_name.clone(),
                             event: variant.name().to_owned(),
-                            fields: variant
-                                .fields()
-                                .iter()
-                                .map(|f| {
-                                    EventFieldMetadata::new(
-                                        f.name().map(|n| n.to_owned()),
-                                        f.type_name().map(|n| n.to_owned()),
-                                        f.ty().id(),
-                                    )
-                                })
-                                .collect(),
+                            fields: variant.fields().to_vec(),
                             docs: variant.docs().to_vec(),
                         },
                     );

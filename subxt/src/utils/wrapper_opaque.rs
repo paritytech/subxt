@@ -125,7 +125,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
     fn visit_composite<'scale, 'info>(
         self,
         value: &mut scale_decode::visitor::types::Composite<'scale, 'info>,
-        type_id: scale_decode::visitor::TypeId,
+        _type_id: scale_decode::visitor::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{
             Error,
@@ -139,7 +139,6 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
         }
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
-                actual: type_id.0,
                 actual_len: value.remaining(),
                 expected_len: 2,
             }))

@@ -13,8 +13,8 @@ use crate::{
     },
     error::Error,
     metadata::{
-        DecodeWithMetadata,
         Metadata,
+        DecodeWithMetadata,
     },
     rpc::types::{
         StorageData,
@@ -72,10 +72,10 @@ where
     Client: OnlineClientT<T>,
 {
     /// Fetch the raw encoded value at the address/key given.
-    pub fn fetch_raw<'a>(
+    pub fn fetch_raw<'address>(
         &self,
-        key: &'a [u8],
-    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'a {
+        key: &'address [u8],
+    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'address {
         let client = self.client.clone();
         let block_hash = self.block_hash;
         // Ensure that the returned future doesn't have a lifetime tied to api.storage(),
@@ -116,14 +116,14 @@ where
     /// println!("Value: {:?}", value);
     /// # }
     /// ```
-    pub fn fetch<'a, Address>(
+    pub fn fetch<'address, Address>(
         &self,
-        address: &'a Address,
+        address: &'address Address,
     ) -> impl Future<
-        Output = Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>,
-    > + 'a
+            Output = Result<Option<Address::Target>, Error>
+        > + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -137,7 +137,7 @@ where
             let metadata = client.client.metadata();
             let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(&lookup_bytes).await? {
-                let val = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
+                let val = decode_storage_with_metadata::<Address::Target>(
                     &mut &*data,
                     address.pallet_name(),
                     address.entry_name(),
@@ -151,13 +151,13 @@ where
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub fn fetch_or_default<'a, Address>(
+    pub fn fetch_or_default<'address, Address>(
         &self,
-        address: &'a Address,
-    ) -> impl Future<Output = Result<<Address::Target as DecodeWithMetadata>::Target, Error>>
-           + 'a
+        address: &'address Address,
+    ) -> impl Future<Output = Result<Address::Target, Error>>
+           + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -176,7 +176,7 @@ where
                     return_type_from_storage_entry_type(&storage_metadata.ty);
                 let bytes = &mut &storage_metadata.default[..];
 
-                let val = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
+                let val = Address::Target::decode_with_metadata(
                     bytes,
                     return_ty_id,
                     &metadata,
@@ -189,12 +189,12 @@ where
     /// Fetch up to `count` keys for a storage map in lexicographic order.
     ///
     /// Supports pagination by passing a value to `start_key`.
-    pub fn fetch_keys<'a>(
+    pub fn fetch_keys<'address>(
         &self,
-        key: &'a [u8],
+        key: &'address [u8],
         count: u32,
-        start_key: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'a {
+        start_key: Option<&'address [u8]>,
+    ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'address {
         let client = self.client.clone();
         let block_hash = self.block_hash;
         async move {
@@ -305,7 +305,7 @@ where
     /// Returns the next key value pair from a map.
     pub async fn next(
         &mut self,
-    ) -> Result<Option<(StorageKey, ReturnTy::Target)>, Error> {
+    ) -> Result<Option<(StorageKey, ReturnTy)>, Error> {
         loop {
             if let Some((k, v)) = self.buffer.pop() {
                 let val = ReturnTy::decode_with_metadata(
@@ -401,4 +401,22 @@ fn return_type_from_storage_entry_type(entry: &StorageEntryType<PortableForm>) -
         StorageEntryType::Plain(ty) => ty.id(),
         StorageEntryType::Map { value, .. } => value.id(),
     }
+}
+
+/// Given some bytes, a pallet and storage name, decode the response.
+fn decode_storage_with_metadata<T: DecodeWithMetadata>(
+    bytes: &mut &[u8],
+    pallet_name: &str,
+    storage_entry: &str,
+    metadata: &Metadata,
+) -> Result<T, Error> {
+    let ty = &metadata.pallet(pallet_name)?.storage(storage_entry)?.ty;
+
+    let id = match ty {
+        StorageEntryType::Plain(ty) => ty.id(),
+        StorageEntryType::Map { value, .. } => value.id(),
+    };
+
+    let val = T::decode_with_metadata(bytes, id, metadata)?;
+    Ok(val)
 }

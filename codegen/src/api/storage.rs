@@ -227,7 +227,7 @@ fn generate_storage_entry_fns(
             #docs_token
             pub fn #fn_name_root(
                 &self,
-            ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
+            ) -> #crate_path::storage::address::StaticStorageAddress::<#storage_entry_value_ty, (), #is_defaultable_type, #is_iterable_type> {
                 #crate_path::storage::address::StaticStorageAddress::new(
                     #pallet_name,
                     #storage_name,
@@ -246,7 +246,7 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-        ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, #crate_path::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
+        ) -> #crate_path::storage::address::StaticStorageAddress::<#storage_entry_value_ty, #crate_path::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
             #crate_path::storage::address::StaticStorageAddress::new(
                 #pallet_name,
                 #storage_name,

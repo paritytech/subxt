@@ -294,9 +294,9 @@ dependencies = [
 
 [[package]]
 name = "bounded-collections"
-version = "0.1.4"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de2aff4807e40f478132150d80b031f2461d88f061851afcab537d7600c24120"
+checksum = "a071c348a5ef6da1d3a87166b408170b46002382b1dda83992b5c2208cefb370"
 dependencies = [
  "log",
  "parity-scale-codec",
@@ -700,9 +700,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.90"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90d59d9acd2a682b4e40605a242f6670eaa58c5957471cbf85e8aa6a0b97a5e8"
+checksum = "86d3488e7665a7a483b57e25bdd90d0aeb2bc7608c8d0346acf2ad3f1caf1d62"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -712,9 +712,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.90"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebfa40bda659dd5c864e65f4c9a2b0aff19bea56b017b9b77c73d3766a453a38"
+checksum = "48fcaf066a053a41a81dfb14d57d99738b767febb8b735c3016e469fac5da690"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -727,15 +727,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.90"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "457ce6757c5c70dc6ecdbda6925b958aae7f959bda7d8fb9bde889e34a09dc03"
+checksum = "a2ef98b8b717a829ca5603af80e1f9e2e48013ab227b68ef37872ef84ee479bf"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.90"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ebf883b7aacd7b2aeb2a7b338648ee19f57c140d4ee8e52c68979c6b2f7f2263"
+checksum = "086c685979a698443656e5cf7856c95c642295a38599f12fb1ff76fb28d19892"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1381,9 +1381,9 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.8"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75f43d41e26995c17e71ee126451dd3941010b0514a81a9d11f3b341debc2399"
+checksum = "bd6effc99afb63425aff9b05836f029929e345a6148a14b7ecd5ab67af944482"
 dependencies = [
  "bytes",
  "fnv",
@@ -1593,9 +1593,9 @@ dependencies = [
 
 [[package]]
 name = "is-terminal"
-version = "0.4.3"
+version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22e18b0a45d56fe973d6db23972bf5bc46f988a4a2385deac9cc29572f09daef"
+checksum = "21b6b32576413a8e69b90e952e4a026476040d81017b80445deda5f2d3921857"
 dependencies = [
  "hermit-abi 0.3.1",
  "io-lifetimes",
@@ -2608,7 +2608,7 @@ dependencies = [
 [[package]]
 name = "scale-decode"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3e0d88f3539344f46c15bfbe23b9c3cb8fe9bdbd"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3f2bbd29fe4b168d438cf34c0fd991fc9e82d625"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2621,7 +2621,7 @@ dependencies = [
 [[package]]
 name = "scale-decode-derive"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3e0d88f3539344f46c15bfbe23b9c3cb8fe9bdbd"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#3f2bbd29fe4b168d438cf34c0fd991fc9e82d625"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2632,9 +2632,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.15"
+version = "0.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b415d798277870984d39315a48b8cf9bfd44b304a3d88544400edf133435fc40"
+checksum = "01664452a22ef3d9dc6ce24cc5dd6fb217d51b09f3ee551b48828a47ee094e79"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2646,9 +2646,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.15"
+version = "0.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b81a6f686d76f6d7e71765af351debd582f89037414a64a4bd4e072ff2179c6"
+checksum = "373feebf1e4294837dcbae7cf8a04b4f8fa4a4f273cb055d7da13a67059a4962"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2686,7 +2686,7 @@ dependencies = [
 [[package]]
 name = "scale-value"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#7872209ec66de5c7e88f0a74782079a6fd16101c"
+source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#0b7f1c83cd214a02be8b37502634cdeabf7ce8e4"
 dependencies = [
  "either",
  "frame-metadata",
@@ -2923,9 +2923,9 @@ checksum = "74233d3b3b2f6d4b006dc19dee745e73e2a6bfb6f93607cd3b02bd5b00797d7c"
 
 [[package]]
 name = "slab"
-version = "0.4.7"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4614a76b2a8be0058caa9dbbaf66d988527d86d003c11a94fbd335d7661edcef"
+checksum = "6528351c9bc8ab22353f9d776db39a20288e8d6c37ef8cfe3317cf875eecfc2d"
 dependencies = [
  "autocfg",
 ]
@@ -3352,9 +3352,9 @@ checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "ss58-registry"
-version = "1.38.0"
+version = "1.39.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e40c020d72bc0a9c5660bb71e4a6fdef081493583062c474740a7d59f55f0e7b"
+checksum = "ecf0bd63593ef78eca595a7fc25e9a443ca46fe69fd472f8f09f5245cdcd769d"
 dependencies = [
  "Inflector",
  "num-format",
@@ -3538,9 +3538,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.107"
+version = "1.0.108"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f4064b5b16e03ae50984a5a8ed5d4f8803e6bc1fd170a3cda91a1be4b18e3f5"
+checksum = "d56e159d99e6c2b93995d171050271edb50ecc5288fbc7cc17de8fdce4e58c14"
 dependencies = [
  "proc-macro2",
  "quote",

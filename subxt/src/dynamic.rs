@@ -5,13 +5,9 @@
 //! This module provides the entry points to create dynamic
 //! transactions, storage and constant lookups.
 
-use crate::{
-    error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        Metadata,
-    },
-};
+use crate::error::Error;
+use crate::metadata::{ Metadata, DecodeWithMetadata };
+use scale_decode::DecodeAsType;
 
 pub use scale_value::Value;
 
@@ -43,13 +39,11 @@ pub struct DecodedValueThunk {
 }
 
 impl DecodeWithMetadata for DecodedValueThunk {
-    type Target = Self;
-
     fn decode_with_metadata(
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<Self::Target, Error> {
+    ) -> Result<Self, Error> {
         let mut v = Vec::with_capacity(bytes.len());
         v.extend_from_slice(bytes);
         *bytes = &[];
@@ -72,10 +66,11 @@ impl DecodedValueThunk {
     }
     /// Decode the SCALE encoded storage entry into a dynamic [`DecodedValue`] type.
     pub fn to_value(&self) -> Result<DecodedValue, Error> {
-        DecodedValue::decode_with_metadata(
+        let val = DecodedValue::decode_as_type(
             &mut &*self.scale_bytes,
             self.type_id,
-            &self.metadata,
-        )
+            self.metadata.types(),
+        )?;
+        Ok(val)
     }
 }

@@ -40,7 +40,7 @@ scale-info = "2.0.0"
 scale-value = { git = "https://github.com/paritytech/scale-value", branch = "jsdw-decode-as-type" }
 scale-bits = "0.3"
 scale-decode = { git = "https://github.com/paritytech/scale-decode", branch = "jsdw-decode-as-type" }
-scale-encode = "0.0.15"
+scale-encode = "0.0.17"
 futures = { version = "0.3.26", default-features = false, features = ["std"] }
 hex = "0.4.3"
 jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }

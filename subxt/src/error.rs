@@ -15,10 +15,8 @@ pub use crate::metadata::{
     InvalidMetadataError,
     MetadataError,
 };
-pub use scale_value::scale::{
-    DecodeError,
-    EncodeError,
-};
+pub use scale_encode::Error as EncodeError;
+pub use scale_decode::Error as DecodeError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -48,10 +46,10 @@ pub enum Error {
     Runtime(DispatchError),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[error("Error decoding into dynamic value: {0}")]
-    DecodeValue(#[from] DecodeError),
+    Decode(#[from] DecodeError),
     /// Error encoding from a [`crate::dynamic::Value`].
     #[error("Error encoding from dynamic value: {0}")]
-    EncodeValue(#[from] EncodeError),
+    Encode(#[from] EncodeError),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
