@@ -78,13 +78,19 @@ pub enum MetadataError {
 #[derive(Debug)]
 struct MetadataInner {
     metadata: RuntimeMetadataV14,
-    pallets: HashMap<String, PalletMetadata>,
+
+    // Events are hashed by pallet an error index (decode oriented)
     events: HashMap<(u8, u8), EventMetadata>,
-    // Errors are hashed by pallet index.
+    // Errors are hashed by pallet and error index (decode oriented)
     errors: HashMap<(u8, u8), ErrorMetadata>,
+
+    // Other apllet details are hashed by pallet name.
+    pallets: HashMap<String, PalletMetadata>,
+
     // Type of the DispatchError type, which is what comes back if
     // an extrinsic fails.
     dispatch_error_ty: Option<u32>,
+
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -245,7 +251,7 @@ impl Metadata {
 pub struct PalletMetadata {
     index: u8,
     name: String,
-    call_indexes: HashMap<String, u8>,
+    call_metadata: HashMap<String, CallMetadata>,
     call_ty_id: Option<u32>,
     event_ty_id: Option<u32>,
     storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
@@ -277,9 +283,9 @@ impl PalletMetadata {
 
     /// Attempt to resolve a call into an index in this pallet, failing
     /// if the call is not found in this pallet.
-    pub fn call_index(&self, function: &str) -> Result<u8, MetadataError> {
-        let fn_index = *self
-            .call_indexes
+    pub fn call(&self, function: &str) -> Result<&CallMetadata, MetadataError> {
+        let fn_index = self
+            .call_metadata
             .get(function)
             .ok_or(MetadataError::CallNotFound)?;
         Ok(fn_index)
@@ -304,37 +310,21 @@ impl PalletMetadata {
     }
 }
 
-/// Metadata for specific field.
 #[derive(Clone, Debug)]
-pub struct EventFieldMetadata {
-    name: Option<String>,
-    type_name: Option<String>,
-    type_id: u32,
+pub struct CallMetadata {
+    call_index: u8,
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
 }
 
-impl EventFieldMetadata {
-    /// Construct a new [`EventFieldMetadata`]
-    pub fn new(name: Option<String>, type_name: Option<String>, type_id: u32) -> Self {
-        EventFieldMetadata {
-            name,
-            type_name,
-            type_id,
-        }
+impl CallMetadata {
+    /// Index of this call.
+    pub fn index(&self) -> u8 {
+        self.call_index
     }
 
-    /// Get the name of the field.
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_deref()
-    }
-
-    /// Get the type name of the field as it appears in the code
-    pub fn type_name(&self) -> Option<&str> {
-        self.type_name.as_deref()
-    }
-
-    /// Get the id of a type
-    pub fn type_id(&self) -> u32 {
-        self.type_id
+    /// The names, type names & types of each field in the call data.
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
+        &self.fields
     }
 }
 
@@ -446,13 +436,21 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
                 let event_ty_id = pallet.event.as_ref().map(|e| e.ty.id());
 
-                let call_indexes =
+                let call_metadata =
                     pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
                         let type_def_variant = get_type_def_variant(call.ty.id())?;
                         let call_indexes = type_def_variant
                             .variants()
                             .iter()
-                            .map(|v| (v.name().clone(), v.index()))
+                            .map(|v| {
+                                (
+                                    v.name().clone(),
+                                    CallMetadata {
+                                        call_index: v.index(),
+                                        fields: v.fields().to_vec(),
+                                    },
+                                )
+                            })
                             .collect();
                         Ok(call_indexes)
                     })?;
@@ -474,7 +472,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
-                    call_indexes,
+                    call_metadata,
                     call_ty_id,
                     event_ty_id,
                     storage,

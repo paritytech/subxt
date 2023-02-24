@@ -15,7 +15,7 @@ pub trait DecodeWithMetadata: Sized {
     ) -> Result<Self, Error>;
 }
 
-impl <T: scale_decode::DecodeAsType> DecodeWithMetadata for T {
+impl<T: scale_decode::DecodeAsType> DecodeWithMetadata for T {
     fn decode_with_metadata(
         bytes: &mut &[u8],
         type_id: u32,
@@ -37,7 +37,7 @@ pub trait EncodeWithMetadata {
     ) -> Result<(), Error>;
 }
 
-impl <T: scale_encode::EncodeAsType> EncodeWithMetadata for T {
+impl<T: scale_encode::EncodeAsType> EncodeWithMetadata for T {
     /// SCALE encode this type to bytes, possibly with the help of metadata.
     fn encode_with_metadata(
         &self,

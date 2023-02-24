@@ -5,8 +5,13 @@
 //! This module provides the entry points to create dynamic
 //! transactions, storage and constant lookups.
 
-use crate::error::Error;
-use crate::metadata::{ Metadata, DecodeWithMetadata };
+use crate::{
+    error::Error,
+    metadata::{
+        DecodeWithMetadata,
+        Metadata,
+    },
+};
 use scale_decode::DecodeAsType;
 
 pub use scale_value::Value;

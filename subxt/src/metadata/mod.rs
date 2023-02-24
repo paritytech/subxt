@@ -13,7 +13,6 @@ pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
     ErrorMetadata,
-    EventFieldMetadata,
     EventMetadata,
     InvalidMetadataError,
     Metadata,

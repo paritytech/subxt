@@ -13,8 +13,8 @@ use crate::{
     },
     error::Error,
     metadata::{
-        Metadata,
         DecodeWithMetadata,
+        Metadata,
     },
     rpc::types::{
         StorageData,
@@ -119,9 +119,7 @@ where
     pub fn fetch<'address, Address>(
         &self,
         address: &'address Address,
-    ) -> impl Future<
-            Output = Result<Option<Address::Target>, Error>
-        > + 'address
+    ) -> impl Future<Output = Result<Option<Address::Target>, Error>> + 'address
     where
         Address: StorageAddress<IsFetchable = Yes> + 'address,
     {
@@ -154,8 +152,7 @@ where
     pub fn fetch_or_default<'address, Address>(
         &self,
         address: &'address Address,
-    ) -> impl Future<Output = Result<Address::Target, Error>>
-           + 'address
+    ) -> impl Future<Output = Result<Address::Target, Error>> + 'address
     where
         Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
@@ -303,9 +300,7 @@ where
     ReturnTy: DecodeWithMetadata,
 {
     /// Returns the next key value pair from a map.
-    pub async fn next(
-        &mut self,
-    ) -> Result<Option<(StorageKey, ReturnTy)>, Error> {
+    pub async fn next(&mut self) -> Result<Option<(StorageKey, ReturnTy)>, Error> {
         loop {
             if let Some((k, v)) = self.buffer.pop() {
                 let val = ReturnTy::decode_with_metadata(

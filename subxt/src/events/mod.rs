@@ -9,16 +9,16 @@
 mod events_client;
 mod events_type;
 
+use codec::{
+    Decode,
+    Encode,
+};
 pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,
     Events,
 };
 use scale_decode::DecodeAsFields;
-use codec::{
-    Decode,
-    Encode,
-};
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///

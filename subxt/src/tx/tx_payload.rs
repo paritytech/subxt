@@ -14,6 +14,7 @@ use crate::{
     metadata::Metadata,
 };
 use codec::Encode;
+use scale_encode::EncodeAsFields;
 use scale_value::{
     Composite,
     ValueDef,
@@ -96,19 +97,23 @@ impl<CallData> StaticTxPayload<CallData> {
     }
 }
 
-impl<CallData: Encode> TxPayload for StaticTxPayload<CallData> {
+impl<CallData: EncodeAsFields> TxPayload for StaticTxPayload<CallData> {
     fn encode_call_data_to(
         &self,
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
         let pallet = metadata.pallet(self.pallet_name)?;
+        let call = pallet.call(self.call_name)?;
+
         let pallet_index = pallet.index();
-        let call_index = pallet.call_index(self.call_name)?;
+        let call_index = call.index();
 
         pallet_index.encode_to(out);
         call_index.encode_to(out);
-        self.call_data.encode_to(out);
+
+        self.call_data
+            .encode_as_fields_to(call.fields(), metadata.types(), out)?;
         Ok(())
     }
 

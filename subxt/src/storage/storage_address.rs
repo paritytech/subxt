@@ -13,9 +13,9 @@ use crate::{
         StorageAddressError,
     },
     metadata::{
-        Metadata,
         DecodeWithMetadata,
         EncodeWithMetadata,
+        Metadata,
     },
 };
 use frame_metadata::StorageEntryType;

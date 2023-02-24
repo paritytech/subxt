@@ -13,8 +13,8 @@ use crate::{
     error::Error,
     events::events_client::get_event_bytes,
     metadata::{
-        EventMetadata,
         DecodeWithMetadata,
+        EventMetadata,
     },
     Config,
     Metadata,
@@ -256,7 +256,8 @@ impl EventDetails {
                 field_metadata.ty().id(),
                 &metadata.runtime_metadata().types,
                 scale_decode::visitor::IgnoreVisitor,
-            ).map_err(scale_decode::Error::from)?;
+            )
+            .map_err(scale_decode::Error::from)?;
         }
 
         // the end of the field bytes.
@@ -361,7 +362,8 @@ impl EventDetails {
                     bytes,
                     field_metadata.ty().id(),
                     &self.metadata.runtime_metadata().types,
-                ).map_err(scale_decode::Error::from)?;
+                )
+                .map_err(scale_decode::Error::from)?;
                 event_values.push(value);
             }
 
@@ -373,7 +375,8 @@ impl EventDetails {
                     bytes,
                     field_metadata.ty().id(),
                     &self.metadata.runtime_metadata().types,
-                ).map_err(scale_decode::Error::from)?;
+                )
+                .map_err(scale_decode::Error::from)?;
                 event_values
                     .push((field_metadata.name().cloned().unwrap_or_default(), value));
             }
@@ -389,7 +392,11 @@ impl EventDetails {
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
         if ev_metadata.pallet() == E::PALLET && ev_metadata.event() == E::EVENT {
-            let decoded = E::decode_as_fields(&mut self.field_bytes(), ev_metadata.fields(), self.metadata.types())?;
+            let decoded = E::decode_as_fields(
+                &mut self.field_bytes(),
+                ev_metadata.fields(),
+                self.metadata.types(),
+            )?;
             Ok(Some(decoded))
         } else {
             Ok(None)
@@ -401,14 +408,17 @@ impl EventDetails {
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: DecodeWithMetadata>(&self) -> Result<E, Error> {
         let pallet = self.metadata.pallet(self.pallet_name())?;
-        let event_ty = pallet.event_ty_id().ok_or_else(||
-            Error::Metadata(crate::metadata::MetadataError::EventNotFound(pallet.index(), self.variant_index()))
-        )?;
+        let event_ty = pallet.event_ty_id().ok_or_else(|| {
+            Error::Metadata(crate::metadata::MetadataError::EventNotFound(
+                pallet.index(),
+                self.variant_index(),
+            ))
+        })?;
 
         let decoded = E::decode_with_metadata(
             &mut &self.all_bytes[self.event_start_idx..self.event_fields_end_idx],
             event_ty,
-            &self.metadata
+            &self.metadata,
         )?;
         Ok(decoded)
     }
@@ -439,7 +449,17 @@ pub(crate) mod test_utils {
     use std::convert::TryFrom;
 
     /// An "outer" events enum containing exactly one event.
-    #[derive(Encode, Decode, TypeInfo, Clone, Debug, PartialEq, Eq, scale_encode::EncodeAsType, scale_decode::DecodeAsType)]
+    #[derive(
+        Encode,
+        Decode,
+        TypeInfo,
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        scale_encode::EncodeAsType,
+        scale_decode::DecodeAsType,
+    )]
     pub enum AllEvents<Ev> {
         Test(Ev),
     }
@@ -601,7 +621,9 @@ mod tests {
 
     #[test]
     fn statically_decode_single_root_event() {
-        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType)]
+        #[derive(
+            Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType,
+        )]
         enum Event {
             A(u8, bool, Vec<String>),
         }

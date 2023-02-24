@@ -6,7 +6,10 @@ use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
     error::Error,
-    metadata::{MetadataError, DecodeWithMetadata},
+    metadata::{
+        DecodeWithMetadata,
+        MetadataError,
+    },
     Config,
 };
 use derivative::Derivative;
@@ -72,7 +75,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut &*constant.value,
             constant.ty.id(),
-            &metadata
+            &metadata,
         )?;
         Ok(value)
     }

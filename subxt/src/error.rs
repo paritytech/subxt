@@ -15,8 +15,8 @@ pub use crate::metadata::{
     InvalidMetadataError,
     MetadataError,
 };
-pub use scale_encode::Error as EncodeError;
 pub use scale_decode::Error as DecodeError;
+pub use scale_encode::Error as EncodeError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
