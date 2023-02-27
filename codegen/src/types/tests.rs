@@ -895,14 +895,18 @@ fn generics_with_alias_adds_phantom_data_marker() {
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct NamedFields<_0> {
                         pub b: ::core::primitive::u32,
-                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
+                        #[codec(skip)]
+                        #[decode_as_type(skip)]
+                        pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
                     }
                     #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
                     #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct UnnamedFields<_0, _1> (
                         pub (::core::primitive::u32, ::core::primitive::u32,),
-                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>
+                        #[codec(skip)]
+                        #[decode_as_type(skip)]
+                        pub ::core::marker::PhantomData<(_0, _1)>
                     );
                 }
             }

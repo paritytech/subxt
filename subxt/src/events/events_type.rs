@@ -347,42 +347,14 @@ impl EventDetails {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
-        // If the first field has a name, we assume that the rest do too (it'll either
-        // be a named struct or a tuple type). If no fields, assume unnamed.
-        let is_named = event_metadata
-            .fields()
-            .get(0)
-            .map(|fm| fm.name().is_some())
-            .unwrap_or(false);
+        use scale_decode::DecodeAsFields;
+        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
+            bytes,
+            event_metadata.fields(),
+            &self.metadata.runtime_metadata().types
+        )?;
 
-        if !is_named {
-            let mut event_values = vec![];
-            for field_metadata in event_metadata.fields() {
-                let value = scale_value::scale::decode_as_type(
-                    bytes,
-                    field_metadata.ty().id(),
-                    &self.metadata.runtime_metadata().types,
-                )
-                .map_err(scale_decode::Error::from)?;
-                event_values.push(value);
-            }
-
-            Ok(scale_value::Composite::Unnamed(event_values))
-        } else {
-            let mut event_values = vec![];
-            for field_metadata in event_metadata.fields() {
-                let value = scale_value::scale::decode_as_type(
-                    bytes,
-                    field_metadata.ty().id(),
-                    &self.metadata.runtime_metadata().types,
-                )
-                .map_err(scale_decode::Error::from)?;
-                event_values
-                    .push((field_metadata.name().cloned().unwrap_or_default(), value));
-            }
-
-            Ok(scale_value::Composite::Named(event_values))
-        }
+        Ok(decoded)
     }
 
     /// Attempt to statically decode these [`EventDetails`] into a type representing the event

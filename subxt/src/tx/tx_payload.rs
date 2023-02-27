@@ -7,10 +7,7 @@
 
 use crate::{
     dynamic::Value,
-    error::{
-        Error,
-        MetadataError,
-    },
+    error::Error,
     metadata::Metadata,
 };
 use codec::Encode;
@@ -103,18 +100,7 @@ impl<CallData: EncodeAsFields> TxPayload for StaticTxPayload<CallData> {
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        let pallet = metadata.pallet(self.pallet_name)?;
-        let call = pallet.call(self.call_name)?;
-
-        let pallet_index = pallet.index();
-        let call_index = call.index();
-
-        pallet_index.encode_to(out);
-        call_index.encode_to(out);
-
-        self.call_data
-            .encode_as_fields_to(call.fields(), metadata.types(), out)?;
-        Ok(())
+        encode_tx_payload(&self.pallet_name, &self.call_name, &self.call_data, metadata, out)
     }
 
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
@@ -181,18 +167,27 @@ impl<'a> TxPayload for DynamicTxPayload<'a> {
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        let pallet = metadata.pallet(&self.pallet_name)?;
-        let call_id = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;
-        let call_value = Value {
-            context: (),
-            value: ValueDef::Variant(Variant {
-                name: self.call_name.to_string(),
-                values: self.fields.clone(),
-            }),
-        };
-
-        pallet.index().encode_to(out);
-        scale_value::scale::encode_as_type(&call_value, call_id, metadata.types(), out)?;
-        Ok(())
+        encode_tx_payload(&self.pallet_name, &self.call_name, &self.fields, metadata, out)
     }
+}
+
+// We use this same logic to encode both static and dynamic tx payloads.
+fn encode_tx_payload<CallData: EncodeAsFields>(
+    pallet_name: &str,
+    call_name: &str,
+    call_data: &CallData,
+    metadata: &Metadata,
+    out: &mut Vec<u8>
+) -> Result<(), Error> {
+    let pallet = metadata.pallet(pallet_name)?;
+    let call = pallet.call(call_name)?;
+
+    let pallet_index = pallet.index();
+    let call_index = call.index();
+
+    pallet_index.encode_to(out);
+    call_index.encode_to(out);
+
+    call_data.encode_as_fields_to(call.fields(), metadata.types(), out)?;
+    Ok(())
 }
