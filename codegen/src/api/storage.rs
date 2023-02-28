@@ -16,7 +16,6 @@ use frame_metadata::{
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
@@ -25,6 +24,8 @@ use scale_info::{
     form::PortableForm,
     TypeDef,
 };
+
+use super::CodegenError;
 
 /// Generate functions which create storage addresses from the provided pallet's metadata.
 /// These addresses can be used to access and iterate over storage values.
@@ -41,22 +42,19 @@ pub fn generate_storage(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
-) -> TokenStream2 {
-    let storage = if let Some(ref storage) = pallet.storage {
-        storage
-    } else {
-        return quote!()
+) -> Result<TokenStream2, CodegenError> {
+    let Some(storage) = &pallet.storage else {
+        return Ok(quote!())
     };
 
-    let storage_fns: Vec<_> = storage
-        .entries
-        .iter()
-        .map(|entry| {
-            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)
-        })
-        .collect();
+    let mut storage_fns = Vec::new();
+    for entry in &storage.entries {
+        let storage_fn =
+            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)?;
+        storage_fns.push(storage_fn);
+    }
 
-    quote! {
+    Ok(quote! {
         pub mod storage {
             use super::#types_mod_ident;
 
@@ -66,7 +64,7 @@ pub fn generate_storage(
                 #( #storage_fns )*
             }
         }
-    }
+    })
 }
 
 fn generate_storage_entry_fns(
@@ -75,7 +73,7 @@ fn generate_storage_entry_fns(
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
     crate_path: &CratePath,
-) -> TokenStream2 {
+) -> Result<TokenStream2, CodegenError> {
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
         StorageEntryType::Map {
@@ -137,13 +135,10 @@ fn generate_storage_entry_fns(
                             vec![ #crate_path::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
                         }
                     } else {
-                        // If we hit this condition, we don't know how to handle the number of hashes vs fields
-                        // that we've been handed, so abort.
-                        abort_call_site!(
-                            "Number of hashers ({}) does not equal 1 for StorageMap, or match number of fields ({}) for StorageNMap",
+                        return Err(CodegenError::MismatchHashers(
                             hashers.len(),
-                            fields.len()
-                        )
+                            fields.len(),
+                        ))
                     };
 
                     (fields, key_impl)
@@ -151,9 +146,9 @@ fn generate_storage_entry_fns(
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id());
                     let fields = vec![(format_ident!("_0"), ty_path)];
-                    let hasher = hashers.get(0).unwrap_or_else(|| {
-                        abort_call_site!("No hasher found for single key")
-                    });
+                    let Some(hasher) = hashers.get(0) else {
+                        return Err(CodegenError::MissingHasher)
+                    };
                     let key_impl = quote! {
                         vec![ #crate_path::storage::address::StorageMapKey::new(_0.borrow(), #hasher) ]
                     };
@@ -165,15 +160,14 @@ fn generate_storage_entry_fns(
 
     let pallet_name = &pallet.name;
     let storage_name = &storage_entry.name;
-    let storage_hash =
-        subxt_metadata::get_storage_hash(metadata, pallet_name, storage_name)
-            .unwrap_or_else(|_| {
-                abort_call_site!(
-                    "Metadata information for the storage entry {}_{} could not be found",
-                    pallet_name,
-                    storage_name
-                )
-            });
+    let storage_hash = subxt_metadata::get_storage_hash(
+        metadata,
+        pallet_name,
+        storage_name,
+    )
+    .map_err(|_| {
+        CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into())
+    })?;
 
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
     let storage_entry_ty = match storage_entry.ty {
@@ -240,7 +234,7 @@ fn generate_storage_entry_fns(
         quote!()
     };
 
-    quote! {
+    Ok(quote! {
         // Access a specific value from a storage entry
         #docs_token
         pub fn #fn_name(
@@ -256,5 +250,5 @@ fn generate_storage_entry_fns(
         }
 
         #root_entry_fn
-    }
+    })
 }

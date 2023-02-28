@@ -22,6 +22,7 @@ use crate::{
     },
     utils::{
         fetch_metadata_bytes_blocking,
+        FetchMetadataError,
         Uri,
     },
     CratePath,
@@ -33,8 +34,10 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
 };
 use heck::ToSnakeCase as _;
-use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::abort_call_site;
+use proc_macro2::{
+    Span,
+    TokenStream as TokenStream2,
+};
 use quote::{
     format_ident,
     quote,
@@ -125,17 +128,15 @@ pub fn generate_runtime_api_from_path<P>(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2
+) -> Result<TokenStream2, CodegenError>
 where
     P: AsRef<path::Path>,
 {
-    let mut file = fs::File::open(&path).unwrap_or_else(|e| {
-        abort_call_site!("Failed to open {}: {}", path.as_ref().to_string_lossy(), e)
-    });
+    let to_err = |err| CodegenError::Io(path.as_ref().to_string_lossy().into(), err);
 
+    let mut file = fs::File::open(&path).map_err(to_err)?;
     let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes)
-        .unwrap_or_else(|e| abort_call_site!("Failed to read metadata file: {}", e));
+    file.read_to_end(&mut bytes).map_err(to_err)?;
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -165,9 +166,8 @@ pub fn generate_runtime_api_from_url(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2 {
-    let bytes = fetch_metadata_bytes_blocking(url)
-        .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
+) -> Result<TokenStream2, CodegenError> {
+    let bytes = fetch_metadata_bytes_blocking(url)?;
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -195,9 +195,8 @@ pub fn generate_runtime_api_from_bytes(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2 {
-    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
-        .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
+) -> Result<TokenStream2, CodegenError> {
+    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
     generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
@@ -233,9 +232,9 @@ impl RuntimeGenerator {
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
         crate_path: CratePath,
-    ) -> TokenStream2 {
+    ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
-        let item_mod_ir = ir::ItemMod::from(item_mod);
+        let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
         let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
@@ -245,7 +244,7 @@ impl RuntimeGenerator {
             derives.clone(),
             crate_path.clone(),
         );
-        let types_mod = type_gen.generate_types_mod();
+        let types_mod = type_gen.generate_types_mod()?;
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
             .metadata
@@ -272,17 +271,18 @@ impl RuntimeGenerator {
 
         let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
-        let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
+        let mut modules = Vec::new();
+        for (pallet, mod_name) in &pallets_with_mod_names {
             let calls = calls::generate_calls(
                 &self.metadata,
                 &type_gen,
                 pallet,
                 types_mod_ident,
                 &crate_path,
-            );
+            )?;
 
             let event =
-                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path);
+                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path)?;
 
             let storage_mod = storage::generate_storage(
                 &self.metadata,
@@ -290,7 +290,7 @@ impl RuntimeGenerator {
                 pallet,
                 types_mod_ident,
                 &crate_path,
-            );
+            )?;
 
             let constants_mod = constants::generate_constants(
                 &self.metadata,
@@ -298,9 +298,9 @@ impl RuntimeGenerator {
                 pallet,
                 types_mod_ident,
                 &crate_path,
-            );
+            )?;
 
-            quote! {
+            let res = quote! {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
@@ -309,8 +309,9 @@ impl RuntimeGenerator {
                     #storage_mod
                     #constants_mod
                 }
-            }
-        });
+            };
+            modules.push(res);
+        }
 
         let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name = format_ident!("{}", p.name);
@@ -356,7 +357,7 @@ impl RuntimeGenerator {
 
         let rust_items = item_mod_ir.rust_items();
 
-        quote! {
+        Ok(quote! {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
@@ -426,7 +427,7 @@ impl RuntimeGenerator {
                     }
                 }
             }
-        }
+        })
     }
 }
 
@@ -437,40 +438,41 @@ pub fn generate_structs_from_variants<F>(
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &CratePath,
-) -> Vec<(String, CompositeDef)>
+) -> Result<Vec<(String, CompositeDef)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
     let ty = type_gen.resolve_type(type_id);
-    if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
-        variant
-            .variants()
-            .iter()
-            .map(|var| {
-                let struct_name = variant_to_struct_name(var.name());
-                let fields = CompositeDefFields::from_scale_info_fields(
-                    struct_name.as_ref(),
-                    var.fields(),
-                    &[],
-                    type_gen,
-                );
-                let struct_def = CompositeDef::struct_def(
-                    &ty,
-                    struct_name.as_ref(),
-                    Default::default(),
-                    fields,
-                    Some(parse_quote!(pub)),
-                    type_gen,
-                    var.docs(),
-                    crate_path,
-                );
-                (var.name().to_string(), struct_def)
-            })
-            .collect()
-    } else {
-        abort_call_site!(
-            "{} type should be an variant/enum type",
-            error_message_type_name
-        )
+
+    let scale_info::TypeDef::Variant(variant) = ty.type_def() else {
+        return Err(CodegenError::InvalidType(error_message_type_name.into()))
+    };
+
+    let mut result = Vec::new();
+
+    for var in variant.variants() {
+        let struct_name = variant_to_struct_name(var.name());
+
+        let fields = CompositeDefFields::from_scale_info_fields(
+            struct_name.as_ref(),
+            var.fields(),
+            &[],
+            type_gen,
+        )?;
+
+        let struct_def = CompositeDef::struct_def(
+            &ty,
+            struct_name.as_ref(),
+            Default::default(),
+            fields,
+            Some(parse_quote!(pub)),
+            type_gen,
+            var.docs(),
+            crate_path,
+        )?;
+
+        result.push((var.name.to_string(), struct_def));
     }
+
+    Ok(result)
 }

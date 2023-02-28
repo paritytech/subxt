@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::api::CodegenError;
+
 use super::{
     CompositeDef,
     CompositeDefFields,
@@ -45,8 +47,8 @@ impl TypeDefGen {
         ty: &Type<PortableForm>,
         type_gen: &TypeGenerator,
         crate_path: &CratePath,
-    ) -> Self {
-        let derives = type_gen.type_derives(ty);
+    ) -> Result<Self, CodegenError> {
+        let derives = type_gen.type_derives(ty)?;
 
         let type_params = ty
             .type_params()
@@ -77,7 +79,7 @@ impl TypeDefGen {
                     composite.fields(),
                     type_params.params(),
                     type_gen,
-                );
+                )?;
                 type_params.update_unused(fields.field_types());
                 let composite_def = CompositeDef::struct_def(
                     ty,
@@ -88,27 +90,25 @@ impl TypeDefGen {
                     type_gen,
                     ty.docs(),
                     crate_path,
-                );
+                )?;
                 TypeDefGenKind::Struct(composite_def)
             }
             TypeDef::Variant(variant) => {
                 let type_name = ty.path().ident().expect("variants should have a name");
-                let variants = variant
-                    .variants()
-                    .iter()
-                    .map(|v| {
-                        let fields = CompositeDefFields::from_scale_info_fields(
-                            v.name(),
-                            v.fields(),
-                            type_params.params(),
-                            type_gen,
-                        );
-                        type_params.update_unused(fields.field_types());
-                        let variant_def =
-                            CompositeDef::enum_variant_def(v.name(), fields, v.docs());
-                        (v.index(), variant_def)
-                    })
-                    .collect();
+
+                let mut variants = Vec::new();
+                for v in variant.variants() {
+                    let fields = CompositeDefFields::from_scale_info_fields(
+                        v.name(),
+                        v.fields(),
+                        type_params.params(),
+                        type_gen,
+                    )?;
+                    type_params.update_unused(fields.field_types());
+                    let variant_def =
+                        CompositeDef::enum_variant_def(v.name(), fields, v.docs());
+                    variants.push((v.index(), variant_def))
+                }
 
                 TypeDefGenKind::Enum(type_name, variants)
             }
@@ -118,12 +118,12 @@ impl TypeDefGen {
         let docs = ty.docs();
         let ty_docs = quote! { #( #[doc = #docs ] )* };
 
-        Self {
+        Ok(Self {
             type_params,
             derives,
             ty_kind,
             ty_docs,
-        }
+        })
     }
 }
 

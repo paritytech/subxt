@@ -2,8 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::CratePath;
-use proc_macro_error::abort;
+use crate::{
+    api::CodegenError,
+    CratePath,
+};
 use std::{
     borrow::Cow,
     collections::HashMap,
@@ -106,39 +108,48 @@ impl TypeSubstitutes {
         }
     }
 
-    pub fn extend(&mut self, elems: impl IntoIterator<Item = (syn::Path, AbsolutePath)>) {
-        self.substitutes
-            .extend(elems.into_iter().map(|(path, AbsolutePath(mut with))| {
-                let Some(syn::PathSegment { arguments: src_path_args, ..}) = path.segments.last() else { abort!(path.span(), "Empty path") };
-                let Some(syn::PathSegment { arguments: target_path_args, ..}) = with.segments.last_mut() else { abort!(with.span(), "Empty path") };
+    pub fn extend(
+        &mut self,
+        elems: impl IntoIterator<Item = (syn::Path, AbsolutePath)>,
+    ) -> Result<(), CodegenError> {
+        let to_extend = elems.into_iter().map(|(path, AbsolutePath(mut with))| {
+            let Some(syn::PathSegment { arguments: src_path_args, ..}) = path.segments.last() else {
+                return Err(CodegenError::EmptySubstitutePath(path.span()))
+            };
+            let Some(syn::PathSegment { arguments: target_path_args, ..}) = with.segments.last_mut() else {
+                return Err(CodegenError::EmptySubstitutePath(with.span()))
+            };
 
-                let source_args: Vec<_> = type_args(src_path_args).collect();
+            let source_args: Vec<_> = type_args(src_path_args).collect();
 
-                let param_mapping = if source_args.is_empty() {
-                    // If the type parameters on the source type are not specified, then this means that
-                    // the type is either not generic or the user wants to pass through all the parameters
-                    TypeParamMapping::None
-                } else {
-                    // Describe the mapping in terms of "which source param idx is used for each target param".
-                    // So, for each target param, find the matching source param index.
-                    let mapping = type_args(target_path_args)
-                        .filter_map(|arg|
-                            source_args
-                                .iter()
-                                .position(|&src| src == arg)
-                                .map(|src_idx|
-                                    u8::try_from(src_idx).expect("type arguments to be fewer than 256; qed"),
-                                )
-                        ).collect();
-                    TypeParamMapping::Specified(mapping)
-                };
+            let param_mapping = if source_args.is_empty() {
+                // If the type parameters on the source type are not specified, then this means that
+                // the type is either not generic or the user wants to pass through all the parameters
+                TypeParamMapping::None
+            } else {
+                // Describe the mapping in terms of "which source param idx is used for each target param".
+                // So, for each target param, find the matching source param index.
+                let mapping = type_args(target_path_args)
+                    .filter_map(|arg|
+                        source_args
+                            .iter()
+                            .position(|&src| src == arg)
+                            .map(|src_idx|
+                                u8::try_from(src_idx).expect("type arguments to be fewer than 256; qed"),
+                            )
+                    ).collect();
+                TypeParamMapping::Specified(mapping)
+            };
 
-                // NOTE: Params are late bound and held separately, so clear them
-                // here to not mess pretty printing this path and params together
-                *target_path_args = syn::PathArguments::None;
+            // NOTE: Params are late bound and held separately, so clear them
+            // here to not mess pretty printing this path and params together
+            *target_path_args = syn::PathArguments::None;
 
-                (PathSegments::from(&path), Substitute { path: with, param_mapping })
-            }));
+            Ok((PathSegments::from(&path), Substitute { path: with, param_mapping }))
+        }).collect::<Result<Vec<_>, _>>()?;
+
+        self.substitutes.extend(to_extend);
+        Ok(())
     }
 
     /// Given a source type path, return a substituted type path if a substitution is defined.

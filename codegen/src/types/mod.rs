@@ -17,7 +17,6 @@ use proc_macro2::{
     Span,
     TokenStream,
 };
-use proc_macro_error::abort_call_site;
 use quote::{
     quote,
     ToTokens,
@@ -29,6 +28,8 @@ use scale_info::{
     TypeDef,
 };
 use std::collections::BTreeMap;
+
+use crate::api::CodegenError;
 
 pub use self::{
     composite_def::{
@@ -87,7 +88,7 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Generate a module containing all types defined in the supplied type registry.
-    pub fn generate_types_mod(&self) -> Module {
+    pub fn generate_types_mod(&self) -> Result<Module, CodegenError> {
         let root_mod_ident = &self.types_mod_ident;
         let mut root_mod = Module::new(root_mod_ident.clone(), root_mod_ident.clone());
 
@@ -118,11 +119,11 @@ impl<'a> TypeGenerator<'a> {
 
             innermost_module.types.insert(
                 path.clone(),
-                TypeDefGen::from_type(ty.ty(), self, &self.crate_path),
+                TypeDefGen::from_type(ty.ty(), self, &self.crate_path)?,
             );
         }
 
-        root_mod
+        Ok(root_mod)
     }
 
     /// # Panics
@@ -302,12 +303,13 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Returns the derives to be applied to a generated type.
-    pub fn type_derives(&self, ty: &Type<PortableForm>) -> Derives {
+    pub fn type_derives(&self, ty: &Type<PortableForm>) -> Result<Derives, CodegenError> {
         let joined_path = ty.path().segments().join("::");
-        let ty_path: syn::TypePath = syn::parse_str(&joined_path).unwrap_or_else(|e| {
-            abort_call_site!("'{}' is an invalid type path: {:?}", joined_path, e,)
-        });
-        self.derives.resolve(&ty_path)
+        let ty_path: syn::TypePath = match syn::parse_str(&joined_path) {
+            Ok(ty_path) => ty_path,
+            Err(e) => return Err(CodegenError::InvalidTypePath(joined_path, e)),
+        };
+        Ok(self.derives.resolve(&ty_path))
     }
 }
 
