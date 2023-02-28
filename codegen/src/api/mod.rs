@@ -251,23 +251,49 @@ impl RuntimeGenerator {
             }
         });
 
-        let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+        let outer_event_variants_and_match_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
             let index = proc_macro2::Literal::u8_unsuffixed(p.index);
 
             p.event.as_ref().map(|_| {
-                quote! {
+                // The variant name to go into the event enum:
+                let outer_event_variant = quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Event),
-                }
+                };
+
+                // An 'if' arm for the RootEvent impl to match this variant name:
+                let outer_event_match_arm = quote! {
+                    if pallet_name == #variant_name_str {
+                        return Ok(Event::#variant_name(#mod_name::Event::decode_with_metadata(
+                            &mut &*pallet_bytes,
+                            pallet_ty,
+                            metadata
+                        )?));
+                    }
+                };
+
+                (outer_event_variant, outer_event_match_arm)
             })
-        });
+        }).collect::<Vec<_>>();
+
+        let outer_event_variants = outer_event_variants_and_match_arms.iter().map(|v| &v.0);
+        let outer_event_match_arms = outer_event_variants_and_match_arms.iter().map(|v| &v.1);
 
         let outer_event = quote! {
             #default_derives
             pub enum Event {
                 #( #outer_event_variants )*
+            }
+
+            impl #crate_path::events::RootEvent for Event {
+                fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                    use #crate_path::metadata::DecodeWithMetadata;
+                    #( #outer_event_match_arms )*
+                    Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Event enum", pallet_name)).into())
+                }
             }
         };
 
@@ -356,10 +382,10 @@ impl RuntimeGenerator {
                 }
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: &C) -> Result<(), ::subxt::error::MetadataError> {
+                pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
                     let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(::subxt::error::MetadataError::IncompatibleMetadata)
+                        Err(#crate_path::error::MetadataError::IncompatibleMetadata)
                     } else {
                         Ok(())
                     }

@@ -405,9 +405,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.1.6"
+version = "4.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec0b0588d44d4d63a87dbd75c136c166bbfd9a86a31cb89e09906521c7d3f5e3"
+checksum = "2f3061d6db6d8fcbbd4b05e057f2acace52e64e96b498c08c2d7a4e65addd340"
 dependencies = [
  "bitflags",
  "clap_derive",
@@ -420,9 +420,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.1.0"
+version = "4.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "684a277d672e91966334af371f1a7b5833f9aa00b07c84e92fbce95e00208ce8"
+checksum = "34d122164198950ba84a918270a3bb3f7ededd25e15f7451673d986f55bd2667"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "dyn-clone"
-version = "1.0.10"
+version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9b0705efd4599c15a38151f4721f7bc388306f61084d3bfd50bd07fbca5cb60"
+checksum = "68b0cf012f1230e43cd00ebb729c6bb58707ecfa8ad08b52ef3a4ccd2697fc30"
 
 [[package]]
 name = "ed25519"
@@ -1250,9 +1250,9 @@ dependencies = [
 
 [[package]]
 name = "h2"
-version = "0.3.15"
+version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f9f29bc9dda355256b2916cf526ab02ce0aeaaaf2bad60d65ef3f12f11dd0f4"
+checksum = "5be7b54589b581f624f566bf5d8eb2bab1db736c51528720b6bd36b96b55924d"
 dependencies = [
  "bytes",
  "fnv",
@@ -2599,7 +2599,7 @@ dependencies = [
 [[package]]
 name = "scale-decode"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#fb381c68297d17a021c21584542ea66a55ef4979"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#d4fc0d45787cc37008da68d2ab14fe8122c02140"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2612,7 +2612,7 @@ dependencies = [
 [[package]]
 name = "scale-decode-derive"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#fb381c68297d17a021c21584542ea66a55ef4979"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#d4fc0d45787cc37008da68d2ab14fe8122c02140"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2623,9 +2623,7 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01664452a22ef3d9dc6ce24cc5dd6fb217d51b09f3ee551b48828a47ee094e79"
+version = "0.0.18"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2637,9 +2635,7 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "373feebf1e4294837dcbae7cf8a04b4f8fa4a4f273cb055d7da13a67059a4962"
+version = "0.0.18"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2677,7 +2673,7 @@ dependencies = [
 [[package]]
 name = "scale-value"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#40d8b34fe97fbe8397ae8cc8796390305ad63b63"
+source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#e2414d38030811a6517a2f00ef5ee549ab3d8837"
 dependencies = [
  "either",
  "frame-metadata",
@@ -3455,7 +3451,7 @@ dependencies = [
 name = "subxt-cli"
 version = "0.27.1"
 dependencies = [
- "clap 4.1.6",
+ "clap 4.1.7",
  "color-eyre",
  "frame-metadata",
  "hex",
