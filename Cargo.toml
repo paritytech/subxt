@@ -21,6 +21,3 @@ license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
-
-[patch.crates-io]
-scale-encode = { path = "../scale-encode/scale-encode" }
