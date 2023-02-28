@@ -100,7 +100,13 @@ impl<CallData: EncodeAsFields> TxPayload for StaticTxPayload<CallData> {
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        encode_tx_payload(&self.pallet_name, &self.call_name, &self.call_data, metadata, out)
+        encode_tx_payload(
+            self.pallet_name,
+            self.call_name,
+            &self.call_data,
+            metadata,
+            out,
+        )
     }
 
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
@@ -167,7 +173,13 @@ impl<'a> TxPayload for DynamicTxPayload<'a> {
         metadata: &Metadata,
         out: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        encode_tx_payload(&self.pallet_name, &self.call_name, &self.fields, metadata, out)
+        encode_tx_payload(
+            &self.pallet_name,
+            &self.call_name,
+            &self.fields,
+            metadata,
+            out,
+        )
     }
 }
 
@@ -177,7 +189,7 @@ fn encode_tx_payload<CallData: EncodeAsFields>(
     call_name: &str,
     call_data: &CallData,
     metadata: &Metadata,
-    out: &mut Vec<u8>
+    out: &mut Vec<u8>,
 ) -> Result<(), Error> {
     let pallet = metadata.pallet(pallet_name)?;
     let call = pallet.call(call_name)?;

@@ -348,11 +348,12 @@ impl EventDetails {
         let event_metadata = self.event_metadata();
 
         use scale_decode::DecodeAsFields;
-        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
-            bytes,
-            event_metadata.fields(),
-            &self.metadata.runtime_metadata().types
-        )?;
+        let decoded =
+            <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
+                bytes,
+                event_metadata.fields(),
+                &self.metadata.runtime_metadata().types,
+            )?;
 
         Ok(decoded)
     }
@@ -402,7 +403,8 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: RootEvent>(&self) -> Result<E, Error> {
-        let pallet_bytes = &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
+        let pallet_bytes =
+            &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
         let pallet = self.metadata.pallet(self.pallet_name())?;
         let pallet_event_ty = pallet.event_ty_id().ok_or_else(|| {
             Error::Metadata(crate::metadata::MetadataError::EventNotFound(
@@ -411,7 +413,12 @@ impl EventDetails {
             ))
         })?;
 
-        E::root_event(pallet_bytes, self.pallet_name(), pallet_event_ty, &self.metadata)
+        E::root_event(
+            pallet_bytes,
+            self.pallet_name(),
+            pallet_event_ty,
+            &self.metadata,
+        )
     }
 }
 
@@ -424,7 +431,12 @@ impl EventDetails {
 pub trait RootEvent: Sized {
     /// Given details of the pallet event we wawnt to decode, and the name of the pallet, try to hand
     /// back a "root event".
-    fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_event_ty: u32, metadata: &Metadata) -> Result<Self, Error>;
+    fn root_event(
+        pallet_bytes: &[u8],
+        pallet_name: &str,
+        pallet_event_ty: u32,
+        metadata: &Metadata,
+    ) -> Result<Self, Error>;
 }
 
 /// Event related test utilities used outside this module.
@@ -468,10 +480,19 @@ pub(crate) mod test_utils {
     }
 
     // We need this in order to be able to decode into a root event type:
-    impl <Ev: DecodeWithMetadata> RootEvent for AllEvents<Ev> {
-        fn root_event(mut bytes: &[u8], pallet_name: &str, pallet_event_ty: u32, metadata: &Metadata) -> Result<Self, Error> {
+    impl<Ev: DecodeWithMetadata> RootEvent for AllEvents<Ev> {
+        fn root_event(
+            mut bytes: &[u8],
+            pallet_name: &str,
+            pallet_event_ty: u32,
+            metadata: &Metadata,
+        ) -> Result<Self, Error> {
             if pallet_name == "Test" {
-                return Ok(AllEvents::Test(Ev::decode_with_metadata(&mut bytes, pallet_event_ty, metadata)?));
+                return Ok(AllEvents::Test(Ev::decode_with_metadata(
+                    &mut bytes,
+                    pallet_event_ty,
+                    metadata,
+                )?))
             }
             panic!("Asked for pallet name '{pallet_name}', which isn't in our test AllEvents type")
         }

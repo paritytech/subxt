@@ -17,10 +17,10 @@ use crate::{
         Metadata,
     },
 };
+use codec::Encode;
 use frame_metadata::StorageEntryType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
-use codec::Encode;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;

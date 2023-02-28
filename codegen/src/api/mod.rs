@@ -279,8 +279,10 @@ impl RuntimeGenerator {
             })
         }).collect::<Vec<_>>();
 
-        let outer_event_variants = outer_event_variants_and_match_arms.iter().map(|v| &v.0);
-        let outer_event_match_arms = outer_event_variants_and_match_arms.iter().map(|v| &v.1);
+        let outer_event_variants =
+            outer_event_variants_and_match_arms.iter().map(|v| &v.0);
+        let outer_event_match_arms =
+            outer_event_variants_and_match_arms.iter().map(|v| &v.1);
 
         let outer_event = quote! {
             #default_derives

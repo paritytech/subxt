@@ -23,7 +23,6 @@ pub use crate::rpc::types::StorageKey;
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
-    pub use frame_metadata::StorageHasher;
     pub use super::storage_address::{
         dynamic,
         dynamic_root,
@@ -33,6 +32,7 @@ pub mod address {
         StorageMapKey,
         Yes,
     };
+    pub use frame_metadata::StorageHasher;
 }
 
 // For consistency with other modules, also expose
