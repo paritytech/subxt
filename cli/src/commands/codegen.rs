@@ -107,6 +107,14 @@ fn codegen(
         type_substitutes,
         crate_path,
     );
-    println!("{runtime_api}");
+    match runtime_api {
+        Ok(runtime_api) => println!("{runtime_api}"),
+        Err(e) => {
+            // `Span` cannot be sent between threads.
+            use color_eyre::owo_colors::OwoColorize;
+            println!("{}", e.to_string().red())
+        }
+    };
+
     Ok(())
 }
