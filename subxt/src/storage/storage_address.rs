@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_map_key::StorageMapKey;
 use crate::{
     dynamic::{
         DecodedValueThunk,
@@ -21,6 +20,7 @@ use crate::{
 use frame_metadata::StorageEntryType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
+use codec::Encode;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
@@ -75,6 +75,31 @@ pub struct StaticStorageAddress<ReturnTy, Fetchable, Defaultable, Iterable> {
     // Hash provided from static code for validation.
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
+}
+
+/// Storage key for a Map.
+#[derive(Clone)]
+pub struct StorageMapKey {
+    value: Vec<u8>,
+    hasher: StorageHasher,
+}
+
+impl StorageMapKey {
+    /// Create a new [`StorageMapKey`] by pre-encoding static data and pairing it with a hasher.
+    pub fn new<Encodable: Encode>(
+        value: Encodable,
+        hasher: StorageHasher,
+    ) -> StorageMapKey {
+        Self {
+            value: value.encode(),
+            hasher,
+        }
+    }
+
+    /// Convert this [`StorageMapKey`] into bytes and append them to some existing bytes.
+    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
+        hash_bytes(&self.value, &self.hasher, bytes)
+    }
 }
 
 impl<ReturnTy, Fetchable, Defaultable, Iterable>
@@ -260,7 +285,7 @@ where
                     for (key, type_id) in self.storage_entry_keys.iter().zip(type_ids) {
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
                     }
-                    super::storage_map_key::hash_bytes(&input, &hashers[0], bytes);
+                    hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
                 } else if hashers.len() == type_ids.len() {
                     // A hasher per field; encode and hash each field independently.
@@ -269,7 +294,7 @@ where
                     {
                         let mut input = Vec::new();
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
-                        super::storage_map_key::hash_bytes(&input, hasher, bytes);
+                        hash_bytes(&input, hasher, bytes);
                     }
                     Ok(())
                 } else {
@@ -281,6 +306,25 @@ where
                     .into())
                 }
             }
+        }
+    }
+}
+
+/// Take some SCALE encoded bytes and a [`StorageHasher`] and hash the bytes accordingly.
+fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
+    match hasher {
+        StorageHasher::Identity => bytes.extend(input),
+        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
+        StorageHasher::Blake2_128Concat => {
+            bytes.extend(sp_core_hashing::blake2_128(input));
+            bytes.extend(input);
+        }
+        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
+        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
+        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
+        StorageHasher::Twox64Concat => {
+            bytes.extend(sp_core_hashing::twox_64(input));
+            bytes.extend(input);
         }
     }
 }

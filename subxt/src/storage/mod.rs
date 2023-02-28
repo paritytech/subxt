@@ -6,7 +6,6 @@
 
 mod storage_address;
 mod storage_client;
-mod storage_map_key;
 mod storage_type;
 
 pub mod utils;
@@ -24,19 +23,15 @@ pub use crate::rpc::types::StorageKey;
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
-    pub use super::{
-        storage_address::{
-            dynamic,
-            dynamic_root,
-            DynamicStorageAddress,
-            StaticStorageAddress,
-            StorageAddress,
-            Yes,
-        },
-        storage_map_key::{
-            StorageHasher,
-            StorageMapKey,
-        },
+    pub use frame_metadata::StorageHasher;
+    pub use super::storage_address::{
+        dynamic,
+        dynamic_root,
+        DynamicStorageAddress,
+        StaticStorageAddress,
+        StorageAddress,
+        StorageMapKey,
+        Yes,
     };
 }
 

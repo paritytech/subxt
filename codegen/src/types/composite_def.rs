@@ -253,7 +253,6 @@ impl CompositeDefFields {
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
                         #[codec(skip)]
-                        #[decode_as_type(skip)]
                         #visibility __subxt_unused_type_params: #phantom_data
                     )
                 });
@@ -272,7 +271,6 @@ impl CompositeDefFields {
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
                         #[codec(skip)]
-                        #[decode_as_type(skip)]
                         #visibility #phantom_data
                     )
                 });
