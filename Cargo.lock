@@ -1573,7 +1573,6 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-keyring",
- "sp-runtime",
  "subxt",
  "subxt-codegen",
  "syn",
@@ -2603,7 +2602,7 @@ dependencies = [
 [[package]]
 name = "scale-decode"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#bcc00bb4bfb69702b0048aba585e7974ad1973a0"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#109000b78ae048dae483340ed87c33dee6b5ae1b"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2616,7 +2615,7 @@ dependencies = [
 [[package]]
 name = "scale-decode-derive"
 version = "0.4.0"
-source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#bcc00bb4bfb69702b0048aba585e7974ad1973a0"
+source = "git+https://github.com/paritytech/scale-decode?branch=jsdw-decode-as-type#109000b78ae048dae483340ed87c33dee6b5ae1b"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2627,9 +2626,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.0.18"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8af4c1ed8b78d7b7079d503b25df7b7cba2de8c5f879c5a22cc057c0bbe30a6"
+checksum = "e1eca19770a61535e8f63979f664f7360d1bb57fa86c61a0efa476df59c6b2dd"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2641,9 +2640,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.0.18"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b39f2457a4fb9248188e1f61aea1303592746a41193365682052094bf08b171"
+checksum = "03a91f785b0c1373b8070fedaf2ffbfb8d6d425c89de5cc45e6481c51768aa37"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -2681,7 +2680,7 @@ dependencies = [
 [[package]]
 name = "scale-value"
 version = "0.6.0"
-source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#e2414d38030811a6517a2f00ef5ee549ab3d8837"
+source = "git+https://github.com/paritytech/scale-value?branch=jsdw-decode-as-type#910ab142daee272ee62b9b36be8eb0cdcdc7616d"
 dependencies = [
  "either",
  "frame-metadata",
