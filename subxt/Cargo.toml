@@ -58,15 +58,15 @@ subxt-metadata = { version = "0.27.1", path = "../metadata" }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { version = "0.4.0" }
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
-sp-core-hashing = "6.0.0"
+sp-core-hashing = "7.0.0"
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { version = "0.2.0" }
 blake2 = { version = "0.10.4", default-features = false }
 
 # These are only included is "substrate-compat" is enabled.
-sp-core = { version = "16.0.0", default-features = false, optional = true }
-sp-runtime = { version = "18.0.0", optional = true }
+sp-core = { version = "18.0.0", default-features = false, optional = true }
+sp-runtime = { version = "20.0.0", optional = true }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { version = "0.2", features = ["js"] }
@@ -76,7 +76,7 @@ bitvec = "1"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 tokio = { version = "1.25", features = ["macros", "time", "rt-multi-thread"] }
-sp-core = { version = "16.0.0", default-features = false }
-sp-runtime = "18.0.0"
-sp-keyring = "18.0.0"
-sp-version = "16.0.0"
+sp-core = { version = "18.0.0", default-features = false }
+sp-runtime = "20.0.0"
+sp-keyring = "20.0.0"
+sp-version = "18.0.0"
