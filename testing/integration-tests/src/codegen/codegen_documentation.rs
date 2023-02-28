@@ -47,7 +47,7 @@ fn metadata_docs() -> Vec<String> {
     docs
 }
 
-fn generate_runtime_interface(crate_path: CratePath) -> String {
+fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> String {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let metadata = load_test_metadata();
 
@@ -59,14 +59,20 @@ fn generate_runtime_interface(crate_path: CratePath) -> String {
     let derives = DerivesRegistry::new(&crate_path);
     let type_substitutes = TypeSubstitutes::new(&crate_path);
     generator
-        .generate_runtime(item_mod, derives, type_substitutes, crate_path)
+        .generate_runtime(
+            item_mod,
+            derives,
+            type_substitutes,
+            crate_path,
+            should_gen_docs,
+        )
         .to_string()
 }
 
-fn interface_docs() -> Vec<String> {
+fn interface_docs(should_gen_docs: bool) -> Vec<String> {
     // Generate the runtime interface from the node's metadata.
     // Note: the API is generated on a single line.
-    let runtime_api = generate_runtime_interface(CratePath::default());
+    let runtime_api = generate_runtime_interface(CratePath::default(), should_gen_docs);
 
     // Documentation lines have the following format:
     //    # [ doc = "Upward message is invalid XCM."]
@@ -101,12 +107,27 @@ fn check_documentation() {
     // Inspect metadata recursively and obtain all associated documentation.
     let raw_docs = metadata_docs();
     // Obtain documentation from the generated API.
-    let runtime_docs = interface_docs();
+    let runtime_docs = interface_docs(true);
 
     for raw in raw_docs.iter() {
         assert!(
             runtime_docs.contains(raw),
             "Documentation not present in runtime API: {raw}"
+        );
+    }
+}
+
+#[test]
+fn check_no_documentation() {
+    // Inspect metadata recursively and obtain all associated documentation.
+    let raw_docs = metadata_docs();
+    // Obtain documentation from the generated API.
+    let runtime_docs = interface_docs(false);
+
+    for raw in raw_docs.iter() {
+        assert!(
+            !runtime_docs.contains(raw),
+            "Documentation should not be present in runtime API: {raw}"
         );
     }
 }
@@ -127,7 +148,13 @@ fn check_root_attrs_preserved() {
     let derives = DerivesRegistry::new(&CratePath::default());
     let type_substitutes = TypeSubstitutes::new(&CratePath::default());
     let generated_code = generator
-        .generate_runtime(item_mod, derives, type_substitutes, CratePath::default())
+        .generate_runtime(
+            item_mod,
+            derives,
+            type_substitutes,
+            CratePath::default(),
+            true,
+        )
         .to_string();
 
     let doc_str_loc = generated_code
