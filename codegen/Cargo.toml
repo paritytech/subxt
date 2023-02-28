@@ -26,6 +26,7 @@ subxt-metadata = { version = "0.27.1", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
 tokio = { version = "1.25", features = ["macros", "rt-multi-thread"] }
+thiserror = "1.0.24"
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }

@@ -3456,6 +3456,7 @@ dependencies = [
  "scale-info",
  "subxt-metadata",
  "syn",
+ "thiserror",
  "tokio",
 ]
 
