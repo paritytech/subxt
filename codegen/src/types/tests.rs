@@ -47,7 +47,7 @@ fn generate_struct_with_primitives() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -95,7 +95,7 @@ fn generate_struct_with_a_struct_field() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -142,7 +142,7 @@ fn generate_tuple_struct() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -226,7 +226,7 @@ fn derive_compact_as_for_uint_wrapper_structs() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -292,7 +292,7 @@ fn generate_enum() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -352,7 +352,7 @@ fn compact_fields() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -410,7 +410,7 @@ fn compact_generic_parameter() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -453,7 +453,7 @@ fn generate_array_field() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -492,7 +492,7 @@ fn option_fields() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -534,7 +534,7 @@ fn box_fields_struct() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -576,7 +576,7 @@ fn box_fields_enum() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -618,7 +618,7 @@ fn range_fields() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -664,7 +664,7 @@ fn generics() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -714,7 +714,7 @@ fn generics_nested() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -767,7 +767,7 @@ fn generate_bitvec() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -822,7 +822,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -884,7 +884,7 @@ fn modules() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -943,7 +943,7 @@ fn dont_force_struct_names_camel_case() {
         DerivesRegistry::new(&crate_path),
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -986,7 +986,7 @@ fn apply_user_defined_derives_for_all_types() {
         derives,
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(
@@ -1053,7 +1053,7 @@ fn apply_user_defined_derives_for_specific_types() {
         derives,
         crate_path,
     );
-    let types = type_gen.generate_types_mod();
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
     assert_eq!(

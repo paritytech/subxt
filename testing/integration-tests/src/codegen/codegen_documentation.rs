@@ -60,6 +60,7 @@ fn generate_runtime_interface(crate_path: CratePath) -> String {
     let type_substitutes = TypeSubstitutes::new(&crate_path);
     generator
         .generate_runtime(item_mod, derives, type_substitutes, crate_path)
+        .expect("API generation must be valid")
         .to_string()
 }
 
@@ -128,6 +129,7 @@ fn check_root_attrs_preserved() {
     let type_substitutes = TypeSubstitutes::new(&CratePath::default());
     let generated_code = generator
         .generate_runtime(item_mod, derives, type_substitutes, CratePath::default())
+        .expect("API generation must be valid")
         .to_string();
 
     let doc_str_loc = generated_code
