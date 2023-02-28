@@ -37,7 +37,7 @@
 //! let substs = TypeSubstitutes::new(&CratePath::default());
 //! // Generate the Runtime API.
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
-//! let runtime_api = generator.generate_runtime(item_mod, derives, substs, CratePath::default());
+//! let runtime_api = generator.generate_runtime(item_mod, derives, substs, CratePath::default()).unwrap();
 //! println!("{}", runtime_api);
 //! ```
 
