@@ -54,6 +54,7 @@ pub use self::{
         generate_runtime_api_from_bytes,
         generate_runtime_api_from_path,
         generate_runtime_api_from_url,
+        CodegenError,
         RuntimeGenerator,
     },
     types::{
