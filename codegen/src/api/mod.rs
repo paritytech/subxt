@@ -82,6 +82,7 @@ where
         derives,
         type_substitutes,
         crate_path,
+        true,
     )
 }
 
@@ -114,6 +115,7 @@ pub fn generate_runtime_api_from_url(
         derives,
         type_substitutes,
         crate_path,
+        true,
     )
 }
 
@@ -134,12 +136,19 @@ pub fn generate_runtime_api_from_bytes(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2 {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
+    generator.generate_runtime(
+        item_mod,
+        derives,
+        type_substitutes,
+        crate_path,
+        should_gen_docs,
+    )
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -172,6 +181,7 @@ impl RuntimeGenerator {
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
         crate_path: CratePath,
+        should_gen_docs: bool,
     ) -> TokenStream2 {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::from(item_mod);
@@ -183,6 +193,7 @@ impl RuntimeGenerator {
             type_substitutes,
             derives.clone(),
             crate_path.clone(),
+            should_gen_docs,
         );
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
@@ -218,10 +229,16 @@ impl RuntimeGenerator {
                 pallet,
                 types_mod_ident,
                 &crate_path,
+                should_gen_docs,
             );
 
-            let event =
-                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path);
+            let event = events::generate_events(
+                &type_gen,
+                pallet,
+                types_mod_ident,
+                &crate_path,
+                should_gen_docs,
+            );
 
             let storage_mod = storage::generate_storage(
                 &self.metadata,
@@ -229,6 +246,7 @@ impl RuntimeGenerator {
                 pallet,
                 types_mod_ident,
                 &crate_path,
+                should_gen_docs,
             );
 
             let constants_mod = constants::generate_constants(
@@ -237,6 +255,7 @@ impl RuntimeGenerator {
                 pallet,
                 types_mod_ident,
                 &crate_path,
+                should_gen_docs,
             );
 
             quote! {
@@ -376,6 +395,7 @@ pub fn generate_structs_from_variants<F>(
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Vec<(String, CompositeDef)>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
@@ -393,6 +413,7 @@ where
                     &[],
                     type_gen,
                 );
+                let docs = should_gen_docs.then_some(var.docs()).unwrap_or_default();
                 let struct_def = CompositeDef::struct_def(
                     &ty,
                     struct_name.as_ref(),
@@ -400,7 +421,7 @@ where
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
-                    var.docs(),
+                    docs,
                     crate_path,
                 );
                 (var.name().to_string(), struct_def)

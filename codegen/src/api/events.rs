@@ -45,6 +45,7 @@ pub fn generate_events(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2 {
     // Early return if the pallet has no events.
     let event = if let Some(ref event) = pallet.event {
@@ -59,6 +60,7 @@ pub fn generate_events(
         |name| name.into(),
         "Event",
         crate_path,
+        should_gen_docs,
     );
     let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
         let pallet_name = &pallet.name;
@@ -77,9 +79,12 @@ pub fn generate_events(
     let event_type = type_gen.resolve_type_path(event.ty.id());
     let event_ty = type_gen.resolve_type(event.ty.id());
     let docs = event_ty.docs();
+    let docs = should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
 
     quote! {
-        #( #[doc = #docs ] )*
+        #docs
         pub type Event = #event_type;
         pub mod events {
             use super::#types_mod_ident;
