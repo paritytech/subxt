@@ -79,9 +79,22 @@
 //!
 //! ```ignore
 //! #[subxt::subxt(crate = "crate::path::to::subxt")]
+//! pub mod polkadot {}
 //! ```
 //!
 //! By default the path `::subxt` is used.
+//!
+//! ### Expose documentation
+//!
+//! In order to expose the documentation from the runtime metadata on the generated
+//! code, users must specify the `expose_documentation` flag:
+//!
+//! ```ignore
+//! #[subxt::subxt(expose_documentation)]
+//! pub mod polkadot {}
+//! ```
+//!
+//! By default the documentation is not generated.
 
 #![deny(unused_crate_dependencies)]
 
@@ -121,6 +134,8 @@ struct RuntimeMetadataArgs {
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
     crate_path: Option<String>,
+    #[darling(default)]
+    expose_documentation: darling::util::Flag,
 }
 
 #[derive(Debug, FromMeta)]
@@ -177,6 +192,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         },
     ));
 
+    let should_gen_docs = args.expose_documentation.is_present();
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
@@ -188,7 +204,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
-                false,
+                should_gen_docs,
             )
             .into()
         }
@@ -202,7 +218,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
-                false,
+                should_gen_docs,
             )
             .into()
         }
