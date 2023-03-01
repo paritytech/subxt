@@ -56,6 +56,7 @@ use syn::parse_quote;
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -64,6 +65,7 @@ pub fn generate_runtime_api_from_path<P>(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -82,7 +84,7 @@ where
         derives,
         type_substitutes,
         crate_path,
-        true,
+        should_gen_docs,
     )
 }
 
@@ -97,6 +99,7 @@ where
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -105,6 +108,7 @@ pub fn generate_runtime_api_from_url(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2 {
     let bytes = fetch_metadata_bytes_blocking(url)
         .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
@@ -115,7 +119,7 @@ pub fn generate_runtime_api_from_url(
         derives,
         type_substitutes,
         crate_path,
-        true,
+        should_gen_docs,
     )
 }
 
@@ -128,6 +132,7 @@ pub fn generate_runtime_api_from_url(
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(

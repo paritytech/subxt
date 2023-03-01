@@ -188,6 +188,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                false,
             )
             .into()
         }
@@ -201,6 +202,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                false,
             )
             .into()
         }
