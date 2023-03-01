@@ -47,12 +47,13 @@ pub fn generate_storage(
         return Ok(quote!())
     };
 
-    let mut storage_fns = Vec::new();
-    for entry in &storage.entries {
-        let storage_fn =
-            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)?;
-        storage_fns.push(storage_fn);
-    }
+    let storage_fns = storage
+        .entries
+        .iter()
+        .map(|entry| {
+            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)
+        })
+        .collect::<Result<Vec<_>, CodegenError>>()?;
 
     Ok(quote! {
         pub mod storage {

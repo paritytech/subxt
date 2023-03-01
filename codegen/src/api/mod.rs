@@ -271,47 +271,52 @@ impl RuntimeGenerator {
 
         let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
-        let mut modules = Vec::new();
-        for (pallet, mod_name) in &pallets_with_mod_names {
-            let calls = calls::generate_calls(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            )?;
+        let modules = pallets_with_mod_names
+            .iter()
+            .map(|(pallet, mod_name)| {
+                let calls = calls::generate_calls(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                )?;
 
-            let event =
-                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path)?;
+                let event = events::generate_events(
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                )?;
 
-            let storage_mod = storage::generate_storage(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            )?;
+                let storage_mod = storage::generate_storage(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                )?;
 
-            let constants_mod = constants::generate_constants(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            )?;
+                let constants_mod = constants::generate_constants(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                )?;
 
-            let res = quote! {
-                pub mod #mod_name {
-                    use super::root_mod;
-                    use super::#types_mod_ident;
-                    #calls
-                    #event
-                    #storage_mod
-                    #constants_mod
-                }
-            };
-            modules.push(res);
-        }
+                Ok(quote! {
+                    pub mod #mod_name {
+                        use super::root_mod;
+                        use super::#types_mod_ident;
+                        #calls
+                        #event
+                        #storage_mod
+                        #constants_mod
+                    }
+                })
+            })
+            .collect::<Result<Vec<_>, CodegenError>>()?;
 
         let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name = format_ident!("{}", p.name);
@@ -448,31 +453,31 @@ where
         return Err(CodegenError::InvalidType(error_message_type_name.into()))
     };
 
-    let mut result = Vec::new();
+    variant
+        .variants()
+        .iter()
+        .map(|var| {
+            let struct_name = variant_to_struct_name(var.name());
 
-    for var in variant.variants() {
-        let struct_name = variant_to_struct_name(var.name());
+            let fields = CompositeDefFields::from_scale_info_fields(
+                struct_name.as_ref(),
+                var.fields(),
+                &[],
+                type_gen,
+            )?;
 
-        let fields = CompositeDefFields::from_scale_info_fields(
-            struct_name.as_ref(),
-            var.fields(),
-            &[],
-            type_gen,
-        )?;
+            let struct_def = CompositeDef::struct_def(
+                &ty,
+                struct_name.as_ref(),
+                Default::default(),
+                fields,
+                Some(parse_quote!(pub)),
+                type_gen,
+                var.docs(),
+                crate_path,
+            )?;
 
-        let struct_def = CompositeDef::struct_def(
-            &ty,
-            struct_name.as_ref(),
-            Default::default(),
-            fields,
-            Some(parse_quote!(pub)),
-            type_gen,
-            var.docs(),
-            crate_path,
-        )?;
-
-        result.push((var.name.to_string(), struct_def));
-    }
-
-    Ok(result)
+            Ok((var.name.to_string(), struct_def))
+        })
+        .collect()
 }

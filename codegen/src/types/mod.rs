@@ -305,10 +305,8 @@ impl<'a> TypeGenerator<'a> {
     /// Returns the derives to be applied to a generated type.
     pub fn type_derives(&self, ty: &Type<PortableForm>) -> Result<Derives, CodegenError> {
         let joined_path = ty.path().segments().join("::");
-        let ty_path: syn::TypePath = match syn::parse_str(&joined_path) {
-            Ok(ty_path) => ty_path,
-            Err(e) => return Err(CodegenError::InvalidTypePath(joined_path, e)),
-        };
+        let ty_path: syn::TypePath = syn::parse_str(&joined_path)
+            .map_err(|e| CodegenError::InvalidTypePath(joined_path, e))?;
         Ok(self.derives.resolve(&ty_path))
     }
 }

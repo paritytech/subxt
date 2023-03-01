@@ -96,19 +96,22 @@ impl TypeDefGen {
             TypeDef::Variant(variant) => {
                 let type_name = ty.path().ident().expect("variants should have a name");
 
-                let mut variants = Vec::new();
-                for v in variant.variants() {
-                    let fields = CompositeDefFields::from_scale_info_fields(
-                        v.name(),
-                        v.fields(),
-                        type_params.params(),
-                        type_gen,
-                    )?;
-                    type_params.update_unused(fields.field_types());
-                    let variant_def =
-                        CompositeDef::enum_variant_def(v.name(), fields, v.docs());
-                    variants.push((v.index(), variant_def))
-                }
+                let variants = variant
+                    .variants()
+                    .iter()
+                    .map(|v| {
+                        let fields = CompositeDefFields::from_scale_info_fields(
+                            v.name(),
+                            v.fields(),
+                            type_params.params(),
+                            type_gen,
+                        )?;
+                        type_params.update_unused(fields.field_types());
+                        let variant_def =
+                            CompositeDef::enum_variant_def(v.name(), fields, v.docs());
+                        Ok((v.index(), variant_def))
+                    })
+                    .collect::<Result<Vec<_>, CodegenError>>()?;
 
                 TypeDefGenKind::Enum(type_name, variants)
             }
