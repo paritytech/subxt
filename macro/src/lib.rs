@@ -48,7 +48,7 @@
 //!
 //! ### Adding derives for all types
 //!
-//! Add `derive_for_all_types` with a comma seperated list of the derives to apply to *all* types
+//! Add `derive_for_all_types` with a comma separated list of the derives to apply to *all* types
 //!
 //! ```ignore
 //! #[subxt::subxt(
@@ -60,7 +60,7 @@
 //!
 //! ### Adding derives for specific types
 //!
-//! Add `derive_for_type` for each specific type with a comma seperated list of the derives to
+//! Add `derive_for_type` for each specific type with a comma separated list of the derives to
 //! apply for that type only.
 //!
 //! ```ignore
