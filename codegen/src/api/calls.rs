@@ -40,6 +40,7 @@ pub fn generate_calls(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2 {
     // Early return if the pallet has no calls.
     let call = if let Some(ref calls) = pallet.calls {
@@ -54,6 +55,7 @@ pub fn generate_calls(
         |name| name.to_upper_camel_case().into(),
         "Call",
         crate_path,
+        should_gen_docs,
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
@@ -98,7 +100,8 @@ pub fn generate_calls(
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
-            let docs = struct_def.docs.take();
+            let docs = should_gen_docs.then_some(struct_def.docs.take()).flatten();
+
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
@@ -124,9 +127,12 @@ pub fn generate_calls(
 
     let call_ty = type_gen.resolve_type(call.ty.id());
     let docs = call_ty.docs();
+    let docs = should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
 
     quote! {
-        #( #[doc = #docs ] )*
+        #docs
         pub mod calls {
             use super::root_mod;
             use super::#types_mod_ident;

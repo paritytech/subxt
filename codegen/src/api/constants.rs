@@ -48,6 +48,7 @@ pub fn generate_constants(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> TokenStream2 {
     // Early return if the pallet has no constants.
     if pallet.constants.is_empty() {
@@ -64,9 +65,12 @@ pub fn generate_constants(
 
         let return_ty = type_gen.resolve_type_path(constant.ty.id());
         let docs = &constant.docs;
+        let docs = should_gen_docs
+            .then_some(quote! { #( #[doc = #docs ] )* })
+            .unwrap_or_default();
 
         quote! {
-            #( #[doc = #docs ] )*
+            #docs
             pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#crate_path::metadata::DecodeStaticType<#return_ty>> {
                 #crate_path::constants::StaticConstantAddress::new(
                     #pallet_name,
