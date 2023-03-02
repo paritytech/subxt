@@ -201,7 +201,6 @@ impl RuntimeGenerator {
             crate_path,
         );
         let types_mod = type_gen.generate_types_mod();
-        let types_mod_inlined = types_mod.children().map(|(_, x)| x);
 
         quote! {
             #( #item_mod_attrs )*
@@ -213,7 +212,7 @@ impl RuntimeGenerator {
 
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
-                #( #types_mod_inlined ) *
+                #types_mod
             }
 
             // use #mod_ident::#types_mod::
