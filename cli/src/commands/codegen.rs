@@ -40,6 +40,9 @@ pub struct Opts {
     /// Defaults to `::subxt`.
     #[clap(long = "crate")]
     crate_path: Option<String>,
+    /// todo
+    #[clap(long)]
+    runtime_types_only: bool,
 }
 
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
@@ -69,7 +72,13 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         subxt_codegen::utils::fetch_metadata_bytes(&url).await?
     };
 
-    codegen(&bytes, opts.derives, opts.derives_for_type, opts.crate_path)?;
+    codegen(
+        &bytes,
+        opts.derives,
+        opts.derives_for_type,
+        opts.crate_path,
+        opts.runtime_types_only,
+    )?;
     Ok(())
 }
 
@@ -78,6 +87,7 @@ fn codegen(
     raw_derives: Vec<String>,
     derives_for_type: Vec<(String, String)>,
     crate_path: Option<String>,
+    runtime_types_only: bool,
 ) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
@@ -106,6 +116,7 @@ fn codegen(
         derives,
         type_substitutes,
         crate_path,
+        runtime_types_only,
     );
     println!("{runtime_api}");
     Ok(())

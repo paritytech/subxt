@@ -192,14 +192,15 @@ impl RuntimeGenerator {
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
 
-        let types_mod = TypeGenerator::new(
+        let type_gen = TypeGenerator::new(
             &self.metadata.types,
             "runtime_types",
             type_substitutes,
             derives,
             crate_path,
-        )
-        .generate_types_mod();
+        );
+        let types_mod = type_gen.generate_types_mod();
+        let types_mod_inlined = types_mod.children().map(|(_, x)| x);
 
         quote! {
             #( #item_mod_attrs )*
@@ -211,8 +212,10 @@ impl RuntimeGenerator {
 
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
-                #types_mod
+                #( #types_mod_inlined ) *
             }
+
+            // use #mod_ident::#types_mod::
         }
     }
 
