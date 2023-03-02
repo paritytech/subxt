@@ -214,8 +214,6 @@ impl RuntimeGenerator {
                 use super::#mod_ident as root_mod;
                 #types_mod
             }
-
-            // use #mod_ident::#types_mod::
         }
     }
 
