@@ -87,10 +87,10 @@
 //! ### Expose documentation
 //!
 //! In order to expose the documentation from the runtime metadata on the generated
-//! code, users must specify the `expose_documentation` flag:
+//! code, users must specify the `generate_docs` flag:
 //!
 //! ```ignore
-//! #[subxt::subxt(expose_documentation)]
+//! #[subxt::subxt(generate_docs)]
 //! pub mod polkadot {}
 //! ```
 //!
@@ -135,7 +135,7 @@ struct RuntimeMetadataArgs {
     #[darling(default, rename = "crate")]
     crate_path: Option<String>,
     #[darling(default)]
-    expose_documentation: darling::util::Flag,
+    generate_docs: darling::util::Flag,
 }
 
 #[derive(Debug, FromMeta)]
@@ -192,7 +192,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         },
     ));
 
-    let should_gen_docs = args.expose_documentation.is_present();
+    let should_gen_docs = args.generate_docs.is_present();
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
