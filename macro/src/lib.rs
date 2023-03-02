@@ -82,6 +82,8 @@
 //! ```
 //!
 //! By default the path `::subxt` is used.
+//!
+//! todo
 
 #![deny(unused_crate_dependencies)]
 
@@ -171,6 +173,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                args.runtime_types_only,
             )
             .into()
         }
@@ -184,6 +187,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                args.runtime_types_only,
             )
             .into()
         }
@@ -201,7 +205,7 @@ fn build_derives_registry(
     universal_derivation: Option<&Punctuated<Path, Comma>>,
     specific_derivations: Vec<DeriveForType>,
 ) -> DerivesRegistry {
-    let mut derives_registry = DerivesRegistry::new(&crate_path);
+    let mut derives_registry = DerivesRegistry::new(crate_path);
     if let Some(derive_for_all) = universal_derivation {
         derives_registry.extend_for_all(derive_for_all.iter().cloned());
     }
@@ -209,7 +213,7 @@ fn build_derives_registry(
         derives_registry.extend_for_type(
             derives.ty,
             derives.derive.into_iter(),
-            &crate_path,
+            crate_path,
         )
     }
     derives_registry
@@ -219,7 +223,7 @@ fn build_type_substitutes(
     crate_path: &CratePath,
     substitutions: Vec<SubstituteType>,
 ) -> TypeSubstitutes {
-    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    let mut type_substitutes = TypeSubstitutes::new(crate_path);
     type_substitutes.extend(substitutions.into_iter().map(
         |SubstituteType { ty, with }| {
             (

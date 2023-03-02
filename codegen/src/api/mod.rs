@@ -56,6 +56,7 @@ use syn::parse_quote;
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// todo
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -64,6 +65,7 @@ pub fn generate_runtime_api_from_path<P>(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    runtime_types_only: bool,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -82,6 +84,7 @@ where
         derives,
         type_substitutes,
         crate_path,
+        runtime_types_only,
     )
 }
 
@@ -96,6 +99,7 @@ where
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// todo
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -104,6 +108,7 @@ pub fn generate_runtime_api_from_url(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    runtime_types_only: bool,
 ) -> TokenStream2 {
     let bytes = fetch_metadata_bytes_blocking(url)
         .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
@@ -114,6 +119,7 @@ pub fn generate_runtime_api_from_url(
         derives,
         type_substitutes,
         crate_path,
+        runtime_types_only,
     )
 }
 
@@ -126,6 +132,7 @@ pub fn generate_runtime_api_from_url(
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// todo
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(
@@ -134,12 +141,17 @@ pub fn generate_runtime_api_from_bytes(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    runtime_types_only: bool,
 ) -> TokenStream2 {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
+    if runtime_types_only {
+        generator.generate_runtime_types(item_mod, derives, type_substitutes, crate_path)
+    } else {
+        generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
+    }
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -157,6 +169,50 @@ impl RuntimeGenerator {
         match metadata.1 {
             RuntimeMetadata::V14(v14) => Self { metadata: v14 },
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
+        }
+    }
+
+    /// Generate the API for interacting with a Substrate runtime.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_mod` - The module declaration for which the API is implemented.
+    /// * `derives` - Provide custom derives for the generated types.
+    /// todo
+    pub fn generate_runtime_types(
+        &self,
+        item_mod: syn::ItemMod,
+        derives: DerivesRegistry,
+        type_substitutes: TypeSubstitutes,
+        crate_path: CratePath,
+    ) -> TokenStream2 {
+        let item_mod_attrs = item_mod.attrs.clone();
+
+        let item_mod_ir = ir::ItemMod::from(item_mod);
+        let mod_ident = &item_mod_ir.ident;
+        let rust_items = item_mod_ir.rust_items();
+
+        let types_mod = TypeGenerator::new(
+            &self.metadata.types,
+            "runtime_types",
+            type_substitutes,
+            derives,
+            crate_path,
+        )
+        .generate_types_mod();
+
+        quote! {
+            #( #item_mod_attrs )*
+            #[allow(dead_code, unused_imports, non_camel_case_types)]
+            #[allow(clippy::all)]
+            pub mod #mod_ident {
+                // Preserve any Rust items that were previously defined in the adorned module
+                #( #rust_items ) *
+
+                // Make it easy to access the root via `root_mod` at different levels:
+                use super::#mod_ident as root_mod;
+                #types_mod
+            }
         }
     }
 
