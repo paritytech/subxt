@@ -56,7 +56,7 @@ use syn::parse_quote;
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
-/// todo
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -99,7 +99,7 @@ where
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
-/// todo
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -132,7 +132,7 @@ pub fn generate_runtime_api_from_url(
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
-/// todo
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(
@@ -178,7 +178,8 @@ impl RuntimeGenerator {
     ///
     /// * `item_mod` - The module declaration for which the API is implemented.
     /// * `derives` - Provide custom derives for the generated types.
-    /// todo
+    /// * `type_substitutes` - Provide custom type substitutes.
+    /// * `crate_path` - Path to the `subxt` crate.
     pub fn generate_runtime_types(
         &self,
         item_mod: syn::ItemMod,

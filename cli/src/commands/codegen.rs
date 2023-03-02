@@ -40,7 +40,7 @@ pub struct Opts {
     /// Defaults to `::subxt`.
     #[clap(long = "crate")]
     crate_path: Option<String>,
-    /// todo
+    /// Whether to limit code generation to only runtime types.
     #[clap(long)]
     runtime_types_only: bool,
 }

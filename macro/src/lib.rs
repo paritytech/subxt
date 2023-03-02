@@ -83,7 +83,16 @@
 //!
 //! By default the path `::subxt` is used.
 //!
-//! todo
+//! ### Runtime types generation
+//!
+//! In some cases, you may be interested only in the runtime types, like `RuntimeCall` enum. You can
+//! limit code generation to just `runtime_types` module with `runtime_types_only` flag:
+//!
+//! ```ignore
+//! #[subxt::subxt(runtime_types_only)]
+//! // or equivalently
+//! #[subxt::subxt(runtime_types_only = true)]
+//! ```
 
 #![deny(unused_crate_dependencies)]
 
