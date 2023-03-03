@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use proc_macro_error::abort;
+use crate::api::CodegenError;
 use syn::token;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -14,22 +14,22 @@ pub struct ItemMod {
     items: Vec<syn::Item>,
 }
 
-impl From<syn::ItemMod> for ItemMod {
-    fn from(module: syn::ItemMod) -> Self {
+impl TryFrom<syn::ItemMod> for ItemMod {
+    type Error = CodegenError;
+
+    fn try_from(module: syn::ItemMod) -> Result<Self, Self::Error> {
         let (brace, items) = match module.content {
             Some((brace, items)) => (brace, items),
-            None => {
-                abort!(module, "out-of-line subxt modules are not supported",)
-            }
+            None => return Err(CodegenError::InvalidModule(module.ident.span())),
         };
 
-        Self {
+        Ok(Self {
             vis: module.vis,
             mod_token: module.mod_token,
             ident: module.ident,
             brace,
             items,
-        }
+        })
     }
 }
 

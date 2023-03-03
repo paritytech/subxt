@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::api::CodegenError;
+
 use super::{
     CompositeDef,
     CompositeDefFields,
@@ -46,8 +48,8 @@ impl TypeDefGen {
         type_gen: &TypeGenerator,
         crate_path: &CratePath,
         should_gen_docs: bool,
-    ) -> Self {
-        let derives = type_gen.type_derives(ty);
+    ) -> Result<Self, CodegenError> {
+        let derives = type_gen.type_derives(ty)?;
 
         let type_params = ty
             .type_params()
@@ -78,7 +80,7 @@ impl TypeDefGen {
                     composite.fields(),
                     type_params.params(),
                     type_gen,
-                );
+                )?;
                 type_params.update_unused(fields.field_types());
                 let docs = should_gen_docs.then_some(ty.docs()).unwrap_or_default();
                 let composite_def = CompositeDef::struct_def(
@@ -90,11 +92,12 @@ impl TypeDefGen {
                     type_gen,
                     docs,
                     crate_path,
-                );
+                )?;
                 TypeDefGenKind::Struct(composite_def)
             }
             TypeDef::Variant(variant) => {
                 let type_name = ty.path().ident().expect("variants should have a name");
+
                 let variants = variant
                     .variants()
                     .iter()
@@ -104,15 +107,15 @@ impl TypeDefGen {
                             v.fields(),
                             type_params.params(),
                             type_gen,
-                        );
+                        )?;
                         type_params.update_unused(fields.field_types());
                         let docs =
                             should_gen_docs.then_some(v.docs()).unwrap_or_default();
                         let variant_def =
                             CompositeDef::enum_variant_def(v.name(), fields, docs);
-                        (v.index(), variant_def)
+                        Ok((v.index(), variant_def))
                     })
-                    .collect();
+                    .collect::<Result<Vec<_>, CodegenError>>()?;
 
                 TypeDefGenKind::Enum(type_name, variants)
             }
@@ -124,12 +127,12 @@ impl TypeDefGen {
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
-        Self {
+        Ok(Self {
             type_params,
             derives,
             ty_kind,
             ty_docs,
-        }
+        })
     }
 }
 

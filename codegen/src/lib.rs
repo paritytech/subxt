@@ -39,7 +39,7 @@
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
 //! // Include metadata documentation in the Runtime API.
 //! let generate_docs = true;
-//! let runtime_api = generator.generate_runtime(item_mod, derives, substs, CratePath::default(), generate_docs);
+//! let runtime_api = generator.generate_runtime(item_mod, derives, substs, CratePath::default(), generate_docs).unwrap();
 //! println!("{}", runtime_api);
 //! ```
 
@@ -56,6 +56,7 @@ pub use self::{
         generate_runtime_api_from_bytes,
         generate_runtime_api_from_path,
         generate_runtime_api_from_url,
+        CodegenError,
         RuntimeGenerator,
     },
     types::{

@@ -121,6 +121,14 @@ fn codegen(
         crate_path,
         should_gen_docs,
     );
-    println!("{runtime_api}");
+    match runtime_api {
+        Ok(runtime_api) => println!("{runtime_api}"),
+        Err(e) => {
+            // Print the error directly to avoid implementing `Send + Sync` on `CodegenError`.
+            use color_eyre::owo_colors::OwoColorize;
+            println!("{}", e.to_string().red())
+        }
+    };
+
     Ok(())
 }

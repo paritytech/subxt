@@ -12,12 +12,13 @@ use frame_metadata::{
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
 };
 use scale_info::form::PortableForm;
+
+use super::CodegenError;
 
 /// Generate constants from the provided pallet's metadata.
 ///
@@ -49,10 +50,10 @@ pub fn generate_constants(
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
     should_gen_docs: bool,
-) -> TokenStream2 {
+) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
     if pallet.constants.is_empty() {
-        return quote!()
+        return Ok(quote!())
     }
     let constants = &pallet.constants;
 
@@ -60,8 +61,9 @@ pub fn generate_constants(
         let fn_name = format_ident!("{}", constant.name.to_snake_case());
         let pallet_name = &pallet.name;
         let constant_name = &constant.name;
-        let constant_hash = subxt_metadata::get_constant_hash(metadata, pallet_name, constant_name)
-            .unwrap_or_else(|_| abort_call_site!("Metadata information for the constant {}_{} could not be found", pallet_name, constant_name));
+        let Ok(constant_hash) = subxt_metadata::get_constant_hash(metadata, pallet_name, constant_name) else {
+            return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
+        };
 
         let return_ty = type_gen.resolve_type_path(constant.ty.id());
         let docs = &constant.docs;
@@ -69,7 +71,7 @@ pub fn generate_constants(
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
-        quote! {
+        Ok(quote! {
             #docs
             pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#crate_path::metadata::DecodeStaticType<#return_ty>> {
                 #crate_path::constants::StaticConstantAddress::new(
@@ -78,10 +80,10 @@ pub fn generate_constants(
                     [#(#constant_hash,)*]
                 )
             }
-        }
-    });
+        })
+    }).collect::<Result<Vec<_>, _>>()?;
 
-    quote! {
+    Ok(quote! {
         pub mod constants {
             use super::#types_mod_ident;
 
@@ -91,5 +93,5 @@ pub fn generate_constants(
                 #(#constant_fns)*
             }
         }
-    }
+    })
 }

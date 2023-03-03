@@ -66,6 +66,7 @@ fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> S
             crate_path,
             should_gen_docs,
         )
+        .expect("API generation must be valid")
         .to_string()
 }
 
@@ -155,6 +156,7 @@ fn check_root_attrs_preserved() {
             CratePath::default(),
             true,
         )
+        .expect("API generation must be valid")
         .to_string();
 
     let doc_str_loc = generated_code

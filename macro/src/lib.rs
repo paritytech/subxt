@@ -180,7 +180,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut type_substitutes = TypeSubstitutes::new(&crate_path);
-    type_substitutes.extend(args.substitute_type.into_iter().map(
+    if let Err(err) = type_substitutes.extend(args.substitute_type.into_iter().map(
         |SubstituteType { ty, with }| {
             (
                 ty,
@@ -190,7 +190,9 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                     }),
             )
         },
-    ));
+    )) {
+        return err.into_compile_error().into()
+    }
 
     let should_gen_docs = args.generate_docs.is_present();
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
@@ -206,7 +208,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 crate_path,
                 should_gen_docs,
             )
-            .into()
+            .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, Some(url_string)) => {
             let url = Uri::from_str(&url_string).unwrap_or_else(|_| {
@@ -220,7 +222,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 crate_path,
                 should_gen_docs,
             )
-            .into()
+            .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, None) => {
             abort_call_site!("One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided")

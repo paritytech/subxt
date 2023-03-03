@@ -11,6 +11,8 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use scale_info::form::PortableForm;
 
+use super::CodegenError;
+
 /// Generate events from the provided pallet metadata.
 ///
 /// The function creates a new module named `events` under the pallet's module.
@@ -46,12 +48,10 @@ pub fn generate_events(
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
     should_gen_docs: bool,
-) -> TokenStream2 {
+) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.
-    let event = if let Some(ref event) = pallet.event {
-        event
-    } else {
-        return quote!()
+    let Some(event) = &pallet.event else {
+        return Ok(quote!())
     };
 
     let struct_defs = super::generate_structs_from_variants(
@@ -61,7 +61,8 @@ pub fn generate_events(
         "Event",
         crate_path,
         should_gen_docs,
-    );
+    )?;
+
     let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
         let pallet_name = &pallet.name;
         let event_struct = &struct_def.name;
@@ -83,12 +84,12 @@ pub fn generate_events(
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
 
-    quote! {
+    Ok(quote! {
         #docs
         pub type Event = #event_type;
         pub mod events {
             use super::#types_mod_ident;
             #( #event_structs )*
         }
-    }
+    })
 }
