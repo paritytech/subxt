@@ -42,6 +42,7 @@ pub fn generate_storage(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let Some(storage) = &pallet.storage else {
         return Ok(quote!())
@@ -51,7 +52,14 @@ pub fn generate_storage(
         .entries
         .iter()
         .map(|entry| {
-            generate_storage_entry_fns(metadata, type_gen, pallet, entry, crate_path)
+            generate_storage_entry_fns(
+                metadata,
+                type_gen,
+                pallet,
+                entry,
+                crate_path,
+                should_gen_docs,
+            )
         })
         .collect::<Result<Vec<_>, CodegenError>>()?;
 
@@ -74,6 +82,7 @@ fn generate_storage_entry_fns(
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
@@ -178,7 +187,9 @@ fn generate_storage_entry_fns(
     let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id());
 
     let docs = &storage_entry.docs;
-    let docs_token = quote! { #( #[doc = #docs ] )* };
+    let docs = should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
 
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`. We apply
@@ -219,7 +230,7 @@ fn generate_storage_entry_fns(
     let root_entry_fn = if is_map_type {
         let fn_name_root = format_ident!("{}_root", fn_name);
         quote! (
-            #docs_token
+            #docs
             pub fn #fn_name_root(
                 &self,
             ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
@@ -237,7 +248,7 @@ fn generate_storage_entry_fns(
 
     Ok(quote! {
         // Access a specific value from a storage entry
-        #docs_token
+        #docs
         pub fn #fn_name(
             &self,
             #( #key_args, )*

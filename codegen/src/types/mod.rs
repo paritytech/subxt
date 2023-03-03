@@ -66,6 +66,8 @@ pub struct TypeGenerator<'a> {
     derives: DerivesRegistry,
     /// The `subxt` crate access path in the generated code.
     crate_path: CratePath,
+    /// True if codegen should generate the documentation for the API.
+    should_gen_docs: bool,
 }
 
 impl<'a> TypeGenerator<'a> {
@@ -76,6 +78,7 @@ impl<'a> TypeGenerator<'a> {
         type_substitutes: TypeSubstitutes,
         derives: DerivesRegistry,
         crate_path: CratePath,
+        should_gen_docs: bool,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
@@ -84,6 +87,7 @@ impl<'a> TypeGenerator<'a> {
             type_substitutes,
             derives,
             crate_path,
+            should_gen_docs,
         }
     }
 
@@ -119,7 +123,12 @@ impl<'a> TypeGenerator<'a> {
 
             innermost_module.types.insert(
                 path.clone(),
-                TypeDefGen::from_type(ty.ty(), self, &self.crate_path)?,
+                TypeDefGen::from_type(
+                    ty.ty(),
+                    self,
+                    &self.crate_path,
+                    self.should_gen_docs,
+                )?,
             );
         }
 

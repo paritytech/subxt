@@ -120,6 +120,7 @@ impl CodegenError {
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -128,6 +129,7 @@ pub fn generate_runtime_api_from_path<P>(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError>
 where
     P: AsRef<path::Path>,
@@ -144,6 +146,7 @@ where
         derives,
         type_substitutes,
         crate_path,
+        should_gen_docs,
     )
 }
 
@@ -158,6 +161,7 @@ where
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -166,6 +170,7 @@ pub fn generate_runtime_api_from_url(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let bytes = fetch_metadata_bytes_blocking(url)?;
 
@@ -175,6 +180,7 @@ pub fn generate_runtime_api_from_url(
         derives,
         type_substitutes,
         crate_path,
+        should_gen_docs,
     )
 }
 
@@ -187,6 +193,7 @@ pub fn generate_runtime_api_from_url(
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(
@@ -195,11 +202,18 @@ pub fn generate_runtime_api_from_bytes(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
+    generator.generate_runtime(
+        item_mod,
+        derives,
+        type_substitutes,
+        crate_path,
+        should_gen_docs,
+    )
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -232,6 +246,7 @@ impl RuntimeGenerator {
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
         crate_path: CratePath,
+        should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
@@ -243,6 +258,7 @@ impl RuntimeGenerator {
             type_substitutes,
             derives.clone(),
             crate_path.clone(),
+            should_gen_docs,
         );
         let types_mod = type_gen.generate_types_mod()?;
         let types_mod_ident = types_mod.ident();
@@ -280,6 +296,7 @@ impl RuntimeGenerator {
                     pallet,
                     types_mod_ident,
                     &crate_path,
+                    should_gen_docs,
                 )?;
 
                 let event = events::generate_events(
@@ -287,6 +304,7 @@ impl RuntimeGenerator {
                     pallet,
                     types_mod_ident,
                     &crate_path,
+                    should_gen_docs,
                 )?;
 
                 let storage_mod = storage::generate_storage(
@@ -295,6 +313,7 @@ impl RuntimeGenerator {
                     pallet,
                     types_mod_ident,
                     &crate_path,
+                    should_gen_docs,
                 )?;
 
                 let constants_mod = constants::generate_constants(
@@ -303,6 +322,7 @@ impl RuntimeGenerator {
                     pallet,
                     types_mod_ident,
                     &crate_path,
+                    should_gen_docs,
                 )?;
 
                 Ok(quote! {
@@ -443,6 +463,7 @@ pub fn generate_structs_from_variants<F>(
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Result<Vec<(String, CompositeDef)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
@@ -466,6 +487,7 @@ where
                 type_gen,
             )?;
 
+            let docs = should_gen_docs.then_some(var.docs()).unwrap_or_default();
             let struct_def = CompositeDef::struct_def(
                 &ty,
                 struct_name.as_ref(),
@@ -473,7 +495,7 @@ where
                 fields,
                 Some(parse_quote!(pub)),
                 type_gen,
-                var.docs(),
+                docs,
                 crate_path,
             )?;
 
