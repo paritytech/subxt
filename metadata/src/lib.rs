@@ -17,6 +17,8 @@ use scale_info::{
 };
 use std::collections::HashSet;
 
+pub mod stripped;
+
 /// Internal byte representation for various metadata types utilized for
 /// generating deterministic hashes between different rust versions.
 #[repr(u8)]
