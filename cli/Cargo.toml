@@ -28,7 +28,7 @@ color-eyre = "0.6.1"
 # serialize the metadata
 serde = { version = "1.0.130", features = ["derive"] }
 # serialize as json
-serde_json = "1.0.93"
+serde_json = "1.0.94"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
