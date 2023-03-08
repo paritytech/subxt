@@ -13,4 +13,8 @@
 #[allow(clippy::all)]
 mod polkadot;
 
+#[rustfmt::skip]
+#[allow(clippy::all)]
+mod balances;
+
 mod codegen_documentation;

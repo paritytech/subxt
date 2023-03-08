@@ -24,7 +24,8 @@ use subxt::{
     OnlineClient,
 };
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/Balances.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
@@ -40,7 +41,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a transaction to submit:
     let tx = polkadot::tx()
         .balances()
-        .transfer(dest, 123_456_789_012_345);
+        .transfer(dest, 123_456_789_012_345)
+        .unvalidated();
 
     // Configure the transaction tip and era:
     let tx_params = Params::new()

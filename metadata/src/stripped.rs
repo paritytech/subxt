@@ -165,6 +165,16 @@ pub fn keep_pallet<T: AsRef<str>>(
 
     // Collect type ids from the pallet.
     let mut type_ids = collect_pallet_types(pallet);
+    for ty in metadata.types.types() {
+        let Some(ident) = ty.ty().path().ident() else {
+            continue
+        };
+        // Collect custom type IDs.
+        if ident == "DispatchError" {
+            type_ids.insert(ty.id());
+        }
+    }
+    // sp_runtime:: DispatchError
 
     // Collect extrisic type IDs.
     type_ids.insert(metadata.extrinsic.ty.id());

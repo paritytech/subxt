@@ -9,6 +9,7 @@ use jsonrpsee::client_transport::ws::Uri;
 use scale::Decode;
 use std::io::{
     self,
+    Read,
     Write,
 };
 use subxt_codegen::utils::fetch_metadata_hex;
@@ -35,6 +36,15 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     match opts.format.as_str() {
         "json" => {
             let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
+
+            // let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+            // let mut file = std::fs::File::open(
+            //     "/home/lexnv/workspace/subxt/artifacts/Balances.scale",
+            // )
+            // .unwrap();
+            // let mut bytes = Vec::new();
+            // file.read_to_end(&mut bytes).unwrap();
+
             let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
             let json = serde_json::to_string_pretty(&metadata)?;
             println!("{json}");
