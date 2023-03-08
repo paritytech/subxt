@@ -10,7 +10,7 @@ publish = false
 
 [dev-dependencies]
 trybuild = "1.0.79"
-scale-info = { version = "2.3.0", features = ["bit-vec"] }
-frame-metadata = "15.0.0"
+scale-info = { path = "/home/lexnv/workspace/scale-info", features = ["bit-vec"] }
+frame-metadata = { version = "15.0.0", path = "/home/lexnv/workspace/frame-metadata/frame-metadata" }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 subxt = { path = "../../subxt" }

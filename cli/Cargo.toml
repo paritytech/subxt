@@ -32,7 +32,7 @@ serde_json = "1.0.94"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
-frame-metadata = { version = "15.0.0", features = ["v14", "std"] }
+frame-metadata = { version = "15.0.0", path = "/home/lexnv/workspace/frame-metadata/frame-metadata", features = ["v14", "std"] }
 # decode bytes into the metadata types
 scale = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 # generate the item mod for codegen

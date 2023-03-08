@@ -23,6 +23,7 @@ use std::{
     any::TypeId,
     collections::{
         BTreeSet,
+        HashMap,
         HashSet,
     },
 };
@@ -40,14 +41,14 @@ pub enum StripError {
 fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>) -> BTreeSet<u32> {
     let mut type_ids = BTreeSet::new();
 
-    println!("Collect");
-    println!("Pallet is : {:?}", pallet);
+    // println!("Collect");
+    // println!("Pallet is : {:?}", pallet);
 
     if let Some(storage) = &pallet.storage {
-        println!("storage : {:?}", storage);
+        // println!("storage : {:?}", storage);
 
         for entry in storage.entries.iter() {
-            println!("Entry : {:?}", entry);
+            // println!("Entry : {:?}", entry);
 
             match entry.ty {
                 StorageEntryType::Plain(ty) => {
@@ -165,30 +166,105 @@ pub fn keep_pallet<T: AsRef<str>>(
     // Collect type ids from the pallet.
     let mut type_ids = collect_pallet_types(pallet);
 
-    println!("TypeIDs {:#?}", type_ids);
-
-    // println!("TypeIDs {:#?}", type_ids);
+    // Collect extrisic type IDs.
+    type_ids.insert(metadata.extrinsic.ty.id());
+    for signed in &metadata.extrinsic.signed_extensions {
+        type_ids.insert(signed.ty.id());
+        type_ids.insert(signed.additional_signed.id());
+    }
+    // Collect runtime type ID.
+    type_ids.insert(metadata.ty.id());
 
     // Extend the type IDs with their dependencies
     let registry = &metadata.types;
-
     let mut result = BTreeSet::new();
     let mut visited = HashSet::new();
     for id in type_ids.iter() {
-        extend_type_id(registry, *id, &mut result, &mut visited)?;
+        extend_type_id(&registry, *id, &mut result, &mut visited)?;
     }
 
     type_ids.extend(result.iter());
 
-    println!("TypeIDs Extended {:#?}", type_ids);
+    println!("TypeIDs {:#?}", type_ids);
+
+    let mut registry = registry.clone();
+    println!("old registry len: {}", registry.types().len());
+    let res = registry.retain(type_ids.clone()).unwrap();
+    println!("new registry len: {}", registry.types().len());
+
+    println!("Res is {:?}", res);
+
+    // Modify the metadata
+    let mut new_metadata = metadata.clone();
+    new_metadata.types = registry;
+    let mut pallet_metadata = pallet.clone();
+    if let Some(storage) = &mut pallet_metadata.storage {
+        for entry in storage.entries.iter_mut() {
+            match &mut entry.ty {
+                StorageEntryType::Plain(plain) => {
+                    let new_id = res.get(&plain.id()).expect("Expected ID to exist");
+                    *plain = (*new_id).into();
+                }
+                StorageEntryType::Map {
+                    hashers,
+                    key,
+                    value,
+                } => {
+                    let new_id = res.get(&key.id()).expect("Expected ID to exist");
+                    *key = (*new_id).into();
+
+                    let new_id = res.get(&value.id()).expect("Expected ID to exist");
+                    *value = (*new_id).into();
+                }
+            }
+        }
+    }
+
+    if let Some(calls) = &mut pallet_metadata.calls {
+        let new_id = res.get(&calls.ty.id()).expect("Expected ID to exist");
+        calls.ty = (*new_id).into();
+    }
+
+    if let Some(event) = &mut pallet_metadata.event {
+        let new_id = res.get(&event.ty.id()).expect("Expected ID to exist");
+        event.ty = (*new_id).into();
+    }
+
+    for constant in pallet_metadata.constants.iter_mut() {
+        let new_id = res.get(&constant.ty.id()).expect("Expected ID to exist");
+        constant.ty = (*new_id).into();
+    }
+
+    if let Some(error) = &mut pallet_metadata.error {
+        let new_id = res.get(&error.ty.id()).expect("Expected ID to exist");
+        error.ty = (*new_id).into();
+    }
+
+    new_metadata.pallets = vec![pallet_metadata];
+
+    let new_id = res
+        .get(&new_metadata.extrinsic.ty.id())
+        .expect("Expected ID to exist");
+    new_metadata.extrinsic.ty = (*new_id).into();
+
+    for ext in new_metadata.extrinsic.signed_extensions.iter_mut() {
+        let new_id = res.get(&ext.ty.id()).expect("Expected ID to exist");
+        ext.ty = (*new_id).into();
+
+        let new_id = res
+            .get(&ext.additional_signed.id())
+            .expect("Expected ID to exist");
+        ext.additional_signed = (*new_id).into();
+    }
+
     println!(
-        "Pallet [{}]\n   stripped {} vs full {}\n",
-        pallet_name.as_ref(),
-        type_ids.len(),
-        metadata.types.types().len()
+        "Stripped {number:>3} vs full {full} for pallet [{pallet}]",
+        number = type_ids.len(),
+        full = metadata.types.types().len(),
+        pallet = pallet_name.as_ref(),
     );
 
-    Ok(metadata)
+    Ok(new_metadata)
 }
 
 #[cfg(test)]
@@ -203,6 +279,7 @@ mod tests {
     use scale_info::meta_type;
     use std::{
         fs,
+        io::Write,
         path::Path,
     };
 
@@ -221,12 +298,17 @@ mod tests {
     #[test]
     fn strip_pallet() {
         let metadata = load_metadata();
+        use codec::Encode;
 
-        keep_pallet(metadata, "AuthorityDiscovery").unwrap();
+        for pallet in metadata.pallets.iter() {
+            let metadata = load_metadata();
+            let metadata = keep_pallet(metadata, &pallet.name).unwrap();
+            let meta: RuntimeMetadataPrefixed = metadata.into();
+            let bytes: Vec<u8> = meta.encode();
 
-        // for pallet in metadata.pallets.iter() {
-        //     let metadata = load_metadata();
-        //     keep_pallet(metadata, &pallet.name).unwrap();
-        // }
+            let mut file =
+                fs::File::create(format!("../artifacts/{}.scale", pallet.name)).unwrap();
+            file.write_all(bytes.as_slice()).unwrap();
+        }
     }
 }

@@ -15,12 +15,12 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
 darling = "0.14.3"
-frame-metadata = "15.0.0"
+frame-metadata = { version = "15.0.0", path = "/home/lexnv/workspace/frame-metadata/frame-metadata" }
 heck = "0.4.1"
 proc-macro2 = "1.0.51"
 quote = "1.0.8"
 syn = "1.0.109"
-scale-info = "2.0.0"
+scale-info = { path = "/home/lexnv/workspace/scale-info" }
 subxt-metadata = { version = "0.27.1", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
@@ -29,5 +29,5 @@ thiserror = "1.0.39"
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
-scale-info = { version = "2.0.0", features = ["bit-vec"] }
+scale-info = { path = "/home/lexnv/workspace/scale-info", features = ["bit-vec"] }
 pretty_assertions = "1.0.0"

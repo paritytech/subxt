@@ -300,7 +300,7 @@ checksum = "a071c348a5ef6da1d3a87166b408170b46002382b1dda83992b5c2208cefb370"
 dependencies = [
  "log",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
 ]
 
@@ -1002,13 +1002,22 @@ dependencies = [
 [[package]]
 name = "frame-metadata"
 version = "15.0.0"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info 2.3.1",
+ "serde",
+]
+
+[[package]]
+name = "frame-metadata"
+version = "15.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df6bb8542ef006ef0de09a5c4420787d79823c0ed7924225822362fd2bf2ff2d"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
- "scale-info",
- "serde",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1565,12 +1574,12 @@ name = "integration-tests"
 version = "0.27.1"
 dependencies = [
  "assert_matches",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "futures",
  "hex",
  "parity-scale-codec",
  "regex",
- "scale-info",
+ "scale-info 2.3.1",
  "sp-core",
  "sp-keyring",
  "sp-runtime",
@@ -2269,7 +2278,7 @@ dependencies = [
  "fixed-hash",
  "impl-codec",
  "impl-serde",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "uint",
 ]
 
@@ -2592,24 +2601,32 @@ dependencies = [
 [[package]]
 name = "scale-bits"
 version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8dd7aca73785181cc41f0bbe017263e682b585ca660540ba569133901d013ecf"
 dependencies = [
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1",
  "serde",
 ]
 
 [[package]]
 name = "scale-decode"
 version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d823d4be477fc33321f93d08fb6c2698273d044f01362dc27573a750deb7c233"
 dependencies = [
  "parity-scale-codec",
  "scale-bits",
- "scale-info",
+ "scale-info 2.3.1",
  "thiserror",
+]
+
+[[package]]
+name = "scale-info"
+version = "2.3.1"
+dependencies = [
+ "bitvec",
+ "cfg-if",
+ "derive_more",
+ "parity-scale-codec",
+ "scale-info-derive 2.3.1",
+ "serde",
 ]
 
 [[package]]
@@ -2622,8 +2639,17 @@ dependencies = [
  "cfg-if",
  "derive_more",
  "parity-scale-codec",
- "scale-info-derive",
- "serde",
+ "scale-info-derive 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "scale-info-derive"
+version = "2.3.1"
+dependencies = [
+ "proc-macro-crate",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2641,15 +2667,13 @@ dependencies = [
 [[package]]
 name = "scale-value"
 version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16a5e7810815bd295da73e4216d1dfbced3c7c7c7054d70fa5f6e4c58123fff4"
 dependencies = [
  "either",
- "frame-metadata",
+ "frame-metadata 15.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
- "scale-info",
+ "scale-info 2.3.1",
  "serde",
  "thiserror",
  "yap",
@@ -2923,7 +2947,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65e5d5ec374fc23f4e1b87219be18e01080d8a21a2dee3b49df8befeddbf5780"
 dependencies = [
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "sp-core",
  "sp-io",
@@ -2939,7 +2963,7 @@ dependencies = [
  "integer-sqrt",
  "num-traits",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "sp-std",
  "static_assertions",
@@ -2971,7 +2995,7 @@ dependencies = [
  "primitive-types",
  "rand 0.8.5",
  "regex",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "schnorrkel",
  "secp256k1",
  "secrecy",
@@ -3118,7 +3142,7 @@ dependencies = [
  "parity-scale-codec",
  "paste",
  "rand 0.8.5",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "sp-application-crypto",
  "sp-arithmetic",
@@ -3228,7 +3252,7 @@ dependencies = [
  "nohash-hasher",
  "parity-scale-codec",
  "parking_lot",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "schnellru",
  "sp-core",
  "sp-std",
@@ -3247,7 +3271,7 @@ dependencies = [
  "impl-serde",
  "parity-scale-codec",
  "parity-wasm",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "sp-core-hashing-proc-macro",
  "sp-runtime",
@@ -3290,7 +3314,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39c4a96e53621ae435981fb6037d8b0be7cf32fae627780094a94ef89f194715"
 dependencies = [
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "smallvec",
  "sp-arithmetic",
@@ -3387,7 +3411,7 @@ dependencies = [
  "bitvec",
  "blake2",
  "derivative",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "futures",
  "getrandom 0.2.8",
  "hex",
@@ -3398,7 +3422,7 @@ dependencies = [
  "primitive-types",
  "scale-bits",
  "scale-decode",
- "scale-info",
+ "scale-info 2.3.1",
  "scale-value",
  "serde",
  "serde_json",
@@ -3420,7 +3444,7 @@ version = "0.27.1"
 dependencies = [
  "clap 4.1.8",
  "color-eyre",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -3438,7 +3462,7 @@ version = "0.27.1"
 dependencies = [
  "bitvec",
  "darling",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "heck",
  "hex",
  "jsonrpsee",
@@ -3446,7 +3470,7 @@ dependencies = [
  "pretty_assertions",
  "proc-macro2",
  "quote",
- "scale-info",
+ "scale-info 2.3.1",
  "subxt-metadata",
  "syn",
  "thiserror",
@@ -3484,9 +3508,9 @@ version = "0.27.1"
 dependencies = [
  "bitvec",
  "criterion",
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1",
  "sp-core-hashing",
 ]
 
@@ -3869,9 +3893,9 @@ checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 name = "ui-tests"
 version = "0.27.1"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 15.0.0",
  "parity-scale-codec",
- "scale-info",
+ "scale-info 2.3.1",
  "subxt",
  "trybuild",
 ]
