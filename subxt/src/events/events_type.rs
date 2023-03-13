@@ -429,7 +429,7 @@ impl EventDetails {
 /// little help via codegen.
 #[doc(hidden)]
 pub trait RootEvent: Sized {
-    /// Given details of the pallet event we wawnt to decode, and the name of the pallet, try to hand
+    /// Given details of the pallet event we want to decode, and the name of the pallet, try to hand
     /// back a "root event".
     fn root_event(
         pallet_bytes: &[u8],

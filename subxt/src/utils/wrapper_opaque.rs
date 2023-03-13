@@ -100,7 +100,10 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
 
         // Do a basic check that the target shape lines up.
         let scale_info::TypeDef::Composite(_) = ty.type_def() else {
-            return Err(Error::new(ErrorKind::WrongShape { actual: Kind::Struct, expected: type_id }))
+            return Err(Error::new(ErrorKind::WrongShape {
+                actual: Kind::Struct,
+                expected: type_id,
+            }))
         };
 
         // Check that the name also lines up.
@@ -111,7 +114,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
             }))
         }
 
-        // Just blat the bytes out..
+        // Just blat the bytes out.
         self.data.encode_to(out);
         Ok(())
     }
@@ -150,7 +153,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
             .expect("length checked")?;
         let field = value.next().expect("length checked")?;
 
-        // Sanity check that the compact length we decoded lines up with the number of bytes encoded inthe next field.
+        // Sanity check that the compact length we decoded lines up with the number of bytes encoded in the next field.
         if field.bytes().len() != len as usize {
             return Err(Error::new(ErrorKind::Custom("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len".into())))
         }
