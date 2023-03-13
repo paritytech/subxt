@@ -14,7 +14,7 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
-darling = "0.14.3"
+darling = "0.14.4"
 frame-metadata = "15.0.0"
 heck = "0.4.1"
 proc-macro2 = "1.0.51"
