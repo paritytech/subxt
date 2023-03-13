@@ -19,7 +19,7 @@ default = ["subxt/integration-tests"]
 assert_matches = "1.5.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 frame-metadata = "15.0.0"
-futures = "0.3.26"
+futures = "0.3.27"
 hex = "0.4.3"
 regex = "1.5.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }

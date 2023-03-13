@@ -40,7 +40,7 @@ scale-info = "2.0.0"
 scale-value = "0.6.0"
 scale-bits = "0.3"
 scale-decode = "0.4.0"
-futures = { version = "0.3.26", default-features = false, features = ["std"] }
+futures = { version = "0.3.27", default-features = false, features = ["std"] }
 hex = "0.4.3"
 jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
 serde = { version = "1.0.155", features = ["derive"] }
