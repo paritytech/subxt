@@ -39,7 +39,7 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 scale-info = "2.0.0"
 scale-value = { git = "https://github.com/paritytech/scale-value", branch = "jsdw-decode-as-type" }
 scale-bits = "0.3"
-scale-decode = { git = "https://github.com/paritytech/scale-decode", branch = "jsdw-decode-as-type" }
+scale-decode = "0.5.0"
 scale-encode = "0.1.0"
 futures = { version = "0.3.26", default-features = false, features = ["std"] }
 hex = "0.4.3"
