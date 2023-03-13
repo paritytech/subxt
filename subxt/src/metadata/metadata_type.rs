@@ -84,7 +84,7 @@ struct MetadataInner {
     // Errors are hashed by pallet and error index (decode oriented)
     errors: HashMap<(u8, u8), ErrorMetadata>,
 
-    // Other apllet details are hashed by pallet name.
+    // Other pallet details are hashed by pallet name.
     pallets: HashMap<String, PalletMetadata>,
 
     // Type of the DispatchError type, which is what comes back if
