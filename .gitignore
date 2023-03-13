@@ -2,5 +2,3 @@
 **/*.rs.bk
 **/.DS_Store
 cargo-timing*
-artifacts/**
-!artifacts/polkadot_metadata.scale
