@@ -3447,12 +3447,12 @@ dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
  "pretty_assertions",
- "proc-macro-error",
  "proc-macro2",
  "quote",
  "scale-info",
  "subxt-metadata",
  "syn",
+ "thiserror",
  "tokio",
 ]
 

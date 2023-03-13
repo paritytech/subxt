@@ -22,6 +22,7 @@ use crate::{
     },
     utils::{
         fetch_metadata_bytes_blocking,
+        FetchMetadataError,
         Uri,
     },
     CratePath,
@@ -33,8 +34,10 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
 };
 use heck::ToSnakeCase as _;
-use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::abort_call_site;
+use proc_macro2::{
+    Span,
+    TokenStream as TokenStream2,
+};
 use quote::{
     format_ident,
     quote,
@@ -47,6 +50,67 @@ use std::{
 };
 use syn::parse_quote;
 
+/// Error returned when the Codegen cannot generate the runtime API.
+#[derive(Debug, thiserror::Error)]
+pub enum CodegenError {
+    /// Cannot fetch the metadata bytes.
+    #[error("Failed to fetch metadata, make sure that you're pointing at a node which is providing V14 metadata: {0}")]
+    Fetch(#[from] FetchMetadataError),
+    /// Failed IO for the metadata file.
+    #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata V14: {1}")]
+    Io(String, std::io::Error),
+    /// Cannot decode the metadata bytes.
+    #[error("Could not decode metadata, only V14 metadata is supported: {0}")]
+    Decode(#[from] codec::Error),
+    /// Out of line modules are not supported.
+    #[error("Out-of-line subxt modules are not supported, make sure you are providing a body to your module: pub mod polkadot {{ ... }}")]
+    InvalidModule(Span),
+    /// Expected named or unnamed fields.
+    #[error("Fields should either be all named or all unnamed, make sure you are providing a valid metadata V14: {0}")]
+    InvalidFields(String),
+    /// Substitute types must have a valid path.
+    #[error("Substitute types must have a valid path")]
+    EmptySubstitutePath(Span),
+    /// Invalid type path.
+    #[error("Invalid type path {0}: {1}")]
+    InvalidTypePath(String, syn::Error),
+    /// Metadata for constant could not be found.
+    #[error("Metadata for constant entry {0}_{1} could not be found. Make sure you are providing a valid metadata V14")]
+    MissingConstantMetadata(String, String),
+    /// Metadata for storage could not be found.
+    #[error("Metadata for storage entry {0}_{1} could not be found. Make sure you are providing a valid metadata V14")]
+    MissingStorageMetadata(String, String),
+    /// StorageNMap should have N hashers.
+    #[error("Number of hashers ({0}) does not equal 1 for StorageMap, or match number of fields ({1}) for StorageNMap. Make sure you are providing a valid metadata V14")]
+    MismatchHashers(usize, usize),
+    /// Expected to find one hasher for StorageMap.
+    #[error("No hasher found for single key. Make sure you are providing a valid metadata V14")]
+    MissingHasher,
+    /// Metadata for call could not be found.
+    #[error("Metadata for call entry {0}_{1} could not be found. Make sure you are providing a valid metadata V14")]
+    MissingCallMetadata(String, String),
+    /// Call variant must have all named fields.
+    #[error("Call variant for type {0} must have all named fields. Make sure you are providing a valid metadata V14")]
+    InvalidCallVariant(u32),
+    /// Type should be an variant/enum.
+    #[error("{0} type should be an variant/enum type. Make sure you are providing a valid metadata V14")]
+    InvalidType(String),
+}
+
+impl CodegenError {
+    /// Render the error as an invocation of syn::compile_error!.
+    pub fn into_compile_error(self) -> TokenStream2 {
+        let msg = self.to_string();
+        let span = match self {
+            Self::InvalidModule(span) => span,
+            Self::EmptySubstitutePath(span) => span,
+            Self::InvalidTypePath(_, err) => err.span(),
+            _ => proc_macro2::Span::call_site(),
+        };
+        syn::Error::new(span, msg).into_compile_error()
+    }
+}
+
 /// Generates the API for interacting with a Substrate runtime.
 ///
 /// # Arguments
@@ -56,6 +120,7 @@ use syn::parse_quote;
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -64,17 +129,16 @@ pub fn generate_runtime_api_from_path<P>(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2
+    should_gen_docs: bool,
+) -> Result<TokenStream2, CodegenError>
 where
     P: AsRef<path::Path>,
 {
-    let mut file = fs::File::open(&path).unwrap_or_else(|e| {
-        abort_call_site!("Failed to open {}: {}", path.as_ref().to_string_lossy(), e)
-    });
+    let to_err = |err| CodegenError::Io(path.as_ref().to_string_lossy().into(), err);
 
+    let mut file = fs::File::open(&path).map_err(to_err)?;
     let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes)
-        .unwrap_or_else(|e| abort_call_site!("Failed to read metadata file: {}", e));
+    file.read_to_end(&mut bytes).map_err(to_err)?;
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -82,6 +146,7 @@ where
         derives,
         type_substitutes,
         crate_path,
+        should_gen_docs,
     )
 }
 
@@ -96,6 +161,7 @@ where
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -104,9 +170,9 @@ pub fn generate_runtime_api_from_url(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2 {
-    let bytes = fetch_metadata_bytes_blocking(url)
-        .unwrap_or_else(|e| abort_call_site!("Failed to obtain metadata: {}", e));
+    should_gen_docs: bool,
+) -> Result<TokenStream2, CodegenError> {
+    let bytes = fetch_metadata_bytes_blocking(url)?;
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -114,6 +180,7 @@ pub fn generate_runtime_api_from_url(
         derives,
         type_substitutes,
         crate_path,
+        should_gen_docs,
     )
 }
 
@@ -126,6 +193,7 @@ pub fn generate_runtime_api_from_url(
 /// * `derives` - Provide custom derives for the generated types.
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
+/// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(
@@ -134,12 +202,18 @@ pub fn generate_runtime_api_from_bytes(
     derives: DerivesRegistry,
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
-) -> TokenStream2 {
-    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
-        .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
+    should_gen_docs: bool,
+) -> Result<TokenStream2, CodegenError> {
+    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)
+    generator.generate_runtime(
+        item_mod,
+        derives,
+        type_substitutes,
+        crate_path,
+        should_gen_docs,
+    )
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -172,9 +246,10 @@ impl RuntimeGenerator {
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
         crate_path: CratePath,
-    ) -> TokenStream2 {
+        should_gen_docs: bool,
+    ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
-        let item_mod_ir = ir::ItemMod::from(item_mod);
+        let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
         let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
@@ -183,8 +258,9 @@ impl RuntimeGenerator {
             type_substitutes,
             derives.clone(),
             crate_path.clone(),
+            should_gen_docs,
         );
-        let types_mod = type_gen.generate_types_mod();
+        let types_mod = type_gen.generate_types_mod()?;
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
             .metadata
@@ -211,45 +287,56 @@ impl RuntimeGenerator {
 
         let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
-        let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let calls = calls::generate_calls(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            );
+        let modules = pallets_with_mod_names
+            .iter()
+            .map(|(pallet, mod_name)| {
+                let calls = calls::generate_calls(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                    should_gen_docs,
+                )?;
 
-            let event =
-                events::generate_events(&type_gen, pallet, types_mod_ident, &crate_path);
+                let event = events::generate_events(
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                    should_gen_docs,
+                )?;
 
-            let storage_mod = storage::generate_storage(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            );
+                let storage_mod = storage::generate_storage(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                    should_gen_docs,
+                )?;
 
-            let constants_mod = constants::generate_constants(
-                &self.metadata,
-                &type_gen,
-                pallet,
-                types_mod_ident,
-                &crate_path,
-            );
+                let constants_mod = constants::generate_constants(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    types_mod_ident,
+                    &crate_path,
+                    should_gen_docs,
+                )?;
 
-            quote! {
-                pub mod #mod_name {
-                    use super::root_mod;
-                    use super::#types_mod_ident;
-                    #calls
-                    #event
-                    #storage_mod
-                    #constants_mod
-                }
-            }
-        });
+                Ok(quote! {
+                    pub mod #mod_name {
+                        use super::root_mod;
+                        use super::#types_mod_ident;
+                        #calls
+                        #event
+                        #storage_mod
+                        #constants_mod
+                    }
+                })
+            })
+            .collect::<Result<Vec<_>, CodegenError>>()?;
 
         let outer_event_variants_and_match_arms = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name_str = &p.name;
@@ -323,7 +410,7 @@ impl RuntimeGenerator {
 
         let rust_items = item_mod_ir.rust_items();
 
-        quote! {
+        Ok(quote! {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
@@ -393,7 +480,7 @@ impl RuntimeGenerator {
                     }
                 }
             }
-        }
+        })
     }
 }
 
@@ -404,40 +491,43 @@ pub fn generate_structs_from_variants<F>(
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &CratePath,
-) -> Vec<(String, CompositeDef)>
+    should_gen_docs: bool,
+) -> Result<Vec<(String, CompositeDef)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
     let ty = type_gen.resolve_type(type_id);
-    if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
-        variant
-            .variants()
-            .iter()
-            .map(|var| {
-                let struct_name = variant_to_struct_name(var.name());
-                let fields = CompositeDefFields::from_scale_info_fields(
-                    struct_name.as_ref(),
-                    var.fields(),
-                    &[],
-                    type_gen,
-                );
-                let struct_def = CompositeDef::struct_def(
-                    &ty,
-                    struct_name.as_ref(),
-                    Default::default(),
-                    fields,
-                    Some(parse_quote!(pub)),
-                    type_gen,
-                    var.docs(),
-                    crate_path,
-                );
-                (var.name().to_string(), struct_def)
-            })
-            .collect()
-    } else {
-        abort_call_site!(
-            "{} type should be an variant/enum type",
-            error_message_type_name
-        )
-    }
+
+    let scale_info::TypeDef::Variant(variant) = ty.type_def() else {
+        return Err(CodegenError::InvalidType(error_message_type_name.into()))
+    };
+
+    variant
+        .variants()
+        .iter()
+        .map(|var| {
+            let struct_name = variant_to_struct_name(var.name());
+
+            let fields = CompositeDefFields::from_scale_info_fields(
+                struct_name.as_ref(),
+                var.fields(),
+                &[],
+                type_gen,
+            )?;
+
+            let docs = should_gen_docs.then_some(var.docs()).unwrap_or_default();
+            let struct_def = CompositeDef::struct_def(
+                &ty,
+                struct_name.as_ref(),
+                Default::default(),
+                fields,
+                Some(parse_quote!(pub)),
+                type_gen,
+                docs,
+                crate_path,
+            )?;
+
+            Ok((var.name.to_string(), struct_def))
+        })
+        .collect()
 }

@@ -40,6 +40,11 @@ pub struct Opts {
     /// Defaults to `::subxt`.
     #[clap(long = "crate")]
     crate_path: Option<String>,
+    /// Do not generate documentation for the runtime API code.
+    ///
+    /// Defaults to `false` (documentation is generated).
+    #[clap(long, action)]
+    no_docs: bool,
 }
 
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
@@ -69,7 +74,13 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         subxt_codegen::utils::fetch_metadata_bytes(&url).await?
     };
 
-    codegen(&bytes, opts.derives, opts.derives_for_type, opts.crate_path)?;
+    codegen(
+        &bytes,
+        opts.derives,
+        opts.derives_for_type,
+        opts.crate_path,
+        opts.no_docs,
+    )?;
     Ok(())
 }
 
@@ -78,6 +89,7 @@ fn codegen(
     raw_derives: Vec<String>,
     derives_for_type: Vec<(String, String)>,
     crate_path: Option<String>,
+    no_docs: bool,
 ) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
@@ -100,13 +112,23 @@ fn codegen(
 
     let type_substitutes = TypeSubstitutes::new(&crate_path);
 
+    let should_gen_docs = !no_docs;
     let runtime_api = subxt_codegen::generate_runtime_api_from_bytes(
         item_mod,
         metadata_bytes,
         derives,
         type_substitutes,
         crate_path,
+        should_gen_docs,
     );
-    println!("{runtime_api}");
+    match runtime_api {
+        Ok(runtime_api) => println!("{runtime_api}"),
+        Err(e) => {
+            // Print the error directly to avoid implementing `Send + Sync` on `CodegenError`.
+            use color_eyre::owo_colors::OwoColorize;
+            println!("{}", e.to_string().red())
+        }
+    };
+
     Ok(())
 }

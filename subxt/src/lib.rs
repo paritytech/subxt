@@ -184,4 +184,8 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
+    #[cfg(feature = "substrate-compat")]
+    pub use sp_core;
+    #[cfg(feature = "substrate-compat")]
+    pub use sp_runtime;
 }

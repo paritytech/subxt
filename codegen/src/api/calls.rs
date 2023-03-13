@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::CodegenError;
 use crate::{
     types::{
         CompositeDefFields,
@@ -18,7 +19,6 @@ use heck::{
     ToUpperCamelCase as _,
 };
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
@@ -40,12 +40,11 @@ pub fn generate_calls(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
-) -> TokenStream2 {
+    should_gen_docs: bool,
+) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no calls.
-    let call = if let Some(ref calls) = pallet.calls {
-        calls
-    } else {
-        return quote!()
+    let Some(call) = &pallet.calls else {
+        return Ok(quote!());
     };
 
     let mut struct_defs = super::generate_structs_from_variants(
@@ -54,7 +53,8 @@ pub fn generate_calls(
         |name| name.to_upper_camel_case().into(),
         "Call",
         crate_path,
-    );
+        should_gen_docs,
+    )?;
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
         .map(|(variant_name, struct_def)| {
@@ -75,30 +75,25 @@ pub fn generate_calls(
                 }
                 CompositeDefFields::NoFields => Default::default(),
                 CompositeDefFields::Unnamed(_) => {
-                    abort_call_site!(
-                        "Call variant for type {} must have all named fields",
-                        call.ty.id()
-                    )
+                    return Err(CodegenError::InvalidCallVariant(call.ty.id()))
                 }
             };
 
             let pallet_name = &pallet.name;
             let call_name = &variant_name;
             let struct_name = &struct_def.name;
-            let call_hash =
-                subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
-                    .unwrap_or_else(|_| {
-                        abort_call_site!(
-                            "Metadata information for the call {}_{} could not be found",
-                            pallet_name,
-                            call_name
-                        )
-                    });
-
+            let Ok(call_hash) =
+                subxt_metadata::get_call_hash(metadata, pallet_name, call_name) else {
+                    return Err(CodegenError::MissingCallMetadata(
+                        pallet_name.into(),
+                        call_name.to_string(),
+                    ))
+                };
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
-            let docs = struct_def.docs.take();
+            let docs = should_gen_docs.then_some(struct_def.docs.take()).flatten();
+
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
@@ -118,15 +113,21 @@ pub fn generate_calls(
                     )
                 }
             };
-            (call_struct, client_fn)
+
+            Ok((call_struct, client_fn))
         })
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
         .unzip();
 
     let call_ty = type_gen.resolve_type(call.ty.id());
     let docs = call_ty.docs();
+    let docs = should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
 
-    quote! {
-        #( #[doc = #docs ] )*
+    Ok(quote! {
+        #docs
         pub mod calls {
             use super::root_mod;
             use super::#types_mod_ident;
@@ -141,5 +142,5 @@ pub fn generate_calls(
                 #( #call_fns )*
             }
         }
-    }
+    })
 }
