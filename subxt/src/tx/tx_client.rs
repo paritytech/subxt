@@ -28,6 +28,7 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
+use std::borrow::Cow;
 
 // This is returned from an API below, so expose it here.
 pub use crate::rpc::types::DryRunResult;
@@ -122,7 +123,45 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         ))
     }
 
-    /// Creates a raw signed extrinsic without submitting it.
+    /// Create a partial extrinsic.
+    pub fn create_partial_signed_with_nonce<Call>(
+        &self,
+        call: &Call,
+        account_nonce: T::Index,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+    ) -> Result<PartialExtrinsic<T, C>, Error>
+    where
+        Call: TxPayload,
+    {
+        // 1. Validate this call against the current node metadata if the call comes
+        // with a hash allowing us to do so.
+        self.validate(call)?;
+
+        // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
+        let call_data = self.call_data(call)?;
+
+        // 3. Construct our custom additional/extra params.
+        let additional_and_extra_params = {
+            // Obtain spec version and transaction version from the runtime version of the client.
+            let runtime = self.client.runtime_version();
+            <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::new(
+                runtime.spec_version,
+                runtime.transaction_version,
+                account_nonce,
+                self.client.genesis_hash(),
+                other_params,
+            )
+        };
+
+        // Return these details, ready to construct a signed extrinsic from.
+        Ok(PartialExtrinsic {
+            client: self.client.clone(),
+            call_data,
+            additional_and_extra_params
+        })
+    }
+
+    /// Creates a signed extrinsic without submitting it.
     pub fn create_signed_with_nonce<Call, Signer>(
         &self,
         call: &Call,
@@ -138,76 +177,12 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         // with a hash allowing us to do so.
         self.validate(call)?;
 
-        // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-        let call_data = Encoded(self.call_data(call)?);
+        // 2. Gather the "additional" and "extra" params along with the encoded call data,
+        //    ready to be signed.
+        let partial_signed = self.create_partial_signed_with_nonce(call, account_nonce, other_params)?;
 
-        // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = {
-            // Obtain spec version and transaction version from the runtime version of the client.
-            let runtime = self.client.runtime_version();
-            <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::new(
-                runtime.spec_version,
-                runtime.transaction_version,
-                account_nonce,
-                self.client.genesis_hash(),
-                other_params,
-            )
-        };
-
-        tracing::debug!(
-            "tx additional_and_extra_params: {:?}",
-            additional_and_extra_params
-        );
-
-        // 4. Construct signature. This is compatible with the Encode impl
-        //    for SignedPayload (which is this payload of bytes that we'd like)
-        //    to sign. See:
-        //    https://github.com/paritytech/substrate/blob/9a6d706d8db00abb6ba183839ec98ecd9924b1f8/primitives/runtime/src/generic/unchecked_extrinsic.rs#L215)
-        let signature = {
-            let mut bytes = Vec::new();
-            call_data.encode_to(&mut bytes);
-            additional_and_extra_params.encode_extra_to(&mut bytes);
-            additional_and_extra_params.encode_additional_to(&mut bytes);
-            if bytes.len() > 256 {
-                signer.sign(T::Hasher::hash_of(&Encoded(bytes)).as_ref())
-            } else {
-                signer.sign(&bytes)
-            }
-        };
-
-        tracing::debug!("tx signature: {}", hex::encode(signature.encode()));
-
-        // 5. Encode extrinsic, now that we have the parts we need. This is compatible
-        //    with the Encode impl for UncheckedExtrinsic (protocol version 4).
-        let extrinsic = {
-            let mut encoded_inner = Vec::new();
-            // "is signed" + transaction protocol version (4)
-            (0b10000000 + 4u8).encode_to(&mut encoded_inner);
-            // from address for signature
-            signer.address().encode_to(&mut encoded_inner);
-            // the signature bytes
-            signature.encode_to(&mut encoded_inner);
-            // attach custom extra params
-            additional_and_extra_params.encode_extra_to(&mut encoded_inner);
-            // and now, call data
-            call_data.encode_to(&mut encoded_inner);
-            // now, prefix byte length:
-            let len = Compact(
-                u32::try_from(encoded_inner.len())
-                    .expect("extrinsic size expected to be <4GB"),
-            );
-            let mut encoded = Vec::new();
-            len.encode_to(&mut encoded);
-            encoded.extend(encoded_inner);
-            encoded
-        };
-
-        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
-        // maybe we can just return the raw bytes..
-        Ok(SubmittableExtrinsic::from_bytes(
-            self.client.clone(),
-            extrinsic,
-        ))
+        // 3. Sign and construct an extrinsic from these details.
+        partial_signed.sign(signer)
     }
 }
 
@@ -216,7 +191,31 @@ where
     T: Config,
     C: OnlineClientT<T>,
 {
-    /// Creates a raw signed extrinsic, without submitting it.
+    // Get the next account nonce to use.
+    async fn next_account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
+        self
+            .client
+            .rpc()
+            .system_account_next_index(account_id)
+            .await
+    }
+
+    /// Creates a partial signed extrinsic, without submitting it.
+    pub async fn create_partial_signed<Call, Signer>(
+        &self,
+        call: &Call,
+        signer: &Signer,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+    ) -> Result<PartialExtrinsic<T, C>, Error>
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
+    {
+        let account_nonce = self.next_account_nonce(signer.account_id()).await?;
+        self.create_partial_signed_with_nonce(call, account_nonce, other_params)
+    }
+
+    /// Creates a signed extrinsic, without submitting it.
     pub async fn create_signed<Call, Signer>(
         &self,
         call: &Call,
@@ -227,13 +226,7 @@ where
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        // Get nonce from the node.
-        let account_nonce = self
-            .client
-            .rpc()
-            .system_account_next_index(signer.account_id())
-            .await?;
-
+        let account_nonce = self.next_account_nonce(signer.account_id()).await?;
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
     }
 
@@ -321,6 +314,89 @@ where
             .await?
             .submit()
             .await
+    }
+}
+
+/// This payload contains the information needed to produce an extrinsic.
+pub struct PartialExtrinsic<T: Config, C> {
+    client: C,
+    call_data: Vec<u8>,
+    additional_and_extra_params: T::ExtrinsicParams
+}
+
+impl <T, C> PartialExtrinsic<T, C>
+where
+    T: Config,
+    C: OfflineClientT<T>,
+{
+    // Obtain bytes representing the signer payload and run call some function
+    // with them. This can avoid an allocation in some cases when compared to
+    // [`PartialExtrinsic::signer_payload()`].
+    fn with_signer_payload<F, R>(&self, f: F) -> R
+    where
+        F: for<'a> FnOnce(Cow<'a, [u8]>) -> R
+    {
+        let mut bytes = self.call_data.clone();
+        self.additional_and_extra_params.encode_extra_to(&mut bytes);
+        self.additional_and_extra_params.encode_additional_to(&mut bytes);
+        if bytes.len() > 256 {
+            f(Cow::Borrowed(T::Hasher::hash_of(&Encoded(bytes)).as_ref()))
+        } else {
+            f(Cow::Owned(bytes))
+        }
+    }
+
+    /// Return the signer payload for this extrinsic. These are the bytes that must
+    /// be signed in order to produce a valid signature for the extrinsic.
+    pub fn signer_payload(&self) -> Vec<u8> {
+        self.with_signer_payload(|bytes| bytes.to_vec())
+    }
+
+    /// Return the bytes representing the call data for this partially constructed
+    /// extrinsic.
+    pub fn call_data(&self) -> &[u8] {
+        &self.call_data
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// The provided `signer` is responsible for providing the "from" address for the transaction,
+    /// as well as providing a signature to attach to it.
+    pub fn sign<Signer>(&self, signer: &Signer) -> Result<SubmittableExtrinsic<T, C>, Error>
+    where
+        Signer: SignerT<T>,
+    {
+        // Given our signer, we can sign the payload representing this extrinsic.
+        let signature = self.with_signer_payload(|bytes| signer.sign(&*bytes));
+
+        // Now encode the extrinsic (into the format expected by protocol version 4)
+        let extrinsic = {
+            let mut encoded_inner = Vec::new();
+            // "is signed" + transaction protocol version (4)
+            (0b10000000 + 4u8).encode_to(&mut encoded_inner);
+            // from address for signature
+            signer.address().encode_to(&mut encoded_inner);
+            // the signature
+            signature.encode_to(&mut encoded_inner);
+            // attach custom extra params
+            self.additional_and_extra_params.encode_extra_to(&mut encoded_inner);
+            // and now, call data (remembering that it's been encoded already and just needs appending)
+            encoded_inner.extend(&self.call_data);
+            // now, prefix byte length:
+            let len = Compact(
+                u32::try_from(encoded_inner.len())
+                    .expect("extrinsic size expected to be <4GB"),
+            );
+            let mut encoded = Vec::new();
+            len.encode_to(&mut encoded);
+            encoded.extend(encoded_inner);
+            encoded
+        };
+
+        // Return an extrinsic ready to be submitted.
+        Ok(SubmittableExtrinsic::from_bytes(
+            self.client.clone(),
+            extrinsic,
+        ))
     }
 }
 
