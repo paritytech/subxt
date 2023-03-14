@@ -369,7 +369,7 @@ where
         Signer: SignerT<T>,
     {
         // Given our signer, we can sign the payload representing this extrinsic.
-        let signature = self.with_signer_payload(|bytes| signer.sign(&*bytes));
+        let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
         // Now, use the signature and "from" address to build the extrinsic.
         self.sign_with_address_and_signature(&signer.address(), &signature)
     }
