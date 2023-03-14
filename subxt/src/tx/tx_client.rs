@@ -182,7 +182,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let partial_signed = self.create_partial_signed_with_nonce(call, account_nonce, other_params)?;
 
         // 3. Sign and construct an extrinsic from these details.
-        partial_signed.sign(signer)
+        Ok(partial_signed.sign(signer))
     }
 }
 
@@ -361,7 +361,7 @@ where
     /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<Signer>(&self, signer: &Signer) -> Result<SubmittableExtrinsic<T, C>, Error>
+    pub fn sign<Signer>(&self, signer: &Signer) -> SubmittableExtrinsic<T, C>
     where
         Signer: SignerT<T>,
     {
@@ -393,10 +393,10 @@ where
         };
 
         // Return an extrinsic ready to be submitted.
-        Ok(SubmittableExtrinsic::from_bytes(
+        SubmittableExtrinsic::from_bytes(
             self.client.clone(),
             extrinsic,
-        ))
+        )
     }
 }
 
