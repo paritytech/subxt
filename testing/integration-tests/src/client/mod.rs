@@ -34,6 +34,7 @@ use subxt::{
         RuntimeEvent,
         RuntimeVersionEvent,
     },
+    tx::Signer,
     utils::AccountId32,
 };
 
@@ -242,6 +243,39 @@ async fn dry_run_fails() {
     } else {
         panic!("expected a runtime module error");
     }
+}
+
+#[tokio::test]
+async fn external_signing() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+
+    // Create a partial extrinsic. We can get the signer payload at this point, to be
+    // signed externally.
+    let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
+    let partial_extrinsic = api
+        .tx()
+        .create_partial_signed(&tx, alice.account_id(), Default::default())
+        .await
+        .unwrap();
+
+    // Get the signer payload.
+    let signer_payload = partial_extrinsic.signer_payload();
+    // Sign it (possibly externally).
+    let signature = alice.sign(&signer_payload);
+    // Use this to build a signed extrinsic.
+    let extrinsic =
+        partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
+
+    // And now submit it.
+    extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
