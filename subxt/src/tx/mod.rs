@@ -27,8 +27,8 @@ pub use self::{
     },
     tx_payload::{
         dynamic,
-        DynamicTxPayload,
-        StaticTxPayload,
+        Payload,
+        BoxedPayload,
         TxPayload,
     },
     tx_progress::{

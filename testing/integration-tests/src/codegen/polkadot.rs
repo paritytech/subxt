@@ -292,8 +292,8 @@ pub mod api {
                 pub fn remark(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Remark> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Remark> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "remark",
                         Remark { remark },
@@ -309,8 +309,8 @@ pub mod api {
                 pub fn set_heap_pages(
                     &self,
                     pages: ::core::primitive::u64,
-                ) -> ::subxt::tx::StaticTxPayload<SetHeapPages> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetHeapPages> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "set_heap_pages",
                         SetHeapPages { pages },
@@ -337,8 +337,8 @@ pub mod api {
                 pub fn set_code(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<SetCode> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCode> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "set_code",
                         SetCode { code },
@@ -362,8 +362,8 @@ pub mod api {
                 pub fn set_code_without_checks(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<SetCodeWithoutChecks> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCodeWithoutChecks> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "set_code_without_checks",
                         SetCodeWithoutChecks { code },
@@ -382,8 +382,8 @@ pub mod api {
                         ::std::vec::Vec<::core::primitive::u8>,
                         ::std::vec::Vec<::core::primitive::u8>,
                     )>,
-                ) -> ::subxt::tx::StaticTxPayload<SetStorage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetStorage> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "set_storage",
                         SetStorage { items },
@@ -399,8 +399,8 @@ pub mod api {
                 pub fn kill_storage(
                     &self,
                     keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
-                ) -> ::subxt::tx::StaticTxPayload<KillStorage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<KillStorage> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "kill_storage",
                         KillStorage { keys },
@@ -420,8 +420,8 @@ pub mod api {
                     &self,
                     prefix: ::std::vec::Vec<::core::primitive::u8>,
                     subkeys: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<KillPrefix> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<KillPrefix> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "kill_prefix",
                         KillPrefix { prefix, subkeys },
@@ -437,8 +437,8 @@ pub mod api {
                 pub fn remark_with_event(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<RemarkWithEvent> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemarkWithEvent> {
+                    ::subxt::tx::Payload::new_static(
                         "System",
                         "remark_with_event",
                         RemarkWithEvent { remark },
@@ -1270,8 +1270,8 @@ pub mod api {
                     calls: ::std::vec::Vec<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Batch> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Batch> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "batch",
                         Batch { calls },
@@ -1300,8 +1300,8 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u16,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<AsDerivative> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AsDerivative> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "as_derivative",
                         AsDerivative {
@@ -1335,8 +1335,8 @@ pub mod api {
                     calls: ::std::vec::Vec<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<BatchAll> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BatchAll> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "batch_all",
                         BatchAll { calls },
@@ -1362,8 +1362,8 @@ pub mod api {
                     &self,
                     as_origin: runtime_types::kitchensink_runtime::OriginCaller,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<DispatchAs> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DispatchAs> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "dispatch_as",
                         DispatchAs {
@@ -1397,8 +1397,8 @@ pub mod api {
                     calls: ::std::vec::Vec<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceBatch> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceBatch> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "force_batch",
                         ForceBatch { calls },
@@ -1420,8 +1420,8 @@ pub mod api {
                     &self,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
                     weight: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<WithWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<WithWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Utility",
                         "with_weight",
                         WithWeight {
@@ -1638,8 +1638,8 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocation> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ReportEquivocation> {
+                    ::subxt::tx::Payload::new_static(
                         "Babe",
                         "report_equivocation",
                         ReportEquivocation {
@@ -1668,9 +1668,9 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocationUnsigned>
+                ) -> ::subxt::tx::Payload<ReportEquivocationUnsigned>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Babe",
                         "report_equivocation_unsigned",
                         ReportEquivocationUnsigned {
@@ -1694,8 +1694,8 @@ pub mod api {
                 pub fn plan_config_change(
                     &self,
                     config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor,
-                ) -> ::subxt::tx::StaticTxPayload<PlanConfigChange> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PlanConfigChange> {
+                    ::subxt::tx::Payload::new_static(
                         "Babe",
                         "plan_config_change",
                         PlanConfigChange { config },
@@ -2223,8 +2223,8 @@ pub mod api {
                 pub fn set(
                     &self,
                     now: ::core::primitive::u64,
-                ) -> ::subxt::tx::StaticTxPayload<Set> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Set> {
+                    ::subxt::tx::Payload::new_static(
                         "Timestamp",
                         "set",
                         Set { now },
@@ -2348,8 +2348,8 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetUncles> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetUncles> {
+                    ::subxt::tx::Payload::new_static(
                         "Authorship",
                         "set_uncles",
                         SetUncles { new_uncles },
@@ -2566,8 +2566,8 @@ pub mod api {
                 pub fn claim(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Claim> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Claim> {
+                    ::subxt::tx::Payload::new_static(
                         "Indices",
                         "claim",
                         Claim { index },
@@ -2606,8 +2606,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Transfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Indices",
                         "transfer",
                         Transfer { new, index },
@@ -2640,8 +2640,8 @@ pub mod api {
                 pub fn free(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Free> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Free> {
+                    ::subxt::tx::Payload::new_static(
                         "Indices",
                         "free",
                         Free { index },
@@ -2682,8 +2682,8 @@ pub mod api {
                     >,
                     index: ::core::primitive::u32,
                     freeze: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<ForceTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Indices",
                         "force_transfer",
                         ForceTransfer { new, index, freeze },
@@ -2716,8 +2716,8 @@ pub mod api {
                 pub fn freeze(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Freeze> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Freeze> {
+                    ::subxt::tx::Payload::new_static(
                         "Indices",
                         "freeze",
                         Freeze { index },
@@ -3021,8 +3021,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Transfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "transfer",
                         Transfer { dest, value },
@@ -3050,8 +3050,8 @@ pub mod api {
                     >,
                     new_free: ::core::primitive::u128,
                     new_reserved: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<SetBalance> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetBalance> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "set_balance",
                         SetBalance {
@@ -3084,8 +3084,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ForceTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "force_transfer",
                         ForceTransfer {
@@ -3114,8 +3114,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<TransferKeepAlive> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferKeepAlive> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "transfer_keep_alive",
                         TransferKeepAlive { dest, value },
@@ -3151,8 +3151,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     keep_alive: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<TransferAll> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferAll> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "transfer_all",
                         TransferAll { dest, keep_alive },
@@ -3174,8 +3174,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ForceUnreserve> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceUnreserve> {
+                    ::subxt::tx::Payload::new_static(
                         "Balances",
                         "force_unreserve",
                         ForceUnreserve { who, amount },
@@ -3934,8 +3934,8 @@ pub mod api {
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: kitchensink_runtime :: NposSolution16 >,
                     witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize,
-                ) -> ::subxt::tx::StaticTxPayload<SubmitUnsigned> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SubmitUnsigned> {
+                    ::subxt::tx::Payload::new_static(
                         "ElectionProviderMultiPhase",
                         "submit_unsigned",
                         SubmitUnsigned {
@@ -3960,9 +3960,9 @@ pub mod api {
                     maybe_next_score: ::core::option::Option<
                         runtime_types::sp_npos_elections::ElectionScore,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetMinimumUntrustedScore>
+                ) -> ::subxt::tx::Payload<SetMinimumUntrustedScore>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "ElectionProviderMultiPhase",
                         "set_minimum_untrusted_score",
                         SetMinimumUntrustedScore { maybe_next_score },
@@ -3990,9 +3990,9 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                         >,
                     )>,
-                ) -> ::subxt::tx::StaticTxPayload<SetEmergencyElectionResult>
+                ) -> ::subxt::tx::Payload<SetEmergencyElectionResult>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "ElectionProviderMultiPhase",
                         "set_emergency_election_result",
                         SetEmergencyElectionResult { supports },
@@ -4016,8 +4016,8 @@ pub mod api {
                 pub fn submit(
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: kitchensink_runtime :: NposSolution16 >,
-                ) -> ::subxt::tx::StaticTxPayload<Submit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Submit> {
+                    ::subxt::tx::Payload::new_static(
                         "ElectionProviderMultiPhase",
                         "submit",
                         Submit {
@@ -4039,8 +4039,8 @@ pub mod api {
                     &self,
                     maybe_max_voters: ::core::option::Option<::core::primitive::u32>,
                     maybe_max_targets: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<GovernanceFallback> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<GovernanceFallback> {
+                    ::subxt::tx::Payload::new_static(
                         "ElectionProviderMultiPhase",
                         "governance_fallback",
                         GovernanceFallback {
@@ -5174,8 +5174,8 @@ pub mod api {
                     payee: runtime_types::pallet_staking::RewardDestination<
                         ::subxt::utils::AccountId32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Bond> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Bond> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "bond",
                         Bond {
@@ -5209,8 +5209,8 @@ pub mod api {
                 pub fn bond_extra(
                     &self,
                     max_additional: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<BondExtra> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BondExtra> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "bond_extra",
                         BondExtra { max_additional },
@@ -5244,8 +5244,8 @@ pub mod api {
                 pub fn unbond(
                     &self,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Unbond> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unbond> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "unbond",
                         Unbond { value },
@@ -5275,8 +5275,8 @@ pub mod api {
                 pub fn withdraw_unbonded(
                     &self,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<WithdrawUnbonded> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<WithdrawUnbonded> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "withdraw_unbonded",
                         WithdrawUnbonded { num_slashing_spans },
@@ -5296,8 +5296,8 @@ pub mod api {
                 pub fn validate(
                     &self,
                     prefs: runtime_types::pallet_staking::ValidatorPrefs,
-                ) -> ::subxt::tx::StaticTxPayload<Validate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Validate> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "validate",
                         Validate { prefs },
@@ -5328,8 +5328,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Nominate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Nominate> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "nominate",
                         Nominate { targets },
@@ -5352,8 +5352,8 @@ pub mod api {
                 #[doc = "- Contains one read."]
                 #[doc = "- Writes are limited to the `origin` account key."]
                 #[doc = "# </weight>"]
-                pub fn chill(&self) -> ::subxt::tx::StaticTxPayload<Chill> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn chill(&self) -> ::subxt::tx::Payload<Chill> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "chill",
                         Chill {},
@@ -5386,8 +5386,8 @@ pub mod api {
                     payee: runtime_types::pallet_staking::RewardDestination<
                         ::subxt::utils::AccountId32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetPayee> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetPayee> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_payee",
                         SetPayee { payee },
@@ -5421,8 +5421,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetController> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetController> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_controller",
                         SetController { controller },
@@ -5445,8 +5445,8 @@ pub mod api {
                 pub fn set_validator_count(
                     &self,
                     new: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetValidatorCount> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetValidatorCount> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_validator_count",
                         SetValidatorCount { new },
@@ -5469,9 +5469,9 @@ pub mod api {
                 pub fn increase_validator_count(
                     &self,
                     additional: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<IncreaseValidatorCount>
+                ) -> ::subxt::tx::Payload<IncreaseValidatorCount>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "increase_validator_count",
                         IncreaseValidatorCount { additional },
@@ -5494,8 +5494,8 @@ pub mod api {
                 pub fn scale_validator_count(
                     &self,
                     factor: runtime_types::sp_arithmetic::per_things::Percent,
-                ) -> ::subxt::tx::StaticTxPayload<ScaleValidatorCount> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ScaleValidatorCount> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "scale_validator_count",
                         ScaleValidatorCount { factor },
@@ -5522,8 +5522,8 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write: ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_no_eras(&self) -> ::subxt::tx::StaticTxPayload<ForceNoEras> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn force_no_eras(&self) -> ::subxt::tx::Payload<ForceNoEras> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "force_no_eras",
                         ForceNoEras {},
@@ -5551,8 +5551,8 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_new_era(&self) -> ::subxt::tx::StaticTxPayload<ForceNewEra> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn force_new_era(&self) -> ::subxt::tx::Payload<ForceNewEra> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "force_new_era",
                         ForceNewEra {},
@@ -5570,8 +5570,8 @@ pub mod api {
                 pub fn set_invulnerables(
                     &self,
                     invulnerables: ::std::vec::Vec<::subxt::utils::AccountId32>,
-                ) -> ::subxt::tx::StaticTxPayload<SetInvulnerables> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetInvulnerables> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_invulnerables",
                         SetInvulnerables { invulnerables },
@@ -5590,8 +5590,8 @@ pub mod api {
                     &self,
                     stash: ::subxt::utils::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ForceUnstake> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceUnstake> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "force_unstake",
                         ForceUnstake {
@@ -5617,8 +5617,8 @@ pub mod api {
                 #[doc = "have enough blocks to get a result."]
                 pub fn force_new_era_always(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<ForceNewEraAlways> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceNewEraAlways> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "force_new_era_always",
                         ForceNewEraAlways {},
@@ -5639,8 +5639,8 @@ pub mod api {
                     &self,
                     era: ::core::primitive::u32,
                     slash_indices: ::std::vec::Vec<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<CancelDeferredSlash> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelDeferredSlash> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "cancel_deferred_slash",
                         CancelDeferredSlash { era, slash_indices },
@@ -5677,8 +5677,8 @@ pub mod api {
                     &self,
                     validator_stash: ::subxt::utils::AccountId32,
                     era: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<PayoutStakers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PayoutStakers> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "payout_stakers",
                         PayoutStakers {
@@ -5705,8 +5705,8 @@ pub mod api {
                 pub fn rebond(
                     &self,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Rebond> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Rebond> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "rebond",
                         Rebond { value },
@@ -5734,8 +5734,8 @@ pub mod api {
                     &self,
                     stash: ::subxt::utils::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ReapStash> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ReapStash> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "reap_stash",
                         ReapStash {
@@ -5769,8 +5769,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Kick> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Kick> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "kick",
                         Kick { who },
@@ -5807,8 +5807,8 @@ pub mod api {
                     max_validator_count : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < :: core :: primitive :: u32 >,
                     chill_threshold : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Percent >,
                     min_commission : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < runtime_types :: sp_arithmetic :: per_things :: Perbill >,
-                ) -> ::subxt::tx::StaticTxPayload<SetStakingConfigs> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetStakingConfigs> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_staking_configs",
                         SetStakingConfigs {
@@ -5856,8 +5856,8 @@ pub mod api {
                 pub fn chill_other(
                     &self,
                     controller: ::subxt::utils::AccountId32,
-                ) -> ::subxt::tx::StaticTxPayload<ChillOther> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ChillOther> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "chill_other",
                         ChillOther { controller },
@@ -5875,9 +5875,9 @@ pub mod api {
                 pub fn force_apply_min_commission(
                     &self,
                     validator_stash: ::subxt::utils::AccountId32,
-                ) -> ::subxt::tx::StaticTxPayload<ForceApplyMinCommission>
+                ) -> ::subxt::tx::Payload<ForceApplyMinCommission>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "force_apply_min_commission",
                         ForceApplyMinCommission { validator_stash },
@@ -5896,8 +5896,8 @@ pub mod api {
                 pub fn set_min_commission(
                     &self,
                     new: runtime_types::sp_arithmetic::per_things::Perbill,
-                ) -> ::subxt::tx::StaticTxPayload<SetMinCommission> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMinCommission> {
+                    ::subxt::tx::Payload::new_static(
                         "Staking",
                         "set_min_commission",
                         SetMinCommission { new },
@@ -7809,8 +7809,8 @@ pub mod api {
                     &self,
                     keys: runtime_types::kitchensink_runtime::SessionKeys,
                     proof: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<SetKeys> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetKeys> {
+                    ::subxt::tx::Payload::new_static(
                         "Session",
                         "set_keys",
                         SetKeys { keys, proof },
@@ -7838,8 +7838,8 @@ pub mod api {
                 #[doc = "- DbWrites: `NextKeys`, `origin account`"]
                 #[doc = "- DbWrites per key id: `KeyOwner`"]
                 #[doc = "# </weight>"]
-                pub fn purge_keys(&self) -> ::subxt::tx::StaticTxPayload<PurgeKeys> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn purge_keys(&self) -> ::subxt::tx::Payload<PurgeKeys> {
+                    ::subxt::tx::Payload::new_static(
                         "Session",
                         "purge_keys",
                         PurgeKeys {},
@@ -8362,8 +8362,8 @@ pub mod api {
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Propose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Propose> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "propose",
                         Propose { proposal, value },
@@ -8384,8 +8384,8 @@ pub mod api {
                 pub fn second(
                     &self,
                     proposal: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Second> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Second> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "second",
                         Second { proposal },
@@ -8410,8 +8410,8 @@ pub mod api {
                     vote: runtime_types::pallet_democracy::vote::AccountVote<
                         ::core::primitive::u128,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "vote",
                         Vote { ref_index, vote },
@@ -8434,8 +8434,8 @@ pub mod api {
                 pub fn emergency_cancel(
                     &self,
                     ref_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<EmergencyCancel> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<EmergencyCancel> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "emergency_cancel",
                         EmergencyCancel { ref_index },
@@ -8458,8 +8458,8 @@ pub mod api {
                     proposal: runtime_types::frame_support::traits::preimages::Bounded<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ExternalPropose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ExternalPropose> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "external_propose",
                         ExternalPropose { proposal },
@@ -8487,9 +8487,9 @@ pub mod api {
                     proposal: runtime_types::frame_support::traits::preimages::Bounded<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ExternalProposeMajority>
+                ) -> ::subxt::tx::Payload<ExternalProposeMajority>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "external_propose_majority",
                         ExternalProposeMajority { proposal },
@@ -8517,9 +8517,9 @@ pub mod api {
                     proposal: runtime_types::frame_support::traits::preimages::Bounded<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ExternalProposeDefault>
+                ) -> ::subxt::tx::Payload<ExternalProposeDefault>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "external_propose_default",
                         ExternalProposeDefault { proposal },
@@ -8552,8 +8552,8 @@ pub mod api {
                     proposal_hash: ::subxt::utils::H256,
                     voting_period: ::core::primitive::u32,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<FastTrack> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<FastTrack> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "fast_track",
                         FastTrack {
@@ -8581,8 +8581,8 @@ pub mod api {
                 pub fn veto_external(
                     &self,
                     proposal_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<VetoExternal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<VetoExternal> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "veto_external",
                         VetoExternal { proposal_hash },
@@ -8604,8 +8604,8 @@ pub mod api {
                 pub fn cancel_referendum(
                     &self,
                     ref_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CancelReferendum> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelReferendum> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "cancel_referendum",
                         CancelReferendum { ref_index },
@@ -8645,8 +8645,8 @@ pub mod api {
                     >,
                     conviction: runtime_types::pallet_democracy::conviction::Conviction,
                     balance: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Delegate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Delegate> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "delegate",
                         Delegate {
@@ -8674,8 +8674,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
                 #[doc = "  voted on. Weight is charged as if maximum votes."]
-                pub fn undelegate(&self) -> ::subxt::tx::StaticTxPayload<Undelegate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn undelegate(&self) -> ::subxt::tx::Payload<Undelegate> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "undelegate",
                         Undelegate {},
@@ -8694,8 +8694,8 @@ pub mod api {
                 #[doc = "Weight: `O(1)`."]
                 pub fn clear_public_proposals(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<ClearPublicProposals> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearPublicProposals> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "clear_public_proposals",
                         ClearPublicProposals {},
@@ -8720,8 +8720,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Unlock> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unlock> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "unlock",
                         Unlock { target },
@@ -8763,8 +8763,8 @@ pub mod api {
                 pub fn remove_vote(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveVote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveVote> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "remove_vote",
                         RemoveVote { index },
@@ -8798,8 +8798,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveOtherVote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveOtherVote> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "remove_other_vote",
                         RemoveOtherVote { target, index },
@@ -8830,8 +8830,8 @@ pub mod api {
                     &self,
                     proposal_hash: ::subxt::utils::H256,
                     maybe_ref_index: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<Blacklist> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Blacklist> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "blacklist",
                         Blacklist {
@@ -8856,8 +8856,8 @@ pub mod api {
                 pub fn cancel_proposal(
                     &self,
                     prop_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CancelProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "Democracy",
                         "cancel_proposal",
                         CancelProposal { prop_index },
@@ -9928,8 +9928,8 @@ pub mod api {
                     new_members: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     prime: ::core::option::Option<::subxt::utils::AccountId32>,
                     old_count: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "set_members",
                         SetMembers {
@@ -9960,8 +9960,8 @@ pub mod api {
                     &self,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Execute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Execute> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "execute",
                         Execute {
@@ -10008,8 +10008,8 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Propose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Propose> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "propose",
                         Propose {
@@ -10045,8 +10045,8 @@ pub mod api {
                     proposal: ::subxt::utils::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "vote",
                         Vote {
@@ -10100,8 +10100,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::OldWeight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "close_old_weight",
                         CloseOldWeight {
@@ -10135,8 +10135,8 @@ pub mod api {
                 pub fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<DisapproveProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DisapproveProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "disapprove_proposal",
                         DisapproveProposal { proposal_hash },
@@ -10186,8 +10186,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Close> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Close> {
+                    ::subxt::tx::Payload::new_static(
                         "Council",
                         "close",
                         Close {
@@ -10691,8 +10691,8 @@ pub mod api {
                     new_members: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     prime: ::core::option::Option<::subxt::utils::AccountId32>,
                     old_count: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "set_members",
                         SetMembers {
@@ -10723,8 +10723,8 @@ pub mod api {
                     &self,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Execute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Execute> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "execute",
                         Execute {
@@ -10771,8 +10771,8 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Propose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Propose> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "propose",
                         Propose {
@@ -10808,8 +10808,8 @@ pub mod api {
                     proposal: ::subxt::utils::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "vote",
                         Vote {
@@ -10863,8 +10863,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::OldWeight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "close_old_weight",
                         CloseOldWeight {
@@ -10898,8 +10898,8 @@ pub mod api {
                 pub fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<DisapproveProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DisapproveProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "disapprove_proposal",
                         DisapproveProposal { proposal_hash },
@@ -10949,8 +10949,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Close> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Close> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalCommittee",
                         "close",
                         Close {
@@ -11415,8 +11415,8 @@ pub mod api {
                     &self,
                     votes: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "vote",
                         Vote { votes, value },
@@ -11433,8 +11433,8 @@ pub mod api {
                 #[doc = "This removes the lock and returns the deposit."]
                 #[doc = ""]
                 #[doc = "The dispatch origin of this call must be signed and be a voter."]
-                pub fn remove_voter(&self) -> ::subxt::tx::StaticTxPayload<RemoveVoter> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn remove_voter(&self) -> ::subxt::tx::Payload<RemoveVoter> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "remove_voter",
                         RemoveVoter {},
@@ -11464,8 +11464,8 @@ pub mod api {
                 pub fn submit_candidacy(
                     &self,
                     candidate_count: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SubmitCandidacy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SubmitCandidacy> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "submit_candidacy",
                         SubmitCandidacy { candidate_count },
@@ -11498,8 +11498,8 @@ pub mod api {
                 pub fn renounce_candidacy(
                     &self,
                     renouncing: runtime_types::pallet_elections_phragmen::Renouncing,
-                ) -> ::subxt::tx::StaticTxPayload<RenounceCandidacy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RenounceCandidacy> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "renounce_candidacy",
                         RenounceCandidacy { renouncing },
@@ -11537,8 +11537,8 @@ pub mod api {
                     >,
                     slash_bond: ::core::primitive::bool,
                     rerun_election: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveMember> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "remove_member",
                         RemoveMember {
@@ -11568,8 +11568,8 @@ pub mod api {
                     &self,
                     num_voters: ::core::primitive::u32,
                     num_defunct: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CleanDefunctVoters> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CleanDefunctVoters> {
+                    ::subxt::tx::Payload::new_static(
                         "Elections",
                         "clean_defunct_voters",
                         CleanDefunctVoters {
@@ -12173,8 +12173,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AddMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddMember> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "add_member",
                         AddMember { who },
@@ -12195,8 +12195,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveMember> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "remove_member",
                         RemoveMember { who },
@@ -12223,8 +12223,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SwapMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SwapMember> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "swap_member",
                         SwapMember { remove, add },
@@ -12243,8 +12243,8 @@ pub mod api {
                 pub fn reset_members(
                     &self,
                     members: ::std::vec::Vec<::subxt::utils::AccountId32>,
-                ) -> ::subxt::tx::StaticTxPayload<ResetMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ResetMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "reset_members",
                         ResetMembers { members },
@@ -12267,8 +12267,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ChangeKey> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ChangeKey> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "change_key",
                         ChangeKey { new },
@@ -12289,8 +12289,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetPrime> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetPrime> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "set_prime",
                         SetPrime { who },
@@ -12305,8 +12305,8 @@ pub mod api {
                 #[doc = "Remove the prime member if it exists."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::PrimeOrigin`."]
-                pub fn clear_prime(&self) -> ::subxt::tx::StaticTxPayload<ClearPrime> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn clear_prime(&self) -> ::subxt::tx::Payload<ClearPrime> {
+                    ::subxt::tx::Payload::new_static(
                         "TechnicalMembership",
                         "clear_prime",
                         ClearPrime {},
@@ -12533,8 +12533,8 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: utils :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocation> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ReportEquivocation> {
+                    ::subxt::tx::Payload::new_static(
                         "Grandpa",
                         "report_equivocation",
                         ReportEquivocation {
@@ -12564,9 +12564,9 @@ pub mod api {
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: utils :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
-                ) -> ::subxt::tx::StaticTxPayload<ReportEquivocationUnsigned>
+                ) -> ::subxt::tx::Payload<ReportEquivocationUnsigned>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Grandpa",
                         "report_equivocation_unsigned",
                         ReportEquivocationUnsigned {
@@ -12599,8 +12599,8 @@ pub mod api {
                     &self,
                     delay: ::core::primitive::u32,
                     best_finalized_block_number: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<NoteStalled> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<NoteStalled> {
+                    ::subxt::tx::Payload::new_static(
                         "Grandpa",
                         "note_stalled",
                         NoteStalled {
@@ -12960,8 +12960,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ProposeSpend> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProposeSpend> {
+                    ::subxt::tx::Payload::new_static(
                         "Treasury",
                         "propose_spend",
                         ProposeSpend { value, beneficiary },
@@ -12985,8 +12985,8 @@ pub mod api {
                 pub fn reject_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RejectProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RejectProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "Treasury",
                         "reject_proposal",
                         RejectProposal { proposal_id },
@@ -13011,8 +13011,8 @@ pub mod api {
                 pub fn approve_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "Treasury",
                         "approve_proposal",
                         ApproveProposal { proposal_id },
@@ -13039,8 +13039,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Spend> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Spend> {
+                    ::subxt::tx::Payload::new_static(
                         "Treasury",
                         "spend",
                         Spend {
@@ -13073,8 +13073,8 @@ pub mod api {
                 pub fn remove_approval(
                     &self,
                     proposal_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveApproval> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveApproval> {
+                    ::subxt::tx::Payload::new_static(
                         "Treasury",
                         "remove_approval",
                         RemoveApproval { proposal_id },
@@ -13700,8 +13700,8 @@ pub mod api {
                         ::subxt::ext::codec::Compact<::core::primitive::u128>,
                     >,
                     data: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<CallOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CallOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "call_old_weight",
                         CallOldWeight {
@@ -13730,9 +13730,9 @@ pub mod api {
                     code: ::std::vec::Vec<::core::primitive::u8>,
                     data: ::std::vec::Vec<::core::primitive::u8>,
                     salt: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<InstantiateWithCodeOldWeight>
+                ) -> ::subxt::tx::Payload<InstantiateWithCodeOldWeight>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "instantiate_with_code_old_weight",
                         InstantiateWithCodeOldWeight {
@@ -13762,8 +13762,8 @@ pub mod api {
                     code_hash: ::subxt::utils::H256,
                     data: ::std::vec::Vec<::core::primitive::u8>,
                     salt: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<InstantiateOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<InstantiateOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "instantiate_old_weight",
                         InstantiateOldWeight {
@@ -13809,8 +13809,8 @@ pub mod api {
                         ::subxt::ext::codec::Compact<::core::primitive::u128>,
                     >,
                     determinism: runtime_types::pallet_contracts::wasm::Determinism,
-                ) -> ::subxt::tx::StaticTxPayload<UploadCode> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UploadCode> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "upload_code",
                         UploadCode {
@@ -13833,8 +13833,8 @@ pub mod api {
                 pub fn remove_code(
                     &self,
                     code_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveCode> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveCode> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "remove_code",
                         RemoveCode { code_hash },
@@ -13863,8 +13863,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     code_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<SetCode> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCode> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "set_code",
                         SetCode { dest, code_hash },
@@ -13904,8 +13904,8 @@ pub mod api {
                         ::subxt::ext::codec::Compact<::core::primitive::u128>,
                     >,
                     data: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Call> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Call> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "call",
                         Call {
@@ -13959,8 +13959,8 @@ pub mod api {
                     code: ::std::vec::Vec<::core::primitive::u8>,
                     data: ::std::vec::Vec<::core::primitive::u8>,
                     salt: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<InstantiateWithCode> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<InstantiateWithCode> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "instantiate_with_code",
                         InstantiateWithCode {
@@ -13994,8 +13994,8 @@ pub mod api {
                     code_hash: ::subxt::utils::H256,
                     data: ::std::vec::Vec<::core::primitive::u8>,
                     salt: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Instantiate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Instantiate> {
+                    ::subxt::tx::Payload::new_static(
                         "Contracts",
                         "instantiate",
                         Instantiate {
@@ -14719,8 +14719,8 @@ pub mod api {
                 pub fn sudo(
                     &self,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<Sudo> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Sudo> {
+                    ::subxt::tx::Payload::new_static(
                         "Sudo",
                         "sudo",
                         Sudo {
@@ -14748,8 +14748,8 @@ pub mod api {
                     &self,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
                     weight: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<SudoUncheckedWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SudoUncheckedWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Sudo",
                         "sudo_unchecked_weight",
                         SudoUncheckedWeight {
@@ -14780,8 +14780,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetKey> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetKey> {
+                    ::subxt::tx::Payload::new_static(
                         "Sudo",
                         "set_key",
                         SetKey { new },
@@ -14811,8 +14811,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<SudoAs> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SudoAs> {
+                    ::subxt::tx::Payload::new_static(
                         "Sudo",
                         "sudo_as",
                         SudoAs {
@@ -14955,8 +14955,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     signature : runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Signature,
-                ) -> ::subxt::tx::StaticTxPayload<Heartbeat> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Heartbeat> {
+                    ::subxt::tx::Payload::new_static(
                         "ImOnline",
                         "heartbeat",
                         Heartbeat {
@@ -15789,8 +15789,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AddRegistrar> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddRegistrar> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "add_registrar",
                         AddRegistrar { account },
@@ -15824,8 +15824,8 @@ pub mod api {
                 pub fn set_identity(
                     &self,
                     info: runtime_types::pallet_identity::types::IdentityInfo,
-                ) -> ::subxt::tx::StaticTxPayload<SetIdentity> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetIdentity> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "set_identity",
                         SetIdentity {
@@ -15866,8 +15866,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         runtime_types::pallet_identity::types::Data,
                     )>,
-                ) -> ::subxt::tx::StaticTxPayload<SetSubs> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetSubs> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "set_subs",
                         SetSubs { subs },
@@ -15899,8 +15899,8 @@ pub mod api {
                 #[doc = "# </weight>"]
                 pub fn clear_identity(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<ClearIdentity> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearIdentity> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "clear_identity",
                         ClearIdentity {},
@@ -15939,8 +15939,8 @@ pub mod api {
                     &self,
                     reg_index: ::core::primitive::u32,
                     max_fee: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<RequestJudgement> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RequestJudgement> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "request_judgement",
                         RequestJudgement { reg_index, max_fee },
@@ -15972,8 +15972,8 @@ pub mod api {
                 pub fn cancel_request(
                     &self,
                     reg_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CancelRequest> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelRequest> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "cancel_request",
                         CancelRequest { reg_index },
@@ -16002,8 +16002,8 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u32,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<SetFee> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetFee> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "set_fee",
                         SetFee { index, fee },
@@ -16035,8 +16035,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetAccountId> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetAccountId> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "set_account_id",
                         SetAccountId { index, new },
@@ -16067,8 +16067,8 @@ pub mod api {
                     fields: runtime_types::pallet_identity::types::BitFlags<
                         runtime_types::pallet_identity::types::IdentityField,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetFields> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetFields> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "set_fields",
                         SetFields { index, fields },
@@ -16111,8 +16111,8 @@ pub mod api {
                         ::core::primitive::u128,
                     >,
                     identity: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<ProvideJudgement> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProvideJudgement> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "provide_judgement",
                         ProvideJudgement {
@@ -16154,8 +16154,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<KillIdentity> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<KillIdentity> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "kill_identity",
                         KillIdentity { target },
@@ -16181,8 +16181,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     data: runtime_types::pallet_identity::types::Data,
-                ) -> ::subxt::tx::StaticTxPayload<AddSub> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddSub> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "add_sub",
                         AddSub { sub, data },
@@ -16205,8 +16205,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     data: runtime_types::pallet_identity::types::Data,
-                ) -> ::subxt::tx::StaticTxPayload<RenameSub> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RenameSub> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "rename_sub",
                         RenameSub { sub, data },
@@ -16231,8 +16231,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveSub> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveSub> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "remove_sub",
                         RemoveSub { sub },
@@ -16254,8 +16254,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "NOTE: This should not normally be used, but is provided in the case that the non-"]
                 #[doc = "controller of an account is maliciously registered as a sub-account."]
-                pub fn quit_sub(&self) -> ::subxt::tx::StaticTxPayload<QuitSub> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn quit_sub(&self) -> ::subxt::tx::Payload<QuitSub> {
+                    ::subxt::tx::Payload::new_static(
                         "Identity",
                         "quit_sub",
                         QuitSub {},
@@ -16986,8 +16986,8 @@ pub mod api {
                 pub fn bid(
                     &self,
                     value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Bid> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Bid> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "bid",
                         Bid { value },
@@ -17021,8 +17021,8 @@ pub mod api {
                 pub fn unbid(
                     &self,
                     pos: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Unbid> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unbid> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "unbid",
                         Unbid { pos },
@@ -17087,8 +17087,8 @@ pub mod api {
                     >,
                     value: ::core::primitive::u128,
                     tip: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Vouch> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vouch> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "vouch",
                         Vouch { who, value, tip },
@@ -17120,8 +17120,8 @@ pub mod api {
                 pub fn unvouch(
                     &self,
                     pos: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Unvouch> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unvouch> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "unvouch",
                         Unvouch { pos },
@@ -17159,8 +17159,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "vote",
                         Vote { candidate, approve },
@@ -17191,8 +17191,8 @@ pub mod api {
                 pub fn defender_vote(
                     &self,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<DefenderVote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DefenderVote> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "defender_vote",
                         DefenderVote { approve },
@@ -17225,8 +17225,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(M + logM + P + X)"]
                 #[doc = "# </weight>"]
-                pub fn payout(&self) -> ::subxt::tx::StaticTxPayload<Payout> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn payout(&self) -> ::subxt::tx::Payload<Payout> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "payout",
                         Payout {},
@@ -17265,8 +17265,8 @@ pub mod api {
                     >,
                     max_members: ::core::primitive::u32,
                     rules: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Found> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Found> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "found",
                         Found {
@@ -17295,8 +17295,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(1)"]
                 #[doc = "# </weight>"]
-                pub fn unfound(&self) -> ::subxt::tx::StaticTxPayload<Unfound> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn unfound(&self) -> ::subxt::tx::Payload<Unfound> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "unfound",
                         Unfound {},
@@ -17343,8 +17343,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     forgive: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<JudgeSuspendedMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<JudgeSuspendedMember> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "judge_suspended_member",
                         JudgeSuspendedMember { who, forgive },
@@ -17403,9 +17403,9 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     judgement: runtime_types::pallet_society::Judgement,
-                ) -> ::subxt::tx::StaticTxPayload<JudgeSuspendedCandidate>
+                ) -> ::subxt::tx::Payload<JudgeSuspendedCandidate>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "judge_suspended_candidate",
                         JudgeSuspendedCandidate { who, judgement },
@@ -17434,8 +17434,8 @@ pub mod api {
                 pub fn set_max_members(
                     &self,
                     max: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetMaxMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMaxMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "Society",
                         "set_max_members",
                         SetMaxMembers { max },
@@ -18604,8 +18604,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<AsRecovered> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AsRecovered> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "as_recovered",
                         AsRecovered {
@@ -18638,8 +18638,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetRecovered> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetRecovered> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "set_recovered",
                         SetRecovered { lost, rescuer },
@@ -18672,8 +18672,8 @@ pub mod api {
                     friends: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     threshold: ::core::primitive::u16,
                     delay_period: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CreateRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CreateRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "create_recovery",
                         CreateRecovery {
@@ -18706,8 +18706,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<InitiateRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<InitiateRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "initiate_recovery",
                         InitiateRecovery { account },
@@ -18741,8 +18741,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<VouchRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<VouchRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "vouch_recovery",
                         VouchRecovery { lost, rescuer },
@@ -18769,8 +18769,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ClaimRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClaimRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "claim_recovery",
                         ClaimRecovery { account },
@@ -18799,8 +18799,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<CloseRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "close_recovery",
                         CloseRecovery { rescuer },
@@ -18825,8 +18825,8 @@ pub mod api {
                 #[doc = "recoverable account (i.e. has a recovery configuration)."]
                 pub fn remove_recovery(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveRecovery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveRecovery> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "remove_recovery",
                         RemoveRecovery {},
@@ -18851,8 +18851,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<CancelRecovered> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelRecovered> {
+                    ::subxt::tx::Payload::new_static(
                         "Recovery",
                         "cancel_recovered",
                         CancelRecovered { account },
@@ -19355,8 +19355,8 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "# </weight>"]
-                pub fn vest(&self) -> ::subxt::tx::StaticTxPayload<Vest> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn vest(&self) -> ::subxt::tx::Payload<Vest> {
+                    ::subxt::tx::Payload::new_static(
                         "Vesting",
                         "vest",
                         Vest {},
@@ -19389,8 +19389,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<VestOther> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<VestOther> {
+                    ::subxt::tx::Payload::new_static(
                         "Vesting",
                         "vest_other",
                         VestOther { target },
@@ -19429,8 +19429,8 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<VestedTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<VestedTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Vesting",
                         "vested_transfer",
                         VestedTransfer { target, schedule },
@@ -19474,8 +19474,8 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceVestedTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceVestedTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Vesting",
                         "force_vested_transfer",
                         ForceVestedTransfer {
@@ -19516,8 +19516,8 @@ pub mod api {
                     &self,
                     schedule1_index: ::core::primitive::u32,
                     schedule2_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<MergeSchedules> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<MergeSchedules> {
+                    ::subxt::tx::Payload::new_static(
                         "Vesting",
                         "merge_schedules",
                         MergeSchedules {
@@ -19821,8 +19821,8 @@ pub mod api {
                     )>,
                     priority: ::core::primitive::u8,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<Schedule> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Schedule> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "schedule",
                         Schedule {
@@ -19844,8 +19844,8 @@ pub mod api {
                     &self,
                     when: ::core::primitive::u32,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Cancel> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Cancel> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "cancel",
                         Cancel { when, index },
@@ -19868,8 +19868,8 @@ pub mod api {
                     )>,
                     priority: ::core::primitive::u8,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<ScheduleNamed> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ScheduleNamed> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "schedule_named",
                         ScheduleNamed {
@@ -19891,8 +19891,8 @@ pub mod api {
                 pub fn cancel_named(
                     &self,
                     id: [::core::primitive::u8; 32usize],
-                ) -> ::subxt::tx::StaticTxPayload<CancelNamed> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelNamed> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "cancel_named",
                         CancelNamed { id },
@@ -19918,8 +19918,8 @@ pub mod api {
                     )>,
                     priority: ::core::primitive::u8,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<ScheduleAfter> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ScheduleAfter> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "schedule_after",
                         ScheduleAfter {
@@ -19951,8 +19951,8 @@ pub mod api {
                     )>,
                     priority: ::core::primitive::u8,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<ScheduleNamedAfter> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ScheduleNamedAfter> {
+                    ::subxt::tx::Payload::new_static(
                         "Scheduler",
                         "schedule_named_after",
                         ScheduleNamedAfter {
@@ -20340,8 +20340,8 @@ pub mod api {
                 pub fn note_preimage(
                     &self,
                     bytes: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<NotePreimage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<NotePreimage> {
+                    ::subxt::tx::Payload::new_static(
                         "Preimage",
                         "note_preimage",
                         NotePreimage { bytes },
@@ -20362,8 +20362,8 @@ pub mod api {
                 pub fn unnote_preimage(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<UnnotePreimage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UnnotePreimage> {
+                    ::subxt::tx::Payload::new_static(
                         "Preimage",
                         "unnote_preimage",
                         UnnotePreimage { hash },
@@ -20382,8 +20382,8 @@ pub mod api {
                 pub fn request_preimage(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RequestPreimage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RequestPreimage> {
+                    ::subxt::tx::Payload::new_static(
                         "Preimage",
                         "request_preimage",
                         RequestPreimage { hash },
@@ -20401,8 +20401,8 @@ pub mod api {
                 pub fn unrequest_preimage(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<UnrequestPreimage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UnrequestPreimage> {
+                    ::subxt::tx::Payload::new_static(
                         "Preimage",
                         "unrequest_preimage",
                         UnrequestPreimage { hash },
@@ -20780,8 +20780,8 @@ pub mod api {
                         runtime_types::kitchensink_runtime::ProxyType,
                     >,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<Proxy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Proxy> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "proxy",
                         Proxy {
@@ -20814,8 +20814,8 @@ pub mod api {
                     >,
                     proxy_type: runtime_types::kitchensink_runtime::ProxyType,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<AddProxy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddProxy> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "add_proxy",
                         AddProxy {
@@ -20846,8 +20846,8 @@ pub mod api {
                     >,
                     proxy_type: runtime_types::kitchensink_runtime::ProxyType,
                     delay: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveProxy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveProxy> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "remove_proxy",
                         RemoveProxy {
@@ -20871,8 +20871,8 @@ pub mod api {
                 #[doc = "the unreserved fees will be inaccessible. **All access to this account will be lost.**"]
                 pub fn remove_proxies(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveProxies> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveProxies> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "remove_proxies",
                         RemoveProxies {},
@@ -20907,8 +20907,8 @@ pub mod api {
                     proxy_type: runtime_types::kitchensink_runtime::ProxyType,
                     delay: ::core::primitive::u32,
                     index: ::core::primitive::u16,
-                ) -> ::subxt::tx::StaticTxPayload<CreatePure> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CreatePure> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "create_pure",
                         CreatePure {
@@ -20950,8 +20950,8 @@ pub mod api {
                     index: ::core::primitive::u16,
                     height: ::core::primitive::u32,
                     ext_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<KillPure> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<KillPure> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "kill_pure",
                         KillPure {
@@ -20991,8 +20991,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<Announce> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Announce> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "announce",
                         Announce { real, call_hash },
@@ -21021,8 +21021,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveAnnouncement> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveAnnouncement> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "remove_announcement",
                         RemoveAnnouncement { real, call_hash },
@@ -21051,8 +21051,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RejectAnnouncement> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RejectAnnouncement> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "reject_announcement",
                         RejectAnnouncement {
@@ -21092,8 +21092,8 @@ pub mod api {
                         runtime_types::kitchensink_runtime::ProxyType,
                     >,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<ProxyAnnounced> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProxyAnnounced> {
+                    ::subxt::tx::Payload::new_static(
                         "Proxy",
                         "proxy_announced",
                         ProxyAnnounced {
@@ -21564,8 +21564,8 @@ pub mod api {
                     &self,
                     other_signatories: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<AsMultiThreshold1> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AsMultiThreshold1> {
+                    ::subxt::tx::Payload::new_static(
                         "Multisig",
                         "as_multi_threshold_1",
                         AsMultiThreshold1 {
@@ -21634,8 +21634,8 @@ pub mod api {
                     >,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
                     max_weight: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<AsMulti> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AsMulti> {
+                    ::subxt::tx::Payload::new_static(
                         "Multisig",
                         "as_multi",
                         AsMulti {
@@ -21697,8 +21697,8 @@ pub mod api {
                     >,
                     call_hash: [::core::primitive::u8; 32usize],
                     max_weight: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveAsMulti> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveAsMulti> {
+                    ::subxt::tx::Payload::new_static(
                         "Multisig",
                         "approve_as_multi",
                         ApproveAsMulti {
@@ -21750,8 +21750,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     call_hash: [::core::primitive::u8; 32usize],
-                ) -> ::subxt::tx::StaticTxPayload<CancelAsMulti> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelAsMulti> {
+                    ::subxt::tx::Payload::new_static(
                         "Multisig",
                         "cancel_as_multi",
                         CancelAsMulti {
@@ -22124,8 +22124,8 @@ pub mod api {
                     &self,
                     value: ::core::primitive::u128,
                     description: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<ProposeBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProposeBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "propose_bounty",
                         ProposeBounty { value, description },
@@ -22148,8 +22148,8 @@ pub mod api {
                 pub fn approve_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "approve_bounty",
                         ApproveBounty { bounty_id },
@@ -22176,8 +22176,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ProposeCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProposeCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "propose_curator",
                         ProposeCurator {
@@ -22214,8 +22214,8 @@ pub mod api {
                 pub fn unassign_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<UnassignCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UnassignCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "unassign_curator",
                         UnassignCurator { bounty_id },
@@ -22238,8 +22238,8 @@ pub mod api {
                 pub fn accept_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<AcceptCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AcceptCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "accept_curator",
                         AcceptCurator { bounty_id },
@@ -22269,8 +22269,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AwardBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AwardBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "award_bounty",
                         AwardBounty {
@@ -22297,8 +22297,8 @@ pub mod api {
                 pub fn claim_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClaimBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClaimBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "claim_bounty",
                         ClaimBounty { bounty_id },
@@ -22323,8 +22323,8 @@ pub mod api {
                 pub fn close_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "close_bounty",
                         CloseBounty { bounty_id },
@@ -22350,8 +22350,8 @@ pub mod api {
                     &self,
                     bounty_id: ::core::primitive::u32,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<ExtendBountyExpiry> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ExtendBountyExpiry> {
+                    ::subxt::tx::Payload::new_static(
                         "Bounties",
                         "extend_bounty_expiry",
                         ExtendBountyExpiry { bounty_id, remark },
@@ -22930,8 +22930,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ReportAwesome> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ReportAwesome> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "report_awesome",
                         ReportAwesome { reason, who },
@@ -22965,8 +22965,8 @@ pub mod api {
                 pub fn retract_tip(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RetractTip> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RetractTip> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "retract_tip",
                         RetractTip { hash },
@@ -23008,8 +23008,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     tip_value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<TipNew> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TipNew> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "tip_new",
                         TipNew {
@@ -23053,8 +23053,8 @@ pub mod api {
                     &self,
                     hash: ::subxt::utils::H256,
                     tip_value: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Tip> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Tip> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "tip",
                         Tip { hash, tip_value },
@@ -23085,8 +23085,8 @@ pub mod api {
                 pub fn close_tip(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<CloseTip> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseTip> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "close_tip",
                         CloseTip { hash },
@@ -23113,8 +23113,8 @@ pub mod api {
                 pub fn slash_tip(
                     &self,
                     hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<SlashTip> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SlashTip> {
+                    ::subxt::tx::Payload::new_static(
                         "Tips",
                         "slash_tip",
                         SlashTip { hash },
@@ -23953,8 +23953,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     min_balance: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Create> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Create> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "create",
                         Create {
@@ -23998,8 +23998,8 @@ pub mod api {
                     >,
                     is_sufficient: ::core::primitive::bool,
                     min_balance: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCreate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCreate> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_create",
                         ForceCreate {
@@ -24030,8 +24030,8 @@ pub mod api {
                 pub fn start_destroy(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<StartDestroy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<StartDestroy> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "start_destroy",
                         StartDestroy { id },
@@ -24058,8 +24058,8 @@ pub mod api {
                 pub fn destroy_accounts(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<DestroyAccounts> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DestroyAccounts> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "destroy_accounts",
                         DestroyAccounts { id },
@@ -24086,8 +24086,8 @@ pub mod api {
                 pub fn destroy_approvals(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<DestroyApprovals> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DestroyApprovals> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "destroy_approvals",
                         DestroyApprovals { id },
@@ -24112,8 +24112,8 @@ pub mod api {
                 pub fn finish_destroy(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<FinishDestroy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<FinishDestroy> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "finish_destroy",
                         FinishDestroy { id },
@@ -24145,8 +24145,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Mint> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Mint> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "mint",
                         Mint {
@@ -24185,8 +24185,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Burn> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Burn> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "burn",
                         Burn { id, who, amount },
@@ -24224,8 +24224,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Transfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "transfer",
                         Transfer { id, target, amount },
@@ -24263,8 +24263,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<TransferKeepAlive> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferKeepAlive> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "transfer_keep_alive",
                         TransferKeepAlive { id, target, amount },
@@ -24307,8 +24307,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ForceTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_transfer",
                         ForceTransfer {
@@ -24342,8 +24342,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Freeze> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Freeze> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "freeze",
                         Freeze { id, who },
@@ -24372,8 +24372,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Thaw> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Thaw> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "thaw",
                         Thaw { id, who },
@@ -24397,8 +24397,8 @@ pub mod api {
                 pub fn freeze_asset(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<FreezeAsset> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<FreezeAsset> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "freeze_asset",
                         FreezeAsset { id },
@@ -24422,8 +24422,8 @@ pub mod api {
                 pub fn thaw_asset(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ThawAsset> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ThawAsset> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "thaw_asset",
                         ThawAsset { id },
@@ -24452,8 +24452,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<TransferOwnership> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferOwnership> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "transfer_ownership",
                         TransferOwnership { id, owner },
@@ -24492,8 +24492,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetTeam> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetTeam> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "set_team",
                         SetTeam {
@@ -24532,8 +24532,8 @@ pub mod api {
                     name: ::std::vec::Vec<::core::primitive::u8>,
                     symbol: ::std::vec::Vec<::core::primitive::u8>,
                     decimals: ::core::primitive::u8,
-                ) -> ::subxt::tx::StaticTxPayload<SetMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "set_metadata",
                         SetMetadata {
@@ -24564,8 +24564,8 @@ pub mod api {
                 pub fn clear_metadata(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "clear_metadata",
                         ClearMetadata { id },
@@ -24598,8 +24598,8 @@ pub mod api {
                     symbol: ::std::vec::Vec<::core::primitive::u8>,
                     decimals: ::core::primitive::u8,
                     is_frozen: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<ForceSetMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceSetMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_set_metadata",
                         ForceSetMetadata {
@@ -24631,8 +24631,8 @@ pub mod api {
                 pub fn force_clear_metadata(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ForceClearMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceClearMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_clear_metadata",
                         ForceClearMetadata { id },
@@ -24688,8 +24688,8 @@ pub mod api {
                     min_balance: ::core::primitive::u128,
                     is_sufficient: ::core::primitive::bool,
                     is_frozen: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<ForceAssetStatus> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceAssetStatus> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_asset_status",
                         ForceAssetStatus {
@@ -24738,8 +24738,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "approve_transfer",
                         ApproveTransfer {
@@ -24775,8 +24775,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<CancelApproval> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelApproval> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "cancel_approval",
                         CancelApproval { id, delegate },
@@ -24812,8 +24812,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCancelApproval> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCancelApproval> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "force_cancel_approval",
                         ForceCancelApproval {
@@ -24859,8 +24859,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     amount: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<TransferApproved> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferApproved> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "transfer_approved",
                         TransferApproved {
@@ -24889,8 +24889,8 @@ pub mod api {
                 pub fn touch(
                     &self,
                     id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Touch> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Touch> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "touch",
                         Touch { id },
@@ -24914,8 +24914,8 @@ pub mod api {
                     &self,
                     id: ::core::primitive::u32,
                     allow_burn: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Refund> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Refund> {
+                    ::subxt::tx::Payload::new_static(
                         "Assets",
                         "refund",
                         Refund { id, allow_burn },
@@ -25836,8 +25836,8 @@ pub mod api {
                 pub fn buy_ticket(
                     &self,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<BuyTicket> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BuyTicket> {
+                    ::subxt::tx::Payload::new_static(
                         "Lottery",
                         "buy_ticket",
                         BuyTicket {
@@ -25862,8 +25862,8 @@ pub mod api {
                     calls: ::std::vec::Vec<
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetCalls> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCalls> {
+                    ::subxt::tx::Payload::new_static(
                         "Lottery",
                         "set_calls",
                         SetCalls { calls },
@@ -25891,8 +25891,8 @@ pub mod api {
                     length: ::core::primitive::u32,
                     delay: ::core::primitive::u32,
                     repeat: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<StartLottery> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<StartLottery> {
+                    ::subxt::tx::Payload::new_static(
                         "Lottery",
                         "start_lottery",
                         StartLottery {
@@ -25913,8 +25913,8 @@ pub mod api {
                 #[doc = "The lottery will continue to run to completion."]
                 #[doc = ""]
                 #[doc = "This extrinsic must be called by the `ManagerOrigin`."]
-                pub fn stop_repeat(&self) -> ::subxt::tx::StaticTxPayload<StopRepeat> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn stop_repeat(&self) -> ::subxt::tx::Payload<StopRepeat> {
+                    ::subxt::tx::Payload::new_static(
                         "Lottery",
                         "stop_repeat",
                         StopRepeat {},
@@ -26340,8 +26340,8 @@ pub mod api {
                     &self,
                     amount: ::core::primitive::u128,
                     duration: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<PlaceBid> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PlaceBid> {
+                    ::subxt::tx::Payload::new_static(
                         "Nis",
                         "place_bid",
                         PlaceBid { amount, duration },
@@ -26364,8 +26364,8 @@ pub mod api {
                     &self,
                     amount: ::core::primitive::u128,
                     duration: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RetractBid> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RetractBid> {
+                    ::subxt::tx::Payload::new_static(
                         "Nis",
                         "retract_bid",
                         RetractBid { amount, duration },
@@ -26380,8 +26380,8 @@ pub mod api {
                 #[doc = "Ensure we have sufficient funding for all potential payouts."]
                 #[doc = ""]
                 #[doc = "- `origin`: Must be accepted by `FundOrigin`."]
-                pub fn fund_deficit(&self) -> ::subxt::tx::StaticTxPayload<FundDeficit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn fund_deficit(&self) -> ::subxt::tx::Payload<FundDeficit> {
+                    ::subxt::tx::Payload::new_static(
                         "Nis",
                         "fund_deficit",
                         FundDeficit {},
@@ -26405,8 +26405,8 @@ pub mod api {
                     &self,
                     index: ::core::primitive::u32,
                     portion: ::core::option::Option<::core::primitive::u128>,
-                ) -> ::subxt::tx::StaticTxPayload<Thaw> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Thaw> {
+                    ::subxt::tx::Payload::new_static(
                         "Nis",
                         "thaw",
                         Thaw { index, portion },
@@ -27371,8 +27371,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Create> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Create> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "create",
                         Create { collection, admin },
@@ -27409,8 +27409,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     free_holding: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCreate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCreate> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "force_create",
                         ForceCreate {
@@ -27445,8 +27445,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     witness: runtime_types::pallet_uniques::types::DestroyWitness,
-                ) -> ::subxt::tx::StaticTxPayload<Destroy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Destroy> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "destroy",
                         Destroy {
@@ -27480,8 +27480,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Mint> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Mint> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "mint",
                         Mint {
@@ -27522,8 +27522,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Burn> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Burn> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "burn",
                         Burn {
@@ -27564,8 +27564,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Transfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "transfer",
                         Transfer {
@@ -27602,8 +27602,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     items: ::std::vec::Vec<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<Redeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Redeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "redeposit",
                         Redeposit { collection, items },
@@ -27629,8 +27629,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Freeze> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Freeze> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "freeze",
                         Freeze { collection, item },
@@ -27656,8 +27656,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Thaw> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Thaw> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "thaw",
                         Thaw { collection, item },
@@ -27681,8 +27681,8 @@ pub mod api {
                 pub fn freeze_collection(
                     &self,
                     collection: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<FreezeCollection> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<FreezeCollection> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "freeze_collection",
                         FreezeCollection { collection },
@@ -27706,8 +27706,8 @@ pub mod api {
                 pub fn thaw_collection(
                     &self,
                     collection: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ThawCollection> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ThawCollection> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "thaw_collection",
                         ThawCollection { collection },
@@ -27737,8 +27737,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<TransferOwnership> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferOwnership> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "transfer_ownership",
                         TransferOwnership { collection, owner },
@@ -27777,8 +27777,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetTeam> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetTeam> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_team",
                         SetTeam {
@@ -27817,8 +27817,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "approve_transfer",
                         ApproveTransfer {
@@ -27860,8 +27860,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<CancelApproval> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelApproval> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "cancel_approval",
                         CancelApproval {
@@ -27914,8 +27914,8 @@ pub mod api {
                     >,
                     free_holding: ::core::primitive::bool,
                     is_frozen: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<ForceItemStatus> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceItemStatus> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "force_item_status",
                         ForceItemStatus {
@@ -27962,8 +27962,8 @@ pub mod api {
                     value: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetAttribute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetAttribute> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_attribute",
                         SetAttribute {
@@ -28001,8 +28001,8 @@ pub mod api {
                     key: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ClearAttribute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearAttribute> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "clear_attribute",
                         ClearAttribute {
@@ -28043,8 +28043,8 @@ pub mod api {
                         ::core::primitive::u8,
                     >,
                     is_frozen: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<SetMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_metadata",
                         SetMetadata {
@@ -28078,8 +28078,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "clear_metadata",
                         ClearMetadata { collection, item },
@@ -28114,8 +28114,8 @@ pub mod api {
                         ::core::primitive::u8,
                     >,
                     is_frozen: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<SetCollectionMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCollectionMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_collection_metadata",
                         SetCollectionMetadata {
@@ -28146,9 +28146,9 @@ pub mod api {
                 pub fn clear_collection_metadata(
                     &self,
                     collection: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearCollectionMetadata>
+                ) -> ::subxt::tx::Payload<ClearCollectionMetadata>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "clear_collection_metadata",
                         ClearCollectionMetadata { collection },
@@ -28173,8 +28173,8 @@ pub mod api {
                 pub fn set_accept_ownership(
                     &self,
                     maybe_collection: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<SetAcceptOwnership> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetAcceptOwnership> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_accept_ownership",
                         SetAcceptOwnership { maybe_collection },
@@ -28201,9 +28201,9 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     max_supply: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetCollectionMaxSupply>
+                ) -> ::subxt::tx::Payload<SetCollectionMaxSupply>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_collection_max_supply",
                         SetCollectionMaxSupply {
@@ -28240,8 +28240,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetPrice> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetPrice> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "set_price",
                         SetPrice {
@@ -28272,8 +28272,8 @@ pub mod api {
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
                     bid_price: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<BuyItem> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BuyItem> {
+                    ::subxt::tx::Payload::new_static(
                         "Uniques",
                         "buy_item",
                         BuyItem {
@@ -30022,8 +30022,8 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Create> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Create> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "create",
                         Create { admin, config },
@@ -30061,8 +30061,8 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCreate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCreate> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "force_create",
                         ForceCreate { owner, config },
@@ -30093,8 +30093,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     witness: runtime_types::pallet_nfts::types::DestroyWitness,
-                ) -> ::subxt::tx::StaticTxPayload<Destroy> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Destroy> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "destroy",
                         Destroy {
@@ -30137,8 +30137,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Mint> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Mint> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "mint",
                         Mint {
@@ -30177,8 +30177,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     item_config: runtime_types::pallet_nfts::types::ItemConfig,
-                ) -> ::subxt::tx::StaticTxPayload<ForceMint> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceMint> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "force_mint",
                         ForceMint {
@@ -30220,8 +30220,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Burn> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Burn> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "burn",
                         Burn {
@@ -30260,8 +30260,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Transfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Transfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "transfer",
                         Transfer {
@@ -30298,8 +30298,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     items: ::std::vec::Vec<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<Redeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Redeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "redeposit",
                         Redeposit { collection, items },
@@ -30325,8 +30325,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<LockItemTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<LockItemTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "lock_item_transfer",
                         LockItemTransfer { collection, item },
@@ -30352,8 +30352,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<UnlockItemTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UnlockItemTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "unlock_item_transfer",
                         UnlockItemTransfer { collection, item },
@@ -30382,8 +30382,8 @@ pub mod api {
                     lock_settings: runtime_types::pallet_nfts::types::BitFlags<
                         runtime_types::pallet_nfts::types::CollectionSetting,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<LockCollection> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<LockCollection> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "lock_collection",
                         LockCollection {
@@ -30416,8 +30416,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<TransferOwnership> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<TransferOwnership> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "transfer_ownership",
                         TransferOwnership { collection, owner },
@@ -30457,8 +30457,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetTeam> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetTeam> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_team",
                         SetTeam {
@@ -30492,8 +30492,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCollectionOwner> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCollectionOwner> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "force_collection_owner",
                         ForceCollectionOwner { collection, owner },
@@ -30523,8 +30523,8 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceCollectionConfig> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceCollectionConfig> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "force_collection_config",
                         ForceCollectionConfig { collection, config },
@@ -30559,8 +30559,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     maybe_deadline: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveTransfer> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveTransfer> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "approve_transfer",
                         ApproveTransfer {
@@ -30600,8 +30600,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<CancelApproval> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelApproval> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "cancel_approval",
                         CancelApproval {
@@ -30635,9 +30635,9 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearAllTransferApprovals>
+                ) -> ::subxt::tx::Payload<ClearAllTransferApprovals>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "clear_all_transfer_approvals",
                         ClearAllTransferApprovals { collection, item },
@@ -30672,8 +30672,8 @@ pub mod api {
                     item: ::core::primitive::u32,
                     lock_metadata: ::core::primitive::bool,
                     lock_attributes: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<LockItemProperties> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<LockItemProperties> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "lock_item_properties",
                         LockItemProperties {
@@ -30723,8 +30723,8 @@ pub mod api {
                     value: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetAttribute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetAttribute> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_attribute",
                         SetAttribute {
@@ -30771,8 +30771,8 @@ pub mod api {
                     value: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ForceSetAttribute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceSetAttribute> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "force_set_attribute",
                         ForceSetAttribute {
@@ -30814,8 +30814,8 @@ pub mod api {
                     key: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ClearAttribute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearAttribute> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "clear_attribute",
                         ClearAttribute {
@@ -30849,8 +30849,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ApproveItemAttributes> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ApproveItemAttributes> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "approve_item_attributes",
                         ApproveItemAttributes {
@@ -30885,9 +30885,9 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     witness : runtime_types :: pallet_nfts :: types :: CancelAttributesApprovalWitness,
-                ) -> ::subxt::tx::StaticTxPayload<CancelItemAttributesApproval>
+                ) -> ::subxt::tx::Payload<CancelItemAttributesApproval>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "cancel_item_attributes_approval",
                         CancelItemAttributesApproval {
@@ -30927,8 +30927,8 @@ pub mod api {
                     data: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_metadata",
                         SetMetadata {
@@ -30961,8 +30961,8 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClearMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "clear_metadata",
                         ClearMetadata { collection, item },
@@ -30995,8 +30995,8 @@ pub mod api {
                     data: runtime_types::sp_core::bounded::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetCollectionMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetCollectionMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_collection_metadata",
                         SetCollectionMetadata { collection, data },
@@ -31023,9 +31023,9 @@ pub mod api {
                 pub fn clear_collection_metadata(
                     &self,
                     collection: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClearCollectionMetadata>
+                ) -> ::subxt::tx::Payload<ClearCollectionMetadata>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "clear_collection_metadata",
                         ClearCollectionMetadata { collection },
@@ -31050,8 +31050,8 @@ pub mod api {
                 pub fn set_accept_ownership(
                     &self,
                     maybe_collection: ::core::option::Option<::core::primitive::u32>,
-                ) -> ::subxt::tx::StaticTxPayload<SetAcceptOwnership> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetAcceptOwnership> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_accept_ownership",
                         SetAcceptOwnership { maybe_collection },
@@ -31076,9 +31076,9 @@ pub mod api {
                     &self,
                     collection: ::core::primitive::u32,
                     max_supply: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetCollectionMaxSupply>
+                ) -> ::subxt::tx::Payload<SetCollectionMaxSupply>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_collection_max_supply",
                         SetCollectionMaxSupply {
@@ -31110,8 +31110,8 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<UpdateMintSettings> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UpdateMintSettings> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "update_mint_settings",
                         UpdateMintSettings {
@@ -31148,8 +31148,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<SetPrice> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetPrice> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "set_price",
                         SetPrice {
@@ -31180,8 +31180,8 @@ pub mod api {
                     collection: ::core::primitive::u32,
                     item: ::core::primitive::u32,
                     bid_price: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<BuyItem> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BuyItem> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "buy_item",
                         BuyItem {
@@ -31214,8 +31214,8 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<PayTips> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PayTips> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "pay_tips",
                         PayTips { tips },
@@ -31255,8 +31255,8 @@ pub mod api {
                         >,
                     >,
                     duration: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CreateSwap> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CreateSwap> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "create_swap",
                         CreateSwap {
@@ -31288,8 +31288,8 @@ pub mod api {
                     &self,
                     offered_collection: ::core::primitive::u32,
                     offered_item: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CancelSwap> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CancelSwap> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "cancel_swap",
                         CancelSwap {
@@ -31327,8 +31327,8 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ClaimSwap> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClaimSwap> {
+                    ::subxt::tx::Payload::new_static(
                         "Nfts",
                         "claim_swap",
                         ClaimSwap {
@@ -32951,8 +32951,8 @@ pub mod api {
                 pub fn store(
                     &self,
                     data: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Store> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Store> {
+                    ::subxt::tx::Payload::new_static(
                         "TransactionStorage",
                         "store",
                         Store { data },
@@ -32975,8 +32975,8 @@ pub mod api {
                     &self,
                     block: ::core::primitive::u32,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Renew> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Renew> {
+                    ::subxt::tx::Payload::new_static(
                         "TransactionStorage",
                         "renew",
                         Renew { block, index },
@@ -32999,8 +32999,8 @@ pub mod api {
                 pub fn check_proof(
                     &self,
                     proof : runtime_types :: sp_transaction_storage_proof :: TransactionStorageProof,
-                ) -> ::subxt::tx::StaticTxPayload<CheckProof> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CheckProof> {
+                    ::subxt::tx::Payload::new_static(
                         "TransactionStorage",
                         "check_proof",
                         CheckProof { proof },
@@ -33336,8 +33336,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Rebag> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Rebag> {
+                    ::subxt::tx::Payload::new_static(
                         "VoterList",
                         "rebag",
                         Rebag { dislocated },
@@ -33363,8 +33363,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<PutInFrontOf> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PutInFrontOf> {
+                    ::subxt::tx::Payload::new_static(
                         "VoterList",
                         "put_in_front_of",
                         PutInFrontOf { lighter },
@@ -33714,8 +33714,8 @@ pub mod api {
                 pub fn control_auto_migration(
                     &self,
                     maybe_config : :: core :: option :: Option < runtime_types :: pallet_state_trie_migration :: pallet :: MigrationLimits >,
-                ) -> ::subxt::tx::StaticTxPayload<ControlAutoMigration> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ControlAutoMigration> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "control_auto_migration",
                         ControlAutoMigration { maybe_config },
@@ -33753,8 +33753,8 @@ pub mod api {
                     limits : runtime_types :: pallet_state_trie_migration :: pallet :: MigrationLimits,
                     real_size_upper: ::core::primitive::u32,
                     witness_task : runtime_types :: pallet_state_trie_migration :: pallet :: MigrationTask,
-                ) -> ::subxt::tx::StaticTxPayload<ContinueMigrate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ContinueMigrate> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "continue_migrate",
                         ContinueMigrate {
@@ -33778,8 +33778,8 @@ pub mod api {
                     &self,
                     keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
                     witness_size: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<MigrateCustomTop> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<MigrateCustomTop> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "migrate_custom_top",
                         MigrateCustomTop { keys, witness_size },
@@ -33802,8 +33802,8 @@ pub mod api {
                     root: ::std::vec::Vec<::core::primitive::u8>,
                     child_keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
                     total_size: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<MigrateCustomChild> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<MigrateCustomChild> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "migrate_custom_child",
                         MigrateCustomChild {
@@ -33823,8 +33823,8 @@ pub mod api {
                 pub fn set_signed_max_limits(
                     &self,
                     limits : runtime_types :: pallet_state_trie_migration :: pallet :: MigrationLimits,
-                ) -> ::subxt::tx::StaticTxPayload<SetSignedMaxLimits> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetSignedMaxLimits> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "set_signed_max_limits",
                         SetSignedMaxLimits { limits },
@@ -33849,8 +33849,8 @@ pub mod api {
                     &self,
                     progress_top : runtime_types :: pallet_state_trie_migration :: pallet :: Progress,
                     progress_child : runtime_types :: pallet_state_trie_migration :: pallet :: Progress,
-                ) -> ::subxt::tx::StaticTxPayload<ForceSetProgress> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ForceSetProgress> {
+                    ::subxt::tx::Payload::new_static(
                         "StateTrieMigration",
                         "force_set_progress",
                         ForceSetProgress {
@@ -34204,8 +34204,8 @@ pub mod api {
                     parent_bounty_id: ::core::primitive::u32,
                     value: ::core::primitive::u128,
                     description: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<AddChildBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddChildBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "add_child_bounty",
                         AddChildBounty {
@@ -34245,8 +34245,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     fee: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<ProposeCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ProposeCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "propose_curator",
                         ProposeCurator {
@@ -34286,8 +34286,8 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<AcceptCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AcceptCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "accept_curator",
                         AcceptCurator {
@@ -34340,8 +34340,8 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<UnassignCurator> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UnassignCurator> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "unassign_curator",
                         UnassignCurator {
@@ -34381,8 +34381,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AwardChildBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AwardChildBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "award_child_bounty",
                         AwardChildBounty {
@@ -34418,8 +34418,8 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ClaimChildBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ClaimChildBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "claim_child_bounty",
                         ClaimChildBounty {
@@ -34460,8 +34460,8 @@ pub mod api {
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseChildBounty> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseChildBounty> {
+                    ::subxt::tx::Payload::new_static(
                         "ChildBounties",
                         "close_child_bounty",
                         CloseChildBounty {
@@ -34966,8 +34966,8 @@ pub mod api {
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
                     enactment_moment : runtime_types :: frame_support :: traits :: schedule :: DispatchTime < :: core :: primitive :: u32 >,
-                ) -> ::subxt::tx::StaticTxPayload<Submit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Submit> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "submit",
                         Submit {
@@ -34994,8 +34994,8 @@ pub mod api {
                 pub fn place_decision_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<PlaceDecisionDeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PlaceDecisionDeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "place_decision_deposit",
                         PlaceDecisionDeposit { index },
@@ -35017,8 +35017,8 @@ pub mod api {
                 pub fn refund_decision_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RefundDecisionDeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RefundDecisionDeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "refund_decision_deposit",
                         RefundDecisionDeposit { index },
@@ -35039,8 +35039,8 @@ pub mod api {
                 pub fn cancel(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Cancel> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Cancel> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "cancel",
                         Cancel { index },
@@ -35061,8 +35061,8 @@ pub mod api {
                 pub fn kill(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Kill> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Kill> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "kill",
                         Kill { index },
@@ -35081,8 +35081,8 @@ pub mod api {
                 pub fn nudge_referendum(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<NudgeReferendum> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<NudgeReferendum> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "nudge_referendum",
                         NudgeReferendum { index },
@@ -35106,8 +35106,8 @@ pub mod api {
                 pub fn one_fewer_deciding(
                     &self,
                     track: ::core::primitive::u16,
-                ) -> ::subxt::tx::StaticTxPayload<OneFewerDeciding> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<OneFewerDeciding> {
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "one_fewer_deciding",
                         OneFewerDeciding { track },
@@ -35129,9 +35129,9 @@ pub mod api {
                 pub fn refund_submission_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RefundSubmissionDeposit>
+                ) -> ::subxt::tx::Payload<RefundSubmissionDeposit>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Referenda",
                         "refund_submission_deposit",
                         RefundSubmissionDeposit { index },
@@ -35748,8 +35748,8 @@ pub mod api {
                 pub fn store(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<Store> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Store> {
+                    ::subxt::tx::Payload::new_static(
                         "Remark",
                         "store",
                         Store { remark },
@@ -35813,8 +35813,8 @@ pub mod api {
                 pub fn fill_block(
                     &self,
                     ratio: runtime_types::sp_arithmetic::per_things::Perbill,
-                ) -> ::subxt::tx::StaticTxPayload<FillBlock> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<FillBlock> {
+                    ::subxt::tx::Payload::new_static(
                         "RootTesting",
                         "fill_block",
                         FillBlock { ratio },
@@ -35948,8 +35948,8 @@ pub mod api {
                     vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                         ::core::primitive::u128,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "vote",
                         Vote { poll_index, vote },
@@ -35993,8 +35993,8 @@ pub mod api {
                     >,
                     conviction : runtime_types :: pallet_conviction_voting :: conviction :: Conviction,
                     balance: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Delegate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Delegate> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "delegate",
                         Delegate {
@@ -36028,8 +36028,8 @@ pub mod api {
                 pub fn undelegate(
                     &self,
                     class: ::core::primitive::u16,
-                ) -> ::subxt::tx::StaticTxPayload<Undelegate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Undelegate> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "undelegate",
                         Undelegate { class },
@@ -36057,8 +36057,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Unlock> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unlock> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "unlock",
                         Unlock { class, target },
@@ -36103,8 +36103,8 @@ pub mod api {
                     &self,
                     class: ::core::option::Option<::core::primitive::u16>,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveVote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveVote> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "remove_vote",
                         RemoveVote { class, index },
@@ -36140,8 +36140,8 @@ pub mod api {
                     >,
                     class: ::core::primitive::u16,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveOtherVote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveOtherVote> {
+                    ::subxt::tx::Payload::new_static(
                         "ConvictionVoting",
                         "remove_other_vote",
                         RemoveOtherVote {
@@ -36433,8 +36433,8 @@ pub mod api {
                 pub fn whitelist_call(
                     &self,
                     call_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<WhitelistCall> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<WhitelistCall> {
+                    ::subxt::tx::Payload::new_static(
                         "Whitelist",
                         "whitelist_call",
                         WhitelistCall { call_hash },
@@ -36449,8 +36449,8 @@ pub mod api {
                 pub fn remove_whitelisted_call(
                     &self,
                     call_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveWhitelistedCall> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveWhitelistedCall> {
+                    ::subxt::tx::Payload::new_static(
                         "Whitelist",
                         "remove_whitelisted_call",
                         RemoveWhitelistedCall { call_hash },
@@ -36467,9 +36467,9 @@ pub mod api {
                     call_hash: ::subxt::utils::H256,
                     call_encoded_len: ::core::primitive::u32,
                     call_weight_witness: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<DispatchWhitelistedCall>
+                ) -> ::subxt::tx::Payload<DispatchWhitelistedCall>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Whitelist",
                         "dispatch_whitelisted_call",
                         DispatchWhitelistedCall {
@@ -36488,9 +36488,9 @@ pub mod api {
                 pub fn dispatch_whitelisted_call_with_preimage(
                     &self,
                     call: runtime_types::kitchensink_runtime::RuntimeCall,
-                ) -> ::subxt::tx::StaticTxPayload<DispatchWhitelistedCallWithPreimage>
+                ) -> ::subxt::tx::Payload<DispatchWhitelistedCallWithPreimage>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Whitelist",
                         "dispatch_whitelisted_call_with_preimage",
                         DispatchWhitelistedCallWithPreimage {
@@ -36771,8 +36771,8 @@ pub mod api {
                     new_members: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     prime: ::core::option::Option<::subxt::utils::AccountId32>,
                     old_count: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<SetMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "set_members",
                         SetMembers {
@@ -36803,8 +36803,8 @@ pub mod api {
                     &self,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Execute> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Execute> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "execute",
                         Execute {
@@ -36851,8 +36851,8 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Propose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Propose> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "propose",
                         Propose {
@@ -36888,8 +36888,8 @@ pub mod api {
                     proposal: ::subxt::utils::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "vote",
                         Vote {
@@ -36943,8 +36943,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::OldWeight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "close_old_weight",
                         CloseOldWeight {
@@ -36978,8 +36978,8 @@ pub mod api {
                 pub fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::utils::H256,
-                ) -> ::subxt::tx::StaticTxPayload<DisapproveProposal> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DisapproveProposal> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "disapprove_proposal",
                         DisapproveProposal { proposal_hash },
@@ -37029,8 +37029,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Close> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Close> {
+                    ::subxt::tx::Payload::new_static(
                         "AllianceMotion",
                         "close",
                         Close {
@@ -37648,8 +37648,8 @@ pub mod api {
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::kitchensink_runtime::RuntimeCall,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Propose> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Propose> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "propose",
                         Propose {
@@ -37673,8 +37673,8 @@ pub mod api {
                     proposal: ::subxt::utils::H256,
                     index: ::core::primitive::u32,
                     approve: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "vote",
                         Vote {
@@ -37699,8 +37699,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::OldWeight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CloseOldWeight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CloseOldWeight> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "close_old_weight",
                         CloseOldWeight {
@@ -37726,8 +37726,8 @@ pub mod api {
                     &self,
                     fellows: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     allies: ::std::vec::Vec<::subxt::utils::AccountId32>,
-                ) -> ::subxt::tx::StaticTxPayload<InitMembers> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<InitMembers> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "init_members",
                         InitMembers { fellows, allies },
@@ -37745,8 +37745,8 @@ pub mod api {
                 pub fn disband(
                     &self,
                     witness: runtime_types::pallet_alliance::types::DisbandWitness,
-                ) -> ::subxt::tx::StaticTxPayload<Disband> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Disband> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "disband",
                         Disband { witness },
@@ -37762,8 +37762,8 @@ pub mod api {
                 pub fn set_rule(
                     &self,
                     rule: runtime_types::pallet_alliance::types::Cid,
-                ) -> ::subxt::tx::StaticTxPayload<SetRule> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetRule> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "set_rule",
                         SetRule { rule },
@@ -37779,8 +37779,8 @@ pub mod api {
                 pub fn announce(
                     &self,
                     announcement: runtime_types::pallet_alliance::types::Cid,
-                ) -> ::subxt::tx::StaticTxPayload<Announce> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Announce> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "announce",
                         Announce { announcement },
@@ -37796,8 +37796,8 @@ pub mod api {
                 pub fn remove_announcement(
                     &self,
                     announcement: runtime_types::pallet_alliance::types::Cid,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveAnnouncement> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveAnnouncement> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "remove_announcement",
                         RemoveAnnouncement { announcement },
@@ -37812,8 +37812,8 @@ pub mod api {
                 #[doc = "Submit oneself for candidacy. A fixed deposit is reserved."]
                 pub fn join_alliance(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<JoinAlliance> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<JoinAlliance> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "join_alliance",
                         JoinAlliance {},
@@ -37833,8 +37833,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<NominateAlly> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<NominateAlly> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "nominate_ally",
                         NominateAlly { who },
@@ -37853,8 +37853,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<ElevateAlly> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ElevateAlly> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "elevate_ally",
                         ElevateAlly { ally },
@@ -37870,8 +37870,8 @@ pub mod api {
                 #[doc = "order to retire."]
                 pub fn give_retirement_notice(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<GiveRetirementNotice> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<GiveRetirementNotice> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "give_retirement_notice",
                         GiveRetirementNotice {},
@@ -37887,8 +37887,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "This can only be done once you have called `give_retirement_notice` and the"]
                 #[doc = "`RetirementPeriod` has passed."]
-                pub fn retire(&self) -> ::subxt::tx::StaticTxPayload<Retire> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn retire(&self) -> ::subxt::tx::Payload<Retire> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "retire",
                         Retire {},
@@ -37907,8 +37907,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<KickMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<KickMember> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "kick_member",
                         KickMember { who },
@@ -37931,8 +37931,8 @@ pub mod api {
                             >,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AddUnscrupulousItems> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddUnscrupulousItems> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "add_unscrupulous_items",
                         AddUnscrupulousItems { items },
@@ -37955,9 +37955,9 @@ pub mod api {
                             >,
                         >,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveUnscrupulousItems>
+                ) -> ::subxt::tx::Payload<RemoveUnscrupulousItems>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "remove_unscrupulous_items",
                         RemoveUnscrupulousItems { items },
@@ -37978,8 +37978,8 @@ pub mod api {
                     index: ::core::primitive::u32,
                     proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     length_bound: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Close> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Close> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "close",
                         Close {
@@ -38001,8 +38001,8 @@ pub mod api {
                 #[doc = "operationally for some time."]
                 pub fn abdicate_fellow_status(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<AbdicateFellowStatus> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AbdicateFellowStatus> {
+                    ::subxt::tx::Payload::new_static(
                         "Alliance",
                         "abdicate_fellow_status",
                         AbdicateFellowStatus {},
@@ -38853,8 +38853,8 @@ pub mod api {
                     &self,
                     amount: ::core::primitive::u128,
                     pool_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Join> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Join> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "join",
                         Join { amount, pool_id },
@@ -38877,8 +38877,8 @@ pub mod api {
                     extra: runtime_types::pallet_nomination_pools::BondExtra<
                         ::core::primitive::u128,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<BondExtra> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<BondExtra> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "bond_extra",
                         BondExtra { extra },
@@ -38896,8 +38896,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The member will earn rewards pro rata based on the members stake vs the sum of the"]
                 #[doc = "members in the pools stake. Rewards do not \"expire\"."]
-                pub fn claim_payout(&self) -> ::subxt::tx::StaticTxPayload<ClaimPayout> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn claim_payout(&self) -> ::subxt::tx::Payload<ClaimPayout> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "claim_payout",
                         ClaimPayout {},
@@ -38947,8 +38947,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     unbonding_points: ::core::primitive::u128,
-                ) -> ::subxt::tx::StaticTxPayload<Unbond> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Unbond> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "unbond",
                         Unbond {
@@ -38973,8 +38973,8 @@ pub mod api {
                     &self,
                     pool_id: ::core::primitive::u32,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<PoolWithdrawUnbonded> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PoolWithdrawUnbonded> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "pool_withdraw_unbonded",
                         PoolWithdrawUnbonded {
@@ -39015,8 +39015,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     num_slashing_spans: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<WithdrawUnbonded> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<WithdrawUnbonded> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "withdraw_unbonded",
                         WithdrawUnbonded {
@@ -39063,8 +39063,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<Create> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Create> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "create",
                         Create {
@@ -39103,8 +39103,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     pool_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CreateWithPoolId> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CreateWithPoolId> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "create_with_pool_id",
                         CreateWithPoolId {
@@ -39133,8 +39133,8 @@ pub mod api {
                     &self,
                     pool_id: ::core::primitive::u32,
                     validators: ::std::vec::Vec<::subxt::utils::AccountId32>,
-                ) -> ::subxt::tx::StaticTxPayload<Nominate> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Nominate> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "nominate",
                         Nominate {
@@ -39163,8 +39163,8 @@ pub mod api {
                     &self,
                     pool_id: ::core::primitive::u32,
                     state: runtime_types::pallet_nomination_pools::PoolState,
-                ) -> ::subxt::tx::StaticTxPayload<SetState> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetState> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "set_state",
                         SetState { pool_id, state },
@@ -39184,8 +39184,8 @@ pub mod api {
                     &self,
                     pool_id: ::core::primitive::u32,
                     metadata: ::std::vec::Vec<::core::primitive::u8>,
-                ) -> ::subxt::tx::StaticTxPayload<SetMetadata> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetMetadata> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "set_metadata",
                         SetMetadata { pool_id, metadata },
@@ -39222,8 +39222,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     max_members_per_pool : runtime_types :: pallet_nomination_pools :: ConfigOp < :: core :: primitive :: u32 >,
-                ) -> ::subxt::tx::StaticTxPayload<SetConfigs> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<SetConfigs> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "set_configs",
                         SetConfigs {
@@ -39260,8 +39260,8 @@ pub mod api {
                     new_state_toggler: runtime_types::pallet_nomination_pools::ConfigOp<
                         ::subxt::utils::AccountId32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<UpdateRoles> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<UpdateRoles> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "update_roles",
                         UpdateRoles {
@@ -39288,8 +39288,8 @@ pub mod api {
                 pub fn chill(
                     &self,
                     pool_id: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Chill> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Chill> {
+                    ::subxt::tx::Payload::new_static(
                         "NominationPools",
                         "chill",
                         Chill { pool_id },
@@ -40283,8 +40283,8 @@ pub mod api {
                         runtime_types::kitchensink_runtime::RuntimeCall,
                     >,
                     enactment_moment : runtime_types :: frame_support :: traits :: schedule :: DispatchTime < :: core :: primitive :: u32 >,
-                ) -> ::subxt::tx::StaticTxPayload<Submit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Submit> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "submit",
                         Submit {
@@ -40311,8 +40311,8 @@ pub mod api {
                 pub fn place_decision_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<PlaceDecisionDeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PlaceDecisionDeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "place_decision_deposit",
                         PlaceDecisionDeposit { index },
@@ -40334,8 +40334,8 @@ pub mod api {
                 pub fn refund_decision_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RefundDecisionDeposit> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RefundDecisionDeposit> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "refund_decision_deposit",
                         RefundDecisionDeposit { index },
@@ -40356,8 +40356,8 @@ pub mod api {
                 pub fn cancel(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Cancel> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Cancel> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "cancel",
                         Cancel { index },
@@ -40378,8 +40378,8 @@ pub mod api {
                 pub fn kill(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Kill> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Kill> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "kill",
                         Kill { index },
@@ -40398,8 +40398,8 @@ pub mod api {
                 pub fn nudge_referendum(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<NudgeReferendum> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<NudgeReferendum> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "nudge_referendum",
                         NudgeReferendum { index },
@@ -40423,8 +40423,8 @@ pub mod api {
                 pub fn one_fewer_deciding(
                     &self,
                     track: ::core::primitive::u16,
-                ) -> ::subxt::tx::StaticTxPayload<OneFewerDeciding> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<OneFewerDeciding> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "one_fewer_deciding",
                         OneFewerDeciding { track },
@@ -40446,9 +40446,9 @@ pub mod api {
                 pub fn refund_submission_deposit(
                     &self,
                     index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<RefundSubmissionDeposit>
+                ) -> ::subxt::tx::Payload<RefundSubmissionDeposit>
                 {
-                    ::subxt::tx::StaticTxPayload::new(
+                    ::subxt::tx::Payload::new_static(
                         "RankedPolls",
                         "refund_submission_deposit",
                         RefundSubmissionDeposit { index },
@@ -41133,8 +41133,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<AddMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<AddMember> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "add_member",
                         AddMember { who },
@@ -41158,8 +41158,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<PromoteMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<PromoteMember> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "promote_member",
                         PromoteMember { who },
@@ -41184,8 +41184,8 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u32,
                     >,
-                ) -> ::subxt::tx::StaticTxPayload<DemoteMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<DemoteMember> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "demote_member",
                         DemoteMember { who },
@@ -41211,8 +41211,8 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                     min_rank: ::core::primitive::u16,
-                ) -> ::subxt::tx::StaticTxPayload<RemoveMember> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RemoveMember> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "remove_member",
                         RemoveMember { who, min_rank },
@@ -41239,8 +41239,8 @@ pub mod api {
                     &self,
                     poll: ::core::primitive::u32,
                     aye: ::core::primitive::bool,
-                ) -> ::subxt::tx::StaticTxPayload<Vote> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Vote> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "vote",
                         Vote { poll, aye },
@@ -41266,8 +41266,8 @@ pub mod api {
                     &self,
                     poll_index: ::core::primitive::u32,
                     max: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<CleanupPoll> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<CleanupPoll> {
+                    ::subxt::tx::Payload::new_static(
                         "RankedCollective",
                         "cleanup_poll",
                         CleanupPoll { poll_index, max },
@@ -41714,8 +41714,8 @@ pub mod api {
                 #[doc = "the chain's resources."]
                 pub fn register_fast_unstake(
                     &self,
-                ) -> ::subxt::tx::StaticTxPayload<RegisterFastUnstake> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<RegisterFastUnstake> {
+                    ::subxt::tx::Payload::new_static(
                         "FastUnstake",
                         "register_fast_unstake",
                         RegisterFastUnstake {},
@@ -41734,8 +41734,8 @@ pub mod api {
                 #[doc = "Note that the associated stash is still fully unbonded and chilled as a consequence of"]
                 #[doc = "calling `register_fast_unstake`. This should probably be followed by a call to"]
                 #[doc = "`Staking::rebond`."]
-                pub fn deregister(&self) -> ::subxt::tx::StaticTxPayload<Deregister> {
-                    ::subxt::tx::StaticTxPayload::new(
+                pub fn deregister(&self) -> ::subxt::tx::Payload<Deregister> {
+                    ::subxt::tx::Payload::new_static(
                         "FastUnstake",
                         "deregister",
                         Deregister {},
@@ -41753,8 +41753,8 @@ pub mod api {
                 pub fn control(
                     &self,
                     unchecked_eras_to_check: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<Control> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<Control> {
+                    ::subxt::tx::Payload::new_static(
                         "FastUnstake",
                         "control",
                         Control {
@@ -42059,8 +42059,8 @@ pub mod api {
                     &self,
                     message_origin : runtime_types :: pallet_message_queue :: mock_helpers :: MessageOrigin,
                     page_index: ::core::primitive::u32,
-                ) -> ::subxt::tx::StaticTxPayload<ReapPage> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ReapPage> {
+                    ::subxt::tx::Payload::new_static(
                         "MessageQueue",
                         "reap_page",
                         ReapPage {
@@ -42091,8 +42091,8 @@ pub mod api {
                     page: ::core::primitive::u32,
                     index: ::core::primitive::u32,
                     weight_limit: runtime_types::sp_weights::weight_v2::Weight,
-                ) -> ::subxt::tx::StaticTxPayload<ExecuteOverweight> {
-                    ::subxt::tx::StaticTxPayload::new(
+                ) -> ::subxt::tx::Payload<ExecuteOverweight> {
+                    ::subxt::tx::Payload::new_static(
                         "MessageQueue",
                         "execute_overweight",
                         ExecuteOverweight {

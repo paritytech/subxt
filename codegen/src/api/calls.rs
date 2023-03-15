@@ -104,8 +104,8 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::StaticTxPayload<#struct_name> {
-                    #crate_path::tx::StaticTxPayload::new(
+                ) -> #crate_path::tx::Payload<#struct_name> {
+                    #crate_path::tx::Payload::new_static(
                         #pallet_name,
                         #call_name,
                         #struct_name { #( #call_args, )* },
