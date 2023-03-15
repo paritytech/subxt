@@ -143,27 +143,15 @@ impl Derives {
 impl quote::ToTokens for Derives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.derives.is_empty() {
-            let mut sorted = self.derives.iter().cloned().collect::<Vec<_>>();
-            sorted.sort_by(|a, b| {
-                quote::quote!(#a)
-                    .to_string()
-                    .cmp(&quote::quote!(#b).to_string())
-            });
-
+            let derives_iter = self.derives.iter();
             tokens.extend(quote::quote! {
-                #[derive(#( #sorted ),*)]
+                #[derive(#( #derives_iter ),*)]
             })
         }
         if !self.attributes.is_empty() {
-            let mut sorted = self.attributes.iter().cloned().collect::<Vec<_>>();
-            sorted.sort_by(|a, b| {
-                quote::quote!(#a)
-                    .to_string()
-                    .cmp(&quote::quote!(#b).to_string())
-            });
-
+            let attrs_iter = self.attributes.iter();
             tokens.extend(quote::quote! {
-                #( #sorted )*
+                #( #attrs_iter )*
             })
         }
     }

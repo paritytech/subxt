@@ -155,7 +155,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
 
         // Sanity check that the compact length we decoded lines up with the number of bytes encoded in the next field.
         if field.bytes().len() != len as usize {
-            return Err(Error::new(ErrorKind::Custom("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len".into())))
+            return Err(Error::new(ErrorKind::Custom("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len".into())));
         }
 
         Ok(WrapperKeepOpaque {
