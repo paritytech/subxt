@@ -5,7 +5,7 @@
 use codec::Encode;
 
 // We use this type a bunch, so export it from here.
-pub use frame_metadata::StorageHasher;
+pub use frame_metadata::v15::StorageHasher;
 
 /// Storage key for a Map.
 #[derive(Clone)]

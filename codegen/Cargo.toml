@@ -14,7 +14,7 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
 darling = "0.14.0"
-frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/", branch = "lexnv/md_v15_test", default-features = false, features = ["std", "v14", "v15-unstable"] }
+frame-metadata = { version = "15.0.0", git = "https://github.com/paritytech/frame-metadata/", branch = "lexnv/md_v15", default-features = false, features = ["std", "v14", "v15-unstable"] }
 heck = "0.4.0"
 proc-macro2 = "1.0.24"
 proc-macro-error = "1.0.4"

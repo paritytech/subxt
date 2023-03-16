@@ -23,7 +23,7 @@ use crate::{
     Config,
 };
 use derivative::Derivative;
-use frame_metadata::StorageEntryType;
+use frame_metadata::v15::StorageEntryType;
 use scale_info::form::PortableForm;
 use std::{
     future::Future,

@@ -8,7 +8,7 @@ use crate::{
 };
 use frame_metadata::v15::{
     RuntimeMetadataV15,
-    TraitMetadata,
+    RuntimeApiMetadata,
 };
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -20,7 +20,7 @@ use scale_info::form::PortableForm;
 
 /// Generates the accessor functions for the given trait.
 fn generate_trait_api(
-    trait_: &TraitMetadata<PortableForm>,
+    trait_: &RuntimeApiMetadata<PortableForm>,
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,

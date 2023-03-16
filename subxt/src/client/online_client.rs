@@ -156,7 +156,7 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
         use codec::Encode;
 
-        let param = 15u32.encode();
+        let param = u32::MAX.encode();
         let bytes = rpc
             .state_call("Metadata_metadata_at_version", Some(&param), None)
             .await?;

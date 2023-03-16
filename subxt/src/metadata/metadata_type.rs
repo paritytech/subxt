@@ -5,13 +5,16 @@
 use super::hash_cache::HashCache;
 use codec::Error as CodecError;
 use frame_metadata::{
-    v15::RuntimeMetadataV15,
-    PalletConstantMetadata,
+    v15::{
+        PalletConstantMetadata,
+        RuntimeMetadataV15,
+        StorageEntryMetadata,
+        META_RESERVED,
+    },
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    StorageEntryMetadata,
-    META_RESERVED,
 };
+
 use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
@@ -675,6 +678,7 @@ mod tests {
                 signed_extensions: vec![],
             },
             meta_type::<()>(),
+            Default::default(),
         );
         let prefixed = RuntimeMetadataPrefixed::from(metadata);
 

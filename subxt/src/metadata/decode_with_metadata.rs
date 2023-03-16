@@ -8,7 +8,7 @@ use crate::{
     error::Error,
 };
 use codec::Decode;
-use frame_metadata::StorageEntryType;
+use frame_metadata::v15::StorageEntryType;
 
 /// This trait is implemented for types which can be decoded with the help of metadata.
 pub trait DecodeWithMetadata {

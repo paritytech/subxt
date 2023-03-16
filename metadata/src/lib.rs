@@ -2,10 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use frame_metadata::{
-    v15::RuntimeMetadataV15,
+use frame_metadata::v15::{
     ExtrinsicMetadata,
-    StorageEntryMetadata,
+    RuntimeMetadataV15,
     StorageEntryType,
 };
 use scale_info::{
@@ -216,7 +215,7 @@ fn get_extrinsic_hash(
 /// Get the hash corresponding to a single storage entry.
 fn get_storage_entry_hash(
     registry: &PortableRegistry,
-    entry: &StorageEntryMetadata<PortableForm>,
+    entry: &frame_metadata::v15::StorageEntryMetadata<PortableForm>,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     let mut bytes = hash(entry.name.as_bytes());
@@ -326,7 +325,7 @@ pub fn get_call_hash(
 /// Obtain the hash representation of a `frame_metadata::PalletMetadata`.
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
-    pallet: &frame_metadata::PalletMetadata<PortableForm>,
+    pallet: &frame_metadata::v15::PalletMetadata<PortableForm>,
 ) -> [u8; 32] {
     // Begin with some arbitrary hash (we don't really care what it is).
     let mut bytes = hash(&[19]);

@@ -138,12 +138,16 @@ pub fn generate_runtime_api_from_bytes(
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
 ) -> TokenStream2 {
+    println!("Decodign metadata");
     let decoded: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &*bytes)
         .unwrap_or_else(|e| abort_call_site!("Failed to decode opaque metadata: {}", e));
     let decoded = decoded.unwrap();
     let bytes = &decoded.0;
     let metadata: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
+    println!("META done");
+
+    println!("{:#?}", metadata);
 
     let generator = RuntimeGenerator::new(metadata);
     generator.generate_runtime(item_mod, derives, type_substitutes, crate_path)

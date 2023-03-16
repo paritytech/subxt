@@ -6,9 +6,9 @@ use crate::{
     types::TypeGenerator,
     CratePath,
 };
-use frame_metadata::{
-    v15::RuntimeMetadataV15,
+use frame_metadata::v15::{
     PalletMetadata,
+    RuntimeMetadataV15,
     StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,

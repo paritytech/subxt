@@ -64,7 +64,7 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
         .build_with_tokio(sender, receiver);
 
     use codec::Encode;
-    let bytes = 15u32.encode();
+    let bytes = u32::MAX.encode();
     let param = format!("0x{}", hex::encode(&bytes));
 
     Ok(client
@@ -81,7 +81,7 @@ async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
         .build(url.to_string())?;
 
     use codec::Encode;
-    let bytes = 15u32.encode();
+    let bytes = u32::MAX.encode();
     let param = format!("0x{}", hex::encode(&bytes));
 
     Ok(client

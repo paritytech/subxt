@@ -971,7 +971,7 @@ dependencies = [
 [[package]]
 name = "frame-metadata"
 version = "15.0.0"
-source = "git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test#35b8304e004f9a759aa2663e24c5f56e2a50c301"
+source = "git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15#3f176938c7a6c569d7608aa02efa0def93476675"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
@@ -1508,7 +1508,7 @@ name = "integration-tests"
 version = "0.25.0"
 dependencies = [
  "assert_matches",
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -3338,7 +3338,7 @@ dependencies = [
  "bitvec",
  "blake2",
  "derivative",
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "futures",
  "getrandom 0.2.8",
  "hex",
@@ -3371,7 +3371,7 @@ version = "0.25.0"
 dependencies = [
  "clap 4.1.1",
  "color-eyre",
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -3389,7 +3389,7 @@ version = "0.25.0"
 dependencies = [
  "bitvec",
  "darling",
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "heck",
  "hex",
  "jsonrpsee",
@@ -3435,7 +3435,7 @@ version = "0.25.0"
 dependencies = [
  "bitvec",
  "criterion",
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "parity-scale-codec",
  "scale-info",
  "sp-core-hashing",
@@ -3811,7 +3811,7 @@ checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 name = "ui-tests"
 version = "0.25.0"
 dependencies = [
- "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15_test)",
+ "frame-metadata 15.0.0 (git+https://github.com/paritytech/frame-metadata/?branch=lexnv/md_v15)",
  "parity-scale-codec",
  "scale-info",
  "subxt",

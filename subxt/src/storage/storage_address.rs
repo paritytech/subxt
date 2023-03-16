@@ -18,12 +18,12 @@ use crate::{
         Metadata,
     },
 };
-use frame_metadata::StorageEntryType;
+use frame_metadata::v15::StorageEntryType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
 
 // We use this type a bunch, so export it from here.
-pub use frame_metadata::StorageHasher;
+pub use frame_metadata::v15::StorageHasher;
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.

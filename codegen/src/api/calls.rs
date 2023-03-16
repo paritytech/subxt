@@ -9,9 +9,9 @@ use crate::{
     },
     CratePath,
 };
-use frame_metadata::{
-    v15::RuntimeMetadataV15,
+use frame_metadata::v15::{
     PalletMetadata,
+    RuntimeMetadataV15,
 };
 use heck::{
     ToSnakeCase as _,
