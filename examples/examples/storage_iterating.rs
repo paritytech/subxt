@@ -10,12 +10,11 @@
 //! polkadot --dev --tmp
 //! ```
 
-use codec::Decode;
+use codec::{
+    Decode,
+    Encode,
+};
 use subxt::{
-    storage::address::{
-        StorageHasher,
-        StorageMapKey,
-    },
     OnlineClient,
     PolkadotConfig,
 };
@@ -83,11 +82,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut query_key = key_addr.to_root_bytes();
 
         // We know that the first key is a u32 (the `XcmVersion`) and is hashed by twox64_concat.
-        // We can build a `StorageMapKey` that replicates that, and append those bytes to the above.
-        StorageMapKey::new(2u32, StorageHasher::Twox64Concat).to_bytes(&mut query_key);
+        // twox64_concat is just the result of running the twox_64 hasher on some value and concatenating
+        // the value itself after it:
+        query_key.extend(subxt::ext::sp_core::twox_64(&2u32.encode()));
+        query_key.extend(&2u32.encode());
 
         // The final query key is essentially the result of:
-        // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
+        // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(scale_encode(2u32)) ++ scale_encode(2u32)`
         println!("\nExample 3\nQuery key: 0x{}", hex::encode(&query_key));
 
         let keys = api

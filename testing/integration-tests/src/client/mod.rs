@@ -471,10 +471,12 @@ async fn chainhead_unstable_storage() {
     let sub_id = blocks.subscription_id().unwrap().clone();
 
     let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
-    let addr = node_runtime::storage().system().account(alice).to_bytes();
+    let addr = node_runtime::storage().system().account(alice);
+    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
+
     let mut sub = api
         .rpc()
-        .chainhead_unstable_storage(sub_id, hash, &addr, None)
+        .chainhead_unstable_storage(sub_id, hash, &addr_bytes, None)
         .await
         .unwrap();
     let event = sub.next().await.unwrap().unwrap();

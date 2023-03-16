@@ -7,10 +7,7 @@ use super::storage_address::{
     Yes,
 };
 use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
+    client::OnlineClientT,
     error::Error,
     metadata::{
         DecodeWithMetadata,
@@ -47,22 +44,6 @@ impl<T: Config, Client> Storage<T, Client> {
             block_hash,
             _marker: PhantomData,
         }
-    }
-}
-
-impl<T, Client> Storage<T, Client>
-where
-    T: Config,
-    Client: OfflineClientT<T>,
-{
-    /// Run the validation logic against some storage address you'd like to access.
-    ///
-    /// Method has the same meaning as [`StorageClient::validate`](super::storage_client::StorageClient::validate).
-    pub fn validate<Address: StorageAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
-        validate_storage_address(address, &self.client.metadata())
     }
 }
 
@@ -129,7 +110,7 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            client.validate(address)?;
+            validate_storage_address(address, &client.client.metadata())?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
             let metadata = client.client.metadata();
@@ -249,7 +230,7 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            client.validate(&address)?;
+            validate_storage_address(&address, &client.client.metadata())?;
 
             let metadata = client.client.metadata();
 

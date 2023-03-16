@@ -26,13 +26,12 @@ pub mod address {
     pub use super::storage_address::{
         dynamic,
         dynamic_root,
-        DynamicStorageAddress,
-        StaticStorageAddress,
+        Address,
+        DynamicAddress,
+        StaticStorageMapKey,
         StorageAddress,
-        StorageMapKey,
         Yes,
     };
-    pub use frame_metadata::StorageHasher;
 }
 
 // For consistency with other modules, also expose
@@ -40,7 +39,7 @@ pub mod address {
 pub use storage_address::{
     dynamic,
     dynamic_root,
-    DynamicStorageAddress,
-    StaticStorageAddress,
+    Address,
+    DynamicAddress,
     StorageAddress,
 };

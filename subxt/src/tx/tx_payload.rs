@@ -17,8 +17,10 @@ use scale_value::{
     ValueDef,
     Variant,
 };
-use std::borrow::Cow;
-use std::sync::Arc;
+use std::{
+    borrow::Cow,
+    sync::Arc,
+};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
@@ -104,13 +106,13 @@ impl<CallData> Payload<CallData> {
     /// Box the payload.
     pub fn boxed(self) -> BoxedPayload
     where
-        CallData: EncodeAsFields + Send + Sync + 'static
+        CallData: EncodeAsFields + Send + Sync + 'static,
     {
         BoxedPayload {
             pallet_name: self.pallet_name,
-            call_name:self.call_name,
+            call_name: self.call_name,
             call_data: Arc::new(self.call_data),
-            validation_hash: self.validation_hash
+            validation_hash: self.validation_hash,
         }
     }
 
@@ -160,7 +162,8 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
         pallet_index.encode_to(out);
         call_index.encode_to(out);
 
-        self.call_data.encode_as_fields_to(call.fields(), metadata.types(), out)?;
+        self.call_data
+            .encode_as_fields_to(call.fields(), metadata.types(), out)?;
         Ok(())
     }
 

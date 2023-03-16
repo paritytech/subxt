@@ -57,6 +57,17 @@ where
     ) -> Result<(), Error> {
         validate_storage_address(address, &self.client.metadata())
     }
+
+    /// Convert some storage address into the raw bytes that would be submitted to the node in order
+    /// to retrieve the associated entry.
+    pub fn address_bytes<Address: StorageAddress>(
+        &self,
+        address: &Address,
+    ) -> Result<Vec<u8>, Error> {
+        let mut bytes = Vec::new();
+        address.append_entry_bytes(&self.client.metadata(), &mut bytes)?;
+        Ok(bytes)
+    }
 }
 
 impl<T, Client> StorageClient<T, Client>
