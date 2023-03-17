@@ -51,6 +51,7 @@ tracing = "0.1.34"
 parking_lot = "0.12.0"
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
+either = "1.8.1"
 
 subxt-macro = { version = "0.27.1", path = "../macro" }
 subxt-metadata = { version = "0.27.1", path = "../metadata" }

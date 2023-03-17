@@ -173,8 +173,8 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
         self.validation_hash.map(|hash| {
             ValidationDetails {
-                pallet_name: &*self.pallet_name,
-                call_name: &*self.call_name,
+                pallet_name: &self.pallet_name,
+                call_name: &self.call_name,
                 hash,
             }
         })

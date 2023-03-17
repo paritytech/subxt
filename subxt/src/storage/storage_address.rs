@@ -183,11 +183,9 @@ where
                 // If the key is not a tuple, encode a single value to the key type.
                 let type_ids = match ty.type_def() {
                     TypeDef::Tuple(tuple) => {
-                        tuple.fields().iter().map(|f| f.id()).collect()
+                        either::Either::Left(tuple.fields().iter().map(|f| f.id()))
                     }
-                    _other => {
-                        vec![key.id()]
-                    }
+                    _other => either::Either::Right(std::iter::once(key.id())),
                 };
 
                 if type_ids.len() != self.storage_entry_keys.len() {
@@ -201,16 +199,16 @@ where
                 if hashers.len() == 1 {
                     // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
                     let mut input = Vec::new();
-                    for (key, type_id) in self.storage_entry_keys.iter().zip(type_ids) {
+                    let iter = self.storage_entry_keys.iter().zip(type_ids);
+                    for (key, type_id) in iter {
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
                     }
                     hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
                 } else if hashers.len() == type_ids.len() {
+                    let iter = self.storage_entry_keys.iter().zip(type_ids).zip(hashers);
                     // A hasher per field; encode and hash each field independently.
-                    for ((key, type_id), hasher) in
-                        self.storage_entry_keys.iter().zip(type_ids).zip(hashers)
-                    {
+                    for ((key, type_id), hasher) in iter {
                         let mut input = Vec::new();
                         key.encode_with_metadata(type_id, metadata, &mut input)?;
                         hash_bytes(&input, hasher, bytes);
@@ -258,7 +256,7 @@ impl EncodeWithMetadata for StaticStorageMapKey {
 }
 
 /// Construct a new dynamic storage lookup to the root of some entry.
-pub fn dynamic_root<'a>(
+pub fn dynamic_root(
     pallet_name: impl Into<String>,
     entry_name: impl Into<String>,
 ) -> DynamicAddress<Value> {
@@ -266,7 +264,7 @@ pub fn dynamic_root<'a>(
 }
 
 /// Construct a new dynamic storage lookup.
-pub fn dynamic<'a, StorageKey: EncodeWithMetadata>(
+pub fn dynamic<StorageKey: EncodeWithMetadata>(
     pallet_name: impl Into<String>,
     entry_name: impl Into<String>,
     storage_entry_keys: Vec<StorageKey>,

@@ -83,13 +83,9 @@ fn generate_storage_entry_fns(
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let (fields, key_impl) = match storage_entry.ty {
+    let (fields, key_impl) = match &storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
-        StorageEntryType::Map {
-            ref key,
-            ref hashers,
-            ..
-        } => {
+        StorageEntryType::Map { key, .. } => {
             let key_ty = type_gen.resolve_type(key.id());
             match key_ty.type_def() {
                 TypeDef::Tuple(tuple) => {
@@ -104,32 +100,13 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
 
-                    let key_impl = if hashers.len() == fields.len() {
-                        // If the number of hashers matches the number of fields, we're dealing with
-                        // something shaped like a StorageNMap, and each field should be hashed separately
-                        // according to the corresponding hasher.
-                        let keys = fields
-                            .iter()
-                            .map(|(field_name, _)| {
-                                quote!( #crate_path::storage::address::StaticStorageMapKey::new(#field_name.borrow()) )
-                            });
-                        quote! {
-                            vec![ #( #keys ),* ]
-                        }
-                    } else if hashers.len() == 1 {
-                        // If there is one hasher, then however many fields we have, we want to hash a
-                        // tuple of them using the one hasher we're told about. This corresponds to a
-                        // StorageMap.
-                        let items =
-                            fields.iter().map(|(field_name, _)| quote!( #field_name ));
-                        quote! {
-                            vec![ #crate_path::storage::address::StaticStorageMapKey::new(&(#( #items.borrow() ),*)) ]
-                        }
-                    } else {
-                        return Err(CodegenError::MismatchHashers(
-                            hashers.len(),
-                            fields.len(),
-                        ))
+                    let keys = fields
+                        .iter()
+                        .map(|(field_name, _)| {
+                            quote!( #crate_path::storage::address::StaticStorageMapKey::new(#field_name.borrow()) )
+                        });
+                    let key_impl = quote! {
+                        vec![ #( #keys ),* ]
                     };
 
                     (fields, key_impl)
