@@ -88,6 +88,7 @@ fn generate_storage_entry_fns(
         StorageEntryType::Map { key, .. } => {
             let key_ty = type_gen.resolve_type(key.id());
             match key_ty.type_def() {
+                // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => {
                     let fields = tuple
                         .fields()
@@ -111,6 +112,7 @@ fn generate_storage_entry_fns(
 
                     (fields, key_impl)
                 }
+                // A map with a single key; return the single key.
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id());
                     let fields = vec![(format_ident!("_0"), ty_path)];
