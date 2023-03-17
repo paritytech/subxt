@@ -71,6 +71,9 @@ pub struct Payload<CallData> {
 // Dev Note: Arc used to enable easy cloning (given that we can't have dyn Clone).
 pub type BoxedPayload = Payload<Arc<dyn EncodeAsFields + Send + Sync + 'static>>;
 
+/// The type of a payload typically used for dynamic transaction payloads.
+pub type DynamicPayload = Payload<Composite<()>>;
+
 impl<CallData> Payload<CallData> {
     /// Create a new [`Payload`].
     pub fn new(
@@ -184,6 +187,6 @@ pub fn dynamic(
     pallet_name: impl Into<String>,
     call_name: impl Into<String>,
     call_data: impl Into<Composite<()>>,
-) -> Payload<Composite<()>> {
+) -> DynamicPayload {
     Payload::new(pallet_name, call_name, call_data.into())
 }

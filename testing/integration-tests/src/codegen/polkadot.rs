@@ -1385,10 +1385,10 @@ pub mod api {
                 #[doc = " Block & extrinsics weights: base values and limits."]
                 pub fn block_weights(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::frame_system::limits::BlockWeights,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "BlockWeights",
                         [
@@ -1402,10 +1402,10 @@ pub mod api {
                 #[doc = " The maximum length of a block (in bytes)."]
                 pub fn block_length(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::frame_system::limits::BlockLength,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "BlockLength",
                         [
@@ -1419,9 +1419,8 @@ pub mod api {
                 #[doc = " Maximum number of block number to block hash mappings to keep (oldest pruned first)."]
                 pub fn block_hash_count(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "BlockHashCount",
                         [
@@ -1435,10 +1434,9 @@ pub mod api {
                 #[doc = " The weight of runtime database operations the runtime can invoke."]
                 pub fn db_weight(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    runtime_types::sp_weights::RuntimeDbWeight,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<runtime_types::sp_weights::RuntimeDbWeight>
+                {
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "DbWeight",
                         [
@@ -1452,10 +1450,9 @@ pub mod api {
                 #[doc = " Get the chain's current version."]
                 pub fn version(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    runtime_types::sp_version::RuntimeVersion,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<runtime_types::sp_version::RuntimeVersion>
+                {
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "Version",
                         [
@@ -1473,9 +1470,8 @@ pub mod api {
                 #[doc = " an identifier of the chain."]
                 pub fn ss58_prefix(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u16>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u16> {
+                    ::subxt::constants::Address::new_static(
                         "System",
                         "SS58Prefix",
                         [
@@ -2032,10 +2028,10 @@ pub mod api {
                 #[doc = " The maximum weight that may be scheduled per block for any dispatchables."]
                 pub fn maximum_weight(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_weights::weight_v2::Weight,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Scheduler",
                         "MaximumWeight",
                         [
@@ -2049,9 +2045,8 @@ pub mod api {
                 #[doc = " The maximum number of scheduled calls in the queue for a single block."]
                 pub fn max_scheduled_per_block(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Scheduler",
                         "MaxScheduledPerBlock",
                         [
@@ -2952,9 +2947,8 @@ pub mod api {
                 #[doc = " the chain has started. Attempting to do so will brick block production."]
                 pub fn epoch_duration(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "Babe",
                         "EpochDuration",
                         [
@@ -2972,9 +2966,8 @@ pub mod api {
                 #[doc = " the probability of a slot being empty)."]
                 pub fn expected_block_time(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "Babe",
                         "ExpectedBlockTime",
                         [
@@ -2988,9 +2981,8 @@ pub mod api {
                 #[doc = " Max number of authorities allowed"]
                 pub fn max_authorities(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Babe",
                         "MaxAuthorities",
                         [
@@ -3121,9 +3113,8 @@ pub mod api {
                 #[doc = " double this period on default settings."]
                 pub fn minimum_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "Timestamp",
                         "MinimumPeriod",
                         [
@@ -3520,9 +3511,9 @@ pub mod api {
                 #[doc = " The deposit needed for reserving an index."]
                 pub fn deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Indices",
                         "Deposit",
                         [
@@ -4268,9 +4259,9 @@ pub mod api {
                 #[doc = " The minimum amount required to keep an account open."]
                 pub fn existential_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Balances",
                         "ExistentialDeposit",
                         [
@@ -4285,9 +4276,8 @@ pub mod api {
                 #[doc = " Not strictly enforced, but used for weight estimation."]
                 pub fn max_locks(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Balances",
                         "MaxLocks",
                         [
@@ -4301,9 +4291,8 @@ pub mod api {
                 #[doc = " The maximum number of named reserves that can exist on an account."]
                 pub fn max_reserves(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Balances",
                         "MaxReserves",
                         [
@@ -4420,9 +4409,8 @@ pub mod api {
                 #[doc = " transactions."]
                 pub fn operational_fee_multiplier(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u8>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u8> {
+                    ::subxt::constants::Address::new_static(
                         "TransactionPayment",
                         "OperationalFeeMultiplier",
                         [
@@ -4574,9 +4562,8 @@ pub mod api {
                 #[doc = " `UncleGenerations + 1` before `now`."]
                 pub fn uncle_generations(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Authorship",
                         "UncleGenerations",
                         [
@@ -7358,9 +7345,8 @@ pub mod api {
                 #[doc = " Maximum number of nominations per nominator."]
                 pub fn max_nominations(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "MaxNominations",
                         [
@@ -7393,9 +7379,8 @@ pub mod api {
                 #[doc = " The test `reducing_history_depth_abrupt` shows this effect."]
                 pub fn history_depth(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "HistoryDepth",
                         [
@@ -7409,9 +7394,8 @@ pub mod api {
                 #[doc = " Number of sessions per era."]
                 pub fn sessions_per_era(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "SessionsPerEra",
                         [
@@ -7425,9 +7409,8 @@ pub mod api {
                 #[doc = " Number of eras that staked funds must remain bonded for."]
                 pub fn bonding_duration(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "BondingDuration",
                         [
@@ -7444,9 +7427,8 @@ pub mod api {
                 #[doc = " should be applied immediately, without opportunity for intervention."]
                 pub fn slash_defer_duration(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "SlashDeferDuration",
                         [
@@ -7463,9 +7445,8 @@ pub mod api {
                 #[doc = " claim their reward. This used to limit the i/o cost for the nominator payout."]
                 pub fn max_nominator_rewarded_per_validator(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "MaxNominatorRewardedPerValidator",
                         [
@@ -7488,9 +7469,8 @@ pub mod api {
                 #[doc = " this effect."]
                 pub fn max_unlocking_chunks(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Staking",
                         "MaxUnlockingChunks",
                         [
@@ -8443,9 +8423,8 @@ pub mod api {
                 #[doc = " Max Authorities in use"]
                 pub fn max_authorities(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Grandpa",
                         "MaxAuthorities",
                         [
@@ -8764,9 +8743,8 @@ pub mod api {
                 #[doc = " multiple pallets send unsigned transactions."]
                 pub fn unsigned_priority(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "ImOnline",
                         "UnsignedPriority",
                         [
@@ -10257,9 +10235,8 @@ pub mod api {
                 #[doc = " where they are on the losing side of a vote."]
                 pub fn enactment_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "EnactmentPeriod",
                         [
@@ -10273,9 +10250,8 @@ pub mod api {
                 #[doc = " How often (in blocks) new public referenda are launched."]
                 pub fn launch_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "LaunchPeriod",
                         [
@@ -10289,9 +10265,8 @@ pub mod api {
                 #[doc = " How often (in blocks) to check for new votes."]
                 pub fn voting_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "VotingPeriod",
                         [
@@ -10308,9 +10283,8 @@ pub mod api {
                 #[doc = " those successful voters are locked into the consequences that their votes entail."]
                 pub fn vote_locking_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "VoteLockingPeriod",
                         [
@@ -10324,9 +10298,9 @@ pub mod api {
                 #[doc = " The minimum amount to be used as a deposit for a public referendum proposal."]
                 pub fn minimum_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "MinimumDeposit",
                         [
@@ -10342,9 +10316,9 @@ pub mod api {
                 #[doc = " as an upgrade having happened recently."]
                 pub fn instant_allowed(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::bool>
+                ) -> ::subxt::constants::Address<::core::primitive::bool>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "InstantAllowed",
                         [
@@ -10358,9 +10332,8 @@ pub mod api {
                 #[doc = " Minimum voting period allowed for a fast-track referendum."]
                 pub fn fast_track_voting_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "FastTrackVotingPeriod",
                         [
@@ -10374,9 +10347,8 @@ pub mod api {
                 #[doc = " Period in blocks where an external proposal may not be re-submitted after being vetoed."]
                 pub fn cooloff_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "CooloffPeriod",
                         [
@@ -10393,9 +10365,8 @@ pub mod api {
                 #[doc = " lead to extrinsic with very big weight: see `delegate` for instance."]
                 pub fn max_votes(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "MaxVotes",
                         [
@@ -10409,9 +10380,8 @@ pub mod api {
                 #[doc = " The maximum number of public proposals that can exist at any time."]
                 pub fn max_proposals(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "MaxProposals",
                         [
@@ -10425,9 +10395,8 @@ pub mod api {
                 #[doc = " The maximum number of deposits a public proposal may have at any time."]
                 pub fn max_deposits(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "MaxDeposits",
                         [
@@ -10441,9 +10410,8 @@ pub mod api {
                 #[doc = " The maximum number of items which can be blacklisted."]
                 pub fn max_blacklisted(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Democracy",
                         "MaxBlacklisted",
                         [
@@ -12591,10 +12559,9 @@ pub mod api {
                 #[doc = " Identifier for the elections-phragmen pallet's lock"]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    [::core::primitive::u8; 8usize],
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<[::core::primitive::u8; 8usize]>
+                {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "PalletId",
                         [
@@ -12608,9 +12575,9 @@ pub mod api {
                 #[doc = " How much should be locked up in order to submit one's candidacy."]
                 pub fn candidacy_bond(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "CandidacyBond",
                         [
@@ -12627,9 +12594,9 @@ pub mod api {
                 #[doc = " creating a gigantic number of votes."]
                 pub fn voting_bond_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "VotingBondBase",
                         [
@@ -12643,9 +12610,9 @@ pub mod api {
                 #[doc = " The amount of bond that need to be locked for each vote (32 bytes)."]
                 pub fn voting_bond_factor(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "VotingBondFactor",
                         [
@@ -12659,9 +12626,8 @@ pub mod api {
                 #[doc = " Number of members to elect."]
                 pub fn desired_members(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "DesiredMembers",
                         [
@@ -12675,9 +12641,8 @@ pub mod api {
                 #[doc = " Number of runners_up to keep."]
                 pub fn desired_runners_up(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "DesiredRunnersUp",
                         [
@@ -12693,9 +12658,8 @@ pub mod api {
                 #[doc = " be in passive mode."]
                 pub fn term_duration(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "TermDuration",
                         [
@@ -12713,9 +12677,8 @@ pub mod api {
                 #[doc = " candidates are accepted in the election."]
                 pub fn max_candidates(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "MaxCandidates",
                         [
@@ -12732,9 +12695,8 @@ pub mod api {
                 #[doc = " When the limit is reached the new voters are ignored."]
                 pub fn max_voters(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "PhragmenElection",
                         "MaxVoters",
                         [
@@ -13614,10 +13576,10 @@ pub mod api {
                 #[doc = " An accepted proposal gets these back. A rejected proposal does not."]
                 pub fn proposal_bond(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "ProposalBond",
                         [
@@ -13631,9 +13593,9 @@ pub mod api {
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_minimum(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "ProposalBondMinimum",
                         [
@@ -13647,10 +13609,10 @@ pub mod api {
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_maximum(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "ProposalBondMaximum",
                         [
@@ -13664,9 +13626,8 @@ pub mod api {
                 #[doc = " Period between successive spends."]
                 pub fn spend_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "SpendPeriod",
                         [
@@ -13680,10 +13641,10 @@ pub mod api {
                 #[doc = " Percentage of spare funds (if any) that are burnt per spend period."]
                 pub fn burn(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "Burn",
                         [
@@ -13697,10 +13658,9 @@ pub mod api {
                 #[doc = " The treasury's pallet id, used for deriving its sovereign account ID."]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    runtime_types::frame_support::PalletId,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<runtime_types::frame_support::PalletId>
+                {
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "PalletId",
                         [
@@ -13716,9 +13676,8 @@ pub mod api {
                 #[doc = " NOTE: This parameter is also used within the Bounties Pallet extension if enabled."]
                 pub fn max_approvals(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Treasury",
                         "MaxApprovals",
                         [
@@ -14276,10 +14235,9 @@ pub mod api {
             impl ConstantsApi {
                 pub fn prefix(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    ::std::vec::Vec<::core::primitive::u8>,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::std::vec::Vec<::core::primitive::u8>>
+                {
+                    ::subxt::constants::Address::new_static(
                         "Claims",
                         "Prefix",
                         [
@@ -14686,9 +14644,9 @@ pub mod api {
                 #[doc = " The minimum amount transferred to call `vested_transfer`."]
                 pub fn min_vested_transfer(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Vesting",
                         "MinVestedTransfer",
                         [
@@ -14701,9 +14659,8 @@ pub mod api {
                 }
                 pub fn max_vesting_schedules(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Vesting",
                         "MaxVestingSchedules",
                         [
@@ -15061,9 +15018,8 @@ pub mod api {
                 #[doc = " The limit on the number of batched calls."]
                 pub fn batched_calls_limit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Utility",
                         "batched_calls_limit",
                         [
@@ -16177,9 +16133,9 @@ pub mod api {
                 #[doc = " The amount held on deposit for a registered identity"]
                 pub fn basic_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "BasicDeposit",
                         [
@@ -16193,9 +16149,9 @@ pub mod api {
                 #[doc = " The amount held on deposit per additional field for a registered identity."]
                 pub fn field_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "FieldDeposit",
                         [
@@ -16211,9 +16167,9 @@ pub mod api {
                 #[doc = " be another trie item whose value is the size of an account ID plus 32 bytes."]
                 pub fn sub_account_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "SubAccountDeposit",
                         [
@@ -16227,9 +16183,8 @@ pub mod api {
                 #[doc = " The maximum number of sub-accounts allowed per identified account."]
                 pub fn max_sub_accounts(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "MaxSubAccounts",
                         [
@@ -16244,9 +16199,8 @@ pub mod api {
                 #[doc = " required to access an identity, but can be pretty high."]
                 pub fn max_additional_fields(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "MaxAdditionalFields",
                         [
@@ -16261,9 +16215,8 @@ pub mod api {
                 #[doc = " of, e.g., updating judgements."]
                 pub fn max_registrars(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Identity",
                         "MaxRegistrars",
                         [
@@ -17022,9 +16975,9 @@ pub mod api {
                 #[doc = " `sizeof(Balance)` bytes and whose key size is `sizeof(AccountId)` bytes."]
                 pub fn proxy_deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "ProxyDepositBase",
                         [
@@ -17042,9 +16995,9 @@ pub mod api {
                 #[doc = " into account `32 + proxy_type.encode().len()` bytes of data."]
                 pub fn proxy_deposit_factor(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "ProxyDepositFactor",
                         [
@@ -17058,9 +17011,8 @@ pub mod api {
                 #[doc = " The maximum amount of proxies allowed for a single account."]
                 pub fn max_proxies(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "MaxProxies",
                         [
@@ -17074,9 +17026,8 @@ pub mod api {
                 #[doc = " The maximum amount of time-delayed announcements that are allowed to be pending."]
                 pub fn max_pending(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "MaxPending",
                         [
@@ -17093,9 +17044,9 @@ pub mod api {
                 #[doc = " bytes)."]
                 pub fn announcement_deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "AnnouncementDepositBase",
                         [
@@ -17112,9 +17063,9 @@ pub mod api {
                 #[doc = " into a pre-existing storage value."]
                 pub fn announcement_deposit_factor(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Proxy",
                         "AnnouncementDepositFactor",
                         [
@@ -17597,9 +17548,9 @@ pub mod api {
                 #[doc = " `32 + sizeof(AccountId)` bytes."]
                 pub fn deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Multisig",
                         "DepositBase",
                         [
@@ -17615,9 +17566,9 @@ pub mod api {
                 #[doc = " This is held for adding 32 bytes more into a pre-existing storage value."]
                 pub fn deposit_factor(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Multisig",
                         "DepositFactor",
                         [
@@ -17631,9 +17582,8 @@ pub mod api {
                 #[doc = " The maximum amount of signatories allowed in the multisig."]
                 pub fn max_signatories(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Multisig",
                         "MaxSignatories",
                         [
@@ -18336,9 +18286,9 @@ pub mod api {
                 #[doc = " The amount held on deposit for placing a bounty proposal."]
                 pub fn bounty_deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "BountyDepositBase",
                         [
@@ -18352,9 +18302,8 @@ pub mod api {
                 #[doc = " The delay period for which a bounty beneficiary need to wait before claim the payout."]
                 pub fn bounty_deposit_payout_delay(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "BountyDepositPayoutDelay",
                         [
@@ -18368,9 +18317,8 @@ pub mod api {
                 #[doc = " Bounty duration in blocks."]
                 pub fn bounty_update_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "BountyUpdatePeriod",
                         [
@@ -18387,10 +18335,10 @@ pub mod api {
                 #[doc = " `CuratorDepositMin`."]
                 pub fn curator_deposit_multiplier(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "CuratorDepositMultiplier",
                         [
@@ -18404,10 +18352,10 @@ pub mod api {
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_max(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "CuratorDepositMax",
                         [
@@ -18421,10 +18369,10 @@ pub mod api {
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_min(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "CuratorDepositMin",
                         [
@@ -18438,9 +18386,9 @@ pub mod api {
                 #[doc = " Minimum value for a bounty."]
                 pub fn bounty_value_minimum(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "BountyValueMinimum",
                         [
@@ -18454,9 +18402,9 @@ pub mod api {
                 #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
                 pub fn data_deposit_per_byte(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "DataDepositPerByte",
                         [
@@ -18472,9 +18420,8 @@ pub mod api {
                 #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
                 pub fn maximum_reason_length(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Bounties",
                         "MaximumReasonLength",
                         [
@@ -19231,9 +19178,8 @@ pub mod api {
                 #[doc = " Maximum number of child bounties that can be added to a parent bounty."]
                 pub fn max_active_child_bounty_count(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ChildBounties",
                         "MaxActiveChildBountyCount",
                         [
@@ -19247,9 +19193,9 @@ pub mod api {
                 #[doc = " Minimum value for a child-bounty."]
                 pub fn child_bounty_value_minimum(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ChildBounties",
                         "ChildBountyValueMinimum",
                         [
@@ -19788,9 +19734,8 @@ pub mod api {
                 #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
                 pub fn maximum_reason_length(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Tips",
                         "MaximumReasonLength",
                         [
@@ -19804,9 +19749,9 @@ pub mod api {
                 #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
                 pub fn data_deposit_per_byte(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Tips",
                         "DataDepositPerByte",
                         [
@@ -19820,9 +19765,8 @@ pub mod api {
                 #[doc = " The period for which a tip remains open after is has achieved threshold tippers."]
                 pub fn tip_countdown(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Tips",
                         "TipCountdown",
                         [
@@ -19836,10 +19780,10 @@ pub mod api {
                 #[doc = " The percent of the final tip which goes to the original reporter of the tip."]
                 pub fn tip_finders_fee(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Percent,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Tips",
                         "TipFindersFee",
                         [
@@ -19853,9 +19797,9 @@ pub mod api {
                 #[doc = " The amount held on deposit for placing a tip report."]
                 pub fn tip_report_deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Tips",
                         "TipReportDepositBase",
                         [
@@ -20501,9 +20445,8 @@ pub mod api {
                 #[doc = " Duration of the unsigned phase."]
                 pub fn unsigned_phase(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "UnsignedPhase",
                         [
@@ -20517,9 +20460,8 @@ pub mod api {
                 #[doc = " Duration of the signed phase."]
                 pub fn signed_phase(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedPhase",
                         [
@@ -20534,10 +20476,10 @@ pub mod api {
                 #[doc = " \"better\" in the Signed phase."]
                 pub fn better_signed_threshold(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Perbill,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "BetterSignedThreshold",
                         [
@@ -20552,10 +20494,10 @@ pub mod api {
                 #[doc = " \"better\" in the Unsigned phase."]
                 pub fn better_unsigned_threshold(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_arithmetic::per_things::Perbill,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "BetterUnsignedThreshold",
                         [
@@ -20572,9 +20514,8 @@ pub mod api {
                 #[doc = " to submit the worker's solution."]
                 pub fn offchain_repeat(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "OffchainRepeat",
                         [
@@ -20588,9 +20529,8 @@ pub mod api {
                 #[doc = " The priority of the unsigned transaction submitted in the unsigned-phase"]
                 pub fn miner_tx_priority(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MinerTxPriority",
                         [
@@ -20610,9 +20550,8 @@ pub mod api {
                 #[doc = " attempts to submit new solutions may cause a runtime panic."]
                 pub fn signed_max_submissions(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedMaxSubmissions",
                         [
@@ -20630,10 +20569,10 @@ pub mod api {
                 #[doc = " this value."]
                 pub fn signed_max_weight(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_weights::weight_v2::Weight,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedMaxWeight",
                         [
@@ -20647,9 +20586,8 @@ pub mod api {
                 #[doc = " The maximum amount of unchecked solutions to refund the call fee for."]
                 pub fn signed_max_refunds(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedMaxRefunds",
                         [
@@ -20663,9 +20601,9 @@ pub mod api {
                 #[doc = " Base reward for a signed solution"]
                 pub fn signed_reward_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedRewardBase",
                         [
@@ -20679,9 +20617,9 @@ pub mod api {
                 #[doc = " Base deposit for a signed solution."]
                 pub fn signed_deposit_base(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedDepositBase",
                         [
@@ -20695,9 +20633,9 @@ pub mod api {
                 #[doc = " Per-byte deposit for a signed solution."]
                 pub fn signed_deposit_byte(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedDepositByte",
                         [
@@ -20711,9 +20649,9 @@ pub mod api {
                 #[doc = " Per-weight deposit for a signed solution."]
                 pub fn signed_deposit_weight(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "SignedDepositWeight",
                         [
@@ -20729,9 +20667,8 @@ pub mod api {
                 #[doc = " take place over multiple blocks."]
                 pub fn max_electing_voters(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MaxElectingVoters",
                         [
@@ -20745,9 +20682,8 @@ pub mod api {
                 #[doc = " The maximum number of electable targets to put in the snapshot."]
                 pub fn max_electable_targets(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u16>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u16> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MaxElectableTargets",
                         [
@@ -20764,9 +20700,8 @@ pub mod api {
                 #[doc = " Note: This must always be greater or equal to `T::DataProvider::desired_targets()`."]
                 pub fn max_winners(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MaxWinners",
                         [
@@ -20779,9 +20714,8 @@ pub mod api {
                 }
                 pub fn miner_max_length(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MinerMaxLength",
                         [
@@ -20794,10 +20728,10 @@ pub mod api {
                 }
                 pub fn miner_max_weight(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
+                ) -> ::subxt::constants::Address<
                     runtime_types::sp_weights::weight_v2::Weight,
                 > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MinerMaxWeight",
                         [
@@ -20810,9 +20744,8 @@ pub mod api {
                 }
                 pub fn miner_max_votes_per_voter(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "ElectionProviderMultiPhase",
                         "MinerMaxVotesPerVoter",
                         [
@@ -21141,10 +21074,9 @@ pub mod api {
                 #[doc = " With that `List::migrate` can be called, which will perform the appropriate migration."]
                 pub fn bag_thresholds(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    ::std::vec::Vec<::core::primitive::u64>,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::std::vec::Vec<::core::primitive::u64>>
+                {
+                    ::subxt::constants::Address::new_static(
                         "VoterList",
                         "BagThresholds",
                         [
@@ -22653,10 +22585,9 @@ pub mod api {
                 #[doc = " The nomination pool's pallet id."]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    runtime_types::frame_support::PalletId,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<runtime_types::frame_support::PalletId>
+                {
+                    ::subxt::constants::Address::new_static(
                         "NominationPools",
                         "PalletId",
                         [
@@ -22681,9 +22612,8 @@ pub mod api {
                 #[doc = " Such a scenario would also be the equivalent of the pool being 90% slashed."]
                 pub fn max_points_to_balance(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u8>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u8> {
+                    ::subxt::constants::Address::new_static(
                         "NominationPools",
                         "MaxPointsToBalance",
                         [
@@ -26369,9 +26299,8 @@ pub mod api {
             impl ConstantsApi {
                 pub fn unsigned_priority(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u64>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
                         "Paras",
                         "UnsignedPriority",
                         [
@@ -29173,9 +29102,9 @@ pub mod api {
                 #[doc = " This should include the cost for storing the genesis head and validation code."]
                 pub fn para_deposit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Registrar",
                         "ParaDeposit",
                         [
@@ -29189,9 +29118,9 @@ pub mod api {
                 #[doc = " The deposit to be paid per byte stored on chain."]
                 pub fn data_deposit_per_byte(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Registrar",
                         "DataDepositPerByte",
                         [
@@ -29478,9 +29407,8 @@ pub mod api {
                 #[doc = " The number of blocks over which a single period lasts."]
                 pub fn lease_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Slots",
                         "LeasePeriod",
                         [
@@ -29494,9 +29422,8 @@ pub mod api {
                 #[doc = " The number of blocks to offset each lease period by."]
                 pub fn lease_offset(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Slots",
                         "LeaseOffset",
                         [
@@ -29964,9 +29891,8 @@ pub mod api {
                 #[doc = " The number of blocks over which an auction may be retroactively ended."]
                 pub fn ending_period(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Auctions",
                         "EndingPeriod",
                         [
@@ -29982,9 +29908,8 @@ pub mod api {
                 #[doc = " `EndingPeriod` / `SampleLength` = Total # of Samples"]
                 pub fn sample_length(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Auctions",
                         "SampleLength",
                         [
@@ -29997,9 +29922,8 @@ pub mod api {
                 }
                 pub fn slot_range_count(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Auctions",
                         "SlotRangeCount",
                         [
@@ -30012,9 +29936,8 @@ pub mod api {
                 }
                 pub fn lease_periods_per_slot(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Auctions",
                         "LeasePeriodsPerSlot",
                         [
@@ -30731,10 +30654,9 @@ pub mod api {
                 #[doc = " `PalletId` for the crowdloan pallet. An appropriate value could be `PalletId(*b\"py/cfund\")`"]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<
-                    runtime_types::frame_support::PalletId,
-                > {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<runtime_types::frame_support::PalletId>
+                {
+                    ::subxt::constants::Address::new_static(
                         "Crowdloan",
                         "PalletId",
                         [
@@ -30749,9 +30671,9 @@ pub mod api {
                 #[doc = " least `ExistentialDeposit`."]
                 pub fn min_contribution(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u128>
+                ) -> ::subxt::constants::Address<::core::primitive::u128>
                 {
-                    ::subxt::constants::StaticConstantAddress::new(
+                    ::subxt::constants::Address::new_static(
                         "Crowdloan",
                         "MinContribution",
                         [
@@ -30765,9 +30687,8 @@ pub mod api {
                 #[doc = " Max number of storage keys to remove per extrinsic call."]
                 pub fn remove_keys_limit(
                     &self,
-                ) -> ::subxt::constants::StaticConstantAddress<::core::primitive::u32>
-                {
-                    ::subxt::constants::StaticConstantAddress::new(
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
                         "Crowdloan",
                         "RemoveKeysLimit",
                         [
