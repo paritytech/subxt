@@ -152,7 +152,6 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        eprintln!("-- poll_next");
         let sub = match self.sub.as_mut() {
             Some(sub) => sub,
             None => return Poll::Ready(None),
@@ -162,7 +161,6 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
             match status {
                 SubstrateTxStatus::Future => TxStatus::Future,
                 SubstrateTxStatus::Ready => {
-                    eprintln!("-- ready");
                     TxStatus::Ready
                 },
                 SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),

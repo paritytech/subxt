@@ -46,6 +46,7 @@ impl RpcClient {
         params: RpcParams,
     ) -> Result<Res, Error> {
         let res = self.0.request_raw(method, params.build()).await?;
+        println!("{:?}", res.get());
         let val = serde_json::from_str(res.get())?;
         Ok(val)
     }
