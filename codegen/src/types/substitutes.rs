@@ -108,48 +108,77 @@ impl TypeSubstitutes {
         }
     }
 
+    /// Only insert the given substitution if a substitution at that path doesn't
+    /// already exist.
+    pub fn insert_if_not_exists(
+        &mut self,
+        source: syn::Path,
+        target: AbsolutePath,
+    ) -> Result<(), CodegenError> {
+        let (key, val) = TypeSubstitutes::parse_path_substitution(source, target.0)?;
+        self.substitutes.entry(key).or_insert(val);
+        Ok(())
+    }
+
+    /// Add a bunch of source to target type substitutions.
     pub fn extend(
         &mut self,
         elems: impl IntoIterator<Item = (syn::Path, AbsolutePath)>,
     ) -> Result<(), CodegenError> {
-        let to_extend = elems.into_iter().map(|(path, AbsolutePath(mut with))| {
-            let Some(syn::PathSegment { arguments: src_path_args, ..}) = path.segments.last() else {
-                return Err(CodegenError::EmptySubstitutePath(path.span()))
-            };
-            let Some(syn::PathSegment { arguments: target_path_args, ..}) = with.segments.last_mut() else {
-                return Err(CodegenError::EmptySubstitutePath(with.span()))
-            };
-
-            let source_args: Vec<_> = type_args(src_path_args).collect();
-
-            let param_mapping = if source_args.is_empty() {
-                // If the type parameters on the source type are not specified, then this means that
-                // the type is either not generic or the user wants to pass through all the parameters
-                TypeParamMapping::None
-            } else {
-                // Describe the mapping in terms of "which source param idx is used for each target param".
-                // So, for each target param, find the matching source param index.
-                let mapping = type_args(target_path_args)
-                    .filter_map(|arg|
-                        source_args
-                            .iter()
-                            .position(|&src| src == arg)
-                            .map(|src_idx|
-                                u8::try_from(src_idx).expect("type arguments to be fewer than 256; qed"),
-                            )
-                    ).collect();
-                TypeParamMapping::Specified(mapping)
-            };
-
-            // NOTE: Params are late bound and held separately, so clear them
-            // here to not mess pretty printing this path and params together
-            *target_path_args = syn::PathArguments::None;
-
-            Ok((PathSegments::from(&path), Substitute { path: with, param_mapping }))
-        }).collect::<Result<Vec<_>, _>>()?;
-
-        self.substitutes.extend(to_extend);
+        for (source, target) in elems.into_iter() {
+            let (key, val) = TypeSubstitutes::parse_path_substitution(source, target.0)?;
+            self.substitutes.insert(key, val);
+        }
         Ok(())
+    }
+
+    /// Given a source and target path, parse the type params to work out the mapping from
+    /// source to target, and output the source => substitution mapping that we work out from this.
+    fn parse_path_substitution(
+        src_path: syn::Path,
+        mut target_path: syn::Path,
+    ) -> Result<(PathSegments, Substitute), CodegenError> {
+        let Some(syn::PathSegment { arguments: src_path_args, ..}) = src_path.segments.last() else {
+            return Err(CodegenError::EmptySubstitutePath(src_path.span()))
+        };
+        let Some(syn::PathSegment { arguments: target_path_args, ..}) = target_path.segments.last_mut() else {
+            return Err(CodegenError::EmptySubstitutePath(target_path.span()))
+        };
+
+        let source_args: Vec<_> = type_args(src_path_args).collect();
+
+        let param_mapping = if source_args.is_empty() {
+            // If the type parameters on the source type are not specified, then this means that
+            // the type is either not generic or the user wants to pass through all the parameters
+            TypeParamMapping::None
+        } else {
+            // Describe the mapping in terms of "which source param idx is used for each target param".
+            // So, for each target param, find the matching source param index.
+            let mapping = type_args(target_path_args)
+                .filter_map(|arg| {
+                    source_args
+                        .iter()
+                        .position(|&src| src == arg)
+                        .map(|src_idx| {
+                            u8::try_from(src_idx)
+                                .expect("type arguments to be fewer than 256; qed")
+                        })
+                })
+                .collect();
+            TypeParamMapping::Specified(mapping)
+        };
+
+        // Now that we've parsed the type params from our target path, remove said params from
+        // that path, since we're storing them separately.
+        *target_path_args = syn::PathArguments::None;
+
+        Ok((
+            PathSegments::from(&src_path),
+            Substitute {
+                path: target_path,
+                param_mapping,
+            },
+        ))
     }
 
     /// Given a source type path, return a substituted type path if a substitution is defined.
@@ -249,7 +278,7 @@ fn is_absolute(path: &syn::Path) -> bool {
             .map_or(false, |segment| segment.ident == "crate")
 }
 
-pub struct AbsolutePath(syn::Path);
+pub struct AbsolutePath(pub syn::Path);
 
 impl TryFrom<syn::Path> for AbsolutePath {
     type Error = (syn::Path, String);

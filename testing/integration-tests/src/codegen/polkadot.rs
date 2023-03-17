@@ -57,97 +57,11 @@ pub mod api {
         "Crowdloan",
         "XcmPallet",
     ];
-    #[derive(
-        :: subxt :: ext :: codec :: Decode,
-        :: subxt :: ext :: codec :: Encode,
-        :: subxt :: ext :: scale_decode :: DecodeAsType,
-        :: subxt :: ext :: scale_encode :: EncodeAsType,
-        Debug,
-    )]
-    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-    pub enum Event {
-        #[codec(index = 0)]
-        System(system::Event),
-        #[codec(index = 1)]
-        Scheduler(scheduler::Event),
-        #[codec(index = 10)]
-        Preimage(preimage::Event),
-        #[codec(index = 4)]
-        Indices(indices::Event),
-        #[codec(index = 5)]
-        Balances(balances::Event),
-        #[codec(index = 32)]
-        TransactionPayment(transaction_payment::Event),
-        #[codec(index = 7)]
-        Staking(staking::Event),
-        #[codec(index = 8)]
-        Offences(offences::Event),
-        #[codec(index = 9)]
-        Session(session::Event),
-        #[codec(index = 11)]
-        Grandpa(grandpa::Event),
-        #[codec(index = 12)]
-        ImOnline(im_online::Event),
-        #[codec(index = 14)]
-        Democracy(democracy::Event),
-        #[codec(index = 15)]
-        Council(council::Event),
-        #[codec(index = 16)]
-        TechnicalCommittee(technical_committee::Event),
-        #[codec(index = 17)]
-        PhragmenElection(phragmen_election::Event),
-        #[codec(index = 18)]
-        TechnicalMembership(technical_membership::Event),
-        #[codec(index = 19)]
-        Treasury(treasury::Event),
-        #[codec(index = 24)]
-        Claims(claims::Event),
-        #[codec(index = 25)]
-        Vesting(vesting::Event),
-        #[codec(index = 26)]
-        Utility(utility::Event),
-        #[codec(index = 28)]
-        Identity(identity::Event),
-        #[codec(index = 29)]
-        Proxy(proxy::Event),
-        #[codec(index = 30)]
-        Multisig(multisig::Event),
-        #[codec(index = 34)]
-        Bounties(bounties::Event),
-        #[codec(index = 38)]
-        ChildBounties(child_bounties::Event),
-        #[codec(index = 35)]
-        Tips(tips::Event),
-        #[codec(index = 36)]
-        ElectionProviderMultiPhase(election_provider_multi_phase::Event),
-        #[codec(index = 37)]
-        VoterList(voter_list::Event),
-        #[codec(index = 39)]
-        NominationPools(nomination_pools::Event),
-        #[codec(index = 40)]
-        FastUnstake(fast_unstake::Event),
-        #[codec(index = 53)]
-        ParaInclusion(para_inclusion::Event),
-        #[codec(index = 56)]
-        Paras(paras::Event),
-        #[codec(index = 59)]
-        Ump(ump::Event),
-        #[codec(index = 60)]
-        Hrmp(hrmp::Event),
-        #[codec(index = 62)]
-        ParasDisputes(paras_disputes::Event),
-        #[codec(index = 70)]
-        Registrar(registrar::Event),
-        #[codec(index = 71)]
-        Slots(slots::Event),
-        #[codec(index = 72)]
-        Auctions(auctions::Event),
-        #[codec(index = 73)]
-        Crowdloan(crowdloan::Event),
-        #[codec(index = 99)]
-        XcmPallet(xcm_pallet::Event),
-    }
+    #[doc = r" The statically generated runtime call type."]
+    pub type Call = runtime_types::polkadot_runtime::RuntimeCall;
+    #[doc = r" The error type returned when there is a runtime issue."]
+    pub type DispatchError = runtime_types::sp_runtime::DispatchError;
+    pub type Event = runtime_types::polkadot_runtime::RuntimeEvent;
     impl ::subxt::events::RootEvent for Event {
         fn root_event(
             pallet_bytes: &[u8],
@@ -461,6 +375,429 @@ pub mod api {
                 pallet_name
             ))
             .into())
+        }
+    }
+    pub fn constants() -> ConstantsApi {
+        ConstantsApi
+    }
+    pub fn storage() -> StorageApi {
+        StorageApi
+    }
+    pub fn tx() -> TransactionApi {
+        TransactionApi
+    }
+    pub struct ConstantsApi;
+    impl ConstantsApi {
+        pub fn system(&self) -> system::constants::ConstantsApi {
+            system::constants::ConstantsApi
+        }
+        pub fn scheduler(&self) -> scheduler::constants::ConstantsApi {
+            scheduler::constants::ConstantsApi
+        }
+        pub fn babe(&self) -> babe::constants::ConstantsApi {
+            babe::constants::ConstantsApi
+        }
+        pub fn timestamp(&self) -> timestamp::constants::ConstantsApi {
+            timestamp::constants::ConstantsApi
+        }
+        pub fn indices(&self) -> indices::constants::ConstantsApi {
+            indices::constants::ConstantsApi
+        }
+        pub fn balances(&self) -> balances::constants::ConstantsApi {
+            balances::constants::ConstantsApi
+        }
+        pub fn transaction_payment(
+            &self,
+        ) -> transaction_payment::constants::ConstantsApi {
+            transaction_payment::constants::ConstantsApi
+        }
+        pub fn authorship(&self) -> authorship::constants::ConstantsApi {
+            authorship::constants::ConstantsApi
+        }
+        pub fn staking(&self) -> staking::constants::ConstantsApi {
+            staking::constants::ConstantsApi
+        }
+        pub fn grandpa(&self) -> grandpa::constants::ConstantsApi {
+            grandpa::constants::ConstantsApi
+        }
+        pub fn im_online(&self) -> im_online::constants::ConstantsApi {
+            im_online::constants::ConstantsApi
+        }
+        pub fn democracy(&self) -> democracy::constants::ConstantsApi {
+            democracy::constants::ConstantsApi
+        }
+        pub fn phragmen_election(&self) -> phragmen_election::constants::ConstantsApi {
+            phragmen_election::constants::ConstantsApi
+        }
+        pub fn treasury(&self) -> treasury::constants::ConstantsApi {
+            treasury::constants::ConstantsApi
+        }
+        pub fn claims(&self) -> claims::constants::ConstantsApi {
+            claims::constants::ConstantsApi
+        }
+        pub fn vesting(&self) -> vesting::constants::ConstantsApi {
+            vesting::constants::ConstantsApi
+        }
+        pub fn utility(&self) -> utility::constants::ConstantsApi {
+            utility::constants::ConstantsApi
+        }
+        pub fn identity(&self) -> identity::constants::ConstantsApi {
+            identity::constants::ConstantsApi
+        }
+        pub fn proxy(&self) -> proxy::constants::ConstantsApi {
+            proxy::constants::ConstantsApi
+        }
+        pub fn multisig(&self) -> multisig::constants::ConstantsApi {
+            multisig::constants::ConstantsApi
+        }
+        pub fn bounties(&self) -> bounties::constants::ConstantsApi {
+            bounties::constants::ConstantsApi
+        }
+        pub fn child_bounties(&self) -> child_bounties::constants::ConstantsApi {
+            child_bounties::constants::ConstantsApi
+        }
+        pub fn tips(&self) -> tips::constants::ConstantsApi {
+            tips::constants::ConstantsApi
+        }
+        pub fn election_provider_multi_phase(
+            &self,
+        ) -> election_provider_multi_phase::constants::ConstantsApi {
+            election_provider_multi_phase::constants::ConstantsApi
+        }
+        pub fn voter_list(&self) -> voter_list::constants::ConstantsApi {
+            voter_list::constants::ConstantsApi
+        }
+        pub fn nomination_pools(&self) -> nomination_pools::constants::ConstantsApi {
+            nomination_pools::constants::ConstantsApi
+        }
+        pub fn paras(&self) -> paras::constants::ConstantsApi {
+            paras::constants::ConstantsApi
+        }
+        pub fn registrar(&self) -> registrar::constants::ConstantsApi {
+            registrar::constants::ConstantsApi
+        }
+        pub fn slots(&self) -> slots::constants::ConstantsApi {
+            slots::constants::ConstantsApi
+        }
+        pub fn auctions(&self) -> auctions::constants::ConstantsApi {
+            auctions::constants::ConstantsApi
+        }
+        pub fn crowdloan(&self) -> crowdloan::constants::ConstantsApi {
+            crowdloan::constants::ConstantsApi
+        }
+    }
+    pub struct StorageApi;
+    impl StorageApi {
+        pub fn system(&self) -> system::storage::StorageApi {
+            system::storage::StorageApi
+        }
+        pub fn scheduler(&self) -> scheduler::storage::StorageApi {
+            scheduler::storage::StorageApi
+        }
+        pub fn preimage(&self) -> preimage::storage::StorageApi {
+            preimage::storage::StorageApi
+        }
+        pub fn babe(&self) -> babe::storage::StorageApi {
+            babe::storage::StorageApi
+        }
+        pub fn timestamp(&self) -> timestamp::storage::StorageApi {
+            timestamp::storage::StorageApi
+        }
+        pub fn indices(&self) -> indices::storage::StorageApi {
+            indices::storage::StorageApi
+        }
+        pub fn balances(&self) -> balances::storage::StorageApi {
+            balances::storage::StorageApi
+        }
+        pub fn transaction_payment(&self) -> transaction_payment::storage::StorageApi {
+            transaction_payment::storage::StorageApi
+        }
+        pub fn authorship(&self) -> authorship::storage::StorageApi {
+            authorship::storage::StorageApi
+        }
+        pub fn staking(&self) -> staking::storage::StorageApi {
+            staking::storage::StorageApi
+        }
+        pub fn offences(&self) -> offences::storage::StorageApi {
+            offences::storage::StorageApi
+        }
+        pub fn session(&self) -> session::storage::StorageApi {
+            session::storage::StorageApi
+        }
+        pub fn grandpa(&self) -> grandpa::storage::StorageApi {
+            grandpa::storage::StorageApi
+        }
+        pub fn im_online(&self) -> im_online::storage::StorageApi {
+            im_online::storage::StorageApi
+        }
+        pub fn democracy(&self) -> democracy::storage::StorageApi {
+            democracy::storage::StorageApi
+        }
+        pub fn council(&self) -> council::storage::StorageApi {
+            council::storage::StorageApi
+        }
+        pub fn technical_committee(&self) -> technical_committee::storage::StorageApi {
+            technical_committee::storage::StorageApi
+        }
+        pub fn phragmen_election(&self) -> phragmen_election::storage::StorageApi {
+            phragmen_election::storage::StorageApi
+        }
+        pub fn technical_membership(&self) -> technical_membership::storage::StorageApi {
+            technical_membership::storage::StorageApi
+        }
+        pub fn treasury(&self) -> treasury::storage::StorageApi {
+            treasury::storage::StorageApi
+        }
+        pub fn claims(&self) -> claims::storage::StorageApi {
+            claims::storage::StorageApi
+        }
+        pub fn vesting(&self) -> vesting::storage::StorageApi {
+            vesting::storage::StorageApi
+        }
+        pub fn identity(&self) -> identity::storage::StorageApi {
+            identity::storage::StorageApi
+        }
+        pub fn proxy(&self) -> proxy::storage::StorageApi {
+            proxy::storage::StorageApi
+        }
+        pub fn multisig(&self) -> multisig::storage::StorageApi {
+            multisig::storage::StorageApi
+        }
+        pub fn bounties(&self) -> bounties::storage::StorageApi {
+            bounties::storage::StorageApi
+        }
+        pub fn child_bounties(&self) -> child_bounties::storage::StorageApi {
+            child_bounties::storage::StorageApi
+        }
+        pub fn tips(&self) -> tips::storage::StorageApi {
+            tips::storage::StorageApi
+        }
+        pub fn election_provider_multi_phase(
+            &self,
+        ) -> election_provider_multi_phase::storage::StorageApi {
+            election_provider_multi_phase::storage::StorageApi
+        }
+        pub fn voter_list(&self) -> voter_list::storage::StorageApi {
+            voter_list::storage::StorageApi
+        }
+        pub fn nomination_pools(&self) -> nomination_pools::storage::StorageApi {
+            nomination_pools::storage::StorageApi
+        }
+        pub fn fast_unstake(&self) -> fast_unstake::storage::StorageApi {
+            fast_unstake::storage::StorageApi
+        }
+        pub fn configuration(&self) -> configuration::storage::StorageApi {
+            configuration::storage::StorageApi
+        }
+        pub fn paras_shared(&self) -> paras_shared::storage::StorageApi {
+            paras_shared::storage::StorageApi
+        }
+        pub fn para_inclusion(&self) -> para_inclusion::storage::StorageApi {
+            para_inclusion::storage::StorageApi
+        }
+        pub fn para_inherent(&self) -> para_inherent::storage::StorageApi {
+            para_inherent::storage::StorageApi
+        }
+        pub fn para_scheduler(&self) -> para_scheduler::storage::StorageApi {
+            para_scheduler::storage::StorageApi
+        }
+        pub fn paras(&self) -> paras::storage::StorageApi {
+            paras::storage::StorageApi
+        }
+        pub fn initializer(&self) -> initializer::storage::StorageApi {
+            initializer::storage::StorageApi
+        }
+        pub fn dmp(&self) -> dmp::storage::StorageApi {
+            dmp::storage::StorageApi
+        }
+        pub fn ump(&self) -> ump::storage::StorageApi {
+            ump::storage::StorageApi
+        }
+        pub fn hrmp(&self) -> hrmp::storage::StorageApi {
+            hrmp::storage::StorageApi
+        }
+        pub fn para_session_info(&self) -> para_session_info::storage::StorageApi {
+            para_session_info::storage::StorageApi
+        }
+        pub fn paras_disputes(&self) -> paras_disputes::storage::StorageApi {
+            paras_disputes::storage::StorageApi
+        }
+        pub fn registrar(&self) -> registrar::storage::StorageApi {
+            registrar::storage::StorageApi
+        }
+        pub fn slots(&self) -> slots::storage::StorageApi {
+            slots::storage::StorageApi
+        }
+        pub fn auctions(&self) -> auctions::storage::StorageApi {
+            auctions::storage::StorageApi
+        }
+        pub fn crowdloan(&self) -> crowdloan::storage::StorageApi {
+            crowdloan::storage::StorageApi
+        }
+        pub fn xcm_pallet(&self) -> xcm_pallet::storage::StorageApi {
+            xcm_pallet::storage::StorageApi
+        }
+    }
+    pub struct TransactionApi;
+    impl TransactionApi {
+        pub fn system(&self) -> system::calls::TransactionApi {
+            system::calls::TransactionApi
+        }
+        pub fn scheduler(&self) -> scheduler::calls::TransactionApi {
+            scheduler::calls::TransactionApi
+        }
+        pub fn preimage(&self) -> preimage::calls::TransactionApi {
+            preimage::calls::TransactionApi
+        }
+        pub fn babe(&self) -> babe::calls::TransactionApi {
+            babe::calls::TransactionApi
+        }
+        pub fn timestamp(&self) -> timestamp::calls::TransactionApi {
+            timestamp::calls::TransactionApi
+        }
+        pub fn indices(&self) -> indices::calls::TransactionApi {
+            indices::calls::TransactionApi
+        }
+        pub fn balances(&self) -> balances::calls::TransactionApi {
+            balances::calls::TransactionApi
+        }
+        pub fn authorship(&self) -> authorship::calls::TransactionApi {
+            authorship::calls::TransactionApi
+        }
+        pub fn staking(&self) -> staking::calls::TransactionApi {
+            staking::calls::TransactionApi
+        }
+        pub fn session(&self) -> session::calls::TransactionApi {
+            session::calls::TransactionApi
+        }
+        pub fn grandpa(&self) -> grandpa::calls::TransactionApi {
+            grandpa::calls::TransactionApi
+        }
+        pub fn im_online(&self) -> im_online::calls::TransactionApi {
+            im_online::calls::TransactionApi
+        }
+        pub fn democracy(&self) -> democracy::calls::TransactionApi {
+            democracy::calls::TransactionApi
+        }
+        pub fn council(&self) -> council::calls::TransactionApi {
+            council::calls::TransactionApi
+        }
+        pub fn technical_committee(&self) -> technical_committee::calls::TransactionApi {
+            technical_committee::calls::TransactionApi
+        }
+        pub fn phragmen_election(&self) -> phragmen_election::calls::TransactionApi {
+            phragmen_election::calls::TransactionApi
+        }
+        pub fn technical_membership(
+            &self,
+        ) -> technical_membership::calls::TransactionApi {
+            technical_membership::calls::TransactionApi
+        }
+        pub fn treasury(&self) -> treasury::calls::TransactionApi {
+            treasury::calls::TransactionApi
+        }
+        pub fn claims(&self) -> claims::calls::TransactionApi {
+            claims::calls::TransactionApi
+        }
+        pub fn vesting(&self) -> vesting::calls::TransactionApi {
+            vesting::calls::TransactionApi
+        }
+        pub fn utility(&self) -> utility::calls::TransactionApi {
+            utility::calls::TransactionApi
+        }
+        pub fn identity(&self) -> identity::calls::TransactionApi {
+            identity::calls::TransactionApi
+        }
+        pub fn proxy(&self) -> proxy::calls::TransactionApi {
+            proxy::calls::TransactionApi
+        }
+        pub fn multisig(&self) -> multisig::calls::TransactionApi {
+            multisig::calls::TransactionApi
+        }
+        pub fn bounties(&self) -> bounties::calls::TransactionApi {
+            bounties::calls::TransactionApi
+        }
+        pub fn child_bounties(&self) -> child_bounties::calls::TransactionApi {
+            child_bounties::calls::TransactionApi
+        }
+        pub fn tips(&self) -> tips::calls::TransactionApi {
+            tips::calls::TransactionApi
+        }
+        pub fn election_provider_multi_phase(
+            &self,
+        ) -> election_provider_multi_phase::calls::TransactionApi {
+            election_provider_multi_phase::calls::TransactionApi
+        }
+        pub fn voter_list(&self) -> voter_list::calls::TransactionApi {
+            voter_list::calls::TransactionApi
+        }
+        pub fn nomination_pools(&self) -> nomination_pools::calls::TransactionApi {
+            nomination_pools::calls::TransactionApi
+        }
+        pub fn fast_unstake(&self) -> fast_unstake::calls::TransactionApi {
+            fast_unstake::calls::TransactionApi
+        }
+        pub fn configuration(&self) -> configuration::calls::TransactionApi {
+            configuration::calls::TransactionApi
+        }
+        pub fn paras_shared(&self) -> paras_shared::calls::TransactionApi {
+            paras_shared::calls::TransactionApi
+        }
+        pub fn para_inclusion(&self) -> para_inclusion::calls::TransactionApi {
+            para_inclusion::calls::TransactionApi
+        }
+        pub fn para_inherent(&self) -> para_inherent::calls::TransactionApi {
+            para_inherent::calls::TransactionApi
+        }
+        pub fn paras(&self) -> paras::calls::TransactionApi {
+            paras::calls::TransactionApi
+        }
+        pub fn initializer(&self) -> initializer::calls::TransactionApi {
+            initializer::calls::TransactionApi
+        }
+        pub fn dmp(&self) -> dmp::calls::TransactionApi {
+            dmp::calls::TransactionApi
+        }
+        pub fn ump(&self) -> ump::calls::TransactionApi {
+            ump::calls::TransactionApi
+        }
+        pub fn hrmp(&self) -> hrmp::calls::TransactionApi {
+            hrmp::calls::TransactionApi
+        }
+        pub fn paras_disputes(&self) -> paras_disputes::calls::TransactionApi {
+            paras_disputes::calls::TransactionApi
+        }
+        pub fn registrar(&self) -> registrar::calls::TransactionApi {
+            registrar::calls::TransactionApi
+        }
+        pub fn slots(&self) -> slots::calls::TransactionApi {
+            slots::calls::TransactionApi
+        }
+        pub fn auctions(&self) -> auctions::calls::TransactionApi {
+            auctions::calls::TransactionApi
+        }
+        pub fn crowdloan(&self) -> crowdloan::calls::TransactionApi {
+            crowdloan::calls::TransactionApi
+        }
+        pub fn xcm_pallet(&self) -> xcm_pallet::calls::TransactionApi {
+            xcm_pallet::calls::TransactionApi
+        }
+    }
+    #[doc = r" check whether the Client you are using is aligned with the statically generated codegen."]
+    pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(
+        client: &C,
+    ) -> Result<(), ::subxt::error::MetadataError> {
+        let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
+        if runtime_metadata_hash
+            != [
+                252u8, 179u8, 170u8, 129u8, 159u8, 95u8, 180u8, 114u8, 218u8, 56u8, 91u8,
+                93u8, 175u8, 45u8, 57u8, 223u8, 178u8, 209u8, 250u8, 247u8, 243u8, 73u8,
+                182u8, 137u8, 176u8, 129u8, 37u8, 196u8, 133u8, 123u8, 93u8, 186u8,
+            ]
+        {
+            Err(::subxt::error::MetadataError::IncompatibleMetadata)
+        } else {
+            Ok(())
         }
     }
     pub mod system {
@@ -2330,10 +2667,14 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
                         "PreimageFor",
-                        vec![::subxt::storage::address::StaticStorageMapKey::new(&(
-                            _0.borrow(),
-                            _1.borrow(),
-                        ))],
+                        vec![
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _0.borrow(),
+                            ),
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _1.borrow(),
+                            ),
+                        ],
                         [
                             96u8, 74u8, 30u8, 112u8, 120u8, 41u8, 52u8, 187u8, 252u8,
                             68u8, 42u8, 5u8, 61u8, 228u8, 250u8, 192u8, 224u8, 61u8,
@@ -7196,10 +7537,14 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Staking",
                         "SpanSlash",
-                        vec![::subxt::storage::address::StaticStorageMapKey::new(&(
-                            _0.borrow(),
-                            _1.borrow(),
-                        ))],
+                        vec![
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _0.borrow(),
+                            ),
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _1.borrow(),
+                            ),
+                        ],
                         [
                             160u8, 63u8, 115u8, 190u8, 233u8, 148u8, 75u8, 3u8, 11u8,
                             59u8, 184u8, 220u8, 205u8, 64u8, 28u8, 190u8, 116u8, 210u8,
@@ -8002,10 +8347,14 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
                         "KeyOwner",
-                        vec![::subxt::storage::address::StaticStorageMapKey::new(&(
-                            _0.borrow(),
-                            _1.borrow(),
-                        ))],
+                        vec![
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _0.borrow(),
+                            ),
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _1.borrow(),
+                            ),
+                        ],
                         [
                             4u8, 91u8, 25u8, 84u8, 250u8, 201u8, 174u8, 129u8, 201u8,
                             58u8, 197u8, 199u8, 137u8, 240u8, 118u8, 33u8, 99u8, 2u8,
@@ -25670,10 +26019,14 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "PastCodeHash",
-                        vec![::subxt::storage::address::StaticStorageMapKey::new(&(
-                            _0.borrow(),
-                            _1.borrow(),
-                        ))],
+                        vec![
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _0.borrow(),
+                            ),
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _1.borrow(),
+                            ),
+                        ],
                         [
                             241u8, 112u8, 128u8, 226u8, 163u8, 193u8, 77u8, 78u8, 177u8,
                             146u8, 31u8, 143u8, 44u8, 140u8, 159u8, 134u8, 221u8, 129u8,
@@ -29788,10 +30141,14 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
                         "ReservedAmounts",
-                        vec![::subxt::storage::address::StaticStorageMapKey::new(&(
-                            _0.borrow(),
-                            _1.borrow(),
-                        ))],
+                        vec![
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _0.borrow(),
+                            ),
+                            ::subxt::storage::address::StaticStorageMapKey::new(
+                                _1.borrow(),
+                            ),
+                        ],
                         [
                             120u8, 85u8, 180u8, 244u8, 154u8, 135u8, 87u8, 79u8, 75u8,
                             169u8, 220u8, 117u8, 227u8, 85u8, 198u8, 214u8, 28u8, 126u8,
@@ -46057,432 +46414,6 @@ pub mod api {
                 #[codec(index = 2)]
                 V2(runtime_types::xcm::v2::Xcm),
             }
-        }
-    }
-    #[doc = r" The default error type returned when there is a runtime issue,"]
-    #[doc = r" exposed here for ease of use."]
-    pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-    pub fn constants() -> ConstantsApi {
-        ConstantsApi
-    }
-    pub fn storage() -> StorageApi {
-        StorageApi
-    }
-    pub fn tx() -> TransactionApi {
-        TransactionApi
-    }
-    pub struct ConstantsApi;
-    impl ConstantsApi {
-        pub fn system(&self) -> system::constants::ConstantsApi {
-            system::constants::ConstantsApi
-        }
-        pub fn scheduler(&self) -> scheduler::constants::ConstantsApi {
-            scheduler::constants::ConstantsApi
-        }
-        pub fn babe(&self) -> babe::constants::ConstantsApi {
-            babe::constants::ConstantsApi
-        }
-        pub fn timestamp(&self) -> timestamp::constants::ConstantsApi {
-            timestamp::constants::ConstantsApi
-        }
-        pub fn indices(&self) -> indices::constants::ConstantsApi {
-            indices::constants::ConstantsApi
-        }
-        pub fn balances(&self) -> balances::constants::ConstantsApi {
-            balances::constants::ConstantsApi
-        }
-        pub fn transaction_payment(
-            &self,
-        ) -> transaction_payment::constants::ConstantsApi {
-            transaction_payment::constants::ConstantsApi
-        }
-        pub fn authorship(&self) -> authorship::constants::ConstantsApi {
-            authorship::constants::ConstantsApi
-        }
-        pub fn staking(&self) -> staking::constants::ConstantsApi {
-            staking::constants::ConstantsApi
-        }
-        pub fn grandpa(&self) -> grandpa::constants::ConstantsApi {
-            grandpa::constants::ConstantsApi
-        }
-        pub fn im_online(&self) -> im_online::constants::ConstantsApi {
-            im_online::constants::ConstantsApi
-        }
-        pub fn democracy(&self) -> democracy::constants::ConstantsApi {
-            democracy::constants::ConstantsApi
-        }
-        pub fn phragmen_election(&self) -> phragmen_election::constants::ConstantsApi {
-            phragmen_election::constants::ConstantsApi
-        }
-        pub fn treasury(&self) -> treasury::constants::ConstantsApi {
-            treasury::constants::ConstantsApi
-        }
-        pub fn claims(&self) -> claims::constants::ConstantsApi {
-            claims::constants::ConstantsApi
-        }
-        pub fn vesting(&self) -> vesting::constants::ConstantsApi {
-            vesting::constants::ConstantsApi
-        }
-        pub fn utility(&self) -> utility::constants::ConstantsApi {
-            utility::constants::ConstantsApi
-        }
-        pub fn identity(&self) -> identity::constants::ConstantsApi {
-            identity::constants::ConstantsApi
-        }
-        pub fn proxy(&self) -> proxy::constants::ConstantsApi {
-            proxy::constants::ConstantsApi
-        }
-        pub fn multisig(&self) -> multisig::constants::ConstantsApi {
-            multisig::constants::ConstantsApi
-        }
-        pub fn bounties(&self) -> bounties::constants::ConstantsApi {
-            bounties::constants::ConstantsApi
-        }
-        pub fn child_bounties(&self) -> child_bounties::constants::ConstantsApi {
-            child_bounties::constants::ConstantsApi
-        }
-        pub fn tips(&self) -> tips::constants::ConstantsApi {
-            tips::constants::ConstantsApi
-        }
-        pub fn election_provider_multi_phase(
-            &self,
-        ) -> election_provider_multi_phase::constants::ConstantsApi {
-            election_provider_multi_phase::constants::ConstantsApi
-        }
-        pub fn voter_list(&self) -> voter_list::constants::ConstantsApi {
-            voter_list::constants::ConstantsApi
-        }
-        pub fn nomination_pools(&self) -> nomination_pools::constants::ConstantsApi {
-            nomination_pools::constants::ConstantsApi
-        }
-        pub fn paras(&self) -> paras::constants::ConstantsApi {
-            paras::constants::ConstantsApi
-        }
-        pub fn registrar(&self) -> registrar::constants::ConstantsApi {
-            registrar::constants::ConstantsApi
-        }
-        pub fn slots(&self) -> slots::constants::ConstantsApi {
-            slots::constants::ConstantsApi
-        }
-        pub fn auctions(&self) -> auctions::constants::ConstantsApi {
-            auctions::constants::ConstantsApi
-        }
-        pub fn crowdloan(&self) -> crowdloan::constants::ConstantsApi {
-            crowdloan::constants::ConstantsApi
-        }
-    }
-    pub struct StorageApi;
-    impl StorageApi {
-        pub fn system(&self) -> system::storage::StorageApi {
-            system::storage::StorageApi
-        }
-        pub fn scheduler(&self) -> scheduler::storage::StorageApi {
-            scheduler::storage::StorageApi
-        }
-        pub fn preimage(&self) -> preimage::storage::StorageApi {
-            preimage::storage::StorageApi
-        }
-        pub fn babe(&self) -> babe::storage::StorageApi {
-            babe::storage::StorageApi
-        }
-        pub fn timestamp(&self) -> timestamp::storage::StorageApi {
-            timestamp::storage::StorageApi
-        }
-        pub fn indices(&self) -> indices::storage::StorageApi {
-            indices::storage::StorageApi
-        }
-        pub fn balances(&self) -> balances::storage::StorageApi {
-            balances::storage::StorageApi
-        }
-        pub fn transaction_payment(&self) -> transaction_payment::storage::StorageApi {
-            transaction_payment::storage::StorageApi
-        }
-        pub fn authorship(&self) -> authorship::storage::StorageApi {
-            authorship::storage::StorageApi
-        }
-        pub fn staking(&self) -> staking::storage::StorageApi {
-            staking::storage::StorageApi
-        }
-        pub fn offences(&self) -> offences::storage::StorageApi {
-            offences::storage::StorageApi
-        }
-        pub fn session(&self) -> session::storage::StorageApi {
-            session::storage::StorageApi
-        }
-        pub fn grandpa(&self) -> grandpa::storage::StorageApi {
-            grandpa::storage::StorageApi
-        }
-        pub fn im_online(&self) -> im_online::storage::StorageApi {
-            im_online::storage::StorageApi
-        }
-        pub fn democracy(&self) -> democracy::storage::StorageApi {
-            democracy::storage::StorageApi
-        }
-        pub fn council(&self) -> council::storage::StorageApi {
-            council::storage::StorageApi
-        }
-        pub fn technical_committee(&self) -> technical_committee::storage::StorageApi {
-            technical_committee::storage::StorageApi
-        }
-        pub fn phragmen_election(&self) -> phragmen_election::storage::StorageApi {
-            phragmen_election::storage::StorageApi
-        }
-        pub fn technical_membership(&self) -> technical_membership::storage::StorageApi {
-            technical_membership::storage::StorageApi
-        }
-        pub fn treasury(&self) -> treasury::storage::StorageApi {
-            treasury::storage::StorageApi
-        }
-        pub fn claims(&self) -> claims::storage::StorageApi {
-            claims::storage::StorageApi
-        }
-        pub fn vesting(&self) -> vesting::storage::StorageApi {
-            vesting::storage::StorageApi
-        }
-        pub fn identity(&self) -> identity::storage::StorageApi {
-            identity::storage::StorageApi
-        }
-        pub fn proxy(&self) -> proxy::storage::StorageApi {
-            proxy::storage::StorageApi
-        }
-        pub fn multisig(&self) -> multisig::storage::StorageApi {
-            multisig::storage::StorageApi
-        }
-        pub fn bounties(&self) -> bounties::storage::StorageApi {
-            bounties::storage::StorageApi
-        }
-        pub fn child_bounties(&self) -> child_bounties::storage::StorageApi {
-            child_bounties::storage::StorageApi
-        }
-        pub fn tips(&self) -> tips::storage::StorageApi {
-            tips::storage::StorageApi
-        }
-        pub fn election_provider_multi_phase(
-            &self,
-        ) -> election_provider_multi_phase::storage::StorageApi {
-            election_provider_multi_phase::storage::StorageApi
-        }
-        pub fn voter_list(&self) -> voter_list::storage::StorageApi {
-            voter_list::storage::StorageApi
-        }
-        pub fn nomination_pools(&self) -> nomination_pools::storage::StorageApi {
-            nomination_pools::storage::StorageApi
-        }
-        pub fn fast_unstake(&self) -> fast_unstake::storage::StorageApi {
-            fast_unstake::storage::StorageApi
-        }
-        pub fn configuration(&self) -> configuration::storage::StorageApi {
-            configuration::storage::StorageApi
-        }
-        pub fn paras_shared(&self) -> paras_shared::storage::StorageApi {
-            paras_shared::storage::StorageApi
-        }
-        pub fn para_inclusion(&self) -> para_inclusion::storage::StorageApi {
-            para_inclusion::storage::StorageApi
-        }
-        pub fn para_inherent(&self) -> para_inherent::storage::StorageApi {
-            para_inherent::storage::StorageApi
-        }
-        pub fn para_scheduler(&self) -> para_scheduler::storage::StorageApi {
-            para_scheduler::storage::StorageApi
-        }
-        pub fn paras(&self) -> paras::storage::StorageApi {
-            paras::storage::StorageApi
-        }
-        pub fn initializer(&self) -> initializer::storage::StorageApi {
-            initializer::storage::StorageApi
-        }
-        pub fn dmp(&self) -> dmp::storage::StorageApi {
-            dmp::storage::StorageApi
-        }
-        pub fn ump(&self) -> ump::storage::StorageApi {
-            ump::storage::StorageApi
-        }
-        pub fn hrmp(&self) -> hrmp::storage::StorageApi {
-            hrmp::storage::StorageApi
-        }
-        pub fn para_session_info(&self) -> para_session_info::storage::StorageApi {
-            para_session_info::storage::StorageApi
-        }
-        pub fn paras_disputes(&self) -> paras_disputes::storage::StorageApi {
-            paras_disputes::storage::StorageApi
-        }
-        pub fn registrar(&self) -> registrar::storage::StorageApi {
-            registrar::storage::StorageApi
-        }
-        pub fn slots(&self) -> slots::storage::StorageApi {
-            slots::storage::StorageApi
-        }
-        pub fn auctions(&self) -> auctions::storage::StorageApi {
-            auctions::storage::StorageApi
-        }
-        pub fn crowdloan(&self) -> crowdloan::storage::StorageApi {
-            crowdloan::storage::StorageApi
-        }
-        pub fn xcm_pallet(&self) -> xcm_pallet::storage::StorageApi {
-            xcm_pallet::storage::StorageApi
-        }
-    }
-    pub struct TransactionApi;
-    impl TransactionApi {
-        pub fn system(&self) -> system::calls::TransactionApi {
-            system::calls::TransactionApi
-        }
-        pub fn scheduler(&self) -> scheduler::calls::TransactionApi {
-            scheduler::calls::TransactionApi
-        }
-        pub fn preimage(&self) -> preimage::calls::TransactionApi {
-            preimage::calls::TransactionApi
-        }
-        pub fn babe(&self) -> babe::calls::TransactionApi {
-            babe::calls::TransactionApi
-        }
-        pub fn timestamp(&self) -> timestamp::calls::TransactionApi {
-            timestamp::calls::TransactionApi
-        }
-        pub fn indices(&self) -> indices::calls::TransactionApi {
-            indices::calls::TransactionApi
-        }
-        pub fn balances(&self) -> balances::calls::TransactionApi {
-            balances::calls::TransactionApi
-        }
-        pub fn authorship(&self) -> authorship::calls::TransactionApi {
-            authorship::calls::TransactionApi
-        }
-        pub fn staking(&self) -> staking::calls::TransactionApi {
-            staking::calls::TransactionApi
-        }
-        pub fn session(&self) -> session::calls::TransactionApi {
-            session::calls::TransactionApi
-        }
-        pub fn grandpa(&self) -> grandpa::calls::TransactionApi {
-            grandpa::calls::TransactionApi
-        }
-        pub fn im_online(&self) -> im_online::calls::TransactionApi {
-            im_online::calls::TransactionApi
-        }
-        pub fn democracy(&self) -> democracy::calls::TransactionApi {
-            democracy::calls::TransactionApi
-        }
-        pub fn council(&self) -> council::calls::TransactionApi {
-            council::calls::TransactionApi
-        }
-        pub fn technical_committee(&self) -> technical_committee::calls::TransactionApi {
-            technical_committee::calls::TransactionApi
-        }
-        pub fn phragmen_election(&self) -> phragmen_election::calls::TransactionApi {
-            phragmen_election::calls::TransactionApi
-        }
-        pub fn technical_membership(
-            &self,
-        ) -> technical_membership::calls::TransactionApi {
-            technical_membership::calls::TransactionApi
-        }
-        pub fn treasury(&self) -> treasury::calls::TransactionApi {
-            treasury::calls::TransactionApi
-        }
-        pub fn claims(&self) -> claims::calls::TransactionApi {
-            claims::calls::TransactionApi
-        }
-        pub fn vesting(&self) -> vesting::calls::TransactionApi {
-            vesting::calls::TransactionApi
-        }
-        pub fn utility(&self) -> utility::calls::TransactionApi {
-            utility::calls::TransactionApi
-        }
-        pub fn identity(&self) -> identity::calls::TransactionApi {
-            identity::calls::TransactionApi
-        }
-        pub fn proxy(&self) -> proxy::calls::TransactionApi {
-            proxy::calls::TransactionApi
-        }
-        pub fn multisig(&self) -> multisig::calls::TransactionApi {
-            multisig::calls::TransactionApi
-        }
-        pub fn bounties(&self) -> bounties::calls::TransactionApi {
-            bounties::calls::TransactionApi
-        }
-        pub fn child_bounties(&self) -> child_bounties::calls::TransactionApi {
-            child_bounties::calls::TransactionApi
-        }
-        pub fn tips(&self) -> tips::calls::TransactionApi {
-            tips::calls::TransactionApi
-        }
-        pub fn election_provider_multi_phase(
-            &self,
-        ) -> election_provider_multi_phase::calls::TransactionApi {
-            election_provider_multi_phase::calls::TransactionApi
-        }
-        pub fn voter_list(&self) -> voter_list::calls::TransactionApi {
-            voter_list::calls::TransactionApi
-        }
-        pub fn nomination_pools(&self) -> nomination_pools::calls::TransactionApi {
-            nomination_pools::calls::TransactionApi
-        }
-        pub fn fast_unstake(&self) -> fast_unstake::calls::TransactionApi {
-            fast_unstake::calls::TransactionApi
-        }
-        pub fn configuration(&self) -> configuration::calls::TransactionApi {
-            configuration::calls::TransactionApi
-        }
-        pub fn paras_shared(&self) -> paras_shared::calls::TransactionApi {
-            paras_shared::calls::TransactionApi
-        }
-        pub fn para_inclusion(&self) -> para_inclusion::calls::TransactionApi {
-            para_inclusion::calls::TransactionApi
-        }
-        pub fn para_inherent(&self) -> para_inherent::calls::TransactionApi {
-            para_inherent::calls::TransactionApi
-        }
-        pub fn paras(&self) -> paras::calls::TransactionApi {
-            paras::calls::TransactionApi
-        }
-        pub fn initializer(&self) -> initializer::calls::TransactionApi {
-            initializer::calls::TransactionApi
-        }
-        pub fn dmp(&self) -> dmp::calls::TransactionApi {
-            dmp::calls::TransactionApi
-        }
-        pub fn ump(&self) -> ump::calls::TransactionApi {
-            ump::calls::TransactionApi
-        }
-        pub fn hrmp(&self) -> hrmp::calls::TransactionApi {
-            hrmp::calls::TransactionApi
-        }
-        pub fn paras_disputes(&self) -> paras_disputes::calls::TransactionApi {
-            paras_disputes::calls::TransactionApi
-        }
-        pub fn registrar(&self) -> registrar::calls::TransactionApi {
-            registrar::calls::TransactionApi
-        }
-        pub fn slots(&self) -> slots::calls::TransactionApi {
-            slots::calls::TransactionApi
-        }
-        pub fn auctions(&self) -> auctions::calls::TransactionApi {
-            auctions::calls::TransactionApi
-        }
-        pub fn crowdloan(&self) -> crowdloan::calls::TransactionApi {
-            crowdloan::calls::TransactionApi
-        }
-        pub fn xcm_pallet(&self) -> xcm_pallet::calls::TransactionApi {
-            xcm_pallet::calls::TransactionApi
-        }
-    }
-    #[doc = r" check whether the Client you are using is aligned with the statically generated codegen."]
-    pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(
-        client: &C,
-    ) -> Result<(), ::subxt::error::MetadataError> {
-        let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
-        if runtime_metadata_hash
-            != [
-                252u8, 179u8, 170u8, 129u8, 159u8, 95u8, 180u8, 114u8, 218u8, 56u8, 91u8,
-                93u8, 175u8, 45u8, 57u8, 223u8, 178u8, 209u8, 250u8, 247u8, 243u8, 73u8,
-                182u8, 137u8, 176u8, 129u8, 37u8, 196u8, 133u8, 123u8, 93u8, 186u8,
-            ]
-        {
-            Err(::subxt::error::MetadataError::IncompatibleMetadata)
-        } else {
-            Ok(())
         }
     }
 }
