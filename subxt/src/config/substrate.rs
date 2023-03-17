@@ -282,6 +282,55 @@ fn deserialize_number<'a, D, T: TryFrom<U256>>(d: D) -> Result<T, D::Error>
 where
     D: serde::Deserializer<'a>,
 {
-    let u256: U256 = serde::Deserialize::deserialize(d)?;
+    // At the time of writing, Smoldot gives back block numbers in numeric rather
+    // than hex format. So let's support deserializing from both here:
+    use crate::rpc::types::NumberOrHex;
+    let number_or_hex = NumberOrHex::deserialize(d)?;
+    let u256 = number_or_hex.into_u256();
     TryFrom::try_from(u256).map_err(|_| serde::de::Error::custom("Try from failed"))
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    // Smoldot returns numeric block numbers in the header at the time of writing;
+    // ensure we can deserialize them properly.
+    #[test]
+    fn can_deserialize_numeric_block_number() {
+        let numeric_block_number_json = r#"
+            {
+                "digest": {
+                    "logs": []
+                },
+                "extrinsicsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "number": 4,
+                "parentHash": "0xcb2690b2c85ceab55be03fc7f7f5f3857e7efeb7a020600ebd4331e10be2f7a5",
+                "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+        "#;
+
+        let header: SubstrateHeader<u32, BlakeTwo256> = serde_json::from_str(numeric_block_number_json).expect("valid block header");
+        assert_eq!(header.number(), 4);
+    }
+
+    // Substrate returns hex block numbers; ensure we can also deserialize those OK.
+    #[test]
+    fn can_deserialize_hex_block_number() {
+        let numeric_block_number_json = r#"
+            {
+                "digest": {
+                    "logs": []
+                },
+                "extrinsicsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "number": "0x04",
+                "parentHash": "0xcb2690b2c85ceab55be03fc7f7f5f3857e7efeb7a020600ebd4331e10be2f7a5",
+                "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+        "#;
+
+        let header: SubstrateHeader<u32, BlakeTwo256> = serde_json::from_str(numeric_block_number_json).expect("valid block header");
+        assert_eq!(header.number(), 4);
+    }
+
 }
