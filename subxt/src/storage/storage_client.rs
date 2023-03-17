@@ -7,6 +7,7 @@ use super::{
         validate_storage_address,
         Storage,
     },
+    utils,
     StorageAddress,
 };
 
@@ -59,14 +60,21 @@ where
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
-    /// to retrieve the associated entry.
+    /// to retrieve the entries at the root of the associated address.
+    pub fn address_root_bytes<Address: StorageAddress>(
+        &self,
+        address: &Address,
+    ) -> Vec<u8> {
+        utils::storage_address_root_bytes(address)
+    }
+
+    /// Convert some storage address into the raw bytes that would be submitted to the node in order
+    /// to retrieve an entry.
     pub fn address_bytes<Address: StorageAddress>(
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        let mut bytes = Vec::new();
-        address.append_entry_bytes(&self.client.metadata(), &mut bytes)?;
-        Ok(bytes)
+        utils::storage_address_bytes(address, &self.client.metadata())
     }
 }
 

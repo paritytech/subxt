@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .storage()
             .at(None)
             .await?
-            .fetch_keys(&key_addr.to_root_bytes(), 10, None)
+            .fetch_keys(&key_addr.root_bytes(), 10, None)
             .await?;
 
         println!("Example 2. Obtained keys:");
@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
 
         // Obtain the root bytes (`twox_128("XcmPallet") ++ twox_128("VersionNotifiers")`).
-        let mut query_key = key_addr.to_root_bytes();
+        let mut query_key = key_addr.root_bytes();
 
         // We know that the first key is a u32 (the `XcmVersion`) and is hashed by twox64_concat.
         // twox64_concat is just the result of running the twox_64 hasher on some value and concatenating
