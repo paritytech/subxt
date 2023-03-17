@@ -156,6 +156,7 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
             Some(sub) => sub,
             None => return Poll::Ready(None),
         };
+        eprintln!("poll_next");
 
         sub.poll_next_unpin(cx).map_ok(|status| {
             match status {
