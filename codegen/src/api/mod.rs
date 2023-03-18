@@ -248,23 +248,6 @@ impl RuntimeGenerator {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
 
-        // Get the path to the `Runtime` struct. We assume that the same path contains
-        // RuntimeCall and RuntimeEvent.
-        let runtime_type_id = self.metadata.ty.id();
-        let runtime_path_segments = self
-            .metadata
-            .types
-            .resolve(runtime_type_id)
-            .ok_or(CodegenError::TypeNotFound(runtime_type_id))?
-            .path()
-            .namespace()
-            .iter()
-            .map(|part| syn::PathSegment::from(format_ident!("{}", part)));
-        let runtime_path = syn::Path {
-            leading_colon: None,
-            segments: syn::punctuated::Punctuated::from_iter(runtime_path_segments),
-        };
-
         let type_gen = TypeGenerator::new(
             &self.metadata.types,
             "runtime_types",
@@ -286,6 +269,28 @@ impl RuntimeGenerator {
                 )
             })
             .collect::<Vec<_>>();
+
+        // Get the path to the `Runtime` struct. We assume that the same path contains
+        // RuntimeCall and RuntimeEvent.
+        let runtime_type_id = self.metadata.ty.id();
+        let runtime_path_segments = self
+            .metadata
+            .types
+            .resolve(runtime_type_id)
+            .ok_or(CodegenError::TypeNotFound(runtime_type_id))?
+            .path()
+            .namespace()
+            .iter()
+            .map(|part| syn::PathSegment::from(format_ident!("{}", part)));
+        let runtime_path_suffix = syn::Path {
+            leading_colon: None,
+            segments: syn::punctuated::Punctuated::from_iter(runtime_path_segments),
+        };
+        let runtime_path = if runtime_path_suffix.segments.is_empty() {
+            quote!(#types_mod_ident)
+        } else {
+            quote!(#types_mod_ident::#runtime_path_suffix)
+        };
 
         // Pallet names and their length are used to create PALLETS array.
         // The array is used to identify the pallets composing the metadata for
@@ -398,22 +403,27 @@ impl RuntimeGenerator {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
             pub mod #mod_ident {
-                // Preserve any Rust items that were previously defined in the adorned module
+                // Preserve any Rust items that were previously defined in the adorned module.
                 #( #rust_items ) *
 
-                // Make it easy to access the root via `root_mod` at different levels:
-                use super::#mod_ident as root_mod;
+                // Make it easy to access the root items via `root_mod` at different levels
+                // without reaching out of this module.
+                #[allow(unused_imports)]
+                mod root_mod {
+                    pub use super::*;
+                }
+
                 // Identify the pallets composing the static metadata by name.
                 pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
                 /// The statically generated runtime call type.
-                pub type Call = #types_mod_ident::#runtime_path::RuntimeCall;
+                pub type Call = #runtime_path::RuntimeCall;
 
                 /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
                 // Make the runtime event type easily accessible, and impl RootEvent to help decode into it.
-                pub type Event = #types_mod_ident::#runtime_path::RuntimeEvent;
+                pub type Event = #runtime_path::RuntimeEvent;
 
                 impl #crate_path::events::RootEvent for Event {
                     fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
