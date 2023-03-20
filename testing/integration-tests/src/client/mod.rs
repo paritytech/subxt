@@ -124,7 +124,7 @@ async fn fetch_keys() {
         .at(None)
         .await
         .unwrap()
-        .fetch_keys(&addr.root_bytes(), 4, None)
+        .fetch_keys(&addr.to_root_bytes(), 4, None)
         .await
         .unwrap();
     assert_eq!(keys.len(), 4)

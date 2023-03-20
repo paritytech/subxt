@@ -130,7 +130,7 @@ where
     /// Return bytes representing the root of this storage entry (ie a hash of
     /// the pallet and entry name). Use [`crate::storage::StorageClient::address_bytes()`]
     /// to obtain the bytes representing the entire address.
-    pub fn root_bytes(&self) -> Vec<u8> {
+    pub fn to_root_bytes(&self) -> Vec<u8> {
         super::utils::storage_address_root_bytes(self)
     }
 }
