@@ -13,10 +13,6 @@ use crate::{
     test_context,
 };
 use codec::Decode;
-use sp_core::{
-    sr25519::Pair,
-    Pair as _,
-};
 use sp_keyring::AccountKeyring;
 use subxt::utils::{
     AccountId32,
