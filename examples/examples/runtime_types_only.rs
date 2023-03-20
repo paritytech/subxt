@@ -6,7 +6,7 @@
 //! runtime types). We can ask `subxt` to generate only runtime types by passing a corresponding
 //! flag.
 //!
-//! Here we present how to correctly create `Block` type for Polkadot chain.
+//! Here we present how to correctly create `Block` type for the Polkadot chain.
 
 use sp_core::H256;
 use sp_runtime::{
@@ -43,6 +43,12 @@ type Block = generic::Block<Header, UncheckedExtrinsic>;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
+
+    // Although we could build an online client, we do not have access to the full runtime API. For
+    // that, we would have to specify `runtime_types_only = false` (or just skipping it).
+    //
+    // let api = subxt::OnlineClient::<PolkadotConfig>::new().await?;
+    // let address = polkadot::constants().balances().existential_deposit(); <- this won't compile!
 
     let polkadot_header = Header::new(
         41,
