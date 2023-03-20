@@ -79,9 +79,22 @@
 //!
 //! ```ignore
 //! #[subxt::subxt(crate = "crate::path::to::subxt")]
+//! pub mod polkadot {}
 //! ```
 //!
 //! By default the path `::subxt` is used.
+//!
+//! ### Expose documentation
+//!
+//! In order to expose the documentation from the runtime metadata on the generated
+//! code, users must specify the `generate_docs` flag:
+//!
+//! ```ignore
+//! #[subxt::subxt(generate_docs)]
+//! pub mod polkadot {}
+//! ```
+//!
+//! By default the documentation is not generated.
 //!
 //! ### Runtime types generation
 //!
@@ -109,7 +122,6 @@ use proc_macro_error::{
 };
 use subxt_codegen::{
     utils::Uri,
-    CratePath,
     DerivesRegistry,
     TypeSubstitutes,
 };
@@ -117,8 +129,6 @@ use syn::{
     parse_macro_input,
     punctuated::Punctuated,
     spanned::Spanned as _,
-    token::Comma,
-    Path,
 };
 
 #[derive(Debug, FromMeta)]
@@ -135,6 +145,8 @@ struct RuntimeMetadataArgs {
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
     crate_path: Option<String>,
+    #[darling(default)]
+    generate_docs: darling::util::Flag,
     #[darling(default)]
     runtime_types_only: bool,
 }
@@ -163,14 +175,39 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         Err(e) => return TokenStream::from(e.write_errors()),
     };
 
-    let crate_path = args.crate_path.map(CratePath::from).unwrap_or_default();
-    let derives_registry = build_derives_registry(
-        &crate_path,
-        args.derive_for_all_types.as_ref(),
-        args.derive_for_type,
-    );
-    let type_substitutes = build_type_substitutes(&crate_path, args.substitute_type);
+    let crate_path = match args.crate_path {
+        Some(crate_path) => crate_path.into(),
+        None => subxt_codegen::CratePath::default(),
+    };
+    let mut derives_registry = DerivesRegistry::new(&crate_path);
 
+    if let Some(derive_for_all) = args.derive_for_all_types {
+        derives_registry.extend_for_all(derive_for_all.iter().cloned());
+    }
+    for derives in &args.derive_for_type {
+        derives_registry.extend_for_type(
+            derives.ty.clone(),
+            derives.derive.iter().cloned(),
+            &crate_path,
+        )
+    }
+
+    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    if let Err(err) = type_substitutes.extend(args.substitute_type.into_iter().map(
+        |SubstituteType { ty, with }| {
+            (
+                ty,
+                with.try_into()
+                    .unwrap_or_else(|(node, msg): (syn::Path, String)| {
+                        abort!(node.span(), msg)
+                    }),
+            )
+        },
+    )) {
+        return err.into_compile_error().into()
+    }
+
+    let should_gen_docs = args.generate_docs.is_present();
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
@@ -182,9 +219,10 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                should_gen_docs,
                 args.runtime_types_only,
             )
-            .into()
+            .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, Some(url_string)) => {
             let url = Uri::from_str(&url_string).unwrap_or_else(|_| {
@@ -196,9 +234,10 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 derives_registry,
                 type_substitutes,
                 crate_path,
+                should_gen_docs,
                 args.runtime_types_only,
             )
-            .into()
+            .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, None) => {
             abort_call_site!("One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided")
@@ -207,42 +246,4 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             abort_call_site!("Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided")
         }
     }
-}
-
-fn build_derives_registry(
-    crate_path: &CratePath,
-    universal_derivation: Option<&Punctuated<Path, Comma>>,
-    specific_derivations: Vec<DeriveForType>,
-) -> DerivesRegistry {
-    let mut derives_registry = DerivesRegistry::new(crate_path);
-    if let Some(derive_for_all) = universal_derivation {
-        derives_registry.extend_for_all(derive_for_all.iter().cloned());
-    }
-    for derives in specific_derivations {
-        derives_registry.extend_for_type(
-            derives.ty,
-            derives.derive.into_iter(),
-            crate_path,
-        )
-    }
-    derives_registry
-}
-
-fn build_type_substitutes(
-    crate_path: &CratePath,
-    substitutions: Vec<SubstituteType>,
-) -> TypeSubstitutes {
-    let mut type_substitutes = TypeSubstitutes::new(crate_path);
-    type_substitutes.extend(substitutions.into_iter().map(
-        |SubstituteType { ty, with }| {
-            (
-                ty,
-                with.try_into()
-                    .unwrap_or_else(|(node, msg): (syn::Path, String)| {
-                        abort!(node.span(), msg)
-                    }),
-            )
-        },
-    ));
-    type_substitutes
 }

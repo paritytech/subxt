@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::api::CodegenError;
+
 use super::{
     CratePath,
     Derives,
@@ -12,7 +14,6 @@ use super::{
     TypePath,
 };
 use proc_macro2::TokenStream;
-use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
@@ -52,8 +53,8 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
         crate_path: &CratePath,
-    ) -> Self {
-        let mut derives = type_gen.type_derives(ty);
+    ) -> Result<Self, CodegenError> {
+        let mut derives = type_gen.type_derives(ty)?;
         let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
@@ -84,7 +85,7 @@ impl CompositeDef {
         let name = format_ident!("{}", ident);
         let docs_token = Some(quote! { #( #[doc = #docs ] )* });
 
-        Self {
+        Ok(Self {
             name,
             kind: CompositeDefKind::Struct {
                 derives,
@@ -93,7 +94,7 @@ impl CompositeDef {
             },
             fields: fields_def,
             docs: docs_token,
-        }
+        })
     }
 
     /// Construct a definition which will generate code for an `enum` variant.
@@ -183,9 +184,9 @@ impl CompositeDefFields {
         fields: &[Field],
         parent_type_params: &[TypeParameter],
         type_gen: &TypeGenerator,
-    ) -> Self {
+    ) -> Result<Self, CodegenError> {
         if fields.is_empty() {
-            return Self::NoFields
+            return Ok(Self::NoFields)
         }
 
         let mut named_fields = Vec::new();
@@ -209,17 +210,15 @@ impl CompositeDefFields {
         }
 
         if !named_fields.is_empty() && !unnamed_fields.is_empty() {
-            abort_call_site!(
-                "'{}': Fields should either be all named or all unnamed.",
-                name,
-            )
+            return Err(CodegenError::InvalidFields(name.into()))
         }
 
-        if !named_fields.is_empty() {
+        let res = if !named_fields.is_empty() {
             Self::Named(named_fields)
         } else {
             Self::Unnamed(unnamed_fields)
-        }
+        };
+        Ok(res)
     }
 
     /// Returns the set of composite fields.
