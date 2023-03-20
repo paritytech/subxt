@@ -18,17 +18,11 @@ use codec::{
     Encode,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use sp_core::{
-    sr25519::Pair as Sr25519Pair,
-    storage::well_known_keys,
-    Pair,
-};
+use sp_core::storage::well_known_keys;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    error::DispatchError,
     rpc::types::{
         ChainHeadEvent,
-        DryRunError,
         FollowEvent,
         Initialized,
         RuntimeEvent,

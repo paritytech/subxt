@@ -18,15 +18,9 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
-    error::{
-        DispatchError,
-        Error,
-    },
-    utils::{
-        AccountId32,
-        MultiAddress,
-    },
+use subxt::utils::{
+    AccountId32,
+    MultiAddress,
 };
 
 #[tokio::test]
