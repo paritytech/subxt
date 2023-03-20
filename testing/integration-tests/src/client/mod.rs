@@ -315,7 +315,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
             .account_id()
             .clone()
             .into(),
-        12345,
+        12345000000000000,
     );
 
     let actual_tx = api.tx().create_unsigned(&tx).unwrap();
