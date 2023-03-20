@@ -329,7 +329,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     // - create a balances.transfer to ALICE with 12345 and "submit unsigned".
     // - find the submitAndWatchExtrinsic call in the WS connection to get these bytes:
     let expected_tx_bytes = hex::decode(
-        "9804060000d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27de5c0",
+        "b004060700d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0f0090c04bb6db2b"
     )
     .unwrap();
 
