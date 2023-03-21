@@ -69,7 +69,10 @@ where
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
-    /// to retrieve an entry.
+    /// to retrieve an entry. This fails if [`StorageAddress::append_entry_bytes`] does; in the built-in
+    /// implementation this would be if the pallet and storage entry being asked for is not available on the
+    /// node you're communicating with, or if the metadata is missing some type information (which should not
+    /// happen).
     pub fn address_bytes<Address: StorageAddress>(
         &self,
         address: &Address,
