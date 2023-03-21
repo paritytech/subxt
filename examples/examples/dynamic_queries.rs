@@ -13,12 +13,7 @@
 // This example showcases working with dynamic values rather than those that are generated via the subxt proc macro.
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    dynamic::Value,
-    tx::PairSigner,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{dynamic::Value, tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

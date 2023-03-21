@@ -3,12 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{
-        self,
-        system,
-    },
-    pair_signer,
-    test_context,
+    node_runtime::{self, system},
+    pair_signer, test_context,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;

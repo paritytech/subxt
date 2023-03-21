@@ -2,10 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    dynamic::DecodedValueThunk,
-    metadata::DecodeWithMetadata,
-};
+use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
 use std::borrow::Cow;
 
 /// This represents a constant address. Anything implementing this trait
@@ -94,9 +91,6 @@ impl<ReturnTy: DecodeWithMetadata> ConstantAddress for Address<ReturnTy> {
 }
 
 /// Construct a new dynamic constant lookup.
-pub fn dynamic(
-    pallet_name: impl Into<String>,
-    constant_name: impl Into<String>,
-) -> DynamicAddress {
+pub fn dynamic(pallet_name: impl Into<String>, constant_name: impl Into<String>) -> DynamicAddress {
     DynamicAddress::new(pallet_name, constant_name)
 }

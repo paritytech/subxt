@@ -5,15 +5,8 @@
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use jsonrpsee::client_transport::ws::Uri;
-use std::{
-    fs,
-    io::Read,
-    path::PathBuf,
-};
-use subxt_codegen::{
-    DerivesRegistry,
-    TypeSubstitutes,
-};
+use std::{fs, io::Read, path::PathBuf};
+use subxt_codegen::{DerivesRegistry, TypeSubstitutes};
 
 /// Generate runtime API client code from metadata.
 ///

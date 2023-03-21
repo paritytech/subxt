@@ -5,20 +5,11 @@
 use std::{
     fmt::Write,
     pin::Pin,
-    sync::{
-        Arc,
-        Mutex,
-    },
+    sync::{Arc, Mutex},
 };
 use subxt::{
-    rpc::{
-        RawValue,
-        RpcClientT,
-        RpcFuture,
-        RpcSubscription,
-    },
-    OnlineClient,
-    PolkadotConfig,
+    rpc::{RawValue, RpcClientT, RpcFuture, RpcSubscription},
+    OnlineClient, PolkadotConfig,
 };
 
 // A dummy RPC client that doesn't actually handle requests properly

@@ -10,14 +10,8 @@
 //! polkadot --dev --tmp
 //! ```
 
-use codec::{
-    Decode,
-    Encode,
-};
-use subxt::{
-    OnlineClient,
-    PolkadotConfig,
-};
+use codec::{Decode, Encode};
+use subxt::{OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -60,9 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(key));
 
-            if let Some(storage_data) =
-                api.storage().at(None).await?.fetch_raw(&key.0).await?
-            {
+            if let Some(storage_data) = api.storage().at(None).await?.fetch_raw(&key.0).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn
@@ -102,9 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(key));
 
-            if let Some(storage_data) =
-                api.storage().at(None).await?.fetch_raw(&key.0).await?
-            {
+            if let Some(storage_data) = api.storage().at(None).await?.fetch_raw(&key.0).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn

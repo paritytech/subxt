@@ -4,16 +4,9 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{
-    client::OnlineClientT,
-    error::Error,
-    Config,
-};
+use crate::{client::OnlineClientT, error::Error, Config};
 use derivative::Derivative;
-use std::{
-    future::Future,
-    marker::PhantomData,
-};
+use std::{future::Future, marker::PhantomData};
 
 /// Execute runtime API calls.
 #[derive(Derivative)]
@@ -51,13 +44,9 @@ where
             // for the latest block and use that.
             let block_hash = match block_hash {
                 Some(hash) => hash,
-                None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("substrate RPC returns the best block when no block number is provided; qed")
-                }
+                None => client.rpc().block_hash(None).await?.expect(
+                    "substrate RPC returns the best block when no block number is provided; qed",
+                ),
             };
 
             Ok(RuntimeApi::new(client, block_hash))

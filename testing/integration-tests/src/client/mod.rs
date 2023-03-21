@@ -3,31 +3,16 @@
 // see LICENSE for license details.
 
 use crate::{
-    pair_signer,
-    test_context,
-    test_context_with,
-    utils::{
-        node_runtime,
-        wait_for_blocks,
-    },
+    pair_signer, test_context, test_context_with,
+    utils::{node_runtime, wait_for_blocks},
 };
 use assert_matches::assert_matches;
-use codec::{
-    Compact,
-    Decode,
-    Encode,
-};
+use codec::{Compact, Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::storage::well_known_keys;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    rpc::types::{
-        ChainHeadEvent,
-        FollowEvent,
-        Initialized,
-        RuntimeEvent,
-        RuntimeVersionEvent,
-    },
+    rpc::types::{ChainHeadEvent, FollowEvent, Initialized, RuntimeEvent, RuntimeVersionEvent},
     tx::Signer,
     utils::AccountId32,
 };
@@ -260,8 +245,7 @@ async fn external_signing() {
     // Sign it (possibly externally).
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
-    let extrinsic =
-        partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
+    let extrinsic = partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
 
     // And now submit it.
     extrinsic
@@ -417,8 +401,7 @@ async fn chainhead_unstable_body() {
 
     // Expected block's extrinsics scale encoded and hex encoded.
     let body = api.rpc().block(Some(hash)).await.unwrap().unwrap();
-    let extrinsics: Vec<Vec<u8>> =
-        body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
+    let extrinsics: Vec<Vec<u8>> = body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
     let expected = format!("0x{}", hex::encode(extrinsics.encode()));
 
     assert_matches!(event,

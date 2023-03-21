@@ -53,18 +53,8 @@ pub mod utils;
 
 pub use self::{
     api::{
-        generate_runtime_api_from_bytes,
-        generate_runtime_api_from_path,
-        generate_runtime_api_from_url,
-        CodegenError,
-        RuntimeGenerator,
+        generate_runtime_api_from_bytes, generate_runtime_api_from_path,
+        generate_runtime_api_from_url, CodegenError, RuntimeGenerator,
     },
-    types::{
-        CratePath,
-        Derives,
-        DerivesRegistry,
-        Module,
-        TypeGenerator,
-        TypeSubstitutes,
-    },
+    types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
 };

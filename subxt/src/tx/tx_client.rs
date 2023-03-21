@@ -4,29 +4,13 @@
 
 use super::TxPayload;
 use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
-    config::{
-        Config,
-        ExtrinsicParams,
-        Hasher,
-    },
+    client::{OfflineClientT, OnlineClientT},
+    config::{Config, ExtrinsicParams, Hasher},
     error::Error,
-    tx::{
-        Signer as SignerT,
-        TxProgress,
-    },
-    utils::{
-        Encoded,
-        PhantomDataSendSync,
-    },
+    tx::{Signer as SignerT, TxProgress},
+    utils::{Encoded, PhantomDataSendSync},
 };
-use codec::{
-    Compact,
-    Encode,
-};
+use codec::{Compact, Encode};
 use derivative::Derivative;
 use std::borrow::Cow;
 
@@ -62,14 +46,13 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     {
         if let Some(details) = call.validation_details() {
             let metadata = self.client.metadata();
-            let expected_hash =
-                metadata.call_hash(details.pallet_name, details.call_name)?;
+            let expected_hash = metadata.call_hash(details.pallet_name, details.call_name)?;
             if details.hash != expected_hash {
                 return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
                     details.pallet_name.into(),
                     details.call_name.into(),
                 )
-                .into())
+                .into());
             }
         }
         Ok(())
@@ -87,10 +70,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates an unsigned extrinsic without submitting it.
-    pub fn create_unsigned<Call>(
-        &self,
-        call: &Call,
-    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -107,8 +87,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             call.encode_call_data_to(&self.client.metadata(), &mut encoded_inner)?;
             // now, prefix byte length:
             let len = Compact(
-                u32::try_from(encoded_inner.len())
-                    .expect("extrinsic size expected to be <4GB"),
+                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
             );
             let mut encoded = Vec::new();
             len.encode_to(&mut encoded);
@@ -193,10 +172,7 @@ where
     C: OnlineClientT<T>,
 {
     // Get the next account nonce to use.
-    async fn next_account_nonce(
-        &self,
-        account_id: &T::AccountId,
-    ) -> Result<T::Index, Error> {
+    async fn next_account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
         self.client
             .rpc()
             .system_account_next_index(account_id)
@@ -399,8 +375,7 @@ where
             encoded_inner.extend(&self.call_data);
             // now, prefix byte length:
             let len = Compact(
-                u32::try_from(encoded_inner.len())
-                    .expect("extrinsic size expected to be <4GB"),
+                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
             );
             let mut encoded = Vec::new();
             len.encode_to(&mut encoded);

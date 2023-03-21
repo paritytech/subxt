@@ -7,10 +7,7 @@
 
 use crate::{
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        Metadata,
-    },
+    metadata::{DecodeWithMetadata, Metadata},
 };
 use scale_decode::DecodeAsType;
 
@@ -29,10 +26,7 @@ pub use crate::tx::dynamic as tx;
 pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::{
-    dynamic as storage,
-    dynamic_root as storage_root,
-};
+pub use crate::storage::{dynamic as storage, dynamic_root as storage_root};
 
 /// This is the result of making a dynamic request to a node. From this,
 /// we can return the raw SCALE bytes that we were handed back, or we can

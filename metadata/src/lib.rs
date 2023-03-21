@@ -3,18 +3,9 @@
 // see LICENSE for license details.
 
 use frame_metadata::{
-    ExtrinsicMetadata,
-    RuntimeMetadataV14,
-    StorageEntryMetadata,
-    StorageEntryType,
+    ExtrinsicMetadata, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryType,
 };
-use scale_info::{
-    form::PortableForm,
-    Field,
-    PortableRegistry,
-    TypeDef,
-    Variant,
-};
+use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
 
 /// Internal byte representation for various metadata types utilized for
@@ -137,8 +128,7 @@ fn get_type_def_hash(
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
             for field in tuple.fields() {
-                bytes =
-                    hash_hashes(bytes, get_type_hash(registry, field.id(), visited_ids));
+                bytes = hash_hashes(bytes, get_type_hash(registry, field.id(), visited_ids));
             }
             bytes
         }
@@ -169,14 +159,10 @@ fn get_type_def_hash(
 }
 
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
-fn get_type_hash(
-    registry: &PortableRegistry,
-    id: u32,
-    visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
+fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet<u32>) -> [u8; 32] {
     // Guard against recursive types and return a fixed arbitrary hash
     if !visited_ids.insert(id) {
-        return hash(&[123u8])
+        return hash(&[123u8]);
     }
 
     let ty = registry.resolve(id).unwrap();
@@ -459,21 +445,11 @@ pub enum NotFound {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bitvec::{
-        order::Lsb0,
-        vec::BitVec,
-    };
+    use bitvec::{order::Lsb0, vec::BitVec};
     use frame_metadata::{
-        ExtrinsicMetadata,
-        PalletCallMetadata,
-        PalletConstantMetadata,
-        PalletErrorMetadata,
-        PalletEventMetadata,
-        PalletMetadata,
-        PalletStorageMetadata,
-        RuntimeMetadataV14,
-        StorageEntryMetadata,
-        StorageEntryModifier,
+        ExtrinsicMetadata, PalletCallMetadata, PalletConstantMetadata, PalletErrorMetadata,
+        PalletEventMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV14,
+        StorageEntryMetadata, StorageEntryModifier,
     };
     use scale_info::meta_type;
 
@@ -722,9 +698,11 @@ mod tests {
         );
 
         // Check hashing with all pallets.
-        let hash_second =
-            get_metadata_per_pallet_hash(&metadata_both, &["First", "Second"]);
-        assert_ne!(hash_second, hash, "hashing both pallets should produce a different result from hashing just one pallet");
+        let hash_second = get_metadata_per_pallet_hash(&metadata_both, &["First", "Second"]);
+        assert_ne!(
+            hash_second, hash,
+            "hashing both pallets should produce a different result from hashing just one pallet"
+        );
     }
 
     #[test]

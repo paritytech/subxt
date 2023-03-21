@@ -8,24 +8,13 @@ use std::task::Poll;
 
 use crate::{
     client::OnlineClientT,
-    error::{
-        DispatchError,
-        Error,
-        RpcError,
-        TransactionError,
-    },
+    error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
-    rpc::types::{
-        Subscription,
-        SubstrateTxStatus,
-    },
+    rpc::types::{Subscription, SubstrateTxStatus},
     Config,
 };
 use derivative::Derivative;
-use futures::{
-    Stream,
-    StreamExt,
-};
+use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
@@ -163,11 +152,7 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
                 SubstrateTxStatus::Ready => TxStatus::Ready,
                 SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
                 SubstrateTxStatus::InBlock(hash) => {
-                    TxStatus::InBlock(TxInBlock::new(
-                        hash,
-                        self.ext_hash,
-                        self.client.clone(),
-                    ))
+                    TxStatus::InBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
                 }
                 SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
                 SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
@@ -188,11 +173,7 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
                 }
                 SubstrateTxStatus::Finalized(hash) => {
                     self.sub = None;
-                    TxStatus::Finalized(TxInBlock::new(
-                        hash,
-                        self.ext_hash,
-                        self.client.clone(),
-                    ))
+                    TxStatus::Finalized(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
                 }
             }
         })
@@ -335,9 +316,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(
-        &self,
-    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    pub async fn wait_for_success(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
@@ -346,7 +325,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
                     DispatchError::decode_from(ev.field_bytes(), &self.client.metadata());
-                return Err(dispatch_error.into())
+                return Err(dispatch_error.into());
             }
         }
 
@@ -367,7 +346,9 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .await?
             .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let extrinsic_idx = block.block.extrinsics
+        let extrinsic_idx = block
+            .block
+            .extrinsics
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;

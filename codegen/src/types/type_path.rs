@@ -4,16 +4,9 @@
 
 use crate::CratePath;
 
-use proc_macro2::{
-    Ident,
-    TokenStream,
-};
+use proc_macro2::{Ident, TokenStream};
 use quote::format_ident;
-use scale_info::{
-    form::PortableForm,
-    Path,
-    TypeDefPrimitive,
-};
+use scale_info::{form::PortableForm, Path, TypeDefPrimitive};
 use std::collections::BTreeSet;
 use syn::parse_quote;
 
@@ -135,10 +128,7 @@ impl TypePathType {
                 let mut ty_path = path_segments
                     .iter()
                     .map(|s| syn::PathSegment::from(format_ident!("{}", s)))
-                    .collect::<syn::punctuated::Punctuated<
-                        syn::PathSegment,
-                        syn::Token![::],
-                    >>();
+                    .collect::<syn::punctuated::Punctuated<syn::PathSegment, syn::Token![::]>>();
                 ty_path.insert(0, syn::PathSegment::from(root_mod_ident));
                 parse_quote!( #ty_path )
             }
@@ -208,25 +198,23 @@ impl TypePathType {
                 let tuple = parse_quote! { (#( # elements, )* ) };
                 syn::Type::Tuple(tuple)
             }
-            TypePathType::Primitive { def } => {
-                syn::Type::Path(match def {
-                    TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
-                    TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
-                    TypeDefPrimitive::Str => parse_quote!(::std::string::String),
-                    TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
-                    TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
-                    TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
-                    TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
-                    TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
-                    TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
-                    TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
-                    TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
-                    TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
-                    TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
-                    TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
-                    TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
-                })
-            }
+            TypePathType::Primitive { def } => syn::Type::Path(match def {
+                TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
+                TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
+                TypeDefPrimitive::Str => parse_quote!(::std::string::String),
+                TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
+                TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
+                TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
+                TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
+                TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
+                TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
+                TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
+                TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
+                TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
+                TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
+                TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
+                TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
+            }),
             TypePathType::Compact {
                 inner,
                 is_field,

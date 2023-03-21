@@ -8,26 +8,16 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
-        runtime_types::{
-            pallet_contracts::wasm::Determinism,
-            sp_weights::weight_v2::Weight,
-        },
+        runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    test_context,
-    TestContext,
+    test_context, TestContext,
 };
 use sp_core::sr25519::Pair;
 use subxt::{
-    tx::{
-        PairSigner,
-        TxProgress,
-    },
+    tx::{PairSigner, TxProgress},
     utils::MultiAddress,
-    Config,
-    Error,
-    OnlineClient,
-    SubstrateConfig,
+    Config, Error, OnlineClient, SubstrateConfig,
 };
 
 struct ContractsTestContext {
@@ -113,9 +103,7 @@ impl ContractsTestContext {
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
         let _extrinsic_success = events
             .find_first::<system::events::ExtrinsicSuccess>()?
-            .ok_or_else(|| {
-                Error::Other("Failed to find a ExtrinsicSuccess event".into())
-            })?;
+            .ok_or_else(|| Error::Other("Failed to find a ExtrinsicSuccess event".into()))?;
 
         tracing::info!("  Block hash: {:?}", events.block_hash());
         tracing::info!("  Code hash: {:?}", code_stored.code_hash);

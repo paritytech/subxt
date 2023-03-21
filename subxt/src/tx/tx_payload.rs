@@ -5,32 +5,17 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::{
-    dynamic::Value,
-    error::Error,
-    metadata::Metadata,
-};
+use crate::{dynamic::Value, error::Error, metadata::Metadata};
 use codec::Encode;
 use scale_encode::EncodeAsFields;
-use scale_value::{
-    Composite,
-    ValueDef,
-    Variant,
-};
-use std::{
-    borrow::Cow,
-    sync::Arc,
-};
+use scale_value::{Composite, ValueDef, Variant};
+use std::{borrow::Cow, sync::Arc};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
 pub trait TxPayload {
     /// Encode call data to the provided output.
-    fn encode_call_data_to(
-        &self,
-        metadata: &Metadata,
-        out: &mut Vec<u8>,
-    ) -> Result<(), Error>;
+    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode call data and return the output. This is a convenience
     /// wrapper around [`TxPayload::encode_call_data_to`].
@@ -151,11 +136,7 @@ impl Payload<Composite<()>> {
 }
 
 impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
-    fn encode_call_data_to(
-        &self,
-        metadata: &Metadata,
-        out: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
         let pallet = metadata.pallet(&self.pallet_name)?;
         let call = pallet.call(&self.call_name)?;
 
@@ -171,12 +152,10 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
     }
 
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
-        self.validation_hash.map(|hash| {
-            ValidationDetails {
-                pallet_name: &self.pallet_name,
-                call_name: &self.call_name,
-                hash,
-            }
+        self.validation_hash.map(|hash| ValidationDetails {
+            pallet_name: &self.pallet_name,
+            call_name: &self.call_name,
+            hash,
         })
     }
 }

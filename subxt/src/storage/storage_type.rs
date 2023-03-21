@@ -2,30 +2,18 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{
-    StorageAddress,
-    Yes,
-};
+use super::storage_address::{StorageAddress, Yes};
 use crate::{
     client::OnlineClientT,
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        Metadata,
-    },
-    rpc::types::{
-        StorageData,
-        StorageKey,
-    },
+    metadata::{DecodeWithMetadata, Metadata},
+    rpc::types::{StorageData, StorageKey},
     Config,
 };
 use derivative::Derivative;
 use frame_metadata::StorageEntryType;
 use scale_info::form::PortableForm;
-use std::{
-    future::Future,
-    marker::PhantomData,
-};
+use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -150,15 +138,10 @@ where
                 // We have to dig into metadata already, so no point using the optimised `decode_storage_with_metadata` call.
                 let pallet_metadata = metadata.pallet(pallet_name)?;
                 let storage_metadata = pallet_metadata.storage(storage_name)?;
-                let return_ty_id =
-                    return_type_from_storage_entry_type(&storage_metadata.ty);
+                let return_ty_id = return_type_from_storage_entry_type(&storage_metadata.ty);
                 let bytes = &mut &storage_metadata.default[..];
 
-                let val = Address::Target::decode_with_metadata(
-                    bytes,
-                    return_ty_id,
-                    &metadata,
-                )?;
+                let val = Address::Target::decode_with_metadata(bytes, return_ty_id, &metadata)?;
                 Ok(val)
             }
         }
@@ -237,11 +220,8 @@ where
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id = lookup_storage_return_type(
-                &metadata,
-                address.pallet_name(),
-                address.entry_name(),
-            )?;
+            let return_type_id =
+                lookup_storage_return_type(&metadata, address.pallet_name(), address.entry_name())?;
 
             // The root pallet/entry bytes for this storage entry:
             let address_root_bytes = super::utils::storage_address_root_bytes(&address);
@@ -289,7 +269,7 @@ where
                     self.return_type_id,
                     &self.metadata,
                 )?;
-                return Ok(Some((k, val)))
+                return Ok(Some((k, val)));
             } else {
                 let start_key = self.start_key.take();
                 let keys = self
@@ -302,7 +282,7 @@ where
                     .await?;
 
                 if keys.is_empty() {
-                    return Ok(None)
+                    return Ok(None);
                 }
 
                 self.start_key = keys.last().cloned();
@@ -350,13 +330,11 @@ fn validate_storage(
     };
     match expected_hash == hash {
         true => Ok(()),
-        false => {
-            Err(crate::error::MetadataError::IncompatibleStorageMetadata(
-                pallet_name.into(),
-                storage_name.into(),
-            )
-            .into())
-        }
+        false => Err(crate::error::MetadataError::IncompatibleStorageMetadata(
+            pallet_name.into(),
+            storage_name.into(),
+        )
+        .into()),
     }
 }
 

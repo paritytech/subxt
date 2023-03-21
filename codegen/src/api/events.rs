@@ -2,10 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    types::TypeGenerator,
-    CratePath,
-};
+use crate::{types::TypeGenerator, CratePath};
 use frame_metadata::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;

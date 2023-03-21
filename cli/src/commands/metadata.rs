@@ -7,10 +7,7 @@ use color_eyre::eyre;
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::client_transport::ws::Uri;
 use scale::Decode;
-use std::io::{
-    self,
-    Write,
-};
+use std::io::{self, Write};
 use subxt_codegen::utils::fetch_metadata_hex;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
@@ -48,11 +45,9 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
             Ok(io::stdout().write_all(&bytes)?)
         }
-        _ => {
-            Err(eyre::eyre!(
-                "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
-                opts.format
-            ))
-        }
+        _ => Err(eyre::eyre!(
+            "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
+            opts.format
+        )),
     }
 }

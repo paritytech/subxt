@@ -4,26 +4,11 @@
 
 use codec::Decode;
 use criterion::*;
-use frame_metadata::{
-    RuntimeMetadata::V14,
-    RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
-};
-use scale_info::{
-    form::PortableForm,
-    TypeDef,
-    TypeDefVariant,
-};
-use std::{
-    fs,
-    path::Path,
-};
+use frame_metadata::{RuntimeMetadata::V14, RuntimeMetadataPrefixed, RuntimeMetadataV14};
+use scale_info::{form::PortableForm, TypeDef, TypeDefVariant};
+use std::{fs, path::Path};
 use subxt_metadata::{
-    get_call_hash,
-    get_constant_hash,
-    get_metadata_hash,
-    get_pallet_hash,
-    get_storage_hash,
+    get_call_hash, get_constant_hash, get_metadata_hash, get_pallet_hash, get_storage_hash,
 };
 
 fn load_metadata() -> RuntimeMetadataV14 {

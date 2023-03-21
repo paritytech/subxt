@@ -4,10 +4,7 @@
 
 use crate::error::RpcError;
 use futures::Stream;
-use std::{
-    future::Future,
-    pin::Pin,
-};
+use std::{future::Future, pin::Pin};
 
 // Re-exporting for simplicity since it's used a bunch in the trait definition.
 pub use serde_json::value::RawValue;
@@ -56,8 +53,7 @@ pub trait RpcClientT: Send + Sync + 'static {
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RpcFuture<'a, T> =
-    Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
+pub type RpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
 pub struct RpcSubscription {

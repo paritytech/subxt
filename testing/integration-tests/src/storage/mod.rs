@@ -2,12 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    node_runtime,
-    pair_signer,
-    test_context,
-    utils::wait_for_blocks,
-};
+use crate::{node_runtime, pair_signer, test_context, utils::wait_for_blocks};
 use sp_keyring::AccountKeyring;
 use subxt::utils::AccountId32;
 

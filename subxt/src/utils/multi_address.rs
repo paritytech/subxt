@@ -6,10 +6,7 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_runtime::MultiAddress`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 
 /// A multi-format address wrapper for on-chain accounts. This is a simplified version of Substrate's
 /// `sp_runtime::MultiAddress`. To obtain more functionality, convert this into that type (this conversion
@@ -48,10 +45,7 @@ impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, Accoun
 // Improve compat with the substrate version if we're using those crates:
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
-    use super::{
-        super::AccountId32,
-        *,
-    };
+    use super::{super::AccountId32, *};
 
     impl<N> From<sp_runtime::AccountId32> for MultiAddress<AccountId32, N> {
         fn from(value: sp_runtime::AccountId32) -> Self {

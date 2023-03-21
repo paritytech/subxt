@@ -5,14 +5,10 @@
 use crate::{
     node_runtime::{
         self,
-        runtime_types::{
-            self,
-            sp_weights::weight_v2::Weight,
-        },
+        runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    pair_signer,
-    test_context,
+    pair_signer, test_context,
 };
 use sp_keyring::AccountKeyring;
 

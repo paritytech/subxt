@@ -6,10 +6,7 @@ use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        MetadataError,
-    },
+    metadata::{DecodeWithMetadata, MetadataError},
     Config,
 };
 use derivative::Derivative;
@@ -37,10 +34,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or constant in question do not exist at all).
-    pub fn validate<Address: ConstantAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
+    pub fn validate<Address: ConstantAddress>(&self, address: &Address) -> Result<(), Error> {
         if let Some(actual_hash) = address.validation_hash() {
             let expected_hash = self
                 .client
@@ -51,7 +45,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
                     address.pallet_name().into(),
                     address.constant_name().into(),
                 )
-                .into())
+                .into());
             }
         }
         Ok(())

@@ -12,10 +12,7 @@ pub mod utils;
 
 pub use storage_client::StorageClient;
 
-pub use storage_type::{
-    KeyIter,
-    Storage,
-};
+pub use storage_type::{KeyIter, Storage};
 
 // Re-export as this is used in the public API in this module:
 pub use crate::rpc::types::StorageKey;
@@ -24,22 +21,10 @@ pub use crate::rpc::types::StorageKey;
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        dynamic,
-        dynamic_root,
-        Address,
-        DynamicAddress,
-        StaticStorageMapKey,
-        StorageAddress,
-        Yes,
+        dynamic, dynamic_root, Address, DynamicAddress, StaticStorageMapKey, StorageAddress, Yes,
     };
 }
 
 // For consistency with other modules, also expose
 // the basic address stuff at the root of the module.
-pub use storage_address::{
-    dynamic,
-    dynamic_root,
-    Address,
-    DynamicAddress,
-    StorageAddress,
-};
+pub use storage_address::{dynamic, dynamic_root, Address, DynamicAddress, StorageAddress};

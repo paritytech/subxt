@@ -2,24 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    RpcClientT,
-    RpcFuture,
-    RpcSubscription,
-};
+use super::{RpcClientT, RpcFuture, RpcSubscription};
 use crate::error::RpcError;
-use futures::stream::{
-    StreamExt,
-    TryStreamExt,
-};
+use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{
-        client::{
-            Client,
-            ClientT,
-            SubscriptionClientT,
-            SubscriptionKind,
-        },
+        client::{Client, ClientT, SubscriptionClientT, SubscriptionKind},
         traits::ToRpcParams,
         Error as JsonRpseeError,
     },

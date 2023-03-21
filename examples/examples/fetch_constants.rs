@@ -10,10 +10,7 @@
 //! polkadot --dev --tmp
 //! ```
 
-use subxt::{
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{OnlineClient, PolkadotConfig};
 
 // Generate the API from a static metadata path.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]

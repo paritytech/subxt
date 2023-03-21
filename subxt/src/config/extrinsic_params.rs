@@ -7,21 +7,11 @@
 //! implementation of the trait is provided ([`BaseExtrinsicParams`]) which is
 //! used by the provided Substrate and Polkadot configuration.
 
-use crate::{
-    utils::Encoded,
-    Config,
-};
-use codec::{
-    Compact,
-    Decode,
-    Encode,
-};
+use crate::{utils::Encoded, Config};
+use codec::{Compact, Decode, Encode};
 use core::fmt::Debug;
 use derivative::Derivative;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are signed and used in transactions.
@@ -148,9 +138,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash
     ) -> Self {
         BaseExtrinsicParams {
             era: other_params.era,
-            mortality_checkpoint: other_params
-                .mortality_checkpoint
-                .unwrap_or(genesis_hash),
+            mortality_checkpoint: other_params.mortality_checkpoint.unwrap_or(genesis_hash),
             tip: other_params.tip,
             nonce,
             spec_version,

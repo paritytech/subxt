@@ -3,12 +3,7 @@
 // see LICENSE for license details.
 
 use regex::Regex;
-use subxt_codegen::{
-    CratePath,
-    DerivesRegistry,
-    RuntimeGenerator,
-    TypeSubstitutes,
-};
+use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
 
 fn load_test_metadata() -> frame_metadata::RuntimeMetadataPrefixed {
     let bytes = test_runtime::METADATA;
@@ -162,7 +157,8 @@ fn check_root_attrs_preserved() {
     let doc_str_loc = generated_code
         .find("Some root level documentation")
         .expect("root docs should be preserved");
-    let attr_loc = generated_code.find("some_root_attribute") // '#' is space separated in generated output.
+    let attr_loc = generated_code
+        .find("some_root_attribute") // '#' is space separated in generated output.
         .expect("root attr should be preserved");
     let mod_start = generated_code
         .find("pub mod api")

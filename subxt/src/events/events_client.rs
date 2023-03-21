@@ -2,13 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    client::OnlineClientT,
-    error::Error,
-    events::Events,
-    rpc::types::StorageKey,
-    Config,
-};
+use crate::{client::OnlineClientT, error::Error, events::Events, rpc::types::StorageKey, Config};
 use derivative::Derivative;
 use std::future::Future;
 
@@ -54,13 +48,11 @@ where
             // for the latest block and use that.
             let block_hash = match block_hash {
                 Some(hash) => hash,
-                None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("didn't pass a block number; qed")
-                }
+                None => client
+                    .rpc()
+                    .block_hash(None)
+                    .await?
+                    .expect("didn't pass a block number; qed"),
             };
 
             let event_bytes = get_event_bytes(&client, Some(block_hash)).await?;
