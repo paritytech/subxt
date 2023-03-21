@@ -65,7 +65,7 @@ impl ContractsTestContext {
         let upload_tx = node_runtime::tx().contracts().upload_code(
             code,
             None,
-            Determinism::Deterministic,
+            Determinism::Enforced,
         );
 
         let events = self
