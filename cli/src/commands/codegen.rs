@@ -45,6 +45,9 @@ pub struct Opts {
     /// Defaults to `false` (documentation is generated).
     #[clap(long, action)]
     no_docs: bool,
+    /// Whether to limit code generation to only runtime types.
+    #[clap(long)]
+    runtime_types_only: bool,
 }
 
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
@@ -80,6 +83,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         opts.derives_for_type,
         opts.crate_path,
         opts.no_docs,
+        opts.runtime_types_only,
     )?;
     Ok(())
 }
@@ -90,6 +94,7 @@ fn codegen(
     derives_for_type: Vec<(String, String)>,
     crate_path: Option<String>,
     no_docs: bool,
+    runtime_types_only: bool,
 ) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
@@ -120,6 +125,7 @@ fn codegen(
         type_substitutes,
         crate_path,
         should_gen_docs,
+        runtime_types_only,
     );
     match runtime_api {
         Ok(runtime_api) => println!("{runtime_api}"),
