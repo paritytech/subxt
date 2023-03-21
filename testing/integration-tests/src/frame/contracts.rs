@@ -62,11 +62,10 @@ impl ContractsTestContext {
     async fn upload_code(&self) -> Result<Hash, Error> {
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let upload_tx = node_runtime::tx().contracts().upload_code(
-            code,
-            None,
-            Determinism::Deterministic,
-        );
+        let upload_tx =
+            node_runtime::tx()
+                .contracts()
+                .upload_code(code, None, Determinism::Enforced);
 
         let events = self
             .client()
