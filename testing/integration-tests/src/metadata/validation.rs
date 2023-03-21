@@ -2,37 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    node_runtime,
-    test_context,
-    TestContext,
-};
+use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::{
-    ExtrinsicMetadata,
-    PalletCallMetadata,
-    PalletMetadata,
-    PalletStorageMetadata,
-    RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
-    StorageEntryMetadata,
-    StorageEntryModifier,
+    ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+    RuntimeMetadataPrefixed, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryModifier,
     StorageEntryType,
 };
 use scale_info::{
-    build::{
-        Fields,
-        Variants,
-    },
-    meta_type,
-    Path,
-    Type,
-    TypeInfo,
+    build::{Fields, Variants},
+    meta_type, Path, Type, TypeInfo,
 };
-use subxt::{
-    Metadata,
-    OfflineClient,
-    SubstrateConfig,
-};
+use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
 async fn metadata_to_api(
     metadata: RuntimeMetadataV14,
@@ -147,9 +127,7 @@ async fn calls_check() {
                     Variants::new()
                         .variant("unbond", |v| {
                             v.index(0).fields(Fields::named().field(|f| {
-                                f.compact::<u128>()
-                                    .name("value")
-                                    .type_name("BalanceOf<T>")
+                                f.compact::<u128>().name("value").type_name("BalanceOf<T>")
                             }))
                         })
                         .variant("withdraw_unbonded", |v| {

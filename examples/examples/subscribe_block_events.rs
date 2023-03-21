@@ -13,11 +13,7 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
-use subxt::{
-    tx::PairSigner,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -43,10 +39,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             // Make small balance transfers from Alice to Bob in a loop:
             loop {
-                let transfer_tx = polkadot::tx().balances().transfer(
-                    AccountKeyring::Bob.to_account_id().into(),
-                    transfer_amount,
-                );
+                let transfer_tx = polkadot::tx()
+                    .balances()
+                    .transfer(AccountKeyring::Bob.to_account_id().into(), transfer_amount);
                 api.tx()
                     .sign_and_submit_default(&transfer_tx, &signer)
                     .await
@@ -76,14 +71,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .is_some();
             let pallet = event.pallet_name();
             let variant = event.variant_name();
-            println!(
-                "    {pallet}::{variant} (is balance transfer? {is_balance_transfer})"
-            );
+            println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
         }
 
         // Or we can find the first transfer event, ignoring any others:
-        let transfer_event =
-            events.find_first::<polkadot::balances::events::Transfer>()?;
+        let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
 
         if let Some(ev) = transfer_event {
             println!("  - Balance transfer success: value: {:?}", ev.amount);

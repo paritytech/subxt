@@ -3,24 +3,11 @@
 // see LICENSE for license details.
 
 use crate::{
-    dynamic::{
-        DecodedValueThunk,
-        Value,
-    },
-    error::{
-        Error,
-        StorageAddressError,
-    },
-    metadata::{
-        DecodeWithMetadata,
-        EncodeWithMetadata,
-        Metadata,
-    },
+    dynamic::{DecodedValueThunk, Value},
+    error::{Error, StorageAddressError},
+    metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
 };
-use frame_metadata::{
-    StorageEntryType,
-    StorageHasher,
-};
+use frame_metadata::{StorageEntryType, StorageHasher};
 use scale_info::TypeDef;
 use std::borrow::Cow;
 
@@ -47,11 +34,7 @@ pub trait StorageAddress {
 
     /// Output the non-prefix bytes; that is, any additional bytes that need
     /// to be appended to the key to dig into maps.
-    fn append_entry_bytes(
-        &self,
-        metadata: &Metadata,
-        bytes: &mut Vec<u8>,
-    ) -> Result<(), Error>;
+    fn append_entry_bytes(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error>;
 
     /// An optional hash which, if present, will be checked against
     /// the node metadata to confirm that the return type matches what
@@ -77,8 +60,7 @@ pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
-pub type DynamicAddress<StorageKey> =
-    Address<StorageKey, DecodedValueThunk, Yes, Yes, Yes>;
+pub type DynamicAddress<StorageKey> = Address<StorageKey, DecodedValueThunk, Yes, Yes, Yes>;
 
 impl<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
     Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
@@ -154,11 +136,7 @@ where
         &self.entry_name
     }
 
-    fn append_entry_bytes(
-        &self,
-        metadata: &Metadata,
-        bytes: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    fn append_entry_bytes(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error> {
         let pallet = metadata.pallet(&self.pallet_name)?;
         let storage = pallet.storage(&self.entry_name)?;
 
@@ -193,7 +171,7 @@ where
                         expected: type_ids.len(),
                         actual: self.storage_entry_keys.len(),
                     }
-                    .into())
+                    .into());
                 }
 
                 if hashers.len() == 1 {

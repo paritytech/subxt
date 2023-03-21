@@ -7,10 +7,5 @@
 mod constant_address;
 mod constants_client;
 
-pub use constant_address::{
-    dynamic,
-    Address,
-    ConstantAddress,
-    DynamicAddress,
-};
+pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
 pub use constants_client::ConstantsClient;

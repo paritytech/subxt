@@ -6,10 +6,7 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_runtime::MultiSignature`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 
 /// Signature container that can store known signature types. This is a simplified version of
 /// `sp_runtime::MultiSignature`. To obtain more functionality, convert this into that type.

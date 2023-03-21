@@ -12,15 +12,7 @@ mod metadata_type;
 pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
-    ErrorMetadata,
-    EventMetadata,
-    InvalidMetadataError,
-    Metadata,
-    MetadataError,
-    PalletMetadata,
+    ErrorMetadata, EventMetadata, InvalidMetadataError, Metadata, MetadataError, PalletMetadata,
 };
 
-pub use decode_encode_traits::{
-    DecodeWithMetadata,
-    EncodeWithMetadata,
-};
+pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};

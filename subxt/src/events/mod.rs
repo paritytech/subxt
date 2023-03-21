@@ -9,10 +9,7 @@
 mod events_client;
 mod events_type;
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,

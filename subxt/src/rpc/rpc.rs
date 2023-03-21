@@ -33,25 +33,11 @@
 
 use super::{
     rpc_params,
-    types::{
-        self,
-        ChainHeadEvent,
-        FollowEvent,
-    },
-    RpcClient,
-    RpcClientT,
-    Subscription,
+    types::{self, ChainHeadEvent, FollowEvent},
+    RpcClient, RpcClientT, Subscription,
 };
-use crate::{
-    error::Error,
-    utils::PhantomDataSendSync,
-    Config,
-    Metadata,
-};
-use codec::{
-    Decode,
-    Encode,
-};
+use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
+use codec::{Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use serde::Serialize;
 use std::sync::Arc;
@@ -222,10 +208,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Get a header
-    pub async fn header(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, Error> {
+    pub async fn header(&self, hash: Option<T::Hash>) -> Result<Option<T::Header>, Error> {
         let params = rpc_params![hash];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -300,9 +283,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn subscribe_best_block_headers(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_best_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -319,9 +300,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to all new block headers.
-    pub async fn subscribe_all_block_headers(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_all_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -374,10 +353,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<X: Encode>(
-        &self,
-        extrinsic: X,
-    ) -> Result<T::Hash, Error> {
+    pub async fn submit_extrinsic<X: Encode>(&self, extrinsic: X) -> Result<T::Hash, Error> {
         let bytes: types::Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let xt_hash = self
@@ -448,10 +424,7 @@ impl<T: Config> Rpc<T> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(
-        &self,
-        session_keys: types::Bytes,
-    ) -> Result<bool, Error> {
+    pub async fn has_session_keys(&self, session_keys: types::Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys];
         self.client.request("author_hasSessionKeys", params).await
     }
@@ -459,11 +432,7 @@ impl<T: Config> Rpc<T> {
     /// Checks if the keystore has private keys for the given public key and key type.
     ///
     /// Returns `true` if a private key could be found.
-    pub async fn has_key(
-        &self,
-        public_key: types::Bytes,
-        key_type: String,
-    ) -> Result<bool, Error> {
+    pub async fn has_key(&self, public_key: types::Bytes, key_type: String) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type];
         self.client.request("author_hasKey", params).await
     }
@@ -477,8 +446,7 @@ impl<T: Config> Rpc<T> {
         at: Option<T::Hash>,
     ) -> Result<types::DryRunResult, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
-        let result_bytes: types::Bytes =
-            self.client.request("system_dryRun", params).await?;
+        let result_bytes: types::Bytes = self.client.request("system_dryRun", params).await?;
         Ok(types::decode_dry_run_result(&mut &*result_bytes.0)?)
     }
 

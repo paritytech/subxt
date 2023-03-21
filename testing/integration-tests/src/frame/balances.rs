@@ -3,21 +3,12 @@
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{
-        self,
-        balances,
-        runtime_types,
-        system,
-    },
-    pair_signer,
-    test_context,
+    node_runtime::{self, balances, runtime_types, system},
+    pair_signer, test_context,
 };
 use codec::Decode;
 use sp_keyring::AccountKeyring;
-use subxt::utils::{
-    AccountId32,
-    MultiAddress,
-};
+use subxt::utils::{AccountId32, MultiAddress};
 
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
@@ -87,11 +78,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
-    use subxt::ext::scale_value::{
-        At,
-        Composite,
-        Value,
-    };
+    use subxt::ext::scale_value::{At, Composite, Value};
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -229,8 +216,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .balances()
         .transfer(bob_address.clone(), 10_000);
     for _ in 0..3 {
-        api
-            .tx()
+        api.tx()
             .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.

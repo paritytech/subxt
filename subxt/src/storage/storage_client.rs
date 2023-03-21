@@ -3,27 +3,17 @@
 // see LICENSE for license details.
 
 use super::{
-    storage_type::{
-        validate_storage_address,
-        Storage,
-    },
-    utils,
-    StorageAddress,
+    storage_type::{validate_storage_address, Storage},
+    utils, StorageAddress,
 };
 
 use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
+    client::{OfflineClientT, OnlineClientT},
     error::Error,
     Config,
 };
 use derivative::Derivative;
-use std::{
-    future::Future,
-    marker::PhantomData,
-};
+use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -52,19 +42,13 @@ where
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
-    pub fn validate<Address: StorageAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
+    pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
         validate_storage_address(address, &self.client.metadata())
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
     /// to retrieve the entries at the root of the associated address.
-    pub fn address_root_bytes<Address: StorageAddress>(
-        &self,
-        address: &Address,
-    ) -> Vec<u8> {
+    pub fn address_root_bytes<Address: StorageAddress>(&self, address: &Address) -> Vec<u8> {
         utils::storage_address_root_bytes(address)
     }
 
@@ -99,13 +83,11 @@ where
             // for the latest block and use that.
             let block_hash = match block_hash {
                 Some(hash) => hash,
-                None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("didn't pass a block number; qed")
-                }
+                None => client
+                    .rpc()
+                    .block_hash(None)
+                    .await?
+                    .expect("didn't pass a block number; qed"),
             };
 
             Ok(Storage::new(client, block_hash))

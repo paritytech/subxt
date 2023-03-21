@@ -5,24 +5,12 @@
 use super::hash_cache::HashCache;
 use codec::Error as CodecError;
 use frame_metadata::{
-    PalletConstantMetadata,
-    RuntimeMetadata,
-    RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
-    StorageEntryMetadata,
-    META_RESERVED,
+    PalletConstantMetadata, RuntimeMetadata, RuntimeMetadataPrefixed, RuntimeMetadataV14,
+    StorageEntryMetadata, META_RESERVED,
 };
 use parking_lot::RwLock;
-use scale_info::{
-    form::PortableForm,
-    PortableRegistry,
-    Type,
-};
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    sync::Arc,
-};
+use scale_info::{form::PortableForm, PortableRegistry, Type};
+use std::{collections::HashMap, convert::TryFrom, sync::Arc};
 
 /// Metadata error originated from inspecting the internal representation of the runtime metadata.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -164,82 +152,54 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for a specific storage entry.
-    pub fn storage_hash(
-        &self,
-        pallet: &str,
-        storage: &str,
-    ) -> Result<[u8; 32], MetadataError> {
+    pub fn storage_hash(&self, pallet: &str, storage: &str) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_storage_hashes
             .get_or_insert(pallet, storage, || {
-                subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage)
-                    .map_err(|e| {
-                        match e {
-                            subxt_metadata::NotFound::Pallet => {
-                                MetadataError::PalletNotFound
-                            }
-                            subxt_metadata::NotFound::Item => {
-                                MetadataError::StorageNotFound
-                            }
-                        }
-                    })
+                subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage).map_err(
+                    |e| match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
+                    },
+                )
             })
     }
 
     /// Obtain the unique hash for a constant.
-    pub fn constant_hash(
-        &self,
-        pallet: &str,
-        constant: &str,
-    ) -> Result<[u8; 32], MetadataError> {
+    pub fn constant_hash(&self, pallet: &str, constant: &str) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_constant_hashes
             .get_or_insert(pallet, constant, || {
-                subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
-                    .map_err(|e| {
-                        match e {
-                            subxt_metadata::NotFound::Pallet => {
-                                MetadataError::PalletNotFound
-                            }
-                            subxt_metadata::NotFound::Item => {
-                                MetadataError::ConstantNotFound
-                            }
-                        }
-                    })
+                subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant).map_err(
+                    |e| match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
+                    },
+                )
             })
     }
 
     /// Obtain the unique hash for a call.
-    pub fn call_hash(
-        &self,
-        pallet: &str,
-        function: &str,
-    ) -> Result<[u8; 32], MetadataError> {
+    pub fn call_hash(&self, pallet: &str, function: &str) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_call_hashes
             .get_or_insert(pallet, function, || {
-                subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function)
-                    .map_err(|e| {
-                        match e {
-                            subxt_metadata::NotFound::Pallet => {
-                                MetadataError::PalletNotFound
-                            }
-                            subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
-                        }
-                    })
+                subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function).map_err(|e| {
+                    match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
+                    }
+                })
             })
     }
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
         if let Some(hash) = *self.inner.cached_metadata_hash.read() {
-            return hash
+            return hash;
         }
 
-        let hash = subxt_metadata::get_metadata_per_pallet_hash(
-            self.runtime_metadata(),
-            pallets,
-        );
+        let hash = subxt_metadata::get_metadata_per_pallet_hash(self.runtime_metadata(), pallets);
         *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
@@ -292,10 +252,7 @@ impl PalletMetadata {
     }
 
     /// Return [`StorageEntryMetadata`] given some storage key.
-    pub fn storage(
-        &self,
-        key: &str,
-    ) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
+    pub fn storage(&self, key: &str) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
         self.storage.get(key).ok_or(MetadataError::StorageNotFound)
     }
 
@@ -411,7 +368,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(InvalidMetadataError::InvalidPrefix)
+            return Err(InvalidMetadataError::InvalidPrefix);
         }
         let metadata = match metadata.1 {
             RuntimeMetadata::V14(meta) => meta,
@@ -436,24 +393,23 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
                 let event_ty_id = pallet.event.as_ref().map(|e| e.ty.id());
 
-                let call_metadata =
-                    pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
-                        let type_def_variant = get_type_def_variant(call.ty.id())?;
-                        let call_indexes = type_def_variant
-                            .variants()
-                            .iter()
-                            .map(|v| {
-                                (
-                                    v.name().clone(),
-                                    CallMetadata {
-                                        call_index: v.index(),
-                                        fields: v.fields().to_vec(),
-                                    },
-                                )
-                            })
-                            .collect();
-                        Ok(call_indexes)
-                    })?;
+                let call_metadata = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
+                    let type_def_variant = get_type_def_variant(call.ty.id())?;
+                    let call_indexes = type_def_variant
+                        .variants()
+                        .iter()
+                        .map(|v| {
+                            (
+                                v.name().clone(),
+                                CallMetadata {
+                                    call_index: v.index(),
+                                    fields: v.fields().to_vec(),
+                                },
+                            )
+                        })
+                        .collect();
+                    Ok(call_indexes)
+                })?;
 
                 let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
                     storage
@@ -548,15 +504,9 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 mod tests {
     use super::*;
     use frame_metadata::{
-        ExtrinsicMetadata,
-        PalletStorageMetadata,
-        StorageEntryModifier,
-        StorageEntryType,
+        ExtrinsicMetadata, PalletStorageMetadata, StorageEntryModifier, StorageEntryType,
     };
-    use scale_info::{
-        meta_type,
-        TypeInfo,
-    };
+    use scale_info::{meta_type, TypeInfo};
 
     fn load_metadata() -> Metadata {
         #[allow(dead_code)]

@@ -5,24 +5,12 @@
 use crate::api::CodegenError;
 
 use super::{
-    CompositeDef,
-    CompositeDefFields,
-    CratePath,
-    Derives,
-    TypeDefParameters,
-    TypeGenerator,
+    CompositeDef, CompositeDefFields, CratePath, Derives, TypeDefParameters, TypeGenerator,
     TypeParameter,
 };
 use proc_macro2::TokenStream;
-use quote::{
-    format_ident,
-    quote,
-};
-use scale_info::{
-    form::PortableForm,
-    Type,
-    TypeDef,
-};
+use quote::{format_ident, quote};
+use scale_info::{form::PortableForm, Type, TypeDef};
 use syn::parse_quote;
 
 /// Generates a Rust `struct` or `enum` definition based on the supplied [`scale-info::Type`].
@@ -55,18 +43,16 @@ impl TypeDefGen {
             .type_params()
             .iter()
             .enumerate()
-            .filter_map(|(i, tp)| {
-                match tp.ty() {
-                    Some(ty) => {
-                        let tp_name = format_ident!("_{}", i);
-                        Some(TypeParameter {
-                            concrete_type_id: ty.id(),
-                            original_name: tp.name().clone(),
-                            name: tp_name,
-                        })
-                    }
-                    None => None,
+            .filter_map(|(i, tp)| match tp.ty() {
+                Some(ty) => {
+                    let tp_name = format_ident!("_{}", i);
+                    Some(TypeParameter {
+                        concrete_type_id: ty.id(),
+                        original_name: tp.name().clone(),
+                        name: tp_name,
+                    })
                 }
+                None => None,
             })
             .collect::<Vec<_>>();
 
@@ -109,10 +95,8 @@ impl TypeDefGen {
                             type_gen,
                         )?;
                         type_params.update_unused(fields.field_types());
-                        let docs =
-                            should_gen_docs.then_some(v.docs()).unwrap_or_default();
-                        let variant_def =
-                            CompositeDef::enum_variant_def(v.name(), fields, docs);
+                        let docs = should_gen_docs.then_some(v.docs()).unwrap_or_default();
+                        let variant_def = CompositeDef::enum_variant_def(v.name(), fields, docs);
                         Ok((v.index(), variant_def))
                     })
                     .collect::<Result<Vec<_>, CodegenError>>()?;

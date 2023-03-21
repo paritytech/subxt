@@ -11,11 +11,7 @@
 use sp_core::H256;
 use sp_runtime::{
     generic,
-    traits::{
-        BlakeTwo256,
-        Block as _,
-        Header as _,
-    },
+    traits::{BlakeTwo256, Block as _, Header as _},
     Digest,
 };
 use subxt::PolkadotConfig;

@@ -2,27 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    types::TypeGenerator,
-    CratePath,
-};
+use crate::{types::TypeGenerator, CratePath};
 use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletMetadata,
-    StorageEntryMetadata,
-    StorageEntryModifier,
+    v14::RuntimeMetadataV14, PalletMetadata, StorageEntryMetadata, StorageEntryModifier,
     StorageEntryType,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{
-    format_ident,
-    quote,
-};
-use scale_info::{
-    form::PortableForm,
-    TypeDef,
-};
+use quote::{format_ident, quote};
+use scale_info::{form::PortableForm, TypeDef};
 
 use super::CodegenError;
 
@@ -127,14 +115,10 @@ fn generate_storage_entry_fns(
 
     let pallet_name = &pallet.name;
     let storage_name = &storage_entry.name;
-    let storage_hash = subxt_metadata::get_storage_hash(
-        metadata,
-        pallet_name,
-        storage_name,
-    )
-    .map_err(|_| {
-        CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into())
-    })?;
+    let storage_hash = subxt_metadata::get_storage_hash(metadata, pallet_name, storage_name)
+        .map_err(|_| {
+            CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into())
+        })?;
 
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
     let storage_entry_ty = match storage_entry.ty {

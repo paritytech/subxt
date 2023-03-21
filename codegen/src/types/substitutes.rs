@@ -2,18 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    api::CodegenError,
-    CratePath,
-};
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-};
-use syn::{
-    parse_quote,
-    spanned::Spanned as _,
-};
+use crate::{api::CodegenError, CratePath};
+use std::{borrow::Cow, collections::HashMap};
+use syn::{parse_quote, spanned::Spanned as _};
 
 use super::TypePath;
 
@@ -160,8 +151,7 @@ impl TypeSubstitutes {
                         .iter()
                         .position(|&src| src == arg)
                         .map(|src_idx| {
-                            u8::try_from(src_idx)
-                                .expect("type arguments to be fewer than 256; qed")
+                            u8::try_from(src_idx).expect("type arguments to be fewer than 256; qed")
                         })
                 })
                 .collect();
@@ -201,15 +191,13 @@ impl TypeSubstitutes {
             mapping: &TypeParamMapping,
         ) -> Cow<'a, [TypePath]> {
             match mapping {
-                TypeParamMapping::Specified(mapping) => {
-                    Cow::Owned(
-                        mapping
-                            .iter()
-                            .filter_map(|&idx| params.get(idx as usize))
-                            .cloned()
-                            .collect(),
-                    )
-                }
+                TypeParamMapping::Specified(mapping) => Cow::Owned(
+                    mapping
+                        .iter()
+                        .filter_map(|&idx| params.get(idx as usize))
+                        .cloned()
+                        .collect(),
+                ),
                 _ => Cow::Borrowed(params),
             }
         }
@@ -259,13 +247,9 @@ fn type_args(path_args: &syn::PathArguments) -> impl Iterator<Item = &syn::Path>
         _ => None,
     };
 
-    args_opt.into_iter().flatten().filter_map(|arg| {
-        match arg {
-            syn::GenericArgument::Type(syn::Type::Path(type_path)) => {
-                Some(&type_path.path)
-            }
-            _ => None,
-        }
+    args_opt.into_iter().flatten().filter_map(|arg| match arg {
+        syn::GenericArgument::Type(syn::Type::Path(type_path)) => Some(&type_path.path),
+        _ => None,
     })
 }
 

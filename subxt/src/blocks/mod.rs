@@ -7,12 +7,5 @@
 mod block_types;
 mod blocks_client;
 
-pub use block_types::{
-    Block,
-    Extrinsic,
-    ExtrinsicEvents,
-};
-pub use blocks_client::{
-    subscribe_to_block_headers_filling_in_gaps,
-    BlocksClient,
-};
+pub use block_types::{Block, Extrinsic, ExtrinsicEvents};
+pub use blocks_client::{subscribe_to_block_headers_filling_in_gaps, BlocksClient};

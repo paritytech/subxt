@@ -6,32 +6,21 @@ use crate::{
     node_runtime::{
         self,
         runtime_types::{
-            pallet_staking::{
-                RewardDestination,
-                ValidatorPrefs,
-            },
+            pallet_staking::{RewardDestination, ValidatorPrefs},
             sp_arithmetic::per_things::Perbill,
         },
         staking,
     },
-    pair_signer,
-    test_context,
+    pair_signer, test_context,
 };
 use assert_matches::assert_matches;
-use sp_core::{
-    sr25519,
-    Pair,
-};
+use sp_core::{sr25519, Pair};
 use sp_keyring::AccountKeyring;
-use subxt::error::{
-    DispatchError,
-    Error,
-};
+use subxt::error::{DispatchError, Error};
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
-    sr25519::Pair::from_string(&format!("//{seed}"), None)
-        .expect("static values are valid; qed")
+    sr25519::Pair::from_string(&format!("//{seed}"), None).expect("static values are valid; qed")
 }
 
 fn default_validator_prefs() -> ValidatorPrefs {

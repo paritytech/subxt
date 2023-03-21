@@ -10,18 +10,13 @@
 //! polkadot --dev --tmp
 //! ```
 
-use subxt::{
-    config::Header,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{config::Header, OnlineClient, PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api =
-        OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
+    let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks = api.rpc().subscribe_finalized_block_headers().await?;

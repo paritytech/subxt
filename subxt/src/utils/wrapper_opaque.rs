@@ -3,17 +3,9 @@
 // see LICENSE for license details.
 
 use super::PhantomDataSendSync;
-use codec::{
-    Compact,
-    Decode,
-    DecodeAll,
-    Encode,
-};
+use codec::{Compact, Decode, DecodeAll, Encode};
 use derivative::Derivative;
-use scale_decode::{
-    IntoVisitor,
-    Visitor,
-};
+use scale_decode::{IntoVisitor, Visitor};
 use scale_encode::EncodeAsType;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
@@ -88,11 +80,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         types: &scale_info::PortableRegistry,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
-        use scale_encode::error::{
-            Error,
-            ErrorKind,
-            Kind,
-        };
+        use scale_encode::error::{Error, ErrorKind, Kind};
 
         let Some(ty) = types.resolve(type_id) else {
             return Err(Error::new(ErrorKind::TypeNotFound(type_id)))
@@ -111,7 +99,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected: type_id,
-            }))
+            }));
         }
 
         // Just blat the bytes out.
@@ -130,21 +118,18 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
         value: &mut scale_decode::visitor::types::Composite<'scale, 'info>,
         _type_id: scale_decode::visitor::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
-        use scale_decode::error::{
-            Error,
-            ErrorKind,
-        };
+        use scale_decode::error::{Error, ErrorKind};
 
         if value.path().ident().as_deref() != Some("WrapperKeepOpaque") {
             return Err(Error::new(ErrorKind::Custom(
                 "Type to decode is not 'WrapperTypeKeepOpaque'".into(),
-            )))
+            )));
         }
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
                 actual_len: value.remaining(),
                 expected_len: 2,
-            }))
+            }));
         }
 
         // The field to decode is a compact len followed by bytes. Decode the length, then grab the bytes.
@@ -184,13 +169,7 @@ mod test {
     impl<T: scale_info::TypeInfo + 'static> scale_info::TypeInfo for WrapperKeepOpaque<T> {
         type Identity = Self;
         fn type_info() -> scale_info::Type {
-            use scale_info::{
-                build::Fields,
-                meta_type,
-                Path,
-                Type,
-                TypeParameter,
-            };
+            use scale_info::{build::Fields, meta_type, Path, Type, TypeParameter};
 
             Type::builder()
                 .path(Path::new("WrapperKeepOpaque", module_path!()))
@@ -204,8 +183,7 @@ mod test {
     }
 
     /// Given a type definition, return type ID and registry representing it.
-    fn make_type<T: scale_info::TypeInfo + 'static>(
-    ) -> (u32, scale_info::PortableRegistry) {
+    fn make_type<T: scale_info::TypeInfo + 'static>() -> (u32, scale_info::PortableRegistry) {
         let m = scale_info::MetaType::new::<T>();
         let mut types = scale_info::Registry::new();
         let id = types.register_type(&m);
@@ -239,8 +217,7 @@ mod test {
             .expect("decode-as-type decodes");
 
         let decode_scale_codec_bytes = &mut &*scale_codec_encoded;
-        let decoded_scale_codec =
-            T::decode(decode_scale_codec_bytes).expect("scale-codec decodes");
+        let decoded_scale_codec = T::decode(decode_scale_codec_bytes).expect("scale-codec decodes");
 
         assert!(
             decode_as_type_bytes.is_empty(),

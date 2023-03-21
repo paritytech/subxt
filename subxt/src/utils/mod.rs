@@ -10,10 +10,7 @@ mod multi_address;
 mod multi_signature;
 mod wrapper_opaque;
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 use derivative::Derivative;
 
 pub use account_id::AccountId32;
@@ -23,11 +20,7 @@ pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
 #[doc(hidden)]
-pub use primitive_types::{
-    H160,
-    H256,
-    H512,
-};
+pub use primitive_types::{H160, H256, H512};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload

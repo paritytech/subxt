@@ -3,10 +3,7 @@
 // see LICENSE for license details.
 
 use crate::test_context;
-use codec::{
-    Compact,
-    Decode,
-};
+use codec::{Compact, Decode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
 

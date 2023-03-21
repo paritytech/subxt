@@ -4,26 +4,10 @@
 
 use crate::api::CodegenError;
 
-use super::{
-    CratePath,
-    Derives,
-    Field,
-    TypeDefParameters,
-    TypeGenerator,
-    TypeParameter,
-    TypePath,
-};
+use super::{CratePath, Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
 use proc_macro2::TokenStream;
-use quote::{
-    format_ident,
-    quote,
-};
-use scale_info::{
-    form::PortableForm,
-    Type,
-    TypeDef,
-    TypeDefPrimitive,
-};
+use quote::{format_ident, quote};
+use scale_info::{form::PortableForm, Type, TypeDef, TypeDefPrimitive};
 
 /// Representation of a type which consists of a set of fields. Used to generate Rust code for
 /// either a standalone `struct` definition, or an `enum` variant.
@@ -98,11 +82,7 @@ impl CompositeDef {
     }
 
     /// Construct a definition which will generate code for an `enum` variant.
-    pub fn enum_variant_def(
-        ident: &str,
-        fields: CompositeDefFields,
-        docs: &[String],
-    ) -> Self {
+    pub fn enum_variant_def(ident: &str, fields: CompositeDefFields, docs: &[String]) -> Self {
         let name = format_ident!("{}", ident);
         let docs_token = Some(quote! { #( #[doc = #docs ] )* });
         Self {
@@ -186,20 +166,16 @@ impl CompositeDefFields {
         type_gen: &TypeGenerator,
     ) -> Result<Self, CodegenError> {
         if fields.is_empty() {
-            return Ok(Self::NoFields)
+            return Ok(Self::NoFields);
         }
 
         let mut named_fields = Vec::new();
         let mut unnamed_fields = Vec::new();
 
         for field in fields {
-            let type_path =
-                type_gen.resolve_field_type_path(field.ty().id(), parent_type_params);
-            let field_type = CompositeDefFieldType::new(
-                field.ty().id(),
-                type_path,
-                field.type_name().cloned(),
-            );
+            let type_path = type_gen.resolve_field_type_path(field.ty().id(), parent_type_params);
+            let field_type =
+                CompositeDefFieldType::new(field.ty().id(), type_path, field.type_name().cloned());
 
             if let Some(name) = field.name() {
                 let field_name = format_ident!("{}", name);
@@ -210,7 +186,7 @@ impl CompositeDefFields {
         }
 
         if !named_fields.is_empty() && !unnamed_fields.is_empty() {
-            return Err(CodegenError::InvalidFields(name.into()))
+            return Err(CodegenError::InvalidFields(name.into()));
         }
 
         let res = if !named_fields.is_empty() {

@@ -4,25 +4,15 @@
 
 //! A representation of a block of events.
 
-use super::{
-    Phase,
-    StaticEvent,
-};
+use super::{Phase, StaticEvent};
 use crate::{
     client::OnlineClientT,
     error::Error,
     events::events_client::get_event_bytes,
-    metadata::{
-        DecodeWithMetadata,
-        EventMetadata,
-    },
-    Config,
-    Metadata,
+    metadata::{DecodeWithMetadata, EventMetadata},
+    Config, Metadata,
 };
-use codec::{
-    Compact,
-    Decode,
-};
+use codec::{Compact, Decode};
 use derivative::Derivative;
 use std::sync::Arc;
 
@@ -42,11 +32,7 @@ pub struct Events<T: Config> {
 }
 
 impl<T: Config> Events<T> {
-    pub(crate) fn new(
-        metadata: Metadata,
-        block_hash: T::Hash,
-        event_bytes: Vec<u8>,
-    ) -> Self {
+    pub(crate) fn new(metadata: Metadata, block_hash: T::Hash, event_bytes: Vec<u8>) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
         // for our iterating to decode.
@@ -348,12 +334,11 @@ impl EventDetails {
         let event_metadata = self.event_metadata();
 
         use scale_decode::DecodeAsFields;
-        let decoded =
-            <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
-                bytes,
-                event_metadata.fields(),
-                &self.metadata.runtime_metadata().types,
-            )?;
+        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
+            bytes,
+            event_metadata.fields(),
+            &self.metadata.runtime_metadata().types,
+        )?;
 
         Ok(decoded)
     }
@@ -403,8 +388,7 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: RootEvent>(&self) -> Result<E, Error> {
-        let pallet_bytes =
-            &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
+        let pallet_bytes = &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
         let pallet = self.metadata.pallet(self.pallet_name())?;
         let pallet_event_ty = pallet.event_ty_id().ok_or_else(|| {
             Error::Metadata(crate::metadata::MetadataError::EventNotFound(
@@ -443,24 +427,13 @@ pub trait RootEvent: Sized {
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
-    use crate::{
-        Config,
-        SubstrateConfig,
-    };
+    use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
-        v14::{
-            ExtrinsicMetadata,
-            PalletEventMetadata,
-            PalletMetadata,
-            RuntimeMetadataV14,
-        },
+        v14::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV14},
         RuntimeMetadataPrefixed,
     };
-    use scale_info::{
-        meta_type,
-        TypeInfo,
-    };
+    use scale_info::{meta_type, TypeInfo};
     use std::convert::TryFrom;
 
     /// An "outer" events enum containing exactly one event.
@@ -492,7 +465,7 @@ pub(crate) mod test_utils {
                     &mut bytes,
                     pallet_event_ty,
                     metadata,
-                )?))
+                )?));
             }
             panic!("Asked for pallet name '{pallet_name}', which isn't in our test AllEvents type")
         }
@@ -579,12 +552,7 @@ pub(crate) mod test_utils {
 #[cfg(test)]
 mod tests {
     use super::{
-        test_utils::{
-            event_record,
-            events,
-            events_raw,
-            AllEvents,
-        },
+        test_utils::{event_record, events, events_raw, AllEvents},
         *,
     };
     use codec::Encode;
@@ -627,13 +595,8 @@ mod tests {
 
         let mut actual_bytes = vec![];
         for field in actual_fields.into_values() {
-            scale_value::scale::encode_as_type(
-                &field,
-                field.context,
-                types,
-                &mut actual_bytes,
-            )
-            .expect("should be able to encode properly");
+            scale_value::scale::encode_as_type(&field, field.context, types, &mut actual_bytes)
+                .expect("should be able to encode properly");
         }
         assert_eq!(actual_bytes, actual.field_bytes());
 
@@ -656,9 +619,7 @@ mod tests {
 
     #[test]
     fn statically_decode_single_root_event() {
-        #[derive(
-            Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType,
-        )]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType)]
         enum Event {
             A(u8, bool, Vec<String>),
         }
@@ -691,9 +652,7 @@ mod tests {
 
     #[test]
     fn statically_decode_single_pallet_event() {
-        #[derive(
-            Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType,
-        )]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType)]
         enum Event {
             A(u8, bool, Vec<String>),
         }
@@ -847,8 +806,7 @@ mod tests {
         // Encode 2 events:
         let mut event_bytes = vec![];
         event_record(Phase::Initialization, Event::A(1)).encode_to(&mut event_bytes);
-        event_record(Phase::ApplyExtrinsic(123), Event::B(true))
-            .encode_to(&mut event_bytes);
+        event_record(Phase::ApplyExtrinsic(123), Event::B(true)).encode_to(&mut event_bytes);
 
         // Push a few naff bytes to the end (a broken third event):
         event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);

@@ -4,12 +4,7 @@
 
 use super::*;
 use pretty_assertions::assert_eq;
-use scale_info::{
-    meta_type,
-    scale,
-    Registry,
-    TypeInfo,
-};
+use scale_info::{meta_type, scale, Registry, TypeInfo};
 use syn::parse_quote;
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
@@ -813,10 +808,7 @@ fn generics_nested() {
 #[test]
 fn generate_bitvec() {
     use bitvec::{
-        order::{
-            Lsb0,
-            Msb0,
-        },
+        order::{Lsb0, Msb0},
         vec::BitVec,
     };
 

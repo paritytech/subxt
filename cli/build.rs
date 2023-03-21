@@ -1,7 +1,4 @@
-use std::{
-    borrow::Cow,
-    process::Command,
-};
+use std::{borrow::Cow, process::Command};
 
 fn main() {
     // Make git hash available via GIT_HASH build-time env var:

@@ -2,20 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    types::TypeGenerator,
-    CratePath,
-};
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletMetadata,
-};
+use crate::{types::TypeGenerator, CratePath};
+use frame_metadata::{v14::RuntimeMetadataV14, PalletMetadata};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 
 use super::CodegenError;
@@ -53,7 +44,7 @@ pub fn generate_constants(
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
     if pallet.constants.is_empty() {
-        return Ok(quote!())
+        return Ok(quote!());
     }
     let constants = &pallet.constants;
 

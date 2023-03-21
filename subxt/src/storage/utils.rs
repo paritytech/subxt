@@ -7,10 +7,7 @@
 //! the trait itself.
 
 use super::StorageAddress;
-use crate::{
-    error::Error,
-    metadata::Metadata,
-};
+use crate::{error::Error, metadata::Metadata};
 
 /// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name
 /// and append those bytes to the output.
@@ -35,9 +32,7 @@ pub(crate) fn storage_address_bytes<Address: StorageAddress>(
 }
 
 /// Outputs a vector containing the bytes written by [`write_storage_address_root_bytes`].
-pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(
-    addr: &Address,
-) -> Vec<u8> {
+pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address) -> Vec<u8> {
     let mut bytes = Vec::new();
     write_storage_address_root_bytes(addr, &mut bytes);
     bytes

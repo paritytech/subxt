@@ -21,20 +21,7 @@ pub use self::signer::PairSigner;
 
 pub use self::{
     signer::Signer,
-    tx_client::{
-        SubmittableExtrinsic,
-        TxClient,
-    },
-    tx_payload::{
-        dynamic,
-        BoxedPayload,
-        DynamicPayload,
-        Payload,
-        TxPayload,
-    },
-    tx_progress::{
-        TxInBlock,
-        TxProgress,
-        TxStatus,
-    },
+    tx_client::{SubmittableExtrinsic, TxClient},
+    tx_payload::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
+    tx_progress::{TxInBlock, TxProgress, TxStatus},
 };

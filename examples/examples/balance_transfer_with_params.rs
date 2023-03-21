@@ -13,11 +13,7 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     config::{
-        polkadot::{
-            Era,
-            PlainTip,
-            PolkadotExtrinsicParamsBuilder as Params,
-        },
+        polkadot::{Era, PlainTip, PolkadotExtrinsicParamsBuilder as Params},
         PolkadotConfig,
     },
     tx::PairSigner,

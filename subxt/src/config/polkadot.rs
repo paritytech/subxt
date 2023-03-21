@@ -6,10 +6,7 @@
 
 use codec::Encode;
 
-use super::extrinsic_params::{
-    BaseExtrinsicParams,
-    BaseExtrinsicParamsBuilder,
-};
+use super::extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder};
 
 /// Default set of commonly used types by Polkadot nodes.
 pub type PolkadotConfig = super::WithExtrinsicParams<

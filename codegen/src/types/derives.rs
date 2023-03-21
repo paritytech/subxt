@@ -3,15 +3,9 @@
 // see LICENSE for license details.
 
 use crate::CratePath;
-use syn::{
-    parse_quote,
-    Path,
-};
+use syn::{parse_quote, Path};
 
-use std::collections::{
-    HashMap,
-    HashSet,
-};
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone)]
 pub struct DerivesRegistry {
@@ -92,17 +86,11 @@ impl Derives {
         let mut attributes = HashSet::new();
 
         derives.insert(syn::parse_quote!(#crate_path::ext::scale_encode::EncodeAsType));
-        let encode_crate_path =
-            quote::quote! { #crate_path::ext::scale_encode }.to_string();
-        attributes.insert(
-            syn::parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
-        );
+        let encode_crate_path = quote::quote! { #crate_path::ext::scale_encode }.to_string();
+        attributes.insert(syn::parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]));
         derives.insert(syn::parse_quote!(#crate_path::ext::scale_decode::DecodeAsType));
-        let decode_crate_path =
-            quote::quote! { #crate_path::ext::scale_decode }.to_string();
-        attributes.insert(
-            syn::parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
-        );
+        let decode_crate_path = quote::quote! { #crate_path::ext::scale_decode }.to_string();
+        attributes.insert(syn::parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]));
 
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));

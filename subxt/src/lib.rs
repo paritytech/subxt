@@ -144,7 +144,9 @@ pub use subxt_macro::subxt;
 pub use getrandom as _;
 
 #[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
-std::compile_error!("Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive");
+std::compile_error!(
+    "Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive"
+);
 
 pub mod blocks;
 pub mod client;
@@ -163,15 +165,8 @@ pub mod utils;
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
-    client::{
-        OfflineClient,
-        OnlineClient,
-    },
-    config::{
-        Config,
-        PolkadotConfig,
-        SubstrateConfig,
-    },
+    client::{OfflineClient, OnlineClient},
+    config::{Config, PolkadotConfig, SubstrateConfig},
     error::Error,
     metadata::Metadata,
 };

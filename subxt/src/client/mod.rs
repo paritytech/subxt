@@ -11,17 +11,9 @@
 mod offline_client;
 mod online_client;
 
-pub use offline_client::{
-    OfflineClient,
-    OfflineClientT,
-};
+pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
-    ClientRuntimeUpdater,
-    OnlineClient,
-    OnlineClientT,
-    RuntimeUpdaterStream,
-    Update,
-    UpgradeError,
+    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
 };
 
 #[cfg(any(

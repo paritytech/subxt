@@ -14,40 +14,16 @@ use subxt_metadata::get_metadata_per_pallet_hash;
 use super::DerivesRegistry;
 use crate::{
     ir,
-    types::{
-        CompositeDef,
-        CompositeDefFields,
-        TypeGenerator,
-        TypeSubstitutes,
-    },
-    utils::{
-        fetch_metadata_bytes_blocking,
-        FetchMetadataError,
-        Uri,
-    },
+    types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
+    utils::{fetch_metadata_bytes_blocking, FetchMetadataError, Uri},
     CratePath,
 };
 use codec::Decode;
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    RuntimeMetadata,
-    RuntimeMetadataPrefixed,
-};
+use frame_metadata::{v14::RuntimeMetadataV14, RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
-use proc_macro2::{
-    Span,
-    TokenStream as TokenStream2,
-};
-use quote::{
-    format_ident,
-    quote,
-};
-use std::{
-    fs,
-    io::Read,
-    path,
-    string::ToString,
-};
+use proc_macro2::{Span, TokenStream as TokenStream2};
+use quote::{format_ident, quote};
+use std::{fs, io::Read, path, string::ToString};
 use syn::parse_quote;
 
 /// Error returned when the Codegen cannot generate the runtime API.
@@ -90,7 +66,9 @@ pub enum CodegenError {
     #[error("Call variant for type {0} must have all named fields. Make sure you are providing a valid metadata V14")]
     InvalidCallVariant(u32),
     /// Type should be an variant/enum.
-    #[error("{0} type should be an variant/enum type. Make sure you are providing a valid metadata V14")]
+    #[error(
+        "{0} type should be an variant/enum type. Make sure you are providing a valid metadata V14"
+    )]
     InvalidType(String),
 }
 
@@ -460,9 +438,7 @@ impl RuntimeGenerator {
 
         let pallets_with_calls: Vec<_> = pallets_with_mod_names
             .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                pallet.calls.as_ref().map(|_| pallet_mod_name)
-            })
+            .filter_map(|(pallet, pallet_mod_name)| pallet.calls.as_ref().map(|_| pallet_mod_name))
             .collect();
 
         let rust_items = item_mod_ir.rust_items();

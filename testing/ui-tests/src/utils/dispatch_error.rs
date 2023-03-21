@@ -3,13 +3,8 @@
 // see LICENSE for license details.
 
 use scale_info::{
-    build::{
-        Fields,
-        Variants,
-    },
-    Path,
-    Type,
-    TypeInfo,
+    build::{Fields, Variants},
+    Path, Type, TypeInfo,
 };
 
 /// See the `ModuleErrorType` in `subxt_codegen` for more info on the different DispatchError

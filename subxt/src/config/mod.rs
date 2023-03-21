@@ -12,15 +12,9 @@ pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 use core::fmt::Debug;
-use serde::{
-    de::DeserializeOwned,
-    Serialize,
-};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub use extrinsic_params::ExtrinsicParams;
 pub use polkadot::PolkadotConfig;
@@ -110,10 +104,7 @@ pub trait Header: Sized + Encode {
 /// // This is how PolkadotConfig is implemented:
 /// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
 /// ```
-pub struct WithExtrinsicParams<
-    T: Config,
-    E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>,
-> {
+pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> {
     _marker: std::marker::PhantomData<(T, E)>,
 }
 

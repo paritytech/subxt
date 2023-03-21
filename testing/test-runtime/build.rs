@@ -3,17 +3,12 @@
 // see LICENSE for license details.
 
 use std::{
-    env,
-    fs,
+    env, fs,
     net::TcpListener,
-    ops::{
-        Deref,
-        DerefMut,
-    },
+    ops::{Deref, DerefMut},
     path::Path,
     process::Command,
-    thread,
-    time,
+    thread, time,
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
@@ -25,8 +20,7 @@ async fn main() {
 
 async fn run() {
     // Select substrate binary to run based on env var.
-    let substrate_bin =
-        env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
+    let substrate_bin = env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
 
     // Run binary.
     let port = next_open_port().expect("Cannot spawn substrate: no available ports");
@@ -38,8 +32,10 @@ async fn run() {
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
         Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => {
-            panic!("A substrate binary should be installed on your path for testing purposes. \
-            See https://github.com/paritytech/subxt/tree/master#integration-testing")
+            panic!(
+                "A substrate binary should be installed on your path for testing purposes. \
+            See https://github.com/paritytech/subxt/tree/master#integration-testing"
+            )
         }
         Err(e) => {
             panic!("Cannot spawn substrate command '{substrate_bin}': {e}")
@@ -67,7 +63,7 @@ async fn run() {
             match res {
                 Ok(res) => {
                     let _ = cmd.kill();
-                    break res
+                    break res;
                 }
                 _ => {
                     thread::sleep(time::Duration::from_secs(1 << retries));
@@ -98,8 +94,7 @@ async fn run() {
             .expect("Path to metadata should be stringifiable")
     );
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
-    fs::write(runtime_path, runtime_api_contents)
-        .expect("Couldn't write runtime rust output");
+    fs::write(runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
 
     let substrate_path =
         which::which(substrate_bin).expect("Cannot resolve path to substrate binary");
@@ -155,26 +150,14 @@ impl Drop for KillOnDrop {
 // Use jsonrpsee to obtain metadata from the node.
 mod client {
     pub use jsonrpsee::{
-        client_transport::ws::{
-            InvalidUri,
-            Receiver,
-            Sender,
-            Uri,
-            WsTransportClientBuilder,
-        },
+        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
         core::{
-            client::{
-                Client,
-                ClientBuilder,
-            },
+            client::{Client, ClientBuilder},
             Error,
         },
     };
 
-    pub use jsonrpsee::core::{
-        client::ClientT,
-        rpc_params,
-    };
+    pub use jsonrpsee::core::{client::ClientT, rpc_params};
 
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {

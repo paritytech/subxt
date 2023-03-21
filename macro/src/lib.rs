@@ -115,21 +115,9 @@ use std::str::FromStr;
 
 use darling::FromMeta;
 use proc_macro::TokenStream;
-use proc_macro_error::{
-    abort,
-    abort_call_site,
-    proc_macro_error,
-};
-use subxt_codegen::{
-    utils::Uri,
-    DerivesRegistry,
-    TypeSubstitutes,
-};
-use syn::{
-    parse_macro_input,
-    punctuated::Punctuated,
-    spanned::Spanned as _,
-};
+use proc_macro_error::{abort, abort_call_site, proc_macro_error};
+use subxt_codegen::{utils::Uri, DerivesRegistry, TypeSubstitutes};
+use syn::{parse_macro_input, punctuated::Punctuated, spanned::Spanned as _};
 
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
@@ -198,13 +186,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             (
                 ty,
                 with.try_into()
-                    .unwrap_or_else(|(node, msg): (syn::Path, String)| {
-                        abort!(node.span(), msg)
-                    }),
+                    .unwrap_or_else(|(node, msg): (syn::Path, String)| abort!(node.span(), msg)),
             )
         },
     )) {
-        return err.into_compile_error().into()
+        return err.into_compile_error().into();
     }
 
     let should_gen_docs = args.generate_docs.is_present();
@@ -240,10 +226,14 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, None) => {
-            abort_call_site!("One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided")
+            abort_call_site!(
+                "One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided"
+            )
         }
         (Some(_), Some(_)) => {
-            abort_call_site!("Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided")
+            abort_call_site!(
+                "Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided"
+            )
         }
     }
 }
