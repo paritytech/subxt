@@ -70,11 +70,14 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
 
+    let ctx = test_context().await;
+    let api = ctx.client();
+
     // This is what the generated code hashes a `session().key_owner(..)` key into:
-    let actual_key_bytes = node_runtime::storage()
+    let actual_key = node_runtime::storage()
         .session()
-        .key_owner(KeyTypeId([1, 2, 3, 4]), [5u8, 6, 7, 8])
-        .to_bytes();
+        .key_owner(KeyTypeId([1, 2, 3, 4]), [5u8, 6, 7, 8]);
+    let actual_key_bytes = api.storage().address_bytes(&actual_key)?;
 
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {

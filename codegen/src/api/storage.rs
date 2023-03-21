@@ -12,7 +12,6 @@ use frame_metadata::{
     StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,
-    StorageHasher,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -84,31 +83,12 @@ fn generate_storage_entry_fns(
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let (fields, key_impl) = match storage_entry.ty {
+    let (fields, key_impl) = match &storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
-        StorageEntryType::Map {
-            ref key,
-            ref hashers,
-            ..
-        } => {
+        StorageEntryType::Map { key, .. } => {
             let key_ty = type_gen.resolve_type(key.id());
-            let hashers = hashers
-                .iter()
-                .map(|hasher| {
-                    let hasher = match hasher {
-                        StorageHasher::Blake2_128 => "Blake2_128",
-                        StorageHasher::Blake2_256 => "Blake2_256",
-                        StorageHasher::Blake2_128Concat => "Blake2_128Concat",
-                        StorageHasher::Twox128 => "Twox128",
-                        StorageHasher::Twox256 => "Twox256",
-                        StorageHasher::Twox64Concat => "Twox64Concat",
-                        StorageHasher::Identity => "Identity",
-                    };
-                    let hasher = format_ident!("{}", hasher);
-                    quote!( #crate_path::storage::address::StorageHasher::#hasher )
-                })
-                .collect::<Vec<_>>();
             match key_ty.type_def() {
+                // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => {
                     let fields = tuple
                         .fields()
@@ -121,46 +101,23 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
 
-                    let key_impl = if hashers.len() == fields.len() {
-                        // If the number of hashers matches the number of fields, we're dealing with
-                        // something shaped like a StorageNMap, and each field should be hashed separately
-                        // according to the corresponding hasher.
-                        let keys = hashers
-                            .into_iter()
-                            .zip(&fields)
-                            .map(|(hasher, (field_name, _))| {
-                                quote!( #crate_path::storage::address::StorageMapKey::new(#field_name.borrow(), #hasher) )
-                            });
-                        quote! {
-                            vec![ #( #keys ),* ]
-                        }
-                    } else if hashers.len() == 1 {
-                        // If there is one hasher, then however many fields we have, we want to hash a
-                        // tuple of them using the one hasher we're told about. This corresponds to a
-                        // StorageMap.
-                        let hasher = hashers.get(0).expect("checked for 1 hasher");
-                        let items =
-                            fields.iter().map(|(field_name, _)| quote!( #field_name ));
-                        quote! {
-                            vec![ #crate_path::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
-                        }
-                    } else {
-                        return Err(CodegenError::MismatchHashers(
-                            hashers.len(),
-                            fields.len(),
-                        ))
+                    let keys = fields
+                        .iter()
+                        .map(|(field_name, _)| {
+                            quote!( #crate_path::storage::address::StaticStorageMapKey::new(#field_name.borrow()) )
+                        });
+                    let key_impl = quote! {
+                        vec![ #( #keys ),* ]
                     };
 
                     (fields, key_impl)
                 }
+                // A map with a single key; return the single key.
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id());
                     let fields = vec![(format_ident!("_0"), ty_path)];
-                    let Some(hasher) = hashers.get(0) else {
-                        return Err(CodegenError::MissingHasher)
-                    };
                     let key_impl = quote! {
-                        vec![ #crate_path::storage::address::StorageMapKey::new(_0.borrow(), #hasher) ]
+                        vec![ #crate_path::storage::address::StaticStorageMapKey::new(_0.borrow()) ]
                     };
                     (fields, key_impl)
                 }
@@ -233,8 +190,14 @@ fn generate_storage_entry_fns(
             #docs
             pub fn #fn_name_root(
                 &self,
-            ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
-                #crate_path::storage::address::StaticStorageAddress::new(
+            ) -> #crate_path::storage::address::Address::<
+                #crate_path::storage::address::StaticStorageMapKey,
+                #storage_entry_value_ty,
+                (),
+                #is_defaultable_type,
+                #is_iterable_type
+            > {
+                #crate_path::storage::address::Address::new_static(
                     #pallet_name,
                     #storage_name,
                     Vec::new(),
@@ -252,8 +215,14 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-        ) -> #crate_path::storage::address::StaticStorageAddress::<#crate_path::metadata::DecodeStaticType<#storage_entry_value_ty>, #crate_path::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
-            #crate_path::storage::address::StaticStorageAddress::new(
+        ) -> #crate_path::storage::address::Address::<
+            #crate_path::storage::address::StaticStorageMapKey,
+            #storage_entry_value_ty,
+            #crate_path::storage::address::Yes,
+            #is_defaultable_type,
+            #is_iterable_type
+        > {
+            #crate_path::storage::address::Address::new_static(
                 #pallet_name,
                 #storage_name,
                 #key_impl,

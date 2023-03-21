@@ -7,6 +7,7 @@ use super::{
         validate_storage_address,
         Storage,
     },
+    utils,
     StorageAddress,
 };
 
@@ -56,6 +57,27 @@ where
         address: &Address,
     ) -> Result<(), Error> {
         validate_storage_address(address, &self.client.metadata())
+    }
+
+    /// Convert some storage address into the raw bytes that would be submitted to the node in order
+    /// to retrieve the entries at the root of the associated address.
+    pub fn address_root_bytes<Address: StorageAddress>(
+        &self,
+        address: &Address,
+    ) -> Vec<u8> {
+        utils::storage_address_root_bytes(address)
+    }
+
+    /// Convert some storage address into the raw bytes that would be submitted to the node in order
+    /// to retrieve an entry. This fails if [`StorageAddress::append_entry_bytes`] does; in the built-in
+    /// implementation this would be if the pallet and storage entry being asked for is not available on the
+    /// node you're communicating with, or if the metadata is missing some type information (which should not
+    /// happen).
+    pub fn address_bytes<Address: StorageAddress>(
+        &self,
+        address: &Address,
+    ) -> Result<Vec<u8>, Error> {
+        utils::storage_address_bytes(address, &self.client.metadata())
     }
 }
 

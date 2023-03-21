@@ -53,6 +53,9 @@ use syn::parse_quote;
 /// Error returned when the Codegen cannot generate the runtime API.
 #[derive(Debug, thiserror::Error)]
 pub enum CodegenError {
+    /// The given metadata type could not be found.
+    #[error("Could not find type with ID {0} in the type registry; please raise a support issue.")]
+    TypeNotFound(u32),
     /// Cannot fetch the metadata bytes.
     #[error("Failed to fetch metadata, make sure that you're pointing at a node which is providing V14 metadata: {0}")]
     Fetch(#[from] FetchMetadataError),
@@ -80,12 +83,6 @@ pub enum CodegenError {
     /// Metadata for storage could not be found.
     #[error("Metadata for storage entry {0}_{1} could not be found. Make sure you are providing a valid metadata V14")]
     MissingStorageMetadata(String, String),
-    /// StorageNMap should have N hashers.
-    #[error("Number of hashers ({0}) does not equal 1 for StorageMap, or match number of fields ({1}) for StorageNMap. Make sure you are providing a valid metadata V14")]
-    MismatchHashers(usize, usize),
-    /// Expected to find one hasher for StorageMap.
-    #[error("No hasher found for single key. Make sure you are providing a valid metadata V14")]
-    MissingHasher,
     /// Metadata for call could not be found.
     #[error("Metadata for call entry {0}_{1} could not be found. Make sure you are providing a valid metadata V14")]
     MissingCallMetadata(String, String),
@@ -319,13 +316,12 @@ impl RuntimeGenerator {
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
-        let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
             &self.metadata.types,
             "runtime_types",
             type_substitutes,
-            derives.clone(),
+            derives,
             crate_path.clone(),
             should_gen_docs,
         );
@@ -342,6 +338,28 @@ impl RuntimeGenerator {
                 )
             })
             .collect::<Vec<_>>();
+
+        // Get the path to the `Runtime` struct. We assume that the same path contains
+        // RuntimeCall and RuntimeEvent.
+        let runtime_type_id = self.metadata.ty.id();
+        let runtime_path_segments = self
+            .metadata
+            .types
+            .resolve(runtime_type_id)
+            .ok_or(CodegenError::TypeNotFound(runtime_type_id))?
+            .path()
+            .namespace()
+            .iter()
+            .map(|part| syn::PathSegment::from(format_ident!("{}", part)));
+        let runtime_path_suffix = syn::Path {
+            leading_colon: None,
+            segments: syn::punctuated::Punctuated::from_iter(runtime_path_segments),
+        };
+        let runtime_path = if runtime_path_suffix.segments.is_empty() {
+            quote!(#types_mod_ident)
+        } else {
+            quote!(#types_mod_ident::#runtime_path_suffix)
+        };
 
         // Pallet names and their length are used to create PALLETS array.
         // The array is used to identify the pallets composing the metadata for
@@ -407,25 +425,23 @@ impl RuntimeGenerator {
             })
             .collect::<Result<Vec<_>, CodegenError>>()?;
 
-        let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
-
+        let root_event_if_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
             p.event.as_ref().map(|_| {
+                // An 'if' arm for the RootEvent impl to match this variant name:
                 quote! {
-                    #[codec(index = #index)]
-                    #variant_name(#mod_name::Event),
+                    if pallet_name == #variant_name_str {
+                        return Ok(Event::#variant_name(#mod_name::Event::decode_with_metadata(
+                            &mut &*pallet_bytes,
+                            pallet_ty,
+                            metadata
+                        )?));
+                    }
                 }
             })
         });
-
-        let outer_event = quote! {
-            #default_derives
-            pub enum Event {
-                #( #outer_event_variants )*
-            }
-        };
 
         let mod_ident = &item_mod_ir.ident;
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
@@ -456,21 +472,35 @@ impl RuntimeGenerator {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
             pub mod #mod_ident {
-                // Preserve any Rust items that were previously defined in the adorned module
+                // Preserve any Rust items that were previously defined in the adorned module.
                 #( #rust_items ) *
 
-                // Make it easy to access the root via `root_mod` at different levels:
-                use super::#mod_ident as root_mod;
+                // Make it easy to access the root items via `root_mod` at different levels
+                // without reaching out of this module.
+                #[allow(unused_imports)]
+                mod root_mod {
+                    pub use super::*;
+                }
+
                 // Identify the pallets composing the static metadata by name.
                 pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
-                #outer_event
-                #( #modules )*
-                #types_mod
+                /// The statically generated runtime call type.
+                pub type Call = #runtime_path::RuntimeCall;
 
-                /// The default error type returned when there is a runtime issue,
-                /// exposed here for ease of use.
+                /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+
+                // Make the runtime event type easily accessible, and impl RootEvent to help decode into it.
+                pub type Event = #runtime_path::RuntimeEvent;
+
+                impl #crate_path::events::RootEvent for Event {
+                    fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        #( #root_event_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Event enum", pallet_name)).into())
+                    }
+                }
 
                 pub fn constants() -> ConstantsApi {
                     ConstantsApi
@@ -512,14 +542,17 @@ impl RuntimeGenerator {
                 }
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: &C) -> Result<(), ::subxt::error::MetadataError> {
+                pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
                     let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(::subxt::error::MetadataError::IncompatibleMetadata)
+                        Err(#crate_path::error::MetadataError::IncompatibleMetadata)
                     } else {
                         Ok(())
                     }
                 }
+
+                #( #modules )*
+                #types_mod
             }
         })
     }

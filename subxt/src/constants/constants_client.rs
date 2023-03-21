@@ -63,7 +63,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     pub fn at<Address: ConstantAddress>(
         &self,
         address: &Address,
-    ) -> Result<<Address::Target as DecodeWithMetadata>::Target, Error> {
+    ) -> Result<Address::Target, Error> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:
@@ -72,7 +72,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         // 2. Attempt to decode the constant into the type given:
         let pallet = metadata.pallet(address.pallet_name())?;
         let constant = pallet.constant(address.constant_name())?;
-        let value = Address::Target::decode_with_metadata(
+        let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut &*constant.value,
             constant.ty.id(),
             &metadata,

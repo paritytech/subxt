@@ -41,7 +41,17 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<
     let mut registry = scale_info::Registry::new();
     let pallets = registry.map_into_portable(pallets);
     let extrinsic = extrinsic.into_portable(&mut registry);
-    let ty = registry.register_type(&meta_type::<()>());
+
+    #[derive(TypeInfo)]
+    struct Runtime;
+    #[derive(TypeInfo)]
+    enum RuntimeCall {}
+    #[derive(TypeInfo)]
+    enum RuntimeEvent {}
+
+    let ty = registry.register_type(&meta_type::<Runtime>());
+    registry.register_type(&meta_type::<RuntimeCall>());
+    registry.register_type(&meta_type::<RuntimeEvent>());
 
     // Metadata needs to contain this DispatchError, since codegen looks for it.
     registry.register_type(&meta_type::<DispatchError>());

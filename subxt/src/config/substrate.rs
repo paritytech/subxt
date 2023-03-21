@@ -23,9 +23,9 @@ use serde::{
 };
 
 pub use crate::utils::{
-    account_id::AccountId32,
-    multi_address::MultiAddress,
-    multi_signature::MultiSignature,
+    AccountId32,
+    MultiAddress,
+    MultiSignature,
 };
 pub use primitive_types::{
     H256,

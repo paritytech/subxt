@@ -4,8 +4,7 @@
 
 //! Types representing the metadata obtained from a node.
 
-mod decode_with_metadata;
-mod encode_with_metadata;
+mod decode_encode_traits;
 mod hash_cache;
 mod metadata_location;
 mod metadata_type;
@@ -14,7 +13,6 @@ pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
     ErrorMetadata,
-    EventFieldMetadata,
     EventMetadata,
     InvalidMetadataError,
     Metadata,
@@ -22,12 +20,7 @@ pub use metadata_type::{
     PalletMetadata,
 };
 
-pub use decode_with_metadata::{
-    DecodeStaticType,
+pub use decode_encode_traits::{
     DecodeWithMetadata,
-};
-
-pub use encode_with_metadata::{
-    EncodeStaticType,
     EncodeWithMetadata,
 };

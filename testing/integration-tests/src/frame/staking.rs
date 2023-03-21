@@ -5,9 +5,12 @@
 use crate::{
     node_runtime::{
         self,
-        runtime_types::pallet_staking::{
-            RewardDestination,
-            ValidatorPrefs,
+        runtime_types::{
+            pallet_staking::{
+                RewardDestination,
+                ValidatorPrefs,
+            },
+            sp_arithmetic::per_things::Perbill,
         },
         staking,
     },
@@ -33,7 +36,7 @@ fn get_from_seed(seed: &str) -> sr25519::Pair {
 
 fn default_validator_prefs() -> ValidatorPrefs {
     ValidatorPrefs {
-        commission: sp_runtime::Perbill::default(),
+        commission: Perbill(0),
         blocked: false,
     }
 }

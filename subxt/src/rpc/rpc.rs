@@ -9,33 +9,25 @@
 //!
 //! # Example
 //!
-//! Fetching storage keys
+//! Fetching the chain genesis hash.
 //!
 //! ```no_run
+//! # #[tokio::main]
+//! # async fn main() {
 //! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
-//! # #[tokio::main]
-//! # async fn main() {
 //! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 //!
-//! let key = polkadot::storage()
-//!     .xcm_pallet()
-//!     .version_notifiers_root()
-//!     .to_bytes();
-//!
-//! // Fetch up to 10 keys.
-//! let keys = api
+//! let genesis_hash = api
 //!     .rpc()
-//!     .storage_keys_paged(&key, 10, None, None)
+//!     .genesis_hash()
 //!     .await
 //!     .unwrap();
 //!
-//! for key in keys.iter() {
-//!     println!("Key: 0x{}", hex::encode(&key));
-//! }
+//! println!("{genesis_hash}");
 //! # }
 //! ```
 

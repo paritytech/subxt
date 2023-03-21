@@ -28,25 +28,39 @@ pub trait ConstantAddress {
     }
 }
 
-/// This represents a statically generated constant lookup address.
-pub struct StaticConstantAddress<ReturnTy> {
-    pallet_name: &'static str,
-    constant_name: &'static str,
+/// This represents the address of a constant.
+pub struct Address<ReturnTy> {
+    pallet_name: Cow<'static, str>,
+    constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl<ReturnTy> StaticConstantAddress<ReturnTy> {
-    /// Create a new [`StaticConstantAddress`] that will be validated
+/// The type of address typically used to return dynamic constant values.
+pub type DynamicAddress = Address<DecodedValueThunk>;
+
+impl<ReturnTy> Address<ReturnTy> {
+    /// Create a new [`Address`] to use to look up a constant.
+    pub fn new(pallet_name: impl Into<String>, constant_name: impl Into<String>) -> Self {
+        Self {
+            pallet_name: Cow::Owned(pallet_name.into()),
+            constant_name: Cow::Owned(constant_name.into()),
+            constant_hash: None,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Create a new [`Address`] that will be validated
     /// against node metadata using the hash given.
-    pub fn new(
+    #[doc(hidden)]
+    pub fn new_static(
         pallet_name: &'static str,
         constant_name: &'static str,
         hash: [u8; 32],
     ) -> Self {
         Self {
-            pallet_name,
-            constant_name,
+            pallet_name: Cow::Borrowed(pallet_name),
+            constant_name: Cow::Borrowed(constant_name),
             constant_hash: Some(hash),
             _marker: std::marker::PhantomData,
         }
@@ -63,41 +77,8 @@ impl<ReturnTy> StaticConstantAddress<ReturnTy> {
     }
 }
 
-impl<ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
+impl<ReturnTy: DecodeWithMetadata> ConstantAddress for Address<ReturnTy> {
     type Target = ReturnTy;
-
-    fn pallet_name(&self) -> &str {
-        self.pallet_name
-    }
-
-    fn constant_name(&self) -> &str {
-        self.constant_name
-    }
-
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        self.constant_hash
-    }
-}
-
-/// This represents a dynamically generated constant address.
-pub struct DynamicConstantAddress<'a> {
-    pallet_name: Cow<'a, str>,
-    constant_name: Cow<'a, str>,
-}
-
-/// Construct a new dynamic constant lookup.
-pub fn dynamic<'a>(
-    pallet_name: impl Into<Cow<'a, str>>,
-    constant_name: impl Into<Cow<'a, str>>,
-) -> DynamicConstantAddress<'a> {
-    DynamicConstantAddress {
-        pallet_name: pallet_name.into(),
-        constant_name: constant_name.into(),
-    }
-}
-
-impl<'a> ConstantAddress for DynamicConstantAddress<'a> {
-    type Target = DecodedValueThunk;
 
     fn pallet_name(&self) -> &str {
         &self.pallet_name
@@ -106,4 +87,16 @@ impl<'a> ConstantAddress for DynamicConstantAddress<'a> {
     fn constant_name(&self) -> &str {
         &self.constant_name
     }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        self.constant_hash
+    }
+}
+
+/// Construct a new dynamic constant lookup.
+pub fn dynamic(
+    pallet_name: impl Into<String>,
+    constant_name: impl Into<String>,
+) -> DynamicAddress {
+    DynamicAddress::new(pallet_name, constant_name)
 }

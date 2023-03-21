@@ -41,7 +41,10 @@ pub use self::{
         Derives,
         DerivesRegistry,
     },
-    substitutes::TypeSubstitutes,
+    substitutes::{
+        AbsolutePath,
+        TypeSubstitutes,
+    },
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,
     type_path::{
