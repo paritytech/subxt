@@ -26,7 +26,7 @@ scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "18.0.0", default-features = false }
 sp-keyring = "20.0.0"
 sp-runtime = "20.0.0"
-syn = "1.0.109"
+syn = "2"
 subxt = { version = "0.27.1", path = "../../subxt" }
 subxt-codegen = { version = "0.27.1", path = "../../codegen" }
 test-runtime = { path = "../test-runtime" }

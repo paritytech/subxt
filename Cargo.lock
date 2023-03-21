@@ -1582,7 +1582,7 @@ dependencies = [
  "sp-runtime",
  "subxt",
  "subxt-codegen",
- "syn 1.0.109",
+ "syn 2.0.2",
  "test-runtime",
  "tokio",
  "tracing",
@@ -3434,7 +3434,7 @@ dependencies = [
  "serde_json",
  "subxt-codegen",
  "subxt-metadata",
- "syn 1.0.109",
+ "syn 2.0.2",
  "tokio",
 ]
 
@@ -3454,7 +3454,7 @@ dependencies = [
  "quote",
  "scale-info",
  "subxt-metadata",
- "syn 1.0.109",
+ "syn 2.0.2",
  "thiserror",
  "tokio",
 ]
@@ -3481,7 +3481,7 @@ dependencies = [
  "darling",
  "proc-macro-error",
  "subxt-codegen",
- "syn 1.0.109",
+ "syn 2.0.2",
 ]
 
 [[package]]

@@ -19,7 +19,7 @@ frame-metadata = "15.0.0"
 heck = "0.4.1"
 proc-macro2 = "1.0.52"
 quote = "1.0.8"
-syn = "1.0.109"
+syn = { version = "2", features = ["extra-traits", "full"] }
 scale-info = "2.0.0"
 subxt-metadata = { version = "0.27.1", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }

@@ -411,7 +411,7 @@ impl ToTokens for CratePath {
 
 impl From<&str> for CratePath {
     fn from(crate_path: &str) -> Self {
-        Self(syn::Path::from_string(crate_path).unwrap_or_else(|err| {
+        Self(syn::parse_str(crate_path).unwrap_or_else(|err| {
             panic!("failed converting {crate_path:?} to `syn::Path`: {err:?}");
         }))
     }
