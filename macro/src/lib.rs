@@ -48,7 +48,7 @@
 //!
 //! ### Adding derives for all types
 //!
-//! Add `derive_for_all_types` with a comma seperated list of the derives to apply to *all* types
+//! Add `derive_for_all_types` with a comma separated list of the derives to apply to *all* types
 //!
 //! ```ignore
 //! #[subxt::subxt(
@@ -60,7 +60,7 @@
 //!
 //! ### Adding derives for specific types
 //!
-//! Add `derive_for_type` for each specific type with a comma seperated list of the derives to
+//! Add `derive_for_type` for each specific type with a comma separated list of the derives to
 //! apply for that type only.
 //!
 //! ```ignore
@@ -95,6 +95,17 @@
 //! ```
 //!
 //! By default the documentation is not generated.
+//!
+//! ### Runtime types generation
+//!
+//! In some cases, you may be interested only in the runtime types, like `RuntimeCall` enum. You can
+//! limit code generation to just `runtime_types` module with `runtime_types_only` flag:
+//!
+//! ```ignore
+//! #[subxt::subxt(runtime_types_only)]
+//! // or equivalently
+//! #[subxt::subxt(runtime_types_only = true)]
+//! ```
 
 #![deny(unused_crate_dependencies)]
 
@@ -136,6 +147,8 @@ struct RuntimeMetadataArgs {
     crate_path: Option<String>,
     #[darling(default)]
     generate_docs: darling::util::Flag,
+    #[darling(default)]
+    runtime_types_only: bool,
 }
 
 #[derive(Debug, FromMeta)]
@@ -207,6 +220,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 type_substitutes,
                 crate_path,
                 should_gen_docs,
+                args.runtime_types_only,
             )
             .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
@@ -221,6 +235,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 type_substitutes,
                 crate_path,
                 should_gen_docs,
+                args.runtime_types_only,
             )
             .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }

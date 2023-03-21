@@ -121,6 +121,7 @@ impl CodegenError {
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_path<P>(
@@ -130,6 +131,7 @@ pub fn generate_runtime_api_from_path<P>(
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
     should_gen_docs: bool,
+    runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError>
 where
     P: AsRef<path::Path>,
@@ -147,6 +149,7 @@ where
         type_substitutes,
         crate_path,
         should_gen_docs,
+        runtime_types_only,
     )
 }
 
@@ -162,6 +165,7 @@ where
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -171,6 +175,7 @@ pub fn generate_runtime_api_from_url(
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
     should_gen_docs: bool,
+    runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let bytes = fetch_metadata_bytes_blocking(url)?;
 
@@ -181,6 +186,7 @@ pub fn generate_runtime_api_from_url(
         type_substitutes,
         crate_path,
         should_gen_docs,
+        runtime_types_only,
     )
 }
 
@@ -194,6 +200,7 @@ pub fn generate_runtime_api_from_url(
 /// * `type_substitutes` - Provide custom type substitutes.
 /// * `crate_path` - Path to the `subxt` crate.
 /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
+/// * `runtime_types_only` - Whether to limit code generation to only runtime types.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_bytes(
@@ -203,17 +210,28 @@ pub fn generate_runtime_api_from_bytes(
     type_substitutes: TypeSubstitutes,
     crate_path: CratePath,
     should_gen_docs: bool,
+    runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(
-        item_mod,
-        derives,
-        type_substitutes,
-        crate_path,
-        should_gen_docs,
-    )
+    if runtime_types_only {
+        generator.generate_runtime_types(
+            item_mod,
+            derives,
+            type_substitutes,
+            crate_path,
+            should_gen_docs,
+        )
+    } else {
+        generator.generate_runtime(
+            item_mod,
+            derives,
+            type_substitutes,
+            crate_path,
+            should_gen_docs,
+        )
+    }
 }
 
 /// Create the API for interacting with a Substrate runtime.
@@ -240,6 +258,57 @@ impl RuntimeGenerator {
     ///
     /// * `item_mod` - The module declaration for which the API is implemented.
     /// * `derives` - Provide custom derives for the generated types.
+    /// * `type_substitutes` - Provide custom type substitutes.
+    /// * `crate_path` - Path to the `subxt` crate.
+    /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
+    pub fn generate_runtime_types(
+        &self,
+        item_mod: syn::ItemMod,
+        derives: DerivesRegistry,
+        type_substitutes: TypeSubstitutes,
+        crate_path: CratePath,
+        should_gen_docs: bool,
+    ) -> Result<TokenStream2, CodegenError> {
+        let item_mod_attrs = item_mod.attrs.clone();
+
+        let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
+        let mod_ident = &item_mod_ir.ident;
+        let rust_items = item_mod_ir.rust_items();
+
+        let type_gen = TypeGenerator::new(
+            &self.metadata.types,
+            "runtime_types",
+            type_substitutes,
+            derives,
+            crate_path,
+            should_gen_docs,
+        );
+        let types_mod = type_gen.generate_types_mod()?;
+
+        Ok(quote! {
+            #( #item_mod_attrs )*
+            #[allow(dead_code, unused_imports, non_camel_case_types)]
+            #[allow(clippy::all)]
+            pub mod #mod_ident {
+                // Preserve any Rust items that were previously defined in the adorned module
+                #( #rust_items ) *
+
+                // Make it easy to access the root via `root_mod` at different levels:
+                use super::#mod_ident as root_mod;
+                #types_mod
+            }
+        })
+    }
+
+    /// Generate the API for interacting with a Substrate runtime.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_mod` - The module declaration for which the API is implemented.
+    /// * `derives` - Provide custom derives for the generated types.
+    /// * `type_substitutes` - Provide custom type substitutes.
+    /// * `crate_path` - Path to the `subxt` crate.
+    /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
