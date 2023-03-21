@@ -168,7 +168,7 @@ struct SubstituteType {
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as syn::AttributeArgs);
+    let attr_args = parse_macro_input!(args as syn::punctuated::Punctuated<syn::Meta, syn::Token![,]>);
     let item_mod = parse_macro_input!(input as syn::ItemMod);
     let args = match RuntimeMetadataArgs::from_list(&attr_args) {
         Ok(v) => v,
