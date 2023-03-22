@@ -243,6 +243,7 @@ async fn dry_run_result_is_substrate_compatible() {
             TransactionValidityError as SpTransactionValidityError,
         },
         ApplyExtrinsicResult as SpApplyExtrinsicResult, DispatchError as SpDispatchError,
+        TokenError as SpTokenError,
     };
 
     // We really just connect to a node to get some valid metadata to help us
@@ -260,10 +261,23 @@ async fn dry_run_result_is_substrate_compatible() {
             )),
             DryRunResult::TransactionValidityError,
         ),
-        // Some dispatch error
+        // Some dispatch errors to check that they decode OK. We've tested module errors
+        // "in situ" in other places so avoid the complexity of testing them properly here.
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Other("hi"))),
+            DryRunResult::DispatchError(DispatchError::Other),
+        ),
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::CannotLookup)),
+            DryRunResult::DispatchError(DispatchError::CannotLookup),
+        ),
         (
             SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
             DryRunResult::DispatchError(DispatchError::BadOrigin),
+        ),
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Token(SpTokenError::CannotCreate))),
+            DryRunResult::DispatchError(DispatchError::Token(TokenError::CannotCreate)),
         ),
     ];
 
