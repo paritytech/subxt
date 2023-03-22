@@ -10,9 +10,13 @@ use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::storage::well_known_keys;
+use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
 use subxt::{
-    rpc::types::{ChainHeadEvent, FollowEvent, Initialized, RuntimeEvent, RuntimeVersionEvent},
+    error::{DispatchError, TokenError},
+    rpc::types::{
+        ChainHeadEvent, DryRunError, FollowEvent, Initialized, RuntimeEvent, RuntimeVersionEvent,
+    },
     tx::Signer,
     utils::AccountId32,
 };
@@ -181,49 +185,51 @@ async fn dry_run_passes() {
         .unwrap();
 }
 
-//// [jsdw] Commented out until Subxt decodes these new Token errors better
-// #[tokio::test]
-// async fn dry_run_fails() {
-//     let ctx = test_context().await;
-//     let api = ctx.client();
-//
-//     wait_for_blocks(&api).await;
-//
-//     let alice = pair_signer(AccountKeyring::Alice.pair());
-//     let hans = pair_signer(Sr25519Pair::generate().0);
-//
-//     let tx = node_runtime::tx().balances().transfer(
-//         hans.account_id().clone().into(),
-//         100_000_000_000_000_000_000_000_000_000_000_000,
-//     );
-//
-//     let signed_extrinsic = api
-//         .tx()
-//         .create_signed(&tx, &alice, Default::default())
-//         .await
-//         .unwrap();
-//
-//     let dry_run_res = signed_extrinsic
-//         .dry_run(None)
-//         .await
-//         .expect("dryrunning failed");
-//
-//     assert_eq!(dry_run_res, Err(DryRunError::DispatchError));
-//
-//     let res = signed_extrinsic
-//         .submit_and_watch()
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await;
-//
-//     if let Err(subxt::error::Error::Runtime(DispatchError::Module(err))) = res {
-//         assert_eq!(err.pallet, "Balances");
-//         assert_eq!(err.error, "InsufficientBalance");
-//     } else {
-//         panic!("expected a runtime module error");
-//     }
-// }
+#[tokio::test]
+async fn dry_run_fails() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    wait_for_blocks(&api).await;
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let hans = pair_signer(Sr25519Pair::generate().0);
+
+    let tx = node_runtime::tx().balances().transfer(
+        hans.account_id().clone().into(),
+        100_000_000_000_000_000_000_000_000_000_000_000,
+    );
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    let dry_run_res = signed_extrinsic
+        .dry_run(None)
+        .await
+        .expect("dryrunning failed");
+
+    assert_eq!(dry_run_res, Err(DryRunError::DispatchError));
+
+    let res = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
+
+    assert!(
+        matches!(
+            res,
+            Err(subxt::error::Error::Runtime(DispatchError::Token(
+                TokenError::FundsUnavailable
+            )))
+        ),
+        "Expected an insufficient balance, got {res:?}"
+    );
+}
 
 #[tokio::test]
 async fn external_signing() {

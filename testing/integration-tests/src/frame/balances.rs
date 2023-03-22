@@ -7,8 +7,12 @@ use crate::{
     pair_signer, test_context,
 };
 use codec::Decode;
+use sp_core::Pair;
 use sp_keyring::AccountKeyring;
-use subxt::utils::{AccountId32, MultiAddress};
+use subxt::{
+    error::{DispatchError, Error, TokenError},
+    utils::{AccountId32, MultiAddress},
+};
 
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
