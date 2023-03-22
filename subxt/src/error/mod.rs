@@ -45,9 +45,6 @@ pub enum Error {
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
     Runtime(DispatchError),
-    /// The bytes representing a runtime error that we were unable to decode.
-    #[error("An unknown runtime error occurred with bytes: {0:?}")]
-    UnknownRuntime(Vec<u8>),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[error("Error decoding into dynamic value: {0}")]
     Decode(#[from] DecodeError),
@@ -63,6 +60,9 @@ pub enum Error {
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
+    /// The bytes representing an error that we were unable to decode.
+    #[error("An error occurred but it could not be decoded: {0:?}")]
+    Unknown(Vec<u8>),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),

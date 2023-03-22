@@ -444,10 +444,10 @@ impl<T: Config> Rpc<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<types::DryRunResult, Error> {
+    ) -> Result<types::DryRunResultBytes, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: types::Bytes = self.client.request("system_dryRun", params).await?;
-        Ok(types::decode_dry_run_result(&mut &*result_bytes.0)?)
+        Ok(types::DryRunResultBytes(result_bytes.0))
     }
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.

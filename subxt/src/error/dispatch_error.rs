@@ -11,7 +11,7 @@ use scale_decode::visitor::DecodeAsTypeResult;
 use std::borrow::Cow;
 
 /// An error dispatching a transaction.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum DispatchError {
     /// Some error occurred.
@@ -60,7 +60,7 @@ pub enum DispatchError {
 }
 
 /// An error relating to tokens when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error)]
+#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TokenError {
     /// Funds are unavailable.
@@ -93,7 +93,7 @@ pub enum TokenError {
 }
 
 /// An error relating to arithmetic when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error)]
+#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ArithmeticError {
     /// Underflow.
@@ -108,7 +108,7 @@ pub enum ArithmeticError {
 }
 
 /// An error relating to thr transactional layers when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error)]
+#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TransactionalError {
     /// Too many transactional layers have been spawned.
@@ -120,7 +120,7 @@ pub enum TransactionalError {
 }
 
 /// Details about a module error that has occurred.
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 #[error("{pallet}: {error}\n\n{}", .description.join("\n"))]
 pub struct ModuleError {
@@ -137,7 +137,7 @@ pub struct ModuleError {
 /// The error details about a module error that has occurred.
 ///
 /// **Note**: Structure used to obtain the underlying bytes of a ModuleError.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RawModuleError {
     /// Index of the pallet that the error came from.
     pub pallet_index: u8,
@@ -155,6 +155,7 @@ impl RawModuleError {
 
 impl DispatchError {
     /// Attempt to decode a runtime [`DispatchError`].
+    #[doc(hidden)]
     pub fn decode_from<'a>(
         bytes: impl Into<Cow<'a, [u8]>>,
         metadata: &Metadata,
@@ -167,7 +168,7 @@ impl DispatchError {
                 tracing::warn!(
                     "Can't decode error: sp_runtime::DispatchError was not found in Metadata"
                 );
-                return Err(super::Error::UnknownRuntime(bytes.into_owned()));
+                return Err(super::Error::Unknown(bytes.into_owned()));
             }
         };
 
@@ -237,32 +238,39 @@ impl DispatchError {
             DecodedDispatchError::Corruption => DispatchError::Corruption,
             DecodedDispatchError::Unavailable => DispatchError::Unavailable,
             // But we apply custom logic to transform the module error into the outward facing version:
-            DecodedDispatchError::Module(bytes) => {
-                let bytes = bytes.0;
+            DecodedDispatchError::Module(module_bytes) => {
+                let module_bytes = module_bytes.0;
 
                 // The old version is 2 bytes; a pallet and error index.
                 // The new version is 5 bytes; a pallet and error index and then 3 extra bytes.
-                let err = if bytes.len() == 2 {
+                let err = if module_bytes.len() == 2 {
                     RawModuleError {
-                        pallet_index: bytes[0],
-                        error: [bytes[1], 0, 0, 0],
+                        pallet_index: module_bytes[0],
+                        error: [module_bytes[1], 0, 0, 0],
                     }
-                } else if bytes.len() == 5 {
+                } else if module_bytes.len() == 5 {
                     RawModuleError {
-                        pallet_index: bytes[0],
-                        error: [bytes[1], bytes[2], bytes[3], bytes[4]],
+                        pallet_index: module_bytes[0],
+                        error: [
+                            module_bytes[1],
+                            module_bytes[2],
+                            module_bytes[3],
+                            module_bytes[4],
+                        ],
                     }
                 } else {
-                    tracing::warn!("Can't decode error: sp_runtime::DispatchError::Module bytes do not match known shapes");
-                    return Err(super::Error::UnknownRuntime(bytes));
+                    tracing::warn!("Can't decode error sp_runtime::DispatchError: bytes do not match known shapes");
+                    // Return _all_ of the bytes; every "unknown" return should be consistent.
+                    return Err(super::Error::Unknown(bytes.to_vec()));
                 };
 
                 // Embelish the error with extra info helpful for matching it up etc:
                 let error_details = match metadata.error(err.pallet_index, err.error[0]) {
                     Ok(details) => details,
                     Err(_) => {
-                        tracing::warn!("Can't embelish error: sp_runtime::DispatchError::Module details do not match known information");
-                        return Err(super::Error::UnknownRuntime(bytes));
+                        tracing::warn!("Can't embelish error sp_runtime::DispatchError; details do not match known information");
+                        // Return _all_ of the bytes; every "unknown" return should be consistent.
+                        return Err(super::Error::Unknown(bytes.to_vec()));
                     }
                 };
 

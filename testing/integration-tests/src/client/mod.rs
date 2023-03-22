@@ -13,9 +13,10 @@ use sp_core::storage::well_known_keys;
 use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
 use subxt::{
-    error::{DispatchError, TokenError},
+    error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent, DryRunError, FollowEvent, Initialized, RuntimeEvent, RuntimeVersionEvent,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
+        RuntimeVersionEvent,
     },
     tx::Signer,
     utils::AccountId32,
@@ -173,8 +174,7 @@ async fn dry_run_passes() {
     signed_extrinsic
         .dry_run(None)
         .await
-        .expect("dryrunning failed")
-        .expect("dry run should be successful");
+        .expect("dryrunning failed");
 
     signed_extrinsic
         .submit_and_watch()
@@ -211,7 +211,10 @@ async fn dry_run_fails() {
         .await
         .expect("dryrunning failed");
 
-    assert_eq!(dry_run_res, Err(DryRunError::DispatchError));
+    assert_eq!(
+        dry_run_res,
+        DryRunResult::DispatchError(DispatchError::Token(TokenError::FundsUnavailable))
+    );
 
     let res = signed_extrinsic
         .submit_and_watch()
@@ -223,12 +226,54 @@ async fn dry_run_fails() {
     assert!(
         matches!(
             res,
-            Err(subxt::error::Error::Runtime(DispatchError::Token(
+            Err(Error::Runtime(DispatchError::Token(
                 TokenError::FundsUnavailable
             )))
         ),
         "Expected an insufficient balance, got {res:?}"
     );
+}
+
+#[tokio::test]
+async fn dry_run_result_is_substrate_compatible() {
+    use sp_runtime::{
+        transaction_validity::{
+            InvalidTransaction as SpInvalidTransaction,
+            TransactionValidityError as SpTransactionValidityError,
+        },
+        ApplyExtrinsicResult as SpApplyExtrinsicResult, DispatchError as SpDispatchError,
+    };
+
+    // We really just connect to a node to get some valid metadata to help us
+    // decode Dispatch Errors.
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let pairs = vec![
+        // All ok
+        (SpApplyExtrinsicResult::Ok(Ok(())), DryRunResult::Success),
+        // Some transaction error
+        (
+            SpApplyExtrinsicResult::Err(SpTransactionValidityError::Invalid(
+                SpInvalidTransaction::BadProof,
+            )),
+            DryRunResult::TransactionValidityError,
+        ),
+        // Some dispatch error
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
+            DryRunResult::DispatchError(DispatchError::BadOrigin),
+        ),
+    ];
+
+    for (actual, expected) in pairs {
+        let encoded = actual.encode();
+        let res = DryRunResultBytes(encoded)
+            .into_dry_run_result(&api.metadata())
+            .unwrap();
+
+        assert_eq!(res, expected);
+    }
 }
 
 #[tokio::test]
