@@ -155,12 +155,16 @@ impl ModuleError {
             .error(self.raw.pallet_index, self.raw.error[0])?;
         Ok(error_details)
     }
+    /// Return the underlying module error data that was decoded.
+    pub fn raw(&self) -> RawModuleError {
+        self.raw
+    }
 }
 
 /// The error details about a module error that has occurred.
 ///
 /// **Note**: Structure used to obtain the underlying bytes of a ModuleError.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RawModuleError {
     /// Index of the pallet that the error came from.
     pub pallet_index: u8,
