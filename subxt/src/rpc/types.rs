@@ -13,9 +13,6 @@ use std::collections::HashMap;
 // Subscription types are returned from some calls, so expose it with the rest of the returned types.
 pub use super::rpc_client::Subscription;
 
-// /// Signal what the result of doing a dry run of an extrinsic is.
-// pub type DryRunResult = Result<(), DryRunError>;
-
 /// An error dry running an extrinsic.
 #[derive(Debug, PartialEq, Eq)]
 pub enum DryRunResult {
@@ -41,7 +38,8 @@ impl DryRunResultBytes {
             Ok(DryRunResult::Success)
         } else if bytes[0] == 0 && bytes[1] == 1 {
             // Ok(Err(dispatch_error)); transaction is valid but execution failed
-            let dispatch_error = crate::error::DispatchError::decode_from(&bytes[2..], metadata)?;
+            let dispatch_error =
+                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
             Ok(DryRunResult::DispatchError(dispatch_error))
         } else if bytes[0] == 1 {
             // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
@@ -52,20 +50,6 @@ impl DryRunResultBytes {
         }
     }
 }
-
-/// dryRun returns an ApplyExtrinsicResult, which is basically a
-/// `Result<Result<(), DispatchError>, TransactionValidityError>`. We want to convert this to
-/// a [`DryRunResult`].
-///
-/// - if `Ok(inner)`, the transaction will be included in the block
-/// - if `Ok(Ok(()))`, the transaction will be included and the call will be dispatched
-///   successfully
-/// - if `Ok(Err(e))`, the transaction will be included but there is some error dispatching
-///   the call to the module.
-///
-/// The errors get a bit involved and have been known to change over time. At the moment
-/// then, we will keep things simple here and just decode the Result portion (ie the initial bytes)
-/// and ignore the rest.
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.

@@ -324,7 +324,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             let ev = ev?;
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
-                    DispatchError::decode_from(ev.field_bytes(), &self.client.metadata())?;
+                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata())?;
                 return Err(dispatch_error.into());
             }
         }

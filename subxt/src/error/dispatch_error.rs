@@ -120,18 +120,41 @@ pub enum TransactionalError {
 }
 
 /// Details about a module error that has occurred.
-#[derive(Clone, Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Clone, Debug, thiserror::Error)]
 #[non_exhaustive]
-#[error("{pallet}: {error}\n\n{}", .description.join("\n"))]
 pub struct ModuleError {
-    /// The name of the pallet that the error came from.
-    pub pallet: String,
-    /// The name of the error.
-    pub error: String,
-    /// A description of the error.
-    pub description: Vec<String>,
-    /// A byte representation of the error.
-    pub error_data: RawModuleError,
+    metadata: Metadata,
+    raw: RawModuleError,
+}
+
+impl PartialEq for ModuleError {
+    fn eq(&self, other: &Self) -> bool {
+        // A module error is the same if the raw underlying details are the same.
+        self.raw == other.raw
+    }
+}
+impl Eq for ModuleError {}
+
+impl std::fmt::Display for ModuleError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Ok(details) = self.details() else {
+            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)")
+        };
+
+        let pallet = details.pallet();
+        let error = details.error();
+        write!(f, "Pallet error {pallet}::{error}")
+    }
+}
+
+impl ModuleError {
+    /// Return more details about this error.
+    pub fn details(&self) -> Result<&crate::metadata::ErrorMetadata, super::Error> {
+        let error_details = self
+            .metadata
+            .error(self.raw.pallet_index, self.raw.error[0])?;
+        Ok(error_details)
+    }
 }
 
 /// The error details about a module error that has occurred.
@@ -158,7 +181,7 @@ impl DispatchError {
     #[doc(hidden)]
     pub fn decode_from<'a>(
         bytes: impl Into<Cow<'a, [u8]>>,
-        metadata: &Metadata,
+        metadata: Metadata,
     ) -> Result<Self, super::Error> {
         let bytes = bytes.into();
 
@@ -219,7 +242,7 @@ impl DispatchError {
         let decoded_dispatch_err = DecodedDispatchError::decode_with_metadata(
             &mut &*bytes,
             dispatch_error_ty_id,
-            metadata,
+            &metadata,
         )?;
 
         // Convert into the outward-facing error, mainly by handling the Module variant.
@@ -243,7 +266,7 @@ impl DispatchError {
 
                 // The old version is 2 bytes; a pallet and error index.
                 // The new version is 5 bytes; a pallet and error index and then 3 extra bytes.
-                let err = if module_bytes.len() == 2 {
+                let raw = if module_bytes.len() == 2 {
                     RawModuleError {
                         pallet_index: module_bytes[0],
                         error: [module_bytes[1], 0, 0, 0],
@@ -264,23 +287,8 @@ impl DispatchError {
                     return Err(super::Error::Unknown(bytes.to_vec()));
                 };
 
-                // Embelish the error with extra info helpful for matching it up etc:
-                let error_details = match metadata.error(err.pallet_index, err.error[0]) {
-                    Ok(details) => details,
-                    Err(_) => {
-                        tracing::warn!("Can't embelish error sp_runtime::DispatchError; details do not match known information");
-                        // Return _all_ of the bytes; every "unknown" return should be consistent.
-                        return Err(super::Error::Unknown(bytes.to_vec()));
-                    }
-                };
-
                 // And return our outward-facing version:
-                DispatchError::Module(ModuleError {
-                    pallet: error_details.pallet().to_string(),
-                    error: error_details.error().to_string(),
-                    description: error_details.docs().to_vec(),
-                    error_data: err,
-                })
+                DispatchError::Module(ModuleError { metadata, raw })
             }
         };
 
