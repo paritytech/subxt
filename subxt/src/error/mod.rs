@@ -44,7 +44,7 @@ pub enum Error {
     Metadata(#[from] MetadataError),
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
-    Runtime(DispatchError),
+    Runtime(#[from] DispatchError),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[error("Error decoding into dynamic value: {0}")]
     Decode(#[from] DecodeError),
@@ -80,12 +80,6 @@ impl From<String> for Error {
     }
 }
 
-impl From<DispatchError> for Error {
-    fn from(error: DispatchError) -> Self {
-        Error::Runtime(error)
-    }
-}
-
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
@@ -105,16 +99,16 @@ pub enum RpcError {
 #[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 #[non_exhaustive]
 pub enum BlockError {
-    /// The block
+    /// An error containing the hash of the block that was not found.
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
-    BlockHashNotFound(String),
+    NotFound(String),
 }
 
 impl BlockError {
     /// Produce an error that a block with the given hash cannot be found.
-    pub fn block_hash_not_found(hash: impl AsRef<[u8]>) -> BlockError {
+    pub fn not_found(hash: impl AsRef<[u8]>) -> BlockError {
         let hash = format!("0x{}", hex::encode(hash));
-        BlockError::BlockHashNotFound(hash)
+        BlockError::NotFound(hash)
     }
 }
 
@@ -129,7 +123,7 @@ pub enum TransactionError {
     /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
-    BlockHashNotFound,
+    BlockNotFound,
 }
 
 /// Something went wrong trying to encode a storage address.
