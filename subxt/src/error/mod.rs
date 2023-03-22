@@ -68,7 +68,7 @@ pub enum Error {
     Other(String),
 }
 
-impl <'a> From<&'a str> for Error {
+impl<'a> From<&'a str> for Error {
     fn from(error: &'a str) -> Self {
         Error::Other(error.into())
     }
