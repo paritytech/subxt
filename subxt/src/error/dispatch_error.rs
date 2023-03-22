@@ -195,7 +195,9 @@ impl DispatchError {
             }
         };
 
-        // The aim is to decode our bytes into roughly this shape:
+        // The aim is to decode our bytes into roughly this shape. This is copied from
+        // `sp_runtime::DispatchError`; we need the variant names and any inner variant
+        // names/shapes to line up in order for decoding to be successful.
         #[derive(scale_decode::DecodeAsType)]
         enum DecodedDispatchError {
             Other,
