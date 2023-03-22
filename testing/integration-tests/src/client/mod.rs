@@ -197,7 +197,8 @@ async fn dry_run_fails() {
 
     let tx = node_runtime::tx().balances().transfer(
         hans.account_id().clone().into(),
-        100_000_000_000_000_000_000_000_000_000_000_000,
+        // 7 more than the default amount Alice has, so this should fail; insufficient funds:
+        1_000_000_000_000_000_000_007,
     );
 
     let signed_extrinsic = api
