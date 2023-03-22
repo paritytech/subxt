@@ -68,8 +68,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        assert_eq!(err.details().pallet(), "Staking");
+        assert_eq!(err.details().error(), "NotController");
     });
     Ok(())
 }
@@ -116,8 +116,8 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
         .await;
 
     assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        assert_eq!(err.details().pallet(), "Staking");
+        assert_eq!(err.details().error(), "NotController");
     });
     Ok(())
 }
@@ -161,8 +161,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .await;
 
     assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        assert_eq!(err.details().pallet(), "Staking");
+        assert_eq!(err.details().error(), "NotController");
     });
 
     let is_chilled = api
@@ -207,8 +207,8 @@ async fn tx_bond() -> Result<(), Error> {
         .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "AlreadyBonded");
+        assert_eq!(err.details().pallet(), "Staking");
+        assert_eq!(err.details().error(), "AlreadyBonded");
     });
     Ok(())
 }
