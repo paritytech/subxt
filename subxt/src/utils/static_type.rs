@@ -28,9 +28,9 @@ impl<T: Encode> EncodeAsType for Static<T> {
     }
 }
 
-pub struct StaticVisitor<T>(std::marker::PhantomData<T>);
+pub struct StaticDecodeAsTypeVisitor<T>(std::marker::PhantomData<T>);
 
-impl<T: Decode> Visitor for StaticVisitor<T> {
+impl<T: Decode> Visitor for StaticDecodeAsTypeVisitor<T> {
     type Value<'scale, 'info> = Static<T>;
     type Error = scale_decode::Error;
 
@@ -49,8 +49,22 @@ impl<T: Decode> Visitor for StaticVisitor<T> {
 }
 
 impl<T: Decode> IntoVisitor for Static<T> {
-    type Visitor = StaticVisitor<T>;
+    type Visitor = StaticDecodeAsTypeVisitor<T>;
     fn into_visitor() -> Self::Visitor {
-        StaticVisitor(std::marker::PhantomData)
+        StaticDecodeAsTypeVisitor(std::marker::PhantomData)
+    }
+}
+
+// Static<T> is just a marker type and should be as transparent as possible:
+impl<T> std::ops::Deref for Static<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> std::ops::DerefMut for Static<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }

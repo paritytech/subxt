@@ -8,7 +8,7 @@ mod account_id;
 pub mod bits;
 mod multi_address;
 mod multi_signature;
-mod statically;
+mod static_type;
 mod wrapper_opaque;
 
 use codec::{Decode, Encode};
@@ -17,7 +17,7 @@ use derivative::Derivative;
 pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
-pub use statically::Static;
+pub use static_type::Static;
 pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
