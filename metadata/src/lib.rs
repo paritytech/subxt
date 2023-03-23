@@ -8,6 +8,8 @@ use frame_metadata::{
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
 
+pub mod retain;
+
 /// Internal byte representation for various metadata types utilized for
 /// generating deterministic hashes between different rust versions.
 #[repr(u8)]
