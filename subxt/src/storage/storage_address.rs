@@ -6,6 +6,7 @@ use crate::{
     dynamic::{DecodedValueThunk, Value},
     error::{Error, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
+    utils::{Encoded, Static},
 };
 use frame_metadata::{StorageEntryType, StorageHasher};
 use scale_info::TypeDef;
@@ -211,26 +212,12 @@ where
 
 /// A static storage key; this is some pre-encoded bytes
 /// likely provided by the generated interface.
-pub struct StaticStorageMapKey(pub Vec<u8>);
+pub type StaticStorageMapKey = Static<Encoded>;
 
-impl StaticStorageMapKey {
-    /// Create a new [`StaticStorageMapKey`] by pre-encoding static data.
-    pub fn new<Encodable: codec::Encode>(value: Encodable) -> StaticStorageMapKey {
-        Self(value.encode())
-    }
-}
-
-impl EncodeWithMetadata for StaticStorageMapKey {
-    fn encode_with_metadata(
-        &self,
-        _type_id: u32,
-        _metadata: &Metadata,
-        bytes: &mut Vec<u8>,
-    ) -> Result<(), Error> {
-        // We just use the already-encoded bytes for a static storage key:
-        bytes.extend(&self.0);
-        Ok(())
-    }
+// Used in codegen to construct the above.
+#[doc(hidden)]
+pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKey {
+    Static(Encoded(t.encode()))
 }
 
 /// Construct a new dynamic storage lookup to the root of some entry.
