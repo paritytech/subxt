@@ -72,7 +72,7 @@ where
         let block_hash = self.header.hash();
         let block_details = match self.client.rpc().block(Some(block_hash)).await? {
             Some(block) => block,
-            None => return Err(BlockError::block_hash_not_found(block_hash).into()),
+            None => return Err(BlockError::not_found(block_hash).into()),
         };
 
         Ok(BlockBody::new(

@@ -66,7 +66,7 @@ where
 
             let block_header = match client.rpc().header(Some(block_hash)).await? {
                 Some(header) => header,
-                None => return Err(BlockError::block_hash_not_found(block_hash).into()),
+                None => return Err(BlockError::not_found(block_hash).into()),
             };
 
             Ok(Block::new(block_header, client))

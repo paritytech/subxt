@@ -324,7 +324,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             let ev = ev?;
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
-                    DispatchError::decode_from(ev.field_bytes(), &self.client.metadata());
+                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata())?;
                 return Err(dispatch_error.into());
             }
         }
@@ -344,7 +344,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .rpc()
             .block(Some(self.block_hash))
             .await?
-            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
         let extrinsic_idx = block
             .block
@@ -357,7 +357,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             })
             // If we successfully obtain the block hash we think contains our
             // extrinsic, the extrinsic should be in there somewhere..
-            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
         let events = EventsClient::new(self.client.clone())
             .at(Some(self.block_hash))

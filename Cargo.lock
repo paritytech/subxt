@@ -1545,6 +1545,7 @@ dependencies = [
  "scale-info",
  "sp-core",
  "sp-keyring",
+ "sp-runtime",
  "subxt",
  "subxt-codegen",
  "syn 1.0.109",

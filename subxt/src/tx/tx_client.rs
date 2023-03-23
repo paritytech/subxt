@@ -462,6 +462,7 @@ where
     ///
     /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
     pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
-        self.client.rpc().dry_run(self.encoded(), at).await
+        let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
+        dry_run_bytes.into_dry_run_result(&self.client.metadata())
     }
 }

@@ -7,8 +7,12 @@ use crate::{
     pair_signer, test_context,
 };
 use codec::Decode;
+use sp_core::Pair;
 use sp_keyring::AccountKeyring;
-use subxt::utils::{AccountId32, MultiAddress};
+use subxt::{
+    error::{DispatchError, Error, TokenError},
+    utils::{AccountId32, MultiAddress},
+};
 
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
@@ -296,46 +300,48 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-//// [jsdw] Commented out until Subxt decodes these new Token errors better
-// #[tokio::test]
-// async fn transfer_error() {
-//     let alice = pair_signer(AccountKeyring::Alice.pair());
-//     let alice_addr = alice.account_id().clone().into();
-//     let hans = pair_signer(Pair::generate().0);
-//     let hans_address = hans.account_id().clone().into();
-//     let ctx = test_context().await;
-//     let api = ctx.client();
-//
-//     let to_hans_tx = node_runtime::tx()
-//         .balances()
-//         .transfer(hans_address, 100_000_000_000_000_000);
-//     let to_alice_tx = node_runtime::tx()
-//         .balances()
-//         .transfer(alice_addr, 100_000_000_000_000_000);
-//
-//     api.tx()
-//         .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await
-//         .unwrap();
-//
-//     let res = api
-//         .tx()
-//         .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await;
-//
-//     if let Err(Error::Runtime(DispatchError::Module(err))) = res {
-//         assert_eq!(err.pallet, "Balances");
-//         assert_eq!(err.error, "InsufficientBalance");
-//     } else {
-//         panic!("expected a runtime module error");
-//     }
-// }
+#[tokio::test]
+async fn transfer_error() {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice_addr = alice.account_id().clone().into();
+    let hans = pair_signer(Pair::generate().0);
+    let hans_address = hans.account_id().clone().into();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let to_hans_tx = node_runtime::tx()
+        .balances()
+        .transfer(hans_address, 100_000_000_000_000_000);
+    let to_alice_tx = node_runtime::tx()
+        .balances()
+        .transfer(alice_addr, 100_000_000_000_000_000);
+
+    api.tx()
+        .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
+
+    let res = api
+        .tx()
+        .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
+
+    assert!(
+        matches!(
+            res,
+            Err(Error::Runtime(DispatchError::Token(
+                TokenError::FundsUnavailable
+            )))
+        ),
+        "Expected an insufficient balance, got {res:?}"
+    );
+}
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {
