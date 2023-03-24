@@ -11,10 +11,6 @@ use std::{
     collections::{BTreeMap, HashSet},
 };
 
-// Extra types used by subxt that must be retained in the metadata.
-const DISPATCH_ERROR: &'static str = "DispatchError";
-const RUNTIME_EVENT: &'static str = "RuntimeEvent";
-
 /// Collect all type IDs needed to represent the provided pallet.
 fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut HashSet<u32>) {
     if let Some(storage) = &pallet.storage {
@@ -130,7 +126,8 @@ fn update_extrinsic_types(
 ///
 /// # Panics
 ///
-/// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types.
+/// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types,
+/// or the metadata does not contain the "sp_runtime::DispatchError" type.
 pub fn retain_metadata_pallets<F>(metadata: &mut RuntimeMetadataV14, mut filter: F)
 where
     F: FnMut(&PalletMetadata<PortableForm>) -> bool,
@@ -151,14 +148,14 @@ where
     type_ids.insert(metadata.ty.id());
 
     // Additionally, subxt depends on the `RuntimeError` and `DispatchError`.
-    for ty in metadata.types.types() {
-        let Some(ident) = ty.ty().path().ident() else {
-            continue
-        };
-        if ident == DISPATCH_ERROR || ident == RUNTIME_EVENT {
-            type_ids.insert(ty.id());
-        }
-    }
+    let dispatch_error_ty = metadata
+        .types
+        .types()
+        .iter()
+        .find(|ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
+        .expect("Metadata must contain sp_runtime::DispatchError");
+
+    type_ids.insert(dispatch_error_ty.id());
 
     // Keep only the needed IDs in the portable registry.
     let map_ids = metadata.types.retain(|id| type_ids.contains(&id));
