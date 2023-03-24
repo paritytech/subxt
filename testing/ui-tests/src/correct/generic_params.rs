@@ -84,7 +84,7 @@ pub mod node_runtime6 {}
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
     substitute_type(
         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
-        // Check that things can be wrapepd in our Static type:
+        // Check that things can be wrapped in our Static type:
         with = "::subxt::utils::Static<crate::DoesntImplEncodeDecodeAsType>"
     )
 )]

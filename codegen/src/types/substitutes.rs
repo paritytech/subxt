@@ -35,7 +35,6 @@ enum TypeParamReplacement {
     ConcreteType(syn::TypePath),
 }
 
-#[macro_export]
 macro_rules! path_segments {
     ($($ident: ident)::*) => {
         PathSegments(
@@ -256,14 +255,15 @@ impl TypeSubstitutes {
         path: impl Into<PathSegments>,
         params: &'b [TypePath],
     ) -> Option<(&'a syn::Path, Cow<'b, [TypePath]>)> {
-        // For now, we only support:
-        // 1. Reordering the generics
-        // 2. Omitting certain generics
+        // If we find a substitute type, we'll see which if the incoming
+        // params to inherit on it, and which params should be replaced
+        // with some concrete type.
         fn reorder_params<'a>(
             params: &'a [TypePath],
             mapping: &TypeParamMapping,
         ) -> Cow<'a, [TypePath]> {
             match mapping {
+                // We need to map the input params to the output params somehow:
                 TypeParamMapping::Specified(mapping) => Cow::Owned(
                     mapping
                         .iter()
@@ -279,6 +279,7 @@ impl TypeSubstitutes {
                         })
                         .collect(),
                 ),
+                // No mapping; just use the input params as is:
                 TypeParamMapping::PassThrough => Cow::Borrowed(params),
             }
         }
