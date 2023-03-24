@@ -51,9 +51,9 @@ fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut Ha
 /// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types.
 fn update_type(ty: &mut UntrackedSymbol<TypeId>, map_ids: &BTreeMap<u32, u32>) {
     let old_id = ty.id();
-    let new_id = map_ids.get(&old_id).expect(&format!(
-        "PortableRegistry did not retain type id {old_id}. This is a bug. Please open an issue."
-    ));
+    let new_id = map_ids
+        .get(&old_id)
+        .unwrap_or_else(|| panic!("PortableRegistry did not retain type id {old_id}. This is a bug. Please open an issue."));
     *ty = (*new_id).into();
 }
 
