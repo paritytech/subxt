@@ -17,7 +17,7 @@ use quote::{quote, ToTokens};
 use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
 use std::collections::BTreeMap;
 
-use crate::api::CodegenError;
+use crate::error::CodegenError;
 
 pub use self::{
     composite_def::{CompositeDef, CompositeDefFieldType, CompositeDefFields},

@@ -46,6 +46,7 @@
 #![deny(unused_crate_dependencies)]
 
 mod api;
+mod error;
 mod ir;
 mod types;
 
@@ -54,7 +55,8 @@ pub mod utils;
 pub use self::{
     api::{
         generate_runtime_api_from_bytes, generate_runtime_api_from_path,
-        generate_runtime_api_from_url, CodegenError, RuntimeGenerator,
+        generate_runtime_api_from_url, RuntimeGenerator,
     },
+    error::CodegenError,
     types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
 };

@@ -116,7 +116,7 @@ use std::str::FromStr;
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use proc_macro_error::{abort, abort_call_site, proc_macro_error};
-use subxt_codegen::{utils::Uri, DerivesRegistry, TypeSubstitutes};
+use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
 use syn::{parse_macro_input, punctuated::Punctuated, spanned::Spanned as _};
 
 #[derive(Debug, FromMeta)]
@@ -190,7 +190,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             )
         },
     )) {
-        return err.into_compile_error().into();
+        return CodegenError::from(err).into_compile_error().into();
     }
 
     let should_gen_docs = args.generate_docs.is_present();

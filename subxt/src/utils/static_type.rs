@@ -14,6 +14,7 @@ use scale_encode::EncodeAsType;
 /// do not implement [`scale_encode::EncodeAsType`] and [`scale_decode::DecodeAsType`] themselves, but
 /// it's best to avoid using it where possible as it will not take into account any type information,
 /// and is thus more likely to encode or decode incorrectly.
+#[derive(Debug, Encode, Decode, PartialEq, Eq, Clone, PartialOrd, Ord, Hash)]
 pub struct Static<T>(pub T);
 
 impl<T: Encode> EncodeAsType for Static<T> {
@@ -52,6 +53,13 @@ impl<T: Decode> IntoVisitor for Static<T> {
     type Visitor = StaticDecodeAsTypeVisitor<T>;
     fn into_visitor() -> Self::Visitor {
         StaticDecodeAsTypeVisitor(std::marker::PhantomData)
+    }
+}
+
+// Make it easy to convert types into Static where required.
+impl<T> From<T> for Static<T> {
+    fn from(value: T) -> Self {
+        Static(value)
     }
 }
 

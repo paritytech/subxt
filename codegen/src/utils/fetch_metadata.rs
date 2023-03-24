@@ -1,3 +1,4 @@
+use crate::error::FetchMetadataError;
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -66,41 +67,4 @@ async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
         .build(url.to_string())?;
 
     Ok(client.request("state_getMetadata", rpc_params![]).await?)
-}
-
-#[derive(Debug)]
-pub enum FetchMetadataError {
-    DecodeError(hex::FromHexError),
-    RequestError(jsonrpsee::core::Error),
-    InvalidScheme(String),
-}
-
-impl std::fmt::Display for FetchMetadataError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            FetchMetadataError::DecodeError(e) => {
-                write!(f, "Cannot decode hex value: {e}")
-            }
-            FetchMetadataError::RequestError(e) => write!(f, "Request error: {e}"),
-            FetchMetadataError::InvalidScheme(s) => {
-                write!(
-                    f,
-                    "'{s}' not supported, supported URI schemes are http, https, ws or wss."
-                )
-            }
-        }
-    }
-}
-
-impl std::error::Error for FetchMetadataError {}
-
-impl From<hex::FromHexError> for FetchMetadataError {
-    fn from(e: hex::FromHexError) -> Self {
-        FetchMetadataError::DecodeError(e)
-    }
-}
-impl From<jsonrpsee::core::Error> for FetchMetadataError {
-    fn from(e: jsonrpsee::core::Error) -> Self {
-        FetchMetadataError::RequestError(e)
-    }
 }

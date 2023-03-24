@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::api::CodegenError;
+use crate::error::CodegenError;
 
 use super::{CratePath, Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
 use proc_macro2::TokenStream;
