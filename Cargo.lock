@@ -3561,10 +3561,12 @@ dependencies = [
 name = "test-runtime"
 version = "0.27.1"
 dependencies = [
+ "heck",
  "jsonrpsee",
  "parity-scale-codec",
  "sp-runtime",
  "subxt",
+ "subxt-metadata",
  "tokio",
  "which",
 ]

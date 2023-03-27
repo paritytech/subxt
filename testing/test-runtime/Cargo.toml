@@ -14,3 +14,5 @@ subxt = { path = "../../subxt" }
 tokio = { version = "1.26", features = ["macros", "rt-multi-thread"] }
 which = "4.4.0"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }
+subxt-metadata = { path = "../../metadata" }
+heck = "0.4.1"

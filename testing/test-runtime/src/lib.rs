@@ -8,3 +8,6 @@
 pub static METADATA: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/metadata.scale"));
 
 include!(concat!(env!("OUT_DIR"), "/runtime.rs"));
+// For each pallet metadata is stripped to contain only that specific pallet.
+// Ensure the generated modules out of those pallets compiles correctly.
+include!(concat!(env!("OUT_DIR"), "/runtime_pallets.rs"));

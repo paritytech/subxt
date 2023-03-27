@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use heck::ToSnakeCase;
 use std::{
     env, fs,
     net::TcpListener,
@@ -10,6 +11,9 @@ use std::{
     process::Command,
     thread, time,
 };
+use subxt::ext::codec::{Decode, Encode};
+use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
+use subxt_metadata::retain_metadata_pallets;
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
@@ -76,7 +80,7 @@ async fn run() {
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let metadata_path = Path::new(&out_dir).join("metadata.scale");
-    fs::write(&metadata_path, metadata_bytes.0).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, metadata_bytes.0.clone()).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
@@ -95,6 +99,51 @@ async fn run() {
     );
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
     fs::write(runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
+
+    let metadata_prefixed: RuntimeMetadataPrefixed =
+        Decode::decode(&mut &metadata_bytes.0[..]).expect("Could not decode metadata bytes");
+
+    let metadata_v14 = match &metadata_prefixed.1 {
+        subxt::ext::frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
+        _ => panic!("Unsupported metadata version. Only V14 is supported currently"),
+    };
+
+    let mut runtime_api_pallets_contents = String::new();
+    let mut index = 0;
+    for pallet in &metadata_v14.pallets {
+        index += 1;
+        if index == 1024 {
+            break;
+        }
+
+        let mut pallet_metadata = metadata_v14.clone();
+        retain_metadata_pallets(&mut pallet_metadata, |pallet_filter| {
+            pallet_filter.name == pallet.name
+        });
+
+        let metadata_path = Path::new(&out_dir).join(format!("metadata_{}.scale", pallet.name));
+
+        runtime_api_pallets_contents += &format!(
+            r#"
+            #[subxt::subxt(
+                runtime_metadata_path = "{}",
+                derive_for_all_types = "Eq, PartialEq",
+            )]
+            pub mod node_runtime_{} {{}}
+        "#,
+            metadata_path
+                .to_str()
+                .expect("Path to metadata should be stringifiable"),
+            pallet.name.to_snake_case(),
+        );
+
+        let meta_prefixed: RuntimeMetadataPrefixed = pallet_metadata.into();
+        fs::write(metadata_path, &meta_prefixed.encode())
+            .expect("Couldn't write pallet metadata output");
+    }
+    let runtime_pallets_path = Path::new(&out_dir).join("runtime_pallets.rs");
+    fs::write(runtime_pallets_path, runtime_api_pallets_contents)
+        .expect("Couldn't write runtime pallets rust output");
 
     let substrate_path =
         which::which(substrate_bin).expect("Cannot resolve path to substrate binary");
