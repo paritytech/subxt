@@ -100,8 +100,7 @@ impl TypeSubstitutes {
         }
     }
 
-    /// Only insert the given substitution if a substitution at that path doesn't
-    /// already exist.
+    /// Insert the given substitution.
     pub fn insert(
         &mut self,
         source: syn::Path,
@@ -312,7 +311,7 @@ impl<T: scale_info::form::Form> From<&scale_info::Path<T>> for PathSegments {
 ///
 /// eg if we have:
 ///
-/// ```
+/// ```text
 /// from = sp_runtime::MultiAddress<A, B>,
 /// to = ::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>
 /// ```
