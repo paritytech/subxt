@@ -9,13 +9,14 @@ use std::{
     ffi::{OsStr, OsString},
     io::{BufRead, BufReader, Read},
     process,
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 use subxt::{
     client::default_rpc_client,
     rpc::{types::RuntimeVersion, Rpc},
     Config, Metadata, OnlineClient, SubstrateConfig,
 };
+use tokio::sync::Mutex;
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
@@ -108,9 +109,7 @@ impl TestNodeProcessBuilder {
             static ref CACHE: Mutex<Option<(RuntimeVersion, Metadata)>> = Mutex::new(None);
         }
 
-        let mut cache = CACHE
-            .lock()
-            .map_err(|err| format!("Cannot lock cache data: {:?}", err))?;
+        let mut cache = CACHE.lock().await;
 
         let rpc_client = default_rpc_client(ws_url.clone())
             .await
