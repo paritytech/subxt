@@ -77,11 +77,12 @@ impl<'a> TypeGenerator<'a> {
             let path = ty.ty().path();
             // Don't generate a type if it was substituted - the target type might
             // not be in the type registry + our resolution already performs the substitution.
-            if self.type_substitutes.for_path(path).is_some() {
+            if self.type_substitutes.contains(path) {
                 continue;
             }
 
             let namespace = path.namespace();
+
             // prelude types e.g. Option/Result have no namespace, so we don't generate them
             if namespace.is_empty() {
                 continue;
@@ -163,7 +164,7 @@ impl<'a> TypeGenerator<'a> {
             .iter()
             .find(|tp| tp.concrete_type_id == id)
         {
-            return TypePath::Parameter(parent_type_param.clone());
+            return TypePath::from_parameter(parent_type_param.clone());
         }
 
         let mut ty = self.resolve_type(id);
@@ -188,17 +189,11 @@ impl<'a> TypeGenerator<'a> {
 
         let ty = match ty.type_def() {
             TypeDef::Composite(_) | TypeDef::Variant(_) => {
-                if let Some((path, params)) = self
+                if let Some(ty) = self
                     .type_substitutes
                     .for_path_with_params(ty.path(), &params)
                 {
-                    TypePathType::Path {
-                        path: syn::TypePath {
-                            qself: None,
-                            path: path.clone(),
-                        },
-                        params: params.to_vec(),
-                    }
+                    ty
                 } else {
                     TypePathType::from_type_def_path(
                         ty.path(),
@@ -256,7 +251,7 @@ impl<'a> TypeGenerator<'a> {
             },
         };
 
-        TypePath::Type(ty)
+        TypePath::from_type(ty)
     }
 
     /// Returns the derives to be applied to all generated types.

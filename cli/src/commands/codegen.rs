@@ -6,7 +6,7 @@ use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use jsonrpsee::client_transport::ws::Uri;
 use std::{fs, io::Read, path::PathBuf};
-use subxt_codegen::{DerivesRegistry, TypeSubstitutes};
+use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
 
 /// Generate runtime API client code from metadata.
 ///
@@ -29,6 +29,11 @@ pub struct Opts {
     /// Example `--derive-for-type my_module::my_type=serde::Serialize`.
     #[clap(long = "derive-for-type", value_parser = derive_for_type_parser)]
     derives_for_type: Vec<(String, String)>,
+    /// Substitute a type for another.
+    ///
+    /// Example `--substitute-type sp_runtime::MultiAddress<A,B>=subxt::utils::Static<::sp_runtime::MultiAddress<A,B>>`
+    #[clap(long = "substitute-type", value_parser = substitute_type_parser)]
+    substitute_types: Vec<(String, String)>,
     /// The `subxt` crate access path in the generated code.
     /// Defaults to `::subxt`.
     #[clap(long = "crate")]
@@ -49,6 +54,14 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
         .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive`, like `my_type=serde::Serialize`"))?;
 
     Ok((ty.to_string(), derive.to_string()))
+}
+
+fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
+    let (from, to) = src
+        .split_once('=')
+        .ok_or_else(|| String::from("Invalid pattern for `substitute-type`. It should be something like `input::Type<A>=replacement::Type<A>`"))?;
+
+    Ok((from.to_string(), to.to_string()))
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
@@ -74,6 +87,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         &bytes,
         opts.derives,
         opts.derives_for_type,
+        opts.substitute_types,
         opts.crate_path,
         opts.no_docs,
         opts.runtime_types_only,
@@ -85,6 +99,7 @@ fn codegen(
     metadata_bytes: &[u8],
     raw_derives: Vec<String>,
     derives_for_type: Vec<(String, String)>,
+    substitute_types: Vec<(String, String)>,
     crate_path: Option<String>,
     no_docs: bool,
     runtime_types_only: bool,
@@ -102,13 +117,31 @@ fn codegen(
     let mut derives = DerivesRegistry::new(&crate_path);
     derives.extend_for_all(p.into_iter());
 
-    for (ty, derive) in derives_for_type.into_iter() {
+    for (ty, derive) in derives_for_type {
         let ty = syn::parse_str(&ty)?;
         let derive = syn::parse_str(&derive)?;
-        derives.extend_for_type(ty, std::iter::once(derive), &crate_path)
+        derives.extend_for_type(ty, std::iter::once(derive), &crate_path);
     }
 
-    let type_substitutes = TypeSubstitutes::new(&crate_path);
+    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    for (from_str, to_str) in substitute_types {
+        let from: syn::Path = syn::parse_str(&from_str)?;
+        let to: syn::Path = syn::parse_str(&to_str)?;
+        let to = to.try_into().map_err(|e: TypeSubstitutionError| {
+            eyre::eyre!(
+                "Cannot parse substitute '{from_str}={to_str}': {}",
+                e.to_string()
+            )
+        })?;
+        type_substitutes
+            .insert(from, to)
+            .map_err(|e: TypeSubstitutionError| {
+                eyre::eyre!(
+                    "Cannot parse substitute '{from_str}={to_str}': {}",
+                    e.to_string()
+                )
+            })?;
+    }
 
     let should_gen_docs = !no_docs;
     let runtime_api = subxt_codegen::generate_runtime_api_from_bytes(

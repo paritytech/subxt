@@ -115,9 +115,9 @@ use std::str::FromStr;
 
 use darling::FromMeta;
 use proc_macro::TokenStream;
-use proc_macro_error::{abort, abort_call_site, proc_macro_error};
+use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
-use syn::{parse_macro_input, punctuated::Punctuated, spanned::Spanned as _};
+use syn::{parse_macro_input, punctuated::Punctuated};
 
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
@@ -181,15 +181,16 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut type_substitutes = TypeSubstitutes::new(&crate_path);
-    if let Err(err) = type_substitutes.extend(args.substitute_type.into_iter().map(
-        |SubstituteType { ty, with }| {
-            (
-                ty,
-                with.try_into()
-                    .unwrap_or_else(|(node, msg): (syn::Path, String)| abort!(node.span(), msg)),
-            )
-        },
-    )) {
+    let substitute_args_res: Result<(), _> = args
+        .substitute_type
+        .into_iter()
+        .try_for_each(|sub| {
+            sub.with
+                .try_into()
+                .and_then(|with| type_substitutes.insert(sub.ty, with))
+        });
+
+    if let Err(err) = substitute_args_res {
         return CodegenError::from(err).into_compile_error().into();
     }
 

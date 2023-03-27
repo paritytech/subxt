@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{error::TypeSubstitutionError, types::TypePathType, CratePath};
-use std::{borrow::Cow, collections::HashMap};
+use crate::{error::TypeSubstitutionError, CratePath};
+use std::{borrow::Borrow, collections::HashMap};
 use syn::{parse_quote, spanned::Spanned as _};
 
-use super::TypePath;
+use super::{TypePath, TypePathType};
 
 #[derive(Debug)]
 pub struct TypeSubstitutes {
@@ -23,16 +23,8 @@ struct Substitute {
 enum TypeParamMapping {
     // Pass any generics from source to target type
     PassThrough,
-    // Map the input types based on this
-    Specified(Vec<TypeParamReplacement>),
-}
-
-#[derive(Debug)]
-enum TypeParamReplacement {
-    // Replace the type the the input generic type at this index
-    InputAtIndex(usize),
-    // Replace the type with this concrete path
-    ConcreteType(syn::TypePath),
+    // Replace any ident seen in the path with the input generic type at this index
+    Specified(Vec<(syn::Ident, usize)>),
 }
 
 macro_rules! path_segments {
@@ -110,6 +102,18 @@ impl TypeSubstitutes {
 
     /// Only insert the given substitution if a substitution at that path doesn't
     /// already exist.
+    pub fn insert(
+        &mut self,
+        source: syn::Path,
+        target: AbsolutePath,
+    ) -> Result<(), TypeSubstitutionError> {
+        let (key, val) = TypeSubstitutes::parse_path_substitution(source, target.0)?;
+        self.substitutes.insert(key, val);
+        Ok(())
+    }
+
+    /// Only insert the given substitution if a substitution at that path doesn't
+    /// already exist.
     pub fn insert_if_not_exists(
         &mut self,
         source: syn::Path,
@@ -136,15 +140,9 @@ impl TypeSubstitutes {
     /// source to target, and output the source => substitution mapping that we work out from this.
     fn parse_path_substitution(
         src_path: syn::Path,
-        mut target_path: syn::Path,
+        target_path: syn::Path,
     ) -> Result<(PathSegments, Substitute), TypeSubstitutionError> {
         let param_mapping = Self::parse_path_param_mapping(&src_path, &target_path)?;
-
-        // The generic args of the target path are no longer needed; we store the useful
-        // details in the param mapping now. So remove them (in part for nicer debug printing).
-        if let Some(last) = target_path.segments.last_mut() {
-            last.arguments = Default::default();
-        }
 
         Ok((
             PathSegments::from(&src_path),
@@ -224,63 +222,56 @@ impl TypeSubstitutes {
             return Ok(TypeParamMapping::PassThrough);
         }
 
-        // For each target param, we either point to the index of an input type we'll use, or
-        // we specify an exact type to always swap use for that param.
-        let mapping = target_args
+        // Make a note of the idents in the source args and their indexes.
+        let mapping = source_args
             .into_iter()
-            .map(|type_path| {
-                if let Some(ident) = get_ident_from_type_path(type_path) {
-                    // Does this ident map to a source type; if so, return said mapping:
-                    if let Some(idx) = source_args.iter().position(|&src| ident == src) {
-                        return Ok(TypeParamReplacement::InputAtIndex(idx));
-                    };
-                }
-                // Not an ident that maps to the "from", so just use the concrete type:
-                Ok(TypeParamReplacement::ConcreteType(type_path.clone()))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+            .enumerate()
+            .map(|(idx, ident)| (ident.clone(), idx))
+            .collect();
 
         Ok(TypeParamMapping::Specified(mapping))
     }
 
-    /// Given a source type path, return a substituted type path if a substitution is defined.
-    pub fn for_path(&self, path: impl Into<PathSegments>) -> Option<&syn::Path> {
-        self.substitutes.get(&path.into()).map(|s| &s.path)
+    /// Given a source type path, return whether a substitute exists for it.
+    pub fn contains(&self, path: impl Into<PathSegments>) -> bool {
+        self.substitutes.contains_key(&path.into())
     }
 
     /// Given a source type path and the resolved, supplied type parameters,
     /// return a new path and optionally overwritten type parameters.
-    pub fn for_path_with_params<'a: 'b, 'b>(
-        &'a self,
+    pub fn for_path_with_params(
+        &self,
         path: impl Into<PathSegments>,
-        params: &'b [TypePath],
-    ) -> Option<(&'a syn::Path, Cow<'b, [TypePath]>)> {
-        // If we find a substitute type, we'll see which if the incoming
-        // params to inherit on it, and which params should be replaced
-        // with some concrete type.
-        fn reorder_params<'a>(
-            params: &'a [TypePath],
+        params: &[TypePath],
+    ) -> Option<TypePathType> {
+        // If we find a substitute type, we'll take the substitute path, and
+        // swap any idents with their new concrete types.
+        fn replace_params(
+            mut substitute_path: syn::Path,
+            params: &[TypePath],
             mapping: &TypeParamMapping,
-        ) -> Cow<'a, [TypePath]> {
+        ) -> TypePathType {
             match mapping {
                 // We need to map the input params to the output params somehow:
-                TypeParamMapping::Specified(mapping) => Cow::Owned(
-                    mapping
+                TypeParamMapping::Specified(mapping) => {
+                    // A map from ident name to replacement path.
+                    let replacement_map: Vec<(&syn::Ident, &TypePath)> = mapping
                         .iter()
-                        .filter_map(|replacement| match replacement {
-                            TypeParamReplacement::ConcreteType(ty) => {
-                                let ty = TypePath::Type(TypePathType::Path {
-                                    path: ty.clone(),
-                                    params: Vec::new(),
-                                });
-                                Some(ty)
-                            }
-                            TypeParamReplacement::InputAtIndex(idx) => params.get(*idx).cloned(),
-                        })
-                        .collect(),
-                ),
-                // No mapping; just use the input params as is:
-                TypeParamMapping::PassThrough => Cow::Borrowed(params),
+                        .filter_map(|(ident, idx)| params.get(*idx).map(|param| (ident, param)))
+                        .collect();
+
+                    // Repalce params in our substitute path with the incoming ones as needed.
+                    replace_path_params_recursively(&mut substitute_path, &replacement_map);
+                    TypePathType::Path {
+                        path: substitute_path,
+                        params: Vec::new(),
+                    }
+                }
+                // No mapping; just hand back the substitute path and input params.
+                TypeParamMapping::PassThrough => TypePathType::Path {
+                    path: substitute_path,
+                    params: params.to_vec(),
+                },
             }
         }
 
@@ -288,7 +279,7 @@ impl TypeSubstitutes {
 
         self.substitutes
             .get(&path)
-            .map(|sub| (&sub.path, reorder_params(params, &sub.param_mapping)))
+            .map(|sub| replace_params(sub.path.clone(), params, &sub.param_mapping))
     }
 }
 
@@ -313,6 +304,44 @@ impl<T: scale_info::form::Form> From<&scale_info::Path<T>> for PathSegments {
                 .map(|x| x.as_ref().to_owned())
                 .collect(),
         )
+    }
+}
+
+/// Dig through a `syn::TypePath` (this is provided by the user in a type substitution definition as the "to" type) and
+/// swap out any type params which match the idents given in the "from" type with the corresponding concrete types.
+///
+/// eg if we have:
+///
+/// ```
+/// from = sp_runtime::MultiAddress<A, B>,
+/// to = ::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>
+/// ```
+///
+/// And we encounter a `sp_runtime::MultiAddress<Foo, bar>`, then we will pass the `::sp_runtime::MultiAddress<A, B>`
+/// type param value into this call to turn it into `::sp_runtime::MultiAddress<Foo, Bar>`.
+fn replace_path_params_recursively<I: Borrow<syn::Ident>, P: Borrow<TypePath>>(
+    path: &mut syn::Path,
+    params: &Vec<(I, P)>,
+) {
+    for segment in &mut path.segments {
+        let syn::PathArguments::AngleBracketed(args) = &mut segment.arguments else {
+            continue
+        };
+        for arg in &mut args.args {
+            let syn::GenericArgument::Type(ty) = arg else {
+                continue
+            };
+            let syn::Type::Path(path) = ty else {
+                continue
+            };
+            if let Some(ident) = get_ident_from_type_path(path) {
+                if let Some((_, replacement)) = params.iter().find(|(i, _)| ident == i.borrow()) {
+                    *ty = replacement.borrow().to_syn_type();
+                    continue;
+                }
+            }
+            replace_path_params_recursively(&mut path.path, params);
+        }
     }
 }
 
@@ -373,14 +402,80 @@ fn is_absolute(path: &syn::Path) -> bool {
 pub struct AbsolutePath(pub syn::Path);
 
 impl TryFrom<syn::Path> for AbsolutePath {
-    type Error = (syn::Path, String);
+    type Error = TypeSubstitutionError;
     fn try_from(value: syn::Path) -> Result<Self, Self::Error> {
         if is_absolute(&value) {
             Ok(AbsolutePath(value))
         } else {
-            Err(
-                (value, "The substitute path must be a global absolute path; try prefixing with `::` or `crate`".to_owned())
-            )
+            Err(TypeSubstitutionError::ExpectedAbsolutePath(value.span()))
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    macro_rules! syn_path {
+        ($path:path) => {{
+            let path: syn::Path = syn::parse_quote!($path);
+            path
+        }};
+    }
+
+    macro_rules! type_path {
+        ($path:path) => {{
+            let path: syn::Path = syn::parse_quote!($path);
+            TypePath::from_syn_path(path)
+        }};
+    }
+
+    fn ident(name: &'static str) -> syn::Ident {
+        syn::Ident::new(name, proc_macro2::Span::call_site())
+    }
+
+    #[test]
+    fn replacing_nested_type_params_works() {
+        // Original path, replacement ident->paths, expected output path
+        let paths = [
+            (
+                syn_path!(::some::path::Foo<::other::Path<A, B>>),
+                vec![],
+                syn_path!(::some::path::Foo<::other::Path<A, B>>),
+            ),
+            (
+                syn_path!(::some::path::Foo<::other::Path<A, B>>),
+                vec![(ident("A"), type_path!(::new::Value))],
+                syn_path!(::some::path::Foo<::other::Path<::new::Value, B>>),
+            ),
+            (
+                syn_path!(::some::path::Foo<::other::Path<A, B>>),
+                vec![
+                    (ident("A"), type_path!(::new::A)),
+                    (ident("B"), type_path!(::new::B)),
+                ],
+                syn_path!(::some::path::Foo<::other::Path<::new::A, ::new::B>>),
+            ),
+            (
+                syn_path!(
+                    ::some::path::Foo<::other::Path<A, ::more::path::to<::something::Argh<B>>>, C>
+                ),
+                vec![
+                    (ident("A"), type_path!(::new::A)),
+                    (ident("B"), type_path!(::new::B)),
+                ],
+                syn_path!(
+                    ::some::path::Foo<
+                        ::other::Path<::new::A, ::more::path::to<::something::Argh<::new::B>>>,
+                        C,
+                    >
+                ),
+            ),
+        ];
+
+        for (mut path, replacements, expected) in paths {
+            replace_path_params_recursively(&mut path, &replacements);
+            assert_eq!(path, expected);
         }
     }
 }

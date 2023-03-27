@@ -1,4 +1,3 @@
-use core::marker::PhantomData;
 use codec::{Decode, Encode};
 use subxt::utils::AccountId32;
 
@@ -15,7 +14,7 @@ pub struct Generic<T>(T);
 #[derive(Encode, Decode, subxt::ext::scale_encode::EncodeAsType, subxt::ext::scale_decode::DecodeAsType, Debug)]
 #[encode_as_type(crate_path = "subxt::ext::scale_encode")]
 #[decode_as_type(crate_path = "subxt::ext::scale_decode")]
-pub struct Second<T, U>(U, PhantomData<T>);
+pub struct Second<T, U>(T, U);
 
 #[derive(Encode, Decode, Debug)]
 pub struct DoesntImplEncodeDecodeAsType(u16);
@@ -90,6 +89,16 @@ pub mod node_runtime6 {}
 )]
 pub mod node_runtime7 {}
 
+#[subxt::subxt(
+    runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
+    substitute_type(
+        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        // Recursive type param substitution should work too (swapping out nested A and B):
+        with = "::subxt::utils::Static<crate::Second<A, B>>"
+    )
+)]
+pub mod node_runtime8 {}
+
 fn main() {
     // We assume Polkadot's config of MultiAddress<AccountId32, ()> here
     let _ = node_runtime::tx()
@@ -106,17 +115,21 @@ fn main() {
 
     let _ = node_runtime4::tx()
         .balances()
-        .transfer(Second(AccountId32::from([0x01;32]), PhantomData), 123);
+        .transfer(Second((), AccountId32::from([0x01;32])), 123);
 
     let _ = node_runtime5::tx()
         .balances()
-        .transfer(Second(true, vec![1u16, 2u16]), 123);
+        .transfer(Second(true, vec![1u8, 2u8]), 123);
 
     let _ = node_runtime6::tx()
         .balances()
-        .transfer(Second(AccountId32::from([0x01;32]), 1234u16), 123);
+        .transfer(Second((), 1234u16), 123);
 
     let _ = node_runtime7::tx()
         .balances()
         .transfer(subxt::utils::Static(DoesntImplEncodeDecodeAsType(1337)), 123);
+
+    let _ = node_runtime8::tx()
+        .balances()
+        .transfer(subxt::utils::Static(Second(AccountId32::from([0x01;32]), ())), 123);
 }

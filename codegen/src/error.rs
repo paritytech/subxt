@@ -84,6 +84,9 @@ pub enum FetchMetadataError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum TypeSubstitutionError {
+    /// Substitute "to" type must be an absolute path.
+    #[error("The 'to' type must be a path prefixed with 'crate::' or '::'")]
+    ExpectedAbsolutePath(Span),
     /// Substitute types must have a valid path.
     #[error("Substitute types must have a valid path.")]
     EmptySubstitutePath(Span),
@@ -106,6 +109,7 @@ impl TypeSubstitutionError {
     // so that there's a common way to set a location for some error.
     fn get_location(&self) -> Span {
         match self {
+            TypeSubstitutionError::ExpectedAbsolutePath(span) => *span,
             TypeSubstitutionError::EmptySubstitutePath(span) => *span,
             TypeSubstitutionError::ExpectedAngleBracketGenerics(span) => *span,
             TypeSubstitutionError::InvalidFromType(span) => *span,
