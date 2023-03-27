@@ -23,6 +23,7 @@ use crate::utils::{MetadataTestRunner, PalletMetadataTestRunner};
 #[test]
 fn ui_tests() {
     let mut m = MetadataTestRunner::default();
+    let mut p = PalletMetadataTestRunner::new();
     let t = trybuild::TestCases::new();
 
     t.pass("src/correct/*.rs");
@@ -48,7 +49,6 @@ fn ui_tests() {
     ));
 
     // Ensure the generate per pallet metadata compiles.
-    let mut p = PalletMetadataTestRunner::new();
     while let Some(path) = p.next_test() {
         t.pass(path);
     }
