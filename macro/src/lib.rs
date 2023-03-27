@@ -181,14 +181,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let mut type_substitutes = TypeSubstitutes::new(&crate_path);
-    let substitute_args_res: Result<(), _> = args
-        .substitute_type
-        .into_iter()
-        .try_for_each(|sub| {
-            sub.with
-                .try_into()
-                .and_then(|with| type_substitutes.insert(sub.ty, with))
-        });
+    let substitute_args_res: Result<(), _> = args.substitute_type.into_iter().try_for_each(|sub| {
+        sub.with
+            .try_into()
+            .and_then(|with| type_substitutes.insert(sub.ty, with))
+    });
 
     if let Err(err) = substitute_args_res {
         return CodegenError::from(err).into_compile_error().into();
