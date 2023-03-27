@@ -2,13 +2,20 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use futures::future;
+use lazy_static::lazy_static;
 use sp_keyring::AccountKeyring;
 use std::{
     ffi::{OsStr, OsString},
     io::{BufRead, BufReader, Read},
     process,
+    sync::{Arc, Mutex},
 };
-use subxt::{Config, OnlineClient};
+use subxt::{
+    client::default_rpc_client,
+    rpc::{types::RuntimeVersion, Rpc},
+    Config, Metadata, OnlineClient, SubstrateConfig,
+};
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
@@ -78,6 +85,58 @@ impl TestNodeProcessBuilder {
         self
     }
 
+    async fn fetch_cache_data(ws_url: String) -> Result<(RuntimeVersion, Metadata), String> {
+        let rpc_client = default_rpc_client(ws_url)
+            .await
+            .map_err(|err| format!("Cannot build default rpc client: {:?}", err))?;
+
+        let rpc = Rpc::<SubstrateConfig>::new(Arc::new(rpc_client));
+
+        let (runtime_version, metadata) =
+            future::join(rpc.runtime_version(None), rpc.metadata(None)).await;
+        Ok((
+            runtime_version.map_err(|err| format!("Cannot fetch runtime version: {:?}", err))?,
+            metadata.map_err(|err| format!("Cannot fetch metadata {:?}", err))?,
+        ))
+    }
+
+    async fn get_cache<R: Config>(
+        ws_url: String,
+    ) -> Result<(R::Hash, RuntimeVersion, Metadata), String> {
+        lazy_static! {
+            // Cannot place the `<R as Config>::Hash` associated type from the outer function into the static mutex cache.
+            static ref CACHE: Mutex<Option<(RuntimeVersion, Metadata)>> = Mutex::new(None);
+        }
+
+        let mut cache = CACHE
+            .lock()
+            .map_err(|err| format!("Cannot lock cache data: {:?}", err))?;
+
+        let rpc_client = default_rpc_client(ws_url.clone())
+            .await
+            .expect("Cannot build default rpc client");
+
+        let rpc = Rpc::<R>::new(Arc::new(rpc_client));
+
+        // Fetch the genesis hash to avoid a `mem::transmute`, or to limit the `TestNodeProcess` to `SubstrateConfig` only.
+        let genesis = rpc
+            .genesis_hash()
+            .await
+            .map_err(|err| format!("Cannot fetch genesis: {:?}", err))?;
+
+        match &mut *cache {
+            Some((runtime, metadata)) => Ok((genesis, runtime.clone(), metadata.clone())),
+            None => {
+                let (runtime_version, metadata) =
+                    TestNodeProcessBuilder::fetch_cache_data(ws_url).await?;
+
+                *cache = Some((runtime_version.clone(), metadata.clone()));
+
+                Ok((genesis, runtime_version, metadata))
+            }
+        }
+    }
+
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
     pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
     where
@@ -112,8 +171,16 @@ impl TestNodeProcessBuilder {
         let ws_port = find_substrate_port_from_output(stderr);
         let ws_url = format!("ws://127.0.0.1:{ws_port}");
 
+        let (genesis, runtime, metadata) =
+            TestNodeProcessBuilder::get_cache::<R>(ws_url.clone()).await?;
+
+        let rpc_client = default_rpc_client(ws_url.clone())
+            .await
+            .map_err(|err| err.to_string())?;
+
         // Connect to the node with a subxt client:
-        let client = OnlineClient::from_url(ws_url.clone()).await;
+        let client =
+            OnlineClient::from_rpc_client_with(genesis, runtime, metadata, Arc::new(rpc_client));
         match client {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {

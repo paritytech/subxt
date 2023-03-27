@@ -1540,6 +1540,7 @@ dependencies = [
  "frame-metadata",
  "futures",
  "hex",
+ "lazy_static",
  "parity-scale-codec",
  "regex",
  "scale-info",
