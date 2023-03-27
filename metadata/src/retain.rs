@@ -4,7 +4,7 @@
 
 //! Utility functions to generate a subset of the metadata.
 
-use frame_metadata::{PalletMetadata, RuntimeMetadataV14, StorageEntryType};
+use frame_metadata::{ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV14, StorageEntryType};
 use scale_info::{form::PortableForm, interner::UntrackedSymbol};
 use std::{
     any::TypeId,
@@ -41,6 +41,19 @@ fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut Ha
 
     if let Some(error) = &pallet.error {
         type_ids.insert(error.ty.id());
+    }
+}
+
+/// Collect all type IDs needed to represent the extrinsic metadata.
+fn collect_extrinsic_types(
+    extrinsic: &ExtrinsicMetadata<PortableForm>,
+    type_ids: &mut HashSet<u32>,
+) {
+    type_ids.insert(extrinsic.ty.id());
+
+    for signed in &extrinsic.signed_extensions {
+        type_ids.insert(signed.ty.id());
+        type_ids.insert(signed.additional_signed.id());
     }
 }
 
@@ -90,6 +103,19 @@ fn update_pallet_types(pallet: &mut PalletMetadata<PortableForm>, map_ids: &BTre
     }
 }
 
+/// Update all type IDs of the provided extrinsic metadata using the new type IDs from the portable registry.
+fn update_extrinsic_types(
+    extrinsic: &mut ExtrinsicMetadata<PortableForm>,
+    map_ids: &BTreeMap<u32, u32>,
+) {
+    update_type(&mut extrinsic.ty, map_ids);
+
+    for signed in &mut extrinsic.signed_extensions {
+        update_type(&mut signed.ty, map_ids);
+        update_type(&mut signed.additional_signed, map_ids);
+    }
+}
+
 /// Generate a subset of the metadata that contains only the
 /// types needed to represent the provided pallets.
 ///
@@ -117,6 +143,8 @@ where
             false
         }
     });
+    collect_extrinsic_types(&metadata.extrinsic, &mut type_ids);
+    type_ids.insert(metadata.ty.id());
 
     // Additionally, subxt depends on the `DispatchError`; we use the same
     // logic here that is used when building our `Metadata`.
@@ -136,6 +164,9 @@ where
     for pallets in &mut metadata.pallets {
         update_pallet_types(pallets, &map_ids);
     }
+
+    update_extrinsic_types(&mut metadata.extrinsic, &map_ids);
+    update_type(&mut metadata.ty, &map_ids);
 }
 
 #[cfg(test)]
