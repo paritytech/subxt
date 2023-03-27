@@ -1,4 +1,4 @@
-error: The substitute path must be a global absolute path; try prefixing with `::` or `crate`
+error: Type substitution error: The 'to' type must be a path prefixed with 'crate::' or '::'
  --> src/incorrect/substitute_path_not_absolute.rs:5:16
   |
 5 |         with = "sp_runtime::Perbill"
