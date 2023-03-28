@@ -120,7 +120,7 @@ impl TestNodeProcessBuilder {
                 let (genesis, runtime_version, metadata) =
                     TestNodeProcessBuilder::fetch_cache_data(rpc_client).await?;
 
-                *cache = Some((*genesis, runtime_version.clone(), metadata.clone()));
+                *cache = Some((genesis, runtime_version.clone(), metadata.clone()));
 
                 Ok((genesis, runtime_version, metadata))
             }
