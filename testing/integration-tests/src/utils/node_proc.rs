@@ -13,30 +13,24 @@ use std::{
 };
 use subxt::{
     client::default_rpc_client,
-    rpc::{types::RuntimeVersion, Rpc},
+    rpc::{types::RuntimeVersion, Rpc, RpcClientT},
     Config, Metadata, OnlineClient, SubstrateConfig,
 };
 use tokio::sync::Mutex;
 
 /// Spawn a local substrate node for testing subxt.
-pub struct TestNodeProcess<R: Config> {
+pub struct TestNodeProcess {
     proc: process::Child,
-    client: OnlineClient<R>,
+    client: OnlineClient<SubstrateConfig>,
 }
 
-impl<R> Drop for TestNodeProcess<R>
-where
-    R: Config,
-{
+impl Drop for TestNodeProcess {
     fn drop(&mut self) {
         let _ = self.kill();
     }
 }
 
-impl<R> TestNodeProcess<R>
-where
-    R: Config,
-{
+impl TestNodeProcess {
     /// Construct a builder for spawning a test node process.
     pub fn build<S>(program: S) -> TestNodeProcessBuilder
     where
@@ -58,7 +52,7 @@ where
     }
 
     /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> OnlineClient<R> {
+    pub fn client(&self) -> OnlineClient<SubstrateConfig> {
         self.client.clone()
     }
 }
@@ -86,50 +80,43 @@ impl TestNodeProcessBuilder {
         self
     }
 
-    async fn fetch_cache_data(ws_url: String) -> Result<(RuntimeVersion, Metadata), String> {
-        let rpc_client = default_rpc_client(ws_url)
-            .await
-            .map_err(|err| format!("Cannot build default rpc client: {:?}", err))?;
+    async fn fetch_cache_data(
+        rpc_client: Arc<impl RpcClientT>,
+    ) -> Result<(<SubstrateConfig as Config>::Hash, RuntimeVersion, Metadata), String> {
+        let rpc = Rpc::<SubstrateConfig>::new(rpc_client);
 
-        let rpc = Rpc::<SubstrateConfig>::new(Arc::new(rpc_client));
-
-        let (runtime_version, metadata) =
-            future::join(rpc.runtime_version(None), rpc.metadata(None)).await;
+        let (genesis_hash, runtime_version, metadata) = future::join3(
+            rpc.genesis_hash(),
+            rpc.runtime_version(None),
+            rpc.metadata(None),
+        )
+        .await;
         Ok((
+            genesis_hash.map_err(|err| format!("Cannot fetch genesis: {:?}", err))?,
             runtime_version.map_err(|err| format!("Cannot fetch runtime version: {:?}", err))?,
             metadata.map_err(|err| format!("Cannot fetch metadata {:?}", err))?,
         ))
     }
 
-    async fn get_cache<R: Config>(
-        ws_url: String,
-    ) -> Result<(R::Hash, RuntimeVersion, Metadata), String> {
+    async fn get_cache(
+        rpc_client: Arc<impl RpcClientT>,
+    ) -> Result<(<SubstrateConfig as Config>::Hash, RuntimeVersion, Metadata), String> {
         lazy_static! {
-            // Cannot place the `<R as Config>::Hash` associated type from the outer function into the static mutex cache.
-            static ref CACHE: Mutex<Option<(RuntimeVersion, Metadata)>> = Mutex::new(None);
+            static ref CACHE: Mutex<Option<(<SubstrateConfig as Config>::Hash, RuntimeVersion, Metadata)>> =
+                Mutex::new(None);
         }
 
         let mut cache = CACHE.lock().await;
 
-        let rpc_client = default_rpc_client(ws_url.clone())
-            .await
-            .expect("Cannot build default rpc client");
-
-        let rpc = Rpc::<R>::new(Arc::new(rpc_client));
-
-        // Fetch the genesis hash to avoid a `mem::transmute`, or to limit the `TestNodeProcess` to `SubstrateConfig` only.
-        let genesis = rpc
-            .genesis_hash()
-            .await
-            .map_err(|err| format!("Cannot fetch genesis: {:?}", err))?;
-
         match &mut *cache {
-            Some((runtime, metadata)) => Ok((genesis, runtime.clone(), metadata.clone())),
+            Some((genesis, runtime, metadata)) => {
+                Ok((genesis.clone(), runtime.clone(), metadata.clone()))
+            }
             None => {
-                let (runtime_version, metadata) =
-                    TestNodeProcessBuilder::fetch_cache_data(ws_url).await?;
+                let (genesis, runtime_version, metadata) =
+                    TestNodeProcessBuilder::fetch_cache_data(rpc_client).await?;
 
-                *cache = Some((runtime_version.clone(), metadata.clone()));
+                *cache = Some((genesis.clone(), runtime_version.clone(), metadata.clone()));
 
                 Ok((genesis, runtime_version, metadata))
             }
@@ -137,10 +124,7 @@ impl TestNodeProcessBuilder {
     }
 
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
-    pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
-    where
-        R: Config,
-    {
+    pub async fn spawn(&self) -> Result<TestNodeProcess, String> {
         let mut cmd = process::Command::new(&self.node_path);
         cmd.env("RUST_LOG", "info")
             .arg("--dev")
@@ -170,16 +154,17 @@ impl TestNodeProcessBuilder {
         let ws_port = find_substrate_port_from_output(stderr);
         let ws_url = format!("ws://127.0.0.1:{ws_port}");
 
-        let (genesis, runtime, metadata) =
-            TestNodeProcessBuilder::get_cache::<R>(ws_url.clone()).await?;
+        let rpc_client = Arc::new(
+            default_rpc_client(ws_url.clone())
+                .await
+                .map_err(|err| err.to_string())?,
+        );
 
-        let rpc_client = default_rpc_client(ws_url.clone())
-            .await
-            .map_err(|err| err.to_string())?;
+        let (genesis, runtime, metadata) =
+            TestNodeProcessBuilder::get_cache(rpc_client.clone()).await?;
 
         // Connect to the node with a subxt client:
-        let client =
-            OnlineClient::from_rpc_client_with(genesis, runtime, metadata, Arc::new(rpc_client));
+        let client = OnlineClient::from_rpc_client_with(genesis, runtime, metadata, rpc_client);
         match client {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {

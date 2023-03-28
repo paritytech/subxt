@@ -24,12 +24,12 @@ pub async fn test_context_with(key: AccountKeyring) -> TestContext {
 
     let proc = TestContext::build(path.as_str())
         .with_authority(key)
-        .spawn::<SubstrateConfig>()
+        .spawn()
         .await;
     proc.unwrap()
 }
 
-pub type TestContext = TestNodeProcess<SubstrateConfig>;
+pub type TestContext = TestNodeProcess;
 
 pub async fn test_context() -> TestContext {
     test_context_with(AccountKeyring::Alice).await
