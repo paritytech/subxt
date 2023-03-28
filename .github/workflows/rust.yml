@@ -132,14 +132,14 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Install latest nextest release
+        uses: taiki-e/install-action@nextest
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
 
       - name: Cargo test
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --all-targets --workspace
+        run: cargo nextest run --workspace
 
   clippy:
     name: Cargo clippy
