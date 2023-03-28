@@ -2,14 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+mod retain;
+
 use frame_metadata::{
     ExtrinsicMetadata, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryType,
 };
+pub use retain::retain_metadata_pallets;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
-
-mod retain;
-pub use retain::retain_metadata_pallets;
 
 /// Internal byte representation for various metadata types utilized for
 /// generating deterministic hashes between different rust versions.

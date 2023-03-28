@@ -49,7 +49,7 @@ fn ui_tests() {
     ));
 
     // Ensure the generate per pallet metadata compiles.
-    while let Some(path) = p.next_test() {
+    while let Some(path) = p.path_to_next_ui_test() {
         t.pass(path);
     }
 }

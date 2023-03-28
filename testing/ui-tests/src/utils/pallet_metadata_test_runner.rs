@@ -35,7 +35,7 @@ impl PalletMetadataTestRunner {
         PalletMetadataTestRunner { metadata, index: 0 }
     }
 
-    pub fn next_test(&mut self) -> Option<String> {
+    pub fn path_to_next_ui_test(&mut self) -> Option<String> {
         let Some(pallet) = self.metadata.pallets.get(self.index) else {
             return None
         };
