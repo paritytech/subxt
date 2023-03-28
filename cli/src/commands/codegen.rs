@@ -3,10 +3,11 @@
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
-use color_eyre::eyre;
 use jsonrpsee::client_transport::ws::Uri;
-use std::{fs, io::Read, path::PathBuf};
+use std::path::PathBuf;
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes};
+
+use super::utils::MetadataSource;
 
 /// Generate runtime API client code from metadata.
 ///
@@ -52,23 +53,8 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let bytes = if let Some(file) = opts.file.as_ref() {
-        if opts.url.is_some() {
-            eyre::bail!("specify one of `--url` or `--file` but not both")
-        };
-
-        let mut file = fs::File::open(file)?;
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes)?;
-        bytes
-    } else {
-        let url = opts.url.unwrap_or_else(|| {
-            "http://localhost:9933"
-                .parse::<Uri>()
-                .expect("default url is valid")
-        });
-        subxt_codegen::utils::fetch_metadata_bytes(&url).await?
-    };
+    let source = MetadataSource::new(opts.url, opts.file)?;
+    let bytes = source.fetch().await?;
 
     codegen(
         &bytes,

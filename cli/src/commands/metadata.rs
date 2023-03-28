@@ -7,37 +7,38 @@ use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use jsonrpsee::client_transport::ws::Uri;
 use scale::{Decode, Encode};
-use std::io::{self, Write};
-use subxt_codegen::utils::fetch_metadata_hex;
+use std::{
+    io::{self, Write},
+    path::PathBuf,
+};
 use subxt_metadata::retain_metadata_pallets;
+
+use super::utils::MetadataSource;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    /// The url of the substrate node to query for metadata.
-    #[clap(
-        name = "url",
-        long,
-        value_parser,
-        default_value = "http://localhost:9933"
-    )]
-    url: Uri,
+    /// The url of the substrate node to query for metadata for codegen.
+    #[clap(name = "url", long, value_parser)]
+    url: Option<Uri>,
+    /// The path to the encoded metadata file.
+    #[clap(short, long, value_parser)]
+    file: Option<PathBuf>,
     /// The format of the metadata to display: `json`, `hex` or `bytes`.
     #[clap(long, short, default_value = "bytes")]
     format: String,
     /// Generate a subset of the metadata that contains only the
     /// types needed to represent the provided pallets.
     #[clap(long, use_value_delimiter = true, value_parser)]
-    retain_pallets: Option<Vec<String>>,
+    pallets: Option<Vec<String>>,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let hex_data = fetch_metadata_hex(&opts.url).await?;
-
-    let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
+    let source = MetadataSource::new(opts.url, opts.file)?;
+    let bytes = source.fetch().await?;
     let mut metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
 
-    if let Some(pallets) = opts.retain_pallets {
+    if let Some(pallets) = opts.pallets {
         let metadata_v14 = match &mut metadata.1 {
             RuntimeMetadata::V14(metadata_v14) => metadata_v14,
             _ => {
