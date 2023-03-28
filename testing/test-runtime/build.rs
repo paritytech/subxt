@@ -44,7 +44,7 @@ async fn run() {
 
     // Download metadata from binary; retry until successful, or a limit is hit.
     let metadata_bytes: subxt::rpc::types::Bytes = {
-        const MAX_RETRIES: usize = 6;
+        const MAX_RETRIES: usize = 10;
         let mut retries = 0;
 
         loop {
