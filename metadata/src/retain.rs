@@ -118,7 +118,8 @@ where
         }
     });
 
-    // Additionally, subxt depends on the `RuntimeError` and `DispatchError`.
+    // Additionally, subxt depends on the `DispatchError`; we use the same
+    // logic here that is used when building our `Metadata`.
     let dispatch_error_ty = metadata
         .types
         .types()
