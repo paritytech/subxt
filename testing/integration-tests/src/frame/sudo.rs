@@ -21,10 +21,11 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().into();
+    let bob: subxt::utils::MultiAddress<::subxt::utils::AccountId32, u32> =
+        AccountKeyring::Bob.to_account_id().into();
 
     let call = Call::Balances(BalancesCall::transfer {
-        dest: bob,
+        dest: bob.clone(),
         value: 10_000,
     });
     let tx = node_runtime::tx().sudo().sudo(call);
@@ -38,17 +39,8 @@ async fn test_sudo() -> Result<(), subxt::Error> {
         .has::<sudo::events::Sudid>()?;
 
     assert!(found_event);
-    Ok(())
-}
 
-#[tokio::test]
-async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().into();
-
+    // Test sudo with unchecked weight
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
         value: 10_000,
@@ -70,5 +62,6 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         .has::<sudo::events::Sudid>()?;
 
     assert!(found_event);
+
     Ok(())
 }

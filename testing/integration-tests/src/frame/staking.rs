@@ -11,7 +11,7 @@ use crate::{
         },
         staking,
     },
-    pair_signer, test_context,
+    pair_signer, test_context, test_context_shared,
 };
 use assert_matches::assert_matches;
 use sp_core::{sr25519, Pair};
@@ -32,8 +32,8 @@ fn default_validator_prefs() -> ValidatorPrefs {
 
 #[tokio::test]
 async fn validate_with_controller_account() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
@@ -52,8 +52,8 @@ async fn validate_with_controller_account() {
 
 #[tokio::test]
 async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
 
@@ -77,8 +77,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
 
 #[tokio::test]
 async fn nominate_with_controller_account() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -98,8 +98,8 @@ async fn nominate_with_controller_account() {
 
 #[tokio::test]
 async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -182,8 +182,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
 #[tokio::test]
 async fn tx_bond() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
@@ -219,8 +219,8 @@ async fn tx_bond() -> Result<(), Error> {
 
 #[tokio::test]
 async fn storage_history_depth() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
     let history_depth_addr = node_runtime::constants().staking().history_depth();
     let history_depth = api.constants().at(&history_depth_addr)?;
     assert_eq!(history_depth, 84);
@@ -229,8 +229,8 @@ async fn storage_history_depth() -> Result<(), Error> {
 
 #[tokio::test]
 async fn storage_current_era() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
     let current_era_addr = node_runtime::storage().staking().current_era();
     let _current_era = api
         .storage()
@@ -244,8 +244,8 @@ async fn storage_current_era() -> Result<(), Error> {
 
 #[tokio::test]
 async fn storage_era_reward_points() -> Result<(), Error> {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
     let current_era_result = api
         .storage()

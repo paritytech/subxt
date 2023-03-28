@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    pair_signer, test_context, test_context_with,
+    pair_signer, test_context, test_context_shared, test_context_with,
     utils::{node_runtime, wait_for_blocks},
 };
 use assert_matches::assert_matches;
@@ -45,14 +45,14 @@ async fn insert_key() {
 
 #[tokio::test]
 async fn fetch_block_hash() {
-    let ctx = test_context().await;
-    ctx.client().rpc().block_hash(None).await.unwrap();
+    let ctx = test_context_shared().await;
+    ctx.client().await.rpc().block_hash(None).await.unwrap();
 }
 
 #[tokio::test]
 async fn fetch_block() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let block_hash = api.rpc().block_hash(None).await.unwrap();
     api.rpc().block(block_hash).await.unwrap();
@@ -60,8 +60,8 @@ async fn fetch_block() {
 
 #[tokio::test]
 async fn fetch_read_proof() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let block_hash = api.rpc().block_hash(None).await.unwrap();
     api.rpc()
@@ -78,8 +78,8 @@ async fn fetch_read_proof() {
 
 #[tokio::test]
 async fn chain_subscribe_all_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().subscribe_all_block_headers().await.unwrap();
     blocks.next().await.unwrap().unwrap();
@@ -87,8 +87,8 @@ async fn chain_subscribe_all_blocks() {
 
 #[tokio::test]
 async fn chain_subscribe_best_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().subscribe_best_block_headers().await.unwrap();
     blocks.next().await.unwrap().unwrap();
@@ -96,8 +96,8 @@ async fn chain_subscribe_best_blocks() {
 
 #[tokio::test]
 async fn chain_subscribe_finalized_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().subscribe_finalized_block_headers().await.unwrap();
     blocks.next().await.unwrap().unwrap();
@@ -105,8 +105,8 @@ async fn chain_subscribe_finalized_blocks() {
 
 #[tokio::test]
 async fn fetch_keys() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let addr = node_runtime::storage().system().account_root();
     let keys = api
@@ -122,8 +122,8 @@ async fn fetch_keys() {
 
 #[tokio::test]
 async fn test_iter() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let addr = node_runtime::storage().system().account_root();
     let mut iter = api
@@ -143,8 +143,8 @@ async fn test_iter() {
 
 #[tokio::test]
 async fn fetch_system_info() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     assert_eq!(api.rpc().system_chain().await.unwrap(), "Development");
     assert_eq!(api.rpc().system_name().await.unwrap(), "Substrate Node");
@@ -153,8 +153,8 @@ async fn fetch_system_info() {
 
 #[tokio::test]
 async fn dry_run_passes() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -248,8 +248,8 @@ async fn dry_run_result_is_substrate_compatible() {
 
     // We really just connect to a node to get some valid metadata to help us
     // decode Dispatch Errors.
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let pairs = vec![
         // All ok
@@ -293,8 +293,8 @@ async fn dry_run_result_is_substrate_compatible() {
 
 #[tokio::test]
 async fn external_signing() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
     // Create a partial extrinsic. We can get the signer payload at this point, to be
@@ -352,8 +352,8 @@ async fn submit_large_extrinsic() {
 
 #[tokio::test]
 async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let tx = node_runtime::tx().balances().transfer(
         pair_signer(AccountKeyring::Alice.pair())
@@ -384,8 +384,8 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 
 #[tokio::test]
 async fn rpc_state_call() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     // Call into the runtime of the chain to get the Metadata.
     let metadata_bytes = api
@@ -410,8 +410,8 @@ async fn rpc_state_call() {
 
 #[tokio::test]
 async fn chainhead_unstable_follow() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     // Check subscription with runtime updates set on false.
     let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
@@ -431,7 +431,7 @@ async fn chainhead_unstable_follow() {
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = api.rpc().finalized_head().await.unwrap();
-    let runtime_version = ctx.client().runtime_version();
+    let runtime_version = api.runtime_version();
 
     assert_matches!(
         event,
@@ -446,8 +446,8 @@ async fn chainhead_unstable_follow() {
 
 #[tokio::test]
 async fn chainhead_unstable_body() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -477,8 +477,8 @@ async fn chainhead_unstable_body() {
 
 #[tokio::test]
 async fn chainhead_unstable_header() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -503,8 +503,8 @@ async fn chainhead_unstable_header() {
 
 #[tokio::test]
 async fn chainhead_unstable_storage() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -530,8 +530,8 @@ async fn chainhead_unstable_storage() {
 
 #[tokio::test]
 async fn chainhead_unstable_call() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -559,8 +559,8 @@ async fn chainhead_unstable_call() {
 
 #[tokio::test]
 async fn chainhead_unstable_unpin() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();

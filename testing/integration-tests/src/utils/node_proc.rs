@@ -22,6 +22,7 @@ use tokio::sync::Mutex;
 pub struct TestNodeProcess {
     proc: process::Child,
     client: OnlineClient<SubstrateConfig>,
+    ws_url: String,
 }
 
 impl Drop for TestNodeProcess {
@@ -54,6 +55,11 @@ impl TestNodeProcess {
     /// Returns the subxt client connected to the running node.
     pub fn client(&self) -> OnlineClient<SubstrateConfig> {
         self.client.clone()
+    }
+
+    /// Returns the server URL that the client is connected to.
+    pub fn url(&self) -> String {
+        self.ws_url.clone()
     }
 }
 
@@ -98,7 +104,7 @@ impl TestNodeProcessBuilder {
         ))
     }
 
-    async fn get_cache(
+    pub async fn get_cache(
         rpc_client: Arc<impl RpcClientT>,
     ) -> Result<(<SubstrateConfig as Config>::Hash, RuntimeVersion, Metadata), String> {
         lazy_static! {
@@ -109,14 +115,12 @@ impl TestNodeProcessBuilder {
         let mut cache = CACHE.lock().await;
 
         match &mut *cache {
-            Some((genesis, runtime, metadata)) => {
-                Ok((genesis.clone(), runtime.clone(), metadata.clone()))
-            }
+            Some((genesis, runtime, metadata)) => Ok((*genesis, runtime.clone(), metadata.clone())),
             None => {
                 let (genesis, runtime_version, metadata) =
                     TestNodeProcessBuilder::fetch_cache_data(rpc_client).await?;
 
-                *cache = Some((genesis.clone(), runtime_version.clone(), metadata.clone()));
+                *cache = Some((*genesis, runtime_version.clone(), metadata.clone()));
 
                 Ok((genesis, runtime_version, metadata))
             }
@@ -166,7 +170,11 @@ impl TestNodeProcessBuilder {
         // Connect to the node with a subxt client:
         let client = OnlineClient::from_rpc_client_with(genesis, runtime, metadata, rpc_client);
         match client {
-            Ok(client) => Ok(TestNodeProcess { proc, client }),
+            Ok(client) => Ok(TestNodeProcess {
+                proc,
+                client,
+                ws_url: ws_url.clone(),
+            }),
             Err(err) => {
                 let err = format!("Failed to connect to node rpc at {ws_url}: {err}");
                 tracing::error!("{}", err);

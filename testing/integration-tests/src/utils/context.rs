@@ -2,12 +2,16 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::sync::Arc;
+
 pub(crate) use crate::{node_runtime, TestNodeProcess};
 use futures::lock::Mutex;
 use lazy_static::lazy_static;
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
-use subxt::{tx::PairSigner, OnlineClient, SubstrateConfig};
+use subxt::{client::default_rpc_client, tx::PairSigner, OnlineClient, SubstrateConfig};
+
+use super::node_proc::TestNodeProcessBuilder;
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
@@ -40,13 +44,24 @@ pub async fn test_context() -> TestContext {
 
 /// Test context that shares a single substrate binary.
 pub struct TestContextShared {
-    client: OnlineClient<SubstrateConfig>,
+    url: String,
 }
 
 impl TestContextShared {
     /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> OnlineClient<SubstrateConfig> {
-        self.client.clone()
+    pub async fn client(&self) -> OnlineClient<SubstrateConfig> {
+        let rpc_client = Arc::new(
+            default_rpc_client(self.url.clone())
+                .await
+                .expect("Cannot create RPC client for testing"),
+        );
+
+        let (genesis, runtime, metadata) = TestNodeProcessBuilder::get_cache(rpc_client.clone())
+            .await
+            .expect("Cannot obtain caching for testing");
+
+        OnlineClient::from_rpc_client_with(genesis, runtime, metadata, rpc_client)
+            .expect("Cannot create subxt client for testing")
     }
 }
 
@@ -59,12 +74,12 @@ pub async fn test_context_shared() -> TestContextShared {
     let mut cache = CACHE.lock().await;
     match &mut *cache {
         Some(test_context) => TestContextShared {
-            client: test_context.client(),
+            url: test_context.url(),
         },
         None => {
             let test_context = test_context_with(AccountKeyring::Alice).await;
             let shared = TestContextShared {
-                client: test_context.client(),
+                url: test_context.url(),
             };
 
             *cache = Some(test_context);

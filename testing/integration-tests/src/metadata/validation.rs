@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context, TestContext};
+use crate::{node_runtime, test_context_shared, TestContextShared};
 use frame_metadata::{
     ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
     RuntimeMetadataPrefixed, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryModifier,
@@ -16,22 +16,19 @@ use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
 async fn metadata_to_api(
     metadata: RuntimeMetadataV14,
-    ctx: &TestContext,
+    ctx: &TestContextShared,
 ) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
     let metadata = Metadata::try_from(prefixed).unwrap();
+    let api = ctx.client().await;
 
-    OfflineClient::new(
-        ctx.client().genesis_hash(),
-        ctx.client().runtime_version(),
-        metadata,
-    )
+    OfflineClient::new(api.genesis_hash(), api.runtime_version(), metadata)
 }
 
 #[tokio::test]
 async fn full_metadata_check() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     // Runtime metadata is identical to the metadata used during API generation.
     assert!(node_runtime::validate_codegen(&api).is_ok());
@@ -50,8 +47,8 @@ async fn full_metadata_check() {
 
 #[tokio::test]
 async fn constant_values_are_not_validated() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let deposit_addr = node_runtime::constants().balances().existential_deposit();
 
@@ -106,8 +103,8 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
 
 #[tokio::test]
 async fn calls_check() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let unbond_tx = node_runtime::tx().staking().unbond(123_456_789_012_345);
     let withdraw_unbonded_addr = node_runtime::tx().staking().withdraw_unbonded(10);
@@ -192,8 +189,8 @@ async fn calls_check() {
 
 #[tokio::test]
 async fn storage_check() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let ctx = test_context_shared().await;
+    let api = ctx.client().await;
 
     let tx_count_addr = node_runtime::storage().system().extrinsic_count();
     let tx_len_addr = node_runtime::storage().system().all_extrinsics_len();
