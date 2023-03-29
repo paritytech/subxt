@@ -2,47 +2,42 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use clap::Args;
 use std::{fs, io::Read, path::PathBuf};
 
 use color_eyre::eyre;
 use subxt_codegen::utils::Uri;
 
-// The source of the metadata.
-pub enum MetadataSource {
-    // Metadata is loaded from a file.
-    FilePath(PathBuf),
-    // Metadata is downloaded from a runtime node.
-    Uri(Uri),
+/// The source of the metadata.
+#[derive(Debug, Args)]
+pub struct FileOrUrl {
+    /// The url of the substrate node to query for metadata for codegen.
+    #[clap(name = "url", long, value_parser)]
+    url: Option<Uri>,
+    /// The path to the encoded metadata file.
+    #[clap(short, long, value_parser)]
+    file: Option<PathBuf>,
 }
 
-impl MetadataSource {
-    /// Constructs a new [`MetadataSource`].
-    pub fn new(url: Option<Uri>, file: Option<PathBuf>) -> color_eyre::Result<Self> {
-        if let Some(file) = file {
-            if url.is_some() {
+impl FileOrUrl {
+    /// Fetch the metadata bytes.
+    pub async fn fetch(&self) -> color_eyre::Result<Vec<u8>> {
+        if let Some(path) = &self.file {
+            if self.url.is_some() {
                 eyre::bail!("specify one of `--url` or `--file` but not both")
             };
 
-            return Ok(Self::FilePath(file));
+            let mut file = fs::File::open(path)?;
+            let mut bytes = Vec::new();
+            file.read_to_end(&mut bytes)?;
+            return Ok(bytes);
         }
-        let url = url.unwrap_or_else(|| {
+
+        let url = self.url.clone().unwrap_or_else(|| {
             "http://localhost:9933"
                 .parse::<Uri>()
                 .expect("default url is valid")
         });
-        Ok(Self::Uri(url))
-    }
-
-    /// Fetch the metadata bytes.
-    pub async fn fetch(&self) -> color_eyre::Result<Vec<u8>> {
-        match &self {
-            Self::FilePath(path) => {
-                let mut file = fs::File::open(path)?;
-                let mut bytes = Vec::new();
-                file.read_to_end(&mut bytes)?;
-                Ok(bytes)
-            }
-            Self::Uri(url) => Ok(subxt_codegen::utils::fetch_metadata_bytes(url).await?),
-        }
+        Ok(subxt_codegen::utils::fetch_metadata_bytes(&url).await?)
     }
 }

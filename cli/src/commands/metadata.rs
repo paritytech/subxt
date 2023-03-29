@@ -5,25 +5,17 @@
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
-use jsonrpsee::client_transport::ws::Uri;
 use scale::{Decode, Encode};
-use std::{
-    io::{self, Write},
-    path::PathBuf,
-};
+use std::io::{self, Write};
 use subxt_metadata::retain_metadata_pallets;
 
-use super::utils::MetadataSource;
+use super::utils::FileOrUrl;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    /// The url of the substrate node to query for metadata for codegen.
-    #[clap(name = "url", long, value_parser)]
-    url: Option<Uri>,
-    /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser)]
-    file: Option<PathBuf>,
+    #[command(flatten)]
+    file_or_url: FileOrUrl,
     /// The format of the metadata to display: `json`, `hex` or `bytes`.
     #[clap(long, short, default_value = "bytes")]
     format: String,
@@ -34,8 +26,7 @@ pub struct Opts {
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let source = MetadataSource::new(opts.url, opts.file)?;
-    let bytes = source.fetch().await?;
+    let bytes = opts.file_or_url.fetch().await?;
     let mut metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
 
     if let Some(pallets) = opts.pallets {

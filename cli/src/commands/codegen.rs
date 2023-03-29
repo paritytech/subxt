@@ -3,11 +3,9 @@
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
-use jsonrpsee::client_transport::ws::Uri;
-use std::path::PathBuf;
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes};
 
-use super::utils::MetadataSource;
+use super::utils::FileOrUrl;
 
 /// Generate runtime API client code from metadata.
 ///
@@ -16,12 +14,8 @@ use super::utils::MetadataSource;
 /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    /// The url of the substrate node to query for metadata for codegen.
-    #[clap(name = "url", long, value_parser)]
-    url: Option<Uri>,
-    /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser)]
-    file: Option<PathBuf>,
+    #[command(flatten)]
+    file_or_url: FileOrUrl,
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,
@@ -53,8 +47,7 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let source = MetadataSource::new(opts.url, opts.file)?;
-    let bytes = source.fetch().await?;
+    let bytes = opts.file_or_url.fetch().await?;
 
     codegen(
         &bytes,
