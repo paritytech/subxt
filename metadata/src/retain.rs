@@ -44,7 +44,21 @@ fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut Ha
     }
 }
 
+/// Remove the generic type parameters of the type ID from the `PortableRegistry`
+/// of the metadata.
+fn remove_generic_type_params(metadata: &mut RuntimeMetadataV14, id: u32) {
+    let portable_ty = metadata.types.types.get_mut(id as usize).expect(&format!(
+        "Metadata does not contain extrinsic type ID {} registered; qed",
+        id
+    ));
+    portable_ty.ty.type_params = Vec::new();
+}
+
 /// Collect all type IDs needed to represent the extrinsic metadata.
+///
+/// Ensure that the extrinsic types from the `PortableRegistry` are trimmed
+/// of the generic type parameters. Those are not needed and contain extra
+/// nested type IDs that increase unnecessarily the size of the generated metadata.
 fn collect_extrinsic_types(
     extrinsic: &ExtrinsicMetadata<PortableForm>,
     type_ids: &mut HashSet<u32>,
@@ -143,7 +157,14 @@ where
             false
         }
     });
-    collect_extrinsic_types(&metadata.extrinsic, &mut type_ids);
+
+    let mut extrinsic_types = HashSet::new();
+    collect_extrinsic_types(&metadata.extrinsic, &mut extrinsic_types);
+    for id in extrinsic_types {
+        remove_generic_type_params(metadata, id);
+        type_ids.insert(id);
+    }
+
     type_ids.insert(metadata.ty.id());
 
     // Additionally, subxt depends on the `DispatchError`; we use the same
