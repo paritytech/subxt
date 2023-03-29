@@ -10,7 +10,7 @@ publish = false
 
 [dev-dependencies]
 trybuild = "1.0.79"
-scale-info = { version = "2.4.0", features = ["bit-vec"] }
+scale-info = { version = "2.5.0", features = ["bit-vec"] }
 frame-metadata = "15.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 subxt = { path = "../../subxt" }
