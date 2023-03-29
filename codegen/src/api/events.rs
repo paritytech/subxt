@@ -53,7 +53,7 @@ pub fn generate_events(
 
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
-        event.ty.id(),
+        event.ty.id,
         |name| name.into(),
         "Event",
         crate_path,
@@ -74,9 +74,9 @@ pub fn generate_events(
             }
         }
     });
-    let event_type = type_gen.resolve_type_path(event.ty.id());
-    let event_ty = type_gen.resolve_type(event.ty.id());
-    let docs = event_ty.docs();
+    let event_type = type_gen.resolve_type_path(event.ty.id);
+    let event_ty = type_gen.resolve_type(event.ty.id);
+    let docs = event_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();

@@ -226,7 +226,7 @@ impl From<&syn::Path> for PathSegments {
 impl<T: scale_info::form::Form> From<&scale_info::Path<T>> for PathSegments {
     fn from(path: &scale_info::Path<T>) -> Self {
         PathSegments(
-            path.segments()
+            path.segments
                 .iter()
                 .map(|x| x.as_ref().to_owned())
                 .collect(),

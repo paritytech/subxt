@@ -543,24 +543,26 @@ where
 {
     let ty = type_gen.resolve_type(type_id);
 
-    let scale_info::TypeDef::Variant(variant) = ty.type_def() else {
+    let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
         return Err(CodegenError::InvalidType(error_message_type_name.into()))
     };
 
     variant
-        .variants()
+        .variants
         .iter()
         .map(|var| {
-            let struct_name = variant_to_struct_name(var.name());
+            let struct_name = variant_to_struct_name(&var.name);
 
             let fields = CompositeDefFields::from_scale_info_fields(
                 struct_name.as_ref(),
-                var.fields(),
+                &var.fields,
                 &[],
                 type_gen,
             )?;
 
-            let docs = should_gen_docs.then_some(var.docs()).unwrap_or_default();
+            let docs = should_gen_docs
+                .then_some(var.docs.as_slice())
+                .unwrap_or_default();
             let struct_def = CompositeDef::struct_def(
                 &ty,
                 struct_name.as_ref(),

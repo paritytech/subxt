@@ -154,16 +154,16 @@ where
             }
             StorageEntryType::Map { hashers, key, .. } => {
                 let ty = metadata
-                    .resolve_type(key.id())
-                    .ok_or_else(|| StorageAddressError::TypeNotFound(key.id()))?;
+                    .resolve_type(key.id)
+                    .ok_or(StorageAddressError::TypeNotFound(key.id))?;
 
                 // If the key is a tuple, we encode each value to the corresponding tuple type.
                 // If the key is not a tuple, encode a single value to the key type.
-                let type_ids = match ty.type_def() {
+                let type_ids = match &ty.type_def {
                     TypeDef::Tuple(tuple) => {
-                        either::Either::Left(tuple.fields().iter().map(|f| f.id()))
+                        either::Either::Left(tuple.fields.iter().map(|f| f.id))
                     }
-                    _other => either::Either::Right(std::iter::once(key.id())),
+                    _other => either::Either::Right(std::iter::once(key.id)),
                 };
 
                 if type_ids.len() != self.storage_entry_keys.len() {

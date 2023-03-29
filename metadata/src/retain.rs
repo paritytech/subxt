@@ -17,40 +17,44 @@ fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut Ha
         for entry in &storage.entries {
             match entry.ty {
                 StorageEntryType::Plain(ty) => {
-                    type_ids.insert(ty.id());
+                    type_ids.insert(ty.id);
                 }
                 StorageEntryType::Map { key, value, .. } => {
-                    type_ids.insert(key.id());
-                    type_ids.insert(value.id());
+                    type_ids.insert(key.id);
+                    type_ids.insert(value.id);
                 }
             }
         }
     }
 
     if let Some(calls) = &pallet.calls {
-        type_ids.insert(calls.ty.id());
+        type_ids.insert(calls.ty.id);
     }
 
     if let Some(event) = &pallet.event {
-        type_ids.insert(event.ty.id());
+        type_ids.insert(event.ty.id);
     }
 
     for constant in &pallet.constants {
-        type_ids.insert(constant.ty.id());
+        type_ids.insert(constant.ty.id);
     }
 
     if let Some(error) = &pallet.error {
-        type_ids.insert(error.ty.id());
+        type_ids.insert(error.ty.id);
     }
 }
 
 /// Remove the generic type parameters of the type ID from the `PortableRegistry`
 /// of the metadata.
 fn remove_generic_type_params(metadata: &mut RuntimeMetadataV14, id: u32) {
-    let portable_ty = metadata.types.types.get_mut(id as usize).expect(&format!(
-        "Metadata does not contain extrinsic type ID {} registered; qed",
-        id
-    ));
+    let portable_ty = metadata
+        .types
+        .types
+        .get_mut(id as usize)
+        .unwrap_or_else(|| {
+            panic!("Metadata does not contain extrinsic type ID {id} registered; qed")
+        });
+
     portable_ty.ty.type_params = Vec::new();
 }
 
@@ -63,11 +67,11 @@ fn collect_extrinsic_types(
     extrinsic: &ExtrinsicMetadata<PortableForm>,
     type_ids: &mut HashSet<u32>,
 ) {
-    type_ids.insert(extrinsic.ty.id());
+    type_ids.insert(extrinsic.ty.id);
 
     for signed in &extrinsic.signed_extensions {
-        type_ids.insert(signed.ty.id());
-        type_ids.insert(signed.additional_signed.id());
+        type_ids.insert(signed.ty.id);
+        type_ids.insert(signed.additional_signed.id);
     }
 }
 
@@ -77,7 +81,7 @@ fn collect_extrinsic_types(
 ///
 /// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types.
 fn update_type(ty: &mut UntrackedSymbol<TypeId>, map_ids: &BTreeMap<u32, u32>) {
-    let old_id = ty.id();
+    let old_id = ty.id;
     let new_id = map_ids
         .get(&old_id)
         .unwrap_or_else(|| panic!("PortableRegistry did not retain type id {old_id}. This is a bug. Please open an issue."));
@@ -165,18 +169,18 @@ where
         type_ids.insert(id);
     }
 
-    type_ids.insert(metadata.ty.id());
+    type_ids.insert(metadata.ty.id);
 
     // Additionally, subxt depends on the `DispatchError`; we use the same
     // logic here that is used when building our `Metadata`.
     let dispatch_error_ty = metadata
         .types
-        .types()
+        .types
         .iter()
-        .find(|ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
+        .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
         .expect("Metadata must contain sp_runtime::DispatchError");
 
-    type_ids.insert(dispatch_error_ty.id());
+    type_ids.insert(dispatch_error_ty.id);
 
     // Keep only the needed IDs in the portable registry.
     let map_ids = metadata.types.retain(|id| type_ids.contains(&id));
