@@ -481,7 +481,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .types
             .types
             .iter()
-            .find(|ty| ty.ty().path.segments == ["sp_runtime", "DispatchError"])
+            .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id);
 
         Ok(Metadata {

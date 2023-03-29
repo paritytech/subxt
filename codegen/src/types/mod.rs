@@ -74,7 +74,7 @@ impl<'a> TypeGenerator<'a> {
         let mut root_mod = Module::new(root_mod_ident.clone(), root_mod_ident.clone());
 
         for ty in &self.type_registry.types {
-            let path = &ty.ty().path;
+            let path = &ty.ty.path;
             // Don't generate a type if it was substituted - the target type might
             // not be in the type registry + our resolution already performs the substitution.
             if self.type_substitutes.for_path(path).is_some() {
@@ -100,7 +100,7 @@ impl<'a> TypeGenerator<'a> {
 
             innermost_module.types.insert(
                 path.clone(),
-                TypeDefGen::from_type(ty.ty(), self, &self.crate_path, self.should_gen_docs)?,
+                TypeDefGen::from_type(&ty.ty, self, &self.crate_path, self.should_gen_docs)?,
             );
         }
 
