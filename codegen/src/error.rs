@@ -72,6 +72,7 @@ impl CodegenError {
     }
 }
 
+/// Error attempting to load metadata.
 #[derive(Debug, thiserror::Error)]
 pub enum FetchMetadataError {
     #[error("Cannot decode hex value: {0}")]
@@ -82,6 +83,7 @@ pub enum FetchMetadataError {
     InvalidScheme(String),
 }
 
+/// Error attempting to do type substitution.
 #[derive(Debug, thiserror::Error)]
 pub enum TypeSubstitutionError {
     /// Substitute "to" type must be an absolute path.
@@ -90,6 +92,7 @@ pub enum TypeSubstitutionError {
     /// Substitute types must have a valid path.
     #[error("Substitute types must have a valid path.")]
     EmptySubstitutePath(Span),
+    /// From/To substitution types should use angle bracket generics.
     #[error("Expected the from/to type generics to have the form 'Foo<A,B,C..>'.")]
     ExpectedAngleBracketGenerics(Span),
     /// Source substitute type must be an ident.

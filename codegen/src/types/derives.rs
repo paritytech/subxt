@@ -7,6 +7,9 @@ use syn::{parse_quote, Path};
 
 use std::collections::{HashMap, HashSet};
 
+/// A struct containing the derives that we'll be applying to types;
+/// a combination of some common derives for all types, plus type
+/// specific derives.
 #[derive(Debug, Clone)]
 pub struct DerivesRegistry {
     default_derives: Derives,
@@ -62,6 +65,8 @@ impl DerivesRegistry {
     }
 }
 
+/// A struct storing the set of derives and derive attributes that we'll apply
+/// to generated types.
 #[derive(Debug, Clone)]
 pub struct Derives {
     derives: HashSet<syn::Path>,
@@ -113,16 +118,19 @@ impl Derives {
         self.insert_derive(parse_quote!(#crate_path::ext::codec::CompactAs));
     }
 
-    pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
+    /// Extend the set of derives by providing an iterator of paths to derive macros.
+    pub fn extend(&mut self, derives: impl Iterator<Item = syn::Path>) {
         for derive in derives {
             self.insert_derive(derive)
         }
     }
 
+    /// Insert a single derive.
     pub fn insert_derive(&mut self, derive: syn::Path) {
         self.derives.insert(derive);
     }
 
+    /// Insert a single attribute to be applied to types.
     pub fn insert_attribute(&mut self, attribute: syn::Attribute) {
         self.attributes.insert(attribute);
     }

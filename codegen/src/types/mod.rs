@@ -327,6 +327,7 @@ impl Module {
     }
 }
 
+/// A newtype wrapper which stores the path to the Subxt crate.
 #[derive(Debug, Clone)]
 pub struct CratePath(syn::Path);
 

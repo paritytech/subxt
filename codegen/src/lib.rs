@@ -43,7 +43,7 @@
 //! println!("{}", runtime_api);
 //! ```
 
-#![deny(unused_crate_dependencies)]
+#![deny(unused_crate_dependencies, missing_docs)]
 
 mod api;
 mod error;

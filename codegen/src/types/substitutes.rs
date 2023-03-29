@@ -8,6 +8,8 @@ use syn::{parse_quote, spanned::Spanned as _};
 
 use super::{TypePath, TypePathType};
 
+/// A map of type substitutes. We match on the paths to generated types in order
+/// to figure out when to swap said type with some provided substitute.
 #[derive(Debug)]
 pub struct TypeSubstitutes {
     substitutes: HashMap<PathSegments, Substitute>,
@@ -36,6 +38,7 @@ macro_rules! path_segments {
 }
 
 impl TypeSubstitutes {
+    /// Create a new set of type substitutes with some default substitutions in place.
     pub fn new(crate_path: &CratePath) -> Self {
         // Some hardcoded default type substitutes, can be overridden by user
         let defaults = [
