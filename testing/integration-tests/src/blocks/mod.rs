@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::test_context_shared;
+use crate::test_context;
 use codec::{Compact, Decode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
@@ -10,8 +10,8 @@ use futures::StreamExt;
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
 async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let mut sub = api.blocks().subscribe_best().await?;
 
@@ -29,8 +29,8 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
 // Check that we can subscribe to finalized blocks.
 #[tokio::test]
 async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let mut sub = api.blocks().subscribe_finalized().await?;
 
@@ -46,8 +46,8 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // Manually subscribe to the next 6 finalized block headers, but deliberately
     // filter out some in the middle so we get back b _ _ b _ b. This guarantees
@@ -66,7 +66,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 
     // This should spot any gaps in the middle and fill them back in.
     let all_finalized_blocks = subxt::blocks::subscribe_to_block_headers_filling_in_gaps(
-        ctx.client().await,
+        ctx.client(),
         None,
         some_finalized_blocks,
     );
@@ -93,8 +93,8 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
 async fn runtime_api_call() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let mut sub = api.blocks().subscribe_best().await?;
 

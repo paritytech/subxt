@@ -2,14 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, pair_signer, test_context, test_context_shared, utils::wait_for_blocks};
+use crate::{node_runtime, pair_signer, test_context, utils::wait_for_blocks};
 use sp_keyring::AccountKeyring;
 use subxt::utils::AccountId32;
 
 #[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // Look up a plain value. Wait long enough that we don't get the genesis block data,
     // because it may have no storage associated with it.
@@ -65,8 +65,8 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
 
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
     let actual_key = node_runtime::storage()
@@ -92,8 +92,8 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
 
 #[tokio::test]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // Boilerplate; we create a new asset class with ID 99, and then
     // we "approveTransfer" of some of this asset class. This gives us an

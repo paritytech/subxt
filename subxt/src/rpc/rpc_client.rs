@@ -9,7 +9,7 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 
-/// A concrete wrapper around an [`RpcClientT`] which exposes the underlying interface via some
+/// A concrete wrapper around an [`RpcClientT`] which exposes the udnerlying interface via some
 /// higher level methods that make it a little easier to work with.
 ///
 /// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
