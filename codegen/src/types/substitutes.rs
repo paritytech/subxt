@@ -262,8 +262,12 @@ impl TypeSubstitutes {
                         .filter_map(|(ident, idx)| params.get(*idx).map(|param| (ident, param)))
                         .collect();
 
-                    // Repalce params in our substitute path with the incoming ones as needed.
-                    replace_path_params_recursively(&mut substitute_path, &replacement_map);
+                    // Replace params in our substitute path with the incoming ones as needed.
+                    // No need if no replacements given.
+                    if !replacement_map.is_empty() {
+                        replace_path_params_recursively(&mut substitute_path, &replacement_map);
+                    }
+
                     TypePathType::Path {
                         path: substitute_path,
                         params: Vec::new(),
@@ -437,14 +441,23 @@ mod test {
     }
 
     #[test]
+    #[rustfmt::skip]
     fn replacing_nested_type_params_works() {
         // Original path, replacement ident->paths, expected output path
         let paths = [
+            // Works ok if nothing to replace
             (
                 syn_path!(::some::path::Foo<::other::Path<A, B>>),
                 vec![],
                 syn_path!(::some::path::Foo<::other::Path<A, B>>),
             ),
+            // Simple top level replacing
+            (
+                syn_path!(::some::path::Foo<A>),
+                vec![(ident("A"), type_path!(::new::Value))],
+                syn_path!(::some::path::Foo<::new::Value>),
+            ),
+            // More deeply nested replacing works too
             (
                 syn_path!(::some::path::Foo<::other::Path<A, B>>),
                 vec![(ident("A"), type_path!(::new::Value))],
@@ -459,19 +472,18 @@ mod test {
                 syn_path!(::some::path::Foo<::other::Path<::new::A, ::new::B>>),
             ),
             (
-                syn_path!(
-                    ::some::path::Foo<::other::Path<A, ::more::path::to<::something::Argh<B>>>, C>
-                ),
+                syn_path!(::some::path::Foo<::other::Path<A, ::more::path::to<::something::Argh<B>>>, C>),
                 vec![
                     (ident("A"), type_path!(::new::A)),
                     (ident("B"), type_path!(::new::B)),
                 ],
-                syn_path!(
-                    ::some::path::Foo<
-                        ::other::Path<::new::A, ::more::path::to<::something::Argh<::new::B>>>,
-                        C,
-                    >
-                ),
+                syn_path!(::some::path::Foo<::other::Path<::new::A, ::more::path::to<::something::Argh<::new::B>>>,C>),
+            ),
+            // The same ident will be replaced as many times as needed:
+            (
+                syn_path!(::some::path::Foo<::other::Path<A, ::foo::Argh<A, B>, A>>),
+                vec![(ident("A"), type_path!(::new::Value))],
+                syn_path!(::some::path::Foo<::other::Path<::new::Value, ::foo::Argh<::new::Value, B>, ::new::Value>>),
             ),
         ];
 
