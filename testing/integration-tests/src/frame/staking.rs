@@ -32,8 +32,8 @@ fn default_validator_prefs() -> ValidatorPrefs {
 
 #[tokio::test]
 async fn validate_with_controller_account() {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
@@ -182,8 +182,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
 #[tokio::test]
 async fn tx_bond() -> Result<(), Error> {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
