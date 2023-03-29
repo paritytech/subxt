@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, balances, runtime_types, system},
-    pair_signer, test_context, test_context_shared,
+    pair_signer, test_context,
 };
 use codec::Decode;
 use sp_core::Pair;
@@ -242,8 +242,8 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
 #[tokio::test]
 async fn storage_total_issuance() {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let addr = node_runtime::storage().balances().total_issuance();
     let total_issuance = api
@@ -262,8 +262,8 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob_signer = pair_signer(AccountKeyring::Bob.pair());
     let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
     let charlie: AccountId32 = AccountKeyring::Charlie.to_account_id().into();
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let tx = node_runtime::tx().staking().bond(
         charlie.into(),
@@ -306,8 +306,8 @@ async fn transfer_error() {
     let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let to_hans_tx = node_runtime::tx()
         .balances()
@@ -347,8 +347,8 @@ async fn transfer_error() {
 async fn transfer_implicit_subscription() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     let to_bob_tx = node_runtime::tx()
         .balances()
@@ -378,8 +378,8 @@ async fn transfer_implicit_subscription() {
 
 #[tokio::test]
 async fn constant_existential_deposit() {
-    let ctx = test_context_shared().await;
-    let api = ctx.client().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // get and decode constant manually via metadata:
     let metadata = api.metadata();
