@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -43,9 +43,10 @@
 //! println!("{}", runtime_api);
 //! ```
 
-#![deny(unused_crate_dependencies)]
+#![deny(unused_crate_dependencies, missing_docs)]
 
 mod api;
+mod error;
 mod ir;
 mod types;
 
@@ -54,7 +55,8 @@ pub mod utils;
 pub use self::{
     api::{
         generate_runtime_api_from_bytes, generate_runtime_api_from_path,
-        generate_runtime_api_from_url, CodegenError, RuntimeGenerator,
+        generate_runtime_api_from_url, RuntimeGenerator,
     },
+    error::{CodegenError, TypeSubstitutionError},
     types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
 };
