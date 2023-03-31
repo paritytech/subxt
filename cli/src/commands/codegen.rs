@@ -128,15 +128,12 @@ fn codegen(
         let from: syn::Path = syn::parse_str(&from_str)?;
         let to: syn::Path = syn::parse_str(&to_str)?;
         let to = to.try_into().map_err(|e: TypeSubstitutionError| {
-            eyre::eyre!(
-                "Cannot parse substitute '{from_str}={to_str}': {}",
-                e.to_string()
-            )
+            eyre::eyre!("Cannot parse substitute '{from_str}={to_str}': {e}")
         })?;
         type_substitutes
             .insert(from, to)
             .map_err(|e: TypeSubstitutionError| {
-                eyre::eyre!("Cannot parse substitute '{from_str}={to_str}': {e}",)
+                eyre::eyre!("Cannot parse substitute '{from_str}={to_str}': {e}")
             })?;
     }
 
