@@ -103,7 +103,7 @@ impl TypeSubstitutes {
         }
     }
 
-    /// Insert the given substitution.
+    /// Insert the given substitution, overwriting any other with the same path.
     pub fn insert(
         &mut self,
         source: syn::Path,
