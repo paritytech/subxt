@@ -29,7 +29,7 @@ pub trait Config: 'static {
     /// transactions associated with a sender account.
     type Index: Debug + Copy + DeserializeOwned + Into<u64>;
 
-    /// The output of the `Hashing` function.
+    /// The output of the `Hasher` function.
     type Hash: Debug
         + Copy
         + Send
