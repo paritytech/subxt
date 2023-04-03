@@ -36,7 +36,7 @@ jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
-scale-info = "2.4.0"
+scale-info = "2.5.0"
 scale-value = "0.7.0"
 scale-bits = "0.3"
 scale-decode = "0.5.0"
@@ -75,7 +75,7 @@ getrandom = { version = "0.2", features = ["js"] }
 [dev-dependencies]
 bitvec = "1"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-scale-info = { version = "2.4.0", features = ["bit-vec"] }
+scale-info = { version = "2.5.0", features = ["bit-vec"] }
 tokio = { version = "1.27", features = ["macros", "time", "rt-multi-thread"] }
 sp-core = { version = "18.0.0", default-features = false }
 sp-runtime = "20.0.0"
