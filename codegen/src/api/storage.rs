@@ -74,17 +74,17 @@ fn generate_storage_entry_fns(
     let (fields, key_impl) = match &storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
         StorageEntryType::Map { key, .. } => {
-            let key_ty = type_gen.resolve_type(key.id());
-            match key_ty.type_def() {
+            let key_ty = type_gen.resolve_type(key.id);
+            match &key_ty.type_def {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => {
                     let fields = tuple
-                        .fields()
+                        .fields
                         .iter()
                         .enumerate()
                         .map(|(i, f)| {
                             let field_name = format_ident!("_{}", syn::Index::from(i));
-                            let field_type = type_gen.resolve_type_path(f.id());
+                            let field_type = type_gen.resolve_type_path(f.id);
                             (field_name, field_type)
                         })
                         .collect::<Vec<_>>();
@@ -102,7 +102,7 @@ fn generate_storage_entry_fns(
                 }
                 // A map with a single key; return the single key.
                 _ => {
-                    let ty_path = type_gen.resolve_type_path(key.id());
+                    let ty_path = type_gen.resolve_type_path(key.id);
                     let fields = vec![(format_ident!("_0"), ty_path)];
                     let key_impl = quote! {
                         vec![ #crate_path::storage::address::make_static_storage_map_key(_0.borrow()) ]
@@ -125,7 +125,7 @@ fn generate_storage_entry_fns(
         StorageEntryType::Plain(ref ty) => ty,
         StorageEntryType::Map { ref value, .. } => value,
     };
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id());
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id);
 
     let docs = &storage_entry.docs;
     let docs = should_gen_docs

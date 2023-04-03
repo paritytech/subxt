@@ -40,15 +40,15 @@ impl TypeDefGen {
         let derives = type_gen.type_derives(ty)?;
 
         let type_params = ty
-            .type_params()
+            .type_params
             .iter()
             .enumerate()
-            .filter_map(|(i, tp)| match tp.ty() {
+            .filter_map(|(i, tp)| match &tp.ty {
                 Some(ty) => {
                     let tp_name = format_ident!("_{}", i);
                     Some(TypeParameter {
-                        concrete_type_id: ty.id(),
-                        original_name: tp.name().clone(),
+                        concrete_type_id: ty.id,
+                        original_name: tp.name.clone(),
                         name: tp_name,
                     })
                 }
@@ -58,17 +58,17 @@ impl TypeDefGen {
 
         let mut type_params = TypeDefParameters::new(type_params);
 
-        let ty_kind = match ty.type_def() {
+        let ty_kind = match &ty.type_def {
             TypeDef::Composite(composite) => {
-                let type_name = ty.path().ident().expect("structs should have a name");
+                let type_name = ty.path.ident().expect("structs should have a name");
                 let fields = CompositeDefFields::from_scale_info_fields(
                     &type_name,
-                    composite.fields(),
+                    &composite.fields,
                     type_params.params(),
                     type_gen,
                 )?;
                 type_params.update_unused(fields.field_types());
-                let docs = should_gen_docs.then_some(ty.docs()).unwrap_or_default();
+                let docs = should_gen_docs.then_some(&*ty.docs).unwrap_or_default();
                 let composite_def = CompositeDef::struct_def(
                     ty,
                     &type_name,
@@ -82,22 +82,22 @@ impl TypeDefGen {
                 TypeDefGenKind::Struct(composite_def)
             }
             TypeDef::Variant(variant) => {
-                let type_name = ty.path().ident().expect("variants should have a name");
+                let type_name = ty.path.ident().expect("variants should have a name");
 
                 let variants = variant
-                    .variants()
+                    .variants
                     .iter()
                     .map(|v| {
                         let fields = CompositeDefFields::from_scale_info_fields(
-                            v.name(),
-                            v.fields(),
+                            &v.name,
+                            &v.fields,
                             type_params.params(),
                             type_gen,
                         )?;
                         type_params.update_unused(fields.field_types());
-                        let docs = should_gen_docs.then_some(v.docs()).unwrap_or_default();
-                        let variant_def = CompositeDef::enum_variant_def(v.name(), fields, docs);
-                        Ok((v.index(), variant_def))
+                        let docs = should_gen_docs.then_some(&*v.docs).unwrap_or_default();
+                        let variant_def = CompositeDef::enum_variant_def(&v.name, fields, docs);
+                        Ok((v.index, variant_def))
                     })
                     .collect::<Result<Vec<_>, CodegenError>>()?;
 
@@ -106,7 +106,7 @@ impl TypeDefGen {
             _ => TypeDefGenKind::BuiltIn,
         };
 
-        let docs = ty.docs();
+        let docs = &ty.docs;
         let ty_docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();

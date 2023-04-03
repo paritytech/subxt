@@ -56,7 +56,7 @@ pub fn generate_constants(
             return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
         };
 
-        let return_ty = type_gen.resolve_type_path(constant.ty.id());
+        let return_ty = type_gen.resolve_type_path(constant.ty.id);
         let docs = &constant.docs;
         let docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })

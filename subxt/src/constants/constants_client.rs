@@ -68,7 +68,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         let constant = pallet.constant(address.constant_name())?;
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut &*constant.value,
-            constant.ty.id(),
+            constant.ty.id,
             &metadata,
         )?;
         Ok(value)

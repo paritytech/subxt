@@ -20,8 +20,8 @@ fn metadata_docs() -> Vec<String> {
 
     // Inspect the metadata types and collect the documentation.
     let mut docs = Vec::new();
-    for ty in metadata.types.types() {
-        docs.extend_from_slice(ty.ty().docs());
+    for ty in &metadata.types.types {
+        docs.extend_from_slice(&ty.ty.docs);
     }
 
     for pallet in metadata.pallets {

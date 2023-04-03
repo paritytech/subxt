@@ -239,7 +239,7 @@ impl EventDetails {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
-                field_metadata.ty().id(),
+                field_metadata.ty.id,
                 &metadata.runtime_metadata().types,
                 scale_decode::visitor::IgnoreVisitor,
             )

@@ -57,10 +57,10 @@ fn get_field_hash(
     field: &Field<PortableForm>,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
-    let mut bytes = get_type_hash(registry, field.ty().id(), visited_ids);
+    let mut bytes = get_type_hash(registry, field.ty.id, visited_ids);
 
     // XOR name and field name with the type hash if they exist
-    if let Some(name) = field.name() {
+    if let Some(name) = &field.name {
         bytes = xor(bytes, hash(name.as_bytes()));
     }
 
@@ -74,8 +74,8 @@ fn get_variant_hash(
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     // Merge our hashes of the name and each field together using xor.
-    let mut bytes = hash(var.name().as_bytes());
-    for field in var.fields() {
+    let mut bytes = hash(var.name.as_bytes());
+    for field in &var.fields {
         bytes = hash_hashes(bytes, get_field_hash(registry, field, visited_ids))
     }
 
@@ -91,14 +91,14 @@ fn get_type_def_hash(
     match ty_def {
         TypeDef::Composite(composite) => {
             let mut bytes = hash(&[TypeBeingHashed::Composite as u8]);
-            for field in composite.fields() {
+            for field in &composite.fields {
                 bytes = hash_hashes(bytes, get_field_hash(registry, field, visited_ids));
             }
             bytes
         }
         TypeDef::Variant(variant) => {
             let mut bytes = hash(&[TypeBeingHashed::Variant as u8]);
-            for var in variant.variants().iter() {
+            for var in &variant.variants {
                 bytes = hash_hashes(bytes, get_variant_hash(registry, var, visited_ids));
             }
             bytes
@@ -107,12 +107,12 @@ fn get_type_def_hash(
             let bytes = hash(&[TypeBeingHashed::Sequence as u8]);
             xor(
                 bytes,
-                get_type_hash(registry, sequence.type_param().id(), visited_ids),
+                get_type_hash(registry, sequence.type_param.id, visited_ids),
             )
         }
         TypeDef::Array(array) => {
             // Take length into account; different length must lead to different hash.
-            let len_bytes = array.len().to_be_bytes();
+            let len_bytes = array.len.to_be_bytes();
             let bytes = hash(&[
                 TypeBeingHashed::Array as u8,
                 len_bytes[0],
@@ -122,13 +122,13 @@ fn get_type_def_hash(
             ]);
             xor(
                 bytes,
-                get_type_hash(registry, array.type_param().id(), visited_ids),
+                get_type_hash(registry, array.type_param.id, visited_ids),
             )
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
-            for field in tuple.fields() {
-                bytes = hash_hashes(bytes, get_type_hash(registry, field.id(), visited_ids));
+            for field in &tuple.fields {
+                bytes = hash_hashes(bytes, get_type_hash(registry, field.id, visited_ids));
             }
             bytes
         }
@@ -140,18 +140,18 @@ fn get_type_def_hash(
             let bytes = hash(&[TypeBeingHashed::Compact as u8]);
             xor(
                 bytes,
-                get_type_hash(registry, compact.type_param().id(), visited_ids),
+                get_type_hash(registry, compact.type_param.id, visited_ids),
             )
         }
         TypeDef::BitSequence(bitseq) => {
             let mut bytes = hash(&[TypeBeingHashed::BitSequence as u8]);
             bytes = xor(
                 bytes,
-                get_type_hash(registry, bitseq.bit_order_type().id(), visited_ids),
+                get_type_hash(registry, bitseq.bit_order_type.id, visited_ids),
             );
             bytes = xor(
                 bytes,
-                get_type_hash(registry, bitseq.bit_store_type().id(), visited_ids),
+                get_type_hash(registry, bitseq.bit_store_type.id, visited_ids),
             );
             bytes
         }
@@ -166,7 +166,7 @@ fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet
     }
 
     let ty = registry.resolve(id).unwrap();
-    get_type_def_hash(registry, ty.type_def(), visited_ids)
+    get_type_def_hash(registry, &ty.type_def, visited_ids)
 }
 
 /// Obtain the hash representation of a `frame_metadata::ExtrinsicMetadata`.
@@ -176,20 +176,20 @@ fn get_extrinsic_hash(
 ) -> [u8; 32] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    let mut bytes = get_type_hash(registry, extrinsic.ty.id(), &mut visited_ids);
+    let mut bytes = get_type_hash(registry, extrinsic.ty.id, &mut visited_ids);
 
     bytes = xor(bytes, hash(&[extrinsic.version]));
     for signed_extension in extrinsic.signed_extensions.iter() {
         let mut ext_bytes = hash(signed_extension.identifier.as_bytes());
         ext_bytes = xor(
             ext_bytes,
-            get_type_hash(registry, signed_extension.ty.id(), &mut visited_ids),
+            get_type_hash(registry, signed_extension.ty.id, &mut visited_ids),
         );
         ext_bytes = xor(
             ext_bytes,
             get_type_hash(
                 registry,
-                signed_extension.additional_signed.id(),
+                signed_extension.additional_signed.id,
                 &mut visited_ids,
             ),
         );
@@ -212,7 +212,7 @@ fn get_storage_entry_hash(
 
     match &entry.ty {
         StorageEntryType::Plain(ty) => {
-            bytes = xor(bytes, get_type_hash(registry, ty.id(), visited_ids));
+            bytes = xor(bytes, get_type_hash(registry, ty.id, visited_ids));
         }
         StorageEntryType::Map {
             hashers,
@@ -223,8 +223,8 @@ fn get_storage_entry_hash(
                 // Cloning the hasher should essentially be a copy.
                 bytes = hash_hashes(bytes, [hasher.clone() as u8; 32]);
             }
-            bytes = xor(bytes, get_type_hash(registry, key.id(), visited_ids));
-            bytes = xor(bytes, get_type_hash(registry, value.id(), visited_ids));
+            bytes = xor(bytes, get_type_hash(registry, key.id, visited_ids));
+            bytes = xor(bytes, get_type_hash(registry, value.id, visited_ids));
         }
     }
 
@@ -274,7 +274,7 @@ pub fn get_constant_hash(
         .ok_or(NotFound::Item)?;
 
     // We only need to check that the type of the constant asked for matches.
-    let bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
+    let bytes = get_type_hash(&metadata.types, constant.ty.id, &mut HashSet::new());
     Ok(bytes)
 }
 
@@ -290,18 +290,18 @@ pub fn get_call_hash(
         .find(|p| p.name == pallet_name)
         .ok_or(NotFound::Pallet)?;
 
-    let call_id = pallet.calls.as_ref().ok_or(NotFound::Item)?.ty.id();
+    let call_id = pallet.calls.as_ref().ok_or(NotFound::Item)?.ty.id;
 
     let call_ty = metadata.types.resolve(call_id).ok_or(NotFound::Item)?;
 
-    let call_variants = match call_ty.type_def() {
-        TypeDef::Variant(variant) => variant.variants(),
+    let call_variants = match &call_ty.type_def {
+        TypeDef::Variant(variant) => &variant.variants,
         _ => return Err(NotFound::Item),
     };
 
     let variant = call_variants
         .iter()
-        .find(|v| v.name() == call_name)
+        .find(|v| v.name == call_name)
         .ok_or(NotFound::Item)?;
 
     // hash the specific variant representing the call we are interested in.
@@ -321,26 +321,26 @@ pub fn get_pallet_hash(
     if let Some(calls) = &pallet.calls {
         bytes = xor(
             bytes,
-            get_type_hash(registry, calls.ty.id(), &mut visited_ids),
+            get_type_hash(registry, calls.ty.id, &mut visited_ids),
         );
     }
     if let Some(ref event) = pallet.event {
         bytes = xor(
             bytes,
-            get_type_hash(registry, event.ty.id(), &mut visited_ids),
+            get_type_hash(registry, event.ty.id, &mut visited_ids),
         );
     }
     for constant in pallet.constants.iter() {
         bytes = xor(bytes, hash(constant.name.as_bytes()));
         bytes = xor(
             bytes,
-            get_type_hash(registry, constant.ty.id(), &mut visited_ids),
+            get_type_hash(registry, constant.ty.id, &mut visited_ids),
         );
     }
     if let Some(ref error) = pallet.error {
         bytes = xor(
             bytes,
-            get_type_hash(registry, error.ty.id(), &mut visited_ids),
+            get_type_hash(registry, error.ty.id, &mut visited_ids),
         );
     }
     if let Some(ref storage) = pallet.storage {
@@ -384,7 +384,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV14) -> [u8; 32] {
     let mut visited_ids = HashSet::<u32>::new();
     bytes.extend(get_type_hash(
         &metadata.types,
-        metadata.ty.id(),
+        metadata.ty.id,
         &mut visited_ids,
     ));
 
