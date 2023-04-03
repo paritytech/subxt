@@ -57,7 +57,7 @@ fn bench_get_call_hash(c: &mut Criterion) {
     for pallet in metadata.pallets.iter() {
         let pallet_name = &pallet.name;
         let call_type_id = match &pallet.calls {
-            Some(calls) => calls.ty.id(),
+            Some(calls) => calls.ty.id,
             None => continue,
         };
         let call_type = metadata.types.resolve(call_type_id).unwrap();

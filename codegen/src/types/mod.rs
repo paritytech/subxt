@@ -73,8 +73,8 @@ impl<'a> TypeGenerator<'a> {
         let root_mod_ident = &self.types_mod_ident;
         let mut root_mod = Module::new(root_mod_ident.clone(), root_mod_ident.clone());
 
-        for ty in self.type_registry.types() {
-            let path = ty.ty().path();
+        for ty in &self.type_registry.types {
+            let path = &ty.ty.path;
             // Don't generate a type if it was substituted - the target type might
             // not be in the type registry + our resolution already performs the substitution.
             if self.type_substitutes.for_path(path).is_some() {
@@ -100,7 +100,7 @@ impl<'a> TypeGenerator<'a> {
 
             innermost_module.types.insert(
                 path.clone(),
-                TypeDefGen::from_type(ty.ty(), self, &self.crate_path, self.should_gen_docs)?,
+                TypeDefGen::from_type(&ty.ty, self, &self.crate_path, self.should_gen_docs)?,
             );
         }
 
@@ -168,29 +168,28 @@ impl<'a> TypeGenerator<'a> {
 
         let mut ty = self.resolve_type(id);
 
-        if ty.path().ident() == Some("Cow".to_string()) {
+        if ty.path.ident() == Some("Cow".to_string()) {
             ty = self.resolve_type(
-                ty.type_params()[0]
-                    .ty()
+                ty.type_params[0]
+                    .ty
                     .expect("type parameters to Cow are not expected to be skipped; qed")
-                    .id(),
+                    .id,
             )
         }
 
         let params: Vec<_> = ty
-            .type_params()
+            .type_params
             .iter()
             .filter_map(|f| {
-                f.ty()
-                    .map(|f| self.resolve_type_path_recurse(f.id(), false, parent_type_params))
+                f.ty.map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params))
             })
             .collect();
 
-        let ty = match ty.type_def() {
+        let ty = match &ty.type_def {
             TypeDef::Composite(_) | TypeDef::Variant(_) => {
                 if let Some((path, params)) = self
                     .type_substitutes
-                    .for_path_with_params(ty.path(), &params)
+                    .for_path_with_params(&ty.path, &params)
                 {
                     TypePathType::Path {
                         path: syn::TypePath {
@@ -200,41 +199,37 @@ impl<'a> TypeGenerator<'a> {
                         params: params.to_vec(),
                     }
                 } else {
-                    TypePathType::from_type_def_path(
-                        ty.path(),
-                        self.types_mod_ident.clone(),
-                        params,
-                    )
+                    TypePathType::from_type_def_path(&ty.path, self.types_mod_ident.clone(), params)
                 }
             }
             TypeDef::Primitive(primitive) => TypePathType::Primitive {
                 def: primitive.clone(),
             },
             TypeDef::Array(arr) => TypePathType::Array {
-                len: arr.len() as usize,
+                len: arr.len as usize,
                 of: Box::new(self.resolve_type_path_recurse(
-                    arr.type_param().id(),
+                    arr.type_param.id,
                     false,
                     parent_type_params,
                 )),
             },
             TypeDef::Sequence(seq) => TypePathType::Vec {
                 of: Box::new(self.resolve_type_path_recurse(
-                    seq.type_param().id(),
+                    seq.type_param.id,
                     false,
                     parent_type_params,
                 )),
             },
             TypeDef::Tuple(tuple) => TypePathType::Tuple {
                 elements: tuple
-                    .fields()
+                    .fields
                     .iter()
-                    .map(|f| self.resolve_type_path_recurse(f.id(), false, parent_type_params))
+                    .map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params))
                     .collect(),
             },
             TypeDef::Compact(compact) => TypePathType::Compact {
                 inner: Box::new(self.resolve_type_path_recurse(
-                    compact.type_param().id(),
+                    compact.type_param.id,
                     false,
                     parent_type_params,
                 )),
@@ -243,12 +238,12 @@ impl<'a> TypeGenerator<'a> {
             },
             TypeDef::BitSequence(bitseq) => TypePathType::BitVec {
                 bit_order_type: Box::new(self.resolve_type_path_recurse(
-                    bitseq.bit_order_type().id(),
+                    bitseq.bit_order_type.id,
                     false,
                     parent_type_params,
                 )),
                 bit_store_type: Box::new(self.resolve_type_path_recurse(
-                    bitseq.bit_store_type().id(),
+                    bitseq.bit_store_type.id,
                     false,
                     parent_type_params,
                 )),
@@ -266,7 +261,7 @@ impl<'a> TypeGenerator<'a> {
 
     /// Returns the derives to be applied to a generated type.
     pub fn type_derives(&self, ty: &Type<PortableForm>) -> Result<Derives, CodegenError> {
-        let joined_path = ty.path().segments().join("::");
+        let joined_path = ty.path.segments.join("::");
         let ty_path: syn::TypePath = syn::parse_str(&joined_path)
             .map_err(|e| CodegenError::InvalidTypePath(joined_path, e))?;
         Ok(self.derives.resolve(&ty_path))

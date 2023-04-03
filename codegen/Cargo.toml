@@ -20,7 +20,7 @@ heck = "0.4.1"
 proc-macro2 = "1.0.54"
 quote = "1.0.8"
 syn = "1.0.109"
-scale-info = "2.4.0"
+scale-info = "2.5.0"
 subxt-metadata = { version = "0.27.1", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
@@ -29,5 +29,5 @@ thiserror = "1.0.40"
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
-scale-info = { version = "2.4.0", features = ["bit-vec"] }
+scale-info = { version = "2.5.0", features = ["bit-vec"] }
 pretty_assertions = "1.0.0"
