@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -352,8 +352,8 @@ fn lookup_storage_return_type(
 /// Fetch the return type out of a [`StorageEntryType`].
 fn return_type_from_storage_entry_type(entry: &StorageEntryType<PortableForm>) -> u32 {
     match entry {
-        StorageEntryType::Plain(ty) => ty.id(),
-        StorageEntryType::Map { value, .. } => value.id(),
+        StorageEntryType::Plain(ty) => ty.id,
+        StorageEntryType::Map { value, .. } => value.id,
     }
 }
 
@@ -367,8 +367,8 @@ fn decode_storage_with_metadata<T: DecodeWithMetadata>(
     let ty = &metadata.pallet(pallet_name)?.storage(storage_entry)?.ty;
 
     let id = match ty {
-        StorageEntryType::Plain(ty) => ty.id(),
-        StorageEntryType::Map { value, .. } => value.id(),
+        StorageEntryType::Plain(ty) => ty.id,
+        StorageEntryType::Map { value, .. } => value.id,
     };
 
     let val = T::decode_with_metadata(bytes, id, metadata)?;

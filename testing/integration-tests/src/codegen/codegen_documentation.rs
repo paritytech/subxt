@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -20,8 +20,8 @@ fn metadata_docs() -> Vec<String> {
 
     // Inspect the metadata types and collect the documentation.
     let mut docs = Vec::new();
-    for ty in metadata.types.types() {
-        docs.extend_from_slice(ty.ty().docs());
+    for ty in &metadata.types.types {
+        docs.extend_from_slice(&ty.ty.docs);
     }
 
     for pallet in metadata.pallets {

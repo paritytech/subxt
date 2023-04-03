@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -239,7 +239,7 @@ impl EventDetails {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
-                field_metadata.ty().id(),
+                field_metadata.ty.id,
                 &metadata.runtime_metadata().types,
                 scale_decode::visitor::IgnoreVisitor,
             )

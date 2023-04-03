@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -56,7 +56,7 @@ pub fn generate_constants(
             return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
         };
 
-        let return_ty = type_gen.resolve_type_path(constant.ty.id());
+        let return_ty = type_gen.resolve_type_path(constant.ty.id);
         let docs = &constant.docs;
         let docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -74,17 +74,17 @@ fn generate_storage_entry_fns(
     let (fields, key_impl) = match &storage_entry.ty {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
         StorageEntryType::Map { key, .. } => {
-            let key_ty = type_gen.resolve_type(key.id());
-            match key_ty.type_def() {
+            let key_ty = type_gen.resolve_type(key.id);
+            match &key_ty.type_def {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => {
                     let fields = tuple
-                        .fields()
+                        .fields
                         .iter()
                         .enumerate()
                         .map(|(i, f)| {
                             let field_name = format_ident!("_{}", syn::Index::from(i));
-                            let field_type = type_gen.resolve_type_path(f.id());
+                            let field_type = type_gen.resolve_type_path(f.id);
                             (field_name, field_type)
                         })
                         .collect::<Vec<_>>();
@@ -92,7 +92,7 @@ fn generate_storage_entry_fns(
                     let keys = fields
                         .iter()
                         .map(|(field_name, _)| {
-                            quote!( #crate_path::storage::address::StaticStorageMapKey::new(#field_name.borrow()) )
+                            quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) )
                         });
                     let key_impl = quote! {
                         vec![ #( #keys ),* ]
@@ -102,10 +102,10 @@ fn generate_storage_entry_fns(
                 }
                 // A map with a single key; return the single key.
                 _ => {
-                    let ty_path = type_gen.resolve_type_path(key.id());
+                    let ty_path = type_gen.resolve_type_path(key.id);
                     let fields = vec![(format_ident!("_0"), ty_path)];
                     let key_impl = quote! {
-                        vec![ #crate_path::storage::address::StaticStorageMapKey::new(_0.borrow()) ]
+                        vec![ #crate_path::storage::address::make_static_storage_map_key(_0.borrow()) ]
                     };
                     (fields, key_impl)
                 }
@@ -125,7 +125,7 @@ fn generate_storage_entry_fns(
         StorageEntryType::Plain(ref ty) => ty,
         StorageEntryType::Map { ref value, .. } => value,
     };
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id());
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id);
 
     let docs = &storage_entry.docs;
     let docs = should_gen_docs
@@ -134,7 +134,7 @@ fn generate_storage_entry_fns(
 
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`. We apply
-        // AsRef to all types, so this just makes it a little more ergonomic.
+        // Borrow to all types, so this just makes it a little more ergonomic.
         //
         // TODO [jsdw]: Support mappings like `String -> str` too for better borrow
         // ergonomics.
