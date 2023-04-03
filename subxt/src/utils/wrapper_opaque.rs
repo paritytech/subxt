@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -87,7 +87,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         };
 
         // Do a basic check that the target shape lines up.
-        let scale_info::TypeDef::Composite(_) = ty.type_def() else {
+        let scale_info::TypeDef::Composite(_) = ty.type_def else {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected: type_id,
@@ -95,7 +95,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         };
 
         // Check that the name also lines up.
-        if ty.path().ident().as_deref() != Some("WrapperKeepOpaque") {
+        if ty.path.ident().as_deref() != Some("WrapperKeepOpaque") {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected: type_id,
@@ -188,7 +188,7 @@ mod test {
         let mut types = scale_info::Registry::new();
         let id = types.register_type(&m);
         let portable_registry: scale_info::PortableRegistry = types.into();
-        (id.id(), portable_registry)
+        (id.id, portable_registry)
     }
 
     fn roundtrips_like_scale_codec<T>(t: T)

@@ -26,9 +26,9 @@ clap = { version = "4.1.11", features = ["derive", "cargo"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
-serde = { version = "1.0.155", features = ["derive"] }
+serde = { version = "1.0.159", features = ["derive"] }
 # serialize as json
-serde_json = "1.0.94"
+serde_json = "1.0.95"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
@@ -40,4 +40,4 @@ syn = "1.0.109"
 # communicate with the substrate nodes
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 # async runtime
-tokio = { version = "1.26", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.27", features = ["rt-multi-thread", "macros", "time"] }

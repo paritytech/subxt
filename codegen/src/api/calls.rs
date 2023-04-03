@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -37,7 +37,7 @@ pub fn generate_calls(
 
     let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
-        call.ty.id(),
+        call.ty.id,
         |name| name.to_upper_camel_case().into(),
         "Call",
         crate_path,
@@ -61,7 +61,7 @@ pub fn generate_calls(
                     .unzip(),
                 CompositeDefFields::NoFields => Default::default(),
                 CompositeDefFields::Unnamed(_) => {
-                    return Err(CodegenError::InvalidCallVariant(call.ty.id()))
+                    return Err(CodegenError::InvalidCallVariant(call.ty.id))
                 }
             };
 
@@ -106,8 +106,8 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
-    let call_ty = type_gen.resolve_type(call.ty.id());
-    let docs = call_ty.docs();
+    let call_ty = type_gen.resolve_type(call.ty.id);
+    let docs = &call_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
