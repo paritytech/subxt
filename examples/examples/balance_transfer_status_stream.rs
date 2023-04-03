@@ -1,6 +1,9 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
-use subxt::{tx::{TxStatus, PairSigner}, OnlineClient, PolkadotConfig};
+use subxt::{
+    tx::{PairSigner, TxStatus},
+    OnlineClient, PolkadotConfig,
+};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -33,15 +36,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let events = in_block.wait_for_success().await?;
                 // We can look for events (this uses the static interface; we can also iterate
                 // over them and dynamically decode them):
-                let transfer_event = events
-                    .find_first::<polkadot::balances::events::Transfer>()?;
+                let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
 
                 if let Some(event) = transfer_event {
                     println!("Balance transfer success: {event:?}");
                 } else {
                     println!("Failed to find Balances::Transfer Event");
                 }
-            },
+            }
             // Just log any other status we encounter:
             other => {
                 println!("Status: {other:?}");

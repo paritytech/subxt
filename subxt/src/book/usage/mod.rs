@@ -14,8 +14,8 @@ This modules contains examples of using Subxt; follow the links for more:
 Alternately, [go back](super).
 */
 
+pub mod blocks;
+pub mod constants;
+pub mod events;
 pub mod extrinsics;
 pub mod storage;
-pub mod events;
-pub mod constants;
-pub mod blocks;
