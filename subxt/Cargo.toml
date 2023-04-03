@@ -44,7 +44,7 @@ scale-encode = "0.1.0"
 futures = { version = "0.3.27", default-features = false, features = ["std"] }
 hex = "0.4.3"
 jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
-serde = { version = "1.0.155", features = ["derive"] }
+serde = { version = "1.0.159", features = ["derive"] }
 serde_json = { version = "1.0.95", features = ["raw_value"] }
 thiserror = "1.0.40"
 tracing = "0.1.34"
