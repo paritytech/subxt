@@ -17,7 +17,7 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 darling = "0.14.4"
 frame-metadata = "15.0.0"
 heck = "0.4.1"
-proc-macro2 = "1.0.54"
+proc-macro2 = "1.0.55"
 quote = "1.0.8"
 syn = "1.0.109"
 scale-info = "2.4.0"
