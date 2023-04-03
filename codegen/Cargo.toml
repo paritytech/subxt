@@ -17,14 +17,14 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 darling = "0.14.4"
 frame-metadata = "15.0.0"
 heck = "0.4.1"
-proc-macro2 = "1.0.54"
+proc-macro2 = "1.0.55"
 quote = "1.0.8"
 syn = "1.0.109"
 scale-info = "2.5.0"
 subxt-metadata = { version = "0.27.1", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
-tokio = { version = "1.26", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.27", features = ["macros", "rt-multi-thread"] }
 thiserror = "1.0.40"
 
 [dev-dependencies]

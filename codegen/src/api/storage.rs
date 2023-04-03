@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -92,7 +92,7 @@ fn generate_storage_entry_fns(
                     let keys = fields
                         .iter()
                         .map(|(field_name, _)| {
-                            quote!( #crate_path::storage::address::StaticStorageMapKey::new(#field_name.borrow()) )
+                            quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) )
                         });
                     let key_impl = quote! {
                         vec![ #( #keys ),* ]
@@ -105,7 +105,7 @@ fn generate_storage_entry_fns(
                     let ty_path = type_gen.resolve_type_path(key.id);
                     let fields = vec![(format_ident!("_0"), ty_path)];
                     let key_impl = quote! {
-                        vec![ #crate_path::storage::address::StaticStorageMapKey::new(_0.borrow()) ]
+                        vec![ #crate_path::storage::address::make_static_storage_map_key(_0.borrow()) ]
                     };
                     (fields, key_impl)
                 }
@@ -134,7 +134,7 @@ fn generate_storage_entry_fns(
 
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`. We apply
-        // AsRef to all types, so this just makes it a little more ergonomic.
+        // Borrow to all types, so this just makes it a little more ergonomic.
         //
         // TODO [jsdw]: Support mappings like `String -> str` too for better borrow
         // ergonomics.
