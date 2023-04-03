@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -8,6 +8,7 @@ mod account_id;
 pub mod bits;
 mod multi_address;
 mod multi_signature;
+mod static_type;
 mod wrapper_opaque;
 
 use codec::{Decode, Encode};
@@ -16,6 +17,7 @@ use derivative::Derivative;
 pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
+pub use static_type::Static;
 pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
