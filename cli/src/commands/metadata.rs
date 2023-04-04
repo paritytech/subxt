@@ -40,7 +40,9 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             }
         };
 
-        retain_metadata_pallets(metadata_v14, |pallet| pallets.contains(&pallet.name));
+        retain_metadata_pallets(metadata_v14, |pallet_name| {
+            pallets.iter().find(|p| &**p == pallet_name).is_some()
+        });
     }
 
     match opts.format.as_str() {
