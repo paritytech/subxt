@@ -43,7 +43,7 @@ impl TypeDefGen {
             .type_params
             .iter()
             .enumerate()
-            .filter_map(|(i, tp)| match tp.ty {
+            .filter_map(|(i, tp)| match &tp.ty {
                 Some(ty) => {
                     let tp_name = format_ident!("_{}", i);
                     Some(TypeParameter {
@@ -68,9 +68,7 @@ impl TypeDefGen {
                     type_gen,
                 )?;
                 type_params.update_unused(fields.field_types());
-                let docs = should_gen_docs
-                    .then_some(ty.docs.as_slice())
-                    .unwrap_or_default();
+                let docs = should_gen_docs.then_some(&*ty.docs).unwrap_or_default();
                 let composite_def = CompositeDef::struct_def(
                     ty,
                     &type_name,
@@ -97,9 +95,7 @@ impl TypeDefGen {
                             type_gen,
                         )?;
                         type_params.update_unused(fields.field_types());
-                        let docs = should_gen_docs
-                            .then_some(v.docs.as_slice())
-                            .unwrap_or_default();
+                        let docs = should_gen_docs.then_some(&*v.docs).unwrap_or_default();
                         let variant_def = CompositeDef::enum_variant_def(&v.name, fields, docs);
                         Ok((v.index, variant_def))
                     })
@@ -110,7 +106,7 @@ impl TypeDefGen {
             _ => TypeDefGenKind::BuiltIn,
         };
 
-        let docs = ty.docs.as_slice();
+        let docs = &ty.docs;
         let ty_docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();

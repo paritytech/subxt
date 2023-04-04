@@ -132,7 +132,7 @@ impl TypePathType {
         root_mod_ident: Ident,
         params: Vec<TypePath>,
     ) -> Self {
-        let path_segments = path.segments.as_slice();
+        let path_segments = &*path.segments;
 
         let path: syn::Path = match path_segments {
             [] => panic!("Type has no ident"),

@@ -64,7 +64,7 @@ fn bench_get_call_hash(c: &mut Criterion) {
         let variants = expect_variant(&call_type.type_def);
 
         for variant in &variants.variants {
-            let call_name = variant.name.as_str();
+            let call_name = &variant.name;
             let bench_name = format!("{pallet_name}/{call_name}");
             group.bench_function(&bench_name, |b| {
                 b.iter(|| get_call_hash(&metadata, &pallet.name, call_name))

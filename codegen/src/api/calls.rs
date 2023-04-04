@@ -107,7 +107,7 @@ pub fn generate_calls(
         .unzip();
 
     let call_ty = type_gen.resolve_type(call.ty.id);
-    let docs = call_ty.docs;
+    let docs = &call_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();

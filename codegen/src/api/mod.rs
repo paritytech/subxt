@@ -501,9 +501,7 @@ where
                 type_gen,
             )?;
 
-            let docs = should_gen_docs
-                .then_some(var.docs.as_slice())
-                .unwrap_or_default();
+            let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
             let struct_def = CompositeDef::struct_def(
                 &ty,
                 struct_name.as_ref(),

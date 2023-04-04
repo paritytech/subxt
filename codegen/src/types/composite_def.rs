@@ -177,7 +177,7 @@ impl CompositeDefFields {
             let field_type =
                 CompositeDefFieldType::new(field.ty.id, type_path, field.type_name.clone());
 
-            if let Some(name) = field.name.as_ref() {
+            if let Some(name) = &field.name {
                 let field_name = format_ident!("{}", name);
                 named_fields.push((field_name, field_type))
             } else {
