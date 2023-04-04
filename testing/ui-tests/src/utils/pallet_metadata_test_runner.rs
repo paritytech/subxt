@@ -47,9 +47,7 @@ impl PalletMetadataTestRunner {
 
         // Build custom metadata containing only this pallet.
         let mut metadata = self.metadata.clone();
-        retain_metadata_pallets(&mut metadata, |pallet_filter| {
-            pallet_filter.name == pallet.name
-        });
+        retain_metadata_pallets(&mut metadata, |pallet_filter| pallet_filter == pallet.name);
 
         let mut tmp_dir = std::env::temp_dir();
         tmp_dir.push(format!("{TEST_DIR_PREFIX}{index}"));
