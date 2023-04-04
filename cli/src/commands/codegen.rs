@@ -2,11 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
-
-use super::utils::FileOrUrl;
 
 /// Generate runtime API client code from metadata.
 ///

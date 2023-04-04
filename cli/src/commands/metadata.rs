@@ -2,14 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale::{Decode, Encode};
 use std::io::{self, Write};
 use subxt_metadata::retain_metadata_pallets;
-
-use super::utils::FileOrUrl;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -41,7 +40,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         };
 
         retain_metadata_pallets(metadata_v14, |pallet_name| {
-            pallets.iter().find(|p| &**p == pallet_name).is_some()
+            pallets.iter().any(|p| &**p == pallet_name)
         });
     }
 
