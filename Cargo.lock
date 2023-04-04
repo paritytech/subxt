@@ -3895,6 +3895,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "subxt",
+ "subxt-metadata",
  "trybuild",
 ]
 

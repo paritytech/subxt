@@ -403,7 +403,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                                 v.name.clone(),
                                 CallMetadata {
                                     call_index: v.index,
-                                    fields: v.fields.to_vec(),
+                                    fields: v.fields.clone(),
                                 },
                             )
                         })

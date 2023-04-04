@@ -2,10 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
-use jsonrpsee::client_transport::ws::Uri;
-use std::{fs, io::Read, path::PathBuf};
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
 
 /// Generate runtime API client code from metadata.
@@ -15,12 +14,8 @@ use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
 /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    /// The url of the substrate node to query for metadata for codegen.
-    #[clap(name = "url", long, value_parser)]
-    url: Option<Uri>,
-    /// The path to the encoded metadata file.
-    #[clap(short, long, value_parser)]
-    file: Option<PathBuf>,
+    #[command(flatten)]
+    file_or_url: FileOrUrl,
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,
@@ -65,23 +60,7 @@ fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let bytes = if let Some(file) = opts.file.as_ref() {
-        if opts.url.is_some() {
-            eyre::bail!("specify one of `--url` or `--file` but not both")
-        };
-
-        let mut file = fs::File::open(file)?;
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes)?;
-        bytes
-    } else {
-        let url = opts.url.unwrap_or_else(|| {
-            "http://localhost:9933"
-                .parse::<Uri>()
-                .expect("default url is valid")
-        });
-        subxt_codegen::utils::fetch_metadata_bytes(&url).await?
-    };
+    let bytes = opts.file_or_url.fetch().await?;
 
     codegen(
         &bytes,

@@ -5,6 +5,7 @@
 #![deny(unused_crate_dependencies)]
 
 mod commands;
+mod utils;
 use clap::Parser as ClapParser;
 
 /// Subxt utilities for interacting with Substrate based nodes.
