@@ -37,9 +37,7 @@ impl FileOrUrl {
             (None, Some(uri)) => Ok(subxt_codegen::utils::fetch_metadata_bytes(uri).await?),
             // Default if neither is provided; fetch from local url
             (None, None) => {
-                let uri = "http://localhost:9933"
-                    .parse()
-                    .expect("default url is valid");
+                let uri = Uri::from_static("http://localhost:9933");
                 Ok(subxt_codegen::utils::fetch_metadata_bytes(&uri).await?)
             }
         }
