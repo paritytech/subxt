@@ -15,7 +15,7 @@ mod dispatch_errors;
 mod storage;
 mod utils;
 
-use crate::utils::MetadataTestRunner;
+use crate::utils::{MetadataTestRunner, PalletMetadataTestRunner};
 
 // Each of these tests leads to some rust code being compiled and
 // executed to test that compilation is successful (or errors in the
@@ -23,6 +23,7 @@ use crate::utils::MetadataTestRunner;
 #[test]
 fn ui_tests() {
     let mut m = MetadataTestRunner::default();
+    let mut p = PalletMetadataTestRunner::new();
     let t = trybuild::TestCases::new();
 
     t.pass("src/correct/*.rs");
@@ -46,6 +47,11 @@ fn ui_tests() {
         "array_dispatch_error",
         dispatch_errors::metadata_array_dispatch_error(),
     ));
+
+    // Ensure the generate per pallet metadata compiles.
+    while let Some(path) = p.path_to_next_ui_test() {
+        t.pass(path);
+    }
 }
 
 #[test]

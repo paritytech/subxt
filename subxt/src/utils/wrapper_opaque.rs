@@ -87,7 +87,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         };
 
         // Do a basic check that the target shape lines up.
-        let scale_info::TypeDef::Composite(_) = ty.type_def else {
+        let scale_info::TypeDef::Composite(_) = &ty.type_def else {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected: type_id,
