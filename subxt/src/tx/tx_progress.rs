@@ -7,7 +7,7 @@
 use std::task::Poll;
 
 use crate::{
-    client::OfflineClientT,
+    client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
     rpc::types::{Subscription, SubstrateTxStatus},
@@ -53,7 +53,7 @@ impl<T: Config, C> TxProgress<T, C> {
 impl<T, C> TxProgress<T, C>
 where
     T: Config,
-    C: OfflineClientT<T>,
+    C: OnlineClientT<T>,
 {
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
@@ -140,7 +140,7 @@ where
     }
 }
 
-impl<T: Config, C: OfflineClientT<T>> Stream for TxProgress<T, C> {
+impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
     type Item = Result<TxStatus<T, C>, Error>;
 
     fn poll_next(
@@ -315,7 +315,7 @@ pub struct TxInBlock<T: Config, C> {
     client: C,
 }
 
-impl<T: Config, C: OfflineClientT<T>> TxInBlock<T, C> {
+impl<T: Config, C> TxInBlock<T, C> {
     pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
         Self {
             block_hash,
@@ -333,7 +333,9 @@ impl<T: Config, C: OfflineClientT<T>> TxInBlock<T, C> {
     pub fn extrinsic_hash(&self) -> T::Hash {
         self.ext_hash
     }
+}
 
+impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     /// Fetch the events associated with this transaction. If the transaction
     /// was successful (ie no `ExtrinsicFailed`) events were found, then we return
     /// the events associated with it. If the transaction was not successful, or
