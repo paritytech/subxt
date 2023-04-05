@@ -7,7 +7,7 @@
 use std::task::Poll;
 
 use crate::{
-    client::OnlineClientT,
+    client::OfflineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
     rpc::types::{Subscription, SubstrateTxStatus},
@@ -53,7 +53,7 @@ impl<T: Config, C> TxProgress<T, C> {
 impl<T, C> TxProgress<T, C>
 where
     T: Config,
-    C: OnlineClientT<T>,
+    C: OfflineClientT<T>,
 {
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
@@ -69,10 +69,10 @@ where
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TxProgress::next_item()`] instead.
     ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
+    /// probability that the transaction will not make it into a block but there is no guarantee
+    /// that this is true. In those cases the stream is closed however, so you currently have no
+    /// way to find out if they finally made it into a block or not.
     pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -82,6 +82,9 @@ where
                 TxStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
+                TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
+                TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
+                TxStatus::Dropped => return Err(TransactionError::Dropped.into()),
                 // Ignore anything else and wait for next status event:
                 _ => continue,
             }
@@ -95,10 +98,10 @@ where
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TxProgress::next_item()`] instead.
     ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
+    /// probability that the transaction will not make it into a block but there is no guarantee
+    /// that this is true. In those cases the stream is closed however, so you currently have no
+    /// way to find out if they finally made it into a block or not.
     pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -108,6 +111,9 @@ where
                 TxStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
+                TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
+                TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
+                TxStatus::Dropped => return Err(TransactionError::Dropped.into()),
                 // Ignore and wait for next status event:
                 _ => continue,
             }
@@ -122,10 +128,10 @@ where
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
     /// use [`TxProgress::next_item()`] instead.
     ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TxProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
+    /// probability that the transaction will not make it into a block but there is no guarantee
+    /// that this is true. In those cases the stream is closed however, so you currently have no
+    /// way to find out if they finally made it into a block or not.
     pub async fn wait_for_finalized_success(
         self,
     ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
@@ -134,7 +140,7 @@ where
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
+impl<T: Config, C: OfflineClientT<T>> Stream for TxProgress<T, C> {
     type Item = Result<TxStatus<T, C>, Error>;
 
     fn poll_next(
@@ -155,13 +161,18 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
                     TxStatus::InBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
                 }
                 SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
-                SubstrateTxStatus::Usurped(hash) => TxStatus::Usurped(hash),
-                SubstrateTxStatus::Dropped => TxStatus::Dropped,
-                SubstrateTxStatus::Invalid => TxStatus::Invalid,
-                // Only the following statuses are actually considered "final" (see the substrate
-                // docs on `TxStatus`). Basically, either the transaction makes it into a
-                // block, or we eventually give up on waiting for it to make it into a block.
-                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                // Only the following statuses are considered "final", in a sense that they end the stream (see the substrate
+                // docs on `TxStatus`):
+                //
+                // - Usurped
+                // - Finalized
+                // - FinalityTimeout
+                // - Invalid
+                // - Dropped
+                //
+                // Even though `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually,
+                // the server considers them final and closes the connection, when they are encountered.
+                // curently there is no way of telling if that happens, because the server ends the stream before.
                 //
                 // As an example, a transaction that is `Invalid` on one node due to having the wrong
                 // nonce might still be valid on some fork on another node which ends up being finalized.
@@ -174,6 +185,18 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
                 SubstrateTxStatus::Finalized(hash) => {
                     self.sub = None;
                     TxStatus::Finalized(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
+                }
+                SubstrateTxStatus::Usurped(hash) => {
+                    self.sub = None;
+                    TxStatus::Usurped(hash)
+                }
+                SubstrateTxStatus::Dropped => {
+                    self.sub = None;
+                    TxStatus::Dropped
+                }
+                SubstrateTxStatus::Invalid => {
+                    self.sub = None;
+                    TxStatus::Invalid
                 }
             }
         })
@@ -220,8 +243,16 @@ impl<T: Config, C: OnlineClientT<T>> Stream for TxProgress<T, C> {
 ///    pool about such cases).
 /// 4. `Retracted` transactions might be included in a future block.
 ///
-/// The stream is considered finished only when either the `Finalized` or `FinalityTimeout`
-/// event is triggered. You are however free to unsubscribe from notifications at any point.
+/// Even though these cases can happen, the server-side of the stream is closed, if one of the following is encountered:
+/// - Usurped
+/// - Finalized
+/// - FinalityTimeout
+/// - Invalid
+/// - Dropped
+/// In any of these cases the client side TxProgress stream is also closed.
+/// So there is currently no way for you to tell if an Dropped`/`Invalid`/`Usurped` transaction
+/// reappears in the pool again or not.
+/// You are free to unsubscribe from notifications at any point.
 /// The first one will be emitted when the block in which the transaction was included gets
 /// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
 /// within 512 blocks. This either indicates that finality is not available for your chain,
@@ -284,7 +315,7 @@ pub struct TxInBlock<T: Config, C> {
     client: C,
 }
 
-impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
+impl<T: Config, C: OfflineClientT<T>> TxInBlock<T, C> {
     pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
         Self {
             block_hash,
