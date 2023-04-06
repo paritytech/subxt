@@ -71,8 +71,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
-    /// TxProgress repeatedly until the extrinsic is finalized.
+    /// that this is true. In those cases the stream is closed however, so you currently have no way to find
+    /// out if they finally made it into a block or not.
     pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -100,8 +100,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
-    /// TxProgress repeatedly until the extrinsic is finalized.
+    /// that this is true. In those cases the stream is closed however, so you currently have no way to find
+    /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -130,8 +130,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
-    /// TxProgress repeatedly until the extrinsic is finalized.
+    /// that this is true. In those cases the stream is closed however, so you currently have no way to find
+    /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized_success(
         self,
     ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
@@ -172,7 +172,8 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
                 //
                 // Even though `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually,
                 // the server considers them final and closes the connection, when they are encountered.
-                // In those cases you have to re-subscribe to the extrinsic/create a new TxProgress repeatedly until the extrinsic is finalized.
+                // In those cases the stream is closed however, so you currently have no way to find
+                // out if they finally made it into a block or not.
                 //
                 // As an example, a transaction that is `Invalid` on one node due to having the wrong
                 // nonce might still be valid on some fork on another node which ends up being finalized.
@@ -257,7 +258,8 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 /// - Dropped
 ///
 /// In any of these cases the client side TxProgress stream is also closed.
-/// In those cases you have to re-subscribe to the extrinsic/create a new TxProgress repeatedly until the extrinsic is finalized.
+/// In those cases the stream is closed however, so you currently have no way to find
+/// out if they finally made it into a block or not.
 
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
@@ -411,7 +413,6 @@ mod test {
     use std::pin::Pin;
 
     use futures::Stream;
-    use serde::Serialize;
 
     use crate::{
         client::{OfflineClientT, OnlineClientT},
@@ -498,9 +499,9 @@ mod test {
         TxProgress::new(sub, MockClient, Default::default())
     }
 
-    fn create_substrate_tx_status_subscription<Hash: Send + 'static + Serialize>(
-        elements: Vec<SubstrateTxStatus<Hash, Hash>>,
-    ) -> Subscription<SubstrateTxStatus<Hash, Hash>> {
+    fn create_substrate_tx_status_subscription(
+        elements: Vec<MockSubstrateTxStatus>,
+    ) -> Subscription<MockSubstrateTxStatus> {
         let rpc_substription_stream: Pin<
             Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
         > = Box::pin(futures::stream::iter(elements.into_iter().map(|e| {
@@ -514,7 +515,7 @@ mod test {
             id: None,
         };
 
-        let sub: Subscription<SubstrateTxStatus<Hash, Hash>> = Subscription::new(rpc_subscription);
+        let sub: Subscription<MockSubstrateTxStatus> = Subscription::new(rpc_subscription);
         sub
     }
 }
