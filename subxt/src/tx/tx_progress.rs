@@ -71,8 +71,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases the stream is closed however, so you currently have no
-    /// way to find out if they finally made it into a block or not.
+    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
+    /// TxProgress repeatedly until the extrinsic is finalized.
     pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -80,7 +80,7 @@ where
                 TxStatus::InBlock(s) | TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                    return Err(TransactionError::FinalityTimeout.into())
                 }
                 TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
                 TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
@@ -100,8 +100,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases the stream is closed however, so you currently have no
-    /// way to find out if they finally made it into a block or not.
+    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
+    /// TxProgress repeatedly until the extrinsic is finalized.
     pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
         while let Some(status) = self.next_item().await {
             match status? {
@@ -109,7 +109,7 @@ where
                 TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                    return Err(TransactionError::FinalityTimeout.into())
                 }
                 TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
                 TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
@@ -130,8 +130,8 @@ where
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases the stream is closed however, so you currently have no
-    /// way to find out if they finally made it into a block or not.
+    /// that this is true. In those cases you have to re-subscribe to the extrinsic/create a new
+    /// TxProgress repeatedly until the extrinsic is finalized.
     pub async fn wait_for_finalized_success(
         self,
     ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
@@ -172,7 +172,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
                 //
                 // Even though `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually,
                 // the server considers them final and closes the connection, when they are encountered.
-                // curently there is no way of telling if that happens, because the server ends the stream before.
+                // In those cases you have to re-subscribe to the extrinsic/create a new TxProgress repeatedly until the extrinsic is finalized.
                 //
                 // As an example, a transaction that is `Invalid` on one node due to having the wrong
                 // nonce might still be valid on some fork on another node which ends up being finalized.
@@ -232,6 +232,12 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 /// there might be cases where transactions alternate between `Future` and `Ready`
 /// pool, and are `Broadcast` in the meantime.
 ///
+/// You are free to unsubscribe from notifications at any point.
+/// The first one will be emitted when the block in which the transaction was included gets
+/// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
+/// within 512 blocks. This either indicates that finality is not available for your chain,
+/// or that finality gadget is lagging behind.
+///
 /// Note that there are conditions that may cause transactions to reappear in the pool:
 ///
 /// 1. Due to possible forks, the transaction that ends up being included
@@ -249,14 +255,10 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 /// - FinalityTimeout
 /// - Invalid
 /// - Dropped
+///
 /// In any of these cases the client side TxProgress stream is also closed.
-/// So there is currently no way for you to tell if an Dropped`/`Invalid`/`Usurped` transaction
-/// reappears in the pool again or not.
-/// You are free to unsubscribe from notifications at any point.
-/// The first one will be emitted when the block in which the transaction was included gets
-/// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
-/// within 512 blocks. This either indicates that finality is not available for your chain,
-/// or that finality gadget is lagging behind.
+/// In those cases you have to re-subscribe to the extrinsic/create a new TxProgress repeatedly until the extrinsic is finalized.
+
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub enum TxStatus<T: Config, C> {
@@ -409,16 +411,19 @@ mod test {
     use std::pin::Pin;
 
     use futures::Stream;
-    use primitive_types::H256;
     use serde::Serialize;
 
     use crate::{
         client::{OfflineClientT, OnlineClientT},
-        config::polkadot::PolkadotConfig,
+        config::{
+            extrinsic_params::BaseExtrinsicParams,
+            polkadot::{PlainTip, PolkadotConfig},
+            WithExtrinsicParams,
+        },
         error::RpcError,
         rpc::{types::SubstrateTxStatus, RpcSubscription, Subscription},
         tx::TxProgress,
-        Error,
+        Config, Error, SubstrateConfig,
     };
 
     use serde_json::value::RawValue;
@@ -440,6 +445,13 @@ mod test {
         }
     }
 
+    type MockTxProgress = TxProgress<PolkadotConfig, MockClient>;
+    type MockHash = <WithExtrinsicParams<
+        SubstrateConfig,
+        BaseExtrinsicParams<SubstrateConfig, PlainTip>,
+    > as Config>::Hash;
+    type MockSubstrateTxStatus = SubstrateTxStatus<MockHash, MockHash>;
+
     impl OnlineClientT<PolkadotConfig> for MockClient {
         fn rpc(&self) -> &crate::rpc::Rpc<PolkadotConfig> {
             panic!("just a mock impl to satisfy trait bounds")
@@ -448,14 +460,10 @@ mod test {
 
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_usurped() {
-        let c = MockClient;
-        let stream_elements: Vec<SubstrateTxStatus<H256, H256>> = vec![
+        let tx_progress = mock_tx_progress(vec![
             SubstrateTxStatus::Ready,
             SubstrateTxStatus::Usurped(Default::default()),
-        ];
-        let sub = create_substrate_tx_status_subscription(stream_elements);
-        let tx_progress: TxProgress<PolkadotConfig, MockClient> =
-            TxProgress::new(sub, c, Default::default());
+        ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
@@ -465,12 +473,8 @@ mod test {
 
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_dropped() {
-        let c = MockClient;
-        let stream_elements: Vec<SubstrateTxStatus<H256, H256>> =
-            vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Dropped];
-        let sub = create_substrate_tx_status_subscription(stream_elements);
-        let tx_progress: TxProgress<PolkadotConfig, MockClient> =
-            TxProgress::new(sub, c, Default::default());
+        let tx_progress =
+            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Dropped]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
@@ -480,17 +484,18 @@ mod test {
 
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_invalid() {
-        let c = MockClient;
-        let stream_elements: Vec<SubstrateTxStatus<H256, H256>> =
-            vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Invalid];
-        let sub = create_substrate_tx_status_subscription(stream_elements);
-        let tx_progress: TxProgress<PolkadotConfig, MockClient> =
-            TxProgress::new(sub, c, Default::default());
+        let tx_progress =
+            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Invalid]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
             Err(Error::Transaction(crate::error::TransactionError::Invalid))
         ));
+    }
+
+    fn mock_tx_progress(statuses: Vec<MockSubstrateTxStatus>) -> MockTxProgress {
+        let sub = create_substrate_tx_status_subscription(statuses);
+        TxProgress::new(sub, MockClient, Default::default())
     }
 
     fn create_substrate_tx_status_subscription<Hash: Send + 'static + Serialize>(

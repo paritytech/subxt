@@ -166,7 +166,7 @@ impl<Res> std::fmt::Debug for Subscription<Res> {
 }
 
 impl<Res> Subscription<Res> {
-    /// Creates a new [`Subscription<Res>`].
+    /// Creates a new [`Subscription`].
     pub fn new(inner: RpcSubscription) -> Self {
         Self {
             inner,

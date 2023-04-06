@@ -119,7 +119,7 @@ pub enum TransactionError {
     /// The finality subscription expired (after ~512 blocks we give up if the
     /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
-    FinalitySubscriptionTimeout,
+    FinalityTimeout,
     /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
