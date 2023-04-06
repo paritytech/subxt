@@ -119,11 +119,20 @@ pub enum TransactionError {
     /// The finality subscription expired (after ~512 blocks we give up if the
     /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
-    FinalitySubscriptionTimeout,
+    FinalityTimeout,
     /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
     BlockNotFound,
+    /// The transaction was deemed invalid in the current chain state.
+    #[error("The transaction is no longer valid")]
+    Invalid,
+    /// The transaction was replaced by a transaction with the same (sender, nonce) pair but with higher priority
+    #[error("The transaction was replaced by a transaction with the same (sender, nonce) pair but with higher priority.")]
+    Usurped,
+    /// The transaction was dropped because of some limit
+    #[error("The transaction was dropped from the pool because of a limit.")]
+    Dropped,
 }
 
 /// Something went wrong trying to encode a storage address.
