@@ -28,11 +28,13 @@ pub use self::{
 
 #[cfg(test)]
 mod tests {
-    use std::pin::Pin;
+    use std::{iter, pin::Pin};
 
     use futures::Stream;
     use jsonrpsee::core::JsonRawValue;
     use primitive_types::H256;
+    use serde::Serialize;
+    use tokio::sync::mpsc;
 
     use crate::{
         client::{OfflineClientT, OnlineClientT},
@@ -43,31 +45,33 @@ mod tests {
         Error, OnlineClient,
     };
 
+    use serde_json::value::RawValue;
+
     #[derive(Clone, Debug)]
     struct MockClient;
 
     impl OfflineClientT<PolkadotConfig> for MockClient {
         fn metadata(&self) -> crate::Metadata {
-            todo!()
+            panic!("just a mock impl to satisfy trait bounds")
         }
 
         fn genesis_hash(&self) -> <PolkadotConfig as crate::Config>::Hash {
-            todo!()
+            panic!("just a mock impl to satisfy trait bounds")
         }
 
         fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
-            todo!()
+            panic!("just a mock impl to satisfy trait bounds")
         }
     }
 
     impl OnlineClientT<PolkadotConfig> for MockClient {
         fn rpc(&self) -> &crate::rpc::Rpc<PolkadotConfig> {
-            todo!()
+            panic!("just a mock impl to satisfy trait bounds")
         }
     }
 
     #[tokio::test]
-    async fn stream_ends_when_usurped() {
+    async fn wait_for_finalized_returns_err_when_usurped() {
         let c = MockClient;
         let stream_elements: Vec<SubstrateTxStatus<H256, H256>> = vec![
             SubstrateTxStatus::Ready,
@@ -83,14 +87,55 @@ mod tests {
         ));
     }
 
-    fn create_substrate_tx_status_subscription<Hash>(
+    #[tokio::test]
+    async fn wait_for_finalized_returns_err_when_dropped() {
+        let c = MockClient;
+        let stream_elements: Vec<SubstrateTxStatus<H256, H256>> =
+            vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Dropped];
+        let sub = create_substrate_tx_status_subscription(stream_elements);
+        let tx_progress: TxProgress<PolkadotConfig, MockClient> =
+            TxProgress::new(sub, c, Default::default());
+        let finalized_result = tx_progress.wait_for_finalized().await;
+        assert!(matches!(
+            finalized_result,
+            Err(Error::Transaction(crate::error::TransactionError::Dropped))
+        ));
+    }
+
+    #[tokio::test]
+    async fn wait_for_finalized_returns_err_when_invalid() {
+        let c = MockClient;
+        let stream_elements: Vec<SubstrateTxStatus<H256, H256>> =
+            vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Invalid];
+        let sub = create_substrate_tx_status_subscription(stream_elements);
+        let tx_progress: TxProgress<PolkadotConfig, MockClient> =
+            TxProgress::new(sub, c, Default::default());
+        let finalized_result = tx_progress.wait_for_finalized().await;
+        assert!(matches!(
+            finalized_result,
+            Err(Error::Transaction(crate::error::TransactionError::Invalid))
+        ));
+    }
+
+    fn create_substrate_tx_status_subscription<Hash: Send + 'static + Serialize>(
         elements: Vec<SubstrateTxStatus<Hash, Hash>>,
     ) -> Subscription<SubstrateTxStatus<Hash, Hash>> {
         let rpc_substription_stream: Pin<
-            Box<dyn Stream<Item = Result<Box<JsonRawValue>, RpcError>> + Send + 'static>,
-        > = todo!();
-        let rpc_subscription: RpcSubscription = todo!();
-        let sub: Subscription<SubstrateTxStatus<Hash, Hash>> = todo!();
+            Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
+        > = Box::pin(futures::stream::iter(elements.into_iter().map(|e| {
+            let s = serde_json::to_string(&e).unwrap();
+            let r: Box<RawValue> = RawValue::from_string(s).unwrap();
+            Ok(r)
+        })));
+
+        let subtxstatus: SubstrateTxStatus<Hash, Hash> = SubstrateTxStatus::Dropped;
+
+        let rpc_subscription: RpcSubscription = RpcSubscription {
+            stream: rpc_substription_stream,
+            id: None,
+        };
+
+        let sub: Subscription<SubstrateTxStatus<Hash, Hash>> = Subscription::new(rpc_subscription);
         sub
     }
 }
