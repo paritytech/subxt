@@ -111,7 +111,7 @@ async fn fetch_keys() {
     let addr = node_runtime::storage().system().account_root();
     let keys = api
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch_keys(&addr.to_root_bytes(), 4, None)
@@ -128,7 +128,7 @@ async fn test_iter() {
     let addr = node_runtime::storage().system().account_root();
     let mut iter = api
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .iter(addr, 10)

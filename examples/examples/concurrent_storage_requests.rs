@@ -29,8 +29,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // For storage requests, we can join futures together to
     // await multiple futures concurrently:
-    let a_fut = api.storage().at(None).await?.fetch(&staking_bonded);
-    let b_fut = api.storage().at(None).await?.fetch(&staking_ledger);
+    let a_fut = api.storage().at_latest().await?.fetch(&staking_bonded);
+    let b_fut = api.storage().at_latest().await?.fetch(&staking_ledger);
     let (a, b) = join!(a_fut, b_fut);
 
     println!("{a:?}, {b:?}");

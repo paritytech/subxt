@@ -212,7 +212,7 @@ async fn tx_call() {
     let contract_info = cxt
         .client()
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch(&info_addr)
@@ -222,7 +222,7 @@ async fn tx_call() {
     let keys = cxt
         .client()
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch_keys(&info_addr_bytes, 10, None)

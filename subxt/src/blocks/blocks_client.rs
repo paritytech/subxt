@@ -49,6 +49,36 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
+        block_hash: T::Hash,
+    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+        self.at_optional_block_hash(Some(block_hash))
+    }
+
+    /// Obtain block details given the provided block hash, or the latest block if `None` is
+    /// provided.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve older blocks,
+    /// but may run into errors attempting to work with them.
+    pub fn at_latest(
+        &self,
+    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+        self.at_optional_block_hash(None)
+    }
+
+    /// Obtain block details given the provided block hash, or the latest block if `None` is
+    /// provided.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve older blocks,
+    /// but may run into errors attempting to work with them.
+    #[inline]
+    fn at_optional_block_hash(
+        &self,
         block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         let client = self.client.clone();

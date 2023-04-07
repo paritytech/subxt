@@ -75,7 +75,7 @@ where
     /// // Fetch just the keys, returning up to 10 keys.
     /// let value = api
     ///     .storage()
-    ///     .at(None)
+    ///     .at_latest()
     ///     .await
     ///     .unwrap()
     ///     .fetch(&address)
@@ -185,7 +185,7 @@ where
     /// // Iterate over keys and values at that address.
     /// let mut iter = api
     ///     .storage()
-    ///     .at(None)
+    ///     .at_latest()
     ///     .await
     ///     .unwrap()
     ///     .iter(address, 10)

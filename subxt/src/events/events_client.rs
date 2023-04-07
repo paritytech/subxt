@@ -38,6 +38,32 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
+        block_hash: T::Hash,
+    ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+        self.at_optional_block_hash(Some(block_hash))
+    }
+
+    /// Obtain events at the latest block hash.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve events from older blocks,
+    /// but may run into errors attempting to work with them.
+    pub fn at_latest(&self) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+        self.at_optional_block_hash(None)
+    }
+
+    /// Obtain events at some block hash.
+    ///
+    /// # Warning
+    ///
+    /// This call only supports blocks produced since the most recent
+    /// runtime upgrade. You can attempt to retrieve events from older blocks,
+    /// but may run into errors attempting to work with them.
+    #[inline]
+    fn at_optional_block_hash(
+        &self,
         block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
