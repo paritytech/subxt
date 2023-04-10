@@ -11,7 +11,7 @@ publish = false
 [dev-dependencies]
 trybuild = "1.0.79"
 scale-info = { version = "2.5.0", features = ["bit-vec"] }
-frame-metadata = "15.1.0"
+frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 subxt = { path = "../../subxt" }
 subxt-metadata = { path = "../../metadata" }
