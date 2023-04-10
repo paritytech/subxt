@@ -42,7 +42,7 @@ version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcb51a0695d8f838b1ee009b3fbf66bda078cd64590202a864a8f3e8c4315c47"
 dependencies = [
- "getrandom 0.2.8",
+ "getrandom 0.2.9",
  "once_cell",
  "version_check",
 ]
@@ -54,7 +54,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
 dependencies = [
  "cfg-if",
- "getrandom 0.2.8",
+ "getrandom 0.2.9",
  "once_cell",
  "version_check",
 ]
@@ -1145,9 +1145,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.8"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c05aeb6a22b8f62540c194aac980f2115af067bfe15a0734d7277a768d396b31"
+checksum = "c85e1d9ab2eadba7e5040d4e09cbd6d072b76a557ad64e797c2cb9d4da21d7e4"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2366,7 +2366,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.8",
+ "getrandom 0.2.9",
 ]
 
 [[package]]
@@ -3400,7 +3400,7 @@ dependencies = [
  "either",
  "frame-metadata",
  "futures",
- "getrandom 0.2.8",
+ "getrandom 0.2.9",
  "hex",
  "impl-serde",
  "jsonrpsee",
