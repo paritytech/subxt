@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Use that query to `fetch` a result. This returns an `Option<_>`, which will be
     //  `None` if no value exists at the given address. You can also use `fetch_default`
     // where applicable, which will return the default value if none exists.
-    let result = api.storage().at(None).await?.fetch(&storage_query).await?;
+    let result = api.storage().at_latest().await?.fetch(&storage_query).await?;
 
     println!("Alice has free balance: {}", result.unwrap().data.free);
     Ok(())

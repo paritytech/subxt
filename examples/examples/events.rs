@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Get events for the latest block:
-    let events = api.events().at(None).await?;
+    let events = api.events().at_latest().await?;
 
     // We can dynamically decode events:
     println!("Dynamic event details:");

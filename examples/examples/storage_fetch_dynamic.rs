@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Use that query to `fetch` a result. Because the query is dynamic, we don't know what the result
     // type will be either, and so we get a type back that can be decoded into a dynamic Value type.
-    let result = api.storage().at(None).await?.fetch(&storage_query).await?;
+    let result = api.storage().at_latest().await?.fetch(&storage_query).await?;
     let value = result.unwrap().to_value()?;
 
     println!("Alice has free balance: {:?}", value.at("data").at("free"));

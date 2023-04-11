@@ -19,9 +19,9 @@ use subxt::config::PolkadotConfig;
 let client = OnlineClient::<PolkadotConfig>::new().await?;
 
 // Get events from the latest block:
-let events = client.blocks().at(None).await?.events().await?;
+let events = client.blocks().at_latest().await?.events().await?;
 // We can use this shorthand too:
-let events = client.events().at(None).await?;
+let events = client.events().at_latest().await?;
 # Ok(())
 # }
 ```
