@@ -39,8 +39,7 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Obtain block details given the provided block hash, or the latest block if `None` is
-    /// provided.
+    /// Obtain block details given the provided block hash.
     ///
     /// # Warning
     ///
@@ -54,14 +53,7 @@ where
         self.at_optional_block_hash(Some(block_hash))
     }
 
-    /// Obtain block details given the provided block hash, or the latest block if `None` is
-    /// provided.
-    ///
-    /// # Warning
-    ///
-    /// This call only supports blocks produced since the most recent
-    /// runtime upgrade. You can attempt to retrieve older blocks,
-    /// but may run into errors attempting to work with them.
+    /// Obtain block details of the latest block hash.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
@@ -70,12 +62,6 @@ where
 
     /// Obtain block details given the provided block hash, or the latest block if `None` is
     /// provided.
-    ///
-    /// # Warning
-    ///
-    /// This call only supports blocks produced since the most recent
-    /// runtime upgrade. You can attempt to retrieve older blocks,
-    /// but may run into errors attempting to work with them.
     #[inline]
     fn at_optional_block_hash(
         &self,
