@@ -3,5 +3,8 @@
 // see LICENSE for license details.
 
 /*!
+# Blocks
+
+The [blocks API](crate::blocks::BlocksClient) in Subxt provides a way to access information about specific blocks, as well as subscribe to new blocks.
 
 */

@@ -8,11 +8,12 @@
 Subxt is a library for interacting with Substrate based nodes. It has a focus on **sub**mitting e**xt**rinsics, hence the name, however it's also capable of reading blocks, storage, events and constants from a node. The aim of this guide is to explain key concepts and get you started with using Subxt.
 
 1. [Features](#features-at-a-glance)
-2. [Setup](#setup)
+2. [Limitations](#limitations)
+3. [Setup](#setup)
    1. [Metadata](#metadata)
    2. [Config](#config)
-3. [Usage](#usage)
-4. [Examples](#examples)
+4. [Usage](#usage)
+5. [Examples](#examples)
 
 ## Features at a glance
 
@@ -25,13 +26,27 @@ Here's a quick overview of the features that Subxt has to offer:
 - Subxt can forego the statically generated interface and build transactions, storage queries and constant queries using data provided at runtime, rather than queries constructed statically.
 - Subxt can be compiled to WASM to run in the browser, allowing it to back Rust based browser apps, or even bind to JS apps.
 
+## Limitations
+
+In various places, you can provide a block hash to access data at a particular block, for instance:
+
+- [`crate::storage::StorageClient::at`]
+- [`crate::events::EventsClient::at`]
+- [`crate::blocks::BlocksClient::at`]
+
+However, Subxt is (by default) only capable of properly working with blocks that were produced after the most recent runtime update. This is because it uses the current runtime's metadata to encode and decode things.
+
+Subxt currently supports V14 metadata, and so it's possible to decode older blocks produced with a runtime that emits V14 metadata by manually setting the metadata used by the client using [`crate::client::OnlineClient::set_metadata()`].
+
+Subxt is currently unable to work with any blocks produced prior to the runtime update that introduces V14 metadata.
+
 ## Setup
 
 Here is a simple but complete example of using Subxt to transfer some tokens from Alice to Bob:
 
 */
 //! ```rust,ignore
-#![doc = include_str!("../../../examples/examples/basic_balance_transfer.rs")]
+#![doc = include_str!("../../../examples/examples/balance_transfer_basic.rs")]
 //! ```
 /*!
 

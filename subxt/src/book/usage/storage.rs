@@ -3,5 +3,98 @@
 // see LICENSE for license details.
 
 /*!
+# Storage
+
+A Substrate based chain has storage, whose values are determined by the extrinsics added to past blocks. Subxt allows you to query the storage of a node, which consists of the following steps:
+
+1. [Constructing a storage query](#constructing-a-storage-query).
+2. [Submitting the query to get back the associated values](#submitting-it).
+
+## Constructing a storage query
+
+We can use the statically generated interface to build storage queries:
+
+```rust,no_run
+use sp_keyring::AccountKeyring;
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+pub mod polkadot {}
+
+let account = AccountKeyring::Alice.to_account_id().into();
+let storage_query = polkadot::storage().system().account(&account);
+```
+
+Alternately, we can dynamically construct a storage query. This will not be type checked or validated until it's submitted:
+
+```rust,no_run
+use subxt::dynamic::Value;
+
+let account = AccountKeyring::Alice.to_account_id();
+let storage_query = subxt::dynamic::storage("System", "Account", vec![
+    Value::from_bytes(account)
+]);
+```
+
+As well as accessing specific entries, some storage locations can also be iterated over (such as the map of account information). Do do this, suffix `_root` onto the query constructor (this will only be available on static constructors when iteration is actually possible):
+
+```rust,no_run
+use sp_keyring::AccountKeyring;
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+pub mod polkadot {}
+
+// A static query capable of iterating over accounts:
+let storage_query = polkadot::storage().system().account_root();
+// A dynamic query to do the same:
+let storage_query = subxt::dynamic::storage_root("System", "Account");
+```
+
+All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing how to build a valid storage query, this trait also has some associated types that determine the shape of the result you'll get back, and determine what you can do with it (ie, can you iterate over storage entries using it).
+
+Static queries set appropriate values for these associated types, and can therefore only be used where it makes sense. Dyanmic queries don't know any better and can be used in more places, but may fail at runtime instead if they are invalid in those places.
+
+## Submitting it
+
+Storage queries can be handed to various functions in [`crate::storage::Storage`] in order to obtain the associated values (also referred to as storage entries) back.
+
+### Fetching storage entries
+
+The simplest way to access storage entries is to construct a query and then call either [`crate::storage::Storage::fetch()`] or [`crate::storage::Storage::fetch_or_default()`] (the latter will only work for storage queries that have a default value when empty):
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/storage_fetch.rs")]
+//! ```
+/*!
+
+For completeness, below is an example using a dynamic query instead. The return type from a dynamic query is a [`crate::dynamic::DecodedValueThunk`], which can be decoded into a [`crate::dynamic::Value`], or else the raw bytes can be accessed instead.
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/storage_fetch_dynamic.rs")]
+//! ```
+/*!
+
+### Iterating storage entries
+
+Many storage entries are maps of values; as well as fetching individual values, it's possible to iterate over all of the values stored at that location:
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/storage_iterating.rs")]
+//! ```
+/*!
+
+Here's the same logic but using dynamically constructed values instead:
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/storage_iterating_dynamic.rs")]
+//! ```
+/*!
+
+### Advanced
+
+For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and [`crate::storage::Storage::fetch_keys`]. Both of these take raw bytes as arguments, which can be obtained from a [`crate::storage::StorageAddress`] by using [`crate::storage::StorageClient::address_bytes()`] or [`crate::storage::StorageClient::address_root_bytes()`].
 
 */

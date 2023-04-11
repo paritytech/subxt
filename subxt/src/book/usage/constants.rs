@@ -3,5 +3,55 @@
 // see LICENSE for license details.
 
 /*!
+# Constants
+
+There are various constants stored in a node; these can only change when the runtime is updated. Much like [`super::storage`], we can query these using Subxt by taking the following steps:
+
+1. [Constructing a constant query](#constructing-a-query).
+2. [Submitting the query to get back the associated value](#submitting-it).
+
+## Constructing a constant query
+
+We can use the statically generated interface to build constant queries:
+
+```rust,no_run
+use sp_keyring::AccountKeyring;
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+pub mod polkadot {}
+
+let constant_query = polkadot::constants().system().block_length();
+```
+
+Alternately, we can dynamically construct a constant query:
+
+```rust,no_run
+use subxt::dynamic::Value;
+
+let account = AccountKeyring::Alice.to_account_id();
+let storage_query = subxt::dynamic::constant("System", "BlockLength");
+```
+
+Static queries also have a static return type, so the constant is decoded appropriately. In addition, they are validated at runtime to ensure that they align with the current node state. Dynamic queries must be decoded into some static type manually, or into the dynamic [`crate::dynamic::Value`] type.
+
+## Submitting it
+
+Constant queries are submitted via [`crate::constants::ConstantsClient::at()`]. It's worth noting that constant values are pulled directly out of the node metadata which the client has already acquired, and so this function is available from a [`crate::OfflineClient`].
+
+Here's an example using a static query:
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/constants_static.rs")]
+//! ```
+/*!
+
+And here's one using a dynamic query:
+
+*/
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/constants_dynamic.rs")]
+//! ```
+/*!
 
 */

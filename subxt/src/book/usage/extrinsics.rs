@@ -5,14 +5,11 @@
 /*!
 # Extrinsics
 
-Submitting extrinsics to a node is one of the core features of Subxt, and generally consists of the following steps:
+Extrinsics define function calls and their parameters, and are the only way that you can change the state of the blockchain. Submitting extrinsics to a node is one of the core features of Subxt, and generally consists of the following steps:
 
 1. [Constructing an extrinsic payload to submit](#constructing-an-extrinsic-payload).
 2. [Signing it](#signing-it).
-2. [Submitting it (optionally with some additional parameters)](#submitting-it).
-   Once submitted, you'll typically also:
-   1. Watch the transaction progress and wait until it has made it into a block.
-   2. Check the events emitted by it once it's in a block to see what happened and whether it succeeded.
+3. [Submitting it (optionally with some additional parameters)](#submitting-it).
 
 We'll look at each of these steps in turn.
 
@@ -127,7 +124,7 @@ The highest level approach to doing this is to call [`crate::tx::TxClient::sign_
 
 */
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/basic_balance_transfer.rs")]
+#![doc = include_str!("../../../../examples/examples/balance_transfer_basic.rs")]
 //! ```
 /*!
 

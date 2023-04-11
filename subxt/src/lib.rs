@@ -5,7 +5,7 @@
 //! Subxt is a library for interacting with Substrate based nodes. Using it looks something like this:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../examples/examples/basic_balance_transfer.rs")]
+#![doc = include_str!("../../examples/examples/balance_transfer_basic.rs")]
 //! ```
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
