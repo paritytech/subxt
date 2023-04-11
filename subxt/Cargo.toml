@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.27.1"
+version = "0.28.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -53,8 +53,8 @@ frame-metadata = "15.0.0"
 derivative = "2.2.0"
 either = "1.8.1"
 
-subxt-macro = { version = "0.27.1", path = "../macro" }
-subxt-metadata = { version = "0.27.1", path = "../metadata" }
+subxt-macro = { version = "0.28.0", path = "../macro" }
+subxt-metadata = { version = "0.28.0", path = "../metadata" }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { version = "0.4.0" }

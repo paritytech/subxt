@@ -1,6 +1,6 @@
 [package]
 name = "subxt-macro"
-version = "0.27.1"
+version = "0.28.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -21,4 +21,4 @@ darling = "0.14.4"
 proc-macro-error = "1.0.4"
 syn = "1.0.109"
 
-subxt-codegen = { path = "../codegen", version = "0.27.1" }
+subxt-codegen = { path = "../codegen", version = "0.28.0" }
