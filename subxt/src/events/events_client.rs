@@ -40,29 +40,16 @@ where
         &self,
         block_hash: T::Hash,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
-        self.at_optional_block_hash(Some(block_hash))
+        self.at_or_latest(Some(block_hash))
     }
 
     /// Obtain events at the latest block hash.
-    ///
-    /// # Warning
-    ///
-    /// This call only supports blocks produced since the most recent
-    /// runtime upgrade. You can attempt to retrieve events from older blocks,
-    /// but may run into errors attempting to work with them.
     pub fn at_latest(&self) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
-        self.at_optional_block_hash(None)
+        self.at_or_latest(None)
     }
 
     /// Obtain events at some block hash.
-    ///
-    /// # Warning
-    ///
-    /// This call only supports blocks produced since the most recent
-    /// runtime upgrade. You can attempt to retrieve events from older blocks,
-    /// but may run into errors attempting to work with them.
-    #[inline]
-    fn at_optional_block_hash(
+    fn at_or_latest(
         &self,
         block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
