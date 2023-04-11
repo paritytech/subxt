@@ -18,7 +18,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     let addr = node_runtime::storage().timestamp().now();
     let entry = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&addr)
         .await?;
@@ -47,7 +47,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let nonce_addr = node_runtime::storage().system().account(alice);
     let entry = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&nonce_addr)
         .await?;
@@ -121,7 +121,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
 
     // The actual test; look up this approval in storage:
     let addr = node_runtime::storage().assets().approvals(99, alice, bob);
-    let entry = api.storage().at(None).await?.fetch(&addr).await?;
+    let entry = api.storage().at_latest().await?.fetch(&addr).await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
 }

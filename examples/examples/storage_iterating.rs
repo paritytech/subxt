@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage_query = polkadot::storage().system().account_root();
 
     // Get back an iterator of results (we acquire 10 at a time, here).
-    let mut results = api.storage().at(None).await?.iter(storage_query, 10).await?;
+    let mut results = api.storage().at_latest().await?.iter(storage_query, 10).await?;
 
     while let Some((key, value)) = results.next().await? {
         println!("Key: 0x{}", hex::encode(&key));
