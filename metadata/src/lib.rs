@@ -5,6 +5,8 @@
 mod retain;
 mod validation;
 
+pub use sp_metadata_ir as metadata_ir;
+
 pub use retain::retain_metadata_pallets;
 pub use validation::{
     get_call_hash, get_constant_hash, get_metadata_hash, get_metadata_per_pallet_hash,
