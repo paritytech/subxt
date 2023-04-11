@@ -38,6 +38,19 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
+        block_hash: T::Hash,
+    ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+        self.at_or_latest(Some(block_hash))
+    }
+
+    /// Obtain events at the latest block hash.
+    pub fn at_latest(&self) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+        self.at_or_latest(None)
+    }
+
+    /// Obtain events at some block hash.
+    fn at_or_latest(
+        &self,
         block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly

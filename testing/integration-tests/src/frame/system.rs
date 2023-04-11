@@ -20,7 +20,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
     let account_info = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&account_info_addr)
         .await;

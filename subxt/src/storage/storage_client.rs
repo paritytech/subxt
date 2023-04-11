@@ -71,24 +71,24 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain storage at some block hash.
-    pub fn at(
+    pub fn at(&self, block_hash: T::Hash) -> Storage<T, Client> {
+        Storage::new(self.client.clone(), block_hash)
+    }
+
+    /// Obtain storage at the latest block hash.
+    pub fn at_latest(
         &self,
-        block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Storage<T, Client>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // If block hash is not provided, get the hash
-            // for the latest block and use that.
-            let block_hash = match block_hash {
-                Some(hash) => hash,
-                None => client
-                    .rpc()
-                    .block_hash(None)
-                    .await?
-                    .expect("didn't pass a block number; qed"),
-            };
+            // get the hash for the latest block and use that.
+            let block_hash = client
+                .rpc()
+                .block_hash(None)
+                .await?
+                .expect("didn't pass a block number; qed");
 
             Ok(Storage::new(client, block_hash))
         }
