@@ -4,9 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.28.0] - 2022-04-11
+
+Notable PRs since the last release:
+
+### Added
+
+- added at_latest ([#900](https://github.com/paritytech/subxt/pull/900))
+- Metadata: Retain a subset of metadata pallets ([#879](https://github.com/paritytech/subxt/pull/879))
+- Expose signer payload to allow external signing ([#861](https://github.com/paritytech/subxt/pull/861))
+- Add ink! as a user of `subxt` ([#837](https://github.com/paritytech/subxt/pull/837))
+- codegen: Add codegen error ([#841](https://github.com/paritytech/subxt/pull/841))
+- codegen: allow documentation to be opted out of ([#843](https://github.com/paritytech/subxt/pull/843))
+- re-export `sp_core` and `sp_runtime` ([#853](https://github.com/paritytech/subxt/pull/853))
+- Allow generating only runtime types in subxt macro ([#845](https://github.com/paritytech/subxt/pull/845))
+- Add 'Static' type and improve type substitution codegen to accept it ([#886](https://github.com/paritytech/subxt/pull/886))
+
+### Changed
+
+- wait_for_finalized behavior if the tx dropped, usurped or invalid ([#897](https://github.com/paritytech/subxt/pull/897))
+- Improve Dispatch Errors ([#878](https://github.com/paritytech/subxt/pull/878))
+- Use scale-encode and scale-decode to encode and decode based on metadata ([#842](https://github.com/paritytech/subxt/pull/842))
+- For smoldot: support deserializing block number in header from hex or number ([#863](https://github.com/paritytech/subxt/pull/863))
+- Bump Substrate dependencies ([#840](https://github.com/paritytech/subxt/pull/840))
+
 ## [0.27.1] - 2022-02-15
 
-## Added
+### Added
 
 - Add `find_last` for block types ([#825](https://github.com/paritytech/subxt/pull/825))
 
@@ -18,12 +42,12 @@ The main breaking change is fairly small: [#804](https://github.com/paritytech/s
 
 Note worthy PRs merged since the last release:
 
-## Added
+### Added
 
 - Add find last function ([#821](https://github.com/paritytech/subxt/pull/821))
 - Doc: first item is current version comment ([#817](https://github.com/paritytech/subxt/pull/817))
 
-## Changed
+### Changed
 
 - Remove unneeded Config bounds and BlockNumber associated type ([#804](https://github.com/paritytech/subxt/pull/804))
 
