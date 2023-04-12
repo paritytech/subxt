@@ -9,9 +9,7 @@ Subxt is a library for interacting with Substrate based nodes. It has a focus on
 
 1. [Features](#features-at-a-glance)
 2. [Limitations](#limitations)
-3. [Setup](#setup)
-   1. [Metadata](#metadata)
-   2. [Config](#config)
+3. [Quick start](#quick-start)
 4. [Usage](#usage)
 5. [Examples](#examples)
 
@@ -19,8 +17,8 @@ Subxt is a library for interacting with Substrate based nodes. It has a focus on
 
 Here's a quick overview of the features that Subxt has to offer:
 
-- Subxt allows you to generate a static, type safe interface to a node given some metadata; this allows you to catch more errors at compile time rather than runtime.
-- Subxt also makes heavy use of node metadata to encode/decode the data sent to/from it. This allows it to target almost any node which can output the correct metadata version, and allows it some flexibility in encoding and decoding things to account for cross-node differences.
+- Subxt allows you to generate a static, type safe interface to a node given some metadata; this allows you to catch many errors at compile time rather than runtime.
+- Subxt also makes heavy use of node metadata to encode/decode the data sent to/from it. This allows it to target almost any node which can output the correct metadata, and allows it some flexibility in encoding and decoding things to account for cross-node differences.
 - Subxt has a pallet-oriented interface, meaning that code you write to talk to some pallet on one node will often "Just Work" when pointed at different nodes that use the same pallet.
 - Subxt can work offline; you can generate and sign transactions, access constants from node metadata and more, without a network connection. This is all checked at compile time, so you can be certain it won't try to establish a network connection if you don't want it to.
 - Subxt can forego the statically generated interface and build transactions, storage queries and constant queries using data provided at runtime, rather than queries constructed statically.
@@ -33,14 +31,13 @@ In various places, you can provide a block hash to access data at a particular b
 - [`crate::storage::StorageClient::at`]
 - [`crate::events::EventsClient::at`]
 - [`crate::blocks::BlocksClient::at`]
+- [`crate::runtime_api::RuntimeApiClient::at`]
 
-However, Subxt is (by default) only capable of properly working with blocks that were produced after the most recent runtime update. This is because it uses the current runtime's metadata to encode and decode things.
+However, Subxt is (by default) only capable of properly working with blocks that were produced after the most recent runtime update. This is because it uses the most recent metadata given back by a node to encode and decode things. It's possible to decode older blocks produced by a runtime that emits compatible (currently, V14) metadata by manually setting the metadata used by the client using [`crate::client::OnlineClient::set_metadata()`].
 
-Subxt currently supports V14 metadata, and so it's possible to decode older blocks produced with a runtime that emits V14 metadata by manually setting the metadata used by the client using [`crate::client::OnlineClient::set_metadata()`].
+Subxt does not support working with blocks produced prior to the runtime update that introduces V14 metadata. It may have some success decoding older blocks using newer metadata, but may also completely fail to do so.
 
-Subxt is currently unable to work with any blocks produced prior to the runtime update that introduces V14 metadata.
-
-## Setup
+## Quick start
 
 Here is a simple but complete example of using Subxt to transfer some tokens from Alice to Bob:
 
@@ -50,12 +47,12 @@ Here is a simple but complete example of using Subxt to transfer some tokens fro
 //! ```
 /*!
 
-This example assumes that a Polkadot node at a supported version is running locally (use [OnlineClient::from_url()](crate::client::OnlineClient::from_url()) to instead interact with a node hosted elsewhere).
+This example assumes that a Polkadot node is running locally (Subxt endeavours to support all recent releases). Typically, to use Subxt to talk to some custom Substrate node (for example a parachain node), you'll want to:
 
-Typically, to use Subxt to talk to some custom Substrate node (for example a parachain node), you'll need to:
+1. [Generate an interface](setup::codegen).
+2. [Configure and instantiate the client](setup::client).
 
-1. Acquire some metadata from that node to pass to the [`#[subxt]`](crate::subxt) macro (optional but recommended).
-2. Configure the client used by providing an instance of the [`Config`](crate::config::Config) trait.
+Follow the above links to learn more about each step.
 
 ### Acquiring metadata
 
@@ -89,6 +86,7 @@ Once Subxt is configured, the next step is actually interacting with a node. Fol
 - [Events](usage::events): Subxt can read the events emitted for recent blocks.
 - [Constants](usage::constants): Subxt can access the constant values stored in a node, which remain the same for a given runtime version.
 - [Blocks](usage::blocks): Subxt can load recent blocks or subscribe to new/finalized blocks, reading the extrinsics, events and storage at these blocks.
+- [Runtime APIs](usage::runtime_apis): Subxt can make calls into pallet runtime APIs to retrieve data.
 
 ## Examples
 
@@ -100,4 +98,5 @@ A set of examples to help showcase various Subxt features and functionality:
 - Working offline.
 
 */
+pub mod setup;
 pub mod usage;

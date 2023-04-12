@@ -16,9 +16,5 @@ description = "Subxt example usage"
 subxt = { path = "../subxt" }
 tokio = { version = "1.27", features = ["rt-multi-thread", "macros", "time"] }
 futures = "0.3.27"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 hex = "0.4.3"
-tracing-subscriber = "0.3.11"
 sp-keyring = "23.0.0"
-sp-core = { version = "20.0.0", default-features = false }
-sp-runtime = "23.0.0"

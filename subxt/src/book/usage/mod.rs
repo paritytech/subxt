@@ -10,6 +10,7 @@ This modules contains examples of using Subxt; follow the links for more:
 - [Events](events)
 - [Constants](constants)
 - [Blocks](blocks)
+- [Runtime APIs](runtime_apis)
 
 Alternately, [go back](super).
 */
@@ -19,3 +20,4 @@ pub mod constants;
 pub mod events;
 pub mod extrinsics;
 pub mod storage;
+pub mod runtime_apis;

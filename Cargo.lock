@@ -3568,13 +3568,9 @@ version = "0.28.0"
 dependencies = [
  "futures",
  "hex",
- "parity-scale-codec",
- "sp-core",
  "sp-keyring",
- "sp-runtime",
  "subxt",
  "tokio",
- "tracing-subscriber 0.3.16",
 ]
 
 [[package]]
