@@ -9,6 +9,7 @@ mod constants;
 mod events;
 mod storage;
 
+use frame_metadata::v15::RuntimeMetadataV15;
 use subxt_metadata::get_metadata_per_pallet_hash;
 
 use super::DerivesRegistry;
@@ -20,7 +21,7 @@ use crate::{
     CratePath,
 };
 use codec::Decode;
-use frame_metadata::{v14::RuntimeMetadataV14, RuntimeMetadata, RuntimeMetadataPrefixed};
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -152,7 +153,7 @@ pub fn generate_runtime_api_from_bytes(
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
 }
 
 impl RuntimeGenerator {
@@ -161,9 +162,17 @@ impl RuntimeGenerator {
     /// **Note:** If you have the metadata path, URL or bytes to hand, prefer to use
     /// one of the `generate_runtime_api_from_*` functions for generating the runtime API
     /// from that.
+    ///
+    /// # Panics
+    ///
+    /// If the metadata version is not supported by subxt.
+    /// Only v14 and v15 versions are supported.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
-            RuntimeMetadata::V14(v14) => Self { metadata: v14 },
+            RuntimeMetadata::V14(v14) => Self {
+                metadata: subxt_metadata::metadata_v14_to_latest(v14),
+            },
+            RuntimeMetadata::V15(v15) => Self { metadata: v15 },
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         }
     }
