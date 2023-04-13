@@ -583,6 +583,35 @@ async fn chainhead_unstable_unpin() {
         .is_err());
 }
 
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FeeDetails {
+    /// The minimum fee for a transaction to be included in a block.
+    pub inclusion_fee: Option<InclusionFee>,
+    /// tip
+    pub tip: u128,
+}
+
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.InclusionFee.html>
+/// The base fee and adjusted weight and length fees constitute the _inclusion fee_.
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InclusionFee {
+    /// minimum amount a user pays for a transaction.
+    pub base_fee: u128,
+    /// amount paid for the encoded length (in bytes) of the transaction.
+    pub len_fee: u128,
+    ///
+    /// - `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on the
+    ///   congestion of the network.
+    /// - `weight_fee`: This amount is computed based on the weight of the transaction. Weight
+    /// accounts for the execution time of a transaction.
+    ///
+    /// adjusted_weight_fee = targeted_fee_adjustment * weight_fee
+    pub adjusted_weight_fee: u128,
+}
+
 #[tokio::test]
 async fn partial_fee_estimate_correct() {
     let ctx = test_context().await;

@@ -6,13 +6,11 @@ use std::borrow::Cow;
 
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
     error::Error,
-    rpc::types::RuntimeDispatchInfo,
     tx::{Signer as SignerT, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
@@ -433,10 +431,23 @@ where
     /// Returns the SCALE encoded extrinsic bytes with the length attached to the end.
     /// Useful for certain RPC-calls that expect this format.
     ///
-    /// *Example*: let self.encoded.0 be [10, 20, 10, 20, 10], then encoded_with_len() will be [10, 20, 10, 20, 10, 5, 0, 0, 0]. So there are always 4 bytes appended representing the length of the extrinsic in bytes in little endian notation.
+    /// ```
+    /// use subxt::{SubstrateConfig, client::OfflineClientT, tx::SubmittableExtrinsic};
+    /// #[derive(Clone)]
+    /// struct MockClient;
+    /// impl OfflineClientT<SubstrateConfig> for MockClient {
+    ///     fn metadata(&self) -> subxt::Metadata { panic!() }  
+    ///     fn genesis_hash(&self) -> <SubstrateConfig as subxt::Config>::Hash { panic!() }
+    ///     fn runtime_version(&self) -> subxt::rpc::types::RuntimeVersion { panic!() }
+    /// }
+    /// let bytes =  vec![4, 2, 0];
+    /// let extrinsic = SubmittableExtrinsic::<SubstrateConfig, _>::from_bytes(MockClient, bytes);
+    /// // extrinsic.encoded().len() is 3 and is encoded as [3, 0, 0, 0]:
+    /// assert_eq!(extrinsic.encoded_with_len(), vec![4, 2, 0, 3, 0, 0, 0]);
+    /// ```
     pub fn encoded_with_len(&self) -> Vec<u8> {
         let b: [u8; 4] = (self.encoded.0.len() as u32).to_le_bytes();
-        [&self.encoded()[..], &b[..]].concat()
+        [self.encoded(), &b[..]].concat()
     }
 }
 
@@ -526,6 +537,20 @@ where
     /// partial_fee = base_fee + len_fee + adjusted_weight_fee
     /// ```
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
+        /// adapted from original type <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
+        #[derive(Debug, Encode, Decode, Eq, PartialEq, Copy, Clone)]
+        pub struct RuntimeDispatchInfo {
+            /// Weight of this dispatch. Adapted from original type <https://paritytech.github.io/substrate/master/frame_support/weights/struct.Weight.html>
+            #[codec(compact)]
+            weight_ref_time: u64,
+            #[codec(compact)]
+            weight_proof_size: u64,
+            /// Class of this dispatch; an enum variant index. Adapted from original type <https://paritytech.github.io/substrate/master/frame_support/dispatch/enum.DispatchClass.html>
+            class: u8,
+            /// The inclusion fee of this dispatch; what we want:
+            partial_fee: u128,
+        }
+
         let encoded_with_len = self.encoded_with_len();
         let RuntimeDispatchInfo { partial_fee, .. } = self
             .client
@@ -539,6 +564,3 @@ where
         Ok(partial_fee)
     }
 }
-
-#[derive(Eq, Encode, PartialEq, Debug, Decode, Serialize, Deserialize)]
-pub struct DataPrefixed<Data>(pub u32, pub Data);
