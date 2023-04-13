@@ -510,7 +510,8 @@ where
     ///     "TransactionPaymentApi_query_fee_details",
     ///     Some(&encoded_with_len),
     ///     None,
-    /// ).await?;
+    /// ).await?.inclusion_fee.unwrap();
+    /// let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
     /// ```
     ///
     /// Referring to this [this stackexchange answer by jsdw](https://substrate.stackexchange.com/questions/2637/determining-the-final-fee-from-a-client/4224#4224) the formula for the _partial_fee_ is:
