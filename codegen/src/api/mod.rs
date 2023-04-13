@@ -21,7 +21,7 @@ use crate::{
     CratePath,
 };
 use codec::Decode;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use frame_metadata::RuntimeMetadataPrefixed;
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -165,15 +165,12 @@ impl RuntimeGenerator {
     ///
     /// # Panics
     ///
-    /// If the metadata version is not supported by subxt.
-    /// Only v14 and v15 versions are supported.
+    /// Panics if the runtime metadata version is not supported.
+    ///
+    /// Supported versions: v14 and v15.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
-        match metadata.1 {
-            RuntimeMetadata::V14(v14) => Self {
-                metadata: subxt_metadata::metadata_v14_to_latest(v14),
-            },
-            RuntimeMetadata::V15(v15) => Self { metadata: v15 },
-            _ => panic!("Unsupported metadata version {:?}", metadata.1),
+        RuntimeGenerator {
+            metadata: subxt_metadata::metadata_to_latest(metadata),
         }
     }
 

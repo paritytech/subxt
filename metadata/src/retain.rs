@@ -4,7 +4,9 @@
 
 //! Utility functions to generate a subset of the metadata.
 
-use frame_metadata::{ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV14, StorageEntryType};
+use frame_metadata::v15::{
+    ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV15, StorageEntryType,
+};
 use scale_info::{form::PortableForm, interner::UntrackedSymbol, TypeDef};
 use std::{
     any::TypeId,
@@ -120,7 +122,7 @@ fn update_type(ty: &mut UntrackedSymbol<TypeId>, map_ids: &BTreeMap<u32, u32>) {
 /// Strip any pallets out of the RuntimeCall type that aren't the ones we want to keep.
 /// The RuntimeCall type is referenced in a bunch of places, so doing this prevents us from
 /// holding on to stuff in pallets we've asked not to keep.
-fn retain_pallets_in_runtime_call_type<F>(metadata: &mut RuntimeMetadataV14, mut filter: F)
+fn retain_pallets_in_runtime_call_type<F>(metadata: &mut RuntimeMetadataV15, mut filter: F)
 where
     F: FnMut(&str) -> bool,
 {
@@ -161,7 +163,7 @@ where
 ///
 /// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types,
 /// or the metadata does not contain the "sp_runtime::DispatchError" type.
-pub fn retain_metadata_pallets<F>(metadata: &mut RuntimeMetadataV14, mut filter: F)
+pub fn retain_metadata_pallets<F>(metadata: &mut RuntimeMetadataV15, mut filter: F)
 where
     F: FnMut(&str) -> bool,
 {
@@ -214,20 +216,18 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::metadata_to_latest;
     use codec::Decode;
-    use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed, RuntimeMetadataV14};
+    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
 
-    fn load_metadata() -> RuntimeMetadataV14 {
+    fn load_metadata() -> RuntimeMetadataV15 {
         let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))
             .expect("Cannot read metadata blob");
         let meta: RuntimeMetadataPrefixed =
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
-        match meta.1 {
-            RuntimeMetadata::V14(v14) => v14,
-            _ => panic!("Unsupported metadata version {:?}", meta.1),
-        }
+        metadata_to_latest(meta)
     }
 
     #[test]

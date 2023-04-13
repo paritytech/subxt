@@ -14,7 +14,8 @@ fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let meta = load_test_metadata();
     let metadata = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(v14) => v14,
+        frame_metadata::RuntimeMetadata::V14(v14) => subxt_metadata::metadata_v14_to_latest(v14),
+        frame_metadata::RuntimeMetadata::V15(v15) => v15,
         _ => panic!("Unsupported metadata version {:?}", meta.1),
     };
 
