@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let account = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&storage_address)
         .await?
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage_address = subxt::dynamic::storage_root("System", "Account");
     let mut iter = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .iter(storage_address, 10)
         .await?;

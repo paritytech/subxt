@@ -146,7 +146,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     let ledger_addr = node_runtime::storage().staking().ledger(alice.account_id());
     let ledger = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&ledger_addr)
         .await?
@@ -234,7 +234,7 @@ async fn storage_current_era() -> Result<(), Error> {
     let current_era_addr = node_runtime::storage().staking().current_era();
     let _current_era = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&current_era_addr)
         .await?
@@ -249,7 +249,7 @@ async fn storage_era_reward_points() -> Result<(), Error> {
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
     let current_era_result = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&reward_points_addr)
         .await;

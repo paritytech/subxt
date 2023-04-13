@@ -1,6 +1,6 @@
 [package]
 name = "subxt-metadata"
-version = "0.27.1"
+version = "0.28.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -17,7 +17,7 @@ description = "Command line utilities for checking metadata compatibility betwee
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
 frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 scale-info = "2.5.0"
-sp-core-hashing = "7.0.0"
+sp-core-hashing = "8.0.0"
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }

@@ -1,6 +1,6 @@
 [package]
 name = "subxt-codegen"
-version = "0.27.1"
+version = "0.28.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -21,7 +21,7 @@ proc-macro2 = "1.0.55"
 quote = "1.0.8"
 syn = "1.0.109"
 scale-info = "2.5.0"
-subxt-metadata = { version = "0.27.1", path = "../metadata" }
+subxt-metadata = { version = "0.28.0", path = "../metadata" }
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport", "http-client"] }
 hex = "0.4.3"
 tokio = { version = "1.27", features = ["macros", "rt-multi-thread"] }

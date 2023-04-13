@@ -397,7 +397,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
         let events = EventsClient::new(self.client.clone())
-            .at(Some(self.block_hash))
+            .at(self.block_hash)
             .await?;
 
         Ok(crate::blocks::ExtrinsicEvents::new(

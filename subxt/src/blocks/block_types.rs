@@ -287,7 +287,7 @@ where
         Some(events) => events.clone(),
         None => {
             events::EventsClient::new(client.clone())
-                .at(Some(block_hash))
+                .at(block_hash)
                 .await?
         }
     };
