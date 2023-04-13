@@ -106,8 +106,11 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let _ = <Compact<u32>>::decode(cursor)?;
     let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
     let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
-        _ => panic!("Metadata V14 unavailable"),
+        frame_metadata::RuntimeMetadata::V14(metadata) => {
+            subxt_metadata::metadata_v14_to_latest(metadata)
+        }
+        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
+        _ => panic!("Metadata V14 or V15 unavailable"),
     };
 
     // Compare the runtime API call against the `state_getMetadata`.

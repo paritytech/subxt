@@ -29,6 +29,7 @@ sp-keyring = "20.0.0"
 syn = "1.0.109"
 subxt = { version = "0.27.1", path = "../../subxt" }
 subxt-codegen = { version = "0.27.1", path = "../../codegen" }
+subxt-metadata = { version = "0.27.1", path = "../../metadata" }
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.27", features = ["macros", "time"] }
 tracing = "0.1.34"

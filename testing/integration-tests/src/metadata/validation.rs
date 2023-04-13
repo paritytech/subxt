@@ -4,9 +4,11 @@
 
 use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::{
-    ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
-    RuntimeMetadataPrefixed, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryModifier,
-    StorageEntryType,
+    v15::{
+        ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+        RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    },
+    RuntimeMetadataPrefixed,
 };
 use scale_info::{
     build::{Fields, Variants},
@@ -15,7 +17,7 @@ use scale_info::{
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
 async fn metadata_to_api(
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
     ctx: &TestContext,
 ) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
@@ -37,7 +39,7 @@ async fn full_metadata_check() {
     assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata = api.metadata().runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
     let api = metadata_to_api(metadata, &ctx).await;
@@ -59,7 +61,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata = api.metadata().runtime_metadata().clone();
 
     let mut existential = metadata
         .pallets
@@ -89,11 +91,12 @@ fn default_pallet() -> PalletMetadata {
         constants: vec![],
         error: None,
         index: 0,
+        docs: vec![],
     }
 }
 
-fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
-    RuntimeMetadataV14::new(
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+    RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
             ty: meta_type::<()>(),
@@ -101,6 +104,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
             signed_extensions: vec![],
         },
         meta_type::<()>(),
+        vec![],
     )
 }
 
