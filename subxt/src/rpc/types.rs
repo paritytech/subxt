@@ -59,7 +59,7 @@ impl DryRunResultBytes {
 ///
 /// The primary motivation for having this type is to avoid overflows when using big integers in
 /// JavaScript (which we consider as an important RPC API consumer).
-#[derive(Encode, Decode, Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq, Eq)]
 #[serde(untagged)]
 pub enum NumberOrHex {
     /// The number represented directly.

@@ -6,14 +6,13 @@ use std::borrow::Cow;
 
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use futures::try_join;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
     error::Error,
-    rpc::types::{FeeDetails, InclusionFee, RuntimeDispatchInfo, Weight},
+    rpc::types::RuntimeDispatchInfo,
     tx::{Signer as SignerT, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
@@ -483,8 +482,8 @@ where
     /// returns an estimate for the partial fee. There are two ways of obtaining this, method I is used here in practice. Both methods should give the exact same result though.
     /// ## Method I: TransactionPaymentApi_query_info
     ///
+    #[cfg_attr(doctest, doc = " ````no_test")]
     /// ```
-    ///
     /// let encoded_with_len = self.encoded_with_len();
     /// let RuntimeDispatchInfo{ partial_fee, ..} = self.client
     ///  .rpc()
@@ -500,6 +499,7 @@ where
     /// ## Method II: TransactionPaymentApi_query_fee_details
     ///
     /// Make a state call to "TransactionPaymentApi_query_fee_details":
+    #[cfg_attr(doctest, doc = " ````no_test")]
     /// ```
     /// let encoded_with_len = self.encoded_with_len();
     /// let InclusionFee {
