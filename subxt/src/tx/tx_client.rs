@@ -2,20 +2,25 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::TxPayload;
+use std::borrow::Cow;
+
+use codec::{Compact, Decode, Encode};
+use derivative::Derivative;
+use futures::try_join;
+use serde::{Deserialize, Serialize};
+
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
     error::Error,
+    rpc::types::{FeeDetails, InclusionFee, RuntimeDispatchInfo, Weight},
     tx::{Signer as SignerT, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-use codec::{Compact, Encode};
-use derivative::Derivative;
-use std::borrow::Cow;
-
 // This is returned from an API below, so expose it here.
 pub use crate::rpc::types::DryRunResult;
+
+use super::TxPayload;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -425,6 +430,15 @@ where
     pub fn into_encoded(self) -> Vec<u8> {
         self.encoded.0
     }
+
+    /// Returns the SCALE encoded extrinsic bytes with the length attached to the end.
+    /// Useful for certain RPC-calls that expect this format.
+    ///
+    /// *Example*: let self.encoded.0 be [10, 20, 10, 20, 10], then encoded_with_len() will be [10, 20, 10, 20, 10, 5, 0, 0, 0]. So there are always 4 bytes appended representing the length of the extrinsic in bytes in little endian notation.
+    pub fn encoded_with_len(&self) -> Vec<u8> {
+        let b: [u8; 4] = (self.encoded.0.len() as u32).to_le_bytes();
+        [&self.encoded()[..], &b[..]].concat()
+    }
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
@@ -465,4 +479,65 @@ where
         let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
         dry_run_bytes.into_dry_run_result(&self.client.metadata())
     }
+
+    /// returns an estimate for the partial fee. There are two ways of obtaining this, method I is used here in practice. Both methods should give the exact same result though.
+    /// ## Method I: TransactionPaymentApi_query_info
+    ///
+    /// ```
+    ///
+    /// let encoded_with_len = self.encoded_with_len();
+    /// let RuntimeDispatchInfo{ partial_fee, ..} = self.client
+    ///  .rpc()
+    ///  .state_call_decoded::<RuntimeDispatchInfo>(
+    ///      "TransactionPaymentApi_query_info",
+    ///      Some(&encoded_with_len),
+    ///      None,
+    /// ).await?;
+    /// ```
+    ///
+    /// Here the `partial_fee` is already the result we are looking for.
+    ///
+    /// ## Method II: TransactionPaymentApi_query_fee_details
+    ///
+    /// Make a state call to "TransactionPaymentApi_query_fee_details":
+    /// ```
+    /// let encoded_with_len = self.encoded_with_len();
+    /// let InclusionFee {
+    ///     base_fee,
+    ///     len_fee,
+    ///     adjusted_weight_fee,
+    /// } = self.client.rpc().state_call_decoded::<FeeDetails>(
+    ///     "TransactionPaymentApi_query_fee_details",
+    ///     Some(&encoded_with_len),
+    ///     None,
+    /// ).await?;
+    /// ```
+    ///
+    /// Referring to this [this stackexchange answer by jsdw](https://substrate.stackexchange.com/questions/2637/determining-the-final-fee-from-a-client/4224#4224) the formula for the _partial_fee_ is:
+    ///
+    /// ```txt
+    /// partial_fee = base_fee + len_fee + (adjusted_weight_fee/estimated_weight*actual_weight)
+    /// ```
+    /// We assume here, that _estimated_weight == actual_weight_.
+    ///
+    /// So this should hold and give the same result as Method I:
+    /// ```txt
+    /// partial_fee = base_fee + len_fee + adjusted_weight_fee
+    /// ```
+    pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
+        let encoded_with_len = self.encoded_with_len();
+        let RuntimeDispatchInfo { partial_fee, .. } = self
+            .client
+            .rpc()
+            .state_call_decoded::<RuntimeDispatchInfo>(
+                "TransactionPaymentApi_query_info",
+                Some(&encoded_with_len),
+                None,
+            )
+            .await?;
+        Ok(partial_fee)
+    }
 }
+
+#[derive(Eq, Encode, PartialEq, Debug, Decode, Serialize, Deserialize)]
+pub struct DataPrefixed<Data>(pub u32, pub Data);
