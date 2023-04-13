@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::Error, Config};
+use crate::{client::OnlineClientT, error::Error, rpc::types, rpc_params, Config};
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 
@@ -42,11 +42,16 @@ where
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
-            let data = client
+            let call_parameters = call_parameters.unwrap_or_default();
+            let hex_encoded_call_params = format!("0x{}", hex::encode(call_parameters));
+            let bytes: types::Bytes = client
                 .rpc()
-                .state_call(function, call_parameters, Some(block_hash))
+                .request(
+                    "state_call",
+                    rpc_params![function, hex_encoded_call_params, Some(block_hash)],
+                )
                 .await?;
-            Ok(data.0)
+            Ok(bytes.0)
         }
     }
 }

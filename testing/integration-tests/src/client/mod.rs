@@ -15,7 +15,7 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent, DryRunResult, DryRunResultBytes, FeeDetails, FollowEvent, InclusionFee,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent,
         Initialized, RuntimeEvent, RuntimeVersionEvent,
     },
     tx::Signer,
@@ -388,15 +388,11 @@ async fn rpc_state_call() {
     let api = ctx.client();
 
     // Call into the runtime of the chain to get the Metadata.
-    let metadata_bytes = api
+    let (_, meta) = api
         .rpc()
-        .state_call("Metadata_metadata", None, None)
+        .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
         .await
         .unwrap();
-
-    let cursor = &mut &*metadata_bytes;
-    let _ = <Compact<u32>>::decode(cursor).unwrap();
-    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor).unwrap();
     let metadata_call = match meta.1 {
         frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
         _ => panic!("Metadata V14 unavailable"),
@@ -584,8 +580,7 @@ async fn chainhead_unstable_unpin() {
 }
 
 /// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
 pub struct FeeDetails {
     /// The minimum fee for a transaction to be included in a block.
     pub inclusion_fee: Option<InclusionFee>,
@@ -595,8 +590,7 @@ pub struct FeeDetails {
 
 /// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.InclusionFee.html>
 /// The base fee and adjusted weight and length fees constitute the _inclusion fee_.
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
 pub struct InclusionFee {
     /// minimum amount a user pays for a transaction.
     pub base_fee: u128,
@@ -634,14 +628,15 @@ async fn partial_fee_estimate_correct() {
     let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
 
     // Method II: TransactionPaymentApi_query_fee_details + calculations
-    let encoded_with_len = signed_extrinsic.encoded_with_len();
+    let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
+    let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
     let InclusionFee {
         base_fee,
         len_fee,
         adjusted_weight_fee,
     } = api
         .rpc()
-        .state_call_decoded::<FeeDetails>(
+        .state_call::<FeeDetails>(
             "TransactionPaymentApi_query_fee_details",
             Some(&encoded_with_len),
             None,

@@ -415,7 +415,7 @@ mod test {
     use futures::Stream;
 
     use crate::{
-        client::{MockClient, OfflineClientT, OnlineClientT},
+        client::{OfflineClientT, OnlineClientT},
         config::{
             extrinsic_params::BaseExtrinsicParams,
             polkadot::{PlainTip, PolkadotConfig},

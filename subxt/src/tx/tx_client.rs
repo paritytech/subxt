@@ -427,28 +427,6 @@ where
     pub fn into_encoded(self) -> Vec<u8> {
         self.encoded.0
     }
-
-    /// Returns the SCALE encoded extrinsic bytes with the length attached to the end.
-    /// Useful for certain RPC-calls that expect this format.
-    ///
-    /// ```
-    /// use subxt::{SubstrateConfig, client::OfflineClientT, tx::SubmittableExtrinsic};
-    /// #[derive(Clone)]
-    /// struct MockClient;
-    /// impl OfflineClientT<SubstrateConfig> for MockClient {
-    ///     fn metadata(&self) -> subxt::Metadata { panic!() }  
-    ///     fn genesis_hash(&self) -> <SubstrateConfig as subxt::Config>::Hash { panic!() }
-    ///     fn runtime_version(&self) -> subxt::rpc::types::RuntimeVersion { panic!() }
-    /// }
-    /// let bytes =  vec![4, 2, 0];
-    /// let extrinsic = SubmittableExtrinsic::<SubstrateConfig, _>::from_bytes(MockClient, bytes);
-    /// // extrinsic.encoded().len() is 3 and is encoded as [3, 0, 0, 0]:
-    /// assert_eq!(extrinsic.encoded_with_len(), vec![4, 2, 0, 3, 0, 0, 0]);
-    /// ```
-    pub fn encoded_with_len(&self) -> Vec<u8> {
-        let b: [u8; 4] = (self.encoded.0.len() as u32).to_le_bytes();
-        [self.encoded(), &b[..]].concat()
-    }
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
@@ -490,52 +468,8 @@ where
         dry_run_bytes.into_dry_run_result(&self.client.metadata())
     }
 
-    /// returns an estimate for the partial fee. There are two ways of obtaining this, method I is used here in practice. Both methods should give the exact same result though.
-    /// ## Method I: TransactionPaymentApi_query_info
-    ///
-    #[cfg_attr(doctest, doc = " ````no_test")]
-    /// ```
-    /// let encoded_with_len = self.encoded_with_len();
-    /// let RuntimeDispatchInfo{ partial_fee, ..} = self.client
-    ///  .rpc()
-    ///  .state_call_decoded::<RuntimeDispatchInfo>(
-    ///      "TransactionPaymentApi_query_info",
-    ///      Some(&encoded_with_len),
-    ///      None,
-    /// ).await?;
-    /// ```
-    ///
-    /// Here the `partial_fee` is already the result we are looking for.
-    ///
-    /// ## Method II: TransactionPaymentApi_query_fee_details
-    ///
-    /// Make a state call to "TransactionPaymentApi_query_fee_details":
-    #[cfg_attr(doctest, doc = " ````no_test")]
-    /// ```
-    /// let encoded_with_len = self.encoded_with_len();
-    /// let InclusionFee {
-    ///     base_fee,
-    ///     len_fee,
-    ///     adjusted_weight_fee,
-    /// } = self.client.rpc().state_call_decoded::<FeeDetails>(
-    ///     "TransactionPaymentApi_query_fee_details",
-    ///     Some(&encoded_with_len),
-    ///     None,
-    /// ).await?.inclusion_fee.unwrap();
-    /// let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
-    /// ```
-    ///
-    /// Referring to this [this stackexchange answer by jsdw](https://substrate.stackexchange.com/questions/2637/determining-the-final-fee-from-a-client/4224#4224) the formula for the _partial_fee_ is:
-    ///
-    /// ```txt
-    /// partial_fee = base_fee + len_fee + (adjusted_weight_fee/estimated_weight*actual_weight)
-    /// ```
-    /// We assume here, that _estimated_weight == actual_weight_.
-    ///
-    /// So this should hold and give the same result as Method I:
-    /// ```txt
-    /// partial_fee = base_fee + len_fee + adjusted_weight_fee
-    /// ```
+    /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
+    /// The actual amount paid can vary from block to block based on node traffic and other factors.
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         /// adapted from original type <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         #[derive(Debug, Encode, Decode, Eq, PartialEq, Copy, Clone)]
@@ -551,11 +485,12 @@ where
             partial_fee: u128,
         }
 
-        let encoded_with_len = self.encoded_with_len();
+        let len_bytes: [u8; 4] = (self.encoded.0.len() as u32).to_le_bytes();
+        let encoded_with_len = [self.encoded(), &len_bytes[..]].concat();
         let RuntimeDispatchInfo { partial_fee, .. } = self
             .client
             .rpc()
-            .state_call_decoded::<RuntimeDispatchInfo>(
+            .state_call::<RuntimeDispatchInfo>(
                 "TransactionPaymentApi_query_info",
                 Some(&encoded_with_len),
                 None,
