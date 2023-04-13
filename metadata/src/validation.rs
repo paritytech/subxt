@@ -4,8 +4,8 @@
 
 //! Utility functions for metadata validation.
 
-use frame_metadata::{
-    ExtrinsicMetadata, RuntimeMetadataV14, StorageEntryMetadata, StorageEntryType,
+use frame_metadata::v15::{
+    ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryType,
 };
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
@@ -171,7 +171,7 @@ fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet
     get_type_def_hash(registry, &ty.type_def, visited_ids)
 }
 
-/// Obtain the hash representation of a `frame_metadata::ExtrinsicMetadata`.
+/// Obtain the hash representation of a `frame_metadata::v15::ExtrinsicMetadata`.
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata<PortableForm>,
@@ -235,7 +235,7 @@ fn get_storage_entry_hash(
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
 pub fn get_storage_hash(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     storage_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -259,7 +259,7 @@ pub fn get_storage_hash(
 
 /// Obtain the hash for a specific constant, or an error if it's not found.
 pub fn get_constant_hash(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     constant_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -282,7 +282,7 @@ pub fn get_constant_hash(
 
 /// Obtain the hash for a specific call, or an error if it's not found.
 pub fn get_call_hash(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     call_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -311,10 +311,10 @@ pub fn get_call_hash(
     Ok(hash)
 }
 
-/// Obtain the hash representation of a `frame_metadata::PalletMetadata`.
+/// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
-    pallet: &frame_metadata::PalletMetadata<PortableForm>,
+    pallet: &PalletMetadata<PortableForm>,
 ) -> [u8; 32] {
     // Begin with some arbitrary hash (we don't really care what it is).
     let mut bytes = hash(&[19]);
@@ -358,8 +358,8 @@ pub fn get_pallet_hash(
     bytes
 }
 
-/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataV14`.
-pub fn get_metadata_hash(metadata: &RuntimeMetadataV14) -> [u8; 32] {
+/// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`.
+pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets: Vec<(&str, [u8; 32])> = metadata
         .pallets
@@ -393,7 +393,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV14) -> [u8; 32] {
     hash(&bytes)
 }
 
-/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataV14`
+/// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`
 /// hashing only the provided pallets.
 ///
 /// **Note:** This is similar to `get_metadata_hash`, but performs hashing only of the provided
@@ -401,7 +401,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV14) -> [u8; 32] {
 /// the pallets from the static metadata. In those cases, the static API can communicate
 /// properly with the subset of pallets from the runtime node.
 pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     pallets: &[T],
 ) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
@@ -448,9 +448,9 @@ pub enum NotFound {
 mod tests {
     use super::*;
     use bitvec::{order::Lsb0, vec::BitVec};
-    use frame_metadata::{
+    use frame_metadata::v15::{
         ExtrinsicMetadata, PalletCallMetadata, PalletConstantMetadata, PalletErrorMetadata,
-        PalletEventMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV14,
+        PalletEventMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15,
         StorageEntryMetadata, StorageEntryModifier,
     };
     use scale_info::meta_type;
@@ -525,6 +525,7 @@ mod tests {
             constants: vec![],
             error: None,
             index: 0,
+            docs: vec![],
         }
     }
 
@@ -548,8 +549,13 @@ mod tests {
         ]
     }
 
-    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
-        RuntimeMetadataV14::new(pallets, build_default_extrinsic(), meta_type::<()>())
+    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+        RuntimeMetadataV15::new(
+            pallets,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+            vec![],
+        )
     }
 
     #[test]
