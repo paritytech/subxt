@@ -19,6 +19,12 @@ pub struct SubstrateNodeBuilder {
     custom_flags: HashMap<CowStr, Option<CowStr>>,
 }
 
+impl Default for SubstrateNodeBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubstrateNodeBuilder {
     /// Configure a new Substrate node.
     pub fn new() -> Self {
@@ -113,13 +119,17 @@ impl Drop for SubstrateNode {
 // Consume a stderr reader from a spawned substrate command and
 // locate the port number that is logged out to it.
 fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> Option<u16> {
-    BufReader::new(r).lines().take(100).find_map(|line| {
+    BufReader::new(r).lines().take(50).find_map(|line| {
         let line = line.expect("failed to obtain next line from stdout for port discovery");
 
         // does the line contain our port (we expect this specific output from substrate).
         let line_end = line
+            // oldest message:
             .rsplit_once("Listening for new connections on 127.0.0.1:")
+            // slightly newer message:
             .or_else(|| line.rsplit_once("Running JSON-RPC WS server: addr=127.0.0.1:"))
+            // newest message (jsonrpsee merging http and ws servers):
+            .or_else(|| line.rsplit_once("Running JSON-RPC server: addr=127.0.0.1:"))
             .map(|(_, port_str)| port_str)?;
 
         // trim non-numeric chars from the end of the port part of the line.

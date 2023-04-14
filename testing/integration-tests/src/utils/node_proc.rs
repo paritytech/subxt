@@ -9,7 +9,8 @@ use subxt::{Config, OnlineClient};
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
-    proc: SubstrateNode,
+    // Keep a handle to the node; once it's dropped the node is killed.
+    _proc: SubstrateNode,
     client: OnlineClient<R>,
 }
 
@@ -23,12 +24,6 @@ where
         S: AsRef<OsStr> + Clone,
     {
         TestNodeProcessBuilder::new(program)
-    }
-
-    /// Attempt to kill the running substrate process.
-    pub fn kill(&mut self) -> std::io::Result<()> {
-        tracing::info!("Killing node process {}", self.proc.id());
-        self.proc.kill()
     }
 
     /// Returns the subxt client connected to the running node.
@@ -61,11 +56,13 @@ impl TestNodeProcessBuilder {
     }
 
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
-    pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
+    pub async fn spawn<R>(self) -> Result<TestNodeProcess<R>, String>
     where
         R: Config,
     {
         let mut node_builder = SubstrateNode::builder();
+
+        node_builder.binary_path(self.node_path);
 
         if let Some(authority) = self.authority {
             let authority = format!("{authority:?}");
@@ -79,7 +76,10 @@ impl TestNodeProcessBuilder {
         // Connect to the node with a subxt client:
         let client = OnlineClient::from_url(ws_url.clone()).await;
         match client {
-            Ok(client) => Ok(TestNodeProcess { proc, client }),
+            Ok(client) => Ok(TestNodeProcess {
+                _proc: proc,
+                client,
+            }),
             Err(err) => Err(format!("Failed to connect to node rpc at {ws_url}: {err}")),
         }
     }

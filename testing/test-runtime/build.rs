@@ -34,8 +34,11 @@ async fn run() {
 
     let port = node.ws_port();
 
-    // Download metadata from binary.
-    let metadata_bytes: subxt::rpc::types::Bytes = {
+    // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
+    // This may at least prevent this script from running so often (ie whenever we change Subxt).
+    #[derive(serde::Deserialize)]
+    pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
+    let metadata_bytes: Bytes = {
         use client::ClientT;
         client::build(&format!("ws://localhost:{port}"))
             .await

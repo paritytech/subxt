@@ -3651,9 +3651,10 @@ dependencies = [
 name = "test-runtime"
 version = "0.28.0"
 dependencies = [
+ "impl-serde",
  "jsonrpsee",
  "parity-scale-codec",
- "sp-runtime",
+ "serde",
  "substrate-runner",
  "subxt",
  "tokio",
