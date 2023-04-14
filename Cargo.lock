@@ -1624,6 +1624,7 @@ dependencies = [
  "sp-core",
  "sp-keyring",
  "sp-runtime",
+ "substrate-runner",
  "subxt",
  "subxt-codegen",
  "syn 1.0.109",
@@ -3481,6 +3482,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "substrate-runner"
+version = "0.28.0"
+
+[[package]]
 name = "subtle"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3649,6 +3654,7 @@ dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
  "sp-runtime",
+ "substrate-runner",
  "subxt",
  "tokio",
  "which",

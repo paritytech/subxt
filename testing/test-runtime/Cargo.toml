@@ -11,6 +11,7 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
+substrate-runner = { path = "../substrate-runner" }
 tokio = { version = "1.27", features = ["macros", "rt-multi-thread"] }
 which = "4.4.0"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }
