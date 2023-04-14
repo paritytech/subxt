@@ -416,11 +416,7 @@ mod test {
 
     use crate::{
         client::{OfflineClientT, OnlineClientT},
-        config::{
-            extrinsic_params::BaseExtrinsicParams,
-            polkadot::{PlainTip, PolkadotConfig},
-            WithExtrinsicParams,
-        },
+        config::{extrinsic_params::BaseExtrinsicParams, polkadot::PlainTip, WithExtrinsicParams},
         error::RpcError,
         rpc::{types::SubstrateTxStatus, RpcSubscription, Subscription},
         tx::TxProgress,
