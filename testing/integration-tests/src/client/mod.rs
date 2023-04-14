@@ -15,8 +15,8 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent,
-        Initialized, RuntimeEvent, RuntimeVersionEvent,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
+        RuntimeVersionEvent,
     },
     tx::Signer,
     utils::AccountId32,
@@ -647,6 +647,6 @@ async fn partial_fee_estimate_correct() {
         .unwrap();
     let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
 
-    /// Both methods should yield the same fee
+    // Both methods should yield the same fee
     assert_eq!(partial_fee_1, partial_fee_2);
 }
