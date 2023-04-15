@@ -11,13 +11,12 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
     error::Error,
-    tx::{Signer as SignerT, TxProgress},
+    tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
+
 // This is returned from an API below, so expose it here.
 pub use crate::rpc::types::DryRunResult;
-
-use super::TxPayload;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -485,14 +484,14 @@ where
             partial_fee: u128,
         }
 
-        let len_bytes: [u8; 4] = (self.encoded.0.len() as u32).to_le_bytes();
-        let encoded_with_len = [self.encoded(), &len_bytes[..]].concat();
+        let mut params = self.encoded().to_vec();
+        (self.encoded().len() as u32).encode_to(&mut params);
         let RuntimeDispatchInfo { partial_fee, .. } = self
             .client
             .rpc()
             .state_call::<RuntimeDispatchInfo>(
                 "TransactionPaymentApi_query_info",
-                Some(&encoded_with_len),
+                Some(&params),
                 None,
             )
             .await?;

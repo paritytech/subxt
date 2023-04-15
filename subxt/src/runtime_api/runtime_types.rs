@@ -2,7 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::Error, rpc::types, rpc_params, Config};
+use crate::{client::OnlineClientT, error::Error, Config};
+use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 
@@ -32,26 +33,21 @@ where
     Client: OnlineClientT<T>,
 {
     /// Execute a raw runtime API call.
-    pub fn call_raw<'a>(
+    pub fn call_raw<'a, Res: Decode>(
         &self,
         function: &'a str,
         call_parameters: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Vec<u8>, Error>> + 'a {
+    ) -> impl Future<Output = Result<Res, Error>> + 'a {
         let client = self.client.clone();
         let block_hash = self.block_hash;
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
-            let call_parameters = call_parameters.unwrap_or_default();
-            let hex_encoded_call_params = format!("0x{}", hex::encode(call_parameters));
-            let bytes: types::Bytes = client
+            let data: Res = client
                 .rpc()
-                .request(
-                    "state_call",
-                    rpc_params![function, hex_encoded_call_params, Some(block_hash)],
-                )
+                .state_call(function, call_parameters, Some(block_hash))
                 .await?;
-            Ok(bytes.0)
+            Ok(data)
         }
     }
 }
