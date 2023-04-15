@@ -4,7 +4,7 @@
 
 use std::borrow::Cow;
 
-use codec::{Compact, Decode, Encode};
+use codec::{Compact, Encode};
 use derivative::Derivative;
 
 use crate::{
@@ -470,26 +470,14 @@ where
     /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
     /// The actual amount paid can vary from block to block based on node traffic and other factors.
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
-        /// adapted from original type <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
-        #[derive(Debug, Encode, Decode, Eq, PartialEq, Copy, Clone)]
-        pub struct RuntimeDispatchInfo {
-            /// Weight of this dispatch. Adapted from original type <https://paritytech.github.io/substrate/master/frame_support/weights/struct.Weight.html>
-            #[codec(compact)]
-            weight_ref_time: u64,
-            #[codec(compact)]
-            weight_proof_size: u64,
-            /// Class of this dispatch; an enum variant index. Adapted from original type <https://paritytech.github.io/substrate/master/frame_support/dispatch/enum.DispatchClass.html>
-            class: u8,
-            /// The inclusion fee of this dispatch; what we want:
-            partial_fee: u128,
-        }
-
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
-        let RuntimeDispatchInfo { partial_fee, .. } = self
+        // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
+        // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
+        let (_, _, _, partial_fee) = self
             .client
             .rpc()
-            .state_call::<RuntimeDispatchInfo>(
+            .state_call::<(Compact<u64>, Compact<u64>, u8, u128)>(
                 "TransactionPaymentApi_query_info",
                 Some(&params),
                 None,
