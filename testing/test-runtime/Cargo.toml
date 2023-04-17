@@ -6,7 +6,6 @@ publish = false
 
 [dependencies]
 subxt = { path = "../../subxt" }
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 substrate-runner = { path = "../substrate-runner" }
