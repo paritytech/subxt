@@ -57,12 +57,10 @@ impl SubstrateNodeBuilder {
         let mut cmd = Command::new(self.binary_path);
 
         cmd.env("RUST_LOG", "info")
-            .arg("--dev")
             .stdout(process::Stdio::piped())
             .stderr(process::Stdio::piped())
-            .arg("--port=0")
-            .arg("--rpc-port=0")
-            .arg("--ws-port=0");
+            .arg("--dev")
+            .arg("--port=0");
 
         for (key, val) in self.custom_flags {
             let arg = match val {
