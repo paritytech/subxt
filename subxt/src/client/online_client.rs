@@ -17,9 +17,7 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use codec::Compact;
 use derivative::Derivative;
-use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -136,10 +134,8 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let (_, meta) = rpc
-            .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
-            .await?;
-        Ok(meta.try_into()?)
+        const V15_METADATA_VERSION: u32 = u32::MAX;
+        rpc.metadata_at_version(V15_METADATA_VERSION).await
     }
 
     /// Create an object which can be used to keep the runtime up to date

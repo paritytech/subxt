@@ -367,6 +367,21 @@ impl<T: Config> Rpc<T> {
         Ok(res)
     }
 
+    /// Execute runtime API call and return the specified runtime metadata version.
+    pub async fn metadata_at_version(&self, version: u32) -> Result<Metadata, Error> {
+        let param = version.encode();
+        let opaque: Option<frame_metadata::OpaqueMetadata> = self
+            .state_call("Metadata_metadata_at_version", Some(&param), None)
+            .await?;
+
+        let bytes = opaque.ok_or(Error::Other("Metadata version not found".into()))?;
+
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
+    }
+
     /// Create and submit an extrinsic and return a subscription to the events triggered.
     pub async fn watch_extrinsic<X: Encode>(
         &self,
