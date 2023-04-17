@@ -388,15 +388,11 @@ async fn rpc_state_call() {
     let api = ctx.client();
 
     // Call into the runtime of the chain to get the Metadata.
-    let metadata_bytes = api
+    let (_, meta) = api
         .rpc()
-        .state_call("Metadata_metadata", None, None)
+        .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
         .await
         .unwrap();
-
-    let cursor = &mut &*metadata_bytes;
-    let _ = <Compact<u32>>::decode(cursor).unwrap();
-    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor).unwrap();
     let metadata_call = match meta.1 {
         frame_metadata::RuntimeMetadata::V14(metadata) => {
             subxt_metadata::metadata_v14_to_latest(metadata)
@@ -583,4 +579,76 @@ async fn chainhead_unstable_unpin() {
         .chainhead_unstable_unpin(sub_id, hash)
         .await
         .is_err());
+}
+
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct FeeDetails {
+    /// The minimum fee for a transaction to be included in a block.
+    pub inclusion_fee: Option<InclusionFee>,
+    /// tip
+    pub tip: u128,
+}
+
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.InclusionFee.html>
+/// The base fee and adjusted weight and length fees constitute the _inclusion fee_.
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct InclusionFee {
+    /// minimum amount a user pays for a transaction.
+    pub base_fee: u128,
+    /// amount paid for the encoded length (in bytes) of the transaction.
+    pub len_fee: u128,
+    ///
+    /// - `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on the
+    ///   congestion of the network.
+    /// - `weight_fee`: This amount is computed based on the weight of the transaction. Weight
+    /// accounts for the execution time of a transaction.
+    ///
+    /// adjusted_weight_fee = targeted_fee_adjustment * weight_fee
+    pub adjusted_weight_fee: u128,
+}
+
+#[tokio::test]
+async fn partial_fee_estimate_correct() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let hans = pair_signer(Sr25519Pair::generate().0);
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(hans.account_id().clone().into(), 1_000_000_000_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    // Method I: TransactionPaymentApi_query_info
+    let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
+
+    // Method II: TransactionPaymentApi_query_fee_details + calculations
+    let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
+    let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
+    let InclusionFee {
+        base_fee,
+        len_fee,
+        adjusted_weight_fee,
+    } = api
+        .rpc()
+        .state_call::<FeeDetails>(
+            "TransactionPaymentApi_query_fee_details",
+            Some(&encoded_with_len),
+            None,
+        )
+        .await
+        .unwrap()
+        .inclusion_fee
+        .unwrap();
+    let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
+
+    // Both methods should yield the same fee
+    assert_eq!(partial_fee_1, partial_fee_2);
 }
