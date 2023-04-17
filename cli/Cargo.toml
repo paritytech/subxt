@@ -22,7 +22,7 @@ subxt-codegen = { version = "0.28.0", path = "../codegen" }
 # perform node compatibility
 subxt-metadata = { version = "0.28.0", path = "../metadata" }
 # parse command line args
-clap = { version = "4.1.11", features = ["derive", "cargo"] }
+clap = { version = "4.2.2", features = ["derive", "cargo"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
