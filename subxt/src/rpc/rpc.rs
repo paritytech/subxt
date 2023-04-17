@@ -31,16 +31,19 @@
 //! # }
 //! ```
 
+use std::sync::Arc;
+
+use codec::{Decode, Encode};
+use frame_metadata::RuntimeMetadataPrefixed;
+use serde::Serialize;
+
+use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
+
 use super::{
     rpc_params,
     types::{self, ChainHeadEvent, FollowEvent},
     RpcClient, RpcClientT, Subscription,
 };
-use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
-use codec::{Decode, Encode};
-use frame_metadata::RuntimeMetadataPrefixed;
-use serde::Serialize;
-use std::sync::Arc;
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
@@ -149,25 +152,6 @@ impl<T: Config> Rpc<T> {
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
-    }
-
-    /// Execute a runtime API call.
-    pub async fn call(
-        &self,
-        function: String,
-        call_parameters: Option<&[u8]>,
-        at: Option<T::Hash>,
-    ) -> Result<types::Bytes, Error> {
-        let call_parameters = call_parameters.unwrap_or_default();
-
-        let bytes: types::Bytes = self
-            .client
-            .request(
-                "state_call",
-                rpc_params![function, to_hex(call_parameters), at],
-            )
-            .await?;
-        Ok(bytes)
     }
 
     /// Fetch system properties
@@ -364,14 +348,13 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Execute a runtime API call.
-    pub async fn state_call(
+    pub async fn state_call<Res: Decode>(
         &self,
         function: &str,
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<types::Bytes, Error> {
+    ) -> Result<Res, Error> {
         let call_parameters = call_parameters.unwrap_or_default();
-
         let bytes: types::Bytes = self
             .client
             .request(
@@ -379,7 +362,9 @@ impl<T: Config> Rpc<T> {
                 rpc_params![function, to_hex(call_parameters), at],
             )
             .await?;
-        Ok(bytes)
+        let cursor = &mut &bytes[..];
+        let res: Res = Decode::decode(cursor)?;
+        Ok(res)
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
