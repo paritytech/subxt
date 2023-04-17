@@ -53,6 +53,7 @@ fn generate_struct_with_primitives() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -104,6 +105,7 @@ fn generate_struct_with_a_struct_field() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Child {
@@ -111,6 +113,7 @@ fn generate_struct_with_a_struct_field() {
                 }
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Parent {
@@ -156,11 +159,13 @@ fn generate_tuple_struct() {
                     use super::root;
 
                     #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                    #[codec(crate = ::subxt_path::ext::codec)]
                     #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct Child(pub ::core::primitive::i32,);
 
                     #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                    #[codec(crate = ::subxt_path::ext::codec)]
                     #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct Parent(pub ::core::primitive::bool, pub root::subxt_codegen::types::tests::Child,);
@@ -245,51 +250,61 @@ fn derive_compact_as_for_uint_wrapper_structs() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Su128 { pub a: ::core::primitive::u128, }
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Su16 { pub a: ::core::primitive::u16, }
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Su32 { pub a: ::core::primitive::u32, }
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Su64 { pub a: ::core::primitive::u64, }
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Su8 { pub a: ::core::primitive::u8, }
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TSu128(pub ::core::primitive::u128,);
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TSu16(pub ::core::primitive::u16,);
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TSu32(pub ::core::primitive::u32,);
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TSu64(pub ::core::primitive::u64,);
 
                 #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TSu8(pub ::core::primitive::u8,);
@@ -331,6 +346,7 @@ fn generate_enum() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub enum E {
@@ -394,6 +410,7 @@ fn compact_fields() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub enum E {
@@ -407,6 +424,7 @@ fn compact_fields() {
                 }
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -414,6 +432,7 @@ fn compact_fields() {
                 }
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct TupleStruct(#[codec(compact)] pub ::core::primitive::u32,);
@@ -460,6 +479,7 @@ fn compact_generic_parameter() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -505,6 +525,7 @@ fn generate_array_field() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -547,6 +568,7 @@ fn option_fields() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -592,6 +614,7 @@ fn box_fields_struct() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -637,6 +660,7 @@ fn box_fields_enum() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub enum E {
@@ -682,6 +706,7 @@ fn range_fields() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -731,6 +756,7 @@ fn generics() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Bar {
@@ -738,6 +764,7 @@ fn generics() {
                     pub c: root::subxt_codegen::types::tests::Foo<::core::primitive::u8>,
                 }
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Foo<_0> {
@@ -786,6 +813,7 @@ fn generics_nested() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Bar<_0> {
@@ -793,6 +821,7 @@ fn generics_nested() {
                 }
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct Foo<_0, _1> {
@@ -841,6 +870,7 @@ fn generate_bitvec() {
             pub mod tests {
                 use super::root;
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
@@ -899,6 +929,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
                 pub mod tests {
                     use super::root;
                     #[derive(::subxt_path::ext::codec::CompactAs, ::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                    #[codec(crate = ::subxt_path::ext::codec)]
                     #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct NamedFields<_0> {
@@ -907,6 +938,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
                         pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
                     }
                     #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                    #[codec(crate = ::subxt_path::ext::codec)]
                     #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                     pub struct UnnamedFields<_0, _1> (
@@ -976,6 +1008,7 @@ fn modules() {
                             use super::root;
 
                             #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                        #[codec(crate = ::subxt_path::ext::codec)]
                         #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                         #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                             pub struct Bar {
@@ -984,6 +1017,7 @@ fn modules() {
                         }
 
                         #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                        #[codec(crate = ::subxt_path::ext::codec)]
                         #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                         #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                         pub struct Foo;
@@ -993,6 +1027,7 @@ fn modules() {
                         use super::root;
 
                         #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                        #[codec(crate = ::subxt_path::ext::codec)]
                         #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                         #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                         pub struct Foo {
@@ -1035,6 +1070,7 @@ fn dont_force_struct_names_camel_case() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct AB;
@@ -1081,11 +1117,13 @@ fn apply_user_defined_derives_for_all_types() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Clone, Debug, Eq)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Clone, Debug, Eq)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct B;
@@ -1153,16 +1191,19 @@ fn apply_user_defined_derives_for_specific_types() {
                 use super::root;
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug, Eq)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug, Eq, Hash)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct B(pub root :: subxt_codegen :: types :: tests :: C,);
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug, Eq, Ord, PartialOrd)]
+                #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct C;
