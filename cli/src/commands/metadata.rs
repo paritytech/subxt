@@ -46,7 +46,6 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         retain_metadata_pallets(&mut metadata_v15, |pallet_name| {
             pallets.iter().any(|p| &**p == pallet_name)
         });
-
         metadata = metadata_v15.into();
     }
 
