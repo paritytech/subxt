@@ -584,7 +584,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Core_version",
                     result,
-                    [0; 32],
+                    [
+                        209u8, 59u8, 156u8, 128u8, 14u8, 210u8, 96u8, 63u8, 140u8, 0u8, 65u8,
+                        211u8, 118u8, 177u8, 9u8, 208u8, 105u8, 124u8, 132u8, 203u8, 157u8, 207u8,
+                        186u8, 177u8, 91u8, 170u8, 22u8, 224u8, 88u8, 56u8, 56u8, 13u8,
+                    ],
                 )
             }
             #[doc = " Execute the given block."]
@@ -597,7 +601,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Core_execute_block",
                     result,
-                    [0; 32],
+                    [
+                        199u8, 164u8, 96u8, 78u8, 188u8, 134u8, 19u8, 247u8, 63u8, 58u8, 93u8,
+                        227u8, 122u8, 157u8, 93u8, 196u8, 16u8, 7u8, 20u8, 17u8, 178u8, 152u8,
+                        211u8, 185u8, 56u8, 153u8, 118u8, 241u8, 118u8, 105u8, 85u8, 3u8,
+                    ],
                 )
             }
             #[doc = " Initialize a block with the given header."]
@@ -613,7 +621,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Core_initialize_block",
                     result,
-                    [0; 32],
+                    [
+                        45u8, 232u8, 143u8, 132u8, 33u8, 211u8, 71u8, 186u8, 169u8, 91u8, 143u8,
+                        156u8, 174u8, 156u8, 10u8, 25u8, 203u8, 16u8, 208u8, 226u8, 12u8, 233u8,
+                        145u8, 228u8, 63u8, 118u8, 66u8, 247u8, 71u8, 48u8, 44u8, 243u8,
+                    ],
                 )
             }
         }
@@ -629,7 +641,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Metadata_metadata",
                     result,
-                    [0; 32],
+                    [
+                        158u8, 223u8, 229u8, 177u8, 228u8, 49u8, 24u8, 219u8, 143u8, 82u8, 255u8,
+                        132u8, 245u8, 210u8, 160u8, 197u8, 218u8, 10u8, 63u8, 165u8, 115u8, 91u8,
+                        70u8, 151u8, 246u8, 51u8, 18u8, 235u8, 91u8, 143u8, 27u8, 127u8,
+                    ],
                 )
             }
             #[doc = " Returns the metadata at a given version."]
@@ -647,7 +663,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Metadata_metadata_at_version",
                     result,
-                    [0; 32],
+                    [
+                        50u8, 164u8, 234u8, 88u8, 65u8, 62u8, 176u8, 66u8, 188u8, 114u8, 205u8,
+                        29u8, 137u8, 173u8, 194u8, 54u8, 237u8, 48u8, 221u8, 46u8, 166u8, 44u8,
+                        220u8, 137u8, 97u8, 128u8, 204u8, 137u8, 29u8, 229u8, 31u8, 134u8,
+                    ],
                 )
             }
             #[doc = " Returns the supported metadata versions."]
@@ -662,7 +682,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Metadata_metadata_versions",
                     result,
-                    [0; 32],
+                    [
+                        255u8, 234u8, 86u8, 244u8, 238u8, 175u8, 175u8, 54u8, 181u8, 181u8, 23u8,
+                        185u8, 231u8, 242u8, 153u8, 246u8, 205u8, 142u8, 184u8, 21u8, 240u8, 217u8,
+                        195u8, 231u8, 32u8, 163u8, 127u8, 3u8, 51u8, 130u8, 68u8, 124u8,
+                    ],
                 )
             }
         }
@@ -687,7 +711,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BlockBuilder_apply_extrinsic",
                     result,
-                    [0; 32],
+                    [
+                        151u8, 89u8, 106u8, 151u8, 95u8, 29u8, 10u8, 68u8, 85u8, 149u8, 144u8,
+                        132u8, 47u8, 46u8, 164u8, 91u8, 225u8, 219u8, 85u8, 120u8, 101u8, 105u8,
+                        45u8, 79u8, 171u8, 133u8, 121u8, 170u8, 197u8, 248u8, 24u8, 10u8,
+                    ],
                 )
             }
             #[doc = " Finish the current block."]
@@ -703,7 +731,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BlockBuilder_finalize_block",
                     result,
-                    [0; 32],
+                    [
+                        78u8, 179u8, 67u8, 170u8, 213u8, 230u8, 122u8, 98u8, 76u8, 244u8, 225u8,
+                        219u8, 83u8, 115u8, 94u8, 229u8, 93u8, 142u8, 120u8, 172u8, 87u8, 99u8,
+                        120u8, 41u8, 143u8, 184u8, 71u8, 49u8, 126u8, 55u8, 240u8, 125u8,
+                    ],
                 )
             }
             #[doc = " Generate inherent extrinsics. The inherent data will vary from chain to chain."]            pub fn inherent_extrinsics (& self , inherent : runtime_types :: sp_inherents :: InherentData ,) -> :: subxt :: runtime_api :: StaticRuntimeApiPayload < :: std :: vec :: Vec < runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > > >{
@@ -712,7 +744,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BlockBuilder_inherent_extrinsics",
                     result,
-                    [0; 32],
+                    [
+                        75u8, 86u8, 85u8, 104u8, 125u8, 169u8, 23u8, 92u8, 162u8, 73u8, 65u8,
+                        223u8, 100u8, 24u8, 201u8, 157u8, 145u8, 208u8, 238u8, 11u8, 255u8, 98u8,
+                        0u8, 211u8, 189u8, 94u8, 5u8, 123u8, 25u8, 1u8, 88u8, 234u8,
+                    ],
                 )
             }
             #[doc = " Check that the inherents are valid. The inherent data will vary from chain to chain."]
@@ -729,7 +765,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BlockBuilder_check_inherents",
                     result,
-                    [0; 32],
+                    [
+                        162u8, 99u8, 46u8, 228u8, 124u8, 158u8, 224u8, 212u8, 90u8, 101u8, 133u8,
+                        173u8, 82u8, 61u8, 131u8, 131u8, 254u8, 209u8, 17u8, 181u8, 87u8, 190u8,
+                        80u8, 165u8, 172u8, 179u8, 121u8, 202u8, 126u8, 48u8, 254u8, 112u8,
+                    ],
                 )
             }
         }
@@ -747,7 +787,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "NominationPoolsApi_pending_rewards",
                     result,
-                    [0; 32],
+                    [
+                        235u8, 64u8, 57u8, 70u8, 111u8, 27u8, 62u8, 236u8, 36u8, 192u8, 103u8,
+                        89u8, 221u8, 194u8, 46u8, 223u8, 71u8, 249u8, 33u8, 135u8, 43u8, 42u8,
+                        147u8, 57u8, 130u8, 44u8, 35u8, 132u8, 163u8, 153u8, 201u8, 105u8,
+                    ],
                 )
             }
             #[doc = " Returns the equivalent balance of `points` for a given pool."]
@@ -763,7 +807,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "NominationPoolsApi_points_to_balance",
                     result,
-                    [0; 32],
+                    [
+                        30u8, 7u8, 5u8, 95u8, 146u8, 43u8, 110u8, 21u8, 148u8, 160u8, 74u8, 92u8,
+                        168u8, 188u8, 74u8, 41u8, 129u8, 172u8, 138u8, 30u8, 232u8, 214u8, 154u8,
+                        18u8, 52u8, 87u8, 71u8, 127u8, 141u8, 177u8, 216u8, 158u8,
+                    ],
                 )
             }
             #[doc = " Returns the equivalent points of `new_funds` for a given pool."]
@@ -779,7 +827,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "NominationPoolsApi_balance_to_points",
                     result,
-                    [0; 32],
+                    [
+                        152u8, 165u8, 227u8, 129u8, 31u8, 108u8, 224u8, 174u8, 74u8, 192u8, 102u8,
+                        139u8, 17u8, 119u8, 173u8, 220u8, 52u8, 157u8, 125u8, 107u8, 110u8, 236u8,
+                        9u8, 93u8, 239u8, 3u8, 18u8, 140u8, 203u8, 136u8, 183u8, 215u8,
+                    ],
                 )
             }
         }
@@ -795,7 +847,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "StakingApi_nominations_quota",
                     result,
-                    [0; 32],
+                    [
+                        181u8, 19u8, 6u8, 134u8, 234u8, 67u8, 127u8, 210u8, 53u8, 38u8, 175u8,
+                        160u8, 243u8, 71u8, 187u8, 206u8, 178u8, 91u8, 26u8, 115u8, 18u8, 214u8,
+                        50u8, 208u8, 161u8, 197u8, 81u8, 13u8, 98u8, 53u8, 124u8, 62u8,
+                    ],
                 )
             }
         }
@@ -829,7 +885,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TaggedTransactionQueue_validate_transaction",
                     result,
-                    [0; 32],
+                    [
+                        93u8, 180u8, 253u8, 37u8, 212u8, 54u8, 180u8, 214u8, 33u8, 5u8, 113u8,
+                        181u8, 25u8, 48u8, 153u8, 221u8, 78u8, 6u8, 115u8, 191u8, 72u8, 75u8,
+                        203u8, 171u8, 129u8, 75u8, 56u8, 60u8, 243u8, 92u8, 173u8, 12u8,
+                    ],
                 )
             }
         }
@@ -849,7 +909,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "OffchainWorkerApi_offchain_worker",
                     result,
-                    [0; 32],
+                    [
+                        187u8, 145u8, 211u8, 0u8, 200u8, 151u8, 231u8, 42u8, 187u8, 128u8, 157u8,
+                        64u8, 191u8, 64u8, 31u8, 158u8, 13u8, 159u8, 227u8, 120u8, 155u8, 215u8,
+                        228u8, 215u8, 44u8, 8u8, 206u8, 116u8, 241u8, 133u8, 2u8, 234u8,
+                    ],
                 )
             }
         }
@@ -866,7 +930,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validators",
                     result,
-                    [0; 32],
+                    [
+                        105u8, 23u8, 110u8, 209u8, 38u8, 112u8, 199u8, 134u8, 145u8, 131u8, 38u8,
+                        221u8, 254u8, 147u8, 242u8, 149u8, 94u8, 76u8, 197u8, 67u8, 228u8, 113u8,
+                        196u8, 50u8, 122u8, 1u8, 121u8, 225u8, 163u8, 210u8, 66u8, 68u8,
+                    ],
                 )
             }
             #[doc = " Returns the validator groups and rotation info localized based on the hypothetical child"]
@@ -884,7 +952,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validator_groups",
                     result,
-                    [0; 32],
+                    [
+                        185u8, 206u8, 229u8, 10u8, 93u8, 19u8, 23u8, 44u8, 159u8, 13u8, 235u8,
+                        236u8, 78u8, 153u8, 144u8, 82u8, 106u8, 248u8, 8u8, 92u8, 250u8, 54u8,
+                        153u8, 53u8, 183u8, 60u8, 67u8, 216u8, 201u8, 88u8, 217u8, 120u8,
+                    ],
                 )
             }
             #[doc = " Yields information on all availability cores as relevant to the child block."]
@@ -903,7 +975,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_availability_cores",
                     result,
-                    [0; 32],
+                    [
+                        107u8, 20u8, 115u8, 26u8, 118u8, 211u8, 207u8, 122u8, 134u8, 174u8, 98u8,
+                        237u8, 216u8, 175u8, 39u8, 176u8, 211u8, 78u8, 142u8, 29u8, 127u8, 56u8,
+                        160u8, 249u8, 174u8, 244u8, 146u8, 181u8, 4u8, 166u8, 93u8, 13u8,
+                    ],
                 )
             }
             #[doc = " Yields the persisted validation data for the given `ParaId` along with an assumption that"]
@@ -929,7 +1005,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_persisted_validation_data",
                     result,
-                    [0; 32],
+                    [
+                        230u8, 186u8, 57u8, 116u8, 47u8, 20u8, 186u8, 89u8, 108u8, 211u8, 22u8,
+                        57u8, 124u8, 234u8, 140u8, 3u8, 104u8, 89u8, 89u8, 188u8, 156u8, 130u8,
+                        146u8, 77u8, 129u8, 66u8, 227u8, 157u8, 4u8, 134u8, 7u8, 237u8,
+                    ],
                 )
             }
             #[doc = " Returns the persisted validation data for the given `ParaId` along with the corresponding"]
@@ -954,7 +1034,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_assumed_validation_data",
                     result,
-                    [0; 32],
+                    [
+                        53u8, 137u8, 220u8, 72u8, 155u8, 9u8, 200u8, 207u8, 158u8, 108u8, 204u8,
+                        15u8, 188u8, 162u8, 129u8, 158u8, 62u8, 200u8, 13u8, 0u8, 217u8, 195u8,
+                        19u8, 151u8, 187u8, 231u8, 197u8, 235u8, 128u8, 244u8, 51u8, 85u8,
+                    ],
                 )
             }
             #[doc = " Checks if the given validation outputs pass the acceptance criteria."]
@@ -972,7 +1056,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_check_validation_outputs",
                     result,
-                    [0; 32],
+                    [
+                        99u8, 191u8, 194u8, 26u8, 245u8, 216u8, 224u8, 232u8, 26u8, 184u8, 120u8,
+                        64u8, 32u8, 134u8, 215u8, 138u8, 195u8, 30u8, 220u8, 111u8, 119u8, 182u8,
+                        62u8, 72u8, 5u8, 144u8, 87u8, 157u8, 125u8, 125u8, 237u8, 34u8,
+                    ],
                 )
             }
             #[doc = " Returns the session index expected at a child of the block."]
@@ -985,7 +1073,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_session_index_for_child",
                     result,
-                    [0; 32],
+                    [
+                        224u8, 173u8, 95u8, 16u8, 57u8, 180u8, 35u8, 148u8, 243u8, 77u8, 123u8,
+                        242u8, 212u8, 122u8, 27u8, 32u8, 44u8, 166u8, 66u8, 124u8, 1u8, 190u8,
+                        93u8, 124u8, 57u8, 127u8, 249u8, 141u8, 173u8, 92u8, 137u8, 165u8,
+                    ],
                 )
             }
             #[doc = " Fetch the validation code used by a para, making the given `OccupiedCoreAssumption`."]
@@ -1007,7 +1099,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validation_code",
                     result,
-                    [0; 32],
+                    [
+                        231u8, 64u8, 145u8, 133u8, 197u8, 196u8, 177u8, 229u8, 152u8, 70u8, 16u8,
+                        159u8, 65u8, 66u8, 172u8, 58u8, 60u8, 50u8, 232u8, 28u8, 36u8, 211u8,
+                        161u8, 28u8, 192u8, 153u8, 89u8, 186u8, 9u8, 246u8, 228u8, 84u8,
+                    ],
                 )
             }
             #[doc = " Get the receipt of a candidate pending availability. This returns `Some` for any paras"]
@@ -1027,7 +1123,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_candidate_pending_availability",
                     result,
-                    [0; 32],
+                    [
+                        175u8, 68u8, 187u8, 74u8, 138u8, 129u8, 153u8, 251u8, 216u8, 70u8, 251u8,
+                        151u8, 169u8, 252u8, 31u8, 16u8, 61u8, 242u8, 169u8, 15u8, 123u8, 58u8,
+                        177u8, 131u8, 6u8, 79u8, 30u8, 105u8, 51u8, 67u8, 19u8, 208u8,
+                    ],
                 )
             }
             #[doc = " Get a vector of events concerning candidates that occurred within a block."]
@@ -1042,7 +1142,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_candidate_events",
                     result,
-                    [0; 32],
+                    [
+                        50u8, 177u8, 192u8, 138u8, 139u8, 179u8, 76u8, 167u8, 238u8, 92u8, 255u8,
+                        249u8, 223u8, 61u8, 112u8, 7u8, 0u8, 6u8, 43u8, 71u8, 209u8, 21u8, 14u8,
+                        184u8, 19u8, 68u8, 106u8, 193u8, 38u8, 251u8, 19u8, 208u8,
+                    ],
                 )
             }
             #[doc = " Get all the pending inbound messages in the downward message queue for a para."]
@@ -1061,7 +1165,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_dmq_contents",
                     result,
-                    [0; 32],
+                    [
+                        34u8, 66u8, 1u8, 92u8, 223u8, 240u8, 222u8, 128u8, 190u8, 242u8, 160u8,
+                        140u8, 60u8, 57u8, 155u8, 105u8, 10u8, 162u8, 212u8, 72u8, 1u8, 192u8,
+                        36u8, 26u8, 127u8, 86u8, 8u8, 255u8, 57u8, 210u8, 148u8, 254u8,
+                    ],
                 )
             }
             #[doc = " Get the contents of all channels addressed to the given recipient. Channels that have no"]
@@ -1084,7 +1192,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_inbound_hrmp_channels_contents",
                     result,
-                    [0; 32],
+                    [
+                        209u8, 72u8, 244u8, 143u8, 167u8, 234u8, 8u8, 33u8, 80u8, 154u8, 132u8,
+                        22u8, 62u8, 174u8, 3u8, 89u8, 78u8, 115u8, 119u8, 77u8, 169u8, 80u8, 98u8,
+                        164u8, 8u8, 8u8, 50u8, 120u8, 58u8, 12u8, 114u8, 57u8,
+                    ],
                 )
             }
             #[doc = " Get the validation code from its hash."]
@@ -1101,7 +1213,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validation_code_by_hash",
                     result,
-                    [0; 32],
+                    [
+                        143u8, 146u8, 97u8, 197u8, 138u8, 122u8, 186u8, 0u8, 86u8, 105u8, 207u8,
+                        55u8, 53u8, 47u8, 131u8, 101u8, 24u8, 71u8, 204u8, 71u8, 96u8, 100u8,
+                        252u8, 127u8, 21u8, 248u8, 70u8, 187u8, 111u8, 112u8, 77u8, 208u8,
+                    ],
                 )
             }
             #[doc = " Scrape dispute relevant from on-chain, backing votes and resolved disputes."]
@@ -1118,7 +1234,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_on_chain_votes",
                     result,
-                    [0; 32],
+                    [
+                        37u8, 2u8, 32u8, 215u8, 117u8, 137u8, 242u8, 168u8, 57u8, 175u8, 59u8,
+                        243u8, 132u8, 133u8, 246u8, 37u8, 154u8, 205u8, 191u8, 114u8, 114u8, 167u8,
+                        104u8, 27u8, 144u8, 56u8, 61u8, 159u8, 9u8, 79u8, 190u8, 239u8,
+                    ],
                 )
             }
             #[doc = " Get the session info for the given session, if stored."]
@@ -1135,7 +1255,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_session_info",
                     result,
-                    [0; 32],
+                    [
+                        107u8, 247u8, 186u8, 88u8, 134u8, 234u8, 251u8, 220u8, 134u8, 138u8, 130u8,
+                        168u8, 253u8, 101u8, 235u8, 126u8, 190u8, 37u8, 77u8, 182u8, 195u8, 100u8,
+                        63u8, 173u8, 147u8, 98u8, 217u8, 235u8, 220u8, 87u8, 83u8, 198u8,
+                    ],
                 )
             }
             #[doc = " Submits a PVF pre-checking statement into the transaction pool."]
@@ -1152,7 +1276,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_submit_pvf_check_statement",
                     result,
-                    [0; 32],
+                    [
+                        228u8, 45u8, 8u8, 229u8, 69u8, 35u8, 3u8, 231u8, 235u8, 184u8, 19u8, 96u8,
+                        72u8, 62u8, 15u8, 218u8, 27u8, 134u8, 19u8, 179u8, 239u8, 1u8, 207u8, 39u8,
+                        50u8, 171u8, 59u8, 204u8, 143u8, 247u8, 27u8, 179u8,
+                    ],
                 )
             }
             #[doc = " Returns code hashes of PVFs that require pre-checking by validators in the active set."]
@@ -1167,7 +1295,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_pvfs_require_precheck",
                     result,
-                    [0; 32],
+                    [
+                        58u8, 208u8, 110u8, 249u8, 77u8, 56u8, 39u8, 46u8, 196u8, 209u8, 189u8,
+                        200u8, 147u8, 235u8, 247u8, 235u8, 125u8, 230u8, 11u8, 151u8, 137u8, 118u8,
+                        110u8, 179u8, 72u8, 53u8, 127u8, 149u8, 252u8, 20u8, 165u8, 239u8,
+                    ],
                 )
             }
             #[doc = " Fetch the hash of the validation code used by a para, making the given `OccupiedCoreAssumption`."]
@@ -1188,7 +1320,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validation_code_hash",
                     result,
-                    [0; 32],
+                    [
+                        232u8, 173u8, 117u8, 125u8, 245u8, 188u8, 20u8, 124u8, 255u8, 219u8, 2u8,
+                        95u8, 131u8, 3u8, 122u8, 190u8, 240u8, 184u8, 8u8, 239u8, 85u8, 107u8,
+                        59u8, 105u8, 206u8, 130u8, 65u8, 142u8, 130u8, 193u8, 143u8, 199u8,
+                    ],
                 )
             }
             #[doc = " Returns all onchain disputes."]
@@ -1205,7 +1341,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_disputes",
                     result,
-                    [0; 32],
+                    [
+                        90u8, 171u8, 12u8, 104u8, 109u8, 92u8, 149u8, 72u8, 109u8, 39u8, 75u8,
+                        241u8, 239u8, 78u8, 46u8, 134u8, 139u8, 200u8, 144u8, 213u8, 218u8, 64u8,
+                        98u8, 102u8, 159u8, 211u8, 154u8, 178u8, 187u8, 146u8, 193u8, 34u8,
+                    ],
                 )
             }
             #[doc = " Returns execution parameters for the session."]
@@ -1222,7 +1362,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_session_executor_params",
                     result,
-                    [0; 32],
+                    [
+                        129u8, 198u8, 157u8, 37u8, 138u8, 132u8, 5u8, 183u8, 233u8, 119u8, 99u8,
+                        173u8, 22u8, 240u8, 182u8, 246u8, 101u8, 3u8, 149u8, 130u8, 107u8, 60u8,
+                        152u8, 217u8, 86u8, 150u8, 253u8, 170u8, 10u8, 86u8, 183u8, 33u8,
+                    ],
                 )
             }
         }
@@ -1239,7 +1383,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_beefy_genesis",
                     result,
-                    [0; 32],
+                    [
+                        80u8, 47u8, 5u8, 126u8, 16u8, 213u8, 203u8, 179u8, 124u8, 14u8, 227u8,
+                        61u8, 164u8, 158u8, 115u8, 127u8, 132u8, 90u8, 222u8, 87u8, 249u8, 214u8,
+                        100u8, 13u8, 201u8, 186u8, 229u8, 217u8, 21u8, 152u8, 197u8, 60u8,
+                    ],
                 )
             }
             #[doc = " Return the current active BEEFY validator set"]
@@ -1256,7 +1404,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_validator_set",
                     result,
-                    [0; 32],
+                    [
+                        49u8, 44u8, 188u8, 42u8, 35u8, 233u8, 181u8, 44u8, 232u8, 88u8, 1u8, 100u8,
+                        90u8, 42u8, 139u8, 239u8, 25u8, 44u8, 183u8, 164u8, 161u8, 129u8, 12u8,
+                        158u8, 41u8, 39u8, 218u8, 43u8, 78u8, 70u8, 156u8, 159u8,
+                    ],
                 )
             }
             #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
@@ -1283,7 +1435,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_submit_report_equivocation_unsigned_extrinsic",
                     result,
-                    [0; 32],
+                    [
+                        232u8, 114u8, 155u8, 57u8, 178u8, 76u8, 154u8, 140u8, 49u8, 60u8, 71u8,
+                        98u8, 167u8, 4u8, 248u8, 159u8, 0u8, 36u8, 119u8, 102u8, 188u8, 10u8,
+                        137u8, 252u8, 249u8, 124u8, 208u8, 173u8, 252u8, 185u8, 117u8, 35u8,
+                    ],
                 )
             }
             #[doc = " Generates a proof of key ownership for the given authority in the"]
@@ -1310,7 +1466,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_generate_key_ownership_proof",
                     result,
-                    [0; 32],
+                    [
+                        219u8, 146u8, 168u8, 108u8, 180u8, 133u8, 182u8, 104u8, 153u8, 14u8, 209u8,
+                        207u8, 32u8, 226u8, 81u8, 196u8, 243u8, 208u8, 0u8, 94u8, 197u8, 232u8,
+                        181u8, 251u8, 182u8, 12u8, 245u8, 231u8, 198u8, 76u8, 59u8, 53u8,
+                    ],
                 )
             }
         }
@@ -1330,7 +1490,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_mmr_root",
                     result,
-                    [0; 32],
+                    [
+                        83u8, 202u8, 15u8, 77u8, 255u8, 136u8, 129u8, 210u8, 154u8, 178u8, 197u8,
+                        94u8, 231u8, 151u8, 68u8, 172u8, 112u8, 116u8, 30u8, 138u8, 142u8, 166u8,
+                        16u8, 4u8, 24u8, 204u8, 18u8, 48u8, 43u8, 103u8, 30u8, 96u8,
+                    ],
                 )
             }
             #[doc = " Return the number of MMR blocks in the chain."]
@@ -1346,7 +1510,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_mmr_leaf_count",
                     result,
-                    [0; 32],
+                    [
+                        81u8, 145u8, 75u8, 170u8, 197u8, 235u8, 92u8, 81u8, 54u8, 16u8, 239u8,
+                        136u8, 174u8, 255u8, 90u8, 27u8, 24u8, 51u8, 152u8, 130u8, 249u8, 247u8,
+                        44u8, 173u8, 4u8, 21u8, 72u8, 44u8, 198u8, 145u8, 94u8, 77u8,
+                    ],
                 )
             }
             #[doc = " Generate MMR proof for a series of block numbers. If `best_known_block_number = Some(n)`,"]
@@ -1370,7 +1538,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_generate_proof",
                     result,
-                    [0; 32],
+                    [
+                        180u8, 123u8, 115u8, 227u8, 101u8, 119u8, 103u8, 230u8, 66u8, 255u8, 15u8,
+                        197u8, 60u8, 180u8, 27u8, 47u8, 73u8, 121u8, 179u8, 219u8, 161u8, 37u8,
+                        57u8, 131u8, 104u8, 106u8, 206u8, 230u8, 168u8, 185u8, 206u8, 32u8,
+                    ],
                 )
             }
             #[doc = " Verify MMR proof against on-chain MMR for a batch of leaves."]
@@ -1391,7 +1563,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_verify_proof",
                     result,
-                    [0; 32],
+                    [
+                        118u8, 13u8, 68u8, 159u8, 27u8, 144u8, 229u8, 72u8, 88u8, 106u8, 193u8,
+                        86u8, 228u8, 243u8, 28u8, 243u8, 99u8, 241u8, 153u8, 169u8, 121u8, 139u8,
+                        60u8, 244u8, 153u8, 110u8, 239u8, 149u8, 122u8, 164u8, 53u8, 9u8,
+                    ],
                 )
             }
             #[doc = " Verify MMR proof against given root hash for a batch of leaves."]
@@ -1416,7 +1592,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_verify_proof_stateless",
                     result,
-                    [0; 32],
+                    [
+                        152u8, 237u8, 225u8, 199u8, 238u8, 151u8, 87u8, 236u8, 210u8, 38u8, 168u8,
+                        160u8, 166u8, 27u8, 186u8, 227u8, 160u8, 154u8, 120u8, 127u8, 98u8, 247u8,
+                        111u8, 99u8, 211u8, 236u8, 39u8, 221u8, 250u8, 110u8, 232u8, 0u8,
+                    ],
                 )
             }
         }
@@ -1449,7 +1629,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_grandpa_authorities",
                     result,
-                    [0; 32],
+                    [
+                        78u8, 213u8, 85u8, 178u8, 49u8, 70u8, 10u8, 221u8, 93u8, 91u8, 250u8, 59u8,
+                        80u8, 141u8, 62u8, 126u8, 55u8, 235u8, 163u8, 12u8, 21u8, 199u8, 240u8,
+                        209u8, 95u8, 63u8, 65u8, 73u8, 141u8, 42u8, 78u8, 154u8,
+                    ],
                 )
             }
             #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
@@ -1475,7 +1659,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_submit_report_equivocation_unsigned_extrinsic",
                     result,
-                    [0; 32],
+                    [
+                        226u8, 83u8, 137u8, 173u8, 45u8, 138u8, 210u8, 202u8, 113u8, 196u8, 110u8,
+                        68u8, 31u8, 192u8, 127u8, 100u8, 125u8, 225u8, 30u8, 252u8, 160u8, 109u8,
+                        251u8, 96u8, 52u8, 214u8, 38u8, 91u8, 158u8, 71u8, 125u8, 220u8,
+                    ],
                 )
             }
             #[doc = " Generates a proof of key ownership for the given authority in the"]
@@ -1504,7 +1692,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_generate_key_ownership_proof",
                     result,
-                    [0; 32],
+                    [
+                        149u8, 80u8, 146u8, 102u8, 63u8, 184u8, 111u8, 153u8, 143u8, 71u8, 109u8,
+                        162u8, 117u8, 45u8, 139u8, 245u8, 154u8, 252u8, 117u8, 224u8, 10u8, 6u8,
+                        143u8, 137u8, 58u8, 213u8, 215u8, 110u8, 180u8, 142u8, 234u8, 182u8,
+                    ],
                 )
             }
             #[doc = " Get current GRANDPA authority set id."]
@@ -1515,7 +1707,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_current_set_id",
                     result,
-                    [0; 32],
+                    [
+                        39u8, 245u8, 166u8, 229u8, 239u8, 200u8, 179u8, 64u8, 193u8, 93u8, 41u8,
+                        40u8, 208u8, 231u8, 75u8, 197u8, 45u8, 119u8, 131u8, 245u8, 84u8, 249u8,
+                        60u8, 7u8, 180u8, 176u8, 119u8, 130u8, 247u8, 134u8, 211u8, 240u8,
+                    ],
                 )
             }
         }
@@ -1532,7 +1728,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_configuration",
                     result,
-                    [0; 32],
+                    [
+                        101u8, 27u8, 68u8, 108u8, 36u8, 12u8, 205u8, 58u8, 238u8, 195u8, 171u8,
+                        167u8, 248u8, 76u8, 92u8, 226u8, 241u8, 192u8, 151u8, 31u8, 6u8, 200u8,
+                        69u8, 180u8, 107u8, 134u8, 221u8, 99u8, 237u8, 223u8, 50u8, 175u8,
+                    ],
                 )
             }
             #[doc = " Returns the slot that started the current epoch."]
@@ -1545,7 +1745,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_current_epoch_start",
                     result,
-                    [0; 32],
+                    [
+                        67u8, 178u8, 67u8, 242u8, 228u8, 74u8, 93u8, 166u8, 160u8, 9u8, 109u8,
+                        174u8, 12u8, 82u8, 239u8, 200u8, 96u8, 54u8, 235u8, 184u8, 159u8, 221u8,
+                        72u8, 244u8, 83u8, 24u8, 239u8, 24u8, 152u8, 177u8, 211u8, 205u8,
+                    ],
                 )
             }
             #[doc = " Returns information regarding the current epoch."]
@@ -1558,7 +1762,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_current_epoch",
                     result,
-                    [0; 32],
+                    [
+                        166u8, 104u8, 201u8, 148u8, 149u8, 137u8, 223u8, 165u8, 82u8, 4u8, 130u8,
+                        58u8, 52u8, 193u8, 201u8, 80u8, 120u8, 212u8, 76u8, 221u8, 11u8, 131u8,
+                        115u8, 8u8, 9u8, 59u8, 191u8, 165u8, 148u8, 24u8, 194u8, 162u8,
+                    ],
                 )
             }
             #[doc = " Returns information regarding the next epoch (which was already"]
@@ -1572,7 +1780,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_next_epoch",
                     result,
-                    [0; 32],
+                    [
+                        251u8, 29u8, 230u8, 254u8, 174u8, 38u8, 55u8, 30u8, 93u8, 42u8, 254u8,
+                        172u8, 183u8, 250u8, 104u8, 211u8, 79u8, 211u8, 55u8, 98u8, 253u8, 73u8,
+                        137u8, 185u8, 116u8, 94u8, 20u8, 232u8, 224u8, 136u8, 86u8, 182u8,
+                    ],
                 )
             }
             #[doc = " Generates a proof of key ownership for the given authority in the"]
@@ -1599,7 +1811,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_generate_key_ownership_proof",
                     result,
-                    [0; 32],
+                    [
+                        16u8, 78u8, 1u8, 172u8, 172u8, 253u8, 240u8, 175u8, 90u8, 130u8, 90u8,
+                        69u8, 249u8, 12u8, 192u8, 134u8, 131u8, 248u8, 186u8, 166u8, 240u8, 182u8,
+                        177u8, 0u8, 107u8, 151u8, 200u8, 41u8, 157u8, 150u8, 162u8, 244u8,
+                    ],
                 )
             }
             #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
@@ -1628,7 +1844,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_submit_report_equivocation_unsigned_extrinsic",
                     result,
-                    [0; 32],
+                    [
+                        255u8, 136u8, 248u8, 244u8, 155u8, 51u8, 20u8, 157u8, 93u8, 19u8, 24u8,
+                        170u8, 72u8, 199u8, 222u8, 111u8, 164u8, 126u8, 159u8, 209u8, 198u8, 37u8,
+                        113u8, 12u8, 36u8, 117u8, 131u8, 7u8, 130u8, 85u8, 177u8, 109u8,
+                    ],
                 )
             }
         }
@@ -1648,7 +1868,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "AuthorityDiscoveryApi_authorities",
                     result,
-                    [0; 32],
+                    [
+                        104u8, 50u8, 187u8, 116u8, 97u8, 112u8, 203u8, 212u8, 27u8, 108u8, 253u8,
+                        8u8, 103u8, 104u8, 63u8, 176u8, 178u8, 179u8, 154u8, 104u8, 167u8, 241u8,
+                        76u8, 136u8, 102u8, 130u8, 88u8, 115u8, 104u8, 64u8, 224u8, 98u8,
+                    ],
                 )
             }
         }
@@ -1672,7 +1896,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "SessionKeys_generate_session_keys",
                     result,
-                    [0; 32],
+                    [
+                        238u8, 35u8, 56u8, 56u8, 5u8, 183u8, 237u8, 233u8, 220u8, 77u8, 245u8,
+                        218u8, 120u8, 21u8, 3u8, 95u8, 106u8, 140u8, 212u8, 37u8, 14u8, 180u8,
+                        24u8, 11u8, 137u8, 193u8, 111u8, 91u8, 235u8, 127u8, 202u8, 230u8,
+                    ],
                 )
             }
             #[doc = " Decode the given public session keys."]
@@ -1694,7 +1922,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "SessionKeys_decode_session_keys",
                     result,
-                    [0; 32],
+                    [
+                        134u8, 106u8, 224u8, 190u8, 133u8, 212u8, 253u8, 184u8, 222u8, 76u8, 44u8,
+                        75u8, 168u8, 18u8, 3u8, 169u8, 32u8, 8u8, 46u8, 5u8, 155u8, 45u8, 149u8,
+                        144u8, 41u8, 174u8, 130u8, 133u8, 22u8, 150u8, 89u8, 196u8,
+                    ],
                 )
             }
         }
@@ -1711,7 +1943,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "AccountNonceApi_account_nonce",
                     result,
-                    [0; 32],
+                    [
+                        115u8, 50u8, 18u8, 201u8, 220u8, 171u8, 244u8, 16u8, 58u8, 183u8, 173u8,
+                        196u8, 253u8, 239u8, 241u8, 100u8, 246u8, 179u8, 50u8, 32u8, 22u8, 245u8,
+                        109u8, 191u8, 232u8, 76u8, 152u8, 87u8, 156u8, 187u8, 175u8, 202u8,
+                    ],
                 )
             }
         }
@@ -1733,7 +1969,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentApi_query_info",
                     result,
-                    [0; 32],
+                    [
+                        157u8, 139u8, 132u8, 17u8, 44u8, 153u8, 215u8, 139u8, 196u8, 107u8, 225u8,
+                        39u8, 78u8, 134u8, 147u8, 168u8, 134u8, 89u8, 51u8, 144u8, 101u8, 117u8,
+                        35u8, 131u8, 108u8, 17u8, 74u8, 1u8, 167u8, 7u8, 165u8, 98u8,
+                    ],
                 )
             }
             pub fn query_fee_details(
@@ -1751,7 +1991,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentApi_query_fee_details",
                     result,
-                    [0; 32],
+                    [
+                        113u8, 100u8, 16u8, 128u8, 108u8, 95u8, 91u8, 255u8, 46u8, 255u8, 52u8,
+                        225u8, 92u8, 186u8, 175u8, 126u8, 96u8, 25u8, 206u8, 207u8, 16u8, 94u8,
+                        204u8, 138u8, 227u8, 38u8, 125u8, 14u8, 38u8, 58u8, 84u8, 71u8,
+                    ],
                 )
             }
             pub fn query_weight_to_fee(
@@ -1764,7 +2008,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentApi_query_weight_to_fee",
                     result,
-                    [0; 32],
+                    [
+                        179u8, 108u8, 155u8, 39u8, 134u8, 220u8, 72u8, 45u8, 230u8, 232u8, 150u8,
+                        146u8, 61u8, 198u8, 145u8, 250u8, 19u8, 157u8, 204u8, 217u8, 111u8, 171u8,
+                        197u8, 21u8, 75u8, 6u8, 16u8, 26u8, 244u8, 101u8, 134u8, 95u8,
+                    ],
                 )
             }
             pub fn query_length_to_fee(
@@ -1777,7 +2025,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentApi_query_length_to_fee",
                     result,
-                    [0; 32],
+                    [
+                        228u8, 141u8, 164u8, 186u8, 169u8, 249u8, 75u8, 2u8, 160u8, 73u8, 73u8,
+                        214u8, 141u8, 76u8, 180u8, 222u8, 230u8, 161u8, 131u8, 88u8, 25u8, 192u8,
+                        77u8, 124u8, 158u8, 113u8, 72u8, 147u8, 13u8, 11u8, 42u8, 30u8,
+                    ],
                 )
             }
         }
@@ -1800,7 +2052,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentCallApi_query_call_info",
                     result,
-                    [0; 32],
+                    [
+                        151u8, 40u8, 199u8, 73u8, 193u8, 248u8, 30u8, 24u8, 71u8, 196u8, 235u8,
+                        10u8, 211u8, 120u8, 228u8, 29u8, 101u8, 175u8, 200u8, 196u8, 70u8, 44u8,
+                        112u8, 209u8, 175u8, 246u8, 148u8, 118u8, 84u8, 127u8, 185u8, 163u8,
+                    ],
                 )
             }
             #[doc = " Query fee details of a given encoded `Call`."]
@@ -1819,7 +2075,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentCallApi_query_call_fee_details",
                     result,
-                    [0; 32],
+                    [
+                        56u8, 220u8, 173u8, 0u8, 48u8, 27u8, 228u8, 70u8, 139u8, 236u8, 142u8,
+                        142u8, 192u8, 147u8, 216u8, 185u8, 152u8, 219u8, 185u8, 189u8, 166u8,
+                        110u8, 224u8, 32u8, 94u8, 53u8, 248u8, 216u8, 90u8, 152u8, 63u8, 148u8,
+                    ],
                 )
             }
             #[doc = " Query the output of the current `WeightToFee` given some input."]
@@ -1833,7 +2093,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentCallApi_query_weight_to_fee",
                     result,
-                    [0; 32],
+                    [
+                        235u8, 177u8, 255u8, 102u8, 0u8, 237u8, 63u8, 37u8, 144u8, 142u8, 86u8,
+                        43u8, 82u8, 41u8, 25u8, 149u8, 75u8, 238u8, 118u8, 216u8, 84u8, 241u8,
+                        54u8, 157u8, 81u8, 246u8, 140u8, 240u8, 210u8, 208u8, 235u8, 172u8,
+                    ],
                 )
             }
             #[doc = " Query the output of the current `LengthToFee` given some input."]
@@ -1847,7 +2111,11 @@ pub mod api {
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "TransactionPaymentCallApi_query_length_to_fee",
                     result,
-                    [0; 32],
+                    [
+                        188u8, 80u8, 192u8, 251u8, 47u8, 200u8, 60u8, 10u8, 214u8, 47u8, 137u8,
+                        111u8, 226u8, 163u8, 60u8, 177u8, 190u8, 210u8, 57u8, 89u8, 34u8, 154u8,
+                        190u8, 244u8, 132u8, 129u8, 212u8, 121u8, 43u8, 190u8, 71u8, 237u8,
+                    ],
                 )
             }
         }
