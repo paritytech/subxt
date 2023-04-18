@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::FetchMetadataError;
+use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -33,14 +34,7 @@ fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
 
 /// Returns the metadata bytes from the provided URL.
 pub async fn fetch_metadata_bytes(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
-    let hex = fetch_metadata_hex(url).await?;
-    let bytes = hex::decode(hex.trim_start_matches("0x"))?;
-    Ok(bytes)
-}
-
-/// Returns the raw, 0x prefixed metadata hex from the provided URL.
-pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError> {
-    let hex_data = match url.scheme_str() {
+    let bytes = match url.scheme_str() {
         Some("http") | Some("https") => fetch_metadata_http(url).await,
         Some("ws") | Some("wss") => fetch_metadata_ws(url).await,
         invalid_scheme => {
@@ -48,10 +42,73 @@ pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError>
             Err(FetchMetadataError::InvalidScheme(scheme.to_owned()))
         }
     }?;
-    Ok(hex_data)
+
+    Ok(bytes)
 }
 
-async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
+/// Returns the raw, 0x prefixed metadata hex from the provided URL.
+pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError> {
+    let bytes = fetch_metadata_bytes(url).await?;
+    let hex_data = format!("0x{}", hex::encode(bytes));
+    Ok(hex_data)
+}
+enum ClientType {
+    WebSocket(jsonrpsee::async_client::Client),
+    Http(jsonrpsee::http_client::HttpClient),
+}
+
+impl ClientType {
+    fn request<'life0, 'life1, 'async_trait, R, Params>(
+        &'life0 self,
+        method: &'life1 str,
+        params: Params,
+    ) -> core::pin::Pin<
+        Box<
+            dyn core::future::Future<Output = Result<R, Error>> + core::marker::Send + 'async_trait,
+        >,
+    >
+    where
+        R: jsonrpsee::core::DeserializeOwned,
+        Params: jsonrpsee::core::traits::ToRpcParams + Send,
+        R: 'async_trait,
+        Params: 'async_trait,
+        'life0: 'async_trait,
+        'life1: 'async_trait,
+        Self: 'async_trait,
+    {
+        match self {
+            ClientType::WebSocket(client) => client.request(method, params),
+            ClientType::Http(client) => client.request(method, params),
+        }
+    }
+}
+
+/// Execute runtime API call and return the specified runtime metadata version.
+async fn fetch_latest_metadata(client: ClientType) -> Result<Vec<u8>, FetchMetadataError> {
+    const V15_METADATA_VERSION: u32 = u32::MAX;
+    let bytes = V15_METADATA_VERSION.encode();
+
+    // Runtime API arguments are scale encoded hex encoded.
+    let version: String = format!("0x{}", hex::encode(&bytes));
+
+    // Returns a hex(Option<frame_metadata::OpaqueMetadata>).
+    let raw: String = client
+        .request(
+            "state_call",
+            rpc_params!["Metadata_metadata_at_version", &version],
+        )
+        .await?;
+    let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
+
+    let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
+    let bytes = opaque.ok_or(FetchMetadataError::Other(
+        "Metadata version not found".into(),
+    ))?;
+
+    Ok(bytes.0)
+}
+
+async fn fetch_metadata_ws(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
     let (sender, receiver) = WsTransportClientBuilder::default()
         .build(url.to_string().parse::<Uri>().unwrap())
         .await
@@ -62,13 +119,13 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<String, FetchMetadataError> {
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
-    Ok(client.request("state_getMetadata", rpc_params![]).await?)
+    fetch_latest_metadata(ClientType::WebSocket(client)).await
 }
 
-async fn fetch_metadata_http(url: &Uri) -> Result<String, FetchMetadataError> {
+async fn fetch_metadata_http(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
     let client = HttpClientBuilder::default()
         .request_timeout(Duration::from_secs(180))
         .build(url.to_string())?;
 
-    Ok(client.request("state_getMetadata", rpc_params![]).await?)
+    fetch_latest_metadata(ClientType::Http(client)).await
 }
