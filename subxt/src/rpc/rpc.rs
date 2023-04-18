@@ -347,13 +347,13 @@ impl<T: Config> Rpc<T> {
         Ok(xt_hash)
     }
 
-    /// Execute a runtime API call.
-    pub async fn state_call<Res: Decode>(
+    /// Execute a runtime API call via `state_call` RPC method.
+    pub async fn state_call_raw(
         &self,
         function: &str,
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Res, Error> {
+    ) -> Result<types::Bytes, Error> {
         let call_parameters = call_parameters.unwrap_or_default();
         let bytes: types::Bytes = self
             .client
@@ -362,6 +362,17 @@ impl<T: Config> Rpc<T> {
                 rpc_params![function, to_hex(call_parameters), at],
             )
             .await?;
+        Ok(bytes)
+    }
+
+    /// Execute a runtime API call and decode the result.
+    pub async fn state_call<Res: Decode>(
+        &self,
+        function: &str,
+        call_parameters: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<Res, Error> {
+        let bytes = self.state_call_raw(function, call_parameters, at).await?;
         let cursor = &mut &bytes[..];
         let res: Res = Decode::decode(cursor)?;
         Ok(res)
