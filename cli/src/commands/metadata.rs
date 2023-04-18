@@ -20,6 +20,9 @@ pub struct Opts {
     format: String,
     /// Generate a subset of the metadata that contains only the
     /// types needed to represent the provided pallets.
+    ///
+    /// The returned metadata is updated to the latest available version
+    /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     pallets: Option<Vec<String>>,
 }
