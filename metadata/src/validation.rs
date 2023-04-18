@@ -5,7 +5,8 @@
 //! Utility functions for metadata validation.
 
 use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryType,
+    ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
+    RuntimeMetadataV15, StorageEntryMetadata, StorageEntryType,
 };
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
@@ -243,7 +244,7 @@ pub fn get_storage_hash(
         .pallets
         .iter()
         .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Pallet)?;
+        .ok_or(NotFound::Root)?;
 
     let storage = pallet.storage.as_ref().ok_or(NotFound::Item)?;
 
@@ -267,7 +268,7 @@ pub fn get_constant_hash(
         .pallets
         .iter()
         .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Pallet)?;
+        .ok_or(NotFound::Root)?;
 
     let constant = pallet
         .constants
@@ -290,7 +291,7 @@ pub fn get_call_hash(
         .pallets
         .iter()
         .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Pallet)?;
+        .ok_or(NotFound::Root)?;
 
     let call_id = pallet.calls.as_ref().ok_or(NotFound::Item)?.ty.id;
 
@@ -309,6 +310,96 @@ pub fn get_call_hash(
     // hash the specific variant representing the call we are interested in.
     let hash = get_variant_hash(&metadata.types, variant, &mut HashSet::new());
     Ok(hash)
+}
+
+fn get_runtime_method_hash(
+    metadata: &RuntimeMetadataV15,
+    trait_metadata: &RuntimeApiMetadata<PortableForm>,
+    method_metadata: &RuntimeApiMethodMetadata<PortableForm>,
+    visited_ids: &mut HashSet<u32>,
+) -> [u8; 32] {
+    // The trait name is part of the runtime API call that is being
+    // generated for this method. Therefore the trait name is strongly
+    // connected to the method in the same way as a parameter is
+    // to the method.
+    let mut bytes = hash(trait_metadata.name.as_bytes());
+    bytes = xor(bytes, hash(method_metadata.name.as_bytes()));
+
+    for input in &method_metadata.inputs {
+        bytes = xor(bytes, hash(input.name.as_bytes()));
+        bytes = xor(
+            bytes,
+            get_type_hash(&metadata.types, input.ty.id, visited_ids),
+        );
+    }
+
+    bytes = xor(
+        bytes,
+        get_type_hash(&metadata.types, method_metadata.output.id, visited_ids),
+    );
+
+    bytes
+}
+
+/// Obtain the hash of a specific runtime trait.
+pub fn get_runtime_trait_hash(
+    metadata: &RuntimeMetadataV15,
+    trait_metadata: &RuntimeApiMetadata<PortableForm>,
+) -> [u8; 32] {
+    // Start out with any hash, the trait name is already part of the
+    // runtime method hash.
+    let mut bytes = hash(trait_metadata.name.as_bytes());
+    let mut visited_ids = HashSet::new();
+
+    let mut methods: Vec<_> = trait_metadata
+        .methods
+        .iter()
+        .map(|method_metadata| {
+            let bytes = get_runtime_method_hash(
+                metadata,
+                trait_metadata,
+                method_metadata,
+                &mut visited_ids,
+            );
+            (&*method_metadata.name, bytes)
+        })
+        .collect();
+
+    // Sort by method name to create a deterministic representation of the underlying metadata.
+    methods.sort_by_key(|&(name, _hash)| name);
+
+    // Note: Hash already takes into account the method name.
+    for (_, hash) in methods {
+        bytes = xor(bytes, hash);
+    }
+
+    bytes
+}
+
+/// Obtain the hash of a specific runtime API function, or an error if it's not found.
+pub fn get_runtime_api_hash(
+    metadata: &RuntimeMetadataV15,
+    trait_name: &str,
+    method_name: &str,
+) -> Result<[u8; 32], NotFound> {
+    let trait_metadata = metadata
+        .apis
+        .iter()
+        .find(|m| m.name == trait_name)
+        .ok_or(NotFound::Root)?;
+
+    let method_metadata = trait_metadata
+        .methods
+        .iter()
+        .find(|m| m.name == method_name)
+        .ok_or(NotFound::Item)?;
+
+    Ok(get_runtime_method_hash(
+        metadata,
+        trait_metadata,
+        method_metadata,
+        &mut HashSet::new(),
+    ))
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
@@ -390,6 +481,19 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
         &mut visited_ids,
     ));
 
+    let mut apis: Vec<_> = metadata
+        .apis
+        .iter()
+        .map(|api| (&*api.name, get_runtime_trait_hash(metadata, api)))
+        .collect();
+
+    // Sort the runtime APIs by trait name to provide a deterministic output.
+    apis.sort_by_key(|&(name, _hash)| name);
+
+    for (_, hash) in apis.iter() {
+        bytes.extend(hash)
+    }
+
     hash(&bytes)
 }
 
@@ -436,11 +540,24 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
     hash(&bytes)
 }
 
-/// An error returned if we attempt to get the hash for a specific call, constant
-/// or storage item that doesn't exist.
+/// An error returned if we attempt to get the hash for a specific call, constant,
+/// storage or runtime API function does not exist.
+///
+/// The location of the specific item (call, constant, storage or runtime API function)
+/// is stored with two indirections:
+/// - Root
+/// The root location of the item. For calls, constants, storage this represents the
+/// pallet name. While for runtime API function this represents the trait name.
+/// - Item
+/// The actual item. For calls, constants, storage this represents the actual name.
+/// While for runtime API functions this represents the method name.
 #[derive(Clone, Debug)]
 pub enum NotFound {
-    Pallet,
+    /// The root location of the item cannot be found.
+    /// - pallet name: for calls, constants, storage
+    /// - trait name: for runtime API functions
+    Root,
+    /// The actual item name cannot be found.
     Item,
 }
 

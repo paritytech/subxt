@@ -12,7 +12,7 @@ use frame_metadata::{
 pub use retain::retain_metadata_pallets;
 pub use validation::{
     get_call_hash, get_constant_hash, get_metadata_hash, get_metadata_per_pallet_hash,
-    get_pallet_hash, get_storage_hash, NotFound,
+    get_pallet_hash, get_runtime_api_hash, get_runtime_trait_hash, get_storage_hash, NotFound,
 };
 
 /// Latest runtime metadata version supported by subxt.
