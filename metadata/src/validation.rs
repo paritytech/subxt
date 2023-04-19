@@ -10,6 +10,15 @@ use frame_metadata::v15::{
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
 
+/// Start with a predefined hashing value for the pallets.
+const MAGIC_PALLET_VALUE: &[u8] = &[19];
+
+/// Predefined value to be returned when we already visited a type.
+const MAGIC_RECURSIVE_TYPE_VALUE: &[u8] = &[123];
+
+// The number of bytes our `hash` function produces.
+const HASH_LEN: usize = 32;
+
 /// Internal byte representation for various metadata types utilized for
 /// generating deterministic hashes between different rust versions.
 #[repr(u8)]
@@ -32,7 +41,7 @@ fn hash(data: &[u8]) -> [u8; 32] {
 /// XOR two hashes together. If we have two pseudorandom hashes, then this will
 /// lead to another pseudorandom value. If there is potentially some pattern to
 /// the hashes we are xoring (eg we might be xoring the same hashes a few times),
-/// prefer `hash_hashes` to give us stronger pseudorandomness guarantees.
+/// prefer `concat_and_hash` to give us stronger pseudorandomness guarantees.
 fn xor(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
     let mut out = [0u8; 32];
     for (idx, (a, b)) in a.into_iter().zip(b).enumerate() {
@@ -45,11 +54,10 @@ fn xor(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
 /// `xor` is OK for one-off combinations of bytes, but if we are merging
 /// potentially identical hashes, this is a safer way to ensure the result is
 /// unique.
-fn hash_hashes(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
+fn concat_and_hash(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
     let mut out = [0u8; 32 * 2];
-    for (idx, byte) in a.into_iter().chain(b).enumerate() {
-        out[idx] = byte;
-    }
+    out[0..32].copy_from_slice(&a[..]);
+    out[32..].copy_from_slice(&b[..]);
     hash(&out)
 }
 
@@ -78,7 +86,7 @@ fn get_variant_hash(
     // Merge our hashes of the name and each field together using xor.
     let mut bytes = hash(var.name.as_bytes());
     for field in &var.fields {
-        bytes = hash_hashes(bytes, get_field_hash(registry, field, visited_ids))
+        bytes = concat_and_hash(bytes, get_field_hash(registry, field, visited_ids))
     }
 
     bytes
@@ -94,14 +102,14 @@ fn get_type_def_hash(
         TypeDef::Composite(composite) => {
             let mut bytes = hash(&[TypeBeingHashed::Composite as u8]);
             for field in &composite.fields {
-                bytes = hash_hashes(bytes, get_field_hash(registry, field, visited_ids));
+                bytes = concat_and_hash(bytes, get_field_hash(registry, field, visited_ids));
             }
             bytes
         }
         TypeDef::Variant(variant) => {
             let mut bytes = hash(&[TypeBeingHashed::Variant as u8]);
             for var in &variant.variants {
-                bytes = hash_hashes(bytes, get_variant_hash(registry, var, visited_ids));
+                bytes = concat_and_hash(bytes, get_variant_hash(registry, var, visited_ids));
             }
             bytes
         }
@@ -130,7 +138,7 @@ fn get_type_def_hash(
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
             for field in &tuple.fields {
-                bytes = hash_hashes(bytes, get_type_hash(registry, field.id, visited_ids));
+                bytes = concat_and_hash(bytes, get_type_hash(registry, field.id, visited_ids));
             }
             bytes
         }
@@ -164,10 +172,12 @@ fn get_type_def_hash(
 fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet<u32>) -> [u8; 32] {
     // Guard against recursive types and return a fixed arbitrary hash
     if !visited_ids.insert(id) {
-        return hash(&[123u8]);
+        return hash(MAGIC_RECURSIVE_TYPE_VALUE);
     }
 
-    let ty = registry.resolve(id).unwrap();
+    let ty = registry
+        .resolve(id)
+        .expect("Type ID provided by the metadata is registered; qed");
     get_type_def_hash(registry, &ty.type_def, visited_ids)
 }
 
@@ -195,7 +205,7 @@ fn get_extrinsic_hash(
                 &mut visited_ids,
             ),
         );
-        bytes = hash_hashes(bytes, ext_bytes);
+        bytes = concat_and_hash(bytes, ext_bytes);
     }
 
     bytes
@@ -223,7 +233,7 @@ fn get_storage_entry_hash(
         } => {
             for hasher in hashers {
                 // Cloning the hasher should essentially be a copy.
-                bytes = hash_hashes(bytes, [hasher.clone() as u8; 32]);
+                bytes = concat_and_hash(bytes, [hasher.clone() as u8; 32]);
             }
             bytes = xor(bytes, get_type_hash(registry, key.id, visited_ids));
             bytes = xor(bytes, get_type_hash(registry, value.id, visited_ids));
@@ -316,8 +326,9 @@ pub fn get_pallet_hash(
     registry: &PortableRegistry,
     pallet: &PalletMetadata<PortableForm>,
 ) -> [u8; 32] {
-    // Begin with some arbitrary hash (we don't really care what it is).
-    let mut bytes = hash(&[19]);
+    // The pallet could potentially be empty and not contain any calls, events and so on.
+    // Use a magic (arbitrary) value as a base for hashing.
+    let mut bytes = hash(MAGIC_PALLET_VALUE);
     let mut visited_ids = HashSet::<u32>::new();
 
     if let Some(calls) = &pallet.calls {
@@ -348,7 +359,7 @@ pub fn get_pallet_hash(
     if let Some(ref storage) = pallet.storage {
         bytes = xor(bytes, hash(storage.prefix.as_bytes()));
         for entry in storage.entries.iter() {
-            bytes = hash_hashes(
+            bytes = concat_and_hash(
                 bytes,
                 get_storage_entry_hash(registry, entry, &mut visited_ids),
             );
@@ -360,6 +371,9 @@ pub fn get_pallet_hash(
 
 /// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`.
 pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
+    // The number of metadata components, other than variable number of pallets that produce a unique hash.
+    const STATIC_METADATA_COMPONENTS: usize = 2;
+
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets: Vec<(&str, [u8; 32])> = metadata
         .pallets
@@ -374,9 +388,9 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
     pallets.sort_by_key(|&(name, _hash)| name);
 
     // Note: pallet name is excluded from hashing.
-    // Each pallet has a hash of 32 bytes, and the vector is extended with
-    // extrinsic hash and metadata ty hash (2 * 32).
-    let mut bytes = Vec::with_capacity(pallets.len() * 32 + 64);
+    // The number of hashes that we take into account, each having a `HASH_LEN` output.
+    let metadata_components = pallets.len() + STATIC_METADATA_COMPONENTS;
+    let mut bytes = Vec::with_capacity(metadata_components * HASH_LEN);
     for (_, hash) in pallets.iter() {
         bytes.extend(hash)
     }
@@ -426,9 +440,8 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
     pallets_hashed.sort_by_key(|&(name, _hash)| name);
 
     // Note: pallet name is excluded from hashing.
-    // Each pallet has a hash of 32 bytes, and the vector is extended with
-    // extrinsic hash and metadata ty hash (2 * 32).
-    let mut bytes = Vec::with_capacity(pallets_hashed.len() * 32);
+    // We are only hashing the hashes of the pallets.
+    let mut bytes = Vec::with_capacity(pallets_hashed.len() * HASH_LEN);
     for (_, hash) in pallets_hashed.iter() {
         bytes.extend(hash)
     }
