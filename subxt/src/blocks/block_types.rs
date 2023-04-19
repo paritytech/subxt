@@ -11,6 +11,7 @@ use crate::{
     runtime_api::RuntimeApi,
     storage::Storage,
 };
+use codec::Decode;
 use derivative::Derivative;
 use futures::lock::Mutex as AsyncMutex;
 use std::sync::Arc;
@@ -160,6 +161,37 @@ where
     pub fn bytes(&self) -> &'a [u8] {
         self.bytes
     }
+
+    /// Decode the extrinsic to the provided return type.
+    pub fn decode<Ext: Decode>(&self) -> Result<Ext, ExtrinsicError> {
+        const SIGNATURE_MASK: u8 = 0b1000_0000;
+        const VERSION_MASK: u8 = 0b0111_1111;
+        const LATEST_EXTRINSIC_VERSION: u8 = 4;
+
+        // Extrinsic are encoded in memory in the following way:
+        //   - Compact<u32>: Length of the extrinsic
+        //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+        //   - signature: emitted `ParaInherent` must be unsigned.
+        //   - extrinsic data
+        if self.bytes.is_empty() {
+            return Err(ExtrinsicError::InsufficientData);
+        }
+
+        let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
+        if is_signed {
+            return Err(ExtrinsicError::SignatureUnsupported);
+        }
+
+        let version = self.bytes[0] & VERSION_MASK;
+        if version != LATEST_EXTRINSIC_VERSION {
+            return Err(ExtrinsicError::UnsupportedVersion(version));
+        }
+
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.bytes[1..]);
+
+        Ext::decode(&mut &bytes[..]).map_err(ExtrinsicError::DecodingError)
+    }
 }
 
 impl<'a, T, C> Extrinsic<'a, T, C>
@@ -173,6 +205,19 @@ where
         let ext_hash = T::Hasher::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
+}
+
+/// Error resulted from decoding an extrinsic.
+#[derive(Debug)]
+pub enum ExtrinsicError {
+    /// Expected more extrinsic bytes.
+    InsufficientData,
+    /// Unsupported signature.
+    SignatureUnsupported,
+    /// The extrinsic has an unsupported version.
+    UnsupportedVersion(u8),
+    /// Decoding error.
+    DecodingError(codec::Error),
 }
 
 /// The events associated with a given extrinsic.
