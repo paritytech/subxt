@@ -55,9 +55,9 @@ fn xor(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
 /// potentially identical hashes, this is a safer way to ensure the result is
 /// unique.
 fn concat_and_hash(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
-    let mut out = [0u8; 32 * 2];
-    out[0..32].copy_from_slice(&a[..]);
-    out[32..].copy_from_slice(&b[..]);
+    let mut out = [0u8; HASH_LEN * 2];
+    out[0..HASH_LEN].copy_from_slice(&a[..]);
+    out[HASH_LEN..].copy_from_slice(&b[..]);
     hash(&out)
 }
 
