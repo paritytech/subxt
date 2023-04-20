@@ -5,9 +5,7 @@
 mod retain;
 mod validation;
 
-use frame_metadata::{
-    v14::RuntimeMetadataV14, v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed,
-};
+use frame_metadata::{v14::RuntimeMetadataV14, v15::RuntimeMetadataV15};
 
 pub use retain::retain_metadata_pallets;
 pub use validation::{
@@ -100,20 +98,5 @@ pub fn metadata_v14_to_latest(metadata: RuntimeMetadataV14) -> RuntimeMetadataV1
         },
         ty: metadata.ty,
         apis: Default::default(),
-    }
-}
-
-/// Convert a prefixed runtime metadata to the latest version of the runtime metadata.
-///
-/// # Panics
-///
-/// Panics if the runtime metadata version is not supported.
-///
-/// Supported versions: v14 and v15.
-pub fn metadata_to_latest(meta: RuntimeMetadataPrefixed) -> RuntimeMetadataV15 {
-    match meta.1 {
-        RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
-        RuntimeMetadata::V15(v15) => v15,
-        _ => panic!("Unsupported metadata version {:?}", meta.1),
     }
 }
