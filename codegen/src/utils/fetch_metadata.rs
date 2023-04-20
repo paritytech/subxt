@@ -4,6 +4,7 @@
 
 use crate::error::FetchMetadataError;
 use codec::{Decode, Encode};
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -12,6 +13,7 @@ use jsonrpsee::{
     rpc_params,
 };
 use std::time::Duration;
+use subxt_metadata::metadata_v14_to_latest;
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
 pub fn fetch_metadata_bytes_blocking(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
@@ -62,21 +64,44 @@ async fn fetch_latest_metadata(client: impl ClientT) -> Result<Vec<u8>, FetchMet
     let version: String = format!("0x{}", hex::encode(&bytes));
 
     // Returns a hex(Option<frame_metadata::OpaqueMetadata>).
-    let raw: String = client
+
+    let result: Result<String, _> = client
         .request(
             "state_call",
             rpc_params!["Metadata_metadata_at_version", &version],
         )
-        .await?;
+        .await;
+
+    if let Ok(raw) = result {
+        let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
+
+        let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
+        let bytes = opaque.ok_or(FetchMetadataError::Other(
+            "Metadata version not found".into(),
+        ))?;
+
+        return Ok(bytes.0);
+    }
+
+    // The `Metadata_metadata_at_version` RPC failed, fall back to the old `state_getMetadata`.
+    let raw: String = client.request("state_getMetadata", rpc_params![]).await?;
 
     let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-
-    let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
-    let bytes = opaque.ok_or(FetchMetadataError::Other(
-        "Metadata version not found".into(),
-    ))?;
-
-    Ok(bytes.0)
+    // Decode the metadata to inspect the RuntimeMetadata variant.
+    let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &raw_bytes[..])?;
+    // Update available versions to V15.
+    let metadata = match meta.1 {
+        RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
+        RuntimeMetadata::V15(v15) => v15,
+        _ => {
+            return Err(FetchMetadataError::Other(
+                "Metadata version not found".into(),
+            ))
+        }
+    };
+    // Convert back to bytes.
+    let meta: RuntimeMetadataPrefixed = metadata.into();
+    Ok(meta.encode())
 }
 
 async fn fetch_metadata_ws(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {

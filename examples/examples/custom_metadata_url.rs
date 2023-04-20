@@ -6,6 +6,7 @@
 // can provide a URL to that node here. HTTP or WebSocket URLs can be
 // provided. Note that if the metadata cannot be retrieved from this
 // node URL at compile time, compilation will fail.
+
 #[subxt::subxt(runtime_metadata_url = "wss://rpc.polkadot.io:443")]
 pub mod polkadot {}
 

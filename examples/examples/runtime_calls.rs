@@ -28,27 +28,42 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a runtime API payload that calls into
     // `Core_version` function.
-    let call = polkadot::apis().core().version();
+    let runtime_api_call = polkadot::apis().core().version();
 
     // Submit the runtime API call.
-    let version = api.runtime_api().at_latest().await?.call(call).await;
+    let version = api
+        .runtime_api()
+        .at_latest()
+        .await?
+        .call(runtime_api_call)
+        .await;
     println!("Core_version: {:?}", version);
 
     // Show the supported metadata versions of the node.
     // Calls into `Metadata_metadata_versions` runtime function.
-    let call = polkadot::apis().metadata().metadata_versions();
+    let runtime_api_call = polkadot::apis().metadata().metadata_versions();
 
     // Submit the runtime API call.
-    let versions = api.runtime_api().at_latest().await?.call(call).await?;
+    let versions = api
+        .runtime_api()
+        .at_latest()
+        .await?
+        .call(runtime_api_call)
+        .await?;
     println!("Metadata_metadata_versions: {:?}", versions);
 
     // Dynamic calls.
-    let call = subxt::dynamic::runtime_api_call(
+    let runtime_api_call = subxt::dynamic::runtime_api_call(
         "Metadata_metadata_versions",
         Vec::<Value<()>>::new(),
         None,
     );
-    let versions = api.runtime_api().at_latest().await?.call(call).await?;
+    let versions = api
+        .runtime_api()
+        .at_latest()
+        .await?
+        .call(runtime_api_call)
+        .await?;
     println!(
         " dynamic Metadata_metadata_versions: {:#?}",
         versions.to_value()

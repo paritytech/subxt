@@ -32,14 +32,15 @@ use crate::{metadata::DecodeWithMetadata, Error, Metadata};
 ///
 /// Each argument of the runtime function must be scale-encoded.
 pub trait RuntimeApiPayload {
-    /// The target type of the return value.
-    // Note: `DecodeWithMetadata` bound implied by the `encode_as_fields_to`.
+    /// The return type of the function call.
+    // Note: `DecodeWithMetadata` is needed to decode the function call result
+    // with the `subxt::Metadata.
     type ReturnType: DecodeWithMetadata;
 
     /// The runtime API function name.
     fn fn_name(&self) -> &str;
 
-    /// Scale encode arguments data to the provided output.
+    /// Scale encode the arguments data.
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode arguments data and return the output. This is a convenience
