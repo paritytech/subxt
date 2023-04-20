@@ -13,7 +13,6 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
-use subxt::blocks::ExtrinsicError;
 use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -65,18 +64,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for extrinsic in block.body().await?.extrinsics() {
             println!("  Extrinsic index {:?}", extrinsic.index());
 
-            let decoded: Result<
-                polkadot::runtime_types::polkadot_runtime::RuntimeCall,
-                ExtrinsicError,
-            > = extrinsic.decode();
+            let decoded = extrinsic.decode_generic();
             match decoded {
                 Ok(decoded) => {
-                    println!("    Decoded extrinsic: {:?}", decoded);
+                    if let Some((address, signature, extra)) = decoded.signature {
+                        println!("    Decoded Signature");
+                        println!("    Decoded Address: {:?}", address.to_value());
+                        println!("    Decoded Sign: {:?}", signature.to_value());
+                        println!("    Decoded Extra: {:?}", extra.to_value());
+                    };
+
+                    let call = decoded.function;
+                    println!("    Decoded call:\n    {:?}", call.to_value());
                 }
                 Err(err) => {
                     println!("    Decoded extrinsic with error: {:?}", err);
                 }
             }
+            println!("\n");
         }
 
         println!("\n");

@@ -5,16 +5,21 @@
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher, Header},
+    dynamic::DecodedValueThunk,
     error::{BlockError, Error},
     events,
+    metadata::DecodeWithMetadata,
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
     storage::Storage,
+    Metadata,
 };
-use codec::Decode;
+use codec::{Codec, Decode, Encode};
 use derivative::Derivative;
+use frame_metadata::v15::RuntimeMetadataV15;
 use futures::lock::Mutex as AsyncMutex;
-use std::sync::Arc;
+use scale_value::Value;
+use std::{collections::HashMap, sync::Arc};
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {
@@ -95,6 +100,71 @@ where
     }
 }
 
+/// Generic type IDs passed to the `UncheckedExtrinsic`.
+#[derive(Debug, Copy, Clone)]
+struct UncheckedExtrinsicIds {
+    address: u32,
+    call: u32,
+    signature: u32,
+    extra: u32,
+}
+
+#[derive(Debug)]
+enum UncheckedExtrinsicIdsError {
+    /// Extrinsic type ID cannot be resolved with the provided metadata.
+    MissingType,
+    /// Extrinsic is missing a type parameter.
+    MissingTypeParam,
+}
+
+impl UncheckedExtrinsicIds {
+    /// Extract the generic type parameters IDs from the extrinsic type.
+    fn new(metadata: &RuntimeMetadataV15) -> Result<Self, UncheckedExtrinsicIdsError> {
+        const ADDRESS: &str = "Address";
+        const CALL: &str = "Call";
+        const SIGNATURE: &str = "Signature";
+        const EXTRA: &str = "Extra";
+
+        let id = metadata.extrinsic.ty.id;
+
+        let Some(ty ) = metadata.types.resolve(id) else {
+            return Err(UncheckedExtrinsicIdsError::MissingType);
+        };
+
+        let params: HashMap<_, _> = ty
+            .type_params
+            .iter()
+            .map(|ty_param| {
+                let Some(ty) = ty_param.ty else {
+                    return Err(UncheckedExtrinsicIdsError::MissingTypeParam);
+                };
+
+                Ok((ty_param.name.as_str(), ty.id))
+            })
+            .collect::<Result<_, _>>()?;
+
+        let Some(address) = params.get(ADDRESS) else {
+            return Err(UncheckedExtrinsicIdsError::MissingTypeParam);
+        };
+        let Some(call) = params.get(CALL) else {
+            return Err(UncheckedExtrinsicIdsError::MissingTypeParam);
+        };
+        let Some(signature) = params.get(SIGNATURE) else {
+            return Err(UncheckedExtrinsicIdsError::MissingTypeParam);
+        };
+        let Some(extra) = params.get(EXTRA) else {
+            return Err(UncheckedExtrinsicIdsError::MissingTypeParam);
+        };
+
+        Ok(UncheckedExtrinsicIds {
+            address: *address,
+            call: *call,
+            signature: *signature,
+            extra: *extra,
+        })
+    }
+}
+
 /// The body of a block.
 pub struct BlockBody<T: Config, C> {
     details: ChainBlockResponse<T>,
@@ -121,17 +191,23 @@ where
 
     /// Returns an iterator over the extrinsics in the block body.
     pub fn extrinsics(&self) -> impl Iterator<Item = Extrinsic<'_, T, C>> {
+        let ids = UncheckedExtrinsicIds::new(self.client.metadata().runtime_metadata())
+            .expect("Should have IDS; qed");
+
+        // let runtime_call_id = runtime_call_id(self.client.metadata().runtime_metadata());
+
         self.details
             .block
             .extrinsics
             .iter()
             .enumerate()
-            .map(|(idx, e)| Extrinsic {
+            .map(move |(idx, e)| Extrinsic {
                 index: idx as u32,
                 bytes: &e.0,
                 client: self.client.clone(),
                 block_hash: self.details.block.header.hash(),
                 cached_events: self.cached_events.clone(),
+                ids,
                 _marker: std::marker::PhantomData,
             })
     }
@@ -144,7 +220,53 @@ pub struct Extrinsic<'a, T: Config, C> {
     client: C,
     block_hash: T::Hash,
     cached_events: CachedEvents<T>,
+    ids: UncheckedExtrinsicIds,
     _marker: std::marker::PhantomData<T>,
+}
+
+// pub trait SignedExtension: Codec + Sync + Send + Clone + Eq + PartialEq {
+//     /// Unique identifier of this signed extension.
+//     ///
+//     /// This will be exposed in the metadata to identify the signed extension used
+//     /// in an extrinsic.
+//     const IDENTIFIER: &'static str;
+
+//     /// The type which encodes the sender identity.
+//     type AccountId;
+
+//     /// The type which encodes the call to be dispatched.
+//     type Call;
+
+//     /// Any additional data that will go into the signed payload. This may be created dynamically
+//     /// from the transaction using the `additional_signed` function.
+//     type AdditionalSigned: Encode;
+
+//     /// The type that encodes information that can be passed from pre_dispatch to post-dispatch.
+//     type Pre;
+// }
+
+/// A extrinsic right from the external world.
+pub struct GenericExtrinsic<Address, Signature, Extra>
+where
+    Address: Decode,
+    Signature: Decode,
+    Extra: Decode,
+{
+    /// The signature, address, number of extrinsics have come before from
+    /// the same signer and an era describing the longevity of this transaction,
+    /// if this is a signed extrinsic.
+    pub signature: Option<(Address, Signature, Extra)>,
+    /// The function that should be called.
+    pub function: DecodedValueThunk,
+}
+
+pub struct ExtrinsicValueThunk {
+    /// The signature, address, number of extrinsics have come before from
+    /// the same signer and an era describing the longevity of this transaction,
+    /// if this is a signed extrinsic.
+    pub signature: Option<(DecodedValueThunk, DecodedValueThunk, DecodedValueThunk)>,
+    /// The function that should be called.
+    pub function: DecodedValueThunk,
 }
 
 impl<'a, T, C> Extrinsic<'a, T, C>
@@ -163,23 +285,17 @@ where
     }
 
     /// Decode the extrinsic to the provided return type.
-    pub fn decode<Ext: Decode>(&self) -> Result<Ext, ExtrinsicError> {
+    pub fn decode(&self) -> Result<GenericExtrinsic<T::Address, T::Signature, ()>, ExtrinsicError> {
         const SIGNATURE_MASK: u8 = 0b1000_0000;
         const VERSION_MASK: u8 = 0b0111_1111;
         const LATEST_EXTRINSIC_VERSION: u8 = 4;
 
         // Extrinsic are encoded in memory in the following way:
-        //   - Compact<u32>: Length of the extrinsic
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
-        //   - signature: emitted `ParaInherent` must be unsigned.
+        //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
         if self.bytes.is_empty() {
             return Err(ExtrinsicError::InsufficientData);
-        }
-
-        let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
-        if is_signed {
-            return Err(ExtrinsicError::SignatureUnsupported);
         }
 
         let version = self.bytes[0] & VERSION_MASK;
@@ -187,10 +303,112 @@ where
             return Err(ExtrinsicError::UnsupportedVersion(version));
         }
 
+        let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
+
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&self.bytes[1..]);
 
-        Ext::decode(&mut &bytes[..]).map_err(ExtrinsicError::DecodingError)
+        let cursor = &mut &bytes[..];
+        let signature = is_signed
+            .then(|| Decode::decode(cursor))
+            .transpose()
+            .map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+        let metadata = self.client.metadata();
+
+        let function = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            cursor,
+            self.ids.call,
+            &metadata,
+        )
+        .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+        // let function: Ext =
+        // Decode::decode(cursor).map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+        Ok(GenericExtrinsic {
+            signature,
+            function,
+        })
+    }
+
+    /// Decode the extrinsic to the provided return type.
+    pub fn decode_generic(&self) -> Result<ExtrinsicValueThunk, ExtrinsicError> {
+        const SIGNATURE_MASK: u8 = 0b1000_0000;
+        const VERSION_MASK: u8 = 0b0111_1111;
+        const LATEST_EXTRINSIC_VERSION: u8 = 4;
+
+        // Extrinsic are encoded in memory in the following way:
+        //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+        //   - signature: [unknown TBD with metadata].
+        //   - extrinsic data
+        if self.bytes.is_empty() {
+            return Err(ExtrinsicError::InsufficientData);
+        }
+
+        let version = self.bytes[0] & VERSION_MASK;
+        if version != LATEST_EXTRINSIC_VERSION {
+            return Err(ExtrinsicError::UnsupportedVersion(version));
+        }
+
+        let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
+
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(&self.bytes[1..]);
+
+        let cursor = &mut &bytes[..];
+
+        let metadata = self.client.metadata();
+
+        let signature = if is_signed {
+            let address = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+                cursor,
+                self.ids.address,
+                &metadata,
+            )
+            .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            let signature = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+                cursor,
+                self.ids.signature,
+                &metadata,
+            )
+            .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            let extra: DecodedValueThunk =
+                <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+                    cursor,
+                    self.ids.extra,
+                    &metadata,
+                )
+                .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            Some((address, signature, extra))
+        } else {
+            None
+        };
+
+        // let signature = is_signed
+        //     .then(|| Decode::decode(cursor))
+        //     .transpose()
+        //     .map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+        // let metadata = self.client.metadata();
+
+        let function = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            cursor,
+            self.ids.call,
+            &metadata,
+        )
+        .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+        // let function: Ext =
+        // Decode::decode(cursor).map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+        Ok(ExtrinsicValueThunk {
+            signature,
+            function,
+        })
     }
 }
 
@@ -199,6 +417,55 @@ where
     T: Config,
     C: OnlineClientT<T>,
 {
+    // /// Decode the extrinsic to the provided return type.
+    // pub fn decode<Ext: Decode>(
+    //     &self,
+    // ) -> Result<GenericExtrinsic<T::Address, Ext, T::Signature, ()>, ExtrinsicError> {
+    //     const SIGNATURE_MASK: u8 = 0b1000_0000;
+    //     const VERSION_MASK: u8 = 0b0111_1111;
+    //     const LATEST_EXTRINSIC_VERSION: u8 = 4;
+
+    //     // Extrinsic are encoded in memory in the following way:
+    //     //   - Compact<u32>: Length of the extrinsic
+    //     //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+    //     //   - signature: [unknown TBD with metadata].
+    //     //   - extrinsic data
+    //     if self.bytes.is_empty() {
+    //         return Err(ExtrinsicError::InsufficientData);
+    //     }
+
+    //     let version = self.bytes[0] & VERSION_MASK;
+    //     if version != LATEST_EXTRINSIC_VERSION {
+    //         return Err(ExtrinsicError::UnsupportedVersion(version));
+    //     }
+
+    //     let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
+
+    //     let mut bytes = Vec::new();
+    //     bytes.extend_from_slice(&self.bytes[1..]);
+
+    //     let cursor = &mut &bytes[..];
+    //     let signature = is_signed
+    //         .then(|| Decode::decode(cursor))
+    //         .transpose()
+    //         .map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+    //     let metadata = self.client.metadata();
+    //     let value = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+    //         cursor,
+    //         ,
+    //         &metadata,
+    //     )?;
+
+    //     let function: Ext =
+    //         Decode::decode(cursor).map_err(|err| ExtrinsicError::DecodingError(err))?;
+
+    //     Ok(GenericExtrinsic {
+    //         signature,
+    //         function,
+    //     })
+    // }
+
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
         let events = get_events(&self.client, self.block_hash, &self.cached_events).await?;

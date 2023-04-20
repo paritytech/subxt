@@ -45,10 +45,10 @@ pub trait Config: 'static {
     type AccountId: Debug + Clone + Serialize;
 
     /// The address type.
-    type Address: Debug + Encode + From<Self::AccountId>;
+    type Address: Debug + Encode + Decode + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Debug + Encode;
+    type Signature: Debug + Encode + Decode;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     type Hasher: Debug + Hasher<Output = Self::Hash>;
