@@ -52,39 +52,9 @@ pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError>
     let hex_data = format!("0x{}", hex::encode(bytes));
     Ok(hex_data)
 }
-enum ClientType {
-    WebSocket(jsonrpsee::async_client::Client),
-    Http(jsonrpsee::http_client::HttpClient),
-}
-
-impl ClientType {
-    fn request<'life0, 'life1, 'async_trait, R, Params>(
-        &'life0 self,
-        method: &'life1 str,
-        params: Params,
-    ) -> core::pin::Pin<
-        Box<
-            dyn core::future::Future<Output = Result<R, Error>> + core::marker::Send + 'async_trait,
-        >,
-    >
-    where
-        R: jsonrpsee::core::DeserializeOwned,
-        Params: jsonrpsee::core::traits::ToRpcParams + Send,
-        R: 'async_trait,
-        Params: 'async_trait,
-        'life0: 'async_trait,
-        'life1: 'async_trait,
-        Self: 'async_trait,
-    {
-        match self {
-            ClientType::WebSocket(client) => client.request(method, params),
-            ClientType::Http(client) => client.request(method, params),
-        }
-    }
-}
 
 /// Execute runtime API call and return the specified runtime metadata version.
-async fn fetch_latest_metadata(client: ClientType) -> Result<Vec<u8>, FetchMetadataError> {
+async fn fetch_latest_metadata(client: impl ClientT) -> Result<Vec<u8>, FetchMetadataError> {
     const V15_METADATA_VERSION: u32 = u32::MAX;
     let bytes = V15_METADATA_VERSION.encode();
 
@@ -98,6 +68,7 @@ async fn fetch_latest_metadata(client: ClientType) -> Result<Vec<u8>, FetchMetad
             rpc_params!["Metadata_metadata_at_version", &version],
         )
         .await?;
+
     let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
 
     let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
@@ -119,7 +90,7 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
-    fetch_latest_metadata(ClientType::WebSocket(client)).await
+    fetch_latest_metadata(client).await
 }
 
 async fn fetch_metadata_http(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
@@ -127,5 +98,5 @@ async fn fetch_metadata_http(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
         .request_timeout(Duration::from_secs(180))
         .build(url.to_string())?;
 
-    fetch_latest_metadata(ClientType::Http(client)).await
+    fetch_latest_metadata(client).await
 }
