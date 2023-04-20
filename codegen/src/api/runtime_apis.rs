@@ -43,6 +43,14 @@ fn generate_runtime_api(
             (param, encoded)
         }).collect();
 
+        // The `let [mut] result = Vec::new()` accumulator needs to be
+        // mutable only if we have inputs to add to it.
+        let encoded_mut = if inputs.is_empty() {
+            quote!()
+        } else {
+            quote!(mut)
+        };
+
         let params = inputs.iter().map(|(param, _)| param);
         let encoded = inputs.iter().map(|(_, encoded)| encoded);
 
@@ -59,7 +67,7 @@ fn generate_runtime_api(
         Ok(quote!(
             #( #[doc = #docs ] )*
             pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::StaticRuntimeApiPayload<#output> {
-                let mut #encoded_params = Vec::new();
+                let #encoded_mut #encoded_params = Vec::new();
                 #( #encoded; )*
 
                 #crate_path::runtime_api::StaticRuntimeApiPayload::new_static(
