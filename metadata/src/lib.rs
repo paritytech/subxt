@@ -15,11 +15,8 @@ pub use validation::{
     get_pallet_hash, get_storage_hash, NotFound,
 };
 
-/// Latest runtime metadata version supported by subxt.
-pub type LatestRuntimeMetadata = RuntimeMetadataV15;
-
 /// Convert the metadata V14 to the latest metadata version.
-pub fn metadata_v14_to_latest(metadata: RuntimeMetadataV14) -> LatestRuntimeMetadata {
+pub fn metadata_v14_to_latest(metadata: RuntimeMetadataV14) -> RuntimeMetadataV15 {
     RuntimeMetadataV15 {
         types: metadata.types,
         pallets: metadata
@@ -113,7 +110,7 @@ pub fn metadata_v14_to_latest(metadata: RuntimeMetadataV14) -> LatestRuntimeMeta
 /// Panics if the runtime metadata version is not supported.
 ///
 /// Supported versions: v14 and v15.
-pub fn metadata_to_latest(meta: RuntimeMetadataPrefixed) -> LatestRuntimeMetadata {
+pub fn metadata_to_latest(meta: RuntimeMetadataPrefixed) -> RuntimeMetadataV15 {
     match meta.1 {
         RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
         RuntimeMetadata::V15(v15) => v15,
