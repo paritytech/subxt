@@ -216,9 +216,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metadata_to_latest;
+    use crate::metadata_v14_to_latest;
     use codec::Decode;
-    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
+    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
 
     fn load_metadata() -> RuntimeMetadataV15 {
@@ -227,7 +227,11 @@ mod tests {
         let meta: RuntimeMetadataPrefixed =
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
-        metadata_to_latest(meta)
+        match meta.1 {
+            RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
+            RuntimeMetadata::V15(v15) => v15,
+            _ => panic!("Unsupported metadata version {:?}", meta.1),
+        }
     }
 
     #[test]
