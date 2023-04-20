@@ -1627,6 +1627,7 @@ dependencies = [
  "substrate-runner",
  "subxt",
  "subxt-codegen",
+ "subxt-metadata",
  "syn 1.0.109",
  "test-runtime",
  "tokio",
@@ -3653,7 +3654,6 @@ version = "0.28.0"
 dependencies = [
  "impl-serde",
  "jsonrpsee",
- "parity-scale-codec",
  "serde",
  "substrate-runner",
  "subxt",

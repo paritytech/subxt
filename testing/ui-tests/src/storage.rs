@@ -3,7 +3,8 @@
 // see LICENSE for license details.
 
 use frame_metadata::{
-    RuntimeMetadataPrefixed, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    v15::{StorageEntryMetadata, StorageEntryModifier, StorageEntryType},
+    RuntimeMetadataPrefixed,
 };
 use scale_info::meta_type;
 

@@ -18,7 +18,7 @@ default = ["subxt/integration-tests"]
 [dev-dependencies]
 assert_matches = "1.5.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-frame-metadata = "15.0.0"
+frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 futures = "0.3.27"
 hex = "0.4.3"
 regex = "1.7.3"
@@ -29,6 +29,7 @@ sp-keyring = "23.0.0"
 syn = "1.0.109"
 subxt = { version = "0.28.0", path = "../../subxt" }
 subxt-codegen = { version = "0.28.0", path = "../../codegen" }
+subxt-metadata = { version = "0.28.0", path = "../../metadata" }
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.27", features = ["macros", "time"] }
 tracing = "0.1.34"

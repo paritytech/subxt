@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::{
-    v14::RuntimeMetadataV14, PalletMetadata, StorageEntryMetadata, StorageEntryModifier,
+use frame_metadata::v15::{
+    PalletMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
     StorageEntryType,
 };
 use heck::ToSnakeCase as _;
@@ -24,7 +24,7 @@ use super::CodegenError;
 /// - `pallet` - Pallet metadata from which the storages are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_storage(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
@@ -64,7 +64,7 @@ pub fn generate_storage(
 }
 
 fn generate_storage_entry_fns(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
