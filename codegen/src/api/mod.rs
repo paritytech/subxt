@@ -219,8 +219,13 @@ impl RuntimeGenerator {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *
 
-                // Make it easy to access the root via `root_mod` at different levels:
-                use super::#mod_ident as root_mod;
+                // Make it easy to access the root items via `root_mod` at different levels
+                // without reaching out of this module.
+                #[allow(unused_imports)]
+                mod root_mod {
+                    pub use super::*;
+                }
+
                 #types_mod
             }
         })
