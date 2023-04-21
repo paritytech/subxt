@@ -1,8 +1,8 @@
-use subxt::{ config::PolkadotConfig, OfflineClient};
-use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::ext::codec::Decode;
+use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::metadata::Metadata;
 use subxt::utils::H256;
+use subxt::{config::PolkadotConfig, OfflineClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let runtime_version = subxt::rpc::types::RuntimeVersion {
         spec_version: 9370,
         transaction_version: 20,
-        other: Default::default()
+        other: Default::default(),
     };
 
     // 3. Metadata (I'll load it from the downloaded metadata, but you can use
@@ -31,11 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // Create an offline client using the details obtained above:
-    let _api = OfflineClient::<PolkadotConfig>::new(
-        genesis_hash,
-        runtime_version,
-        metadata
-    );
+    let _api = OfflineClient::<PolkadotConfig>::new(genesis_hash, runtime_version, metadata);
 
     Ok(())
 }

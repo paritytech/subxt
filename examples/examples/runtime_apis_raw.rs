@@ -1,6 +1,6 @@
-use subxt::{OnlineClient, PolkadotConfig};
+use subxt::ext::codec::{Compact, Decode};
 use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
-use subxt::ext::codec::{Decode, Compact};
+use subxt::{OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
