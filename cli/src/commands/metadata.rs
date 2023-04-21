@@ -8,7 +8,7 @@ use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale::{Decode, Encode};
 use std::io::{self, Write};
-use subxt_metadata::retain_metadata_pallets;
+use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -20,6 +20,9 @@ pub struct Opts {
     format: String,
     /// Generate a subset of the metadata that contains only the
     /// types needed to represent the provided pallets.
+    ///
+    /// The returned metadata is updated to the latest available version
+    /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     pallets: Option<Vec<String>>,
 }
@@ -29,8 +32,9 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     let mut metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
 
     if let Some(pallets) = opts.pallets {
-        let metadata_v14 = match &mut metadata.1 {
-            RuntimeMetadata::V14(metadata_v14) => metadata_v14,
+        let mut metadata_v15 = match metadata.1 {
+            RuntimeMetadata::V14(metadata_v14) => metadata_v14_to_latest(metadata_v14),
+            RuntimeMetadata::V15(metadata_v15) => metadata_v15,
             _ => {
                 return Err(eyre::eyre!(
                     "Unsupported metadata version {:?}, expected V14.",
@@ -39,9 +43,10 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             }
         };
 
-        retain_metadata_pallets(metadata_v14, |pallet_name| {
+        retain_metadata_pallets(&mut metadata_v15, |pallet_name| {
             pallets.iter().any(|p| &**p == pallet_name)
         });
+        metadata = metadata_v15.into();
     }
 
     match opts.format.as_str() {

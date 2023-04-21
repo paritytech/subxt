@@ -1,6 +1,6 @@
 [package]
 name = "subxt-cli"
-version = "0.27.1"
+version = "0.28.0"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -18,21 +18,21 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.27.1", path = "../codegen" }
+subxt-codegen = { version = "0.28.0", path = "../codegen" }
 # perform node compatibility
-subxt-metadata = { version = "0.27.1", path = "../metadata" }
+subxt-metadata = { version = "0.28.0", path = "../metadata" }
 # parse command line args
-clap = { version = "4.1.11", features = ["derive", "cargo"] }
+clap = { version = "4.2.2", features = ["derive", "cargo"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
 serde = { version = "1.0.159", features = ["derive"] }
 # serialize as json
-serde_json = "1.0.95"
+serde_json = "1.0.96"
 # hex encoded metadata to bytes
 hex = "0.4.3"
 # actual metadata types
-frame-metadata = { version = "15.0.0", features = ["v14", "std"] }
+frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 # decode bytes into the metadata types
 scale = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
 # generate the item mod for codegen

@@ -3,15 +3,15 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
-use frame_metadata::{RuntimeMetadataPrefixed, RuntimeMetadataV14};
+use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
 use std::io::Read;
-use subxt_metadata::retain_metadata_pallets;
+use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";
 static METADATA_FILE: &str = "../../artifacts/polkadot_metadata.scale";
 
 pub struct PalletMetadataTestRunner {
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
     index: usize,
 }
 
@@ -28,8 +28,9 @@ impl PalletMetadataTestRunner {
             Decode::decode(&mut &*bytes).expect("Cannot decode metadata bytes");
 
         let metadata = match meta.1 {
-            frame_metadata::RuntimeMetadata::V14(v14) => v14,
-            _ => panic!("Unsupported metadata version. Tests support only v14"),
+            frame_metadata::RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
+            frame_metadata::RuntimeMetadata::V15(v15) => v15,
+            _ => panic!("Unsupported metadata version {:?}", meta.1),
         };
 
         PalletMetadataTestRunner { metadata, index: 0 }

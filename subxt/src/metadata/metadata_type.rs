@@ -5,8 +5,8 @@
 use super::hash_cache::HashCache;
 use codec::Error as CodecError;
 use frame_metadata::{
-    PalletConstantMetadata, RuntimeMetadata, RuntimeMetadataPrefixed, RuntimeMetadataV14,
-    StorageEntryMetadata, META_RESERVED,
+    v15::PalletConstantMetadata, v15::RuntimeMetadataV15, v15::StorageEntryMetadata,
+    RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
 };
 use parking_lot::RwLock;
 use scale_info::{form::PortableForm, PortableRegistry, Type};
@@ -65,7 +65,7 @@ pub enum MetadataError {
 // We hide the innards behind an Arc so that it's easy to clone and share.
 #[derive(Debug)]
 struct MetadataInner {
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
 
     // Events are hashed by pallet an error index (decode oriented)
     events: HashMap<(u8, u8), EventMetadata>,
@@ -147,7 +147,7 @@ impl Metadata {
     }
 
     /// Return the runtime metadata.
-    pub fn runtime_metadata(&self) -> &RuntimeMetadataV14 {
+    pub fn runtime_metadata(&self) -> &RuntimeMetadataV15 {
         &self.inner.metadata
     }
 
@@ -371,7 +371,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(InvalidMetadataError::InvalidPrefix);
         }
         let metadata = match metadata.1 {
-            RuntimeMetadata::V14(meta) => meta,
+            RuntimeMetadata::V14(v14) => subxt_metadata::metadata_v14_to_latest(v14),
+            RuntimeMetadata::V15(v15) => v15,
             _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
@@ -503,8 +504,9 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use frame_metadata::{
-        ExtrinsicMetadata, PalletStorageMetadata, StorageEntryModifier, StorageEntryType,
+    use frame_metadata::v15::{
+        ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+        StorageEntryModifier, StorageEntryType,
     };
     use scale_info::{meta_type, TypeInfo};
 
@@ -531,19 +533,20 @@ mod tests {
             value: vec![1, 2, 3],
             docs: vec![],
         };
-        let pallet = frame_metadata::PalletMetadata {
+        let pallet = PalletMetadata {
             index: 0,
             name: "System",
-            calls: Some(frame_metadata::PalletCallMetadata {
+            calls: Some(PalletCallMetadata {
                 ty: meta_type::<Call>(),
             }),
             storage: Some(storage),
             constants: vec![constant],
             event: None,
             error: None,
+            docs: vec![],
         };
 
-        let metadata = RuntimeMetadataV14::new(
+        let metadata = RuntimeMetadataV15::new(
             vec![pallet],
             ExtrinsicMetadata {
                 ty: meta_type::<()>(),
@@ -551,6 +554,7 @@ mod tests {
                 signed_extensions: vec![],
             },
             meta_type::<()>(),
+            vec![],
         );
         let prefixed = RuntimeMetadataPrefixed::from(metadata);
 

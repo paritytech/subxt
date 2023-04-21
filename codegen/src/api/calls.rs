@@ -7,7 +7,7 @@ use crate::{
     types::{CompositeDefFields, TypeGenerator},
     CratePath,
 };
-use frame_metadata::{v14::RuntimeMetadataV14, PalletMetadata};
+use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
 use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -23,7 +23,7 @@ use scale_info::form::PortableForm;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,

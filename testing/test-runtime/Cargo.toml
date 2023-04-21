@@ -1,16 +1,16 @@
 [package]
 name = "test-runtime"
-version = "0.27.1"
+version = "0.28.0"
 edition = "2021"
 publish = false
 
 [dependencies]
 subxt = { path = "../../subxt" }
-sp-runtime = "20.0.0"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
-subxt = { path = "../../subxt" }
+substrate-runner = { path = "../substrate-runner" }
+impl-serde = "0.4.0"
+serde = "1.0.160"
 tokio = { version = "1.27", features = ["macros", "rt-multi-thread"] }
 which = "4.4.0"
 jsonrpsee = { version = "0.16.0", features = ["async-client", "client-ws-transport"] }

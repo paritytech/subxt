@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::{v14::RuntimeMetadataV14, PalletMetadata};
+use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -35,7 +35,7 @@ use super::CodegenError;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_constants(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,

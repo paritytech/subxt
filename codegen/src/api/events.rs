@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::PalletMetadata;
+use frame_metadata::v15::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use scale_info::form::PortableForm;

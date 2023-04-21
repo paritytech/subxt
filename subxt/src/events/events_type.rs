@@ -430,7 +430,7 @@ pub(crate) mod test_utils {
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
-        v14::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV14},
+        v15::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
@@ -503,6 +503,7 @@ pub(crate) mod test_utils {
             constants: vec![],
             error: None,
             index: 0,
+            docs: vec![],
         }];
 
         let extrinsic = ExtrinsicMetadata {
@@ -511,8 +512,8 @@ pub(crate) mod test_utils {
             signed_extensions: vec![],
         };
 
-        let v14 = RuntimeMetadataV14::new(pallets, extrinsic, meta_type::<()>());
-        let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
+        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::try_from(runtime_metadata).unwrap()
     }
