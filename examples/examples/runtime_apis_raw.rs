@@ -1,4 +1,4 @@
-use subxt::ext::codec::{Compact, Decode};
+use subxt::ext::codec::Compact;
 use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::{OnlineClient, PolkadotConfig};
 
@@ -13,13 +13,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Use runtime APIs at the latest block:
     let runtime_apis = api.runtime_api().at_latest().await?;
 
-    // Ask for metadata:
-    let bytes = runtime_apis.call_raw("Metadata_metadata", None).await?;
-
-    // Decode it:
-    let cursor = &mut &*bytes;
-    let _ = <Compact<u32>>::decode(cursor)?;
-    let meta = RuntimeMetadataPrefixed::decode(cursor)?;
+    // Ask for metadata and decode it:
+    let (_, meta): (Compact<u32>, RuntimeMetadataPrefixed) =
+        runtime_apis.call_raw("Metadata_metadata", None).await?;
 
     println!("{meta:?}");
     Ok(())
