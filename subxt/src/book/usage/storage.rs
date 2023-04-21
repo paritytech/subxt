@@ -28,6 +28,7 @@
 //! validated until it's submitted:
 //!
 //! ```rust,no_run
+//! use sp_keyring::AccountKeyring;
 //! use subxt::dynamic::Value;
 //!
 //! let account = AccountKeyring::Alice.to_account_id();

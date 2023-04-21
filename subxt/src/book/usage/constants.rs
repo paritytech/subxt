@@ -26,6 +26,7 @@
 //! Alternately, we can dynamically construct a constant query:
 //!
 //! ```rust,no_run
+//! use sp_keyring::AccountKeyring;
 //! use subxt::dynamic::Value;
 //!
 //! let account = AccountKeyring::Alice.to_account_id();

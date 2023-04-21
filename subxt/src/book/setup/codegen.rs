@@ -53,7 +53,7 @@
 //! If you'd like to manually generate the same code that the macro generates under the hood, you
 //! can use the `subxt codegen` command:
 //!
-//! ```rust
+//! ```shell
 //! # Install the CLI tool if you haven't already:
 //! cargo install subxt-cli
 //! # Generate and format rust code, saving it to `interface.rs`:
