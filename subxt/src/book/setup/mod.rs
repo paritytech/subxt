@@ -11,5 +11,5 @@ This modules contains details on setting up Subxt:
 Alternately, [go back](super).
 */
 
-mod codegen;
 mod client;
+mod codegen;

@@ -19,5 +19,5 @@ pub mod blocks;
 pub mod constants;
 pub mod events;
 pub mod extrinsics;
-pub mod storage;
 pub mod runtime_apis;
+pub mod storage;

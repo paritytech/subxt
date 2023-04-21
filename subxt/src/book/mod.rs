@@ -11,7 +11,6 @@ Subxt is a library for interacting with Substrate based nodes. It has a focus on
 2. [Limitations](#limitations)
 3. [Quick start](#quick-start)
 4. [Usage](#usage)
-5. [Examples](#examples)
 
 ## Features at a glance
 
@@ -87,15 +86,6 @@ Once Subxt is configured, the next step is actually interacting with a node. Fol
 - [Constants](usage::constants): Subxt can access the constant values stored in a node, which remain the same for a given runtime version.
 - [Blocks](usage::blocks): Subxt can load recent blocks or subscribe to new/finalized blocks, reading the extrinsics, events and storage at these blocks.
 - [Runtime APIs](usage::runtime_apis): Subxt can make calls into pallet runtime APIs to retrieve data.
-
-## Examples
-
-A set of examples to help showcase various Subxt features and functionality:
-
-- Building a WASM app with Subxt.
-- Ditching the statically generated interface.
-- Integrating with Substrate.
-- Working offline.
 
 */
 pub mod setup;
