@@ -60,6 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let block_hash = block.hash();
 
         println!(" Block {:?}", block_hash);
+        println!(" Block {:?}", block_hash);
         // Ask for the extrinsics for this block.
         for extrinsic in block.body().await?.extrinsics() {
             println!("  Extrinsic index {:?}", extrinsic.index());
@@ -69,9 +70,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(decoded) => {
                     if let Some((address, signature, extra)) = decoded.signature {
                         println!("    Decoded Signature");
-                        println!("    Decoded Address: {:?}", address.to_value());
-                        println!("    Decoded Sign: {:?}", signature.to_value());
-                        println!("    Decoded Extra: {:?}", extra.to_value());
+                        println!("    Decoded Address: {:?}", address);
+                        println!("    Decoded Sign: {:?}", signature);
+                        println!("    Decoded Extra: {:?}", extra);
                     };
 
                     let call = decoded.function;

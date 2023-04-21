@@ -17,8 +17,8 @@ use codec::{Codec, Decode, Encode};
 use derivative::Derivative;
 use frame_metadata::v15::RuntimeMetadataV15;
 use futures::lock::Mutex as AsyncMutex;
-use scale_value::Value;
-use std::{collections::HashMap, sync::Arc};
+use scale_value::{scale::decode_as_type, Value};
+use std::{collections::HashMap, marker::PhantomData, sync::Arc};
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {
@@ -259,13 +259,14 @@ where
     pub function: DecodedValueThunk,
 }
 
-pub struct ExtrinsicValueThunk {
+pub struct ExtrinsicValueThunk<T: Config> {
     /// The signature, address, number of extrinsics have come before from
     /// the same signer and an era describing the longevity of this transaction,
     /// if this is a signed extrinsic.
-    pub signature: Option<(DecodedValueThunk, DecodedValueThunk, DecodedValueThunk)>,
+    pub signature: Option<(Value<u32>, Value<u32>, Value<u32>)>,
     /// The function that should be called.
     pub function: DecodedValueThunk,
+    _phantom: PhantomData<T>,
 }
 
 impl<'a, T, C> Extrinsic<'a, T, C>
@@ -332,7 +333,7 @@ where
     }
 
     /// Decode the extrinsic to the provided return type.
-    pub fn decode_generic(&self) -> Result<ExtrinsicValueThunk, ExtrinsicError> {
+    pub fn decode_generic(&self) -> Result<ExtrinsicValueThunk<T>, ExtrinsicError> {
         const SIGNATURE_MASK: u8 = 0b1000_0000;
         const VERSION_MASK: u8 = 0b0111_1111;
         const LATEST_EXTRINSIC_VERSION: u8 = 4;
@@ -347,6 +348,7 @@ where
 
         println!("byteslen {:?}", self.bytes.len());
         println!("bytes {:?}", self.bytes);
+        println!("byteshex  {:?}", hex::encode(&self.bytes));
 
         let version = self.bytes[0] & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
@@ -361,49 +363,90 @@ where
 
         println!("byteslen {:?}", bytes.len());
 
-
         let cursor = &mut &bytes[..];
 
         let metadata = self.client.metadata();
 
         let signature = if is_signed {
-
             println!("bytes {:?}", cursor);
+            println!("byteshex  {:?}", hex::encode(&bytes));
 
-            // When the payload is signed, the signature is encoded as
-            // Option<(Address, Signature, Extra)>. Get rid of the first
-            // bit which signals the option.
-            let is_option: u8 = Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
-            if is_option != 1 {
-                println!("Is this option or now: {:?}", is_option);
-                // return Err(ExtrinsicError::InvalidSignature);
-            }
+            // let address_prefix: u8 =
+            //     Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
 
-            // skip over the bytes
-            let len = cursor.len();
-            let address = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
-                cursor,
-                self.ids.address,
-                &metadata,
-            )
-            .map_err(|_| ExtrinsicError::InsufficientData)?;
-            let after = cursor.len();
-            println!("Curson length: {:?} {:?}", len, after);
+            let address =
+                decode_as_type(cursor, self.ids.address, &metadata.runtime_metadata().types)
+                    .map_err(|_| ExtrinsicError::InsufficientData)?;
 
-            let signature = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            let signature = decode_as_type(
                 cursor,
                 self.ids.signature,
-                &metadata,
+                &metadata.runtime_metadata().types,
             )
             .map_err(|_| ExtrinsicError::InsufficientData)?;
 
-            let extra: DecodedValueThunk =
-                <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
-                    cursor,
-                    self.ids.extra,
-                    &metadata,
-                )
+            // let address: T::Address =
+            // Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            println!(" ADDRESS IS {:?}", address);
+
+            // let signature: T::Signature =
+            //     Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            println!(" Signature IS {:?}", signature);
+
+            // Skip over the bytes for this field:
+            // scale_decode::visitor::decode_with_visitor(
+            //     cursor,
+            //     self.ids.extra,
+            //     &metadata.runtime_metadata().types,
+            //     scale_decode::visitor::IgnoreVisitor,
+            // )
+            // .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            let extra = decode_as_type(cursor, self.ids.extra, &metadata.runtime_metadata().types)
                 .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            println!(" extra IS {:?}", extra);
+
+            // let extra: T::ExtrinsicParams =
+            //     Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            // // When the payload is signed, the signature is encoded as
+            // // Option<(Address, Signature, Extra)>. Get rid of the first
+            // // bit which signals the option.
+            // let is_option: u8 = Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
+            // if is_option != 1 {
+            //     println!("Is this option or now: {:?}", is_option);
+            //     // return Err(ExtrinsicError::InvalidSignature);
+            // }
+
+            // skip over the bytes
+            // let len = cursor.len();
+            // let address = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            //     cursor,
+            //     self.ids.address,
+            //     &metadata,
+            // )
+            // .map_err(|_| ExtrinsicError::InsufficientData)?;
+            // let after = cursor.len();
+            // println!("Curson length: {:?} {:?}", len, after);
+
+            // let signature: DecodedValueThunk =
+            //     <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            //         cursor,
+            //         self.ids.signature,
+            //         &metadata,
+            //     )
+            //     .map_err(|_| ExtrinsicError::InsufficientData)?;
+
+            // let extra: DecodedValueThunk =
+            //     <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
+            //         cursor,
+            //         self.ids.extra,
+            //         &metadata,
+            //     )
+            //     .map_err(|_| ExtrinsicError::InsufficientData)?;
 
             Some((address, signature, extra))
         } else {
@@ -430,6 +473,7 @@ where
         Ok(ExtrinsicValueThunk {
             signature,
             function,
+            _phantom: PhantomData,
         })
     }
 }
@@ -504,7 +548,7 @@ pub enum ExtrinsicError {
     /// Unsupported signature.
     SignatureUnsupported,
     /// Invalid signature.
-    InvalidSignature, 
+    InvalidSignature,
     /// The extrinsic has an unsupported version.
     UnsupportedVersion(u8),
     /// Decoding error.
