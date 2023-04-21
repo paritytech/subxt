@@ -9,5 +9,5 @@
 //!
 //! Alternately, [go back](super).
 
-mod client;
-mod codegen;
+pub mod client;
+pub mod codegen;

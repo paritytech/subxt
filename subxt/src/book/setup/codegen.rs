@@ -10,7 +10,7 @@
 //!
 //! ## The `#[subxt]` macro
 //!
-//! The simplest way to generate an interface to use is via the [`#[subxt]`](crate::subxt!) macro.
+//! The simplest way to generate an interface to use is via the [`#[subxt]`](crate::subxt) macro.
 //! Using this macro looks something like:
 //!
 //! ```rust,no_run
@@ -44,7 +44,7 @@
 //!
 //! ## The CLI tool
 //!
-//! Using the [`#[subxt]`](crate::subxt!) macro carries some downsides, notably that using it to
+//! Using the [`#[subxt]`](crate::subxt) macro carries some downsides, notably that using it to
 //! generate an interface will have an impact on compile times (though much less of one if you only
 //! need a few pallets), and that editor looking tends to not be very good at auto-completing and
 //! providing documentation for the generated interface. Additionally, you can't peer into the
