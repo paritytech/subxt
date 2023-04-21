@@ -580,7 +580,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 runtime_types::sp_version::RuntimeVersion,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Core_version",
                     result,
@@ -637,7 +637,7 @@ pub mod api {
                 &self,
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<runtime_types::sp_core::OpaqueMetadata>
             {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Metadata_metadata",
                     result,
@@ -678,7 +678,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 ::std::vec::Vec<::core::primitive::u32>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "Metadata_metadata_versions",
                     result,
@@ -727,7 +727,7 @@ pub mod api {
                     runtime_types::sp_runtime::traits::BlakeTwo256,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BlockBuilder_finalize_block",
                     result,
@@ -926,7 +926,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 ::std::vec::Vec<runtime_types::polkadot_primitives::v4::validator_app::Public>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validators",
                     result,
@@ -948,7 +948,7 @@ pub mod api {
                 >,
                 runtime_types::polkadot_primitives::v4::GroupRotationInfo<::core::primitive::u32>,
             )> {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_validator_groups",
                     result,
@@ -971,7 +971,7 @@ pub mod api {
                     >,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_availability_cores",
                     result,
@@ -1069,7 +1069,7 @@ pub mod api {
             pub fn session_index_for_child(
                 &self,
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u32> {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_session_index_for_child",
                     result,
@@ -1138,7 +1138,7 @@ pub mod api {
                     runtime_types::polkadot_primitives::v4::CandidateEvent<::subxt::utils::H256>,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_candidate_events",
                     result,
@@ -1230,7 +1230,7 @@ pub mod api {
                     >,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_on_chain_votes",
                     result,
@@ -1291,7 +1291,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::ValidationCodeHash>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_pvfs_require_precheck",
                     result,
@@ -1337,7 +1337,7 @@ pub mod api {
                     runtime_types::polkadot_primitives::v4::DisputeState<::core::primitive::u32>,
                 )>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "ParachainHost_disputes",
                     result,
@@ -1379,7 +1379,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 ::core::option::Option<::core::primitive::u32>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_beefy_genesis",
                     result,
@@ -1400,7 +1400,7 @@ pub mod api {
                     >,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BeefyApi_validator_set",
                     result,
@@ -1486,7 +1486,7 @@ pub mod api {
                     runtime_types::sp_mmr_primitives::Error,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_mmr_root",
                     result,
@@ -1506,7 +1506,7 @@ pub mod api {
                     runtime_types::sp_mmr_primitives::Error,
                 >,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "MmrApi_mmr_leaf_count",
                     result,
@@ -1625,7 +1625,7 @@ pub mod api {
                     ::core::primitive::u64,
                 )>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_grandpa_authorities",
                     result,
@@ -1703,7 +1703,7 @@ pub mod api {
             pub fn current_set_id(
                 &self,
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u64> {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "GrandpaApi_current_set_id",
                     result,
@@ -1724,7 +1724,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 runtime_types::sp_consensus_babe::BabeConfiguration,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_configuration",
                     result,
@@ -1741,7 +1741,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 runtime_types::sp_consensus_slots::Slot,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_current_epoch_start",
                     result,
@@ -1758,7 +1758,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 runtime_types::sp_consensus_babe::Epoch,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_current_epoch",
                     result,
@@ -1776,7 +1776,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 runtime_types::sp_consensus_babe::Epoch,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "BabeApi_next_epoch",
                     result,
@@ -1864,7 +1864,7 @@ pub mod api {
             ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
                 ::std::vec::Vec<runtime_types::sp_authority_discovery::app::Public>,
             > {
-                let mut result = Vec::new();
+                let result = Vec::new();
                 ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
                     "AuthorityDiscoveryApi_authorities",
                     result,
@@ -2154,6 +2154,12 @@ pub mod api {
         }
         pub fn democracy(&self) -> democracy::constants::ConstantsApi {
             democracy::constants::ConstantsApi
+        }
+        pub fn council(&self) -> council::constants::ConstantsApi {
+            council::constants::ConstantsApi
+        }
+        pub fn technical_committee(&self) -> technical_committee::constants::ConstantsApi {
+            technical_committee::constants::ConstantsApi
         }
         pub fn phragmen_election(&self) -> phragmen_election::constants::ConstantsApi {
             phragmen_election::constants::ConstantsApi
@@ -2541,9 +2547,9 @@ pub mod api {
         let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
         if runtime_metadata_hash
             != [
-                249u8, 78u8, 188u8, 5u8, 29u8, 44u8, 55u8, 180u8, 164u8, 85u8, 12u8, 151u8, 222u8,
-                121u8, 117u8, 192u8, 79u8, 39u8, 68u8, 212u8, 58u8, 118u8, 65u8, 98u8, 180u8,
-                133u8, 156u8, 160u8, 169u8, 246u8, 43u8, 84u8,
+                190u8, 141u8, 166u8, 186u8, 44u8, 119u8, 250u8, 170u8, 99u8, 5u8, 93u8, 253u8,
+                141u8, 142u8, 175u8, 243u8, 206u8, 208u8, 98u8, 63u8, 166u8, 71u8, 159u8, 227u8,
+                34u8, 235u8, 190u8, 96u8, 248u8, 13u8, 47u8, 146u8,
             ]
         {
             Err(::subxt::error::MetadataError::IncompatibleMetadata)
@@ -4837,10 +4843,9 @@ pub mod api {
                         "Initialized",
                         vec![],
                         [
-                            142u8, 101u8, 250u8, 113u8, 93u8, 201u8, 157u8, 18u8, 166u8, 153u8,
-                            59u8, 197u8, 107u8, 247u8, 124u8, 110u8, 202u8, 67u8, 62u8, 57u8,
-                            186u8, 134u8, 49u8, 182u8, 149u8, 44u8, 255u8, 85u8, 87u8, 177u8,
-                            149u8, 121u8,
+                            40u8, 135u8, 28u8, 144u8, 247u8, 208u8, 48u8, 220u8, 46u8, 60u8, 131u8,
+                            190u8, 196u8, 235u8, 126u8, 66u8, 34u8, 14u8, 32u8, 131u8, 71u8, 46u8,
+                            62u8, 207u8, 177u8, 213u8, 167u8, 34u8, 199u8, 29u8, 16u8, 236u8,
                         ],
                     )
                 }
@@ -13530,6 +13535,28 @@ pub mod api {
                 }
             }
         }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " The maximum weight of a dispatch call that can be proposed and executed."]
+                pub fn max_proposal_weight(
+                    &self,
+                ) -> ::subxt::constants::Address<runtime_types::sp_weights::weight_v2::Weight>
+                {
+                    ::subxt::constants::Address::new_static(
+                        "Council",
+                        "MaxProposalWeight",
+                        [
+                            206u8, 61u8, 253u8, 247u8, 163u8, 40u8, 161u8, 52u8, 134u8, 140u8,
+                            206u8, 83u8, 44u8, 166u8, 226u8, 115u8, 181u8, 14u8, 227u8, 130u8,
+                            210u8, 32u8, 85u8, 29u8, 230u8, 97u8, 130u8, 165u8, 147u8, 134u8,
+                            106u8, 76u8,
+                        ],
+                    )
+                }
+            }
+        }
     }
     pub mod technical_committee {
         use super::root_mod;
@@ -14182,6 +14209,28 @@ pub mod api {
                             157u8, 69u8, 56u8, 142u8, 106u8, 17u8, 215u8, 159u8, 48u8, 42u8, 185u8,
                             209u8, 49u8, 159u8, 32u8, 168u8, 111u8, 158u8, 159u8, 217u8, 244u8,
                             158u8,
+                        ],
+                    )
+                }
+            }
+        }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " The maximum weight of a dispatch call that can be proposed and executed."]
+                pub fn max_proposal_weight(
+                    &self,
+                ) -> ::subxt::constants::Address<runtime_types::sp_weights::weight_v2::Weight>
+                {
+                    ::subxt::constants::Address::new_static(
+                        "TechnicalCommittee",
+                        "MaxProposalWeight",
+                        [
+                            206u8, 61u8, 253u8, 247u8, 163u8, 40u8, 161u8, 52u8, 134u8, 140u8,
+                            206u8, 83u8, 44u8, 166u8, 226u8, 115u8, 181u8, 14u8, 227u8, 130u8,
+                            210u8, 32u8, 85u8, 29u8, 230u8, 97u8, 130u8, 165u8, 147u8, 134u8,
+                            106u8, 76u8,
                         ],
                     )
                 }
@@ -50497,8 +50546,7 @@ pub mod api {
                 pub struct PrimaryPreDigest {
                     pub authority_index: ::core::primitive::u32,
                     pub slot: runtime_types::sp_consensus_slots::Slot,
-                    pub vrf_output: [::core::primitive::u8; 32usize],
-                    pub vrf_proof: [::core::primitive::u8; 64usize],
+                    pub vrf_signature: runtime_types::sp_core::sr25519::vrf::VrfSignature,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -50527,8 +50575,7 @@ pub mod api {
                 pub struct SecondaryVRFPreDigest {
                     pub authority_index: ::core::primitive::u32,
                     pub slot: runtime_types::sp_consensus_slots::Slot,
-                    pub vrf_output: [::core::primitive::u8; 32usize],
-                    pub vrf_proof: [::core::primitive::u8; 64usize],
+                    pub vrf_signature: runtime_types::sp_core::sr25519::vrf::VrfSignature,
                 }
             }
             #[derive(
@@ -50945,6 +50992,23 @@ pub mod api {
             }
             pub mod sr25519 {
                 use super::runtime_types;
+                pub mod vrf {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: codec :: Decode,
+                        :: subxt :: ext :: codec :: Encode,
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct VrfSignature {
+                        pub output: [::core::primitive::u8; 32usize],
+                        pub proof: [::core::primitive::u8; 64usize],
+                    }
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
