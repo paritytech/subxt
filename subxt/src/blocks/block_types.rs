@@ -1,4 +1,3 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -346,27 +345,50 @@ where
             return Err(ExtrinsicError::InsufficientData);
         }
 
+        println!("byteslen {:?}", self.bytes.len());
+        println!("bytes {:?}", self.bytes);
+
         let version = self.bytes[0] & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
             return Err(ExtrinsicError::UnsupportedVersion(version));
         }
 
         let is_signed = self.bytes[0] & SIGNATURE_MASK != 0;
+        println!("is signed {:?}", is_signed);
 
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&self.bytes[1..]);
+
+        println!("byteslen {:?}", bytes.len());
+
 
         let cursor = &mut &bytes[..];
 
         let metadata = self.client.metadata();
 
         let signature = if is_signed {
+
+            println!("bytes {:?}", cursor);
+
+            // When the payload is signed, the signature is encoded as
+            // Option<(Address, Signature, Extra)>. Get rid of the first
+            // bit which signals the option.
+            let is_option: u8 = Decode::decode(cursor).map_err(|_| ExtrinsicError::InsufficientData)?;
+            if is_option != 1 {
+                println!("Is this option or now: {:?}", is_option);
+                // return Err(ExtrinsicError::InvalidSignature);
+            }
+
+            // skip over the bytes
+            let len = cursor.len();
             let address = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
                 cursor,
                 self.ids.address,
                 &metadata,
             )
             .map_err(|_| ExtrinsicError::InsufficientData)?;
+            let after = cursor.len();
+            println!("Curson length: {:?} {:?}", len, after);
 
             let signature = <DecodedValueThunk as DecodeWithMetadata>::decode_with_metadata(
                 cursor,
@@ -481,6 +503,8 @@ pub enum ExtrinsicError {
     InsufficientData,
     /// Unsupported signature.
     SignatureUnsupported,
+    /// Invalid signature.
+    InvalidSignature, 
     /// The extrinsic has an unsupported version.
     UnsupportedVersion(u8),
     /// Decoding error.
