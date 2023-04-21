@@ -17,7 +17,7 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use codec::{Compact, Decode};
+use codec::Compact;
 use derivative::Derivative;
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
@@ -136,10 +136,9 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
-        let cursor = &mut &*bytes;
-        let _ = <Compact<u32>>::decode(cursor)?;
-        let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        let (_, meta) = rpc
+            .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
+            .await?;
         Ok(meta.try_into()?)
     }
 

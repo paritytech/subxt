@@ -8,7 +8,7 @@ use crate::{
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-use frame_metadata::{StorageEntryType, StorageHasher};
+use frame_metadata::v15::{StorageEntryType, StorageHasher};
 use scale_info::TypeDef;
 use std::borrow::Cow;
 

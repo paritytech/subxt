@@ -4,12 +4,14 @@
 
 use clap::Parser as ClapParser;
 use color_eyre::eyre::{self, WrapErr};
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed, RuntimeMetadataV14, META_RESERVED};
+use frame_metadata::{
+    v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
+};
 use jsonrpsee::client_transport::ws::Uri;
 use scale::Decode;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use subxt_metadata::{get_metadata_hash, get_pallet_hash};
+use subxt_metadata::{get_metadata_hash, get_pallet_hash, metadata_v14_to_latest};
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
@@ -94,7 +96,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
     Ok(())
 }
 
-async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV14> {
+async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV15> {
     let bytes = subxt_codegen::utils::fetch_metadata_bytes(url).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
@@ -108,7 +110,8 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
     }
 
     match metadata.1 {
-        RuntimeMetadata::V14(v14) => Ok(v14),
+        RuntimeMetadata::V14(v14) => Ok(metadata_v14_to_latest(v14)),
+        RuntimeMetadata::V15(v15) => Ok(v15),
         _ => Err(eyre::eyre!(
             "Node {:?} with unsupported metadata version: {:?}",
             url,

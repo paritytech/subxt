@@ -4,21 +4,23 @@
 
 use codec::Decode;
 use criterion::*;
-use frame_metadata::{RuntimeMetadata::V14, RuntimeMetadataPrefixed, RuntimeMetadataV14};
+use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info::{form::PortableForm, TypeDef, TypeDefVariant};
 use std::{fs, path::Path};
 use subxt_metadata::{
     get_call_hash, get_constant_hash, get_metadata_hash, get_pallet_hash, get_storage_hash,
+    metadata_v14_to_latest,
 };
 
-fn load_metadata() -> RuntimeMetadataV14 {
+fn load_metadata() -> RuntimeMetadataV15 {
     let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))
         .expect("Cannot read metadata blob");
     let meta: RuntimeMetadataPrefixed =
         Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
     match meta.1 {
-        V14(v14) => v14,
+        RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
+        RuntimeMetadata::V15(v15) => v15,
         _ => panic!("Unsupported metadata version {:?}", meta.1),
     }
 }

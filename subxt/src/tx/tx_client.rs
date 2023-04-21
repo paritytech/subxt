@@ -2,17 +2,18 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::TxPayload;
+use std::borrow::Cow;
+
+use codec::{Compact, Encode};
+use derivative::Derivative;
+
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
     error::Error,
-    tx::{Signer as SignerT, TxProgress},
+    tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-use codec::{Compact, Encode};
-use derivative::Derivative;
-use std::borrow::Cow;
 
 // This is returned from an API below, so expose it here.
 pub use crate::rpc::types::DryRunResult;
@@ -464,5 +465,24 @@ where
     pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
         let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
         dry_run_bytes.into_dry_run_result(&self.client.metadata())
+    }
+
+    /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
+    /// The actual amount paid can vary from block to block based on node traffic and other factors.
+    pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
+        let mut params = self.encoded().to_vec();
+        (self.encoded().len() as u32).encode_to(&mut params);
+        // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
+        // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
+        let (_, _, _, partial_fee) = self
+            .client
+            .rpc()
+            .state_call::<(Compact<u64>, Compact<u64>, u8, u128)>(
+                "TransactionPaymentApi_query_info",
+                Some(&params),
+                None,
+            )
+            .await?;
+        Ok(partial_fee)
     }
 }
