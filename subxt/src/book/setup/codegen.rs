@@ -46,7 +46,7 @@
 //!
 //! Using the [`#[subxt]`](crate::subxt!) macro carries some downsides, notably that using it to
 //! generate an interface will have an impact on compile times (though much less of one if you only
-//! need a few pallets), and that editor looking tends to not be very good at autocompleting and
+//! need a few pallets), and that editor looking tends to not be very good at auto-completing and
 //! providing documentation for the generated interface. Additionally, you can't peer into the
 //! generated code and see what's going on if you use the macro.
 //!
@@ -61,6 +61,6 @@
 //! ```
 //!
 //! Use `subxt codegen --help` for more options; many of the options available via the macro are
-//! also available via the CLI tool, such as the abliity to substitute generated types for others,
+//! also available via the CLI tool, such as the ability to substitute generated types for others,
 //! or strip out docs from the generated code.
 //!

@@ -67,7 +67,7 @@
 #![doc = include_str!("../../../examples/examples/balance_transfer_basic.rs")]
 //! ```
 //!
-//! This example assumes that a Polkadot node is running locally (Subxt endeavours to support all
+//! This example assumes that a Polkadot node is running locally (Subxt endeavors to support all
 //! recent releases). Typically, to use Subxt to talk to some custom Substrate node (for example a
 //! parachain node), you'll want to:
 //!

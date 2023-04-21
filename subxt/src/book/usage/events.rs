@@ -6,7 +6,7 @@
 //!
 //! In the process of adding extrinsics to a block, they are executed. When extrinsics are executed,
 //! they may produce events describing what's happening, but additionally the node may add emit some
-//! events of its own as the blook is processed. Events live in a single location in node storage
+//! events of its own as the block is processed. Events live in a single location in node storage
 //! which is overwritten at each block.
 //!
 //! When we submit extrinsics using Subxt, methods like

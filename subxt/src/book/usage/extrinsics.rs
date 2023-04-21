@@ -17,7 +17,7 @@
 //! > As a side note, an _extrinsic_ is anything that can be added to a block, and a _transaction_
 //! > is an extrinsic that is submitted from a particular user (and is therefore also signed). Subxt
 //! > can construct unsigned extrinsics, but overwhelmingly you'll need to sign them, and so the
-//! > documentation tends to use the terms _extrinsic_ and _transaction_ interchangably.
+//! > documentation tends to use the terms _extrinsic_ and _transaction_ interchangeably.
 //!
 //! ## Constructing an extrinsic payload
 //!

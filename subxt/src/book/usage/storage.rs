@@ -59,7 +59,7 @@
 //! over storage entries using it).
 //!
 //! Static queries set appropriate values for these associated types, and can therefore only be used
-//! where it makes sense. Dyanmic queries don't know any better and can be used in more places, but
+//! where it makes sense. Dynamic queries don't know any better and can be used in more places, but
 //! may fail at runtime instead if they are invalid in those places.
 //!
 //! ## Submitting it
