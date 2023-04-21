@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use codec::Decode;
 use core::marker::PhantomData;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
@@ -51,17 +50,10 @@ pub trait RuntimeApiPayload {
         Ok(v)
     }
 
-    /// Returns the details needed to validate the runtime API call, which
-    /// include a statically generated validation hash.
-    fn validation_details(&self) -> Option<ValidationDetails> {
+    /// Returns the statically generated validation hash.
+    fn validation_hash(&self) -> Option<[u8; 32]> {
         None
     }
-}
-
-pub struct ValidationDetails {
-    /// A hash (this is generated at compile time in our codegen)
-    /// to compare against the runtime code.
-    pub hash: [u8; 32],
 }
 
 /// A runtime API payload containing the generic argument data
@@ -89,8 +81,8 @@ impl<ReturnTy: DecodeWithMetadata> RuntimeApiPayload for StaticRuntimeApiPayload
         Ok(())
     }
 
-    fn validation_details(&self) -> Option<ValidationDetails> {
-        self.validation_hash.map(|hash| ValidationDetails { hash })
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        self.validation_hash
     }
 }
 
@@ -121,7 +113,7 @@ pub type StaticRuntimeApiPayload<ReturnTy> = Payload<Vec<u8>, ReturnTy>;
 /// A dynamic runtime API payload.
 pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
 
-impl<ReturnTy: Decode, ArgsData> Payload<ArgsData, ReturnTy> {
+impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Create a new [`Payload`].
     pub fn new(
         fn_name: impl Into<String>,
@@ -133,6 +125,24 @@ impl<ReturnTy: Decode, ArgsData> Payload<ArgsData, ReturnTy> {
             args_data,
             validation_hash,
             _marker: PhantomData,
+        }
+    }
+
+    /// Create a new [`StaticRuntimeApiPayload`] using static function name
+    /// and scale-encoded argument data.
+    ///
+    /// This is only expected to be used from codegen.
+    #[doc(hidden)]
+    pub fn new_static(
+        fn_name: &'static str,
+        args_data: Vec<u8>,
+        hash: [u8; 32],
+    ) -> StaticRuntimeApiPayload<ReturnTy> {
+        StaticRuntimeApiPayload {
+            fn_name: Cow::Borrowed(fn_name),
+            args_data,
+            validation_hash: Some(hash),
+            _marker: std::marker::PhantomData,
         }
     }
 
@@ -152,22 +162,6 @@ impl<ReturnTy: Decode, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Returns the arguments data.
     pub fn args_data(&self) -> &ArgsData {
         &self.args_data
-    }
-}
-
-impl<ReturnTy> StaticRuntimeApiPayload<ReturnTy> {
-    /// Create a new [`StaticRuntimeApiPayload`] using static function name
-    /// and scale-encoded argument data.
-    ///
-    /// This is only expected to be used from codegen.
-    #[doc(hidden)]
-    pub fn new_static(fn_name: &'static str, args_data: Vec<u8>, hash: [u8; 32]) -> Self {
-        Self {
-            fn_name: Cow::Borrowed(fn_name),
-            args_data,
-            validation_hash: Some(hash),
-            _marker: std::marker::PhantomData,
-        }
     }
 }
 

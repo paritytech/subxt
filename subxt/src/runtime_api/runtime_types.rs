@@ -72,11 +72,11 @@ where
             let return_id = fn_metadata.return_id();
 
             // Validate the runtime API payload hash against the compile hash from codegen.
-            if let Some(details) = payload.validation_details() {
+            if let Some(static_hash) = payload.validation_hash() {
                 let runtime_hash = metadata
                     .runtime_api_hash(fn_metadata.trait_name(), fn_metadata.method_name())?;
 
-                if details.hash != runtime_hash {
+                if static_hash != runtime_hash {
                     return Err(
                         crate::metadata::MetadataError::IncompatibleRuntimeApiMetadata(
                             fn_metadata.trait_name().into(),
