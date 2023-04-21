@@ -11,7 +11,7 @@ use crate::{
 };
 use scale_decode::DecodeAsType;
 
-pub use scale_value::{ Value, At };
+pub use scale_value::{At, Value};
 
 /// A [`scale_value::Value`] type endowed with contextual information
 /// regarding what type was used to decode each part of it. This implements
