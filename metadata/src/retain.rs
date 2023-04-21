@@ -211,6 +211,10 @@ where
     }
     update_extrinsic_types(&mut metadata.extrinsic, &map_ids);
     update_type(&mut metadata.ty, &map_ids);
+
+    // The retain pallets method strips the runtime APIs information,
+    // as it only takes into account working with pallets.
+    metadata.apis = Default::default();
 }
 
 #[cfg(test)]
