@@ -6,6 +6,7 @@ use std::borrow::Cow;
 
 use codec::{Compact, Encode};
 use derivative::Derivative;
+use sp_core_hashing::blake2_256;
 
 use crate::{
     client::{OfflineClientT, OnlineClientT},
@@ -320,7 +321,7 @@ where
         self.additional_and_extra_params
             .encode_additional_to(&mut bytes);
         if bytes.len() > 256 {
-            f(Cow::Borrowed(T::Hasher::hash_of(&Encoded(bytes)).as_ref()))
+            f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
         } else {
             f(Cow::Owned(bytes))
         }
