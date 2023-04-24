@@ -39,32 +39,29 @@
 //! This will replace the generated type and any usages with the specified type at the `use` import.
 //! It is useful for using custom decoding for specific types, or to provide a type with foreign
 //! trait implementations, or other specialized functionality.
-//!
+
 //! ## Custom Derives
 //!
-//! By default all generated types are annotated with `scale::Encode`, `scale::Decode`
-//! `scale_encode::EncodeAsType` and `scale_decode::DecodeAsType` derives. The latter two are also
-//! accompanied by corresponding attributes related to crate paths. However when using the
-//! generated types in the client, they may require additional derives or attributes to be useful.
+//! By default all generated types are annotated with `scale::Encode` and `scale::Decode` derives.
+//! However when using the generated types in the client, they may require additional derives to be
+//! useful.
 //!
-//! ### Adding derives and attributes for all types
+//! ### Adding derives for all types
 //!
-//! Add `derive_for_all_types` and/or `attribute_all_types` with a comma separated lists of the
-//! derives (attributes) to apply to *all* types
+//! Add `derive_for_all_types` with a comma separated list of the derives to apply to *all* types
 //!
 //! ```ignore
 //! #[subxt::subxt(
 //!     runtime_metadata_path = "polkadot_metadata.scale",
-//!     derive_for_all_types = "Eq, PartialEq",
-//!     attribute_all_types = "#[allow(clippy::all)]",
+//!     derive_for_all_types = "Eq, PartialEq"
 //! )]
 //! pub mod polkadot {}
 //! ```
 //!
-//! ### Adding derives and attributes for specific types
+//! ### Adding derives for specific types
 //!
-//! Add `derive_for_type` and/or `attribute_type` with a comma separated lists of the derives
-//! (attributes) to apply for that type only.
+//! Add `derive_for_type` for each specific type with a comma separated list of the derives to
+//! apply for that type only.
 //!
 //! ```ignore
 //! #[subxt::subxt(
@@ -72,26 +69,11 @@
 //!     derive_for_all_types = "Eq, PartialEq",
 //!     derive_for_type(type = "frame_support::PalletId", derive = "Ord, PartialOrd"),
 //!     derive_for_type(type = "sp_runtime::ModuleError", derive = "Hash"),
-//!     attribute_type(type = "sp_runtime::ModuleError", attribute = "#[allow(clippy::all)]"),
 //! )]
 //! pub mod polkadot {}
 //! ```
 //!
-//! ### Opting out from default derives and attributes
-//!
-//! If you need full control over the derives, you can disable default derives with:
-//! ```ignore
-//! #[subxt::subxt(no_default_derives)]
-//! // or equivalently
-//! #[subxt::subxt(no_default_derives = true)]
-//! ```
-//!
-//! This comes useful when you want to use `subxt` generated types without `subxt` crate. Normally,
-//! it is implicitly assumed that `subxt` crate is available (to expose `scale` and
-//! `scale_en|decode` crates). If you want to use generated types without `subxt` crate, you need to
-//! disable default derives with `no_default_derives` flag.
-//!
-//! ## Custom crate path
+//! ### Custom crate path
 //!
 //! In order to specify a custom crate path to be used for the code generation:
 //!
@@ -102,7 +84,7 @@
 //!
 //! By default the path `::subxt` is used.
 //!
-//! ## Expose documentation
+//! ### Expose documentation
 //!
 //! In order to expose the documentation from the runtime metadata on the generated
 //! code, users must specify the `generate_docs` flag:
@@ -114,7 +96,7 @@
 //!
 //! By default the documentation is not generated.
 //!
-//! ## Runtime types generation
+//! ### Runtime types generation
 //!
 //! In some cases, you may be interested only in the runtime types, like `RuntimeCall` enum. You can
 //! limit code generation to just `runtime_types` module with `runtime_types_only` flag:
@@ -124,6 +106,7 @@
 //! // or equivalently
 //! #[subxt::subxt(runtime_types_only = true)]
 //! ```
+
 #![deny(unused_crate_dependencies)]
 
 extern crate proc_macro;
@@ -158,7 +141,7 @@ struct RuntimeMetadataArgs {
     #[darling(multiple)]
     derive_for_type: Vec<DeriveForType>,
     #[darling(multiple)]
-    attribute_type: Vec<AttributeType>,
+    attribute_for_type: Vec<AttributeType>,
     #[darling(multiple)]
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
@@ -222,7 +205,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     for derives in &args.derive_for_type {
         derives_registry.extend_for_type(derives.ty.clone(), derives.derive.iter().cloned(), vec![])
     }
-    for attributes in &args.attribute_type {
+    for attributes in &args.attribute_for_type {
         derives_registry.extend_for_type(
             attributes.ty.clone(),
             vec![],

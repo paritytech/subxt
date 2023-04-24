@@ -30,8 +30,8 @@ pub struct Opts {
     /// Additional attributes for a given type.
     ///
     /// Example `--attribute-type my_module::my_type=#[allow(clippy::all)]`.
-    #[clap(long = "attribute-type", value_parser = attribute_type_parser)]
-    attribute_type: Vec<(String, String)>,
+    #[clap(long = "attribute-for-type", value_parser = attribute_for_type_parser)]
+    attribute_for_type: Vec<(String, String)>,
     /// Substitute a type for another.
     ///
     /// Example `--substitute-type sp_runtime::MultiAddress<A,B>=subxt::utils::Static<::sp_runtime::MultiAddress<A,B>>`
@@ -66,7 +66,7 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     Ok((ty.to_string(), derive.to_string()))
 }
 
-fn attribute_type_parser(src: &str) -> Result<(String, String), String> {
+fn attribute_for_type_parser(src: &str) -> Result<(String, String), String> {
     let (ty, attribute) = src
         .split_once('=')
         .ok_or_else(|| String::from("Invalid pattern for `attribute-type`. It should be `type=attribute`, like `my_type=serde::#[allow(clippy::all)]`"))?;
@@ -90,7 +90,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         opts.derives,
         opts.attributes,
         opts.derives_for_type,
-        opts.attribute_type,
+        opts.attribute_for_type,
         opts.substitute_types,
         opts.crate_path,
         opts.no_docs,
