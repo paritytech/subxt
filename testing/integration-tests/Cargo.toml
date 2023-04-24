@@ -21,7 +21,7 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 futures = "0.3.27"
 hex = "0.4.3"
-regex = "1.7.3"
+regex = "1.8.1"
 scale-info = { version = "2.5.0", features = ["bit-vec"] }
 sp-core = { version = "20.0.0", default-features = false }
 sp-runtime = "23.0.0"
