@@ -114,9 +114,102 @@ jobs:
             command: test
             args: --doc
 
-  tests:
-    name: Cargo test
-    runs-on: ubuntu-latest-16-cores
+  test-docs:
+    name: "Test: docs"
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            ./substrate --version
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+            command: test
+            args: --doc
+
+  test-integration:
+    name: "Test: integration tests"
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            ./substrate --version
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+            command: test
+            args: --all-targets --package integration-tests
+
+  test-ui:
+    name: "Test: UI tests"
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            ./substrate --version
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+            command: test
+            args: --all-targets --package ui-tests
+
+  tests-other:
+    name: "Test: other (mainly unit) tests"
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
@@ -143,7 +236,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: test
-          args: --all-targets --workspace
+          args: --all-targets --workspace --exclude ui-tests --exclude integration-tests
 
   clippy:
     name: Cargo clippy
