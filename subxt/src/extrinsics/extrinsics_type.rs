@@ -69,14 +69,14 @@ impl<T: Config> Extrinsics<T> {
     ) -> impl Iterator<Item = Result<ExtrinsicDetails, Error>> + Send + Sync + 'static {
         let metadata = self.metadata.clone();
         let extrinsics = self.extrinsics.clone();
-        let ids = self.ids.clone();
+        let ids = self.ids;
         let num_extr = self.extrinsics.len();
         let mut index = 0;
         std::iter::from_fn(move || {
             if index == num_extr {
                 None
             } else {
-                match ExtrinsicDetails::decode_from::<T>(
+                match ExtrinsicDetails::decode_from(
                     metadata.clone(),
                     extrinsics[index].clone(),
                     ids,
@@ -183,7 +183,7 @@ pub struct ExtrinsicDetails {
 
 impl ExtrinsicDetails {
     // Attempt to dynamically decode a single event from our events input.
-    fn decode_from<T: Config>(
+    fn decode_from(
         metadata: Metadata,
         extrinsic_bytes: Arc<[u8]>,
         ids: ExtrinsicIds,
@@ -308,7 +308,7 @@ impl ExtrinsicDetails {
     /// Returns `None` if the extrinsic is not signed.
     pub fn as_address<T: Decode>(&self) -> Option<Result<T, Error>> {
         self.address_bytes()
-            .and_then(|bytes| Some(T::decode(&mut &bytes[..]).map_err(Error::Codec)))
+            .map(|bytes| T::decode(&mut &bytes[..]).map_err(Error::Codec))
     }
 
     /// Attempt to statically decode the extrinsic call bytes into the provided type.
