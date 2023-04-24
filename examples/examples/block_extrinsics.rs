@@ -66,7 +66,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Ask for the extrinsics for this block.
         for extrinsic in extrinsics.iter() {
             let extrinsic = extrinsic?;
-            println!("  Extrinsic index {:?}", extrinsic.index());
+            println!(
+                "  Extrinsic block index {:?}, pallet index {:?}, variant index {:?}",
+                extrinsic.index(),
+                extrinsic.pallet_index(),
+                extrinsic.variant_index()
+            );
 
             let call: polkadot::runtime_types::polkadot_runtime::RuntimeCall =
                 extrinsic.as_call()?;

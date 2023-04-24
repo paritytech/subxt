@@ -177,6 +177,10 @@ pub struct ExtrinsicDetails {
     address_end_idx: usize,
     /// The start index in the `bytes` from which the call is encoded.
     call_start_idx: usize,
+    /// The pallet index.
+    pallet_index: u8,
+    /// The variant index.
+    variant_index: u8,
     /// Extrinsic bytes.
     bytes: Arc<[u8]>,
 }
@@ -246,7 +250,7 @@ impl ExtrinsicDetails {
 
         let call_start_idx = extrinsic_bytes.len() - cursor.len();
 
-        // Postpone decoding the extrinsic function call.
+        // Ensure the provided bytes are sound.
         scale_decode::visitor::decode_with_visitor(
             cursor,
             ids.call,
@@ -255,20 +259,36 @@ impl ExtrinsicDetails {
         )
         .map_err(scale_decode::Error::from)?;
 
+        // Decode the pallet index, then the call variant.
+        let cursor = &mut &extrinsic_bytes[call_start_idx..];
+        let pallet_index: u8 = Decode::decode(cursor).map_err(Error::Codec)?;
+        let variant_index: u8 = Decode::decode(cursor).map_err(Error::Codec)?;
+
         Ok(ExtrinsicDetails {
             index,
             is_signed,
             address_start_idx,
             address_end_idx,
             call_start_idx,
+            pallet_index,
+            variant_index,
             bytes: extrinsic_bytes,
         })
     }
 
     /// The index of the extrinsic in the given block.
-    ///  What index is this event in the stored events for this block.
     pub fn index(&self) -> usize {
         self.index
+    }
+
+    /// The index of the pallet that the extrinsic originated from.
+    pub fn pallet_index(&self) -> u8 {
+        self.pallet_index
+    }
+
+    /// The index of the event variant that the event originated from.
+    pub fn variant_index(&self) -> u8 {
+        self.variant_index
     }
 
     /// Return _all_ of the bytes representing this extrinsic, which include, in order:
