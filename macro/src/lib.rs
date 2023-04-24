@@ -46,6 +46,7 @@ struct SubstituteType {
     with: syn::Path,
 }
 
+// Note: docs for this are in the subxt library; don't add any here as they will be appended.
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
