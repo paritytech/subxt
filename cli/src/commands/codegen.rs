@@ -29,7 +29,7 @@ pub struct Opts {
     derives_for_type: Vec<(String, String)>,
     /// Additional attributes for a given type.
     ///
-    /// Example `--attribute-type my_module::my_type=#[allow(clippy::all)]`.
+    /// Example `--attributes-for-type my_module::my_type=#[allow(clippy::all)]`.
     #[clap(long = "attributes-for-type", value_parser = attributes_for_type_parser)]
     attributes_for_type: Vec<(String, String)>,
     /// Substitute a type for another.
