@@ -52,7 +52,7 @@ fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> S
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let derives = DerivesRegistry::new(&crate_path);
+    let derives = DerivesRegistry::with_default_derives(&crate_path);
     let type_substitutes = TypeSubstitutes::new(&crate_path);
     generator
         .generate_runtime(
@@ -142,7 +142,7 @@ fn check_root_attrs_preserved() {
 
     // Generate a runtime interface from the provided metadata.
     let generator = RuntimeGenerator::new(metadata);
-    let derives = DerivesRegistry::new(&CratePath::default());
+    let derives = DerivesRegistry::with_default_derives(&CratePath::default());
     let type_substitutes = TypeSubstitutes::new(&CratePath::default());
     let generated_code = generator
         .generate_runtime(

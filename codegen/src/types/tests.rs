@@ -39,7 +39,7 @@ fn generate_struct_with_primitives() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -91,7 +91,7 @@ fn generate_struct_with_a_struct_field() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -145,7 +145,7 @@ fn generate_tuple_struct() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -236,7 +236,7 @@ fn derive_compact_as_for_uint_wrapper_structs() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -333,7 +333,7 @@ fn generate_enum() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -397,7 +397,7 @@ fn compact_fields() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -465,7 +465,7 @@ fn compact_generic_parameter() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -512,7 +512,7 @@ fn generate_array_field() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -555,7 +555,7 @@ fn option_fields() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -601,7 +601,7 @@ fn box_fields_struct() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -647,7 +647,7 @@ fn box_fields_enum() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -693,7 +693,7 @@ fn range_fields() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -743,7 +743,7 @@ fn generics() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -800,7 +800,7 @@ fn generics_nested() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -857,7 +857,7 @@ fn generate_bitvec() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -916,7 +916,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -987,7 +987,7 @@ fn modules() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -1056,7 +1056,7 @@ fn dont_force_struct_names_camel_case() {
         &portable_types,
         "root",
         TypeSubstitutes::new(&crate_path),
-        DerivesRegistry::new(&crate_path),
+        DerivesRegistry::with_default_derives(&crate_path),
         crate_path,
         true,
     );
@@ -1096,8 +1096,11 @@ fn apply_user_defined_derives_for_all_types() {
 
     let crate_path = "::subxt_path".into();
     // configure derives
-    let mut derives = DerivesRegistry::new(&crate_path);
-    derives.extend_for_all(vec![parse_quote!(Clone), parse_quote!(Eq)]);
+    let mut derives = DerivesRegistry::with_default_derives(&crate_path);
+    derives.extend_for_all(
+        vec![parse_quote!(Clone), parse_quote!(Eq)],
+        vec![parse_quote!(#[some_attribute])],
+    );
 
     let type_gen = TypeGenerator::new(
         &portable_types,
@@ -1120,12 +1123,14 @@ fn apply_user_defined_derives_for_all_types() {
                 #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
+                #[some_attribute]
                 pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Clone, Debug, Eq)]
                 #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
+                #[some_attribute]
                 pub struct B;
             }
         }
@@ -1153,14 +1158,14 @@ fn apply_user_defined_derives_for_specific_types() {
 
     let crate_path = "::subxt_path".into();
     // configure derives
-    let mut derives = DerivesRegistry::new(&crate_path);
+    let mut derives = DerivesRegistry::with_default_derives(&crate_path);
     // for all types
-    derives.extend_for_all(vec![parse_quote!(Eq)]);
+    derives.extend_for_all(vec![parse_quote!(Eq)], vec![]);
     // for specific types
     derives.extend_for_type(
         parse_quote!(subxt_codegen::types::tests::B),
         vec![parse_quote!(Hash)],
-        &crate_path,
+        vec![parse_quote!(#[some_attribute])],
     );
     // duplicates (in this case `Eq`) will be combined (i.e. a set union)
     derives.extend_for_type(
@@ -1170,7 +1175,7 @@ fn apply_user_defined_derives_for_specific_types() {
             parse_quote!(Ord),
             parse_quote!(PartialOrd),
         ],
-        &crate_path,
+        vec![],
     );
 
     let type_gen = TypeGenerator::new(
@@ -1200,6 +1205,7 @@ fn apply_user_defined_derives_for_specific_types() {
                 #[codec(crate = ::subxt_path::ext::codec)]
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
+                #[some_attribute]
                 pub struct B(pub root :: subxt_codegen :: types :: tests :: C,);
 
                 #[derive(::subxt_path::ext::codec::Decode, ::subxt_path::ext::codec::Encode, ::subxt_path::ext::scale_decode::DecodeAsType, ::subxt_path::ext::scale_encode::EncodeAsType, Debug, Eq, Ord, PartialOrd)]
@@ -1210,5 +1216,63 @@ fn apply_user_defined_derives_for_specific_types() {
             }
         }
             .to_string()
+    )
+}
+
+#[test]
+fn opt_out_from_default_derives() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct A(B);
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct B;
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<A>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let crate_path = "::subxt_path".into();
+    // configure derives
+    let mut derives = DerivesRegistry::new();
+    derives.extend_for_all(
+        vec![parse_quote!(Clone), parse_quote!(Eq)],
+        vec![parse_quote!(#[some_attribute])],
+    );
+    derives.extend_for_type(
+        parse_quote!(subxt_codegen::types::tests::B),
+        vec![parse_quote!(Hash)],
+        vec![parse_quote!(#[some_other_attribute])],
+    );
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        TypeSubstitutes::new(&crate_path),
+        derives,
+        crate_path,
+        true,
+    );
+    let types = type_gen.generate_types_mod().expect("Valid type mod; qed");
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(Clone, Eq)]
+                #[some_attribute]
+                pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
+
+                #[derive(Clone, Eq, Hash)]
+                #[some_attribute]
+                #[some_other_attribute]
+                pub struct B;
+            }
+        }
+        .to_string()
     )
 }
