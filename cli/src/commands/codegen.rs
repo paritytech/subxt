@@ -109,6 +109,7 @@ impl syn::parse::Parse for OuterAttribute {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn codegen(
     metadata_bytes: &[u8],
     raw_derives: Vec<String>,
