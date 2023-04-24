@@ -57,6 +57,9 @@ pub enum Error {
     /// Block related error.
     #[error("Block error: {0}")]
     Block(#[from] BlockError),
+    /// Extrinsic related error.
+    #[error("Extrinsic error: {0}")]
+    Extrinsic(#[from] ExtrinsicError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
@@ -110,6 +113,25 @@ impl BlockError {
         let hash = format!("0x{}", hex::encode(hash));
         BlockError::NotFound(hash)
     }
+}
+
+/// Extrinsic error.
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+#[non_exhaustive]
+pub enum ExtrinsicError {
+    /// Extrinsic type ID cannot be resolved with the provided metadata.
+    #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
+    MissingType,
+    /// Expected more extrinsic bytes.
+    #[error("Expected more extrinsic bytes")]
+    InsufficientData,
+    /// Unsupported signature.
+    #[error("Unsupported extrinsic version, only version 4 is supported currently")]
+    /// The extrinsic has an unsupported version.
+    UnsupportedVersion(u8),
+    /// Decoding error.
+    #[error("Cannot decode extrinsic: {0}")]
+    DecodingError(codec::Error),
 }
 
 /// Transaction error.

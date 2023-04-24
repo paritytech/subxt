@@ -155,6 +155,7 @@ pub mod constants;
 pub mod dynamic;
 pub mod error;
 pub mod events;
+pub mod extrinsics;
 pub mod metadata;
 pub mod rpc;
 pub mod runtime_api;

@@ -58,31 +58,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let block = block?;
 
         let block_hash = block.hash();
+        println!(" Block {:?}", block_hash);
 
-        println!(" Block {:?}", block_hash);
-        println!(" Block {:?}", block_hash);
         // Ask for the extrinsics for this block.
-        for extrinsic in block.body().await?.extrinsics() {
+        let extrinsics = block.extrinsics().await?;
+
+        // Ask for the extrinsics for this block.
+        for extrinsic in extrinsics.iter() {
+            let extrinsic = extrinsic?;
             println!("  Extrinsic index {:?}", extrinsic.index());
 
-            let decoded = extrinsic.decode_generic();
-            match decoded {
-                Ok(decoded) => {
-                    if let Some((address, signature, extra)) = decoded.signature {
-                        println!("    Decoded Signature");
-                        println!("    Decoded Address: {:?}", address);
-                        println!("    Decoded Sign: {:?}", signature);
-                        println!("    Decoded Extra: {:?}", extra);
-                    };
+            // let decoded = extrinsic.decode_generic();
+            // match decoded {
+            //     Ok(decoded) => {
+            //         if let Some((address, signature, extra)) = decoded.signature {
+            //             println!("    Decoded Signature");
+            //             println!("    Decoded Address: {:?}", address);
+            //             println!("    Decoded Sign: {:?}", signature);
+            //             println!("    Decoded Extra: {:?}", extra);
+            //         };
 
-                    let call = decoded.function;
-                    println!("    Decoded call:\n    {:?}", call.to_value());
-                }
-                Err(err) => {
-                    println!("    Decoded extrinsic with error: {:?}", err);
-                }
-            }
-            println!("\n");
+            //         let call = decoded.function;
+            //         println!("    Decoded call:\n    {:?}", call.to_value());
+            //     }
+            //     Err(err) => {
+            //         println!("    Decoded extrinsic with error: {:?}", err);
+            //     }
+            // }
+            // println!("\n");
         }
 
         println!("\n");
