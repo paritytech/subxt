@@ -12,6 +12,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
   # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
