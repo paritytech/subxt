@@ -16,6 +16,12 @@ pub struct DerivesRegistry {
     specific_type_derives: HashMap<syn::TypePath, Derives>,
 }
 
+impl Default for DerivesRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DerivesRegistry {
     /// Creates a new `DerivesRegistry` with no default derives.
     pub fn new() -> Self {
@@ -85,6 +91,12 @@ impl DerivesRegistry {
 pub struct Derives {
     derives: HashSet<syn::Path>,
     attributes: HashSet<syn::Attribute>,
+}
+
+impl Default for Derives {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl FromIterator<syn::Path> for Derives {
