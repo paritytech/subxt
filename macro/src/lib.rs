@@ -134,9 +134,9 @@ struct SubstituteType {
 /// mod polkadot {}
 /// ```
 ///
-/// The above is also an example of using the [`subxt::utils::Static`] type to wrap some type which doesn't
-/// on it's own implement [`subxt::ext::scale_encode::EncodeAsType`] or [`subxt::ext::scale_decode::DecodeAsType`],
-/// which are required traits for any substitute type to implement by default.
+/// The above is also an example of using the `subxt::utils::Static` type to wrap some type which doesn't
+/// on it's own implement `EncodeAsType` or `DecodeAsType`, which are required traits for any substitute
+/// type to implement by default.
 ///
 /// ## `derive_for_all_types = "..."`
 ///
