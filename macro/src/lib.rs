@@ -137,11 +137,11 @@ struct RuntimeMetadataArgs {
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(default)]
-    attribute_all_types: Option<Punctuated<OuterAttribute, syn::Token![,]>>,
+    attributes_for_all_types: Option<Punctuated<OuterAttribute, syn::Token![,]>>,
     #[darling(multiple)]
     derive_for_type: Vec<DeriveForType>,
     #[darling(multiple)]
-    attribute_for_type: Vec<AttributeType>,
+    attributes_for_type: Vec<AttributesForType>,
     #[darling(multiple)]
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
@@ -162,10 +162,10 @@ struct DeriveForType {
 }
 
 #[derive(Debug, FromMeta)]
-struct AttributeType {
+struct AttributesForType {
     #[darling(rename = "type")]
     ty: syn::TypePath,
-    attribute: Punctuated<OuterAttribute, syn::Token![,]>,
+    attributes: Punctuated<OuterAttribute, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -196,7 +196,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     let universal_derives = args.derive_for_all_types.unwrap_or_default();
-    let universal_attributes = args.attribute_all_types.unwrap_or_default();
+    let universal_attributes = args.attributes_for_all_types.unwrap_or_default();
     derives_registry.extend_for_all(
         universal_derives,
         universal_attributes.iter().map(|a| a.0.clone()),
@@ -205,11 +205,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     for derives in &args.derive_for_type {
         derives_registry.extend_for_type(derives.ty.clone(), derives.derive.iter().cloned(), vec![])
     }
-    for attributes in &args.attribute_for_type {
+    for attributes in &args.attributes_for_type {
         derives_registry.extend_for_type(
             attributes.ty.clone(),
             vec![],
-            attributes.attribute.iter().map(|a| a.0.clone()),
+            attributes.attributes.iter().map(|a| a.0.clone()),
         )
     }
 

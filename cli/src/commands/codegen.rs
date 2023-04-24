@@ -30,8 +30,8 @@ pub struct Opts {
     /// Additional attributes for a given type.
     ///
     /// Example `--attribute-type my_module::my_type=#[allow(clippy::all)]`.
-    #[clap(long = "attribute-for-type", value_parser = attribute_for_type_parser)]
-    attribute_for_type: Vec<(String, String)>,
+    #[clap(long = "attributes-for-type", value_parser = attributes_for_type_parser)]
+    attributes_for_type: Vec<(String, String)>,
     /// Substitute a type for another.
     ///
     /// Example `--substitute-type sp_runtime::MultiAddress<A,B>=subxt::utils::Static<::sp_runtime::MultiAddress<A,B>>`
@@ -66,7 +66,7 @@ fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
     Ok((ty.to_string(), derive.to_string()))
 }
 
-fn attribute_for_type_parser(src: &str) -> Result<(String, String), String> {
+fn attributes_for_type_parser(src: &str) -> Result<(String, String), String> {
     let (ty, attribute) = src
         .split_once('=')
         .ok_or_else(|| String::from("Invalid pattern for `attribute-type`. It should be `type=attribute`, like `my_type=serde::#[allow(clippy::all)]`"))?;
@@ -90,7 +90,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         opts.derives,
         opts.attributes,
         opts.derives_for_type,
-        opts.attribute_for_type,
+        opts.attributes_for_type,
         opts.substitute_types,
         opts.crate_path,
         opts.no_docs,
@@ -115,7 +115,7 @@ fn codegen(
     raw_derives: Vec<String>,
     raw_attributes: Vec<String>,
     derives_for_type: Vec<(String, String)>,
-    attribute_type: Vec<(String, String)>,
+    attributes_for_type: Vec<(String, String)>,
     substitute_types: Vec<(String, String)>,
     crate_path: Option<String>,
     no_docs: bool,
@@ -149,7 +149,7 @@ fn codegen(
         let derive = syn::parse_str(&derive)?;
         derives.extend_for_type(ty, std::iter::once(derive), vec![]);
     }
-    for (ty, attr) in attribute_type {
+    for (ty, attr) in attributes_for_type {
         let ty = syn::parse_str(&ty)?;
         let attribute: OuterAttribute = syn::parse_str(&attr)?;
         derives.extend_for_type(ty, vec![], std::iter::once(attribute.0));
