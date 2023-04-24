@@ -6,7 +6,7 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher, Header},
     error::{BlockError, Error},
-    events,
+    events, extrinsics,
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
     storage::Storage,
@@ -69,17 +69,19 @@ where
 
     /// Fetch and return the block body.
     pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
-        let block_hash = self.header.hash();
-        let block_details = match self.client.rpc().block(Some(block_hash)).await? {
-            Some(block) => block,
-            None => return Err(BlockError::not_found(block_hash).into()),
-        };
+        let block_details = self.block_details().await?;
 
         Ok(BlockBody::new(
             self.client.clone(),
             block_details,
             self.cached_events.clone(),
         ))
+    }
+
+    /// Return the extrinsics associated with the block.
+    pub async fn extrinsics(&self) -> Result<extrinsics::Extrinsics<T>, Error> {
+        let block_details = self.block_details().await?;
+        extrinsics::Extrinsics::new(self.client.metadata(), block_details.block)
     }
 
     /// Work with storage.
@@ -91,6 +93,15 @@ where
     /// Execute a runtime API call at this block.
     pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
         Ok(RuntimeApi::new(self.client.clone(), self.hash()))
+    }
+
+    /// Fetch the block's body from the chain.
+    async fn block_details(&self) -> Result<ChainBlockResponse<T>, Error> {
+        let block_hash = self.header.hash();
+        match self.client.rpc().block(Some(block_hash)).await? {
+            Some(block) => Ok(block),
+            None => Err(BlockError::not_found(block_hash).into()),
+        }
     }
 }
 
