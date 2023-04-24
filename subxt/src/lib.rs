@@ -266,5 +266,23 @@ pub mod ext {
 /// )]
 /// mod polkadot {}
 /// ```
+/// ## `no_default_derives`
 ///
+/// By default, the macro will add all derives necessary for the generated code to play nicely with Subxt. Adding this attribute
+/// removes all default derives.
+///
+/// ```rust,no_run
+/// #[subxt::subxt(
+///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_types_only,
+///     no_default_derives,
+///     derive_for_all_types="codec::Encode, codec::Decode"
+/// )]
+/// mod polkadot {}
+/// ```
+///
+/// **Note**: At the moment, you must derive at least one of `codec::Encode` or `codec::Decode` or `scale_encode::EncodeAsType` or
+/// `scale_decode::DecodeAsType` (because we add `#[codec(..)]` attributes on some fields/types during codegen), and you must use this
+/// feature in conjunction with `runtime_types_only` (or manually specify a bunch of defaults to make codegen work properly when
+/// generating the subxt interfaces).
 pub use subxt_macro::subxt;
