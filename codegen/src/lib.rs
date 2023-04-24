@@ -32,7 +32,7 @@
 //!     pub mod api {}
 //! );
 //! // Default module derivatives.
-//! let mut derives = DerivesRegistry::new(&CratePath::default());
+//! let mut derives = DerivesRegistry::with_default_derives(&CratePath::default());
 //! // Default type substitutes.
 //! let substs = TypeSubstitutes::new(&CratePath::default());
 //! // Generate the Runtime API.
