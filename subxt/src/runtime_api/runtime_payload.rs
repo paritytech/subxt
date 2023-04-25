@@ -69,25 +69,10 @@ pub struct Payload<ArgsData, ReturnTy> {
     _marker: PhantomData<ReturnTy>,
 }
 
-impl<ReturnTy: DecodeWithMetadata> RuntimeApiPayload for StaticRuntimeApiPayload<ReturnTy> {
+impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
+    for Payload<ArgsData, ReturnTy>
+{
     type ReturnType = ReturnTy;
-
-    fn fn_name(&self) -> &str {
-        &self.fn_name
-    }
-
-    fn encode_args_to(&self, _metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        out.extend(self.args_data.clone());
-        Ok(())
-    }
-
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        self.validation_hash
-    }
-}
-
-impl RuntimeApiPayload for DynamicRuntimeApiPayload {
-    type ReturnType = DecodedValueThunk;
 
     fn fn_name(&self) -> &str {
         &self.fn_name
@@ -101,14 +86,11 @@ impl RuntimeApiPayload for DynamicRuntimeApiPayload {
 
         Ok(())
     }
-}
 
-/// A static runtime API payload.
-///
-/// The payload already contains the scale-encoded argument bytes.
-///
-/// This is only expected to be used from codegen.
-pub type StaticRuntimeApiPayload<ReturnTy> = Payload<Vec<u8>, ReturnTy>;
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        self.validation_hash
+    }
+}
 
 /// A dynamic runtime API payload.
 pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
@@ -128,17 +110,17 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
         }
     }
 
-    /// Create a new [`StaticRuntimeApiPayload`] using static function name
+    /// Create a new static [`Payload`] using static function name
     /// and scale-encoded argument data.
     ///
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
         fn_name: &'static str,
-        args_data: Vec<u8>,
+        args_data: ArgsData,
         hash: [u8; 32],
-    ) -> StaticRuntimeApiPayload<ReturnTy> {
-        StaticRuntimeApiPayload {
+    ) -> Payload<ArgsData, ReturnTy> {
+        Payload {
             fn_name: Cow::Borrowed(fn_name),
             args_data,
             validation_hash: Some(hash),
