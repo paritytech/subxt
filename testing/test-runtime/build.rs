@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use codec::{Decode, Encode};
 use std::{env, fs, path::Path};
 use substrate_runner::{Error as SubstrateNodeError, SubstrateNode};
 
@@ -36,17 +37,28 @@ async fn run() {
 
     // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
     // This may at least prevent this script from running so often (ie whenever we change Subxt).
-    #[derive(serde::Deserialize)]
-    pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
-    let metadata_bytes: Bytes = {
+    #[derive(codec::Decode)]
+    pub struct Bytes(pub Vec<u8>);
+    const V15_METADATA_VERSION: u32 = u32::MAX;
+    let bytes = V15_METADATA_VERSION.encode();
+    let version: String = format!("0x{}", hex::encode(&bytes));
+    let raw: String = {
         use client::ClientT;
         client::build(&format!("ws://localhost:{port}"))
             .await
             .unwrap_or_else(|e| panic!("Failed to connect to node: {e}"))
-            .request("state_getMetadata", client::rpc_params![])
+            .request(
+                "state_call",
+                client::rpc_params!["Metadata_metadata_at_version", &version],
+            )
             .await
             .unwrap_or_else(|e| panic!("Failed to obtain metadata from node: {e}"))
     };
+    let raw_bytes = hex::decode(raw.trim_start_matches("0x"))
+        .unwrap_or_else(|e| panic!("Failed to hex-decode metadata: {e}"));
+    let bytes: Option<Bytes> = Decode::decode(&mut &raw_bytes[..])
+        .unwrap_or_else(|e| panic!("Failed to decode metadata bytes: {e}"));
+    let metadata_bytes = bytes.expect("Metadata version not found");
 
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
