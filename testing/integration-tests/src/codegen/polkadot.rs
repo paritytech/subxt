@@ -587,11 +587,6 @@ pub mod api {
                     let variant_error: babe::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Babe(variant_error))
                 }
-                3u8 => {
-                    let variant_error: timestamp::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Timestamp(variant_error))
-                }
                 4u8 => {
                     let variant_error: indices::Error =
                         ::subxt::ext::codec::Decode::decode(cursor)?;
@@ -602,11 +597,6 @@ pub mod api {
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Balances(variant_error))
                 }
-                32u8 => {
-                    let variant_error: transaction_payment::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::TransactionPayment(variant_error))
-                }
                 6u8 => {
                     let variant_error: authorship::Error =
                         ::subxt::ext::codec::Decode::decode(cursor)?;
@@ -616,16 +606,6 @@ pub mod api {
                     let variant_error: staking::Error =
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Staking(variant_error))
-                }
-                8u8 => {
-                    let variant_error: offences::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Offences(variant_error))
-                }
-                33u8 => {
-                    let variant_error: historical::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Historical(variant_error))
                 }
                 9u8 => {
                     let variant_error: session::Error =
@@ -641,11 +621,6 @@ pub mod api {
                     let variant_error: im_online::Error =
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::ImOnline(variant_error))
-                }
-                13u8 => {
-                    let variant_error: authority_discovery::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::AuthorityDiscovery(variant_error))
                 }
                 14u8 => {
                     let variant_error: democracy::Error =
@@ -739,20 +714,10 @@ pub mod api {
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::FastUnstake(variant_error))
                 }
-                50u8 => {
-                    let variant_error: parachains_origin::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParachainsOrigin(variant_error))
-                }
                 51u8 => {
                     let variant_error: configuration::Error =
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Configuration(variant_error))
-                }
-                52u8 => {
-                    let variant_error: paras_shared::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParasShared(variant_error))
                 }
                 53u8 => {
                     let variant_error: para_inclusion::Error =
@@ -764,23 +729,9 @@ pub mod api {
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::ParaInherent(variant_error))
                 }
-                55u8 => {
-                    let variant_error: para_scheduler::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParaScheduler(variant_error))
-                }
                 56u8 => {
                     let variant_error: paras::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Paras(variant_error))
-                }
-                57u8 => {
-                    let variant_error: initializer::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Initializer(variant_error))
-                }
-                58u8 => {
-                    let variant_error: dmp::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Dmp(variant_error))
                 }
                 59u8 => {
                     let variant_error: ump::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
@@ -789,11 +740,6 @@ pub mod api {
                 60u8 => {
                     let variant_error: hrmp::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::Hrmp(variant_error))
-                }
-                61u8 => {
-                    let variant_error: para_session_info::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParaSessionInfo(variant_error))
                 }
                 62u8 => {
                     let variant_error: paras_disputes::Error =
@@ -824,7 +770,11 @@ pub mod api {
                         ::subxt::ext::codec::Decode::decode(cursor)?;
                     Ok(Error::XcmPallet(variant_error))
                 }
-                _ => todo!(),
+                _ => Err(::subxt::ext::scale_decode::Error::custom(format!(
+                    "Pallet index '{}' not found",
+                    pallet_index
+                ))
+                .into()),
             }
         }
     }
