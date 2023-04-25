@@ -5,7 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-subxt = { workspace = true }
+subxt = { workspace = true, features = ["default"] }
 
 [build-dependencies]
 substrate-runner = { workspace = true }

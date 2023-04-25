@@ -7,6 +7,7 @@ members = [
     "testing/test-runtime",
     "testing/integration-tests",
     "testing/ui-tests",
+    "testing/wasm-tests",
     "macro",
     "metadata",
     "subxt"
@@ -77,7 +78,7 @@ sp-runtime = "23.0.0"
 sp-version = "21.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.28.0", path = "subxt" }
+subxt = { version = "0.28.0", path = "subxt", default-features = false }
 subxt-macro = { version = "0.28.0", path = "macro" }
 subxt-metadata = { version = "0.28.0", path = "metadata" }
 subxt-codegen = { version = "0.28.0", path = "codegen" }

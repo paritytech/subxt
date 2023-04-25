@@ -9,4 +9,4 @@ wasm-bindgen-test = { workspace = true }
 tracing-wasm = { workspace = true }
 console_error_panic_hook = { workspace = true }
 serde_json = { workspace = true }
-subxt = { workspace = true, default-features = false, features = ["jsonrpsee-web"] }
+subxt = { workspace = true, features = ["jsonrpsee-web"] }
