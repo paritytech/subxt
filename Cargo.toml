@@ -7,7 +7,10 @@ members = [
     "testing/test-runtime",
     "testing/integration-tests",
     "testing/ui-tests",
-    "testing/wasm-tests",
+    ## This cannot be a workspace dependency, because it requires
+    ## mutually exclusive jsonrpsee features to work, and workspaces
+    ## aggregate features used across crates:
+    # "testing/wasm-tests",
     "macro",
     "metadata",
     "subxt"
@@ -78,7 +81,7 @@ sp-runtime = "23.0.0"
 sp-version = "21.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.28.0", path = "subxt", default-features = false }
+subxt = { version = "0.28.0", path = "subxt" }
 subxt-macro = { version = "0.28.0", path = "macro" }
 subxt-metadata = { version = "0.28.0", path = "metadata" }
 subxt-codegen = { version = "0.28.0", path = "codegen" }

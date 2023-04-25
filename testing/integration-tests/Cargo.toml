@@ -27,7 +27,7 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 syn = { workspace = true }
-subxt = { workspace = true, features = ["default"] }
+subxt = { workspace = true }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
 test-runtime = { workspace = true }
