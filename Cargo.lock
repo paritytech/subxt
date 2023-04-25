@@ -3658,8 +3658,10 @@ dependencies = [
 name = "test-runtime"
 version = "0.28.0"
 dependencies = [
+ "hex",
  "impl-serde",
  "jsonrpsee",
+ "parity-scale-codec",
  "serde",
  "substrate-runner",
  "subxt",
