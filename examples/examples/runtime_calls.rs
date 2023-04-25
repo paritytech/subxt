@@ -10,6 +10,7 @@
 //! polkadot --dev --tmp
 //! ```
 
+use sp_keyring::AccountKeyring;
 use subxt::dynamic::Value;
 use subxt::{config::PolkadotConfig, OnlineClient};
 
@@ -51,6 +52,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .call(runtime_api_call)
         .await?;
     println!("Metadata_metadata_versions: {:?}", versions);
+
+    // Create a runtime API payload that calls into
+    // `AccountNonceApi_account_nonce` function.
+    let account = AccountKeyring::Alice.to_account_id().into();
+    let runtime_api_call = polkadot::apis().account_nonce_api().account_nonce(account);
+
+    // Submit the runtime API call.
+    let nonce = api
+        .runtime_api()
+        .at_latest()
+        .await?
+        .call(runtime_api_call)
+        .await;
+    println!("AccountNonceApi_account_nonce for Alice: {:?}", nonce);
 
     // Dynamic calls.
     let runtime_api_call = subxt::dynamic::runtime_api_call(
