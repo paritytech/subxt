@@ -10,6 +10,9 @@ use core::fmt::Debug;
 use scale_decode::visitor::DecodeAsTypeResult;
 use std::borrow::Cow;
 
+use super::Error;
+use crate::error::RootError;
+
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
@@ -158,6 +161,12 @@ impl ModuleError {
     /// Return the underlying module error data that was decoded.
     pub fn raw(&self) -> RawModuleError {
         self.raw
+    }
+
+    /// attempts to decode the ModuleError into a value implementing the trait `RootError`
+    /// where the actual type of value is the generated top level enum `Error`.
+    pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
+        E::root_error(&self.raw.pallet_index, &self.raw.error)
     }
 }
 

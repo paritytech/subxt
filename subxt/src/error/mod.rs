@@ -14,7 +14,7 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
-pub use crate::metadata::{InvalidMetadataError, MetadataError};
+pub use crate::metadata::{InvalidMetadataError, Metadata, MetadataError};
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
 
@@ -161,4 +161,11 @@ pub enum StorageAddressError {
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
     },
+}
+
+/// This trait is implemented on the statically generated root ModuleError type
+#[doc(hidden)]
+pub trait RootError: Sized {
+    /// Given details of the pallet error we want to decode
+    fn root_error(pallet_index: &u8, error: &[u8; 4]) -> Result<Self, Error>;
 }
