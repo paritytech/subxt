@@ -13,7 +13,7 @@ homepage.workspace = true
 description = "Generate an API for interacting with a substrate node from FRAME metadata"
 
 [dependencies]
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 darling = { workspace = true }
 frame-metadata = { workspace = true }
 heck = { workspace = true }

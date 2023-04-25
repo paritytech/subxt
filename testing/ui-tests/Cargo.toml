@@ -12,6 +12,6 @@ publish = false
 trybuild = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 frame-metadata ={ workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "full", "bit-vec"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
 subxt = { workspace = true }
 subxt-metadata = { workspace = true }

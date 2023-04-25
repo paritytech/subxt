@@ -35,7 +35,7 @@ jsonrpsee-ws = ["jsonrpsee/async-client", "jsonrpsee/client-ws-transport"]
 jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 scale-info = { workspace = true }
 scale-value = { workspace = true }
 scale-bits = { workspace = true }
@@ -77,7 +77,7 @@ getrandom = { workspace = true, features = ["js"] }
 
 [dev-dependencies]
 bitvec = { workspace = true }
-codec = { workspace = true, features = ["derive", "full", "bit-vec"] }
+codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
 sp-core = { workspace = true }

@@ -17,7 +17,7 @@ default = ["subxt/integration-tests"]
 
 [dev-dependencies]
 assert_matches = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "full", "bit-vec"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
 frame-metadata = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }

@@ -31,7 +31,7 @@ bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.4", default-features = false }
 clap = { version = "4.2.4", features = ["derive", "cargo"] }
 criterion = "0.4"
-codec = { package = "parity-scale-codec", version = "3", default-features = false }
+codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
 darling = "0.14.4"

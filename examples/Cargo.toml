@@ -16,7 +16,7 @@ description = "Subxt example usage"
 subxt = { workspace = true }
 tokio = { workspace = true }
 futures = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "full", "bit-vec"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
 hex = { workspace = true }
 sp-keyring = { workspace = true }
 sp-core = { workspace = true }
