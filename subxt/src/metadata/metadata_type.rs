@@ -103,15 +103,6 @@ impl Metadata {
             .ok_or(MetadataError::PalletNotFound)
     }
 
-    /// Returns a reference to [`PalletMetadata`].
-    pub fn pallet_by_index(&self, pallet_index: u8) -> Result<&PalletMetadata, MetadataError> {
-        self.inner
-            .pallets
-            .values()
-            .find(|pallet_metadata| pallet_metadata.index == pallet_index)
-            .ok_or(MetadataError::PalletNotFound)
-    }
-
     /// Returns the metadata for the event at the given pallet and event indices.
     pub fn event(
         &self,

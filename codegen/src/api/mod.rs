@@ -475,7 +475,6 @@ impl RuntimeGenerator {
                     }
                 }
 
-
                 pub fn constants() -> ConstantsApi {
                     ConstantsApi
                 }
