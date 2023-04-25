@@ -399,6 +399,7 @@ impl RuntimeGenerator {
             &type_gen,
             types_mod_ident,
             &crate_path,
+            should_gen_docs,
         )?;
 
         Ok(quote! {

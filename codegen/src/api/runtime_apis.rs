@@ -16,6 +16,7 @@ fn generate_runtime_api(
     api: &RuntimeApiMetadata<PortableForm>,
     type_gen: &TypeGenerator,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
     // Trait name must remain as is (upper case) to identity the runtime call.
     let trait_name = &api.name;
@@ -33,6 +34,9 @@ fn generate_runtime_api(
         // Runtime function name is `TraitName_MethodName`.
         let runtime_fn_name = format!("{}_{}", trait_name, method_name);
         let docs = &method.docs;
+        let docs: TokenStream2 = should_gen_docs
+            .then_some(quote! { #( #[doc = #docs ] )* })
+            .unwrap_or_default();
 
         let inputs: Vec<_> = method.inputs.iter().map(|input| {
             let name = format_ident!("{}", &input.name);
@@ -65,7 +69,7 @@ fn generate_runtime_api(
             };
 
         Ok(quote!(
-            #( #[doc = #docs ] )*
+            #docs
             pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::StaticRuntimeApiPayload<#output> {
                 let #encoded_mut #encoded_params = Vec::new();
                 #( #encoded; )*
@@ -106,12 +110,13 @@ pub fn generate_runtime_apis(
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
+    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let apis = &metadata.apis;
 
     let runtime_fns: Vec<_> = apis
         .iter()
-        .map(|api| generate_runtime_api(metadata, api, type_gen, crate_path))
+        .map(|api| generate_runtime_api(metadata, api, type_gen, crate_path, should_gen_docs))
         .collect::<Result<_, _>>()?;
 
     let runtime_apis_def = runtime_fns.iter().map(|(apis, _)| apis);
