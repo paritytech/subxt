@@ -16,21 +16,40 @@ pub struct DerivesRegistry {
     specific_type_derives: HashMap<syn::TypePath, Derives>,
 }
 
+impl Default for DerivesRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DerivesRegistry {
-    /// Creates a new `DerivesRegistry` with the supplied `crate_path`.
+    /// Creates a new `DerivesRegistry` with no default derives.
+    pub fn new() -> Self {
+        Self {
+            default_derives: Derives::new(),
+            specific_type_derives: Default::default(),
+        }
+    }
+
+    /// Creates a new `DerivesRegistry` with default derives.
     ///
     /// The `crate_path` denotes the `subxt` crate access path in the
     /// generated code.
-    pub fn new(crate_path: &CratePath) -> Self {
+    pub fn with_default_derives(crate_path: &CratePath) -> Self {
         Self {
-            default_derives: Derives::new(crate_path),
+            default_derives: Derives::with_defaults(crate_path),
             specific_type_derives: Default::default(),
         }
     }
 
     /// Insert derives to be applied to all generated types.
-    pub fn extend_for_all(&mut self, derives: impl IntoIterator<Item = syn::Path>) {
-        self.default_derives.derives.extend(derives)
+    pub fn extend_for_all(
+        &mut self,
+        derives: impl IntoIterator<Item = syn::Path>,
+        attributes: impl IntoIterator<Item = syn::Attribute>,
+    ) {
+        self.default_derives.derives.extend(derives);
+        self.default_derives.attributes.extend(attributes);
     }
 
     /// Insert derives to be applied to a specific generated type.
@@ -38,13 +57,14 @@ impl DerivesRegistry {
         &mut self,
         ty: syn::TypePath,
         derives: impl IntoIterator<Item = syn::Path>,
-        crate_path: &CratePath,
+        attributes: impl IntoIterator<Item = syn::Attribute>,
     ) {
         let type_derives = self
             .specific_type_derives
             .entry(ty)
-            .or_insert_with(|| Derives::new(crate_path));
-        type_derives.derives.extend(derives)
+            .or_insert_with(Derives::new);
+        type_derives.derives.extend(derives);
+        type_derives.attributes.extend(attributes);
     }
 
     /// Returns the derives to be applied to all generated types.
@@ -73,6 +93,12 @@ pub struct Derives {
     attributes: HashSet<syn::Attribute>,
 }
 
+impl Default for Derives {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FromIterator<syn::Path> for Derives {
     fn from_iter<T: IntoIterator<Item = Path>>(iter: T) -> Self {
         let derives = iter.into_iter().collect();
@@ -84,9 +110,17 @@ impl FromIterator<syn::Path> for Derives {
 }
 
 impl Derives {
+    /// Creates an empty instance of `Derives` (with no default derives).
+    pub fn new() -> Self {
+        Self {
+            derives: HashSet::new(),
+            attributes: HashSet::new(),
+        }
+    }
+
     /// Creates a new instance of `Derives` with the `crate_path` prepended
     /// to the set of default derives that reside in `subxt`.
-    pub fn new(crate_path: &CratePath) -> Self {
+    pub fn with_defaults(crate_path: &CratePath) -> Self {
         let mut derives = HashSet::new();
         let mut attributes = HashSet::new();
 
@@ -99,8 +133,6 @@ impl Derives {
         attributes.insert(syn::parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]));
 
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Encode));
-        attributes.insert(syn::parse_quote!(#[codec(crate = #crate_path::ext::codec)]));
-
         derives.insert(syn::parse_quote!(#crate_path::ext::codec::Decode));
         attributes.insert(syn::parse_quote!(#[codec(crate = #crate_path::ext::codec)]));
 
