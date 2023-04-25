@@ -119,6 +119,15 @@ use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
 use syn::{parse_macro_input, punctuated::Punctuated};
 
+#[derive(Clone, Debug)]
+struct OuterAttribute(syn::Attribute);
+
+impl syn::parse::Parse for OuterAttribute {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        Ok(Self(input.call(syn::Attribute::parse_outer)?[0].clone()))
+    }
+}
+
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
     #[darling(default)]
@@ -127,8 +136,12 @@ struct RuntimeMetadataArgs {
     runtime_metadata_url: Option<String>,
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
+    #[darling(default)]
+    attributes_for_all_types: Option<Punctuated<OuterAttribute, syn::Token![,]>>,
     #[darling(multiple)]
     derive_for_type: Vec<DeriveForType>,
+    #[darling(multiple)]
+    attributes_for_type: Vec<AttributesForType>,
     #[darling(multiple)]
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
@@ -137,6 +150,8 @@ struct RuntimeMetadataArgs {
     generate_docs: darling::util::Flag,
     #[darling(default)]
     runtime_types_only: bool,
+    #[darling(default)]
+    no_default_derives: bool,
 }
 
 #[derive(Debug, FromMeta)]
@@ -144,6 +159,13 @@ struct DeriveForType {
     #[darling(rename = "type")]
     ty: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
+}
+
+#[derive(Debug, FromMeta)]
+struct AttributesForType {
+    #[darling(rename = "type")]
+    ty: syn::TypePath,
+    attributes: Punctuated<OuterAttribute, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -167,16 +189,27 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         Some(crate_path) => crate_path.into(),
         None => subxt_codegen::CratePath::default(),
     };
-    let mut derives_registry = DerivesRegistry::new(&crate_path);
+    let mut derives_registry = if args.no_default_derives {
+        DerivesRegistry::new()
+    } else {
+        DerivesRegistry::with_default_derives(&crate_path)
+    };
 
-    if let Some(derive_for_all) = args.derive_for_all_types {
-        derives_registry.extend_for_all(derive_for_all.iter().cloned());
-    }
+    let universal_derives = args.derive_for_all_types.unwrap_or_default();
+    let universal_attributes = args.attributes_for_all_types.unwrap_or_default();
+    derives_registry.extend_for_all(
+        universal_derives,
+        universal_attributes.iter().map(|a| a.0.clone()),
+    );
+
     for derives in &args.derive_for_type {
+        derives_registry.extend_for_type(derives.ty.clone(), derives.derive.iter().cloned(), vec![])
+    }
+    for attributes in &args.attributes_for_type {
         derives_registry.extend_for_type(
-            derives.ty.clone(),
-            derives.derive.iter().cloned(),
-            &crate_path,
+            attributes.ty.clone(),
+            vec![],
+            attributes.attributes.iter().map(|a| a.0.clone()),
         )
     }
 
