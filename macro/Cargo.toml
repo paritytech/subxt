@@ -1,6 +1,6 @@
 [package]
 name = "subxt-macro"
-version = "0.28.0"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -17,8 +17,7 @@ description = "Generate types and helpers for interacting with Substrate runtime
 proc-macro = true
 
 [dependencies]
-darling = "0.14.4"
-proc-macro-error = "1.0.4"
-syn = "1.0.109"
-
-subxt-codegen = { path = "../codegen", version = "0.28.0" }
+darling = { workspace = true }
+proc-macro-error = { workspace = true }
+syn = { workspace = true }
+subxt-codegen = { workspace = true }

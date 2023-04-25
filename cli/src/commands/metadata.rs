@@ -6,7 +6,7 @@ use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
-use scale::{Decode, Encode};
+use codec::{Decode, Encode};
 use std::io::{self, Write};
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 

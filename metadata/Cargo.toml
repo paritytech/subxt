@@ -1,6 +1,6 @@
 [package]
 name = "subxt-metadata"
-version = "0.28.0"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -20,9 +20,9 @@ scale-info = "2.5.0"
 sp-core-hashing = "8.0.0"
 
 [dev-dependencies]
-bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
-criterion = "0.4"
-scale-info = { version = "2.5.0", features = ["bit-vec"] }
+bitvec = { workspace = true, features = ["alloc"] }
+criterion = { workspace = true }
+scale-info = { workspace = true }
 
 [lib]
 # Without this, libtest cli opts interfere with criteron benches:
