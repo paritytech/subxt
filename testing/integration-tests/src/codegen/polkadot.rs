@@ -519,1604 +519,2623 @@ pub mod api {
         use subxt::ext::codec::Encode;
         pub struct RuntimeApi;
         impl RuntimeApi {
-            pub fn core(&self) -> Core {
-                Core
+            pub fn core(&self) -> core::Core {
+                core::Core
             }
-            pub fn metadata(&self) -> Metadata {
-                Metadata
+            pub fn metadata(&self) -> metadata::Metadata {
+                metadata::Metadata
             }
-            pub fn block_builder(&self) -> BlockBuilder {
-                BlockBuilder
+            pub fn block_builder(&self) -> block_builder::BlockBuilder {
+                block_builder::BlockBuilder
             }
-            pub fn nomination_pools_api(&self) -> NominationPoolsApi {
-                NominationPoolsApi
+            pub fn nomination_pools_api(&self) -> nomination_pools_api::NominationPoolsApi {
+                nomination_pools_api::NominationPoolsApi
             }
-            pub fn staking_api(&self) -> StakingApi {
-                StakingApi
+            pub fn staking_api(&self) -> staking_api::StakingApi {
+                staking_api::StakingApi
             }
-            pub fn tagged_transaction_queue(&self) -> TaggedTransactionQueue {
-                TaggedTransactionQueue
+            pub fn tagged_transaction_queue(
+                &self,
+            ) -> tagged_transaction_queue::TaggedTransactionQueue {
+                tagged_transaction_queue::TaggedTransactionQueue
             }
-            pub fn offchain_worker_api(&self) -> OffchainWorkerApi {
-                OffchainWorkerApi
+            pub fn offchain_worker_api(&self) -> offchain_worker_api::OffchainWorkerApi {
+                offchain_worker_api::OffchainWorkerApi
             }
-            pub fn parachain_host(&self) -> ParachainHost {
-                ParachainHost
+            pub fn parachain_host(&self) -> parachain_host::ParachainHost {
+                parachain_host::ParachainHost
             }
-            pub fn beefy_api(&self) -> BeefyApi {
-                BeefyApi
+            pub fn beefy_api(&self) -> beefy_api::BeefyApi {
+                beefy_api::BeefyApi
             }
-            pub fn mmr_api(&self) -> MmrApi {
-                MmrApi
+            pub fn mmr_api(&self) -> mmr_api::MmrApi {
+                mmr_api::MmrApi
             }
-            pub fn grandpa_api(&self) -> GrandpaApi {
-                GrandpaApi
+            pub fn grandpa_api(&self) -> grandpa_api::GrandpaApi {
+                grandpa_api::GrandpaApi
             }
-            pub fn babe_api(&self) -> BabeApi {
-                BabeApi
+            pub fn babe_api(&self) -> babe_api::BabeApi {
+                babe_api::BabeApi
             }
-            pub fn authority_discovery_api(&self) -> AuthorityDiscoveryApi {
-                AuthorityDiscoveryApi
+            pub fn authority_discovery_api(
+                &self,
+            ) -> authority_discovery_api::AuthorityDiscoveryApi {
+                authority_discovery_api::AuthorityDiscoveryApi
             }
-            pub fn session_keys(&self) -> SessionKeys {
-                SessionKeys
+            pub fn session_keys(&self) -> session_keys::SessionKeys {
+                session_keys::SessionKeys
             }
-            pub fn account_nonce_api(&self) -> AccountNonceApi {
-                AccountNonceApi
+            pub fn account_nonce_api(&self) -> account_nonce_api::AccountNonceApi {
+                account_nonce_api::AccountNonceApi
             }
-            pub fn transaction_payment_api(&self) -> TransactionPaymentApi {
-                TransactionPaymentApi
+            pub fn transaction_payment_api(
+                &self,
+            ) -> transaction_payment_api::TransactionPaymentApi {
+                transaction_payment_api::TransactionPaymentApi
             }
-            pub fn transaction_payment_call_api(&self) -> TransactionPaymentCallApi {
-                TransactionPaymentCallApi
+            pub fn transaction_payment_call_api(
+                &self,
+            ) -> transaction_payment_call_api::TransactionPaymentCallApi {
+                transaction_payment_call_api::TransactionPaymentCallApi
             }
         }
-        #[doc = " The `Core` runtime api that every Substrate runtime needs to implement."]
-        pub struct Core;
-        impl Core {
-            #[doc = " Returns the version of the runtime."]
-            pub fn version(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_version::RuntimeVersion,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Core_version",
-                    result,
-                    [
-                        209u8, 59u8, 156u8, 128u8, 14u8, 210u8, 96u8, 63u8, 140u8, 0u8, 65u8,
-                        211u8, 118u8, 177u8, 9u8, 208u8, 105u8, 124u8, 132u8, 203u8, 157u8, 207u8,
-                        186u8, 177u8, 91u8, 170u8, 22u8, 224u8, 88u8, 56u8, 56u8, 13u8,
-                    ],
-                )
-            }
-            #[doc = " Execute the given block."]
-            pub fn execute_block(
-                &self,
-                block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > >,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<()> {
-                let mut result = Vec::new();
-                block.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Core_execute_block",
-                    result,
-                    [
-                        199u8, 164u8, 96u8, 78u8, 188u8, 134u8, 19u8, 247u8, 63u8, 58u8, 93u8,
-                        227u8, 122u8, 157u8, 93u8, 196u8, 16u8, 7u8, 20u8, 17u8, 178u8, 152u8,
-                        211u8, 185u8, 56u8, 153u8, 118u8, 241u8, 118u8, 105u8, 85u8, 3u8,
-                    ],
-                )
-            }
-            #[doc = " Initialize a block with the given header."]
-            pub fn initialize_block(
-                &self,
-                header: runtime_types::sp_runtime::generic::header::Header<
-                    ::core::primitive::u32,
-                    runtime_types::sp_runtime::traits::BlakeTwo256,
-                >,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<()> {
-                let mut result = Vec::new();
-                header.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Core_initialize_block",
-                    result,
-                    [
-                        45u8, 232u8, 143u8, 132u8, 33u8, 211u8, 71u8, 186u8, 169u8, 91u8, 143u8,
-                        156u8, 174u8, 156u8, 10u8, 25u8, 203u8, 16u8, 208u8, 226u8, 12u8, 233u8,
-                        145u8, 228u8, 63u8, 118u8, 66u8, 247u8, 71u8, 48u8, 44u8, 243u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " The `Metadata` api trait that returns metadata for the runtime."]
-        pub struct Metadata;
-        impl Metadata {
-            #[doc = " Returns the metadata of a runtime."]
-            pub fn metadata(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<runtime_types::sp_core::OpaqueMetadata>
-            {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Metadata_metadata",
-                    result,
-                    [
-                        158u8, 223u8, 229u8, 177u8, 228u8, 49u8, 24u8, 219u8, 143u8, 82u8, 255u8,
-                        132u8, 245u8, 210u8, 160u8, 197u8, 218u8, 10u8, 63u8, 165u8, 115u8, 91u8,
-                        70u8, 151u8, 246u8, 51u8, 18u8, 235u8, 91u8, 143u8, 27u8, 127u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the metadata at a given version."]
-            #[doc = ""]
-            #[doc = " If the given `version` isn't supported, this will return `None`."]
-            #[doc = " Use [`Self::metadata_versions`] to find out about supported metadata version of the runtime."]
-            pub fn metadata_at_version(
-                &self,
-                version: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<runtime_types::sp_core::OpaqueMetadata>,
-            > {
-                let mut result = Vec::new();
-                version.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Metadata_metadata_at_version",
-                    result,
-                    [
-                        50u8, 164u8, 234u8, 88u8, 65u8, 62u8, 176u8, 66u8, 188u8, 114u8, 205u8,
-                        29u8, 137u8, 173u8, 194u8, 54u8, 237u8, 48u8, 221u8, 46u8, 166u8, 44u8,
-                        220u8, 137u8, 97u8, 128u8, 204u8, 137u8, 29u8, 229u8, 31u8, 134u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the supported metadata versions."]
-            #[doc = ""]
-            #[doc = " This can be used to call `metadata_at_version`."]
-            pub fn metadata_versions(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<::core::primitive::u32>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "Metadata_metadata_versions",
-                    result,
-                    [
-                        255u8, 234u8, 86u8, 244u8, 238u8, 175u8, 175u8, 54u8, 181u8, 181u8, 23u8,
-                        185u8, 231u8, 242u8, 153u8, 246u8, 205u8, 142u8, 184u8, 21u8, 240u8, 217u8,
-                        195u8, 231u8, 32u8, 163u8, 127u8, 3u8, 51u8, 130u8, 68u8, 124u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " The `BlockBuilder` api trait that provides the required functionality for building a block."]
-        pub struct BlockBuilder;
-        impl BlockBuilder {
-            #[doc = " Apply the given extrinsic."]
-            #[doc = ""]
-            #[doc = " Returns an inclusion outcome which specifies if this extrinsic is included in"]
-            #[doc = " this block or not."]
-            pub fn apply_extrinsic(
-                &self,
-                extrinsic : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<
-                    ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
-                    runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
-                >,
-            > {
-                let mut result = Vec::new();
-                extrinsic.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BlockBuilder_apply_extrinsic",
-                    result,
-                    [
-                        151u8, 89u8, 106u8, 151u8, 95u8, 29u8, 10u8, 68u8, 85u8, 149u8, 144u8,
-                        132u8, 47u8, 46u8, 164u8, 91u8, 225u8, 219u8, 85u8, 120u8, 101u8, 105u8,
-                        45u8, 79u8, 171u8, 133u8, 121u8, 170u8, 197u8, 248u8, 24u8, 10u8,
-                    ],
-                )
-            }
-            #[doc = " Finish the current block."]
-            pub fn finalize_block(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_runtime::generic::header::Header<
-                    ::core::primitive::u32,
-                    runtime_types::sp_runtime::traits::BlakeTwo256,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BlockBuilder_finalize_block",
-                    result,
-                    [
-                        78u8, 179u8, 67u8, 170u8, 213u8, 230u8, 122u8, 98u8, 76u8, 244u8, 225u8,
-                        219u8, 83u8, 115u8, 94u8, 229u8, 93u8, 142u8, 120u8, 172u8, 87u8, 99u8,
-                        120u8, 41u8, 143u8, 184u8, 71u8, 49u8, 126u8, 55u8, 240u8, 125u8,
-                    ],
-                )
-            }
-            #[doc = " Generate inherent extrinsics. The inherent data will vary from chain to chain."]            pub fn inherent_extrinsics (& self , inherent : runtime_types :: sp_inherents :: InherentData ,) -> :: subxt :: runtime_api :: StaticRuntimeApiPayload < :: std :: vec :: Vec < runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > > >{
-                let mut result = Vec::new();
-                inherent.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BlockBuilder_inherent_extrinsics",
-                    result,
-                    [
-                        75u8, 86u8, 85u8, 104u8, 125u8, 169u8, 23u8, 92u8, 162u8, 73u8, 65u8,
-                        223u8, 100u8, 24u8, 201u8, 157u8, 145u8, 208u8, 238u8, 11u8, 255u8, 98u8,
-                        0u8, 211u8, 189u8, 94u8, 5u8, 123u8, 25u8, 1u8, 88u8, 234u8,
-                    ],
-                )
-            }
-            #[doc = " Check that the inherents are valid. The inherent data will vary from chain to chain."]
-            pub fn check_inherents(
-                &self,
-                block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > >,
-                data: runtime_types::sp_inherents::InherentData,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_inherents::CheckInherentsResult,
-            > {
-                let mut result = Vec::new();
-                block.encode_to(&mut result);
-                data.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BlockBuilder_check_inherents",
-                    result,
-                    [
-                        162u8, 99u8, 46u8, 228u8, 124u8, 158u8, 224u8, 212u8, 90u8, 101u8, 133u8,
-                        173u8, 82u8, 61u8, 131u8, 131u8, 254u8, 209u8, 17u8, 181u8, 87u8, 190u8,
-                        80u8, 165u8, 172u8, 179u8, 121u8, 202u8, 126u8, 48u8, 254u8, 112u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " Runtime api for accessing information about nomination pools."]
-        pub struct NominationPoolsApi;
-        impl NominationPoolsApi {
-            #[doc = " Returns the pending rewards for the member that the AccountId was given for."]
-            pub fn pending_rewards(
-                &self,
-                who: ::subxt::utils::AccountId32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                who.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "NominationPoolsApi_pending_rewards",
-                    result,
-                    [
-                        235u8, 64u8, 57u8, 70u8, 111u8, 27u8, 62u8, 236u8, 36u8, 192u8, 103u8,
-                        89u8, 221u8, 194u8, 46u8, 223u8, 71u8, 249u8, 33u8, 135u8, 43u8, 42u8,
-                        147u8, 57u8, 130u8, 44u8, 35u8, 132u8, 163u8, 153u8, 201u8, 105u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the equivalent balance of `points` for a given pool."]
-            pub fn points_to_balance(
-                &self,
-                pool_id: ::core::primitive::u32,
-                points: ::core::primitive::u128,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                pool_id.encode_to(&mut result);
-                points.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "NominationPoolsApi_points_to_balance",
-                    result,
-                    [
-                        30u8, 7u8, 5u8, 95u8, 146u8, 43u8, 110u8, 21u8, 148u8, 160u8, 74u8, 92u8,
-                        168u8, 188u8, 74u8, 41u8, 129u8, 172u8, 138u8, 30u8, 232u8, 214u8, 154u8,
-                        18u8, 52u8, 87u8, 71u8, 127u8, 141u8, 177u8, 216u8, 158u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the equivalent points of `new_funds` for a given pool."]
-            pub fn balance_to_points(
-                &self,
-                pool_id: ::core::primitive::u32,
-                new_funds: ::core::primitive::u128,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                pool_id.encode_to(&mut result);
-                new_funds.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "NominationPoolsApi_balance_to_points",
-                    result,
-                    [
-                        152u8, 165u8, 227u8, 129u8, 31u8, 108u8, 224u8, 174u8, 74u8, 192u8, 102u8,
-                        139u8, 17u8, 119u8, 173u8, 220u8, 52u8, 157u8, 125u8, 107u8, 110u8, 236u8,
-                        9u8, 93u8, 239u8, 3u8, 18u8, 140u8, 203u8, 136u8, 183u8, 215u8,
-                    ],
-                )
-            }
-        }
-        pub struct StakingApi;
-        impl StakingApi {
-            #[doc = " Returns the nominations quota for a nominator with a given balance."]
-            pub fn nominations_quota(
-                &self,
-                balance: ::core::primitive::u128,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u32> {
-                let mut result = Vec::new();
-                balance.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "StakingApi_nominations_quota",
-                    result,
-                    [
-                        181u8, 19u8, 6u8, 134u8, 234u8, 67u8, 127u8, 210u8, 53u8, 38u8, 175u8,
-                        160u8, 243u8, 71u8, 187u8, 206u8, 178u8, 91u8, 26u8, 115u8, 18u8, 214u8,
-                        50u8, 208u8, 161u8, 197u8, 81u8, 13u8, 98u8, 53u8, 124u8, 62u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " The `TaggedTransactionQueue` api trait for interfering with the transaction queue."]
-        pub struct TaggedTransactionQueue;
-        impl TaggedTransactionQueue {
-            #[doc = " Validate the transaction."]
-            #[doc = ""]
-            #[doc = " This method is invoked by the transaction pool to learn details about given transaction."]
-            #[doc = " The implementation should make sure to verify the correctness of the transaction"]
-            #[doc = " against current state. The given `block_hash` corresponds to the hash of the block"]
-            #[doc = " that is used as current state."]
-            #[doc = ""]
-            #[doc = " Note that this call may be performed by the pool multiple times and transactions"]
-            #[doc = " might be verified in any possible order."]
-            pub fn validate_transaction(
-                &self,
-                source: runtime_types::sp_runtime::transaction_validity::TransactionSource,
-                tx : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
-                block_hash: ::subxt::utils::H256,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<
-                    runtime_types::sp_runtime::transaction_validity::ValidTransaction,
-                    runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
-                >,
-            > {
-                let mut result = Vec::new();
-                source.encode_to(&mut result);
-                tx.encode_to(&mut result);
-                block_hash.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TaggedTransactionQueue_validate_transaction",
-                    result,
-                    [
-                        93u8, 180u8, 253u8, 37u8, 212u8, 54u8, 180u8, 214u8, 33u8, 5u8, 113u8,
-                        181u8, 25u8, 48u8, 153u8, 221u8, 78u8, 6u8, 115u8, 191u8, 72u8, 75u8,
-                        203u8, 171u8, 129u8, 75u8, 56u8, 60u8, 243u8, 92u8, 173u8, 12u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " The offchain worker api."]
-        pub struct OffchainWorkerApi;
-        impl OffchainWorkerApi {
-            #[doc = " Starts the off-chain task for given block header."]
-            pub fn offchain_worker(
-                &self,
-                header: runtime_types::sp_runtime::generic::header::Header<
-                    ::core::primitive::u32,
-                    runtime_types::sp_runtime::traits::BlakeTwo256,
-                >,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<()> {
-                let mut result = Vec::new();
-                header.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "OffchainWorkerApi_offchain_worker",
-                    result,
-                    [
-                        187u8, 145u8, 211u8, 0u8, 200u8, 151u8, 231u8, 42u8, 187u8, 128u8, 157u8,
-                        64u8, 191u8, 64u8, 31u8, 158u8, 13u8, 159u8, 227u8, 120u8, 155u8, 215u8,
-                        228u8, 215u8, 44u8, 8u8, 206u8, 116u8, 241u8, 133u8, 2u8, 234u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " The API for querying the state of parachains on-chain."]
-        pub struct ParachainHost;
-        impl ParachainHost {
-            #[doc = " Get the current validators."]
-            pub fn validators(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<runtime_types::polkadot_primitives::v4::validator_app::Public>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_validators",
-                    result,
-                    [
-                        105u8, 23u8, 110u8, 209u8, 38u8, 112u8, 199u8, 134u8, 145u8, 131u8, 38u8,
-                        221u8, 254u8, 147u8, 242u8, 149u8, 94u8, 76u8, 197u8, 67u8, 228u8, 113u8,
-                        196u8, 50u8, 122u8, 1u8, 121u8, 225u8, 163u8, 210u8, 66u8, 68u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the validator groups and rotation info localized based on the hypothetical child"]
-            #[doc = "  of a block whose state  this is invoked on. Note that `now` in the `GroupRotationInfo`"]
-            #[doc = " should be the successor of the number of the block."]
-            pub fn validator_groups(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<(
-                ::std::vec::Vec<
-                    ::std::vec::Vec<runtime_types::polkadot_primitives::v4::ValidatorIndex>,
-                >,
-                runtime_types::polkadot_primitives::v4::GroupRotationInfo<::core::primitive::u32>,
-            )> {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_validator_groups",
-                    result,
-                    [
-                        185u8, 206u8, 229u8, 10u8, 93u8, 19u8, 23u8, 44u8, 159u8, 13u8, 235u8,
-                        236u8, 78u8, 153u8, 144u8, 82u8, 106u8, 248u8, 8u8, 92u8, 250u8, 54u8,
-                        153u8, 53u8, 183u8, 60u8, 67u8, 216u8, 201u8, 88u8, 217u8, 120u8,
-                    ],
-                )
-            }
-            #[doc = " Yields information on all availability cores as relevant to the child block."]
-            #[doc = " Cores are either free or occupied. Free cores can have paras assigned to them."]
-            pub fn availability_cores(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<
-                    runtime_types::polkadot_primitives::v4::CoreState<
-                        ::subxt::utils::H256,
+        pub mod core {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The `Core` runtime api that every Substrate runtime needs to implement."]
+            pub struct Core;
+            impl Core {
+                #[doc = " Returns the version of the runtime."]
+                pub fn version(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Version,
+                    runtime_types::sp_version::RuntimeVersion,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Core_version",
+                        inputs::Version {},
+                        [
+                            209u8, 59u8, 156u8, 128u8, 14u8, 210u8, 96u8, 63u8, 140u8, 0u8, 65u8,
+                            211u8, 118u8, 177u8, 9u8, 208u8, 105u8, 124u8, 132u8, 203u8, 157u8,
+                            207u8, 186u8, 177u8, 91u8, 170u8, 22u8, 224u8, 88u8, 56u8, 56u8, 13u8,
+                        ],
+                    )
+                }
+                #[doc = " Execute the given block."]
+                pub fn execute_block(
+                    &self,
+                    block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > >,
+                ) -> ::subxt::runtime_api::Payload<inputs::ExecuteBlock, ()> {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Core_execute_block",
+                        inputs::ExecuteBlock { block },
+                        [
+                            199u8, 164u8, 96u8, 78u8, 188u8, 134u8, 19u8, 247u8, 63u8, 58u8, 93u8,
+                            227u8, 122u8, 157u8, 93u8, 196u8, 16u8, 7u8, 20u8, 17u8, 178u8, 152u8,
+                            211u8, 185u8, 56u8, 153u8, 118u8, 241u8, 118u8, 105u8, 85u8, 3u8,
+                        ],
+                    )
+                }
+                #[doc = " Initialize a block with the given header."]
+                pub fn initialize_block(
+                    &self,
+                    header: runtime_types::sp_runtime::generic::header::Header<
                         ::core::primitive::u32,
+                        runtime_types::sp_runtime::traits::BlakeTwo256,
                     >,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_availability_cores",
-                    result,
-                    [
-                        107u8, 20u8, 115u8, 26u8, 118u8, 211u8, 207u8, 122u8, 134u8, 174u8, 98u8,
-                        237u8, 216u8, 175u8, 39u8, 176u8, 211u8, 78u8, 142u8, 29u8, 127u8, 56u8,
-                        160u8, 249u8, 174u8, 244u8, 146u8, 181u8, 4u8, 166u8, 93u8, 13u8,
-                    ],
-                )
+                ) -> ::subxt::runtime_api::Payload<inputs::InitializeBlock, ()> {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Core_initialize_block",
+                        inputs::InitializeBlock { header },
+                        [
+                            45u8, 232u8, 143u8, 132u8, 33u8, 211u8, 71u8, 186u8, 169u8, 91u8,
+                            143u8, 156u8, 174u8, 156u8, 10u8, 25u8, 203u8, 16u8, 208u8, 226u8,
+                            12u8, 233u8, 145u8, 228u8, 63u8, 118u8, 66u8, 247u8, 71u8, 48u8, 44u8,
+                            243u8,
+                        ],
+                    )
+                }
             }
-            #[doc = " Yields the persisted validation data for the given `ParaId` along with an assumption that"]
-            #[doc = " should be used if the para currently occupies a core."]
-            #[doc = ""]
-            #[doc = " Returns `None` if either the para is not registered or the assumption is `Freed`"]
-            #[doc = " and the para already occupies a core."]
-            pub fn persisted_validation_data(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-                assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_primitives::v4::PersistedValidationData<
-                        ::subxt::utils::H256,
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Version {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ExecuteBlock { pub block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > > , }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct InitializeBlock {
+                    pub header: runtime_types::sp_runtime::generic::header::Header<
                         ::core::primitive::u32,
+                        runtime_types::sp_runtime::traits::BlakeTwo256,
                     >,
-                >,
-            > {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                assumption.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_persisted_validation_data",
-                    result,
-                    [
-                        230u8, 186u8, 57u8, 116u8, 47u8, 20u8, 186u8, 89u8, 108u8, 211u8, 22u8,
-                        57u8, 124u8, 234u8, 140u8, 3u8, 104u8, 89u8, 89u8, 188u8, 156u8, 130u8,
-                        146u8, 77u8, 129u8, 66u8, 227u8, 157u8, 4u8, 134u8, 7u8, 237u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the persisted validation data for the given `ParaId` along with the corresponding"]
-            #[doc = " validation code hash. Instead of accepting assumption about the para, matches the validation"]
-            #[doc = " data hash against an expected one and yields `None` if they're not equal."]
-            pub fn assumed_validation_data(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-                expected_persisted_validation_data_hash: ::subxt::utils::H256,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<(
-                    runtime_types::polkadot_primitives::v4::PersistedValidationData<
-                        ::subxt::utils::H256,
-                        ::core::primitive::u32,
-                    >,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                )>,
-            > {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                expected_persisted_validation_data_hash.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_assumed_validation_data",
-                    result,
-                    [
-                        53u8, 137u8, 220u8, 72u8, 155u8, 9u8, 200u8, 207u8, 158u8, 108u8, 204u8,
-                        15u8, 188u8, 162u8, 129u8, 158u8, 62u8, 200u8, 13u8, 0u8, 217u8, 195u8,
-                        19u8, 151u8, 187u8, 231u8, 197u8, 235u8, 128u8, 244u8, 51u8, 85u8,
-                    ],
-                )
-            }
-            #[doc = " Checks if the given validation outputs pass the acceptance criteria."]
-            pub fn check_validation_outputs(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-                outputs: runtime_types::polkadot_primitives::v4::CandidateCommitments<
-                    ::core::primitive::u32,
-                >,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::bool>
-            {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                outputs.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_check_validation_outputs",
-                    result,
-                    [
-                        99u8, 191u8, 194u8, 26u8, 245u8, 216u8, 224u8, 232u8, 26u8, 184u8, 120u8,
-                        64u8, 32u8, 134u8, 215u8, 138u8, 195u8, 30u8, 220u8, 111u8, 119u8, 182u8,
-                        62u8, 72u8, 5u8, 144u8, 87u8, 157u8, 125u8, 125u8, 237u8, 34u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the session index expected at a child of the block."]
-            #[doc = ""]
-            #[doc = " This can be used to instantiate a `SigningContext`."]
-            pub fn session_index_for_child(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u32> {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_session_index_for_child",
-                    result,
-                    [
-                        224u8, 173u8, 95u8, 16u8, 57u8, 180u8, 35u8, 148u8, 243u8, 77u8, 123u8,
-                        242u8, 212u8, 122u8, 27u8, 32u8, 44u8, 166u8, 66u8, 124u8, 1u8, 190u8,
-                        93u8, 124u8, 57u8, 127u8, 249u8, 141u8, 173u8, 92u8, 137u8, 165u8,
-                    ],
-                )
-            }
-            #[doc = " Fetch the validation code used by a para, making the given `OccupiedCoreAssumption`."]
-            #[doc = ""]
-            #[doc = " Returns `None` if either the para is not registered or the assumption is `Freed`"]
-            #[doc = " and the para already occupies a core."]
-            pub fn validation_code(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-                assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_parachain::primitives::ValidationCode,
-                >,
-            > {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                assumption.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_validation_code",
-                    result,
-                    [
-                        231u8, 64u8, 145u8, 133u8, 197u8, 196u8, 177u8, 229u8, 152u8, 70u8, 16u8,
-                        159u8, 65u8, 66u8, 172u8, 58u8, 60u8, 50u8, 232u8, 28u8, 36u8, 211u8,
-                        161u8, 28u8, 192u8, 153u8, 89u8, 186u8, 9u8, 246u8, 228u8, 84u8,
-                    ],
-                )
-            }
-            #[doc = " Get the receipt of a candidate pending availability. This returns `Some` for any paras"]
-            #[doc = " assigned to occupied cores in `availability_cores` and `None` otherwise."]
-            pub fn candidate_pending_availability(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_primitives::v4::CommittedCandidateReceipt<
-                        ::subxt::utils::H256,
-                    >,
-                >,
-            > {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_candidate_pending_availability",
-                    result,
-                    [
-                        175u8, 68u8, 187u8, 74u8, 138u8, 129u8, 153u8, 251u8, 216u8, 70u8, 251u8,
-                        151u8, 169u8, 252u8, 31u8, 16u8, 61u8, 242u8, 169u8, 15u8, 123u8, 58u8,
-                        177u8, 131u8, 6u8, 79u8, 30u8, 105u8, 51u8, 67u8, 19u8, 208u8,
-                    ],
-                )
-            }
-            #[doc = " Get a vector of events concerning candidates that occurred within a block."]
-            pub fn candidate_events(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<
-                    runtime_types::polkadot_primitives::v4::CandidateEvent<::subxt::utils::H256>,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_candidate_events",
-                    result,
-                    [
-                        50u8, 177u8, 192u8, 138u8, 139u8, 179u8, 76u8, 167u8, 238u8, 92u8, 255u8,
-                        249u8, 223u8, 61u8, 112u8, 7u8, 0u8, 6u8, 43u8, 71u8, 209u8, 21u8, 14u8,
-                        184u8, 19u8, 68u8, 106u8, 193u8, 38u8, 251u8, 19u8, 208u8,
-                    ],
-                )
-            }
-            #[doc = " Get all the pending inbound messages in the downward message queue for a para."]
-            pub fn dmq_contents(
-                &self,
-                recipient: runtime_types::polkadot_parachain::primitives::Id,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<
-                    runtime_types::polkadot_core_primitives::InboundDownwardMessage<
-                        ::core::primitive::u32,
-                    >,
-                >,
-            > {
-                let mut result = Vec::new();
-                recipient.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_dmq_contents",
-                    result,
-                    [
-                        34u8, 66u8, 1u8, 92u8, 223u8, 240u8, 222u8, 128u8, 190u8, 242u8, 160u8,
-                        140u8, 60u8, 57u8, 155u8, 105u8, 10u8, 162u8, 212u8, 72u8, 1u8, 192u8,
-                        36u8, 26u8, 127u8, 86u8, 8u8, 255u8, 57u8, 210u8, 148u8, 254u8,
-                    ],
-                )
-            }
-            #[doc = " Get the contents of all channels addressed to the given recipient. Channels that have no"]
-            #[doc = " messages in them are also included."]
-            pub fn inbound_hrmp_channels_contents(
-                &self,
-                recipient: runtime_types::polkadot_parachain::primitives::Id,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::subxt::utils::KeyedVec<
-                    runtime_types::polkadot_parachain::primitives::Id,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_core_primitives::InboundHrmpMessage<
-                            ::core::primitive::u32,
-                        >,
-                    >,
-                >,
-            > {
-                let mut result = Vec::new();
-                recipient.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_inbound_hrmp_channels_contents",
-                    result,
-                    [
-                        209u8, 72u8, 244u8, 143u8, 167u8, 234u8, 8u8, 33u8, 80u8, 154u8, 132u8,
-                        22u8, 62u8, 174u8, 3u8, 89u8, 78u8, 115u8, 119u8, 77u8, 169u8, 80u8, 98u8,
-                        164u8, 8u8, 8u8, 50u8, 120u8, 58u8, 12u8, 114u8, 57u8,
-                    ],
-                )
-            }
-            #[doc = " Get the validation code from its hash."]
-            pub fn validation_code_by_hash(
-                &self,
-                hash: runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_parachain::primitives::ValidationCode,
-                >,
-            > {
-                let mut result = Vec::new();
-                hash.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_validation_code_by_hash",
-                    result,
-                    [
-                        143u8, 146u8, 97u8, 197u8, 138u8, 122u8, 186u8, 0u8, 86u8, 105u8, 207u8,
-                        55u8, 53u8, 47u8, 131u8, 101u8, 24u8, 71u8, 204u8, 71u8, 96u8, 100u8,
-                        252u8, 127u8, 21u8, 248u8, 70u8, 187u8, 111u8, 112u8, 77u8, 208u8,
-                    ],
-                )
-            }
-            #[doc = " Scrape dispute relevant from on-chain, backing votes and resolved disputes."]
-            pub fn on_chain_votes(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_primitives::v4::ScrapedOnChainVotes<
-                        ::subxt::utils::H256,
-                    >,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_on_chain_votes",
-                    result,
-                    [
-                        37u8, 2u8, 32u8, 215u8, 117u8, 137u8, 242u8, 168u8, 57u8, 175u8, 59u8,
-                        243u8, 132u8, 133u8, 246u8, 37u8, 154u8, 205u8, 191u8, 114u8, 114u8, 167u8,
-                        104u8, 27u8, 144u8, 56u8, 61u8, 159u8, 9u8, 79u8, 190u8, 239u8,
-                    ],
-                )
-            }
-            #[doc = " Get the session info for the given session, if stored."]
-            #[doc = ""]
-            #[doc = " NOTE: This function is only available since parachain host version 2."]
-            pub fn session_info(
-                &self,
-                index: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<runtime_types::polkadot_primitives::v4::SessionInfo>,
-            > {
-                let mut result = Vec::new();
-                index.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_session_info",
-                    result,
-                    [
-                        107u8, 247u8, 186u8, 88u8, 134u8, 234u8, 251u8, 220u8, 134u8, 138u8, 130u8,
-                        168u8, 253u8, 101u8, 235u8, 126u8, 190u8, 37u8, 77u8, 182u8, 195u8, 100u8,
-                        63u8, 173u8, 147u8, 98u8, 217u8, 235u8, 220u8, 87u8, 83u8, 198u8,
-                    ],
-                )
-            }
-            #[doc = " Submits a PVF pre-checking statement into the transaction pool."]
-            #[doc = ""]
-            #[doc = " NOTE: This function is only available since parachain host version 2."]
-            pub fn submit_pvf_check_statement(
-                &self,
-                stmt: runtime_types::polkadot_primitives::v4::PvfCheckStatement,
-                signature: runtime_types::polkadot_primitives::v4::validator_app::Signature,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<()> {
-                let mut result = Vec::new();
-                stmt.encode_to(&mut result);
-                signature.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_submit_pvf_check_statement",
-                    result,
-                    [
-                        228u8, 45u8, 8u8, 229u8, 69u8, 35u8, 3u8, 231u8, 235u8, 184u8, 19u8, 96u8,
-                        72u8, 62u8, 15u8, 218u8, 27u8, 134u8, 19u8, 179u8, 239u8, 1u8, 207u8, 39u8,
-                        50u8, 171u8, 59u8, 204u8, 143u8, 247u8, 27u8, 179u8,
-                    ],
-                )
-            }
-            #[doc = " Returns code hashes of PVFs that require pre-checking by validators in the active set."]
-            #[doc = ""]
-            #[doc = " NOTE: This function is only available since parachain host version 2."]
-            pub fn pvfs_require_precheck(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::ValidationCodeHash>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_pvfs_require_precheck",
-                    result,
-                    [
-                        58u8, 208u8, 110u8, 249u8, 77u8, 56u8, 39u8, 46u8, 196u8, 209u8, 189u8,
-                        200u8, 147u8, 235u8, 247u8, 235u8, 125u8, 230u8, 11u8, 151u8, 137u8, 118u8,
-                        110u8, 179u8, 72u8, 53u8, 127u8, 149u8, 252u8, 20u8, 165u8, 239u8,
-                    ],
-                )
-            }
-            #[doc = " Fetch the hash of the validation code used by a para, making the given `OccupiedCoreAssumption`."]
-            #[doc = ""]
-            #[doc = " NOTE: This function is only available since parachain host version 2."]
-            pub fn validation_code_hash(
-                &self,
-                para_id: runtime_types::polkadot_parachain::primitives::Id,
-                assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                >,
-            > {
-                let mut result = Vec::new();
-                para_id.encode_to(&mut result);
-                assumption.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_validation_code_hash",
-                    result,
-                    [
-                        232u8, 173u8, 117u8, 125u8, 245u8, 188u8, 20u8, 124u8, 255u8, 219u8, 2u8,
-                        95u8, 131u8, 3u8, 122u8, 190u8, 240u8, 184u8, 8u8, 239u8, 85u8, 107u8,
-                        59u8, 105u8, 206u8, 130u8, 65u8, 142u8, 130u8, 193u8, 143u8, 199u8,
-                    ],
-                )
-            }
-            #[doc = " Returns all onchain disputes."]
-            pub fn disputes(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<(
-                    ::core::primitive::u32,
-                    runtime_types::polkadot_core_primitives::CandidateHash,
-                    runtime_types::polkadot_primitives::v4::DisputeState<::core::primitive::u32>,
-                )>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_disputes",
-                    result,
-                    [
-                        90u8, 171u8, 12u8, 104u8, 109u8, 92u8, 149u8, 72u8, 109u8, 39u8, 75u8,
-                        241u8, 239u8, 78u8, 46u8, 134u8, 139u8, 200u8, 144u8, 213u8, 218u8, 64u8,
-                        98u8, 102u8, 159u8, 211u8, 154u8, 178u8, 187u8, 146u8, 193u8, 34u8,
-                    ],
-                )
-            }
-            #[doc = " Returns execution parameters for the session."]
-            pub fn session_executor_params(
-                &self,
-                session_index: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::polkadot_primitives::v4::executor_params::ExecutorParams,
-                >,
-            > {
-                let mut result = Vec::new();
-                session_index.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "ParachainHost_session_executor_params",
-                    result,
-                    [
-                        129u8, 198u8, 157u8, 37u8, 138u8, 132u8, 5u8, 183u8, 233u8, 119u8, 99u8,
-                        173u8, 22u8, 240u8, 182u8, 246u8, 101u8, 3u8, 149u8, 130u8, 107u8, 60u8,
-                        152u8, 217u8, 86u8, 150u8, 253u8, 170u8, 10u8, 86u8, 183u8, 33u8,
-                    ],
-                )
+                }
             }
         }
-        #[doc = " API necessary for BEEFY voters."]
-        pub struct BeefyApi;
-        impl BeefyApi {
-            #[doc = " Return the block number where BEEFY consensus is enabled/started"]
-            pub fn beefy_genesis(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<::core::primitive::u32>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BeefyApi_beefy_genesis",
-                    result,
-                    [
-                        80u8, 47u8, 5u8, 126u8, 16u8, 213u8, 203u8, 179u8, 124u8, 14u8, 227u8,
-                        61u8, 164u8, 158u8, 115u8, 127u8, 132u8, 90u8, 222u8, 87u8, 249u8, 214u8,
-                        100u8, 13u8, 201u8, 186u8, 229u8, 217u8, 21u8, 152u8, 197u8, 60u8,
-                    ],
-                )
+        pub mod metadata {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The `Metadata` api trait that returns metadata for the runtime."]
+            pub struct Metadata;
+            impl Metadata {
+                #[doc = " Returns the metadata of a runtime."]
+                pub fn metadata(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Metadata,
+                    runtime_types::sp_core::OpaqueMetadata,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Metadata_metadata",
+                        inputs::Metadata {},
+                        [
+                            158u8, 223u8, 229u8, 177u8, 228u8, 49u8, 24u8, 219u8, 143u8, 82u8,
+                            255u8, 132u8, 245u8, 210u8, 160u8, 197u8, 218u8, 10u8, 63u8, 165u8,
+                            115u8, 91u8, 70u8, 151u8, 246u8, 51u8, 18u8, 235u8, 91u8, 143u8, 27u8,
+                            127u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the metadata at a given version."]
+                #[doc = ""]
+                #[doc = " If the given `version` isn't supported, this will return `None`."]
+                #[doc = " Use [`Self::metadata_versions`] to find out about supported metadata version of the runtime."]
+                pub fn metadata_at_version(
+                    &self,
+                    version: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::MetadataAtVersion,
+                    ::core::option::Option<runtime_types::sp_core::OpaqueMetadata>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Metadata_metadata_at_version",
+                        inputs::MetadataAtVersion { version },
+                        [
+                            50u8, 164u8, 234u8, 88u8, 65u8, 62u8, 176u8, 66u8, 188u8, 114u8, 205u8,
+                            29u8, 137u8, 173u8, 194u8, 54u8, 237u8, 48u8, 221u8, 46u8, 166u8, 44u8,
+                            220u8, 137u8, 97u8, 128u8, 204u8, 137u8, 29u8, 229u8, 31u8, 134u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the supported metadata versions."]
+                #[doc = ""]
+                #[doc = " This can be used to call `metadata_at_version`."]
+                pub fn metadata_versions(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::MetadataVersions,
+                    ::std::vec::Vec<::core::primitive::u32>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "Metadata_metadata_versions",
+                        inputs::MetadataVersions {},
+                        [
+                            255u8, 234u8, 86u8, 244u8, 238u8, 175u8, 175u8, 54u8, 181u8, 181u8,
+                            23u8, 185u8, 231u8, 242u8, 153u8, 246u8, 205u8, 142u8, 184u8, 21u8,
+                            240u8, 217u8, 195u8, 231u8, 32u8, 163u8, 127u8, 3u8, 51u8, 130u8, 68u8,
+                            124u8,
+                        ],
+                    )
+                }
             }
-            #[doc = " Return the current active BEEFY validator set"]
-            pub fn validator_set(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::sp_consensus_beefy::ValidatorSet<
-                        runtime_types::sp_consensus_beefy::crypto::Public,
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Metadata {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct MetadataAtVersion {
+                    pub version: ::core::primitive::u32,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct MetadataVersions {}
+            }
+        }
+        pub mod block_builder {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The `BlockBuilder` api trait that provides the required functionality for building a block."]
+            pub struct BlockBuilder;
+            impl BlockBuilder {
+                #[doc = " Apply the given extrinsic."]
+                #[doc = ""]
+                #[doc = " Returns an inclusion outcome which specifies if this extrinsic is included in"]
+                #[doc = " this block or not."]
+                pub fn apply_extrinsic(
+                    &self,
+                    extrinsic : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ApplyExtrinsic,
+                    ::core::result::Result<
+                        ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
+                        runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
                     >,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BeefyApi_validator_set",
-                    result,
-                    [
-                        49u8, 44u8, 188u8, 42u8, 35u8, 233u8, 181u8, 44u8, 232u8, 88u8, 1u8, 100u8,
-                        90u8, 42u8, 139u8, 239u8, 25u8, 44u8, 183u8, 164u8, 161u8, 129u8, 12u8,
-                        158u8, 41u8, 39u8, 218u8, 43u8, 78u8, 70u8, 156u8, 159u8,
-                    ],
-                )
-            }
-            #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
-            #[doc = " must provide the equivocation proof and a key ownership proof"]
-            #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
-            #[doc = " extrinsic will be unsigned and should only be accepted for local"]
-            #[doc = " authorship (not to be broadcast to the network). This method returns"]
-            #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
-            #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
-            #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
-            pub fn submit_report_equivocation_unsigned_extrinsic(
-                &self,
-                equivocation_proof: runtime_types::sp_consensus_beefy::EquivocationProof<
-                    ::core::primitive::u32,
-                    runtime_types::sp_consensus_beefy::crypto::Public,
-                    runtime_types::sp_consensus_beefy::crypto::Signature,
-                >,
-                key_owner_proof: runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::option::Option<()>>
-            {
-                let mut result = Vec::new();
-                equivocation_proof.encode_to(&mut result);
-                key_owner_proof.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BeefyApi_submit_report_equivocation_unsigned_extrinsic",
-                    result,
-                    [
-                        232u8, 114u8, 155u8, 57u8, 178u8, 76u8, 154u8, 140u8, 49u8, 60u8, 71u8,
-                        98u8, 167u8, 4u8, 248u8, 159u8, 0u8, 36u8, 119u8, 102u8, 188u8, 10u8,
-                        137u8, 252u8, 249u8, 124u8, 208u8, 173u8, 252u8, 185u8, 117u8, 35u8,
-                    ],
-                )
-            }
-            #[doc = " Generates a proof of key ownership for the given authority in the"]
-            #[doc = " given set. An example usage of this module is coupled with the"]
-            #[doc = " session historical module to prove that a given authority key is"]
-            #[doc = " tied to a given staking identity during a specific session. Proofs"]
-            #[doc = " of key ownership are necessary for submitting equivocation reports."]
-            #[doc = " NOTE: even though the API takes a `set_id` as parameter the current"]
-            #[doc = " implementations ignores this parameter and instead relies on this"]
-            #[doc = " method being called at the correct block height, i.e. any point at"]
-            #[doc = " which the given set id is live on-chain. Future implementations will"]
-            #[doc = " instead use indexed data through an offchain worker, not requiring"]
-            #[doc = " older states to be available."]
-            pub fn generate_key_ownership_proof(
-                &self,
-                set_id: ::core::primitive::u64,
-                authority_id: runtime_types::sp_consensus_beefy::crypto::Public,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof>,
-            > {
-                let mut result = Vec::new();
-                set_id.encode_to(&mut result);
-                authority_id.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BeefyApi_generate_key_ownership_proof",
-                    result,
-                    [
-                        219u8, 146u8, 168u8, 108u8, 180u8, 133u8, 182u8, 104u8, 153u8, 14u8, 209u8,
-                        207u8, 32u8, 226u8, 81u8, 196u8, 243u8, 208u8, 0u8, 94u8, 197u8, 232u8,
-                        181u8, 251u8, 182u8, 12u8, 245u8, 231u8, 198u8, 76u8, 59u8, 53u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " API to interact with MMR pallet."]
-        pub struct MmrApi;
-        impl MmrApi {
-            #[doc = " Return the on-chain MMR root hash."]
-            pub fn mmr_root(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<
-                    ::subxt::utils::H256,
-                    runtime_types::sp_mmr_primitives::Error,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "MmrApi_mmr_root",
-                    result,
-                    [
-                        83u8, 202u8, 15u8, 77u8, 255u8, 136u8, 129u8, 210u8, 154u8, 178u8, 197u8,
-                        94u8, 231u8, 151u8, 68u8, 172u8, 112u8, 116u8, 30u8, 138u8, 142u8, 166u8,
-                        16u8, 4u8, 24u8, 204u8, 18u8, 48u8, 43u8, 103u8, 30u8, 96u8,
-                    ],
-                )
-            }
-            #[doc = " Return the number of MMR blocks in the chain."]
-            pub fn mmr_leaf_count(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<
-                    ::core::primitive::u64,
-                    runtime_types::sp_mmr_primitives::Error,
-                >,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "MmrApi_mmr_leaf_count",
-                    result,
-                    [
-                        81u8, 145u8, 75u8, 170u8, 197u8, 235u8, 92u8, 81u8, 54u8, 16u8, 239u8,
-                        136u8, 174u8, 255u8, 90u8, 27u8, 24u8, 51u8, 152u8, 130u8, 249u8, 247u8,
-                        44u8, 173u8, 4u8, 21u8, 72u8, 44u8, 198u8, 145u8, 94u8, 77u8,
-                    ],
-                )
-            }
-            #[doc = " Generate MMR proof for a series of block numbers. If `best_known_block_number = Some(n)`,"]
-            #[doc = " use historical MMR state at given block height `n`. Else, use current MMR state."]
-            pub fn generate_proof(
-                &self,
-                block_numbers: ::std::vec::Vec<::core::primitive::u32>,
-                best_known_block_number: ::core::option::Option<::core::primitive::u32>,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<
-                    (
-                        ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
-                        runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
-                    ),
-                    runtime_types::sp_mmr_primitives::Error,
-                >,
-            > {
-                let mut result = Vec::new();
-                block_numbers.encode_to(&mut result);
-                best_known_block_number.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "MmrApi_generate_proof",
-                    result,
-                    [
-                        180u8, 123u8, 115u8, 227u8, 101u8, 119u8, 103u8, 230u8, 66u8, 255u8, 15u8,
-                        197u8, 60u8, 180u8, 27u8, 47u8, 73u8, 121u8, 179u8, 219u8, 161u8, 37u8,
-                        57u8, 131u8, 104u8, 106u8, 206u8, 230u8, 168u8, 185u8, 206u8, 32u8,
-                    ],
-                )
-            }
-            #[doc = " Verify MMR proof against on-chain MMR for a batch of leaves."]
-            #[doc = ""]
-            #[doc = " Note this function will use on-chain MMR root hash and check if the proof matches the hash."]
-            #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
-            #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
-            pub fn verify_proof(
-                &self,
-                leaves: ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
-                proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>,
-            > {
-                let mut result = Vec::new();
-                leaves.encode_to(&mut result);
-                proof.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "MmrApi_verify_proof",
-                    result,
-                    [
-                        118u8, 13u8, 68u8, 159u8, 27u8, 144u8, 229u8, 72u8, 88u8, 106u8, 193u8,
-                        86u8, 228u8, 243u8, 28u8, 243u8, 99u8, 241u8, 153u8, 169u8, 121u8, 139u8,
-                        60u8, 244u8, 153u8, 110u8, 239u8, 149u8, 122u8, 164u8, 53u8, 9u8,
-                    ],
-                )
-            }
-            #[doc = " Verify MMR proof against given root hash for a batch of leaves."]
-            #[doc = ""]
-            #[doc = " Note this function does not require any on-chain storage - the"]
-            #[doc = " proof is verified against given MMR root hash."]
-            #[doc = ""]
-            #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
-            #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
-            pub fn verify_proof_stateless(
-                &self,
-                root: ::subxt::utils::H256,
-                leaves: ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
-                proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>,
-            > {
-                let mut result = Vec::new();
-                root.encode_to(&mut result);
-                leaves.encode_to(&mut result);
-                proof.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "MmrApi_verify_proof_stateless",
-                    result,
-                    [
-                        152u8, 237u8, 225u8, 199u8, 238u8, 151u8, 87u8, 236u8, 210u8, 38u8, 168u8,
-                        160u8, 166u8, 27u8, 186u8, 227u8, 160u8, 154u8, 120u8, 127u8, 98u8, 247u8,
-                        111u8, 99u8, 211u8, 236u8, 39u8, 221u8, 250u8, 110u8, 232u8, 0u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " APIs for integrating the GRANDPA finality gadget into runtimes."]
-        #[doc = " This should be implemented on the runtime side."]
-        #[doc = ""]
-        #[doc = " This is primarily used for negotiating authority-set changes for the"]
-        #[doc = " gadget. GRANDPA uses a signaling model of changing authority sets:"]
-        #[doc = " changes should be signaled with a delay of N blocks, and then automatically"]
-        #[doc = " applied in the runtime after those N blocks have passed."]
-        #[doc = ""]
-        #[doc = " The consensus protocol will coordinate the handoff externally."]
-        pub struct GrandpaApi;
-        impl GrandpaApi {
-            #[doc = " Get the current GRANDPA authorities and weights. This should not change except"]
-            #[doc = " for when changes are scheduled and the corresponding delay has passed."]
-            #[doc = ""]
-            #[doc = " When called at block B, it will return the set of authorities that should be"]
-            #[doc = " used to finalize descendants of this block (B+1, B+2, ...). The block B itself"]
-            #[doc = " is finalized by the authorities from block B-1."]
-            pub fn grandpa_authorities(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<(
-                    runtime_types::sp_consensus_grandpa::app::Public,
-                    ::core::primitive::u64,
-                )>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "GrandpaApi_grandpa_authorities",
-                    result,
-                    [
-                        78u8, 213u8, 85u8, 178u8, 49u8, 70u8, 10u8, 221u8, 93u8, 91u8, 250u8, 59u8,
-                        80u8, 141u8, 62u8, 126u8, 55u8, 235u8, 163u8, 12u8, 21u8, 199u8, 240u8,
-                        209u8, 95u8, 63u8, 65u8, 73u8, 141u8, 42u8, 78u8, 154u8,
-                    ],
-                )
-            }
-            #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
-            #[doc = " must provide the equivocation proof and a key ownership proof"]
-            #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
-            #[doc = " extrinsic will be unsigned and should only be accepted for local"]
-            #[doc = " authorship (not to be broadcast to the network). This method returns"]
-            #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
-            #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
-            #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
-            pub fn submit_report_equivocation_unsigned_extrinsic(
-                &self,
-                equivocation_proof: runtime_types::sp_consensus_grandpa::EquivocationProof<
-                    ::subxt::utils::H256,
-                    ::core::primitive::u32,
-                >,
-                key_owner_proof: runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::option::Option<()>>
-            {
-                let mut result = Vec::new();
-                equivocation_proof.encode_to(&mut result);
-                key_owner_proof.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "GrandpaApi_submit_report_equivocation_unsigned_extrinsic",
-                    result,
-                    [
-                        226u8, 83u8, 137u8, 173u8, 45u8, 138u8, 210u8, 202u8, 113u8, 196u8, 110u8,
-                        68u8, 31u8, 192u8, 127u8, 100u8, 125u8, 225u8, 30u8, 252u8, 160u8, 109u8,
-                        251u8, 96u8, 52u8, 214u8, 38u8, 91u8, 158u8, 71u8, 125u8, 220u8,
-                    ],
-                )
-            }
-            #[doc = " Generates a proof of key ownership for the given authority in the"]
-            #[doc = " given set. An example usage of this module is coupled with the"]
-            #[doc = " session historical module to prove that a given authority key is"]
-            #[doc = " tied to a given staking identity during a specific session. Proofs"]
-            #[doc = " of key ownership are necessary for submitting equivocation reports."]
-            #[doc = " NOTE: even though the API takes a `set_id` as parameter the current"]
-            #[doc = " implementations ignore this parameter and instead rely on this"]
-            #[doc = " method being called at the correct block height, i.e. any point at"]
-            #[doc = " which the given set id is live on-chain. Future implementations will"]
-            #[doc = " instead use indexed data through an offchain worker, not requiring"]
-            #[doc = " older states to be available."]
-            pub fn generate_key_ownership_proof(
-                &self,
-                set_id: ::core::primitive::u64,
-                authority_id: runtime_types::sp_consensus_grandpa::app::Public,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
-                >,
-            > {
-                let mut result = Vec::new();
-                set_id.encode_to(&mut result);
-                authority_id.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "GrandpaApi_generate_key_ownership_proof",
-                    result,
-                    [
-                        149u8, 80u8, 146u8, 102u8, 63u8, 184u8, 111u8, 153u8, 143u8, 71u8, 109u8,
-                        162u8, 117u8, 45u8, 139u8, 245u8, 154u8, 252u8, 117u8, 224u8, 10u8, 6u8,
-                        143u8, 137u8, 58u8, 213u8, 215u8, 110u8, 180u8, 142u8, 234u8, 182u8,
-                    ],
-                )
-            }
-            #[doc = " Get current GRANDPA authority set id."]
-            pub fn current_set_id(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u64> {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "GrandpaApi_current_set_id",
-                    result,
-                    [
-                        39u8, 245u8, 166u8, 229u8, 239u8, 200u8, 179u8, 64u8, 193u8, 93u8, 41u8,
-                        40u8, 208u8, 231u8, 75u8, 197u8, 45u8, 119u8, 131u8, 245u8, 84u8, 249u8,
-                        60u8, 7u8, 180u8, 176u8, 119u8, 130u8, 247u8, 134u8, 211u8, 240u8,
-                    ],
-                )
-            }
-        }
-        #[doc = " API necessary for block authorship with BABE."]
-        pub struct BabeApi;
-        impl BabeApi {
-            #[doc = " Return the configuration for BABE."]
-            pub fn configuration(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_consensus_babe::BabeConfiguration,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_configuration",
-                    result,
-                    [
-                        101u8, 27u8, 68u8, 108u8, 36u8, 12u8, 205u8, 58u8, 238u8, 195u8, 171u8,
-                        167u8, 248u8, 76u8, 92u8, 226u8, 241u8, 192u8, 151u8, 31u8, 6u8, 200u8,
-                        69u8, 180u8, 107u8, 134u8, 221u8, 99u8, 237u8, 223u8, 50u8, 175u8,
-                    ],
-                )
-            }
-            #[doc = " Returns the slot that started the current epoch."]
-            pub fn current_epoch_start(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_consensus_slots::Slot,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_current_epoch_start",
-                    result,
-                    [
-                        67u8, 178u8, 67u8, 242u8, 228u8, 74u8, 93u8, 166u8, 160u8, 9u8, 109u8,
-                        174u8, 12u8, 82u8, 239u8, 200u8, 96u8, 54u8, 235u8, 184u8, 159u8, 221u8,
-                        72u8, 244u8, 83u8, 24u8, 239u8, 24u8, 152u8, 177u8, 211u8, 205u8,
-                    ],
-                )
-            }
-            #[doc = " Returns information regarding the current epoch."]
-            pub fn current_epoch(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_consensus_babe::Epoch,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_current_epoch",
-                    result,
-                    [
-                        166u8, 104u8, 201u8, 148u8, 149u8, 137u8, 223u8, 165u8, 82u8, 4u8, 130u8,
-                        58u8, 52u8, 193u8, 201u8, 80u8, 120u8, 212u8, 76u8, 221u8, 11u8, 131u8,
-                        115u8, 8u8, 9u8, 59u8, 191u8, 165u8, 148u8, 24u8, 194u8, 162u8,
-                    ],
-                )
-            }
-            #[doc = " Returns information regarding the next epoch (which was already"]
-            #[doc = " previously announced)."]
-            pub fn next_epoch(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::sp_consensus_babe::Epoch,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_next_epoch",
-                    result,
-                    [
-                        251u8, 29u8, 230u8, 254u8, 174u8, 38u8, 55u8, 30u8, 93u8, 42u8, 254u8,
-                        172u8, 183u8, 250u8, 104u8, 211u8, 79u8, 211u8, 55u8, 98u8, 253u8, 73u8,
-                        137u8, 185u8, 116u8, 94u8, 20u8, 232u8, 224u8, 136u8, 86u8, 182u8,
-                    ],
-                )
-            }
-            #[doc = " Generates a proof of key ownership for the given authority in the"]
-            #[doc = " current epoch. An example usage of this module is coupled with the"]
-            #[doc = " session historical module to prove that a given authority key is"]
-            #[doc = " tied to a given staking identity during a specific session. Proofs"]
-            #[doc = " of key ownership are necessary for submitting equivocation reports."]
-            #[doc = " NOTE: even though the API takes a `slot` as parameter the current"]
-            #[doc = " implementations ignores this parameter and instead relies on this"]
-            #[doc = " method being called at the correct block height, i.e. any point at"]
-            #[doc = " which the epoch for the given slot is live on-chain. Future"]
-            #[doc = " implementations will instead use indexed data through an offchain"]
-            #[doc = " worker, not requiring older states to be available."]
-            pub fn generate_key_ownership_proof(
-                &self,
-                slot: runtime_types::sp_consensus_slots::Slot,
-                authority_id: runtime_types::sp_consensus_babe::app::Public,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof>,
-            > {
-                let mut result = Vec::new();
-                slot.encode_to(&mut result);
-                authority_id.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_generate_key_ownership_proof",
-                    result,
-                    [
-                        16u8, 78u8, 1u8, 172u8, 172u8, 253u8, 240u8, 175u8, 90u8, 130u8, 90u8,
-                        69u8, 249u8, 12u8, 192u8, 134u8, 131u8, 248u8, 186u8, 166u8, 240u8, 182u8,
-                        177u8, 0u8, 107u8, 151u8, 200u8, 41u8, 157u8, 150u8, 162u8, 244u8,
-                    ],
-                )
-            }
-            #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
-            #[doc = " must provide the equivocation proof and a key ownership proof"]
-            #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
-            #[doc = " extrinsic will be unsigned and should only be accepted for local"]
-            #[doc = " authorship (not to be broadcast to the network). This method returns"]
-            #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
-            #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
-            #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
-            pub fn submit_report_equivocation_unsigned_extrinsic(
-                &self,
-                equivocation_proof: runtime_types::sp_consensus_slots::EquivocationProof<
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BlockBuilder_apply_extrinsic",
+                        inputs::ApplyExtrinsic { extrinsic },
+                        [
+                            151u8, 89u8, 106u8, 151u8, 95u8, 29u8, 10u8, 68u8, 85u8, 149u8, 144u8,
+                            132u8, 47u8, 46u8, 164u8, 91u8, 225u8, 219u8, 85u8, 120u8, 101u8,
+                            105u8, 45u8, 79u8, 171u8, 133u8, 121u8, 170u8, 197u8, 248u8, 24u8,
+                            10u8,
+                        ],
+                    )
+                }
+                #[doc = " Finish the current block."]
+                pub fn finalize_block(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::FinalizeBlock,
                     runtime_types::sp_runtime::generic::header::Header<
                         ::core::primitive::u32,
                         runtime_types::sp_runtime::traits::BlakeTwo256,
                     >,
-                    runtime_types::sp_consensus_babe::app::Public,
-                >,
-                key_owner_proof: runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::option::Option<()>>
-            {
-                let mut result = Vec::new();
-                equivocation_proof.encode_to(&mut result);
-                key_owner_proof.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "BabeApi_submit_report_equivocation_unsigned_extrinsic",
-                    result,
-                    [
-                        255u8, 136u8, 248u8, 244u8, 155u8, 51u8, 20u8, 157u8, 93u8, 19u8, 24u8,
-                        170u8, 72u8, 199u8, 222u8, 111u8, 164u8, 126u8, 159u8, 209u8, 198u8, 37u8,
-                        113u8, 12u8, 36u8, 117u8, 131u8, 7u8, 130u8, 85u8, 177u8, 109u8,
-                    ],
-                )
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BlockBuilder_finalize_block",
+                        inputs::FinalizeBlock {},
+                        [
+                            78u8, 179u8, 67u8, 170u8, 213u8, 230u8, 122u8, 98u8, 76u8, 244u8,
+                            225u8, 219u8, 83u8, 115u8, 94u8, 229u8, 93u8, 142u8, 120u8, 172u8,
+                            87u8, 99u8, 120u8, 41u8, 143u8, 184u8, 71u8, 49u8, 126u8, 55u8, 240u8,
+                            125u8,
+                        ],
+                    )
+                }
+                #[doc = " Generate inherent extrinsics. The inherent data will vary from chain to chain."]                pub fn inherent_extrinsics (& self , inherent : runtime_types :: sp_inherents :: InherentData ,) -> :: subxt :: runtime_api :: Payload < inputs :: InherentExtrinsics , :: std :: vec :: Vec < runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > > >{
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BlockBuilder_inherent_extrinsics",
+                        inputs::InherentExtrinsics { inherent },
+                        [
+                            75u8, 86u8, 85u8, 104u8, 125u8, 169u8, 23u8, 92u8, 162u8, 73u8, 65u8,
+                            223u8, 100u8, 24u8, 201u8, 157u8, 145u8, 208u8, 238u8, 11u8, 255u8,
+                            98u8, 0u8, 211u8, 189u8, 94u8, 5u8, 123u8, 25u8, 1u8, 88u8, 234u8,
+                        ],
+                    )
+                }
+                #[doc = " Check that the inherents are valid. The inherent data will vary from chain to chain."]
+                pub fn check_inherents(
+                    &self,
+                    block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > >,
+                    data: runtime_types::sp_inherents::InherentData,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CheckInherents,
+                    runtime_types::sp_inherents::CheckInherentsResult,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BlockBuilder_check_inherents",
+                        inputs::CheckInherents { block, data },
+                        [
+                            162u8, 99u8, 46u8, 228u8, 124u8, 158u8, 224u8, 212u8, 90u8, 101u8,
+                            133u8, 173u8, 82u8, 61u8, 131u8, 131u8, 254u8, 209u8, 17u8, 181u8,
+                            87u8, 190u8, 80u8, 165u8, 172u8, 179u8, 121u8, 202u8, 126u8, 48u8,
+                            254u8, 112u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ApplyExtrinsic { pub extrinsic : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > , }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct FinalizeBlock {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct InherentExtrinsics {
+                    pub inherent: runtime_types::sp_inherents::InherentData,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CheckInherents { pub block : runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > > , pub data : runtime_types :: sp_inherents :: InherentData , }
             }
         }
-        #[doc = " The authority discovery api."]
-        #[doc = ""]
-        #[doc = " This api is used by the `client/authority-discovery` module to retrieve identifiers"]
-        #[doc = " of the current and next authority set."]
-        pub struct AuthorityDiscoveryApi;
-        impl AuthorityDiscoveryApi {
-            #[doc = " Retrieve authority identifiers of the current and next authority set."]
-            pub fn authorities(
-                &self,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::std::vec::Vec<runtime_types::sp_authority_discovery::app::Public>,
-            > {
-                let result = Vec::new();
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "AuthorityDiscoveryApi_authorities",
-                    result,
-                    [
-                        104u8, 50u8, 187u8, 116u8, 97u8, 112u8, 203u8, 212u8, 27u8, 108u8, 253u8,
-                        8u8, 103u8, 104u8, 63u8, 176u8, 178u8, 179u8, 154u8, 104u8, 167u8, 241u8,
-                        76u8, 136u8, 102u8, 130u8, 88u8, 115u8, 104u8, 64u8, 224u8, 98u8,
-                    ],
-                )
+        pub mod nomination_pools_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " Runtime api for accessing information about nomination pools."]
+            pub struct NominationPoolsApi;
+            impl NominationPoolsApi {
+                #[doc = " Returns the pending rewards for the member that the AccountId was given for."]
+                pub fn pending_rewards(
+                    &self,
+                    who: ::subxt::utils::AccountId32,
+                ) -> ::subxt::runtime_api::Payload<inputs::PendingRewards, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "NominationPoolsApi_pending_rewards",
+                        inputs::PendingRewards { who },
+                        [
+                            235u8, 64u8, 57u8, 70u8, 111u8, 27u8, 62u8, 236u8, 36u8, 192u8, 103u8,
+                            89u8, 221u8, 194u8, 46u8, 223u8, 71u8, 249u8, 33u8, 135u8, 43u8, 42u8,
+                            147u8, 57u8, 130u8, 44u8, 35u8, 132u8, 163u8, 153u8, 201u8, 105u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the equivalent balance of `points` for a given pool."]
+                pub fn points_to_balance(
+                    &self,
+                    pool_id: ::core::primitive::u32,
+                    points: ::core::primitive::u128,
+                ) -> ::subxt::runtime_api::Payload<inputs::PointsToBalance, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "NominationPoolsApi_points_to_balance",
+                        inputs::PointsToBalance { pool_id, points },
+                        [
+                            30u8, 7u8, 5u8, 95u8, 146u8, 43u8, 110u8, 21u8, 148u8, 160u8, 74u8,
+                            92u8, 168u8, 188u8, 74u8, 41u8, 129u8, 172u8, 138u8, 30u8, 232u8,
+                            214u8, 154u8, 18u8, 52u8, 87u8, 71u8, 127u8, 141u8, 177u8, 216u8,
+                            158u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the equivalent points of `new_funds` for a given pool."]
+                pub fn balance_to_points(
+                    &self,
+                    pool_id: ::core::primitive::u32,
+                    new_funds: ::core::primitive::u128,
+                ) -> ::subxt::runtime_api::Payload<inputs::BalanceToPoints, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "NominationPoolsApi_balance_to_points",
+                        inputs::BalanceToPoints { pool_id, new_funds },
+                        [
+                            152u8, 165u8, 227u8, 129u8, 31u8, 108u8, 224u8, 174u8, 74u8, 192u8,
+                            102u8, 139u8, 17u8, 119u8, 173u8, 220u8, 52u8, 157u8, 125u8, 107u8,
+                            110u8, 236u8, 9u8, 93u8, 239u8, 3u8, 18u8, 140u8, 203u8, 136u8, 183u8,
+                            215u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct PendingRewards {
+                    pub who: ::subxt::utils::AccountId32,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct PointsToBalance {
+                    pub pool_id: ::core::primitive::u32,
+                    pub points: ::core::primitive::u128,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct BalanceToPoints {
+                    pub pool_id: ::core::primitive::u32,
+                    pub new_funds: ::core::primitive::u128,
+                }
             }
         }
-        #[doc = " Session keys runtime api."]
-        pub struct SessionKeys;
-        impl SessionKeys {
-            #[doc = " Generate a set of session keys with optionally using the given seed."]
-            #[doc = " The keys should be stored within the keystore exposed via runtime"]
-            #[doc = " externalities."]
-            #[doc = ""]
-            #[doc = " The seed needs to be a valid `utf8` string."]
-            #[doc = ""]
-            #[doc = " Returns the concatenated SCALE encoded public keys."]
-            pub fn generate_session_keys(
-                &self,
-                seed: ::core::option::Option<::std::vec::Vec<::core::primitive::u8>>,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::std::vec::Vec<::core::primitive::u8>>
-            {
-                let mut result = Vec::new();
-                seed.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "SessionKeys_generate_session_keys",
-                    result,
-                    [
-                        238u8, 35u8, 56u8, 56u8, 5u8, 183u8, 237u8, 233u8, 220u8, 77u8, 245u8,
-                        218u8, 120u8, 21u8, 3u8, 95u8, 106u8, 140u8, 212u8, 37u8, 14u8, 180u8,
-                        24u8, 11u8, 137u8, 193u8, 111u8, 91u8, 235u8, 127u8, 202u8, 230u8,
-                    ],
-                )
+        pub mod staking_api {
+            use super::root_mod;
+            use super::runtime_types;
+            pub struct StakingApi;
+            impl StakingApi {
+                #[doc = " Returns the nominations quota for a nominator with a given balance."]
+                pub fn nominations_quota(
+                    &self,
+                    balance: ::core::primitive::u128,
+                ) -> ::subxt::runtime_api::Payload<inputs::NominationsQuota, ::core::primitive::u32>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "StakingApi_nominations_quota",
+                        inputs::NominationsQuota { balance },
+                        [
+                            181u8, 19u8, 6u8, 134u8, 234u8, 67u8, 127u8, 210u8, 53u8, 38u8, 175u8,
+                            160u8, 243u8, 71u8, 187u8, 206u8, 178u8, 91u8, 26u8, 115u8, 18u8,
+                            214u8, 50u8, 208u8, 161u8, 197u8, 81u8, 13u8, 98u8, 53u8, 124u8, 62u8,
+                        ],
+                    )
+                }
             }
-            #[doc = " Decode the given public session keys."]
-            #[doc = ""]
-            #[doc = " Returns the list of public raw public keys + key type."]
-            pub fn decode_session_keys(
-                &self,
-                encoded: ::std::vec::Vec<::core::primitive::u8>,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                ::core::option::Option<
-                    ::std::vec::Vec<(
-                        ::std::vec::Vec<::core::primitive::u8>,
-                        runtime_types::sp_core::crypto::KeyTypeId,
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct NominationsQuota {
+                    pub balance: ::core::primitive::u128,
+                }
+            }
+        }
+        pub mod tagged_transaction_queue {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The `TaggedTransactionQueue` api trait for interfering with the transaction queue."]
+            pub struct TaggedTransactionQueue;
+            impl TaggedTransactionQueue {
+                #[doc = " Validate the transaction."]
+                #[doc = ""]
+                #[doc = " This method is invoked by the transaction pool to learn details about given transaction."]
+                #[doc = " The implementation should make sure to verify the correctness of the transaction"]
+                #[doc = " against current state. The given `block_hash` corresponds to the hash of the block"]
+                #[doc = " that is used as current state."]
+                #[doc = ""]
+                #[doc = " Note that this call may be performed by the pool multiple times and transactions"]
+                #[doc = " might be verified in any possible order."]
+                pub fn validate_transaction(
+                    &self,
+                    source: runtime_types::sp_runtime::transaction_validity::TransactionSource,
+                    tx : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
+                    block_hash: ::subxt::utils::H256,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidateTransaction,
+                    ::core::result::Result<
+                        runtime_types::sp_runtime::transaction_validity::ValidTransaction,
+                        runtime_types::sp_runtime::transaction_validity::TransactionValidityError,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TaggedTransactionQueue_validate_transaction",
+                        inputs::ValidateTransaction {
+                            source,
+                            tx,
+                            block_hash,
+                        },
+                        [
+                            93u8, 180u8, 253u8, 37u8, 212u8, 54u8, 180u8, 214u8, 33u8, 5u8, 113u8,
+                            181u8, 25u8, 48u8, 153u8, 221u8, 78u8, 6u8, 115u8, 191u8, 72u8, 75u8,
+                            203u8, 171u8, 129u8, 75u8, 56u8, 60u8, 243u8, 92u8, 173u8, 12u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidateTransaction { pub source : runtime_types :: sp_runtime :: transaction_validity :: TransactionSource , pub tx : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > , pub block_hash : :: subxt :: utils :: H256 , }
+            }
+        }
+        pub mod offchain_worker_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The offchain worker api."]
+            pub struct OffchainWorkerApi;
+            impl OffchainWorkerApi {
+                #[doc = " Starts the off-chain task for given block header."]
+                pub fn offchain_worker(
+                    &self,
+                    header: runtime_types::sp_runtime::generic::header::Header<
+                        ::core::primitive::u32,
+                        runtime_types::sp_runtime::traits::BlakeTwo256,
+                    >,
+                ) -> ::subxt::runtime_api::Payload<inputs::OffchainWorker, ()> {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "OffchainWorkerApi_offchain_worker",
+                        inputs::OffchainWorker { header },
+                        [
+                            187u8, 145u8, 211u8, 0u8, 200u8, 151u8, 231u8, 42u8, 187u8, 128u8,
+                            157u8, 64u8, 191u8, 64u8, 31u8, 158u8, 13u8, 159u8, 227u8, 120u8,
+                            155u8, 215u8, 228u8, 215u8, 44u8, 8u8, 206u8, 116u8, 241u8, 133u8, 2u8,
+                            234u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct OffchainWorker {
+                    pub header: runtime_types::sp_runtime::generic::header::Header<
+                        ::core::primitive::u32,
+                        runtime_types::sp_runtime::traits::BlakeTwo256,
+                    >,
+                }
+            }
+        }
+        pub mod parachain_host {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The API for querying the state of parachains on-chain."]
+            pub struct ParachainHost;
+            impl ParachainHost {
+                #[doc = " Get the current validators."]
+                pub fn validators(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Validators,
+                    ::std::vec::Vec<runtime_types::polkadot_primitives::v4::validator_app::Public>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_validators",
+                        inputs::Validators {},
+                        [
+                            105u8, 23u8, 110u8, 209u8, 38u8, 112u8, 199u8, 134u8, 145u8, 131u8,
+                            38u8, 221u8, 254u8, 147u8, 242u8, 149u8, 94u8, 76u8, 197u8, 67u8,
+                            228u8, 113u8, 196u8, 50u8, 122u8, 1u8, 121u8, 225u8, 163u8, 210u8,
+                            66u8, 68u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the validator groups and rotation info localized based on the hypothetical child"]
+                #[doc = "  of a block whose state  this is invoked on. Note that `now` in the `GroupRotationInfo`"]
+                #[doc = " should be the successor of the number of the block."]
+                pub fn validator_groups(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidatorGroups,
+                    (
+                        ::std::vec::Vec<
+                            ::std::vec::Vec<runtime_types::polkadot_primitives::v4::ValidatorIndex>,
+                        >,
+                        runtime_types::polkadot_primitives::v4::GroupRotationInfo<
+                            ::core::primitive::u32,
+                        >,
+                    ),
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_validator_groups",
+                        inputs::ValidatorGroups {},
+                        [
+                            185u8, 206u8, 229u8, 10u8, 93u8, 19u8, 23u8, 44u8, 159u8, 13u8, 235u8,
+                            236u8, 78u8, 153u8, 144u8, 82u8, 106u8, 248u8, 8u8, 92u8, 250u8, 54u8,
+                            153u8, 53u8, 183u8, 60u8, 67u8, 216u8, 201u8, 88u8, 217u8, 120u8,
+                        ],
+                    )
+                }
+                #[doc = " Yields information on all availability cores as relevant to the child block."]
+                #[doc = " Cores are either free or occupied. Free cores can have paras assigned to them."]
+                pub fn availability_cores(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::AvailabilityCores,
+                    ::std::vec::Vec<
+                        runtime_types::polkadot_primitives::v4::CoreState<
+                            ::subxt::utils::H256,
+                            ::core::primitive::u32,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_availability_cores",
+                        inputs::AvailabilityCores {},
+                        [
+                            107u8, 20u8, 115u8, 26u8, 118u8, 211u8, 207u8, 122u8, 134u8, 174u8,
+                            98u8, 237u8, 216u8, 175u8, 39u8, 176u8, 211u8, 78u8, 142u8, 29u8,
+                            127u8, 56u8, 160u8, 249u8, 174u8, 244u8, 146u8, 181u8, 4u8, 166u8,
+                            93u8, 13u8,
+                        ],
+                    )
+                }
+                #[doc = " Yields the persisted validation data for the given `ParaId` along with an assumption that"]
+                #[doc = " should be used if the para currently occupies a core."]
+                #[doc = ""]
+                #[doc = " Returns `None` if either the para is not registered or the assumption is `Freed`"]
+                #[doc = " and the para already occupies a core."]
+                pub fn persisted_validation_data(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::PersistedValidationData,
+                    ::core::option::Option<
+                        runtime_types::polkadot_primitives::v4::PersistedValidationData<
+                            ::subxt::utils::H256,
+                            ::core::primitive::u32,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_persisted_validation_data",
+                        inputs::PersistedValidationData {
+                            para_id,
+                            assumption,
+                        },
+                        [
+                            230u8, 186u8, 57u8, 116u8, 47u8, 20u8, 186u8, 89u8, 108u8, 211u8, 22u8,
+                            57u8, 124u8, 234u8, 140u8, 3u8, 104u8, 89u8, 89u8, 188u8, 156u8, 130u8,
+                            146u8, 77u8, 129u8, 66u8, 227u8, 157u8, 4u8, 134u8, 7u8, 237u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the persisted validation data for the given `ParaId` along with the corresponding"]
+                #[doc = " validation code hash. Instead of accepting assumption about the para, matches the validation"]
+                #[doc = " data hash against an expected one and yields `None` if they're not equal."]
+                pub fn assumed_validation_data(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    expected_persisted_validation_data_hash: ::subxt::utils::H256,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::AssumedValidationData,
+                    ::core::option::Option<(
+                        runtime_types::polkadot_primitives::v4::PersistedValidationData<
+                            ::subxt::utils::H256,
+                            ::core::primitive::u32,
+                        >,
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
                     )>,
-                >,
-            > {
-                let mut result = Vec::new();
-                encoded.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "SessionKeys_decode_session_keys",
-                    result,
-                    [
-                        134u8, 106u8, 224u8, 190u8, 133u8, 212u8, 253u8, 184u8, 222u8, 76u8, 44u8,
-                        75u8, 168u8, 18u8, 3u8, 169u8, 32u8, 8u8, 46u8, 5u8, 155u8, 45u8, 149u8,
-                        144u8, 41u8, 174u8, 130u8, 133u8, 22u8, 150u8, 89u8, 196u8,
-                    ],
-                )
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_assumed_validation_data",
+                        inputs::AssumedValidationData {
+                            para_id,
+                            expected_persisted_validation_data_hash,
+                        },
+                        [
+                            53u8, 137u8, 220u8, 72u8, 155u8, 9u8, 200u8, 207u8, 158u8, 108u8,
+                            204u8, 15u8, 188u8, 162u8, 129u8, 158u8, 62u8, 200u8, 13u8, 0u8, 217u8,
+                            195u8, 19u8, 151u8, 187u8, 231u8, 197u8, 235u8, 128u8, 244u8, 51u8,
+                            85u8,
+                        ],
+                    )
+                }
+                #[doc = " Checks if the given validation outputs pass the acceptance criteria."]
+                pub fn check_validation_outputs(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    outputs: runtime_types::polkadot_primitives::v4::CandidateCommitments<
+                        ::core::primitive::u32,
+                    >,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CheckValidationOutputs,
+                    ::core::primitive::bool,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_check_validation_outputs",
+                        inputs::CheckValidationOutputs { para_id, outputs },
+                        [
+                            99u8, 191u8, 194u8, 26u8, 245u8, 216u8, 224u8, 232u8, 26u8, 184u8,
+                            120u8, 64u8, 32u8, 134u8, 215u8, 138u8, 195u8, 30u8, 220u8, 111u8,
+                            119u8, 182u8, 62u8, 72u8, 5u8, 144u8, 87u8, 157u8, 125u8, 125u8, 237u8,
+                            34u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the session index expected at a child of the block."]
+                #[doc = ""]
+                #[doc = " This can be used to instantiate a `SigningContext`."]
+                pub fn session_index_for_child(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SessionIndexForChild,
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_session_index_for_child",
+                        inputs::SessionIndexForChild {},
+                        [
+                            224u8, 173u8, 95u8, 16u8, 57u8, 180u8, 35u8, 148u8, 243u8, 77u8, 123u8,
+                            242u8, 212u8, 122u8, 27u8, 32u8, 44u8, 166u8, 66u8, 124u8, 1u8, 190u8,
+                            93u8, 124u8, 57u8, 127u8, 249u8, 141u8, 173u8, 92u8, 137u8, 165u8,
+                        ],
+                    )
+                }
+                #[doc = " Fetch the validation code used by a para, making the given `OccupiedCoreAssumption`."]
+                #[doc = ""]
+                #[doc = " Returns `None` if either the para is not registered or the assumption is `Freed`"]
+                #[doc = " and the para already occupies a core."]
+                pub fn validation_code(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidationCode,
+                    ::core::option::Option<
+                        runtime_types::polkadot_parachain::primitives::ValidationCode,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_validation_code",
+                        inputs::ValidationCode {
+                            para_id,
+                            assumption,
+                        },
+                        [
+                            231u8, 64u8, 145u8, 133u8, 197u8, 196u8, 177u8, 229u8, 152u8, 70u8,
+                            16u8, 159u8, 65u8, 66u8, 172u8, 58u8, 60u8, 50u8, 232u8, 28u8, 36u8,
+                            211u8, 161u8, 28u8, 192u8, 153u8, 89u8, 186u8, 9u8, 246u8, 228u8, 84u8,
+                        ],
+                    )
+                }
+                #[doc = " Get the receipt of a candidate pending availability. This returns `Some` for any paras"]
+                #[doc = " assigned to occupied cores in `availability_cores` and `None` otherwise."]
+                pub fn candidate_pending_availability(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CandidatePendingAvailability,
+                    ::core::option::Option<
+                        runtime_types::polkadot_primitives::v4::CommittedCandidateReceipt<
+                            ::subxt::utils::H256,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_candidate_pending_availability",
+                        inputs::CandidatePendingAvailability { para_id },
+                        [
+                            175u8, 68u8, 187u8, 74u8, 138u8, 129u8, 153u8, 251u8, 216u8, 70u8,
+                            251u8, 151u8, 169u8, 252u8, 31u8, 16u8, 61u8, 242u8, 169u8, 15u8,
+                            123u8, 58u8, 177u8, 131u8, 6u8, 79u8, 30u8, 105u8, 51u8, 67u8, 19u8,
+                            208u8,
+                        ],
+                    )
+                }
+                #[doc = " Get a vector of events concerning candidates that occurred within a block."]
+                pub fn candidate_events(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CandidateEvents,
+                    ::std::vec::Vec<
+                        runtime_types::polkadot_primitives::v4::CandidateEvent<
+                            ::subxt::utils::H256,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_candidate_events",
+                        inputs::CandidateEvents {},
+                        [
+                            50u8, 177u8, 192u8, 138u8, 139u8, 179u8, 76u8, 167u8, 238u8, 92u8,
+                            255u8, 249u8, 223u8, 61u8, 112u8, 7u8, 0u8, 6u8, 43u8, 71u8, 209u8,
+                            21u8, 14u8, 184u8, 19u8, 68u8, 106u8, 193u8, 38u8, 251u8, 19u8, 208u8,
+                        ],
+                    )
+                }
+                #[doc = " Get all the pending inbound messages in the downward message queue for a para."]
+                pub fn dmq_contents(
+                    &self,
+                    recipient: runtime_types::polkadot_parachain::primitives::Id,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::DmqContents,
+                    ::std::vec::Vec<
+                        runtime_types::polkadot_core_primitives::InboundDownwardMessage<
+                            ::core::primitive::u32,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_dmq_contents",
+                        inputs::DmqContents { recipient },
+                        [
+                            34u8, 66u8, 1u8, 92u8, 223u8, 240u8, 222u8, 128u8, 190u8, 242u8, 160u8,
+                            140u8, 60u8, 57u8, 155u8, 105u8, 10u8, 162u8, 212u8, 72u8, 1u8, 192u8,
+                            36u8, 26u8, 127u8, 86u8, 8u8, 255u8, 57u8, 210u8, 148u8, 254u8,
+                        ],
+                    )
+                }
+                #[doc = " Get the contents of all channels addressed to the given recipient. Channels that have no"]
+                #[doc = " messages in them are also included."]
+                pub fn inbound_hrmp_channels_contents(
+                    &self,
+                    recipient: runtime_types::polkadot_parachain::primitives::Id,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::InboundHrmpChannelsContents,
+                    ::subxt::utils::KeyedVec<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_core_primitives::InboundHrmpMessage<
+                                ::core::primitive::u32,
+                            >,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_inbound_hrmp_channels_contents",
+                        inputs::InboundHrmpChannelsContents { recipient },
+                        [
+                            209u8, 72u8, 244u8, 143u8, 167u8, 234u8, 8u8, 33u8, 80u8, 154u8, 132u8,
+                            22u8, 62u8, 174u8, 3u8, 89u8, 78u8, 115u8, 119u8, 77u8, 169u8, 80u8,
+                            98u8, 164u8, 8u8, 8u8, 50u8, 120u8, 58u8, 12u8, 114u8, 57u8,
+                        ],
+                    )
+                }
+                #[doc = " Get the validation code from its hash."]
+                pub fn validation_code_by_hash(
+                    &self,
+                    hash: runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidationCodeByHash,
+                    ::core::option::Option<
+                        runtime_types::polkadot_parachain::primitives::ValidationCode,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_validation_code_by_hash",
+                        inputs::ValidationCodeByHash { hash },
+                        [
+                            143u8, 146u8, 97u8, 197u8, 138u8, 122u8, 186u8, 0u8, 86u8, 105u8,
+                            207u8, 55u8, 53u8, 47u8, 131u8, 101u8, 24u8, 71u8, 204u8, 71u8, 96u8,
+                            100u8, 252u8, 127u8, 21u8, 248u8, 70u8, 187u8, 111u8, 112u8, 77u8,
+                            208u8,
+                        ],
+                    )
+                }
+                #[doc = " Scrape dispute relevant from on-chain, backing votes and resolved disputes."]
+                pub fn on_chain_votes(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::OnChainVotes,
+                    ::core::option::Option<
+                        runtime_types::polkadot_primitives::v4::ScrapedOnChainVotes<
+                            ::subxt::utils::H256,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_on_chain_votes",
+                        inputs::OnChainVotes {},
+                        [
+                            37u8, 2u8, 32u8, 215u8, 117u8, 137u8, 242u8, 168u8, 57u8, 175u8, 59u8,
+                            243u8, 132u8, 133u8, 246u8, 37u8, 154u8, 205u8, 191u8, 114u8, 114u8,
+                            167u8, 104u8, 27u8, 144u8, 56u8, 61u8, 159u8, 9u8, 79u8, 190u8, 239u8,
+                        ],
+                    )
+                }
+                #[doc = " Get the session info for the given session, if stored."]
+                #[doc = ""]
+                #[doc = " NOTE: This function is only available since parachain host version 2."]
+                pub fn session_info(
+                    &self,
+                    index: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SessionInfo,
+                    ::core::option::Option<runtime_types::polkadot_primitives::v4::SessionInfo>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_session_info",
+                        inputs::SessionInfo { index },
+                        [
+                            107u8, 247u8, 186u8, 88u8, 134u8, 234u8, 251u8, 220u8, 134u8, 138u8,
+                            130u8, 168u8, 253u8, 101u8, 235u8, 126u8, 190u8, 37u8, 77u8, 182u8,
+                            195u8, 100u8, 63u8, 173u8, 147u8, 98u8, 217u8, 235u8, 220u8, 87u8,
+                            83u8, 198u8,
+                        ],
+                    )
+                }
+                #[doc = " Submits a PVF pre-checking statement into the transaction pool."]
+                #[doc = ""]
+                #[doc = " NOTE: This function is only available since parachain host version 2."]
+                pub fn submit_pvf_check_statement(
+                    &self,
+                    stmt: runtime_types::polkadot_primitives::v4::PvfCheckStatement,
+                    signature: runtime_types::polkadot_primitives::v4::validator_app::Signature,
+                ) -> ::subxt::runtime_api::Payload<inputs::SubmitPvfCheckStatement, ()>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_submit_pvf_check_statement",
+                        inputs::SubmitPvfCheckStatement { stmt, signature },
+                        [
+                            228u8, 45u8, 8u8, 229u8, 69u8, 35u8, 3u8, 231u8, 235u8, 184u8, 19u8,
+                            96u8, 72u8, 62u8, 15u8, 218u8, 27u8, 134u8, 19u8, 179u8, 239u8, 1u8,
+                            207u8, 39u8, 50u8, 171u8, 59u8, 204u8, 143u8, 247u8, 27u8, 179u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns code hashes of PVFs that require pre-checking by validators in the active set."]
+                #[doc = ""]
+                #[doc = " NOTE: This function is only available since parachain host version 2."]
+                pub fn pvfs_require_precheck(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::PvfsRequirePrecheck,
+                    ::std::vec::Vec<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_pvfs_require_precheck",
+                        inputs::PvfsRequirePrecheck {},
+                        [
+                            58u8, 208u8, 110u8, 249u8, 77u8, 56u8, 39u8, 46u8, 196u8, 209u8, 189u8,
+                            200u8, 147u8, 235u8, 247u8, 235u8, 125u8, 230u8, 11u8, 151u8, 137u8,
+                            118u8, 110u8, 179u8, 72u8, 53u8, 127u8, 149u8, 252u8, 20u8, 165u8,
+                            239u8,
+                        ],
+                    )
+                }
+                #[doc = " Fetch the hash of the validation code used by a para, making the given `OccupiedCoreAssumption`."]
+                #[doc = ""]
+                #[doc = " NOTE: This function is only available since parachain host version 2."]
+                pub fn validation_code_hash(
+                    &self,
+                    para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidationCodeHash,
+                    ::core::option::Option<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_validation_code_hash",
+                        inputs::ValidationCodeHash {
+                            para_id,
+                            assumption,
+                        },
+                        [
+                            232u8, 173u8, 117u8, 125u8, 245u8, 188u8, 20u8, 124u8, 255u8, 219u8,
+                            2u8, 95u8, 131u8, 3u8, 122u8, 190u8, 240u8, 184u8, 8u8, 239u8, 85u8,
+                            107u8, 59u8, 105u8, 206u8, 130u8, 65u8, 142u8, 130u8, 193u8, 143u8,
+                            199u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns all onchain disputes."]
+                pub fn disputes(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Disputes,
+                    ::std::vec::Vec<(
+                        ::core::primitive::u32,
+                        runtime_types::polkadot_core_primitives::CandidateHash,
+                        runtime_types::polkadot_primitives::v4::DisputeState<
+                            ::core::primitive::u32,
+                        >,
+                    )>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_disputes",
+                        inputs::Disputes {},
+                        [
+                            90u8, 171u8, 12u8, 104u8, 109u8, 92u8, 149u8, 72u8, 109u8, 39u8, 75u8,
+                            241u8, 239u8, 78u8, 46u8, 134u8, 139u8, 200u8, 144u8, 213u8, 218u8,
+                            64u8, 98u8, 102u8, 159u8, 211u8, 154u8, 178u8, 187u8, 146u8, 193u8,
+                            34u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns execution parameters for the session."]
+                pub fn session_executor_params(
+                    &self,
+                    session_index: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SessionExecutorParams,
+                    ::core::option::Option<
+                        runtime_types::polkadot_primitives::v4::executor_params::ExecutorParams,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "ParachainHost_session_executor_params",
+                        inputs::SessionExecutorParams { session_index },
+                        [
+                            129u8, 198u8, 157u8, 37u8, 138u8, 132u8, 5u8, 183u8, 233u8, 119u8,
+                            99u8, 173u8, 22u8, 240u8, 182u8, 246u8, 101u8, 3u8, 149u8, 130u8,
+                            107u8, 60u8, 152u8, 217u8, 86u8, 150u8, 253u8, 170u8, 10u8, 86u8,
+                            183u8, 33u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Validators {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidatorGroups {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct AvailabilityCores {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct PersistedValidationData {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    pub assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct AssumedValidationData {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    pub expected_persisted_validation_data_hash: ::subxt::utils::H256,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CheckValidationOutputs {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    pub outputs: runtime_types::polkadot_primitives::v4::CandidateCommitments<
+                        ::core::primitive::u32,
+                    >,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SessionIndexForChild {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidationCode {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    pub assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CandidatePendingAvailability {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CandidateEvents {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct DmqContents {
+                    pub recipient: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct InboundHrmpChannelsContents {
+                    pub recipient: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidationCodeByHash {
+                    pub hash: runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct OnChainVotes {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SessionInfo {
+                    pub index: ::core::primitive::u32,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SubmitPvfCheckStatement {
+                    pub stmt: runtime_types::polkadot_primitives::v4::PvfCheckStatement,
+                    pub signature: runtime_types::polkadot_primitives::v4::validator_app::Signature,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct PvfsRequirePrecheck {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidationCodeHash {
+                    pub para_id: runtime_types::polkadot_parachain::primitives::Id,
+                    pub assumption: runtime_types::polkadot_primitives::v4::OccupiedCoreAssumption,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Disputes {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SessionExecutorParams {
+                    pub session_index: ::core::primitive::u32,
+                }
             }
         }
-        #[doc = " The API to query account nonce (aka transaction index)."]
-        pub struct AccountNonceApi;
-        impl AccountNonceApi {
-            #[doc = " Get current account nonce of given `AccountId`."]
-            pub fn account_nonce(
-                &self,
-                account: ::subxt::utils::AccountId32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u32> {
-                let mut result = Vec::new();
-                account.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "AccountNonceApi_account_nonce",
-                    result,
-                    [
-                        115u8, 50u8, 18u8, 201u8, 220u8, 171u8, 244u8, 16u8, 58u8, 183u8, 173u8,
-                        196u8, 253u8, 239u8, 241u8, 100u8, 246u8, 179u8, 50u8, 32u8, 22u8, 245u8,
-                        109u8, 191u8, 232u8, 76u8, 152u8, 87u8, 156u8, 187u8, 175u8, 202u8,
-                    ],
-                )
+        pub mod beefy_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " API necessary for BEEFY voters."]
+            pub struct BeefyApi;
+            impl BeefyApi {
+                #[doc = " Return the block number where BEEFY consensus is enabled/started"]
+                pub fn beefy_genesis(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::BeefyGenesis,
+                    ::core::option::Option<::core::primitive::u32>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BeefyApi_beefy_genesis",
+                        inputs::BeefyGenesis {},
+                        [
+                            80u8, 47u8, 5u8, 126u8, 16u8, 213u8, 203u8, 179u8, 124u8, 14u8, 227u8,
+                            61u8, 164u8, 158u8, 115u8, 127u8, 132u8, 90u8, 222u8, 87u8, 249u8,
+                            214u8, 100u8, 13u8, 201u8, 186u8, 229u8, 217u8, 21u8, 152u8, 197u8,
+                            60u8,
+                        ],
+                    )
+                }
+                #[doc = " Return the current active BEEFY validator set"]
+                pub fn validator_set(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::ValidatorSet,
+                    ::core::option::Option<
+                        runtime_types::sp_consensus_beefy::ValidatorSet<
+                            runtime_types::sp_consensus_beefy::crypto::Public,
+                        >,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BeefyApi_validator_set",
+                        inputs::ValidatorSet {},
+                        [
+                            49u8, 44u8, 188u8, 42u8, 35u8, 233u8, 181u8, 44u8, 232u8, 88u8, 1u8,
+                            100u8, 90u8, 42u8, 139u8, 239u8, 25u8, 44u8, 183u8, 164u8, 161u8,
+                            129u8, 12u8, 158u8, 41u8, 39u8, 218u8, 43u8, 78u8, 70u8, 156u8, 159u8,
+                        ],
+                    )
+                }
+                #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
+                #[doc = " must provide the equivocation proof and a key ownership proof"]
+                #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
+                #[doc = " extrinsic will be unsigned and should only be accepted for local"]
+                #[doc = " authorship (not to be broadcast to the network). This method returns"]
+                #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
+                #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
+                #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
+                pub fn submit_report_equivocation_unsigned_extrinsic(
+                    &self,
+                    equivocation_proof: runtime_types::sp_consensus_beefy::EquivocationProof<
+                        ::core::primitive::u32,
+                        runtime_types::sp_consensus_beefy::crypto::Public,
+                        runtime_types::sp_consensus_beefy::crypto::Signature,
+                    >,
+                    key_owner_proof: runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SubmitReportEquivocationUnsignedExtrinsic,
+                    ::core::option::Option<()>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BeefyApi_submit_report_equivocation_unsigned_extrinsic",
+                        inputs::SubmitReportEquivocationUnsignedExtrinsic {
+                            equivocation_proof,
+                            key_owner_proof,
+                        },
+                        [
+                            232u8, 114u8, 155u8, 57u8, 178u8, 76u8, 154u8, 140u8, 49u8, 60u8, 71u8,
+                            98u8, 167u8, 4u8, 248u8, 159u8, 0u8, 36u8, 119u8, 102u8, 188u8, 10u8,
+                            137u8, 252u8, 249u8, 124u8, 208u8, 173u8, 252u8, 185u8, 117u8, 35u8,
+                        ],
+                    )
+                }
+                #[doc = " Generates a proof of key ownership for the given authority in the"]
+                #[doc = " given set. An example usage of this module is coupled with the"]
+                #[doc = " session historical module to prove that a given authority key is"]
+                #[doc = " tied to a given staking identity during a specific session. Proofs"]
+                #[doc = " of key ownership are necessary for submitting equivocation reports."]
+                #[doc = " NOTE: even though the API takes a `set_id` as parameter the current"]
+                #[doc = " implementations ignores this parameter and instead relies on this"]
+                #[doc = " method being called at the correct block height, i.e. any point at"]
+                #[doc = " which the given set id is live on-chain. Future implementations will"]
+                #[doc = " instead use indexed data through an offchain worker, not requiring"]
+                #[doc = " older states to be available."]
+                pub fn generate_key_ownership_proof(
+                    &self,
+                    set_id: ::core::primitive::u64,
+                    authority_id: runtime_types::sp_consensus_beefy::crypto::Public,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GenerateKeyOwnershipProof,
+                    ::core::option::Option<
+                        runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BeefyApi_generate_key_ownership_proof",
+                        inputs::GenerateKeyOwnershipProof {
+                            set_id,
+                            authority_id,
+                        },
+                        [
+                            219u8, 146u8, 168u8, 108u8, 180u8, 133u8, 182u8, 104u8, 153u8, 14u8,
+                            209u8, 207u8, 32u8, 226u8, 81u8, 196u8, 243u8, 208u8, 0u8, 94u8, 197u8,
+                            232u8, 181u8, 251u8, 182u8, 12u8, 245u8, 231u8, 198u8, 76u8, 59u8,
+                            53u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct BeefyGenesis {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct ValidatorSet {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SubmitReportEquivocationUnsignedExtrinsic {
+                    pub equivocation_proof: runtime_types::sp_consensus_beefy::EquivocationProof<
+                        ::core::primitive::u32,
+                        runtime_types::sp_consensus_beefy::crypto::Public,
+                        runtime_types::sp_consensus_beefy::crypto::Signature,
+                    >,
+                    pub key_owner_proof: runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GenerateKeyOwnershipProof {
+                    pub set_id: ::core::primitive::u64,
+                    pub authority_id: runtime_types::sp_consensus_beefy::crypto::Public,
+                }
             }
         }
-        pub struct TransactionPaymentApi;
-        impl TransactionPaymentApi {
-            pub fn query_info(
-                &self,
-                uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
-                len: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
-                    ::core::primitive::u128,
-                    runtime_types::sp_weights::weight_v2::Weight,
-                >,
-            > {
-                let mut result = Vec::new();
-                uxt.encode_to(&mut result);
-                len.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentApi_query_info",
-                    result,
-                    [
-                        157u8, 139u8, 132u8, 17u8, 44u8, 153u8, 215u8, 139u8, 196u8, 107u8, 225u8,
-                        39u8, 78u8, 134u8, 147u8, 168u8, 134u8, 89u8, 51u8, 144u8, 101u8, 117u8,
-                        35u8, 131u8, 108u8, 17u8, 74u8, 1u8, 167u8, 7u8, 165u8, 98u8,
-                    ],
-                )
+        pub mod mmr_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " API to interact with MMR pallet."]
+            pub struct MmrApi;
+            impl MmrApi {
+                #[doc = " Return the on-chain MMR root hash."]
+                pub fn mmr_root(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::MmrRoot,
+                    ::core::result::Result<
+                        ::subxt::utils::H256,
+                        runtime_types::sp_mmr_primitives::Error,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "MmrApi_mmr_root",
+                        inputs::MmrRoot {},
+                        [
+                            83u8, 202u8, 15u8, 77u8, 255u8, 136u8, 129u8, 210u8, 154u8, 178u8,
+                            197u8, 94u8, 231u8, 151u8, 68u8, 172u8, 112u8, 116u8, 30u8, 138u8,
+                            142u8, 166u8, 16u8, 4u8, 24u8, 204u8, 18u8, 48u8, 43u8, 103u8, 30u8,
+                            96u8,
+                        ],
+                    )
+                }
+                #[doc = " Return the number of MMR blocks in the chain."]
+                pub fn mmr_leaf_count(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::MmrLeafCount,
+                    ::core::result::Result<
+                        ::core::primitive::u64,
+                        runtime_types::sp_mmr_primitives::Error,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "MmrApi_mmr_leaf_count",
+                        inputs::MmrLeafCount {},
+                        [
+                            81u8, 145u8, 75u8, 170u8, 197u8, 235u8, 92u8, 81u8, 54u8, 16u8, 239u8,
+                            136u8, 174u8, 255u8, 90u8, 27u8, 24u8, 51u8, 152u8, 130u8, 249u8,
+                            247u8, 44u8, 173u8, 4u8, 21u8, 72u8, 44u8, 198u8, 145u8, 94u8, 77u8,
+                        ],
+                    )
+                }
+                #[doc = " Generate MMR proof for a series of block numbers. If `best_known_block_number = Some(n)`,"]
+                #[doc = " use historical MMR state at given block height `n`. Else, use current MMR state."]
+                pub fn generate_proof(
+                    &self,
+                    block_numbers: ::std::vec::Vec<::core::primitive::u32>,
+                    best_known_block_number: ::core::option::Option<::core::primitive::u32>,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GenerateProof,
+                    ::core::result::Result<
+                        (
+                            ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
+                            runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                        ),
+                        runtime_types::sp_mmr_primitives::Error,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "MmrApi_generate_proof",
+                        inputs::GenerateProof {
+                            block_numbers,
+                            best_known_block_number,
+                        },
+                        [
+                            180u8, 123u8, 115u8, 227u8, 101u8, 119u8, 103u8, 230u8, 66u8, 255u8,
+                            15u8, 197u8, 60u8, 180u8, 27u8, 47u8, 73u8, 121u8, 179u8, 219u8, 161u8,
+                            37u8, 57u8, 131u8, 104u8, 106u8, 206u8, 230u8, 168u8, 185u8, 206u8,
+                            32u8,
+                        ],
+                    )
+                }
+                #[doc = " Verify MMR proof against on-chain MMR for a batch of leaves."]
+                #[doc = ""]
+                #[doc = " Note this function will use on-chain MMR root hash and check if the proof matches the hash."]
+                #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
+                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
+                pub fn verify_proof(
+                    &self,
+                    leaves: ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
+                    proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::VerifyProof,
+                    ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "MmrApi_verify_proof",
+                        inputs::VerifyProof { leaves, proof },
+                        [
+                            118u8, 13u8, 68u8, 159u8, 27u8, 144u8, 229u8, 72u8, 88u8, 106u8, 193u8,
+                            86u8, 228u8, 243u8, 28u8, 243u8, 99u8, 241u8, 153u8, 169u8, 121u8,
+                            139u8, 60u8, 244u8, 153u8, 110u8, 239u8, 149u8, 122u8, 164u8, 53u8,
+                            9u8,
+                        ],
+                    )
+                }
+                #[doc = " Verify MMR proof against given root hash for a batch of leaves."]
+                #[doc = ""]
+                #[doc = " Note this function does not require any on-chain storage - the"]
+                #[doc = " proof is verified against given MMR root hash."]
+                #[doc = ""]
+                #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
+                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
+                pub fn verify_proof_stateless(
+                    &self,
+                    root: ::subxt::utils::H256,
+                    leaves: ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
+                    proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::VerifyProofStateless,
+                    ::core::result::Result<(), runtime_types::sp_mmr_primitives::Error>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "MmrApi_verify_proof_stateless",
+                        inputs::VerifyProofStateless {
+                            root,
+                            leaves,
+                            proof,
+                        },
+                        [
+                            152u8, 237u8, 225u8, 199u8, 238u8, 151u8, 87u8, 236u8, 210u8, 38u8,
+                            168u8, 160u8, 166u8, 27u8, 186u8, 227u8, 160u8, 154u8, 120u8, 127u8,
+                            98u8, 247u8, 111u8, 99u8, 211u8, 236u8, 39u8, 221u8, 250u8, 110u8,
+                            232u8, 0u8,
+                        ],
+                    )
+                }
             }
-            pub fn query_fee_details(
-                &self,
-                uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
-                len: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::pallet_transaction_payment::types::FeeDetails<
-                    ::core::primitive::u128,
-                >,
-            > {
-                let mut result = Vec::new();
-                uxt.encode_to(&mut result);
-                len.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentApi_query_fee_details",
-                    result,
-                    [
-                        113u8, 100u8, 16u8, 128u8, 108u8, 95u8, 91u8, 255u8, 46u8, 255u8, 52u8,
-                        225u8, 92u8, 186u8, 175u8, 126u8, 96u8, 25u8, 206u8, 207u8, 16u8, 94u8,
-                        204u8, 138u8, 227u8, 38u8, 125u8, 14u8, 38u8, 58u8, 84u8, 71u8,
-                    ],
-                )
-            }
-            pub fn query_weight_to_fee(
-                &self,
-                weight: runtime_types::sp_weights::weight_v2::Weight,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                weight.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentApi_query_weight_to_fee",
-                    result,
-                    [
-                        179u8, 108u8, 155u8, 39u8, 134u8, 220u8, 72u8, 45u8, 230u8, 232u8, 150u8,
-                        146u8, 61u8, 198u8, 145u8, 250u8, 19u8, 157u8, 204u8, 217u8, 111u8, 171u8,
-                        197u8, 21u8, 75u8, 6u8, 16u8, 26u8, 244u8, 101u8, 134u8, 95u8,
-                    ],
-                )
-            }
-            pub fn query_length_to_fee(
-                &self,
-                length: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                length.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentApi_query_length_to_fee",
-                    result,
-                    [
-                        228u8, 141u8, 164u8, 186u8, 169u8, 249u8, 75u8, 2u8, 160u8, 73u8, 73u8,
-                        214u8, 141u8, 76u8, 180u8, 222u8, 230u8, 161u8, 131u8, 88u8, 25u8, 192u8,
-                        77u8, 124u8, 158u8, 113u8, 72u8, 147u8, 13u8, 11u8, 42u8, 30u8,
-                    ],
-                )
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct MmrRoot {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct MmrLeafCount {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GenerateProof {
+                    pub block_numbers: ::std::vec::Vec<::core::primitive::u32>,
+                    pub best_known_block_number: ::core::option::Option<::core::primitive::u32>,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct VerifyProof {
+                    pub leaves:
+                        ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
+                    pub proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct VerifyProofStateless {
+                    pub root: ::subxt::utils::H256,
+                    pub leaves:
+                        ::std::vec::Vec<runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf>,
+                    pub proof: runtime_types::sp_mmr_primitives::Proof<::subxt::utils::H256>,
+                }
             }
         }
-        pub struct TransactionPaymentCallApi;
-        impl TransactionPaymentCallApi {
-            #[doc = " Query information of a dispatch class, weight, and fee of a given encoded `Call`."]
-            pub fn query_call_info(
-                &self,
-                call: runtime_types::polkadot_runtime::RuntimeCall,
-                len: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
-                    ::core::primitive::u128,
-                    runtime_types::sp_weights::weight_v2::Weight,
-                >,
-            > {
-                let mut result = Vec::new();
-                call.encode_to(&mut result);
-                len.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentCallApi_query_call_info",
-                    result,
-                    [
-                        151u8, 40u8, 199u8, 73u8, 193u8, 248u8, 30u8, 24u8, 71u8, 196u8, 235u8,
-                        10u8, 211u8, 120u8, 228u8, 29u8, 101u8, 175u8, 200u8, 196u8, 70u8, 44u8,
-                        112u8, 209u8, 175u8, 246u8, 148u8, 118u8, 84u8, 127u8, 185u8, 163u8,
-                    ],
-                )
+        pub mod grandpa_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " APIs for integrating the GRANDPA finality gadget into runtimes."]
+            #[doc = " This should be implemented on the runtime side."]
+            #[doc = ""]
+            #[doc = " This is primarily used for negotiating authority-set changes for the"]
+            #[doc = " gadget. GRANDPA uses a signaling model of changing authority sets:"]
+            #[doc = " changes should be signaled with a delay of N blocks, and then automatically"]
+            #[doc = " applied in the runtime after those N blocks have passed."]
+            #[doc = ""]
+            #[doc = " The consensus protocol will coordinate the handoff externally."]
+            pub struct GrandpaApi;
+            impl GrandpaApi {
+                #[doc = " Get the current GRANDPA authorities and weights. This should not change except"]
+                #[doc = " for when changes are scheduled and the corresponding delay has passed."]
+                #[doc = ""]
+                #[doc = " When called at block B, it will return the set of authorities that should be"]
+                #[doc = " used to finalize descendants of this block (B+1, B+2, ...). The block B itself"]
+                #[doc = " is finalized by the authorities from block B-1."]
+                pub fn grandpa_authorities(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GrandpaAuthorities,
+                    ::std::vec::Vec<(
+                        runtime_types::sp_consensus_grandpa::app::Public,
+                        ::core::primitive::u64,
+                    )>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "GrandpaApi_grandpa_authorities",
+                        inputs::GrandpaAuthorities {},
+                        [
+                            78u8, 213u8, 85u8, 178u8, 49u8, 70u8, 10u8, 221u8, 93u8, 91u8, 250u8,
+                            59u8, 80u8, 141u8, 62u8, 126u8, 55u8, 235u8, 163u8, 12u8, 21u8, 199u8,
+                            240u8, 209u8, 95u8, 63u8, 65u8, 73u8, 141u8, 42u8, 78u8, 154u8,
+                        ],
+                    )
+                }
+                #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
+                #[doc = " must provide the equivocation proof and a key ownership proof"]
+                #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
+                #[doc = " extrinsic will be unsigned and should only be accepted for local"]
+                #[doc = " authorship (not to be broadcast to the network). This method returns"]
+                #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
+                #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
+                #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
+                pub fn submit_report_equivocation_unsigned_extrinsic(
+                    &self,
+                    equivocation_proof: runtime_types::sp_consensus_grandpa::EquivocationProof<
+                        ::subxt::utils::H256,
+                        ::core::primitive::u32,
+                    >,
+                    key_owner_proof: runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SubmitReportEquivocationUnsignedExtrinsic,
+                    ::core::option::Option<()>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "GrandpaApi_submit_report_equivocation_unsigned_extrinsic",
+                        inputs::SubmitReportEquivocationUnsignedExtrinsic {
+                            equivocation_proof,
+                            key_owner_proof,
+                        },
+                        [
+                            226u8, 83u8, 137u8, 173u8, 45u8, 138u8, 210u8, 202u8, 113u8, 196u8,
+                            110u8, 68u8, 31u8, 192u8, 127u8, 100u8, 125u8, 225u8, 30u8, 252u8,
+                            160u8, 109u8, 251u8, 96u8, 52u8, 214u8, 38u8, 91u8, 158u8, 71u8, 125u8,
+                            220u8,
+                        ],
+                    )
+                }
+                #[doc = " Generates a proof of key ownership for the given authority in the"]
+                #[doc = " given set. An example usage of this module is coupled with the"]
+                #[doc = " session historical module to prove that a given authority key is"]
+                #[doc = " tied to a given staking identity during a specific session. Proofs"]
+                #[doc = " of key ownership are necessary for submitting equivocation reports."]
+                #[doc = " NOTE: even though the API takes a `set_id` as parameter the current"]
+                #[doc = " implementations ignore this parameter and instead rely on this"]
+                #[doc = " method being called at the correct block height, i.e. any point at"]
+                #[doc = " which the given set id is live on-chain. Future implementations will"]
+                #[doc = " instead use indexed data through an offchain worker, not requiring"]
+                #[doc = " older states to be available."]
+                pub fn generate_key_ownership_proof(
+                    &self,
+                    set_id: ::core::primitive::u64,
+                    authority_id: runtime_types::sp_consensus_grandpa::app::Public,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GenerateKeyOwnershipProof,
+                    ::core::option::Option<
+                        runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "GrandpaApi_generate_key_ownership_proof",
+                        inputs::GenerateKeyOwnershipProof {
+                            set_id,
+                            authority_id,
+                        },
+                        [
+                            149u8, 80u8, 146u8, 102u8, 63u8, 184u8, 111u8, 153u8, 143u8, 71u8,
+                            109u8, 162u8, 117u8, 45u8, 139u8, 245u8, 154u8, 252u8, 117u8, 224u8,
+                            10u8, 6u8, 143u8, 137u8, 58u8, 213u8, 215u8, 110u8, 180u8, 142u8,
+                            234u8, 182u8,
+                        ],
+                    )
+                }
+                #[doc = " Get current GRANDPA authority set id."]
+                pub fn current_set_id(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<inputs::CurrentSetId, ::core::primitive::u64>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "GrandpaApi_current_set_id",
+                        inputs::CurrentSetId {},
+                        [
+                            39u8, 245u8, 166u8, 229u8, 239u8, 200u8, 179u8, 64u8, 193u8, 93u8,
+                            41u8, 40u8, 208u8, 231u8, 75u8, 197u8, 45u8, 119u8, 131u8, 245u8, 84u8,
+                            249u8, 60u8, 7u8, 180u8, 176u8, 119u8, 130u8, 247u8, 134u8, 211u8,
+                            240u8,
+                        ],
+                    )
+                }
             }
-            #[doc = " Query fee details of a given encoded `Call`."]
-            pub fn query_call_fee_details(
-                &self,
-                call: runtime_types::polkadot_runtime::RuntimeCall,
-                len: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<
-                runtime_types::pallet_transaction_payment::types::FeeDetails<
-                    ::core::primitive::u128,
-                >,
-            > {
-                let mut result = Vec::new();
-                call.encode_to(&mut result);
-                len.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentCallApi_query_call_fee_details",
-                    result,
-                    [
-                        56u8, 220u8, 173u8, 0u8, 48u8, 27u8, 228u8, 70u8, 139u8, 236u8, 142u8,
-                        142u8, 192u8, 147u8, 216u8, 185u8, 152u8, 219u8, 185u8, 189u8, 166u8,
-                        110u8, 224u8, 32u8, 94u8, 53u8, 248u8, 216u8, 90u8, 152u8, 63u8, 148u8,
-                    ],
-                )
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GrandpaAuthorities {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SubmitReportEquivocationUnsignedExtrinsic {
+                    pub equivocation_proof: runtime_types::sp_consensus_grandpa::EquivocationProof<
+                        ::subxt::utils::H256,
+                        ::core::primitive::u32,
+                    >,
+                    pub key_owner_proof:
+                        runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GenerateKeyOwnershipProof {
+                    pub set_id: ::core::primitive::u64,
+                    pub authority_id: runtime_types::sp_consensus_grandpa::app::Public,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CurrentSetId {}
             }
-            #[doc = " Query the output of the current `WeightToFee` given some input."]
-            pub fn query_weight_to_fee(
-                &self,
-                weight: runtime_types::sp_weights::weight_v2::Weight,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                weight.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentCallApi_query_weight_to_fee",
-                    result,
-                    [
-                        235u8, 177u8, 255u8, 102u8, 0u8, 237u8, 63u8, 37u8, 144u8, 142u8, 86u8,
-                        43u8, 82u8, 41u8, 25u8, 149u8, 75u8, 238u8, 118u8, 216u8, 84u8, 241u8,
-                        54u8, 157u8, 81u8, 246u8, 140u8, 240u8, 210u8, 208u8, 235u8, 172u8,
-                    ],
-                )
+        }
+        pub mod babe_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " API necessary for block authorship with BABE."]
+            pub struct BabeApi;
+            impl BabeApi {
+                #[doc = " Return the configuration for BABE."]
+                pub fn configuration(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Configuration,
+                    runtime_types::sp_consensus_babe::BabeConfiguration,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_configuration",
+                        inputs::Configuration {},
+                        [
+                            101u8, 27u8, 68u8, 108u8, 36u8, 12u8, 205u8, 58u8, 238u8, 195u8, 171u8,
+                            167u8, 248u8, 76u8, 92u8, 226u8, 241u8, 192u8, 151u8, 31u8, 6u8, 200u8,
+                            69u8, 180u8, 107u8, 134u8, 221u8, 99u8, 237u8, 223u8, 50u8, 175u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns the slot that started the current epoch."]
+                pub fn current_epoch_start(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CurrentEpochStart,
+                    runtime_types::sp_consensus_slots::Slot,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_current_epoch_start",
+                        inputs::CurrentEpochStart {},
+                        [
+                            67u8, 178u8, 67u8, 242u8, 228u8, 74u8, 93u8, 166u8, 160u8, 9u8, 109u8,
+                            174u8, 12u8, 82u8, 239u8, 200u8, 96u8, 54u8, 235u8, 184u8, 159u8,
+                            221u8, 72u8, 244u8, 83u8, 24u8, 239u8, 24u8, 152u8, 177u8, 211u8,
+                            205u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns information regarding the current epoch."]
+                pub fn current_epoch(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::CurrentEpoch,
+                    runtime_types::sp_consensus_babe::Epoch,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_current_epoch",
+                        inputs::CurrentEpoch {},
+                        [
+                            166u8, 104u8, 201u8, 148u8, 149u8, 137u8, 223u8, 165u8, 82u8, 4u8,
+                            130u8, 58u8, 52u8, 193u8, 201u8, 80u8, 120u8, 212u8, 76u8, 221u8, 11u8,
+                            131u8, 115u8, 8u8, 9u8, 59u8, 191u8, 165u8, 148u8, 24u8, 194u8, 162u8,
+                        ],
+                    )
+                }
+                #[doc = " Returns information regarding the next epoch (which was already"]
+                #[doc = " previously announced)."]
+                pub fn next_epoch(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::NextEpoch,
+                    runtime_types::sp_consensus_babe::Epoch,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_next_epoch",
+                        inputs::NextEpoch {},
+                        [
+                            251u8, 29u8, 230u8, 254u8, 174u8, 38u8, 55u8, 30u8, 93u8, 42u8, 254u8,
+                            172u8, 183u8, 250u8, 104u8, 211u8, 79u8, 211u8, 55u8, 98u8, 253u8,
+                            73u8, 137u8, 185u8, 116u8, 94u8, 20u8, 232u8, 224u8, 136u8, 86u8,
+                            182u8,
+                        ],
+                    )
+                }
+                #[doc = " Generates a proof of key ownership for the given authority in the"]
+                #[doc = " current epoch. An example usage of this module is coupled with the"]
+                #[doc = " session historical module to prove that a given authority key is"]
+                #[doc = " tied to a given staking identity during a specific session. Proofs"]
+                #[doc = " of key ownership are necessary for submitting equivocation reports."]
+                #[doc = " NOTE: even though the API takes a `slot` as parameter the current"]
+                #[doc = " implementations ignores this parameter and instead relies on this"]
+                #[doc = " method being called at the correct block height, i.e. any point at"]
+                #[doc = " which the epoch for the given slot is live on-chain. Future"]
+                #[doc = " implementations will instead use indexed data through an offchain"]
+                #[doc = " worker, not requiring older states to be available."]
+                pub fn generate_key_ownership_proof(
+                    &self,
+                    slot: runtime_types::sp_consensus_slots::Slot,
+                    authority_id: runtime_types::sp_consensus_babe::app::Public,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GenerateKeyOwnershipProof,
+                    ::core::option::Option<
+                        runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_generate_key_ownership_proof",
+                        inputs::GenerateKeyOwnershipProof { slot, authority_id },
+                        [
+                            16u8, 78u8, 1u8, 172u8, 172u8, 253u8, 240u8, 175u8, 90u8, 130u8, 90u8,
+                            69u8, 249u8, 12u8, 192u8, 134u8, 131u8, 248u8, 186u8, 166u8, 240u8,
+                            182u8, 177u8, 0u8, 107u8, 151u8, 200u8, 41u8, 157u8, 150u8, 162u8,
+                            244u8,
+                        ],
+                    )
+                }
+                #[doc = " Submits an unsigned extrinsic to report an equivocation. The caller"]
+                #[doc = " must provide the equivocation proof and a key ownership proof"]
+                #[doc = " (should be obtained using `generate_key_ownership_proof`). The"]
+                #[doc = " extrinsic will be unsigned and should only be accepted for local"]
+                #[doc = " authorship (not to be broadcast to the network). This method returns"]
+                #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
+                #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
+                #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
+                pub fn submit_report_equivocation_unsigned_extrinsic(
+                    &self,
+                    equivocation_proof: runtime_types::sp_consensus_slots::EquivocationProof<
+                        runtime_types::sp_runtime::generic::header::Header<
+                            ::core::primitive::u32,
+                            runtime_types::sp_runtime::traits::BlakeTwo256,
+                        >,
+                        runtime_types::sp_consensus_babe::app::Public,
+                    >,
+                    key_owner_proof: runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::SubmitReportEquivocationUnsignedExtrinsic,
+                    ::core::option::Option<()>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "BabeApi_submit_report_equivocation_unsigned_extrinsic",
+                        inputs::SubmitReportEquivocationUnsignedExtrinsic {
+                            equivocation_proof,
+                            key_owner_proof,
+                        },
+                        [
+                            255u8, 136u8, 248u8, 244u8, 155u8, 51u8, 20u8, 157u8, 93u8, 19u8, 24u8,
+                            170u8, 72u8, 199u8, 222u8, 111u8, 164u8, 126u8, 159u8, 209u8, 198u8,
+                            37u8, 113u8, 12u8, 36u8, 117u8, 131u8, 7u8, 130u8, 85u8, 177u8, 109u8,
+                        ],
+                    )
+                }
             }
-            #[doc = " Query the output of the current `LengthToFee` given some input."]
-            pub fn query_length_to_fee(
-                &self,
-                length: ::core::primitive::u32,
-            ) -> ::subxt::runtime_api::StaticRuntimeApiPayload<::core::primitive::u128>
-            {
-                let mut result = Vec::new();
-                length.encode_to(&mut result);
-                ::subxt::runtime_api::StaticRuntimeApiPayload::new_static(
-                    "TransactionPaymentCallApi_query_length_to_fee",
-                    result,
-                    [
-                        188u8, 80u8, 192u8, 251u8, 47u8, 200u8, 60u8, 10u8, 214u8, 47u8, 137u8,
-                        111u8, 226u8, 163u8, 60u8, 177u8, 190u8, 210u8, 57u8, 89u8, 34u8, 154u8,
-                        190u8, 244u8, 132u8, 129u8, 212u8, 121u8, 43u8, 190u8, 71u8, 237u8,
-                    ],
-                )
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Configuration {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CurrentEpochStart {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct CurrentEpoch {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct NextEpoch {}
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GenerateKeyOwnershipProof {
+                    pub slot: runtime_types::sp_consensus_slots::Slot,
+                    pub authority_id: runtime_types::sp_consensus_babe::app::Public,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct SubmitReportEquivocationUnsignedExtrinsic {
+                    pub equivocation_proof: runtime_types::sp_consensus_slots::EquivocationProof<
+                        runtime_types::sp_runtime::generic::header::Header<
+                            ::core::primitive::u32,
+                            runtime_types::sp_runtime::traits::BlakeTwo256,
+                        >,
+                        runtime_types::sp_consensus_babe::app::Public,
+                    >,
+                    pub key_owner_proof: runtime_types::sp_consensus_babe::OpaqueKeyOwnershipProof,
+                }
+            }
+        }
+        pub mod authority_discovery_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The authority discovery api."]
+            #[doc = ""]
+            #[doc = " This api is used by the `client/authority-discovery` module to retrieve identifiers"]
+            #[doc = " of the current and next authority set."]
+            pub struct AuthorityDiscoveryApi;
+            impl AuthorityDiscoveryApi {
+                #[doc = " Retrieve authority identifiers of the current and next authority set."]
+                pub fn authorities(
+                    &self,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::Authorities,
+                    ::std::vec::Vec<runtime_types::sp_authority_discovery::app::Public>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "AuthorityDiscoveryApi_authorities",
+                        inputs::Authorities {},
+                        [
+                            104u8, 50u8, 187u8, 116u8, 97u8, 112u8, 203u8, 212u8, 27u8, 108u8,
+                            253u8, 8u8, 103u8, 104u8, 63u8, 176u8, 178u8, 179u8, 154u8, 104u8,
+                            167u8, 241u8, 76u8, 136u8, 102u8, 130u8, 88u8, 115u8, 104u8, 64u8,
+                            224u8, 98u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Authorities {}
+            }
+        }
+        pub mod session_keys {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " Session keys runtime api."]
+            pub struct SessionKeys;
+            impl SessionKeys {
+                #[doc = " Generate a set of session keys with optionally using the given seed."]
+                #[doc = " The keys should be stored within the keystore exposed via runtime"]
+                #[doc = " externalities."]
+                #[doc = ""]
+                #[doc = " The seed needs to be a valid `utf8` string."]
+                #[doc = ""]
+                #[doc = " Returns the concatenated SCALE encoded public keys."]
+                pub fn generate_session_keys(
+                    &self,
+                    seed: ::core::option::Option<::std::vec::Vec<::core::primitive::u8>>,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::GenerateSessionKeys,
+                    ::std::vec::Vec<::core::primitive::u8>,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "SessionKeys_generate_session_keys",
+                        inputs::GenerateSessionKeys { seed },
+                        [
+                            238u8, 35u8, 56u8, 56u8, 5u8, 183u8, 237u8, 233u8, 220u8, 77u8, 245u8,
+                            218u8, 120u8, 21u8, 3u8, 95u8, 106u8, 140u8, 212u8, 37u8, 14u8, 180u8,
+                            24u8, 11u8, 137u8, 193u8, 111u8, 91u8, 235u8, 127u8, 202u8, 230u8,
+                        ],
+                    )
+                }
+                #[doc = " Decode the given public session keys."]
+                #[doc = ""]
+                #[doc = " Returns the list of public raw public keys + key type."]
+                pub fn decode_session_keys(
+                    &self,
+                    encoded: ::std::vec::Vec<::core::primitive::u8>,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::DecodeSessionKeys,
+                    ::core::option::Option<
+                        ::std::vec::Vec<(
+                            ::std::vec::Vec<::core::primitive::u8>,
+                            runtime_types::sp_core::crypto::KeyTypeId,
+                        )>,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "SessionKeys_decode_session_keys",
+                        inputs::DecodeSessionKeys { encoded },
+                        [
+                            134u8, 106u8, 224u8, 190u8, 133u8, 212u8, 253u8, 184u8, 222u8, 76u8,
+                            44u8, 75u8, 168u8, 18u8, 3u8, 169u8, 32u8, 8u8, 46u8, 5u8, 155u8, 45u8,
+                            149u8, 144u8, 41u8, 174u8, 130u8, 133u8, 22u8, 150u8, 89u8, 196u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct GenerateSessionKeys {
+                    pub seed: ::core::option::Option<::std::vec::Vec<::core::primitive::u8>>,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct DecodeSessionKeys {
+                    pub encoded: ::std::vec::Vec<::core::primitive::u8>,
+                }
+            }
+        }
+        pub mod account_nonce_api {
+            use super::root_mod;
+            use super::runtime_types;
+            #[doc = " The API to query account nonce (aka transaction index)."]
+            pub struct AccountNonceApi;
+            impl AccountNonceApi {
+                #[doc = " Get current account nonce of given `AccountId`."]
+                pub fn account_nonce(
+                    &self,
+                    account: ::subxt::utils::AccountId32,
+                ) -> ::subxt::runtime_api::Payload<inputs::AccountNonce, ::core::primitive::u32>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "AccountNonceApi_account_nonce",
+                        inputs::AccountNonce { account },
+                        [
+                            115u8, 50u8, 18u8, 201u8, 220u8, 171u8, 244u8, 16u8, 58u8, 183u8,
+                            173u8, 196u8, 253u8, 239u8, 241u8, 100u8, 246u8, 179u8, 50u8, 32u8,
+                            22u8, 245u8, 109u8, 191u8, 232u8, 76u8, 152u8, 87u8, 156u8, 187u8,
+                            175u8, 202u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct AccountNonce {
+                    pub account: ::subxt::utils::AccountId32,
+                }
+            }
+        }
+        pub mod transaction_payment_api {
+            use super::root_mod;
+            use super::runtime_types;
+            pub struct TransactionPaymentApi;
+            impl TransactionPaymentApi {
+                pub fn query_info(
+                    &self,
+                    uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
+                    len: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::QueryInfo,
+                    runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
+                        ::core::primitive::u128,
+                        runtime_types::sp_weights::weight_v2::Weight,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentApi_query_info",
+                        inputs::QueryInfo { uxt, len },
+                        [
+                            157u8, 139u8, 132u8, 17u8, 44u8, 153u8, 215u8, 139u8, 196u8, 107u8,
+                            225u8, 39u8, 78u8, 134u8, 147u8, 168u8, 134u8, 89u8, 51u8, 144u8,
+                            101u8, 117u8, 35u8, 131u8, 108u8, 17u8, 74u8, 1u8, 167u8, 7u8, 165u8,
+                            98u8,
+                        ],
+                    )
+                }
+                pub fn query_fee_details(
+                    &self,
+                    uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) >,
+                    len: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::QueryFeeDetails,
+                    runtime_types::pallet_transaction_payment::types::FeeDetails<
+                        ::core::primitive::u128,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentApi_query_fee_details",
+                        inputs::QueryFeeDetails { uxt, len },
+                        [
+                            113u8, 100u8, 16u8, 128u8, 108u8, 95u8, 91u8, 255u8, 46u8, 255u8, 52u8,
+                            225u8, 92u8, 186u8, 175u8, 126u8, 96u8, 25u8, 206u8, 207u8, 16u8, 94u8,
+                            204u8, 138u8, 227u8, 38u8, 125u8, 14u8, 38u8, 58u8, 84u8, 71u8,
+                        ],
+                    )
+                }
+                pub fn query_weight_to_fee(
+                    &self,
+                    weight: runtime_types::sp_weights::weight_v2::Weight,
+                ) -> ::subxt::runtime_api::Payload<inputs::QueryWeightToFee, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentApi_query_weight_to_fee",
+                        inputs::QueryWeightToFee { weight },
+                        [
+                            179u8, 108u8, 155u8, 39u8, 134u8, 220u8, 72u8, 45u8, 230u8, 232u8,
+                            150u8, 146u8, 61u8, 198u8, 145u8, 250u8, 19u8, 157u8, 204u8, 217u8,
+                            111u8, 171u8, 197u8, 21u8, 75u8, 6u8, 16u8, 26u8, 244u8, 101u8, 134u8,
+                            95u8,
+                        ],
+                    )
+                }
+                pub fn query_length_to_fee(
+                    &self,
+                    length: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<inputs::QueryLengthToFee, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentApi_query_length_to_fee",
+                        inputs::QueryLengthToFee { length },
+                        [
+                            228u8, 141u8, 164u8, 186u8, 169u8, 249u8, 75u8, 2u8, 160u8, 73u8, 73u8,
+                            214u8, 141u8, 76u8, 180u8, 222u8, 230u8, 161u8, 131u8, 88u8, 25u8,
+                            192u8, 77u8, 124u8, 158u8, 113u8, 72u8, 147u8, 13u8, 11u8, 42u8, 30u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryInfo { pub uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > , pub len : :: core :: primitive :: u32 , }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryFeeDetails { pub uxt : runtime_types :: sp_runtime :: generic :: unchecked_extrinsic :: UncheckedExtrinsic < :: subxt :: utils :: MultiAddress < :: subxt :: utils :: AccountId32 , () > , runtime_types :: polkadot_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: polkadot_runtime_common :: claims :: PrevalidateAttests ,) > , pub len : :: core :: primitive :: u32 , }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryWeightToFee {
+                    pub weight: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryLengthToFee {
+                    pub length: ::core::primitive::u32,
+                }
+            }
+        }
+        pub mod transaction_payment_call_api {
+            use super::root_mod;
+            use super::runtime_types;
+            pub struct TransactionPaymentCallApi;
+            impl TransactionPaymentCallApi {
+                #[doc = " Query information of a dispatch class, weight, and fee of a given encoded `Call`."]
+                pub fn query_call_info(
+                    &self,
+                    call: runtime_types::polkadot_runtime::RuntimeCall,
+                    len: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::QueryCallInfo,
+                    runtime_types::pallet_transaction_payment::types::RuntimeDispatchInfo<
+                        ::core::primitive::u128,
+                        runtime_types::sp_weights::weight_v2::Weight,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentCallApi_query_call_info",
+                        inputs::QueryCallInfo { call, len },
+                        [
+                            151u8, 40u8, 199u8, 73u8, 193u8, 248u8, 30u8, 24u8, 71u8, 196u8, 235u8,
+                            10u8, 211u8, 120u8, 228u8, 29u8, 101u8, 175u8, 200u8, 196u8, 70u8,
+                            44u8, 112u8, 209u8, 175u8, 246u8, 148u8, 118u8, 84u8, 127u8, 185u8,
+                            163u8,
+                        ],
+                    )
+                }
+                #[doc = " Query fee details of a given encoded `Call`."]
+                pub fn query_call_fee_details(
+                    &self,
+                    call: runtime_types::polkadot_runtime::RuntimeCall,
+                    len: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<
+                    inputs::QueryCallFeeDetails,
+                    runtime_types::pallet_transaction_payment::types::FeeDetails<
+                        ::core::primitive::u128,
+                    >,
+                > {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentCallApi_query_call_fee_details",
+                        inputs::QueryCallFeeDetails { call, len },
+                        [
+                            56u8, 220u8, 173u8, 0u8, 48u8, 27u8, 228u8, 70u8, 139u8, 236u8, 142u8,
+                            142u8, 192u8, 147u8, 216u8, 185u8, 152u8, 219u8, 185u8, 189u8, 166u8,
+                            110u8, 224u8, 32u8, 94u8, 53u8, 248u8, 216u8, 90u8, 152u8, 63u8, 148u8,
+                        ],
+                    )
+                }
+                #[doc = " Query the output of the current `WeightToFee` given some input."]
+                pub fn query_weight_to_fee(
+                    &self,
+                    weight: runtime_types::sp_weights::weight_v2::Weight,
+                ) -> ::subxt::runtime_api::Payload<inputs::QueryWeightToFee, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentCallApi_query_weight_to_fee",
+                        inputs::QueryWeightToFee { weight },
+                        [
+                            235u8, 177u8, 255u8, 102u8, 0u8, 237u8, 63u8, 37u8, 144u8, 142u8, 86u8,
+                            43u8, 82u8, 41u8, 25u8, 149u8, 75u8, 238u8, 118u8, 216u8, 84u8, 241u8,
+                            54u8, 157u8, 81u8, 246u8, 140u8, 240u8, 210u8, 208u8, 235u8, 172u8,
+                        ],
+                    )
+                }
+                #[doc = " Query the output of the current `LengthToFee` given some input."]
+                pub fn query_length_to_fee(
+                    &self,
+                    length: ::core::primitive::u32,
+                ) -> ::subxt::runtime_api::Payload<inputs::QueryLengthToFee, ::core::primitive::u128>
+                {
+                    ::subxt::runtime_api::Payload::new_static(
+                        "TransactionPaymentCallApi_query_length_to_fee",
+                        inputs::QueryLengthToFee { length },
+                        [
+                            188u8, 80u8, 192u8, 251u8, 47u8, 200u8, 60u8, 10u8, 214u8, 47u8, 137u8,
+                            111u8, 226u8, 163u8, 60u8, 177u8, 190u8, 210u8, 57u8, 89u8, 34u8,
+                            154u8, 190u8, 244u8, 132u8, 129u8, 212u8, 121u8, 43u8, 190u8, 71u8,
+                            237u8,
+                        ],
+                    )
+                }
+            }
+            pub mod inputs {
+                use super::root_mod;
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryCallInfo {
+                    pub call: runtime_types::polkadot_runtime::RuntimeCall,
+                    pub len: ::core::primitive::u32,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryCallFeeDetails {
+                    pub call: runtime_types::polkadot_runtime::RuntimeCall,
+                    pub len: ::core::primitive::u32,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryWeightToFee {
+                    pub weight: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct QueryLengthToFee {
+                    pub length: ::core::primitive::u32,
+                }
             }
         }
     }
