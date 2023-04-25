@@ -136,12 +136,13 @@ impl PartialEq for ModuleError {
         self.raw == other.raw
     }
 }
+
 impl Eq for ModuleError {}
 
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Ok(details) = self.details() else {
-            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)")
+            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
         };
 
         let pallet = details.pallet();
@@ -166,7 +167,7 @@ impl ModuleError {
     /// attempts to decode the ModuleError into a value implementing the trait `RootError`
     /// where the actual type of value is the generated top level enum `Error`.
     pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
-        E::root_error(&self.raw.pallet_index, &self.raw.error)
+        E::root_error(&self.raw.error, self.details()?.pallet(), &self.metadata)
     }
 }
 

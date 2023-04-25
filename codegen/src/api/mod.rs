@@ -395,18 +395,19 @@ impl RuntimeGenerator {
             }
         };
 
-        let root_error_match_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_index = p.index;
+        let root_error_if_arms = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name_str = &p.name;
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-
-            p.error.as_ref().map(|_|
-                quote! {
-                    #variant_index => {
-                        let variant_error: #mod_name::Error = #crate_path::ext::codec::Decode::decode(cursor)?;
-                        Ok(Error::#variant_name(variant_error))
+            p.error.as_ref().map(|err|
+                {
+                    let type_id = err.ty.id;
+                    quote! {
+                    if pallet_name == #variant_name_str {
+                        let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
+                        return Ok(Error::#variant_name(variant_error));
                     }
+                }
                 }
             )
         });
@@ -466,12 +467,11 @@ impl RuntimeGenerator {
 
                 #outer_error
                 impl #crate_path::error::RootError for Error {
-                    fn root_error(pallet_index: &u8, error: &[u8; 4]) -> Result<Self, #crate_path::Error> {
-                        let cursor = &mut &error[..];
-                        match *pallet_index {
-                           #( #root_error_match_arms )*
-                            _ => Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet index '{}' not found", pallet_index)).into())
-                        }
+                    fn root_error(pallet_bytes: &[u8; 4], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        let cursor = &mut &pallet_bytes[..];
+                        #( #root_error_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Error enum", pallet_name)).into())
                     }
                 }
 
@@ -547,7 +547,7 @@ where
     let ty = type_gen.resolve_type(type_id);
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
-        return Err(CodegenError::InvalidType(error_message_type_name.into()))
+        return Err(CodegenError::InvalidType(error_message_type_name.into()));
     };
 
     variant

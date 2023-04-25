@@ -566,216 +566,213 @@ pub mod api {
         XcmPallet(xcm_pallet::Error),
     }
     impl ::subxt::error::RootError for Error {
-        fn root_error(pallet_index: &u8, error: &[u8; 4]) -> Result<Self, ::subxt::Error> {
-            let cursor = &mut &error[..];
-            match *pallet_index {
-                0u8 => {
-                    let variant_error: system::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::System(variant_error))
-                }
-                1u8 => {
-                    let variant_error: scheduler::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Scheduler(variant_error))
-                }
-                10u8 => {
-                    let variant_error: preimage::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Preimage(variant_error))
-                }
-                2u8 => {
-                    let variant_error: babe::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Babe(variant_error))
-                }
-                4u8 => {
-                    let variant_error: indices::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Indices(variant_error))
-                }
-                5u8 => {
-                    let variant_error: balances::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Balances(variant_error))
-                }
-                6u8 => {
-                    let variant_error: authorship::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Authorship(variant_error))
-                }
-                7u8 => {
-                    let variant_error: staking::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Staking(variant_error))
-                }
-                9u8 => {
-                    let variant_error: session::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Session(variant_error))
-                }
-                11u8 => {
-                    let variant_error: grandpa::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Grandpa(variant_error))
-                }
-                12u8 => {
-                    let variant_error: im_online::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ImOnline(variant_error))
-                }
-                14u8 => {
-                    let variant_error: democracy::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Democracy(variant_error))
-                }
-                15u8 => {
-                    let variant_error: council::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Council(variant_error))
-                }
-                16u8 => {
-                    let variant_error: technical_committee::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::TechnicalCommittee(variant_error))
-                }
-                17u8 => {
-                    let variant_error: phragmen_election::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::PhragmenElection(variant_error))
-                }
-                18u8 => {
-                    let variant_error: technical_membership::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::TechnicalMembership(variant_error))
-                }
-                19u8 => {
-                    let variant_error: treasury::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Treasury(variant_error))
-                }
-                24u8 => {
-                    let variant_error: claims::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Claims(variant_error))
-                }
-                25u8 => {
-                    let variant_error: vesting::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Vesting(variant_error))
-                }
-                26u8 => {
-                    let variant_error: utility::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Utility(variant_error))
-                }
-                28u8 => {
-                    let variant_error: identity::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Identity(variant_error))
-                }
-                29u8 => {
-                    let variant_error: proxy::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Proxy(variant_error))
-                }
-                30u8 => {
-                    let variant_error: multisig::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Multisig(variant_error))
-                }
-                34u8 => {
-                    let variant_error: bounties::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Bounties(variant_error))
-                }
-                38u8 => {
-                    let variant_error: child_bounties::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ChildBounties(variant_error))
-                }
-                35u8 => {
-                    let variant_error: tips::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Tips(variant_error))
-                }
-                36u8 => {
-                    let variant_error: election_provider_multi_phase::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ElectionProviderMultiPhase(variant_error))
-                }
-                37u8 => {
-                    let variant_error: voter_list::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::VoterList(variant_error))
-                }
-                39u8 => {
-                    let variant_error: nomination_pools::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::NominationPools(variant_error))
-                }
-                40u8 => {
-                    let variant_error: fast_unstake::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::FastUnstake(variant_error))
-                }
-                51u8 => {
-                    let variant_error: configuration::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Configuration(variant_error))
-                }
-                53u8 => {
-                    let variant_error: para_inclusion::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParaInclusion(variant_error))
-                }
-                54u8 => {
-                    let variant_error: para_inherent::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParaInherent(variant_error))
-                }
-                56u8 => {
-                    let variant_error: paras::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Paras(variant_error))
-                }
-                59u8 => {
-                    let variant_error: ump::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Ump(variant_error))
-                }
-                60u8 => {
-                    let variant_error: hrmp::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Hrmp(variant_error))
-                }
-                62u8 => {
-                    let variant_error: paras_disputes::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::ParasDisputes(variant_error))
-                }
-                70u8 => {
-                    let variant_error: registrar::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Registrar(variant_error))
-                }
-                71u8 => {
-                    let variant_error: slots::Error = ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Slots(variant_error))
-                }
-                72u8 => {
-                    let variant_error: auctions::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Auctions(variant_error))
-                }
-                73u8 => {
-                    let variant_error: crowdloan::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::Crowdloan(variant_error))
-                }
-                99u8 => {
-                    let variant_error: xcm_pallet::Error =
-                        ::subxt::ext::codec::Decode::decode(cursor)?;
-                    Ok(Error::XcmPallet(variant_error))
-                }
-                _ => Err(::subxt::ext::scale_decode::Error::custom(format!(
-                    "Pallet index '{}' not found",
-                    pallet_index
-                ))
-                .into()),
+        fn root_error(
+            pallet_bytes: &[u8; 4],
+            pallet_name: &str,
+            metadata: &::subxt::Metadata,
+        ) -> Result<Self, ::subxt::Error> {
+            use subxt::metadata::DecodeWithMetadata;
+            let cursor = &mut &pallet_bytes[..];
+            if pallet_name == "System" {
+                let variant_error = system::Error::decode_with_metadata(cursor, 176u32, metadata)?;
+                return Ok(Error::System(variant_error));
             }
+            if pallet_name == "Scheduler" {
+                let variant_error =
+                    scheduler::Error::decode_with_metadata(cursor, 450u32, metadata)?;
+                return Ok(Error::Scheduler(variant_error));
+            }
+            if pallet_name == "Preimage" {
+                let variant_error =
+                    preimage::Error::decode_with_metadata(cursor, 455u32, metadata)?;
+                return Ok(Error::Preimage(variant_error));
+            }
+            if pallet_name == "Babe" {
+                let variant_error = babe::Error::decode_with_metadata(cursor, 467u32, metadata)?;
+                return Ok(Error::Babe(variant_error));
+            }
+            if pallet_name == "Indices" {
+                let variant_error = indices::Error::decode_with_metadata(cursor, 469u32, metadata)?;
+                return Ok(Error::Indices(variant_error));
+            }
+            if pallet_name == "Balances" {
+                let variant_error =
+                    balances::Error::decode_with_metadata(cursor, 478u32, metadata)?;
+                return Ok(Error::Balances(variant_error));
+            }
+            if pallet_name == "Authorship" {
+                let variant_error =
+                    authorship::Error::decode_with_metadata(cursor, 484u32, metadata)?;
+                return Ok(Error::Authorship(variant_error));
+            }
+            if pallet_name == "Staking" {
+                let variant_error = staking::Error::decode_with_metadata(cursor, 508u32, metadata)?;
+                return Ok(Error::Staking(variant_error));
+            }
+            if pallet_name == "Session" {
+                let variant_error = session::Error::decode_with_metadata(cursor, 515u32, metadata)?;
+                return Ok(Error::Session(variant_error));
+            }
+            if pallet_name == "Grandpa" {
+                let variant_error = grandpa::Error::decode_with_metadata(cursor, 519u32, metadata)?;
+                return Ok(Error::Grandpa(variant_error));
+            }
+            if pallet_name == "ImOnline" {
+                let variant_error =
+                    im_online::Error::decode_with_metadata(cursor, 527u32, metadata)?;
+                return Ok(Error::ImOnline(variant_error));
+            }
+            if pallet_name == "Democracy" {
+                let variant_error =
+                    democracy::Error::decode_with_metadata(cursor, 544u32, metadata)?;
+                return Ok(Error::Democracy(variant_error));
+            }
+            if pallet_name == "Council" {
+                let variant_error = council::Error::decode_with_metadata(cursor, 547u32, metadata)?;
+                return Ok(Error::Council(variant_error));
+            }
+            if pallet_name == "TechnicalCommittee" {
+                let variant_error =
+                    technical_committee::Error::decode_with_metadata(cursor, 549u32, metadata)?;
+                return Ok(Error::TechnicalCommittee(variant_error));
+            }
+            if pallet_name == "PhragmenElection" {
+                let variant_error =
+                    phragmen_election::Error::decode_with_metadata(cursor, 553u32, metadata)?;
+                return Ok(Error::PhragmenElection(variant_error));
+            }
+            if pallet_name == "TechnicalMembership" {
+                let variant_error =
+                    technical_membership::Error::decode_with_metadata(cursor, 555u32, metadata)?;
+                return Ok(Error::TechnicalMembership(variant_error));
+            }
+            if pallet_name == "Treasury" {
+                let variant_error =
+                    treasury::Error::decode_with_metadata(cursor, 561u32, metadata)?;
+                return Ok(Error::Treasury(variant_error));
+            }
+            if pallet_name == "Claims" {
+                let variant_error = claims::Error::decode_with_metadata(cursor, 562u32, metadata)?;
+                return Ok(Error::Claims(variant_error));
+            }
+            if pallet_name == "Vesting" {
+                let variant_error = vesting::Error::decode_with_metadata(cursor, 566u32, metadata)?;
+                return Ok(Error::Vesting(variant_error));
+            }
+            if pallet_name == "Utility" {
+                let variant_error = utility::Error::decode_with_metadata(cursor, 567u32, metadata)?;
+                return Ok(Error::Utility(variant_error));
+            }
+            if pallet_name == "Identity" {
+                let variant_error =
+                    identity::Error::decode_with_metadata(cursor, 578u32, metadata)?;
+                return Ok(Error::Identity(variant_error));
+            }
+            if pallet_name == "Proxy" {
+                let variant_error = proxy::Error::decode_with_metadata(cursor, 587u32, metadata)?;
+                return Ok(Error::Proxy(variant_error));
+            }
+            if pallet_name == "Multisig" {
+                let variant_error =
+                    multisig::Error::decode_with_metadata(cursor, 591u32, metadata)?;
+                return Ok(Error::Multisig(variant_error));
+            }
+            if pallet_name == "Bounties" {
+                let variant_error =
+                    bounties::Error::decode_with_metadata(cursor, 595u32, metadata)?;
+                return Ok(Error::Bounties(variant_error));
+            }
+            if pallet_name == "ChildBounties" {
+                let variant_error =
+                    child_bounties::Error::decode_with_metadata(cursor, 598u32, metadata)?;
+                return Ok(Error::ChildBounties(variant_error));
+            }
+            if pallet_name == "Tips" {
+                let variant_error = tips::Error::decode_with_metadata(cursor, 600u32, metadata)?;
+                return Ok(Error::Tips(variant_error));
+            }
+            if pallet_name == "ElectionProviderMultiPhase" {
+                let variant_error = election_provider_multi_phase::Error::decode_with_metadata(
+                    cursor, 612u32, metadata,
+                )?;
+                return Ok(Error::ElectionProviderMultiPhase(variant_error));
+            }
+            if pallet_name == "VoterList" {
+                let variant_error =
+                    voter_list::Error::decode_with_metadata(cursor, 616u32, metadata)?;
+                return Ok(Error::VoterList(variant_error));
+            }
+            if pallet_name == "NominationPools" {
+                let variant_error =
+                    nomination_pools::Error::decode_with_metadata(cursor, 633u32, metadata)?;
+                return Ok(Error::NominationPools(variant_error));
+            }
+            if pallet_name == "FastUnstake" {
+                let variant_error =
+                    fast_unstake::Error::decode_with_metadata(cursor, 638u32, metadata)?;
+                return Ok(Error::FastUnstake(variant_error));
+            }
+            if pallet_name == "Configuration" {
+                let variant_error =
+                    configuration::Error::decode_with_metadata(cursor, 642u32, metadata)?;
+                return Ok(Error::Configuration(variant_error));
+            }
+            if pallet_name == "ParaInclusion" {
+                let variant_error =
+                    para_inclusion::Error::decode_with_metadata(cursor, 647u32, metadata)?;
+                return Ok(Error::ParaInclusion(variant_error));
+            }
+            if pallet_name == "ParaInherent" {
+                let variant_error =
+                    para_inherent::Error::decode_with_metadata(cursor, 653u32, metadata)?;
+                return Ok(Error::ParaInherent(variant_error));
+            }
+            if pallet_name == "Paras" {
+                let variant_error = paras::Error::decode_with_metadata(cursor, 680u32, metadata)?;
+                return Ok(Error::Paras(variant_error));
+            }
+            if pallet_name == "Ump" {
+                let variant_error = ump::Error::decode_with_metadata(cursor, 686u32, metadata)?;
+                return Ok(Error::Ump(variant_error));
+            }
+            if pallet_name == "Hrmp" {
+                let variant_error = hrmp::Error::decode_with_metadata(cursor, 695u32, metadata)?;
+                return Ok(Error::Hrmp(variant_error));
+            }
+            if pallet_name == "ParasDisputes" {
+                let variant_error =
+                    paras_disputes::Error::decode_with_metadata(cursor, 703u32, metadata)?;
+                return Ok(Error::ParasDisputes(variant_error));
+            }
+            if pallet_name == "Registrar" {
+                let variant_error =
+                    registrar::Error::decode_with_metadata(cursor, 705u32, metadata)?;
+                return Ok(Error::Registrar(variant_error));
+            }
+            if pallet_name == "Slots" {
+                let variant_error = slots::Error::decode_with_metadata(cursor, 707u32, metadata)?;
+                return Ok(Error::Slots(variant_error));
+            }
+            if pallet_name == "Auctions" {
+                let variant_error =
+                    auctions::Error::decode_with_metadata(cursor, 712u32, metadata)?;
+                return Ok(Error::Auctions(variant_error));
+            }
+            if pallet_name == "Crowdloan" {
+                let variant_error =
+                    crowdloan::Error::decode_with_metadata(cursor, 715u32, metadata)?;
+                return Ok(Error::Crowdloan(variant_error));
+            }
+            if pallet_name == "XcmPallet" {
+                let variant_error =
+                    xcm_pallet::Error::decode_with_metadata(cursor, 727u32, metadata)?;
+                return Ok(Error::XcmPallet(variant_error));
+            }
+            Err(::subxt::ext::scale_decode::Error::custom(format!(
+                "Pallet name '{}' not found in root Error enum",
+                pallet_name
+            ))
+            .into())
         }
     }
     pub fn constants() -> ConstantsApi {
