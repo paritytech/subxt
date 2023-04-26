@@ -61,10 +61,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(" Block {:?}", block_hash);
 
         // Ask for the extrinsics for this block.
-        let extrinsics = block.extrinsics().await?;
+        let body = block.body().await?;
 
         // Ask for the extrinsics for this block.
-        for extrinsic in extrinsics.iter() {
+        for extrinsic in body.extrinsics() {
             let extrinsic = extrinsic?;
             println!(
                 "  Extrinsic block index {:?}, pallet index {:?}, variant index {:?}",
