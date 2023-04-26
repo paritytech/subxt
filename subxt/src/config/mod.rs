@@ -124,10 +124,8 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
 /// implement subxt's Hasher and Header traits for some substrate structs
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
-    use primitive_types::{H256, U256};
-    use sp_core::Hasher as SpHasher;
-
     use super::*;
+    use primitive_types::{H256, U256};
 
     impl<N, H> Header for sp_runtime::generic::Header<N, H>
     where
@@ -147,7 +145,7 @@ mod substrate_impls {
         type Output = H256;
 
         fn hash(s: &[u8]) -> Self::Output {
-            <Self as SpHasher>::hash(s)
+            <Self as sp_core::Hasher>::hash(s)
         }
     }
 
@@ -155,7 +153,7 @@ mod substrate_impls {
         type Output = H256;
 
         fn hash(s: &[u8]) -> Self::Output {
-            <Self as SpHasher>::hash(s)
+            <Self as sp_core::Hasher>::hash(s)
         }
     }
 }
