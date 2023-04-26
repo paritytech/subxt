@@ -83,6 +83,11 @@ pub fn generate_calls(
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
+
+                impl #crate_path::blocks::StaticExtrinsic for #struct_name {
+                    const PALLET: &'static str = #pallet_name;
+                    const CALL: &'static str = #call_name;
+                }
             };
 
             let client_fn = quote! {
