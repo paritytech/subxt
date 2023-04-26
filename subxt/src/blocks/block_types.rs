@@ -5,15 +5,17 @@
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher, Header},
-    error::{BlockError, Error},
-    events, extrinsics,
+    error::{BlockError, Error, ExtrinsicError},
+    events,
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
     storage::Storage,
 };
+use codec::Decode;
 use derivative::Derivative;
+use frame_metadata::v15::RuntimeMetadataV15;
 use futures::lock::Mutex as AsyncMutex;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {
@@ -69,19 +71,15 @@ where
 
     /// Fetch and return the block body.
     pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
+        let ids = ExtrinsicIds::new(self.client.metadata().runtime_metadata())?;
         let block_details = self.block_details().await?;
 
         Ok(BlockBody::new(
             self.client.clone(),
             block_details,
             self.cached_events.clone(),
+            ids,
         ))
-    }
-
-    /// Return the extrinsics associated with the block.
-    pub async fn extrinsics(&self) -> Result<extrinsics::Extrinsics<T>, Error> {
-        let block_details = self.block_details().await?;
-        extrinsics::Extrinsics::new(self.client.metadata(), block_details.block)
     }
 
     /// Work with storage.
@@ -110,6 +108,7 @@ pub struct BlockBody<T: Config, C> {
     details: ChainBlockResponse<T>,
     client: C,
     cached_events: CachedEvents<T>,
+    ids: ExtrinsicIds,
 }
 
 impl<T, C> BlockBody<T, C>
@@ -121,59 +120,321 @@ where
         client: C,
         details: ChainBlockResponse<T>,
         cached_events: CachedEvents<T>,
+        ids: ExtrinsicIds,
     ) -> Self {
         Self {
             details,
             client,
             cached_events,
+            ids,
         }
     }
 
     /// Returns an iterator over the extrinsics in the block body.
-    pub fn extrinsics(&self) -> impl Iterator<Item = Extrinsic<'_, T, C>> {
-        self.details
-            .block
-            .extrinsics
+    // Dev note: The returned iterator is 'static + Send so that we can box it up and make
+    // use of it with our `FilterExtrinsic` stuff.
+    pub fn extrinsics(
+        &self,
+    ) -> impl Iterator<Item = Result<ExtrinsicDetails<T, C>, Error>> + Send + Sync + 'static {
+        let extrinsics = self.details.block.extrinsics.clone();
+        let num_extrinsics = self.details.block.extrinsics.len();
+        let client = self.client.clone();
+        let hash = self.details.block.header.hash();
+        let cached_events = self.cached_events.clone();
+        let ids = self.ids.clone();
+        let mut index = 0;
+
+        std::iter::from_fn(move || {
+            if index == num_extrinsics {
+                None
+            } else {
+                match ExtrinsicDetails::decode_from(
+                    index as u32,
+                    extrinsics[index].0.clone().into(),
+                    client.clone(),
+                    hash,
+                    cached_events.clone(),
+                    ids,
+                ) {
+                    Ok(extrinsic_details) => {
+                        index += 1;
+                        Some(Ok(extrinsic_details))
+                    }
+                    Err(e) => {
+                        index = num_extrinsics;
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+}
+
+/// The type IDs extracted from the metadata that represent the
+/// generic type parameters passed to the `UncheckedExtrinsic` from
+/// the substrate-based chain.
+#[derive(Debug, Copy, Clone)]
+pub(crate) struct ExtrinsicIds {
+    /// The address (source) of the extrinsic.
+    address: u32,
+    /// The extrinsic call type.
+    call: u32,
+    /// The signature of the extrinsic.
+    signature: u32,
+    /// The extra parameters of the extrinsic.
+    extra: u32,
+}
+
+impl ExtrinsicIds {
+    /// Extract the generic type parameters IDs from the extrinsic type.
+    fn new(metadata: &RuntimeMetadataV15) -> Result<Self, ExtrinsicError> {
+        const ADDRESS: &str = "Address";
+        const CALL: &str = "Call";
+        const SIGNATURE: &str = "Signature";
+        const EXTRA: &str = "Extra";
+
+        let id = metadata.extrinsic.ty.id;
+
+        let Some(ty) = metadata.types.resolve(id) else {
+            return Err(ExtrinsicError::MissingType);
+        };
+
+        let params: HashMap<_, _> = ty
+            .type_params
             .iter()
-            .enumerate()
-            .map(|(idx, e)| Extrinsic {
-                index: idx as u32,
-                bytes: &e.0,
-                client: self.client.clone(),
-                block_hash: self.details.block.header.hash(),
-                cached_events: self.cached_events.clone(),
-                _marker: std::marker::PhantomData,
+            .map(|ty_param| {
+                let Some(ty) = ty_param.ty else {
+                    return Err(ExtrinsicError::MissingType);
+                };
+
+                Ok((ty_param.name.as_str(), ty.id))
             })
+            .collect::<Result<_, _>>()?;
+
+        let Some(address) = params.get(ADDRESS) else {
+            return Err(ExtrinsicError::MissingType);
+        };
+        let Some(call) = params.get(CALL) else {
+            return Err(ExtrinsicError::MissingType);
+        };
+        let Some(signature) = params.get(SIGNATURE) else {
+            return Err(ExtrinsicError::MissingType);
+        };
+        let Some(extra) = params.get(EXTRA) else {
+            return Err(ExtrinsicError::MissingType);
+        };
+
+        Ok(ExtrinsicIds {
+            address: *address,
+            call: *call,
+            signature: *signature,
+            extra: *extra,
+        })
     }
 }
 
 /// A single extrinsic in a block.
-pub struct Extrinsic<'a, T: Config, C> {
+pub struct ExtrinsicDetails<T: Config, C> {
+    /// The index of the extrinsic in the block.
     index: u32,
-    bytes: &'a [u8],
-    client: C,
+    /// Extrinsic bytes.
+    bytes: Arc<[u8]>,
+    /// True if the extrinsic payload is signed.
+    is_signed: bool,
+    /// The start index in the `bytes` from which the address is encoded.
+    address_start_idx: usize,
+    /// The end index of the address in the encoded `bytes`.
+    address_end_idx: usize,
+    /// The start index in the `bytes` from which the call is encoded.
+    call_start_idx: usize,
+    /// The pallet index.
+    pallet_index: u8,
+    /// The variant index.
+    variant_index: u8,
+    /// The block hash of this extrinsic (needed to fetch events).
     block_hash: T::Hash,
+    /// Subxt client.
+    client: C,
+    /// Cached events.
     cached_events: CachedEvents<T>,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<'a, T, C> Extrinsic<'a, T, C>
+impl<T, C> ExtrinsicDetails<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
 {
+    // Attempt to dynamically decode a single extrinsic from the given input.
+    fn decode_from(
+        index: u32,
+        extrinsic_bytes: Arc<[u8]>,
+        client: C,
+        block_hash: T::Hash,
+        cached_events: CachedEvents<T>,
+        ids: ExtrinsicIds,
+    ) -> Result<ExtrinsicDetails<T, C>, Error> {
+        const SIGNATURE_MASK: u8 = 0b1000_0000;
+        const VERSION_MASK: u8 = 0b0111_1111;
+        const LATEST_EXTRINSIC_VERSION: u8 = 4;
+
+        let metadata = client.metadata();
+
+        // Extrinsic are encoded in memory in the following way:
+        //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+        //   - signature: [unknown TBD with metadata].
+        //   - extrinsic data
+        if extrinsic_bytes.is_empty() {
+            return Err(ExtrinsicError::InsufficientData.into());
+        }
+
+        let version = extrinsic_bytes[0] & VERSION_MASK;
+        if version != LATEST_EXTRINSIC_VERSION {
+            return Err(ExtrinsicError::UnsupportedVersion(version).into());
+        }
+
+        let is_signed = extrinsic_bytes[0] & SIGNATURE_MASK != 0;
+
+        // Skip over the first byte which denotes the version and signing.
+        let cursor = &mut &extrinsic_bytes[1..];
+
+        let mut address_start_idx = 0;
+        let mut address_end_idx = 0;
+
+        if is_signed {
+            address_start_idx = extrinsic_bytes.len() - cursor.len();
+
+            // Skip over the address, signature and extra fields.
+            scale_decode::visitor::decode_with_visitor(
+                cursor,
+                ids.address,
+                &metadata.runtime_metadata().types,
+                scale_decode::visitor::IgnoreVisitor,
+            )
+            .map_err(scale_decode::Error::from)?;
+            address_end_idx = extrinsic_bytes.len() - cursor.len();
+
+            scale_decode::visitor::decode_with_visitor(
+                cursor,
+                ids.signature,
+                &metadata.runtime_metadata().types,
+                scale_decode::visitor::IgnoreVisitor,
+            )
+            .map_err(scale_decode::Error::from)?;
+
+            scale_decode::visitor::decode_with_visitor(
+                cursor,
+                ids.extra,
+                &metadata.runtime_metadata().types,
+                scale_decode::visitor::IgnoreVisitor,
+            )
+            .map_err(scale_decode::Error::from)?;
+        }
+
+        let call_start_idx = extrinsic_bytes.len() - cursor.len();
+
+        // Ensure the provided bytes are sound.
+        scale_decode::visitor::decode_with_visitor(
+            &mut *cursor,
+            ids.call,
+            &metadata.runtime_metadata().types,
+            scale_decode::visitor::IgnoreVisitor,
+        )
+        .map_err(scale_decode::Error::from)?;
+
+        // Decode the pallet index, then the call variant.
+        let cursor = &mut &extrinsic_bytes[call_start_idx..];
+
+        if cursor.len() < 2 {
+            return Err(ExtrinsicError::InsufficientData.into());
+        }
+        let pallet_index = cursor[0];
+        let variant_index = cursor[1];
+
+        Ok(ExtrinsicDetails {
+            index,
+            bytes: extrinsic_bytes,
+            is_signed,
+            address_start_idx,
+            address_end_idx,
+            call_start_idx,
+            pallet_index,
+            variant_index,
+            block_hash,
+            client,
+            cached_events,
+            _marker: std::marker::PhantomData,
+        })
+    }
+
+    /// Is the extrinsic signed?
+    pub fn is_signed(&self) -> bool {
+        self.is_signed
+    }
+
     /// The index of the extrinsic in the block.
     pub fn index(&self) -> u32 {
         self.index
     }
 
-    /// The bytes of the extrinsic.
-    pub fn bytes(&self) -> &'a [u8] {
-        self.bytes
+    /// Return _all_ of the bytes representing this extrinsic, which include, in order:
+    /// - First byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+    /// - SignatureType (if the payload is signed)
+    ///   - Address
+    ///   - Signature
+    ///   - Extra fields
+    /// - Extrinsic call bytes
+    pub fn bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+
+    /// Return only the bytes representing this extrinsic call.
+    ///
+    /// # Note
+    ///
+    /// Please use `[Self::bytes]` if you want to get all extrinsic bytes.
+    pub fn call_bytes(&self) -> &[u8] {
+        &self.bytes[self.call_start_idx..]
+    }
+
+    /// Return only the bytes of the address that signed this extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Returns `None` if the extrinsic is not signed.
+    pub fn address_bytes(&self) -> Option<&[u8]> {
+        self.is_signed
+            .then(|| &self.bytes[self.address_start_idx..self.address_end_idx])
+    }
+
+    /// Attempt to statically decode the address bytes into the provided type.
+    ///
+    /// # Note
+    ///
+    /// Returns `None` if the extrinsic is not signed.
+    pub fn as_address<Address: Decode>(&self) -> Option<Result<Address, Error>> {
+        self.address_bytes()
+            .map(|bytes| Address::decode(&mut &bytes[..]).map_err(Error::Codec))
+    }
+
+    /// Attempt to statically decode the extrinsic call bytes into the provided type.
+    pub fn as_call<Call: Decode>(&self) -> Result<Call, Error> {
+        let bytes = &mut &self.call_bytes()[..];
+        Call::decode(bytes).map_err(Error::Codec)
+    }
+
+    /// The index of the pallet that the extrinsic originated from.
+    pub fn pallet_index(&self) -> u8 {
+        self.pallet_index
+    }
+
+    /// The index of the event variant that the event originated from.
+    pub fn variant_index(&self) -> u8 {
+        self.variant_index
     }
 }
 
-impl<'a, T, C> Extrinsic<'a, T, C>
+impl<T, C> ExtrinsicDetails<T, C>
 where
     T: Config,
     C: OnlineClientT<T>,

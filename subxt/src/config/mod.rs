@@ -54,7 +54,7 @@ pub trait Config: 'static {
     type Hasher: Debug + Hasher<Output = Self::Hash>;
 
     /// The block header.
-    type Header: Debug + Header<Hasher = Self::Hasher> + Send + DeserializeOwned;
+    type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
