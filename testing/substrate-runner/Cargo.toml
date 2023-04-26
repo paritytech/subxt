@@ -1,6 +1,6 @@
 [package]
 name = "substrate-runner"
-version = "0.28.0"
+version.workspace = true
 edition = "2021"
 publish = false
 
