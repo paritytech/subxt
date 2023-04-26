@@ -7,14 +7,14 @@ members = [
     "testing/test-runtime",
     "testing/integration-tests",
     "testing/ui-tests",
-    ## This cannot be a workspace dependency, because it requires
-    ## mutually exclusive jsonrpsee features to work, and workspaces
-    ## aggregate features used across crates:
-    # "testing/wasm-tests",
     "macro",
     "metadata",
     "subxt"
 ]
+
+# This cannot be a workspace dependency, because it requires
+# mutually exclusive jsonrpsee features to work, and workspaces
+# will aggregate features used across crates:
 exclude = ["testing/wasm-tests"]
 resolver = "2"
 
