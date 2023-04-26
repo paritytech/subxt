@@ -25,6 +25,9 @@ fn generate_runtime_api(
     // The snake case for the trait name.
     let trait_name_snake = format_ident!("{}", api.name.to_snake_case());
     let docs = &api.docs;
+    let docs: TokenStream2 = should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
 
     let structs_and_methods: Vec<_> = api.methods.iter().map(|method| {
         let method_name = format_ident!("{}", method.name);
@@ -94,7 +97,7 @@ fn generate_runtime_api(
             use super::root_mod;
             use super::#types_mod_ident;
 
-            #( #[doc = #docs ] )*
+            #docs
             pub struct #trait_name;
 
             impl #trait_name {
