@@ -37,8 +37,6 @@ async fn run() {
 
     // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
     // This may at least prevent this script from running so often (ie whenever we change Subxt).
-    #[derive(codec::Decode)]
-    pub struct Bytes(pub Vec<u8>);
     const V15_METADATA_VERSION: u32 = u32::MAX;
     let bytes = V15_METADATA_VERSION.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
@@ -56,14 +54,14 @@ async fn run() {
     };
     let raw_bytes = hex::decode(raw.trim_start_matches("0x"))
         .unwrap_or_else(|e| panic!("Failed to hex-decode metadata: {e}"));
-    let bytes: Option<Bytes> = Decode::decode(&mut &raw_bytes[..])
+    let bytes: Option<Vec<u8>> = Decode::decode(&mut &raw_bytes[..])
         .unwrap_or_else(|e| panic!("Failed to decode metadata bytes: {e}"));
     let metadata_bytes = bytes.expect("Metadata version not found");
 
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let metadata_path = Path::new(&out_dir).join("metadata.scale");
-    fs::write(&metadata_path, metadata_bytes.0).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
