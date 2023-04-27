@@ -75,10 +75,10 @@ fn generate_runtime_api(
 
         let method = quote!(
             #docs
-            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<inputs::#struct_name, #output> {
+            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, #output> {
                 #crate_path::runtime_api::Payload::new_static(
                     #runtime_fn_name,
-                    inputs::#struct_name { #( #param_names, )* },
+                    types::#struct_name { #( #param_names, )* },
                     [#(#call_hash,)*],
                 )
             }
@@ -104,8 +104,7 @@ fn generate_runtime_api(
                 #( #methods )*
             }
 
-            pub mod inputs {
-                use super::root_mod;
+            pub mod types {
                 use super::#types_mod_ident;
 
                 #( #structs )*
