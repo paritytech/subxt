@@ -13,14 +13,34 @@ use jsonrpsee::{
 };
 use std::time::Duration;
 
+/// The metadata version that is fetched from the node.
+pub enum MetadataVersion {
+    /// Version 14.
+    V14,
+    /// Latest unstable version of the metadata.
+    Unstable,
+}
+
+impl Default for MetadataVersion {
+    fn default() -> Self {
+        MetadataVersion::V14
+    }
+}
+
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
-pub fn fetch_metadata_bytes_blocking(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_bytes(url))
+pub fn fetch_metadata_bytes_blocking(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
+    tokio_block_on(fetch_metadata_bytes(url, version))
 }
 
 /// Returns the raw, 0x prefixed metadata hex from the provided URL, blocking the current thread.
-pub fn fetch_metadata_hex_blocking(url: &Uri) -> Result<String, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_hex(url))
+pub fn fetch_metadata_hex_blocking(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<String, FetchMetadataError> {
+    tokio_block_on(fetch_metadata_hex(url, version))
 }
 
 // Block on some tokio runtime for sync contexts
@@ -33,10 +53,13 @@ fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
 }
 
 /// Returns the metadata bytes from the provided URL.
-pub async fn fetch_metadata_bytes(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
+pub async fn fetch_metadata_bytes(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
     let bytes = match url.scheme_str() {
-        Some("http") | Some("https") => fetch_metadata_http(url).await,
-        Some("ws") | Some("wss") => fetch_metadata_ws(url).await,
+        Some("http") | Some("https") => fetch_metadata_http(url, version).await,
+        Some("ws") | Some("wss") => fetch_metadata_ws(url, version).await,
         invalid_scheme => {
             let scheme = invalid_scheme.unwrap_or("no scheme");
             Err(FetchMetadataError::InvalidScheme(scheme.to_owned()))
@@ -47,49 +70,63 @@ pub async fn fetch_metadata_bytes(url: &Uri) -> Result<Vec<u8>, FetchMetadataErr
 }
 
 /// Returns the raw, 0x prefixed metadata hex from the provided URL.
-pub async fn fetch_metadata_hex(url: &Uri) -> Result<String, FetchMetadataError> {
-    let bytes = fetch_metadata_bytes(url).await?;
+pub async fn fetch_metadata_hex(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<String, FetchMetadataError> {
+    let bytes = fetch_metadata_bytes(url, version).await?;
     let hex_data = format!("0x{}", hex::encode(bytes));
     Ok(hex_data)
 }
 
 /// Execute runtime API call and return the specified runtime metadata version.
-async fn fetch_latest_metadata(client: impl ClientT) -> Result<Vec<u8>, FetchMetadataError> {
-    const V15_METADATA_VERSION: u32 = u32::MAX;
-    let bytes = V15_METADATA_VERSION.encode();
+async fn fetch_metadata(
+    client: impl ClientT,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
+    const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
+    const LATEST_STABLE_VERSION: u32 = 14;
 
-    // Runtime API arguments are scale encoded hex encoded.
+    let version_num = match version {
+        MetadataVersion::V14 => 14,
+        MetadataVersion::Unstable => UNSTABLE_METADATA_VERSION,
+    };
+
+    // Fetch the latest stable version with `Metadata_metadata` API.
+    if version_num == LATEST_STABLE_VERSION {
+        let raw: String = client
+            .request("state_call", rpc_params!["Metadata_metadata", "0x"])
+            .await?;
+        let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
+        let bytes: frame_metadata::OpaqueMetadata = Decode::decode(&mut &raw_bytes[..])?;
+        return Ok(bytes.0);
+    }
+
+    // Other versions (including unstable) are fetched with `Metadata_metadata_at_version`.
+    let bytes = version_num.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
 
-    // Returns a hex(Option<frame_metadata::OpaqueMetadata>).
-    let result: Result<String, _> = client
+    let raw: String = client
         .request(
             "state_call",
             rpc_params!["Metadata_metadata_at_version", &version],
         )
-        .await;
-
-    if let Ok(raw) = result {
-        let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-
-        let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
-        let bytes = opaque.ok_or(FetchMetadataError::Other(
-            "Metadata version not found".into(),
-        ))?;
-
-        return Ok(bytes.0);
-    }
-
-    // The `Metadata_metadata_at_version` RPC failed, fall back to the `Metadata_metadata`.
-    let raw: String = client
-        .request("state_call", rpc_params!["Metadata_metadata", "0x"])
         .await?;
+
     let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-    let bytes: frame_metadata::OpaqueMetadata = Decode::decode(&mut &raw_bytes[..])?;
-    Ok(bytes.0)
+
+    let opaque: Option<frame_metadata::OpaqueMetadata> = Decode::decode(&mut &raw_bytes[..])?;
+    let bytes = opaque.ok_or(FetchMetadataError::Other(
+        "Metadata version not found".into(),
+    ))?;
+
+    return Ok(bytes.0);
 }
 
-async fn fetch_metadata_ws(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
+async fn fetch_metadata_ws(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
     let (sender, receiver) = WsTransportClientBuilder::default()
         .build(url.to_string().parse::<Uri>().unwrap())
         .await
@@ -100,13 +137,16 @@ async fn fetch_metadata_ws(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
-    fetch_latest_metadata(client).await
+    fetch_metadata(client, version).await
 }
 
-async fn fetch_metadata_http(url: &Uri) -> Result<Vec<u8>, FetchMetadataError> {
+async fn fetch_metadata_http(
+    url: &Uri,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
     let client = HttpClientBuilder::default()
         .request_timeout(Duration::from_secs(180))
         .build(url.to_string())?;
 
-    fetch_latest_metadata(client).await
+    fetch_metadata(client, version).await
 }

@@ -18,7 +18,7 @@ use crate::error::CodegenError;
 use crate::{
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-    utils::{fetch_metadata_bytes_blocking, Uri},
+    utils::{fetch_metadata_bytes_blocking, MetadataVersion, Uri},
     CratePath,
 };
 use codec::Decode;
@@ -95,7 +95,11 @@ pub fn generate_runtime_api_from_url(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let bytes = fetch_metadata_bytes_blocking(url)?;
+    // Fetch latest unstable version, if that fails fall back to the latest stable.
+    let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
+        Ok(bytes) => bytes,
+        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::V14)?,
+    };
 
     generate_runtime_api_from_bytes(
         item_mod,

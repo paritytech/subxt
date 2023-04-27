@@ -43,12 +43,18 @@ pub struct Opts {
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     match opts.pallet {
-        Some(pallet) => handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str()).await,
-        None => handle_full_metadata(opts.nodes.as_slice()).await,
+        Some(pallet) => {
+            handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str(), opts.version).await
+        }
+        None => handle_full_metadata(opts.nodes.as_slice(), opts.version).await,
     }
 }
 
-async fn handle_pallet_metadata(nodes: &[Uri], name: &str) -> color_eyre::Result<()> {
+async fn handle_pallet_metadata(
+    nodes: &[Uri],
+    name: &str,
+    version: MetadataVersion,
+) -> color_eyre::Result<()> {
     #[derive(Serialize, Deserialize, Default)]
     #[serde(rename_all = "camelCase")]
     struct CompatibilityPallet {
@@ -58,7 +64,7 @@ async fn handle_pallet_metadata(nodes: &[Uri], name: &str) -> color_eyre::Result
 
     let mut compatibility: CompatibilityPallet = Default::default();
     for node in nodes.iter() {
-        let metadata = fetch_runtime_metadata(node).await?;
+        let metadata = fetch_runtime_metadata(node, version).await?;
 
         match metadata.pallets.iter().find(|pallet| pallet.name == name) {
             Some(pallet_metadata) => {
@@ -87,10 +93,10 @@ async fn handle_pallet_metadata(nodes: &[Uri], name: &str) -> color_eyre::Result
     Ok(())
 }
 
-async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
+async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_eyre::Result<()> {
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
-        let metadata = fetch_runtime_metadata(node).await?;
+        let metadata = fetch_runtime_metadata(node, version).await?;
         let hash = get_metadata_hash(&metadata);
         let hex_hash = hex::encode(hash);
         println!("Node {node:?} has metadata hash {hex_hash:?}",);
@@ -110,8 +116,11 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
     Ok(())
 }
 
-async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV15> {
-    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url).await?;
+async fn fetch_runtime_metadata(
+    url: &Uri,
+    version: MetadataVersion,
+) -> color_eyre::Result<RuntimeMetadataV15> {
+    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version.into()).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
     if metadata.0 != META_RESERVED {
