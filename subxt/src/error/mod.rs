@@ -57,9 +57,6 @@ pub enum Error {
     /// Block related error.
     #[error("Block error: {0}")]
     Block(#[from] BlockError),
-    /// Extrinsic related error.
-    #[error("Extrinsic error: {0}")]
-    Extrinsic(#[from] ExtrinsicError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
     StorageAddress(#[from] StorageAddressError),
@@ -105,20 +102,6 @@ pub enum BlockError {
     /// An error containing the hash of the block that was not found.
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
     NotFound(String),
-}
-
-impl BlockError {
-    /// Produce an error that a block with the given hash cannot be found.
-    pub fn not_found(hash: impl AsRef<[u8]>) -> BlockError {
-        let hash = format!("0x{}", hex::encode(hash));
-        BlockError::NotFound(hash)
-    }
-}
-
-/// Extrinsic error.
-#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
-#[non_exhaustive]
-pub enum ExtrinsicError {
     /// Extrinsic type ID cannot be resolved with the provided metadata.
     #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
     MissingType,
@@ -132,6 +115,14 @@ pub enum ExtrinsicError {
     /// Decoding error.
     #[error("Cannot decode extrinsic: {0}")]
     DecodingError(codec::Error),
+}
+
+impl BlockError {
+    /// Produce an error that a block with the given hash cannot be found.
+    pub fn not_found(hash: impl AsRef<[u8]>) -> BlockError {
+        let hash = format!("0x{}", hex::encode(hash));
+        BlockError::NotFound(hash)
+    }
 }
 
 /// Transaction error.

@@ -5,7 +5,7 @@
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher, Header},
-    error::{BlockError, Error, ExtrinsicError},
+    error::{BlockError, Error},
     events,
     metadata::{DecodeWithMetadata, ExtrinsicMetadata},
     rpc::types::ChainBlockResponse,
@@ -218,7 +218,7 @@ pub(crate) struct ExtrinsicIds {
 
 impl ExtrinsicIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
-    fn new(metadata: &RuntimeMetadataV15) -> Result<Self, ExtrinsicError> {
+    fn new(metadata: &RuntimeMetadataV15) -> Result<Self, BlockError> {
         const ADDRESS: &str = "Address";
         const CALL: &str = "Call";
         const SIGNATURE: &str = "Signature";
@@ -227,7 +227,7 @@ impl ExtrinsicIds {
         let id = metadata.extrinsic.ty.id;
 
         let Some(ty) = metadata.types.resolve(id) else {
-            return Err(ExtrinsicError::MissingType);
+            return Err(BlockError::MissingType);
         };
 
         let params: HashMap<_, _> = ty
@@ -235,7 +235,7 @@ impl ExtrinsicIds {
             .iter()
             .map(|ty_param| {
                 let Some(ty) = ty_param.ty else {
-                    return Err(ExtrinsicError::MissingType);
+                    return Err(BlockError::MissingType);
                 };
 
                 Ok((ty_param.name.as_str(), ty.id))
@@ -243,16 +243,16 @@ impl ExtrinsicIds {
             .collect::<Result<_, _>>()?;
 
         let Some(address) = params.get(ADDRESS) else {
-            return Err(ExtrinsicError::MissingType);
+            return Err(BlockError::MissingType);
         };
         let Some(call) = params.get(CALL) else {
-            return Err(ExtrinsicError::MissingType);
+            return Err(BlockError::MissingType);
         };
         let Some(signature) = params.get(SIGNATURE) else {
-            return Err(ExtrinsicError::MissingType);
+            return Err(BlockError::MissingType);
         };
         let Some(extra) = params.get(EXTRA) else {
-            return Err(ExtrinsicError::MissingType);
+            return Err(BlockError::MissingType);
         };
 
         Ok(ExtrinsicIds {
@@ -336,12 +336,12 @@ where
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
         if extrinsic_bytes.is_empty() {
-            return Err(ExtrinsicError::InsufficientData.into());
+            return Err(BlockError::InsufficientData.into());
         }
 
         let version = extrinsic_bytes[0] & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
-            return Err(ExtrinsicError::UnsupportedVersion(version).into());
+            return Err(BlockError::UnsupportedVersion(version).into());
         }
 
         let is_signed = extrinsic_bytes[0] & SIGNATURE_MASK != 0;
@@ -397,7 +397,7 @@ where
         let cursor = &mut &extrinsic_bytes[call_start_idx..];
 
         if cursor.len() < 2 {
-            return Err(ExtrinsicError::InsufficientData.into());
+            return Err(BlockError::InsufficientData.into());
         }
         let pallet_index = cursor[0];
         let variant_index = cursor[1];
