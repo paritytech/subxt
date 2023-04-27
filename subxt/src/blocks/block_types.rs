@@ -7,11 +7,12 @@ use crate::{
     config::{Config, Hasher, Header},
     error::{BlockError, Error, ExtrinsicError},
     events,
+    metadata::{DecodeWithMetadata, ExtrinsicMetadata},
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
     storage::Storage,
+    Metadata,
 };
-use codec::Decode;
 use derivative::Derivative;
 use frame_metadata::v15::RuntimeMetadataV15;
 use futures::lock::Mutex as AsyncMutex;
@@ -142,7 +143,7 @@ where
         let client = self.client.clone();
         let hash = self.details.block.header.hash();
         let cached_events = self.cached_events.clone();
-        let ids = self.ids.clone();
+        let ids = self.ids;
         let mut index = 0;
 
         std::iter::from_fn(move || {
@@ -168,6 +169,35 @@ where
                 }
             }
         })
+    }
+
+    /// Iterate through the extrinsics using metadata to dynamically decode and skip
+    /// them, and return only those which should decode to the provided `E` type.
+    /// If an error occurs, all subsequent iterations return `None`.
+    pub fn find_extrinsic<E: StaticExtrinsic>(
+        &self,
+    ) -> impl Iterator<Item = Result<E, Error>> + '_ {
+        self.extrinsics().filter_map(|e| {
+            e.and_then(|e| e.as_extrinsic::<E>().map_err(Into::into))
+                .transpose()
+        })
+    }
+
+    /// Iterate through the extrinsics using metadata to dynamically decode and skip
+    /// them, and return the first extrinsic found which decodes to the provided `E` type.
+    pub fn find_first_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+        self.find_extrinsic::<E>().next().transpose()
+    }
+
+    /// Iterate through the extrinsics using metadata to dynamically decode and skip
+    /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
+    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+        self.find_extrinsic::<E>().last().transpose()
+    }
+
+    /// Find an extrinsics that decodes to the type provided. Returns true if it was found.
+    pub fn has_extrinsic<E: StaticExtrinsic>(&self) -> Result<bool, Error> {
+        Ok(self.find_extrinsic::<E>().next().transpose()?.is_some())
     }
 }
 
@@ -234,6 +264,24 @@ impl ExtrinsicIds {
     }
 }
 
+/// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
+///
+/// Generated API structures that represent an extrinsic implement this trait.
+///
+/// The trait is utilized to decode emitted extrinsics from a block, via obtaining the
+/// form of the `Extrinsic` from the metadata.
+pub trait StaticExtrinsic: DecodeAsFields {
+    /// Pallet name.
+    const PALLET: &'static str;
+    /// Call name.
+    const CALL: &'static str;
+
+    /// Returns true if the given pallet and call names match this extrinsic.
+    fn is_extrinsic(pallet: &str, call: &str) -> bool {
+        Self::PALLET == pallet && Self::CALL == call
+    }
+}
+
 /// A single extrinsic in a block.
 pub struct ExtrinsicDetails<T: Config, C> {
     /// The index of the extrinsic in the block.
@@ -258,25 +306,9 @@ pub struct ExtrinsicDetails<T: Config, C> {
     client: C,
     /// Cached events.
     cached_events: CachedEvents<T>,
+    /// Subxt metadata to fetch the extrinsic metadata.
+    metadata: Metadata,
     _marker: std::marker::PhantomData<T>,
-}
-
-/// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
-///
-/// Generated API structures that represent an extrinsic implement this trait.
-///
-/// The trait is utilized to decode emitted extrinsics from a block, via obtaining the
-/// form of the `Extrinsic` from the metadata.
-pub trait StaticExtrinsic: DecodeAsFields {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Call name.
-    const CALL: &'static str;
-
-    /// Returns true if the given pallet and call names match this extrinsic.
-    fn is_extrinsic(pallet: &str, call: &str) -> bool {
-        Self::PALLET == pallet && Self::CALL == call
-    }
 }
 
 impl<T, C> ExtrinsicDetails<T, C>
@@ -382,6 +414,7 @@ where
             block_hash,
             client,
             cached_events,
+            metadata,
             _marker: std::marker::PhantomData,
         })
     }
@@ -407,13 +440,28 @@ where
         &self.bytes
     }
 
-    /// Return only the bytes representing this extrinsic call.
+    /// Return only the bytes representing this extrinsic call:
+    /// - First byte is the pallet index
+    /// - Second byte is the variant (call) index
+    /// - Followed by field bytes.
     ///
     /// # Note
     ///
-    /// Please use `[Self::bytes]` if you want to get all extrinsic bytes.
+    /// Please use [`Self::bytes`] if you want to get all extrinsic bytes.
     pub fn call_bytes(&self) -> &[u8] {
         &self.bytes[self.call_start_idx..]
+    }
+
+    /// Return the bytes representing the fields stored in this extrinsic.
+    ///
+    /// # Note
+    ///
+    /// This is a subset of [`Self::call_bytes`] that does not include the
+    /// first two bytes that denote the pallet index and the variant index.
+    pub fn field_bytes(&self) -> &[u8] {
+        // Note: this cannot panic because we checked the extrinsic bytes
+        // to contain at least two bytes.
+        &self.call_bytes()[2..]
     }
 
     /// Return only the bytes of the address that signed this extrinsic.
@@ -426,31 +474,124 @@ where
             .then(|| &self.bytes[self.address_start_idx..self.address_end_idx])
     }
 
-    /// Attempt to statically decode the address bytes into the provided type.
-    ///
-    /// # Note
-    ///
-    /// Returns `None` if the extrinsic is not signed.
-    pub fn as_address<Address: Decode>(&self) -> Option<Result<Address, Error>> {
-        self.address_bytes()
-            .map(|bytes| Address::decode(&mut &bytes[..]).map_err(Error::Codec))
-    }
-
-    /// Attempt to statically decode the extrinsic call bytes into the provided type.
-    pub fn as_call<Call: Decode>(&self) -> Result<Call, Error> {
-        let bytes = &mut &self.call_bytes()[..];
-        Call::decode(bytes).map_err(Error::Codec)
-    }
-
     /// The index of the pallet that the extrinsic originated from.
     pub fn pallet_index(&self) -> u8 {
         self.pallet_index
     }
 
-    /// The index of the event variant that the event originated from.
+    /// The index of the extrinsic variant that the extrinsic originated from.
     pub fn variant_index(&self) -> u8 {
         self.variant_index
     }
+
+    /// The name of the pallet from whence the extrinsic originated.
+    pub fn pallet_name(&self) -> &str {
+        self.extrinsic_metadata().pallet()
+    }
+
+    /// The name of the call (ie the name of the variant that it corresponds to).
+    pub fn variant_name(&self) -> &str {
+        self.extrinsic_metadata().call()
+    }
+
+    /// Fetch the metadata for this extrinsic.
+    pub fn extrinsic_metadata(&self) -> &ExtrinsicMetadata {
+        self.metadata
+            .extrinsic(self.pallet_index(), self.variant_index())
+            .expect("this must exist in order to have produced the ExtrinsicDetails")
+    }
+
+    /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
+    /// type which represents the named or unnamed fields that were
+    /// present in the extrinsic.
+    pub fn field_values(
+        &self,
+    ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
+        let bytes = &mut self.field_bytes();
+        let extrinsic_metadata = self.extrinsic_metadata();
+
+        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
+            bytes,
+            extrinsic_metadata.fields(),
+            &self.metadata.runtime_metadata().types,
+        )?;
+
+        Ok(decoded)
+    }
+
+    /// Attempt to statically decode these [`ExtrinsicDetails`] into a type representing the extrinsic
+    /// fields. This leans directly on [`codec::Decode`]. You can also attempt to decode the entirety
+    /// of the extrinsic using [`Self::as_root_extrinsic()`], which is more lenient because it's able
+    /// to lean on [`scale_decode::DecodeAsType`].
+    pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+        let extrinsic_metadata = self.extrinsic_metadata();
+        if extrinsic_metadata.pallet() == E::PALLET && extrinsic_metadata.call() == E::CALL {
+            let decoded = E::decode_as_fields(
+                &mut self.field_bytes(),
+                extrinsic_metadata.fields(),
+                self.metadata.types(),
+            )?;
+            Ok(Some(decoded))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Attempt to decode these [`ExtrinsicDetails`] into a pallet extrinsic type (which includes
+    /// the pallet enum variants as well as the extrinsic fields). These extrinsics can be found in
+    /// the static codegen under a path like `pallet_name::Call`.
+    pub fn as_pallet_extrinsic<E: DecodeWithMetadata>(&self) -> Result<E, Error> {
+        let pallet = self.metadata.pallet(self.pallet_name())?;
+        let extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
+            Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
+                pallet.index(),
+                self.variant_index(),
+            ))
+        })?;
+
+        // Ignore the root enum index, so start 1 byte after that:
+        let decoded =
+            E::decode_with_metadata(&mut &self.call_bytes()[1..], extrinsic_ty, &self.metadata)?;
+        Ok(decoded)
+    }
+
+    /// Attempt to decode these [`ExtrinsicDetails`] into a root extrinsic type (which includes
+    /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
+    /// type for this is exposed via static codegen as a root level `Call` type.
+    pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
+        let pallet = self.metadata.pallet(self.pallet_name())?;
+        let pallet_extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
+            Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
+                pallet.index(),
+                self.variant_index(),
+            ))
+        })?;
+
+        // Ignore root enum index.
+        E::root_extrinsic(
+            &self.call_bytes()[1..],
+            self.pallet_name(),
+            pallet_extrinsic_ty,
+            &self.metadata,
+        )
+    }
+}
+
+/// This trait is implemented on the statically generated root extrinsic type, so that we're able
+/// to decode it properly via a pallet that impls `DecodeAsMetadata`. This is necessary
+/// because the "root extrinsic" type is generated using pallet info but doesn't actually exist in the
+/// metadata types, so we have no easy way to decode things into it via type information and need a
+/// little help via codegen.
+#[doc(hidden)]
+pub trait RootExtrinsic: Sized {
+    /// Given details of the pallet extrinsic we want to decode, and the name of the pallet, try to hand
+    /// back a "root extrinsic".
+    fn root_extrinsic(
+        pallet_bytes: &[u8],
+        pallet_name: &str,
+        pallet_extrinsic_ty: u32,
+        metadata: &Metadata,
+    ) -> Result<Self, Error>;
 }
 
 impl<T, C> ExtrinsicDetails<T, C>
