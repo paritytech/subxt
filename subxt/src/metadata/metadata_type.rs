@@ -564,6 +564,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             let pallet_index = variant.index;
 
             // Pallet variants must contain one single call variant.
+            // In the following form:
+            //
+            // enum RuntimeCall {
+            //   Pallet(pallet_call)
+            // }
             if variant.fields.len() != 1 {
                 return Err(InvalidMetadataError::InvalidExtrinsicVariant(pallet_index));
             }
@@ -613,6 +618,30 @@ mod tests {
     use scale_info::{meta_type, TypeInfo};
 
     fn load_metadata() -> Metadata {
+        // Extrinsic needs to contain at least the generic type parameter "Call"
+        // for the metadata to be valid.
+        // The "Call" type from the metadata is used to decode extrinsics.
+        // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Call> {
+            call: Call,
+        }
+        // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+        // Each pallet must contain one single variant.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum RuntimeCall {
+            PalletName(Pallet),
+        }
+        // The calls of the pallet.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum Pallet {
+            #[allow(unused)]
+            SomeCall,
+        }
+
         #[allow(dead_code)]
         #[allow(non_camel_case_types)]
         #[derive(TypeInfo)]
@@ -651,7 +680,7 @@ mod tests {
         let metadata = RuntimeMetadataV15::new(
             vec![pallet],
             ExtrinsicMetadata {
-                ty: meta_type::<()>(),
+                ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
                 version: 0,
                 signed_extensions: vec![],
             },
