@@ -56,6 +56,11 @@ pub struct Opts {
     /// Defaults to `false` (default trait derivations are provided).
     #[clap(long)]
     no_default_derives: bool,
+    /// Do not provide default substitutions for the generated types.
+    ///
+    /// Defaults to `false` (default substitutions are provided).
+    #[clap(long)]
+    no_default_substitutions: bool,
 }
 
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
@@ -96,6 +101,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         opts.no_docs,
         opts.runtime_types_only,
         opts.no_default_derives,
+        opts.no_default_substitutions,
     )?;
     Ok(())
 }
@@ -121,6 +127,7 @@ fn codegen(
     no_docs: bool,
     runtime_types_only: bool,
     no_default_derives: bool,
+    no_default_substitutions: bool,
 ) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
@@ -155,7 +162,12 @@ fn codegen(
         derives.extend_for_type(ty, vec![], std::iter::once(attribute.0));
     }
 
-    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    let mut type_substitutes = if no_default_substitutions {
+        TypeSubstitutes::new()
+    } else {
+        TypeSubstitutes::with_default_substitutes(&crate_path)
+    };
+
     for (from_str, to_str) in substitute_types {
         let from: syn::Path = syn::parse_str(&from_str)?;
         let to: syn::Path = syn::parse_str(&to_str)?;
