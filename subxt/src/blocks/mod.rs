@@ -10,4 +10,6 @@ mod extrinsic_types;
 
 pub use block_types::Block;
 pub use blocks_client::{subscribe_to_block_headers_filling_in_gaps, BlocksClient};
-pub use extrinsic_types::{ExtrinsicDetails, ExtrinsicEvents, RootExtrinsic, StaticExtrinsic};
+pub use extrinsic_types::{
+    ExtrinsicDetails, ExtrinsicEvents, Extrinsics, RootExtrinsic, StaticExtrinsic,
+};
