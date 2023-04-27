@@ -92,7 +92,7 @@ where
         let extrinsics = self.extrinsics.clone();
         let num_extrinsics = self.extrinsics.len();
         let client = self.client.clone();
-        let hash = self.hash.clone();
+        let hash = self.hash;
         let cached_events = self.cached_events.clone();
         let ids = self.ids;
         let mut index = 0;

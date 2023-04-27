@@ -61,14 +61,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!(" Block {:?}", block_hash);
 
         // Ask for the extrinsics for this block.
-        let body = block.body().await?;
+        let extrinsics = block.body().await?.extrinsics();
 
-        let transfer_tx = body.find_first_extrinsic::<polkadot::balances::calls::Transfer>();
+        let transfer_tx = extrinsics.find_first::<polkadot::balances::calls::Transfer>();
         println!(" Transfer tx: {:?}", transfer_tx);
 
         // Ask for the extrinsics for this block.
-        for extrinsic in body.extrinsics() {
+        for extrinsic in extrinsics.iter() {
             let extrinsic = extrinsic?;
+
             println!(
                 "  Extrinsic block index {:?}, pallet index {:?}, variant index {:?}",
                 extrinsic.index(),
