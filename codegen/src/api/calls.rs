@@ -111,6 +111,7 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
+    let call_type = type_gen.resolve_type_path(call.ty.id);
     let call_ty = type_gen.resolve_type(call.ty.id);
     let docs = &call_ty.docs;
     let docs = should_gen_docs
@@ -119,6 +120,7 @@ pub fn generate_calls(
 
     Ok(quote! {
         #docs
+        pub type Call = #call_type;
         pub mod calls {
             use super::root_mod;
             use super::#types_mod_ident;

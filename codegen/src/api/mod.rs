@@ -353,6 +353,26 @@ impl RuntimeGenerator {
             }
         };
 
+        let outer_extrinsic_variants = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name);
+            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+
+            p.calls.as_ref().map(|_| {
+                quote! {
+                    #[codec(index = #index)]
+                    #variant_name(#mod_name::Call),
+                }
+            })
+        });
+
+        let outer_extrinsic = quote! {
+            #default_derives
+            pub enum Call {
+                #( #outer_extrinsic_variants )*
+            }
+        };
+
         let root_event_if_arms = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name_str = &p.name;
             let variant_name = format_ident!("{}", variant_name_str);
@@ -362,6 +382,24 @@ impl RuntimeGenerator {
                 quote! {
                     if pallet_name == #variant_name_str {
                         return Ok(Event::#variant_name(#mod_name::Event::decode_with_metadata(
+                            &mut &*pallet_bytes,
+                            pallet_ty,
+                            metadata
+                        )?));
+                    }
+                }
+            })
+        });
+
+        let root_extrinsic_if_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
+            p.calls.as_ref().map(|_| {
+                // An 'if' arm for the RootExtrinsic impl to match this variant name:
+                quote! {
+                    if pallet_name == #variant_name_str {
+                        return Ok(Call::#variant_name(#mod_name::Call::decode_with_metadata(
                             &mut &*pallet_bytes,
                             pallet_ty,
                             metadata
@@ -421,6 +459,16 @@ impl RuntimeGenerator {
                         use #crate_path::metadata::DecodeWithMetadata;
                         #( #root_event_if_arms )*
                         Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Event enum", pallet_name)).into())
+                    }
+                }
+
+                #outer_extrinsic
+
+                impl #crate_path::blocks::RootExtrinsic for Call {
+                    fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        #( #root_extrinsic_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Call enum", pallet_name)).into())
                     }
                 }
 
