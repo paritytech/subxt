@@ -34,7 +34,7 @@
 //! // Default module derivatives.
 //! let mut derives = DerivesRegistry::with_default_derives(&CratePath::default());
 //! // Default type substitutes.
-//! let substs = TypeSubstitutes::new(&CratePath::default());
+//! let substs = TypeSubstitutes::with_default_substitutes(&CratePath::default());
 //! // Generate the Runtime API.
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
 //! // Include metadata documentation in the Runtime API.

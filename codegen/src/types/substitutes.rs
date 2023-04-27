@@ -37,9 +37,25 @@ macro_rules! path_segments {
     }
 }
 
+impl Default for TypeSubstitutes {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TypeSubstitutes {
-    /// Create a new set of type substitutes with some default substitutions in place.
-    pub fn new(crate_path: &CratePath) -> Self {
+    /// Creates a new `TypeSubstitutes` with no default derives.
+    pub fn new() -> Self {
+        Self {
+            substitutes: HashMap::new(),
+        }
+    }
+
+    /// Creates a new `TypeSubstitutes` with some default substitutions in place.
+    ///
+    /// The `crate_path` denotes the `subxt` crate access path in the
+    /// generated code.
+    pub fn with_default_substitutes(crate_path: &CratePath) -> Self {
         // Some hardcoded default type substitutes, can be overridden by user
         let defaults = [
             (
@@ -163,11 +179,11 @@ impl TypeSubstitutes {
         src_path: &syn::Path,
         target_path: &syn::Path,
     ) -> Result<TypeParamMapping, TypeSubstitutionError> {
-        let Some(syn::PathSegment { arguments: src_path_args, ..}) = src_path.segments.last() else {
-            return Err(TypeSubstitutionError::EmptySubstitutePath(src_path.span()))
+        let Some(syn::PathSegment { arguments: src_path_args, .. }) = src_path.segments.last() else {
+            return Err(TypeSubstitutionError::EmptySubstitutePath(src_path.span()));
         };
-        let Some(syn::PathSegment { arguments: target_path_args, ..}) = target_path.segments.last() else {
-            return Err(TypeSubstitutionError::EmptySubstitutePath(target_path.span()))
+        let Some(syn::PathSegment { arguments: target_path_args, .. }) = target_path.segments.last() else {
+            return Err(TypeSubstitutionError::EmptySubstitutePath(target_path.span()));
         };
 
         // Get hold of the generic args for the "from" type, erroring if they aren't valid.
@@ -331,14 +347,14 @@ fn replace_path_params_recursively<I: Borrow<syn::Ident>, P: Borrow<TypePath>>(
 ) {
     for segment in &mut path.segments {
         let syn::PathArguments::AngleBracketed(args) = &mut segment.arguments else {
-            continue
+            continue;
         };
         for arg in &mut args.args {
             let syn::GenericArgument::Type(ty) = arg else {
-                continue
+                continue;
             };
             let syn::Type::Path(path) = ty else {
-                continue
+                continue;
             };
             if let Some(ident) = get_ident_from_type_path(path) {
                 if let Some((_, replacement)) = params.iter().find(|(i, _)| ident == i.borrow()) {
@@ -356,7 +372,7 @@ fn replace_path_params_recursively<I: Borrow<syn::Ident>, P: Borrow<TypePath>>(
 fn get_valid_to_substitution_type(arg: &syn::GenericArgument) -> Option<&syn::TypePath> {
     let syn::GenericArgument::Type(syn::Type::Path(type_path)) = arg else {
         // We are looking for a type, not a lifetime or anything else
-        return None
+        return None;
     };
     Some(type_path)
 }
@@ -366,7 +382,7 @@ fn get_valid_to_substitution_type(arg: &syn::GenericArgument) -> Option<&syn::Ty
 fn get_valid_from_substitution_type(arg: &syn::GenericArgument) -> Option<&syn::Ident> {
     let syn::GenericArgument::Type(syn::Type::Path(type_path)) = arg else {
         // We are looking for a type, not a lifetime or anything else
-        return None
+        return None;
     };
     get_ident_from_type_path(type_path)
 }
@@ -387,7 +403,7 @@ fn get_ident_from_type_path(type_path: &syn::TypePath) -> Option<&syn::Ident> {
     }
     let Some(segment) = type_path.path.segments.last() else {
         // Get the single ident (should be infallible)
-        return None
+        return None;
     };
     if !segment.arguments.is_empty() {
         // The ident shouldn't have any of it's own generic args like A<B, C>
