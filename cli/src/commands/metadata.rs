@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::utils::FileOrUrl;
+use crate::utils::MetadataVersion;
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre;
@@ -25,6 +26,19 @@ pub struct Opts {
     /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     pallets: Option<Vec<String>>,
+    /// Specify the metadata version.
+    ///
+    ///  - unstable:
+    ///
+    ///    Use the latest unstable metadata of the node.
+    ///
+    ///  - number
+    ///
+    ///    Use this specific metadata version.
+    ///
+    /// Defaults to 14.
+    #[clap(long = "version", default_value = "14")]
+    version: MetadataVersion,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {

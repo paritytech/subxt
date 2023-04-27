@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::utils::FileOrUrl;
+use crate::utils::{FileOrUrl, MetadataVersion};
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
@@ -16,6 +16,19 @@ use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
 pub struct Opts {
     #[command(flatten)]
     file_or_url: FileOrUrl,
+    /// Specify the metadata version.
+    ///
+    ///  - unstable:
+    ///
+    ///    Use the latest unstable metadata of the node.
+    ///
+    ///  - number
+    ///
+    ///    Use this specific metadata version.
+    ///
+    /// Defaults to 14.
+    #[clap(long = "version", default_value = "14")]
+    version: MetadataVersion,
     /// Additional derives
     #[clap(long = "derive")]
     derives: Vec<String>,

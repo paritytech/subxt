@@ -43,3 +43,32 @@ impl FileOrUrl {
         }
     }
 }
+
+/// The metadata version to fetch from the node.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MetadataVersion {
+    version: u32,
+}
+
+impl std::str::FromStr for MetadataVersion {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        const SUPPORTED_VERSIONS: &[u32] = &[14];
+
+        match input {
+            "unstable" => Ok(MetadataVersion { version: u32::MAX }),
+            version => {
+                let num: u32 = version
+                    .parse()
+                    .map_err(|_| format!("Invalid metadata version specified {:?}. Subxt supports the following versions {:?}", version, SUPPORTED_VERSIONS))?;
+
+                if !SUPPORTED_VERSIONS.iter().any(|&value| value == num) {
+                    return Err(format!("Invalid metadata version specified {:?}. Subxt supports the following versions {:?}", version, SUPPORTED_VERSIONS));
+                }
+
+                Ok(MetadataVersion { version: num })
+            }
+        }
+    }
+}

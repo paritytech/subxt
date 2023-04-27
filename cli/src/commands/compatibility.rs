@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::MetadataVersion;
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::{self, WrapErr};
@@ -25,6 +26,19 @@ pub struct Opts {
     /// The validation will omit the full metadata check and focus instead on the pallet.
     #[clap(long, value_parser)]
     pallet: Option<String>,
+    /// Specify the metadata version.
+    ///
+    ///  - unstable:
+    ///
+    ///    Use the latest unstable metadata of the node.
+    ///
+    ///  - number
+    ///
+    ///    Use this specific metadata version.
+    ///
+    /// Defaults to 14.
+    #[clap(long = "version", default_value = "14")]
+    version: MetadataVersion,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
