@@ -3,12 +3,12 @@
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
+use codec::Decode;
 use color_eyre::eyre::{self, WrapErr};
 use frame_metadata::{
     v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
 };
 use jsonrpsee::client_transport::ws::Uri;
-use scale::Decode;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_metadata::{get_metadata_hash, get_pallet_hash, metadata_v14_to_latest};
