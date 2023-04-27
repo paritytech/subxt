@@ -13,7 +13,7 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
-use subxt::{tx::PairSigner, Config, OnlineClient, PolkadotConfig};
+use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -73,14 +73,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 extrinsic.variant_index()
             );
 
-            let call: polkadot::runtime_types::polkadot_runtime::RuntimeCall =
-                extrinsic.as_call()?;
-            println!("  Extrinsic call: {:?}", call);
+            let root_extrinsic = extrinsic.as_root_extrinsic::<polkadot::Call>();
+            println!("   As root extrinsic {:?}\n", root_extrinsic);
 
-            if extrinsic.is_signed() {
-                let address = extrinsic.as_address::<<PolkadotConfig as Config>::Address>();
-                println!("  Extrinsic address: {:?}", address);
-            }
+            let pallet_extrinsic = extrinsic
+                .as_pallet_extrinsic::<polkadot::runtime_types::pallet_balances::pallet::Call>();
+            println!(
+                "   Extrinsic as Balances Pallet call: {:?}\n",
+                pallet_extrinsic
+            );
+
+            let call = extrinsic.as_extrinsic::<polkadot::balances::calls::Transfer>()?;
+            println!(
+                "   Extrinsic as polkadot::balances::calls::Transfer: {:?}\n\n",
+                call
+            );
         }
 
         println!("\n");
