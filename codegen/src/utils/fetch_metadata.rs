@@ -14,17 +14,13 @@ use jsonrpsee::{
 use std::time::Duration;
 
 /// The metadata version that is fetched from the node.
+#[derive(Default)]
 pub enum MetadataVersion {
     /// Version 14.
+    #[default]
     V14,
     /// Latest unstable version of the metadata.
     Unstable,
-}
-
-impl Default for MetadataVersion {
-    fn default() -> Self {
-        MetadataVersion::V14
-    }
 }
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
@@ -120,7 +116,7 @@ async fn fetch_metadata(
         "Metadata version not found".into(),
     ))?;
 
-    return Ok(bytes.0);
+    Ok(bytes.0)
 }
 
 async fn fetch_metadata_ws(

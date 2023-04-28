@@ -393,6 +393,23 @@ impl<T: Config> Rpc<T> {
         Ok(metadata)
     }
 
+    /// Execute a runtime API call into `Metadata_metadata` method
+    /// to fetch the latest available metadata.
+    ///
+    /// # Note
+    ///
+    /// This returns the same output as [`Self::metadata`], but calls directly
+    /// into the runtime.
+    pub async fn state_call_metadata(&self) -> Result<Metadata, Error> {
+        let bytes: frame_metadata::OpaqueMetadata =
+            self.state_call("Metadata_metadata", None, None).await?;
+
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
+    }
+
     /// Create and submit an extrinsic and return a subscription to the events triggered.
     pub async fn watch_extrinsic<X: Encode>(
         &self,
