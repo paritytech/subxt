@@ -168,7 +168,8 @@ pub enum StorageAddressError {
 pub trait RootError: Sized {
     /// Given details of the pallet error we want to decode
     fn root_error(
-        pallet_bytes: &[u8; 4],
+        // typically a [u8; 4] encodes the error of a pallet
+        pallet_bytes: &[u8],
         pallet_name: &str,
         metadata: &Metadata,
     ) -> Result<Self, Error>;

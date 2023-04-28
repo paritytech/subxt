@@ -467,7 +467,7 @@ impl RuntimeGenerator {
 
                 #outer_error
                 impl #crate_path::error::RootError for Error {
-                    fn root_error(pallet_bytes: &[u8; 4], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                    fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
                         use #crate_path::metadata::DecodeWithMetadata;
                         let cursor = &mut &pallet_bytes[..];
                         #( #root_error_if_arms )*

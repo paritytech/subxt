@@ -567,7 +567,7 @@ pub mod api {
     }
     impl ::subxt::error::RootError for Error {
         fn root_error(
-            pallet_bytes: &[u8; 4],
+            pallet_bytes: &[u8],
             pallet_name: &str,
             metadata: &::subxt::Metadata,
         ) -> Result<Self, ::subxt::Error> {

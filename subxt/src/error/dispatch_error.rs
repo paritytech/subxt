@@ -164,7 +164,7 @@ impl ModuleError {
         self.raw
     }
 
-    /// attempts to decode the ModuleError into a value implementing the trait `RootError`
+    /// Attempts to decode the ModuleError into a value implementing the trait `RootError`
     /// where the actual type of value is the generated top level enum `Error`.
     pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
         E::root_error(&self.raw.error, self.details()?.pallet(), &self.metadata)

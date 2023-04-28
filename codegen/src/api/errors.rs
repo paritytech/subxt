@@ -30,6 +30,5 @@ pub fn generate_error_type_alias(
     Ok(quote! {
         #docs
         pub type Error = #error_type;
-
     })
 }
