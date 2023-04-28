@@ -2,10 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::test_context;
+use crate::{pair_signer, test_context, utils::node_runtime};
 use codec::Compact;
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
+use sp_keyring::AccountKeyring;
+use subxt::blocks::BlocksClient;
 
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
@@ -117,4 +119,72 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let metadata = metadata.runtime_metadata();
     assert_eq!(&metadata_call, metadata);
     Ok(())
+}
+
+#[tokio::test]
+async fn decode_extrinsics() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+
+    // Generate a block that has unsigned and signed transactions.
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.account_id().clone().into(), 10_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    let in_block = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_in_block()
+        .await
+        .unwrap();
+
+    let block_hash = in_block.block_hash();
+
+    let block = BlocksClient::new(api).at(block_hash).await.unwrap();
+    let extrinsics = block.body().await.unwrap().extrinsics();
+    assert_eq!(extrinsics.len(), 2);
+    assert_eq!(extrinsics.block_hash(), block_hash);
+
+    assert!(extrinsics
+        .has::<node_runtime::balances::calls::Transfer>()
+        .unwrap());
+
+    assert!(extrinsics
+        .find_first::<node_runtime::balances::calls::Transfer>()
+        .unwrap()
+        .is_some());
+
+    let block_extrinsics = extrinsics
+        .iter()
+        .map(|res| res.unwrap())
+        .collect::<Vec<_>>();
+
+    assert_eq!(block_extrinsics.len(), 2);
+    let timestamp = block_extrinsics.get(0).unwrap();
+    timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
+    timestamp
+        .as_pallet_extrinsic::<node_runtime::runtime_types::pallet_timestamp::pallet::Call>()
+        .unwrap();
+    timestamp
+        .as_extrinsic::<node_runtime::timestamp::calls::Set>()
+        .unwrap();
+    assert!(!timestamp.is_signed());
+
+    let tx = block_extrinsics.get(1).unwrap();
+    tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
+    tx.as_pallet_extrinsic::<node_runtime::runtime_types::pallet_balances::pallet::Call>()
+        .unwrap();
+    tx.as_extrinsic::<node_runtime::balances::calls::Transfer>()
+        .unwrap();
+    assert!(tx.is_signed());
 }

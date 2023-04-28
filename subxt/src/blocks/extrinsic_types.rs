@@ -83,6 +83,22 @@ where
         }
     }
 
+    /// The number of extrinsics.
+    pub fn len(&self) -> usize {
+        self.extrinsics.len()
+    }
+
+    /// Are there no extrinsics in this block?
+    // Note: mainly here to satisfy clippy.
+    pub fn is_empty(&self) -> bool {
+        self.extrinsics.is_empty()
+    }
+
+    /// Return the block hash that these extrinsics are from.
+    pub fn block_hash(&self) -> T::Hash {
+        self.hash
+    }
+
     /// Returns an iterator over the extrinsics in the block body.
     // Dev note: The returned iterator is 'static + Send so that we can box it up and make
     // use of it with our `FilterExtrinsic` stuff.
