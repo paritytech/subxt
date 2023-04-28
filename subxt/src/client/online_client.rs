@@ -134,13 +134,19 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        const V15_METADATA_VERSION: u32 = u32::MAX;
-        // Try to fetch the latest unstable metadata, if that fails fall back to
-        // fetching the latest stable metadata.
-        match rpc.metadata_at_version(V15_METADATA_VERSION).await {
-            Ok(bytes) => Ok(bytes),
-            Err(_) => rpc.state_call_metadata().await,
+        #[cfg(feature = "unstable-metadata")]
+        {
+            // Try to fetch the latest unstable metadata, if that fails fall back to
+            // fetching the latest stable metadata.
+            const V15_METADATA_VERSION: u32 = u32::MAX;
+            match rpc.metadata_at_version(V15_METADATA_VERSION).await {
+                Ok(bytes) => Ok(bytes),
+                Err(_) => rpc.state_call_metadata().await,
+            }
         }
+
+        #[cfg(not(feature = "unstable-metadata"))]
+        rpc.state_call_metadata().await
     }
 
     /// Create an object which can be used to keep the runtime up to date
