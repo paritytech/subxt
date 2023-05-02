@@ -6,6 +6,7 @@
 
 mod calls;
 mod constants;
+mod errors;
 mod events;
 mod runtime_apis;
 mod storage;
@@ -325,10 +326,13 @@ impl RuntimeGenerator {
                     should_gen_docs,
                 )?;
 
+                let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
+
                 Ok(quote! {
                     pub mod #mod_name {
                         use super::root_mod;
                         use super::#types_mod_ident;
+                        #errors
                         #calls
                         #event
                         #storage_mod
@@ -374,6 +378,43 @@ impl RuntimeGenerator {
                     }
                 }
             })
+        });
+
+        let outer_error_variants = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name);
+            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+
+            p.error.as_ref().map(|_| {
+                quote! {
+                    #[codec(index = #index)]
+                    #variant_name(#mod_name::Error),
+                }
+            })
+        });
+
+        let outer_error = quote! {
+            #default_derives
+            pub enum Error {
+                #( #outer_error_variants )*
+            }
+        };
+
+        let root_error_if_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
+            p.error.as_ref().map(|err|
+                {
+                    let type_id = err.ty.id;
+                    quote! {
+                    if pallet_name == #variant_name_str {
+                        let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
+                        return Ok(Error::#variant_name(variant_error));
+                    }
+                }
+                }
+            )
         });
 
         let mod_ident = &item_mod_ir.ident;
@@ -434,6 +475,16 @@ impl RuntimeGenerator {
                         use #crate_path::metadata::DecodeWithMetadata;
                         #( #root_event_if_arms )*
                         Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Event enum", pallet_name)).into())
+                    }
+                }
+
+                #outer_error
+                impl #crate_path::error::RootError for Error {
+                    fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        let cursor = &mut &pallet_bytes[..];
+                        #( #root_error_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Error enum", pallet_name)).into())
                     }
                 }
 
@@ -514,7 +565,7 @@ where
     let ty = type_gen.resolve_type(type_id);
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
-        return Err(CodegenError::InvalidType(error_message_type_name.into()))
+        return Err(CodegenError::InvalidType(error_message_type_name.into()));
     };
 
     variant
