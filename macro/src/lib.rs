@@ -207,7 +207,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     );
 
     for derives in &args.derive_for_type {
-        derives_registry.extend_for_type(derives.path.clone(), derives.derive.iter().cloned(), vec![])
+        derives_registry.extend_for_type(
+            derives.path.clone(),
+            derives.derive.iter().cloned(),
+            vec![],
+        )
     }
     for attributes in &args.attributes_for_type {
         derives_registry.extend_for_type(
