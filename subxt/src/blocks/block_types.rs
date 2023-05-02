@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    blocks::{extrinsic_types::ExtrinsicIds, Extrinsics},
+    blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Header},
     error::{BlockError, Error},
@@ -70,7 +70,7 @@ where
 
     /// Fetch and return the block body.
     pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
-        let ids = ExtrinsicIds::new(self.client.metadata().runtime_metadata())?;
+        let ids = ExtrinsicPartTypeIds::new(self.client.metadata().runtime_metadata())?;
         let block_hash = self.header.hash();
         let Some(block_details) = self.client.rpc().block(Some(block_hash)).await? else {
             return Err(BlockError::not_found(block_hash).into());
@@ -101,7 +101,7 @@ pub struct BlockBody<T: Config, C> {
     details: ChainBlockResponse<T>,
     client: C,
     cached_events: CachedEvents<T>,
-    ids: ExtrinsicIds,
+    ids: ExtrinsicPartTypeIds,
 }
 
 impl<T, C> BlockBody<T, C>
@@ -113,7 +113,7 @@ where
         client: C,
         details: ChainBlockResponse<T>,
         cached_events: CachedEvents<T>,
-        ids: ExtrinsicIds,
+        ids: ExtrinsicPartTypeIds,
     ) -> Self {
         Self {
             details,

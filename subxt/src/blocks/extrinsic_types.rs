@@ -58,7 +58,7 @@ pub struct Extrinsics<T: Config, C> {
     client: C,
     extrinsics: Vec<ChainBlockExtrinsic>,
     cached_events: CachedEvents<T>,
-    ids: ExtrinsicIds,
+    ids: ExtrinsicPartTypeIds,
     hash: T::Hash,
 }
 
@@ -71,7 +71,7 @@ where
         client: C,
         extrinsics: Vec<ChainBlockExtrinsic>,
         cached_events: CachedEvents<T>,
-        ids: ExtrinsicIds,
+        ids: ExtrinsicPartTypeIds,
         hash: T::Hash,
     ) -> Self {
         Self {
@@ -207,7 +207,7 @@ where
         client: C,
         block_hash: T::Hash,
         cached_events: CachedEvents<T>,
-        ids: ExtrinsicIds,
+        ids: ExtrinsicPartTypeIds,
     ) -> Result<ExtrinsicDetails<T, C>, Error> {
         const SIGNATURE_MASK: u8 = 0b1000_0000;
         const VERSION_MASK: u8 = 0b0111_1111;
@@ -478,7 +478,7 @@ where
 /// generic type parameters passed to the `UncheckedExtrinsic` from
 /// the substrate-based chain.
 #[derive(Debug, Copy, Clone)]
-pub(crate) struct ExtrinsicIds {
+pub(crate) struct ExtrinsicPartTypeIds {
     /// The address (source) of the extrinsic.
     address: u32,
     /// The extrinsic call type.
@@ -489,7 +489,7 @@ pub(crate) struct ExtrinsicIds {
     extra: u32,
 }
 
-impl ExtrinsicIds {
+impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
     pub(crate) fn new(metadata: &RuntimeMetadataV15) -> Result<Self, BlockError> {
         const ADDRESS: &str = "Address";
@@ -528,7 +528,7 @@ impl ExtrinsicIds {
             return Err(BlockError::MissingType);
         };
 
-        Ok(ExtrinsicIds {
+        Ok(ExtrinsicPartTypeIds {
             address: *address,
             call: *call,
             signature: *signature,
@@ -772,7 +772,7 @@ mod tests {
     fn insufficient_extrinsic_bytes() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
 
         // Decode with empty bytes.
         let result = ExtrinsicDetails::decode_from(
@@ -795,7 +795,7 @@ mod tests {
     fn unsupported_version_extrinsic() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
 
         // Decode with invalid version.
         let result = ExtrinsicDetails::decode_from(
@@ -819,7 +819,7 @@ mod tests {
     fn statically_decode_extrinsic() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
 
         let tx = crate::tx::dynamic(
             "Test",
