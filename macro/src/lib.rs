@@ -158,22 +158,19 @@ struct RuntimeMetadataArgs {
 
 #[derive(Debug, FromMeta)]
 struct DeriveForType {
-    #[darling(rename = "type")]
-    ty: syn::TypePath,
+    path: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
 struct AttributesForType {
-    #[darling(rename = "type")]
-    ty: syn::TypePath,
+    path: syn::TypePath,
     attributes: Punctuated<OuterAttribute, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
 struct SubstituteType {
-    #[darling(rename = "type")]
-    ty: syn::Path,
+    path: syn::Path,
     with: syn::Path,
 }
 
@@ -210,11 +207,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     );
 
     for derives in &args.derive_for_type {
-        derives_registry.extend_for_type(derives.ty.clone(), derives.derive.iter().cloned(), vec![])
+        derives_registry.extend_for_type(derives.path.clone(), derives.derive.iter().cloned(), vec![])
     }
     for attributes in &args.attributes_for_type {
         derives_registry.extend_for_type(
-            attributes.ty.clone(),
+            attributes.path.clone(),
             vec![],
             attributes.attributes.iter().map(|a| a.0.clone()),
         )
@@ -228,7 +225,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let substitute_args_res: Result<(), _> = args.substitute_type.into_iter().try_for_each(|sub| {
         sub.with
             .try_into()
-            .and_then(|with| type_substitutes.insert(sub.ty, with))
+            .and_then(|with| type_substitutes.insert(sub.path, with))
     });
 
     if let Err(err) = substitute_args_res {
