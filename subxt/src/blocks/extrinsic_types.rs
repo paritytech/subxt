@@ -630,3 +630,141 @@ impl<T: Config> ExtrinsicEvents<T> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
+    use assert_matches::assert_matches;
+    use codec::{Decode, Encode};
+    use frame_metadata::{
+        v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
+        RuntimeMetadataPrefixed,
+    };
+    use primitive_types::H256;
+    use scale_info::{meta_type, TypeInfo};
+    use scale_value::Value;
+
+    // Extrinsic needs to contain at least the generic type parameter "Call"
+    // for the metadata to be valid.
+    // The "Call" type from the metadata is used to decode extrinsics.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct ExtrinsicType<Address, Call, Signature, Extra> {
+        pub signature: Option<(Address, Signature, Extra)>,
+        pub function: Call,
+    }
+
+    // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+    // Each pallet must contain one single variant.
+    #[allow(unused)]
+    #[derive(
+        Encode,
+        Decode,
+        TypeInfo,
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        scale_encode::EncodeAsType,
+        scale_decode::DecodeAsType,
+    )]
+    enum RuntimeCall {
+        Test(Pallet),
+    }
+
+    // We need this in order to be able to decode into a root extrinsic type:
+    impl RootExtrinsic for RuntimeCall {
+        fn root_extrinsic(
+            mut pallet_bytes: &[u8],
+            pallet_name: &str,
+            pallet_extrinsic_ty: u32,
+            metadata: &Metadata,
+        ) -> Result<Self, Error> {
+            if pallet_name == "Test" {
+                return Ok(RuntimeCall::Test(Pallet::decode_with_metadata(
+                    &mut pallet_bytes,
+                    pallet_extrinsic_ty,
+                    metadata,
+                )?));
+            }
+            panic!(
+                "Asked for pallet name '{pallet_name}', which isn't in our test RuntimeCall type"
+            )
+        }
+    }
+
+    // The calls of the pallet.
+    #[allow(unused)]
+    #[derive(
+        Encode,
+        Decode,
+        TypeInfo,
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        scale_encode::EncodeAsType,
+        scale_decode::DecodeAsType,
+    )]
+    enum Pallet {
+        #[allow(unused)]
+        #[codec(index = 2)]
+        TestCall {
+            value: u128,
+            signed: bool,
+            name: String,
+        },
+    }
+
+    /// Build fake metadata consisting the types needed to represent an extrinsic.
+    fn metadata() -> Metadata {
+        let pallets = vec![PalletMetadata {
+            name: "Test",
+            storage: None,
+            calls: Some(PalletCallMetadata {
+                ty: meta_type::<Pallet>(),
+            }),
+            event: None,
+            constants: vec![],
+            error: None,
+            index: 0,
+            docs: vec![],
+        }];
+
+        let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<ExtrinsicType<(), RuntimeCall, (), ()>>(),
+            version: 4,
+            signed_extensions: vec![],
+        };
+
+        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
+
+        Metadata::try_from(runtime_metadata).unwrap()
+    }
+
+    /// Build an offline client to work with the test metadata.
+    fn client(metadata: Metadata) -> OfflineClient<PolkadotConfig> {
+        // Create the encoded extrinsic bytes.
+        let rt_version = RuntimeVersion {
+            spec_version: 1,
+            transaction_version: 4,
+            other: Default::default(),
+        };
+        let block_hash = H256::random();
+        OfflineClient::new(block_hash, rt_version, metadata)
+    }
+
+    #[test]
+    fn extrinsic_metadata_consistency() {
+        let metadata = metadata();
+
+        // Except our metadata to contain the registered types.
+        let extrinsic = metadata
+            .extrinsic(0, 2)
+            .expect("metadata contains the RuntimeCall enum with this pallet");
+        assert_eq!(extrinsic.pallet(), "Test");
+        assert_eq!(extrinsic.call(), "TestCall");
+    }
+}
