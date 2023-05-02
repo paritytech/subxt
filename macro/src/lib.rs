@@ -31,7 +31,7 @@
 //! ```ignore
 //! #[subxt::subxt(
 //!     runtime_metadata_path = "polkadot_metadata.scale",
-//!     substitute_type(type = "sp_arithmetic::per_things::Perbill", with = "sp_runtime::Perbill")
+//!     substitute_type(path = "sp_arithmetic::per_things::Perbill", with = "sp_runtime::Perbill")
 //! )]
 //! pub mod polkadot {}
 //! ```
@@ -67,8 +67,8 @@
 //! #[subxt::subxt(
 //!     runtime_metadata_path = "polkadot_metadata.scale",
 //!     derive_for_all_types = "Eq, PartialEq",
-//!     derive_for_type(type = "frame_support::PalletId", derive = "Ord, PartialOrd"),
-//!     derive_for_type(type = "sp_runtime::ModuleError", derive = "Hash"),
+//!     derive_for_type(path = "frame_support::PalletId", derive = "Ord, PartialOrd"),
+//!     derive_for_type(path = "sp_runtime::ModuleError", derive = "Hash"),
 //! )]
 //! pub mod polkadot {}
 //! ```
