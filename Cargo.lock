@@ -3593,7 +3593,6 @@ name = "subxt-codegen"
 version = "0.28.0"
 dependencies = [
  "bitvec",
- "darling 0.20.0",
  "frame-metadata",
  "heck",
  "hex",
