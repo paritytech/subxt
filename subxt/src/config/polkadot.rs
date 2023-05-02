@@ -4,15 +4,29 @@
 
 //! Polkadot specific configuration
 
+use super::{
+    extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder},
+    Config,
+};
 use codec::Encode;
 
-use super::extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder};
+pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
+use crate::SubstrateConfig;
+pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.
-pub type PolkadotConfig = super::WithExtrinsicParams<
-    super::SubstrateConfig,
-    PolkadotExtrinsicParams<super::SubstrateConfig>,
->;
+pub enum PolkadotConfig {}
+
+impl Config for PolkadotConfig {
+    type Index = <SubstrateConfig as Config>::Index;
+    type Hash = <SubstrateConfig as Config>::Hash;
+    type AccountId = <SubstrateConfig as Config>::AccountId;
+    type Address = MultiAddress<Self::AccountId, ()>;
+    type Signature = <SubstrateConfig as Config>::Signature;
+    type Hasher = <SubstrateConfig as Config>::Hasher;
+    type Header = <SubstrateConfig as Config>::Header;
+    type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
+}
 
 /// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for a polkadot node.
