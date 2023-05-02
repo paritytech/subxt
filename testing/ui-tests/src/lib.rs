@@ -23,7 +23,8 @@ use crate::utils::{MetadataTestRunner, PalletMetadataTestRunner};
 #[test]
 fn ui_tests() {
     let mut m = MetadataTestRunner::default();
-    let mut p = PalletMetadataTestRunner::new();
+    // specify pallets we want to test the metadata for (None => all pallets, but specifying only Some(..) speeds up test)
+    let mut p = PalletMetadataTestRunner::new(Some(&["Grandpa", "Claims", "Babe"]));
     let t = trybuild::TestCases::new();
 
     t.pass("src/correct/*.rs");
