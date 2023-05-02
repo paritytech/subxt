@@ -152,6 +152,8 @@ struct RuntimeMetadataArgs {
     runtime_types_only: bool,
     #[darling(default)]
     no_default_derives: bool,
+    #[darling(default)]
+    no_default_substitutions: bool,
 }
 
 #[derive(Debug, FromMeta)]
@@ -213,7 +215,11 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         )
     }
 
-    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    let mut type_substitutes = if args.no_default_substitutions {
+        TypeSubstitutes::new()
+    } else {
+        TypeSubstitutes::with_default_substitutes(&crate_path)
+    };
     let substitute_args_res: Result<(), _> = args.substitute_type.into_iter().try_for_each(|sub| {
         sub.with
             .try_into()

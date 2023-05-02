@@ -120,3 +120,40 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     type Header = T::Header;
     type ExtrinsicParams = E;
 }
+
+/// implement subxt's Hasher and Header traits for some substrate structs
+#[cfg(feature = "substrate-compat")]
+mod substrate_impls {
+    use super::*;
+    use primitive_types::{H256, U256};
+
+    impl<N, H> Header for sp_runtime::generic::Header<N, H>
+    where
+        Self: Encode,
+        N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
+        H: sp_runtime::traits::Hash + Hasher,
+    {
+        type Number = N;
+        type Hasher = H;
+
+        fn number(&self) -> Self::Number {
+            self.number
+        }
+    }
+
+    impl Hasher for sp_core::Blake2Hasher {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
+
+    impl Hasher for sp_core::KeccakHasher {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
+}
