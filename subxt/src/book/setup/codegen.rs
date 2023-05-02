@@ -10,7 +10,7 @@
 //!
 //! ## The `#[subxt]` macro
 //!
-//! The simplest way to generate an interface to use is via the [`#[subxt]`](crate::subxt) macro.
+//! The most common way to generate the interface is to use the [`#[subxt]`](crate::subxt) macro.
 //! Using this macro looks something like:
 //!
 //! ```rust,no_run
@@ -19,16 +19,16 @@
 //! ```
 //!
 //! The macro takes a path to some node metadata, and uses that to generate the interface you'll use
-//! to talk to it.
+//! to talk to it. [Go here](crate::subxt) to learn more about the options available to the macro.
 //!
-//! The simplest way to do obtain this metadata is to use the `subxt` CLI tool to download it from a
-//! node. The tool can be installed via `cargo`:
+//! To obtain this metadata you'll need for the above, you can use the `subxt` CLI tool to download it
+//! from a node. The tool can be installed via `cargo`:
 //!
 //! ```shell
 //! cargo install subxt-cli
 //! ```
 //!
-//! And then, use it to fetch metadata and save it to a file:
+//! And then it can be used to fetch metadata and save it to a file:
 //!
 //! ```shell
 //! # Download and save all of the metadata:
@@ -41,17 +41,17 @@
 //! information, making the bundle much smaller in the event that you only need to generate an
 //! interface for a subset of the available pallets on the node.
 //!
-//!
 //! ## The CLI tool
 //!
-//! Using the [`#[subxt]`](crate::subxt) macro carries some downsides, notably that using it to
-//! generate an interface will have an impact on compile times (though much less of one if you only
-//! need a few pallets), and that editor looking tends to not be very good at auto-completing and
-//! providing documentation for the generated interface. Additionally, you can't peer into the
-//! generated code and see what's going on if you use the macro.
+//! Using the [`#[subxt]`](crate::subxt) macro carries some downsides:
 //!
-//! If you'd like to manually generate the same code that the macro generates under the hood, you
-//! can use the `subxt codegen` command:
+//! - Using it to generate an interface will have a small impact on compile times (though much less of
+//! one if you only need a few pallets).
+//! - IDE support for autocompletion and documentation when using the macro interface can be poor.
+//! - It's impossible to manually look at the generated code to understand and debug things.
+//!
+//! If these are an issue, you can manually generate the same code that the macro generates under the hood
+//! by using the `subxt codegen` command:
 //!
 //! ```shell
 //! # Install the CLI tool if you haven't already:

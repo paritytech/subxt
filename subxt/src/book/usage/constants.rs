@@ -4,8 +4,9 @@
 
 //! # Constants
 //!
-//! There are various constants stored in a node; these can only change when the runtime is updated.
-//! Much like [`super::storage`], we can query these using Subxt by taking the following steps:
+//! There are various constants stored in a node; the types and values of these are defined in a
+//! runtime, and can only change when the runtime is updated. Much like [`super::storage`], we can
+//! query these using Subxt by taking the following steps:
 //!
 //! 1. [Constructing a constant query](#constructing-a-query).
 //! 2. [Submitting the query to get back the associated value](#submitting-it).
@@ -40,9 +41,10 @@
 //!
 //! ## Submitting it
 //!
-//! Constant queries are submitted via [`crate::constants::ConstantsClient::at()`]. It's worth
-//! noting that constant values are pulled directly out of the node metadata which the client has
-//! already acquired, and so this function is available from a [`crate::OfflineClient`].
+//! Constant queries are handed to Subxt via [`crate::constants::ConstantsClient::at()`]. It's worth
+//! noting that constant values are pulled directly out of the node metadata which Subxt has
+//! already acquired, and so this function requires no network access and is available from a
+//! [`crate::OfflineClient`].
 //!
 //! Here's an example using a static query:
 //!

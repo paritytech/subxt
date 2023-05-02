@@ -38,7 +38,7 @@
 //! ```
 //!
 //! As well as accessing specific entries, some storage locations can also be iterated over (such as
-//! the map of account information). Do do this, suffix `_root` onto the query constructor (this
+//! the map of account information). To do this, suffix `_root` onto the query constructor (this
 //! will only be available on static constructors when iteration is actually possible):
 //!
 //! ```rust,no_run

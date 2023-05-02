@@ -11,11 +11,15 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a new API client, configured to talk to Polkadot nodes.
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
+    // Build a balance transfer extrinsic.
     let dest = AccountKeyring::Bob.to_account_id().into();
     let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
 
+    // Submit the balance transfer extrinsic from Alice, and then monitor the
+    // progress of it.
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let mut balance_transfer_progress = api
         .tx()

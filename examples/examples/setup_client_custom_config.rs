@@ -3,7 +3,8 @@ use subxt::{
     OnlineClient,
 };
 
-/// Defing a custom config type:
+/// Define a custom config type (see the `subxt::config::Config` docs for
+/// more information about each type):
 enum MyConfig {}
 impl Config for MyConfig {
     // This is different from the default `u32`:
