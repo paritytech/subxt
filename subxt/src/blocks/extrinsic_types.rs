@@ -717,6 +717,28 @@ mod tests {
         },
     }
 
+    #[allow(unused)]
+    #[derive(
+        Encode,
+        Decode,
+        TypeInfo,
+        Clone,
+        Debug,
+        PartialEq,
+        Eq,
+        scale_encode::EncodeAsType,
+        scale_decode::DecodeAsType,
+    )]
+    struct TestCallExtrinsic {
+        value: u128,
+        signed: bool,
+        name: String,
+    }
+    impl StaticExtrinsic for TestCallExtrinsic {
+        const PALLET: &'static str = "Test";
+        const CALL: &'static str = "TestCall";
+    }
+
     /// Build fake metadata consisting the types needed to represent an extrinsic.
     fn metadata() -> Metadata {
         let pallets = vec![PalletMetadata {
@@ -879,6 +901,21 @@ mod tests {
         assert_eq!(
             decoded_extrinsic,
             Pallet::TestCall {
+                value: 10,
+                signed: true,
+                name: "SomeValue".into(),
+            }
+        );
+
+        // Decode the extrinsic to the extrinsic variant.
+        let decoded_extrinsic = extrinsic
+            .as_extrinsic::<TestCallExtrinsic>()
+            .expect("can decode extrinsic to extrinsic variant")
+            .expect("value cannot be None");
+
+        assert_eq!(
+            decoded_extrinsic,
+            TestCallExtrinsic {
                 value: 10,
                 signed: true,
                 name: "SomeValue".into(),
