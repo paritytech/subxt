@@ -143,8 +143,8 @@ impl<T: Config> Rpc<T> {
         genesis_hash.ok_or_else(|| "Genesis hash not found".into())
     }
 
-    /// Fetch the metadata
-    pub async fn metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
+    /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
+    pub async fn metadata_legacy(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
         let bytes: types::Bytes = self
             .client
             .request("state_getMetadata", rpc_params![at])
@@ -400,7 +400,7 @@ impl<T: Config> Rpc<T> {
     ///
     /// This returns the same output as [`Self::metadata`], but calls directly
     /// into the runtime.
-    pub async fn state_call_metadata(&self) -> Result<Metadata, Error> {
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
         let bytes: frame_metadata::OpaqueMetadata =
             self.state_call("Metadata_metadata", None, None).await?;
 

@@ -16,9 +16,11 @@ use std::time::Duration;
 /// The metadata version that is fetched from the node.
 #[derive(Default)]
 pub enum MetadataVersion {
-    /// Version 14.
+    /// Latest stable version of the metadata.
     #[default]
-    V14,
+    Latest,
+    /// Fetch a specified version of the metadata.
+    Version(u32),
     /// Latest unstable version of the metadata.
     Unstable,
 }
@@ -81,22 +83,20 @@ async fn fetch_metadata(
     version: MetadataVersion,
 ) -> Result<Vec<u8>, FetchMetadataError> {
     const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
-    const LATEST_STABLE_VERSION: u32 = 14;
 
     let version_num = match version {
-        MetadataVersion::V14 => 14,
+        MetadataVersion::Latest => {
+            // Fetch latest stable metadata of a node via `Metadata_metadata`.
+            let raw: String = client
+                .request("state_call", rpc_params!["Metadata_metadata", "0x"])
+                .await?;
+            let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
+            let bytes: frame_metadata::OpaqueMetadata = Decode::decode(&mut &raw_bytes[..])?;
+            return Ok(bytes.0);
+        }
+        MetadataVersion::Version(version) => version,
         MetadataVersion::Unstable => UNSTABLE_METADATA_VERSION,
     };
-
-    // Fetch the latest stable version with `Metadata_metadata` API.
-    if version_num == LATEST_STABLE_VERSION {
-        let raw: String = client
-            .request("state_call", rpc_params!["Metadata_metadata", "0x"])
-            .await?;
-        let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-        let bytes: frame_metadata::OpaqueMetadata = Decode::decode(&mut &raw_bytes[..])?;
-        return Ok(bytes.0);
-    }
 
     // Other versions (including unstable) are fetched with `Metadata_metadata_at_version`.
     let bytes = version_num.encode();

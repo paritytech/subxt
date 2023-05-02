@@ -98,7 +98,7 @@ pub fn generate_runtime_api_from_url(
     // Fetch latest unstable version, if that fails fall back to the latest stable.
     let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
         Ok(bytes) => bytes,
-        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::V14)?,
+        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
     };
 
     generate_runtime_api_from_bytes(

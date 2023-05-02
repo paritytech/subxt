@@ -141,12 +141,12 @@ impl<T: Config> OnlineClient<T> {
             const V15_METADATA_VERSION: u32 = u32::MAX;
             match rpc.metadata_at_version(V15_METADATA_VERSION).await {
                 Ok(bytes) => Ok(bytes),
-                Err(_) => rpc.state_call_metadata().await,
+                Err(_) => rpc.metadata().await,
             }
         }
 
         #[cfg(not(feature = "unstable-metadata"))]
-        rpc.state_call_metadata().await
+        rpc.metadata().await
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -390,7 +390,7 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let metadata = match self.client.rpc().metadata(None).await {
+        let metadata = match self.client.rpc().metadata().await {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };

@@ -83,18 +83,12 @@ impl std::str::FromStr for MetadataVersion {
     type Err = String;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        const SUPPORTED_VERSIONS: &[u32] = &[14];
-
         match input {
             "unstable" => Ok(MetadataVersion { version: u32::MAX }),
             version => {
                 let num: u32 = version
                     .parse()
-                    .map_err(|_| format!("Invalid metadata version specified {:?}. Subxt supports the following versions {:?}", version, SUPPORTED_VERSIONS))?;
-
-                if !SUPPORTED_VERSIONS.iter().any(|&value| value == num) {
-                    return Err(format!("Invalid metadata version specified {:?}. Subxt supports the following versions {:?}", version, SUPPORTED_VERSIONS));
-                }
+                    .map_err(|_| format!("Invalid metadata version specified {:?}", version))?;
 
                 Ok(MetadataVersion { version: num })
             }
@@ -105,9 +99,9 @@ impl std::str::FromStr for MetadataVersion {
 impl From<MetadataVersion> for CodegenMetadataVersion {
     fn from(input: MetadataVersion) -> CodegenMetadataVersion {
         match input.version {
-            14 => CodegenMetadataVersion::V14,
             u32::MAX => CodegenMetadataVersion::Unstable,
-            _ => panic!("MetadataVersion and CodegenMetadataVersion are not in sync!"),
+            14 => CodegenMetadataVersion::Latest,
+            v => CodegenMetadataVersion::Version(v),
         }
     }
 }
