@@ -767,4 +767,27 @@ mod tests {
         assert_eq!(extrinsic.pallet(), "Test");
         assert_eq!(extrinsic.call(), "TestCall");
     }
+
+    #[test]
+    fn insufficient_extrinsic_bytes() {
+        let metadata = metadata();
+        let client = client(metadata.clone());
+        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+
+        // Decode with empty bytes.
+        let result = ExtrinsicDetails::decode_from(
+            1,
+            vec![].into(),
+            client.clone(),
+            H256::random(),
+            Default::default(),
+            ids,
+        );
+        assert_matches!(
+            result.err(),
+            Some(crate::Error::Block(
+                crate::error::BlockError::InsufficientData
+            ))
+        );
+    }
 }
