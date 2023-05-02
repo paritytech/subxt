@@ -814,4 +814,75 @@ mod tests {
             ))
         );
     }
+
+    #[test]
+    fn statically_decode_extrinsic() {
+        let metadata = metadata();
+        let client = client(metadata.clone());
+        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+
+        let tx = crate::tx::dynamic(
+            "Test",
+            "TestCall",
+            vec![
+                Value::u128(10),
+                Value::bool(true),
+                Value::string("SomeValue"),
+            ],
+        );
+        let tx_encoded = client
+            .tx()
+            .create_unsigned(&tx)
+            .expect("Valid dynamic parameters are provided");
+
+        // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
+        // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
+        let extrinsic = ExtrinsicDetails::decode_from(
+            1,
+            tx_encoded.encoded()[1..].into(),
+            client,
+            H256::random(),
+            Default::default(),
+            ids,
+        )
+        .expect("Valid extrinsic");
+
+        assert!(!extrinsic.is_signed());
+
+        assert_eq!(extrinsic.index(), 1);
+
+        assert_eq!(extrinsic.pallet_index(), 0);
+        assert_eq!(extrinsic.pallet_name(), "Test");
+
+        assert_eq!(extrinsic.variant_index(), 2);
+        assert_eq!(extrinsic.variant_name(), "TestCall");
+
+        // Decode the extrinsic to the root enum.
+        let decoded_extrinsic = extrinsic
+            .as_root_extrinsic::<RuntimeCall>()
+            .expect("can decode extrinsic to root enum");
+
+        assert_eq!(
+            decoded_extrinsic,
+            RuntimeCall::Test(Pallet::TestCall {
+                value: 10,
+                signed: true,
+                name: "SomeValue".into(),
+            })
+        );
+
+        // Decode the extrinsic to the pallet enum.
+        let decoded_extrinsic = extrinsic
+            .as_pallet_extrinsic::<Pallet>()
+            .expect("can decode extrinsic to pallet enum");
+
+        assert_eq!(
+            decoded_extrinsic,
+            Pallet::TestCall {
+                value: 10,
+                signed: true,
+                name: "SomeValue".into(),
+            }
+        );
+    }
 }
