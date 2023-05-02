@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -21,30 +21,22 @@
 //! Fetching storage keys
 //!
 //! ```no_run
+//! # #[tokio::main]
+//! # async fn main() {
 //! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
-//! # #[tokio::main]
-//! # async fn main() {
 //! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 //!
-//! let key = polkadot::storage()
-//!     .xcm_pallet()
-//!     .version_notifiers_root()
-//!     .to_bytes();
-//!
-//! // Fetch up to 10 keys.
-//! let keys = api
+//! let genesis_hash = api
 //!     .rpc()
-//!     .storage_keys_paged(&key, 10, None, None)
+//!     .genesis_hash()
 //!     .await
 //!     .unwrap();
 //!
-//! for key in keys.iter() {
-//!     println!("Key: 0x{}", hex::encode(&key));
-//! }
+//! println!("{genesis_hash}");
 //! # }
 //! ```
 
@@ -66,17 +58,7 @@ pub mod types;
 pub use rpc::*;
 
 pub use rpc_client_t::{
-    RawValue,
-    RpcClientT,
-    RpcFuture,
-    RpcSubscription,
-    RpcSubscriptionId,
-    RpcSubscriptionStream,
+    RawValue, RpcClientT, RpcFuture, RpcSubscription, RpcSubscriptionId, RpcSubscriptionStream,
 };
 
-pub use rpc_client::{
-    rpc_params,
-    RpcClient,
-    RpcParams,
-    Subscription,
-};
+pub use rpc_client::{rpc_params, RpcClient, RpcParams, Subscription};

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -13,12 +13,7 @@
 // This example showcases working with dynamic values rather than those that are generated via the subxt proc macro.
 
 use sp_keyring::AccountKeyring;
-use subxt::{
-    dynamic::Value,
-    tx::PairSigner,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{dynamic::Value, tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -66,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
     let account = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&storage_address)
         .await?
@@ -78,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage_address = subxt::dynamic::storage_root("System", "Account");
     let mut iter = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .iter(storage_address, 10)
         .await?;

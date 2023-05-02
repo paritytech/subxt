@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.27.1"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -35,47 +35,52 @@ jsonrpsee-ws = ["jsonrpsee/async-client", "jsonrpsee/client-ws-transport"]
 jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"]
 
 [dependencies]
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
-scale-info = "2.0.0"
-scale-value = "0.6.0"
-scale-bits = "0.3"
-scale-decode = "0.4.0"
-futures = { version = "0.3.27", default-features = false, features = ["std"] }
-hex = "0.4.3"
-jsonrpsee = { version = "0.16", optional = true, features = ["jsonrpsee-types"] }
-serde = { version = "1.0.155", features = ["derive"] }
-serde_json = { version = "1.0.94", features = ["raw_value"] }
-thiserror = "1.0.40"
-tracing = "0.1.34"
-parking_lot = "0.12.0"
-frame-metadata = "15.0.0"
-derivative = "2.2.0"
-
-subxt-macro = { version = "0.27.1", path = "../macro" }
-subxt-metadata = { version = "0.27.1", path = "../metadata" }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+scale-info = { workspace = true }
+scale-value = { workspace = true }
+scale-bits = { workspace = true }
+scale-decode = { workspace = true }
+scale-encode = { workspace = true }
+futures = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+parking_lot = { workspace = true }
+frame-metadata = { workspace = true }
+derivative = { workspace = true }
+either = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
-impl-serde = { version = "0.4.0" }
-primitive-types = { version = "0.12.0", default-features = false, features = ["codec", "scale-info", "serde"] }
-sp-core-hashing = "7.0.0"
+impl-serde = { workspace = true }
+primitive-types = { workspace = true }
+sp-core-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:
-base58 = { version = "0.2.0" }
-blake2 = { version = "0.10.4", default-features = false }
+base58 = { workspace = true }
+blake2 = { workspace = true }
+
+# Included if one of the jsonrpsee features is enabled.
+jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
 
 # These are only included is "substrate-compat" is enabled.
-sp-core = { version = "18.0.0", default-features = false, optional = true }
-sp-runtime = { version = "20.0.0", optional = true }
+sp-core = { workspace = true, optional = true }
+sp-runtime = { workspace = true, optional = true }
+
+# Other subxt crates we depend on.
+subxt-macro = { workspace = true }
+subxt-metadata = { workspace = true }
 
 [target.wasm32-unknown-unknown.dependencies]
-getrandom = { version = "0.2", features = ["js"] }
+getrandom = { workspace = true, features = ["js"] }
 
 [dev-dependencies]
-bitvec = "1"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-scale-info = { version = "2.0.0", features = ["bit-vec"] }
-tokio = { version = "1.26", features = ["macros", "time", "rt-multi-thread"] }
-sp-core = { version = "18.0.0", default-features = false }
-sp-runtime = "20.0.0"
-sp-keyring = "20.0.0"
-sp-version = "18.0.0"
+bitvec = { workspace = true }
+codec = { workspace = true, features = ["derive", "bit-vec"] }
+scale-info = { workspace = true, features = ["bit-vec"] }
+tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+sp-keyring = { workspace = true }
+sp-version = { workspace = true }

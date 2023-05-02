@@ -1,14 +1,10 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{
-        self,
-        system,
-    },
-    pair_signer,
-    test_context,
+    node_runtime::{self, system},
+    pair_signer, test_context,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
@@ -24,7 +20,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
     let account_info = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&account_info_addr)
         .await;

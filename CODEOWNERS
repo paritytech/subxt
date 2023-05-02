@@ -17,6 +17,7 @@
 # - The latest matching rule, if multiple, takes precedence.
 
 # main codeowner
+* @paritytech/subxt-team
 
 # CI
-/.github/ @paritytech/ci
+/.github/ @paritytech/ci @paritytech/subxt-team

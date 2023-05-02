@@ -1,31 +1,21 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
-    pair_signer,
-    test_context,
-    test_context_with,
-    utils::{
-        node_runtime,
-        wait_for_blocks,
-    },
+    pair_signer, test_context, test_context_with,
+    utils::{node_runtime, wait_for_blocks},
 };
 use assert_matches::assert_matches;
-use codec::{
-    Compact,
-    Decode,
-    Encode,
-};
+use codec::{Compact, Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::storage::well_known_keys;
+use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
 use subxt::{
+    error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent,
-        FollowEvent,
-        Initialized,
-        RuntimeEvent,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
     tx::Signer,
@@ -121,7 +111,7 @@ async fn fetch_keys() {
     let addr = node_runtime::storage().system().account_root();
     let keys = api
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch_keys(&addr.to_root_bytes(), 4, None)
@@ -138,7 +128,7 @@ async fn test_iter() {
     let addr = node_runtime::storage().system().account_root();
     let mut iter = api
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .iter(addr, 10)
@@ -184,8 +174,7 @@ async fn dry_run_passes() {
     signed_extrinsic
         .dry_run(None)
         .await
-        .expect("dryrunning failed")
-        .expect("dry run should be successful");
+        .expect("dryrunning failed");
 
     signed_extrinsic
         .submit_and_watch()
@@ -196,49 +185,111 @@ async fn dry_run_passes() {
         .unwrap();
 }
 
-//// [jsdw] Commented out until Subxt decodes these new Token errors better
-// #[tokio::test]
-// async fn dry_run_fails() {
-//     let ctx = test_context().await;
-//     let api = ctx.client();
-//
-//     wait_for_blocks(&api).await;
-//
-//     let alice = pair_signer(AccountKeyring::Alice.pair());
-//     let hans = pair_signer(Sr25519Pair::generate().0);
-//
-//     let tx = node_runtime::tx().balances().transfer(
-//         hans.account_id().clone().into(),
-//         100_000_000_000_000_000_000_000_000_000_000_000,
-//     );
-//
-//     let signed_extrinsic = api
-//         .tx()
-//         .create_signed(&tx, &alice, Default::default())
-//         .await
-//         .unwrap();
-//
-//     let dry_run_res = signed_extrinsic
-//         .dry_run(None)
-//         .await
-//         .expect("dryrunning failed");
-//
-//     assert_eq!(dry_run_res, Err(DryRunError::DispatchError));
-//
-//     let res = signed_extrinsic
-//         .submit_and_watch()
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await;
-//
-//     if let Err(subxt::error::Error::Runtime(DispatchError::Module(err))) = res {
-//         assert_eq!(err.pallet, "Balances");
-//         assert_eq!(err.error, "InsufficientBalance");
-//     } else {
-//         panic!("expected a runtime module error");
-//     }
-// }
+#[tokio::test]
+async fn dry_run_fails() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    wait_for_blocks(&api).await;
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let hans = pair_signer(Sr25519Pair::generate().0);
+
+    let tx = node_runtime::tx().balances().transfer(
+        hans.account_id().clone().into(),
+        // 7 more than the default amount Alice has, so this should fail; insufficient funds:
+        1_000_000_000_000_000_000_007,
+    );
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    let dry_run_res = signed_extrinsic
+        .dry_run(None)
+        .await
+        .expect("dryrunning failed");
+
+    assert_eq!(
+        dry_run_res,
+        DryRunResult::DispatchError(DispatchError::Token(TokenError::FundsUnavailable))
+    );
+
+    let res = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
+
+    assert!(
+        matches!(
+            res,
+            Err(Error::Runtime(DispatchError::Token(
+                TokenError::FundsUnavailable
+            )))
+        ),
+        "Expected an insufficient balance, got {res:?}"
+    );
+}
+
+#[tokio::test]
+async fn dry_run_result_is_substrate_compatible() {
+    use sp_runtime::{
+        transaction_validity::{
+            InvalidTransaction as SpInvalidTransaction,
+            TransactionValidityError as SpTransactionValidityError,
+        },
+        ApplyExtrinsicResult as SpApplyExtrinsicResult, DispatchError as SpDispatchError,
+        TokenError as SpTokenError,
+    };
+
+    // We really just connect to a node to get some valid metadata to help us
+    // decode Dispatch Errors.
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let pairs = vec![
+        // All ok
+        (SpApplyExtrinsicResult::Ok(Ok(())), DryRunResult::Success),
+        // Some transaction error
+        (
+            SpApplyExtrinsicResult::Err(SpTransactionValidityError::Invalid(
+                SpInvalidTransaction::BadProof,
+            )),
+            DryRunResult::TransactionValidityError,
+        ),
+        // Some dispatch errors to check that they decode OK. We've tested module errors
+        // "in situ" in other places so avoid the complexity of testing them properly here.
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Other("hi"))),
+            DryRunResult::DispatchError(DispatchError::Other),
+        ),
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::CannotLookup)),
+            DryRunResult::DispatchError(DispatchError::CannotLookup),
+        ),
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
+            DryRunResult::DispatchError(DispatchError::BadOrigin),
+        ),
+        (
+            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Token(SpTokenError::CannotCreate))),
+            DryRunResult::DispatchError(DispatchError::Token(TokenError::CannotCreate)),
+        ),
+    ];
+
+    for (actual, expected) in pairs {
+        let encoded = actual.encode();
+        let res = DryRunResultBytes(encoded)
+            .into_dry_run_result(&api.metadata())
+            .unwrap();
+
+        assert_eq!(res, expected);
+    }
+}
 
 #[tokio::test]
 async fn external_signing() {
@@ -260,8 +311,7 @@ async fn external_signing() {
     // Sign it (possibly externally).
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
-    let extrinsic =
-        partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
+    let extrinsic = partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
 
     // And now submit it.
     extrinsic
@@ -338,20 +388,18 @@ async fn rpc_state_call() {
     let api = ctx.client();
 
     // Call into the runtime of the chain to get the Metadata.
-    let metadata_bytes = api
+    let (_, meta) = api
         .rpc()
-        .state_call("Metadata_metadata", None, None)
+        .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
         .await
         .unwrap();
-
-    let cursor = &mut &*metadata_bytes;
-    let _ = <Compact<u32>>::decode(cursor).unwrap();
-    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor).unwrap();
     let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
-        _ => panic!("Metadata V14 unavailable"),
+        frame_metadata::RuntimeMetadata::V14(metadata) => {
+            subxt_metadata::metadata_v14_to_latest(metadata)
+        }
+        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
+        _ => panic!("Metadata V14 or V15 unavailable"),
     };
-
     // Compare the runtime API call against the `state_getMetadata`.
     let metadata = api.rpc().metadata(None).await.unwrap();
     let metadata = metadata.runtime_metadata();
@@ -417,8 +465,7 @@ async fn chainhead_unstable_body() {
 
     // Expected block's extrinsics scale encoded and hex encoded.
     let body = api.rpc().block(Some(hash)).await.unwrap().unwrap();
-    let extrinsics: Vec<Vec<u8>> =
-        body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
+    let extrinsics: Vec<Vec<u8>> = body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
     let expected = format!("0x{}", hex::encode(extrinsics.encode()));
 
     assert_matches!(event,
@@ -466,10 +513,12 @@ async fn chainhead_unstable_storage() {
     let sub_id = blocks.subscription_id().unwrap().clone();
 
     let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
-    let addr = node_runtime::storage().system().account(alice).to_bytes();
+    let addr = node_runtime::storage().system().account(alice);
+    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
+
     let mut sub = api
         .rpc()
-        .chainhead_unstable_storage(sub_id, hash, &addr, None)
+        .chainhead_unstable_storage(sub_id, hash, &addr_bytes, None)
         .await
         .unwrap();
     let event = sub.next().await.unwrap().unwrap();
@@ -530,4 +579,76 @@ async fn chainhead_unstable_unpin() {
         .chainhead_unstable_unpin(sub_id, hash)
         .await
         .is_err());
+}
+
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct FeeDetails {
+    /// The minimum fee for a transaction to be included in a block.
+    pub inclusion_fee: Option<InclusionFee>,
+    /// tip
+    pub tip: u128,
+}
+
+/// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.InclusionFee.html>
+/// The base fee and adjusted weight and length fees constitute the _inclusion fee_.
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct InclusionFee {
+    /// minimum amount a user pays for a transaction.
+    pub base_fee: u128,
+    /// amount paid for the encoded length (in bytes) of the transaction.
+    pub len_fee: u128,
+    ///
+    /// - `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on the
+    ///   congestion of the network.
+    /// - `weight_fee`: This amount is computed based on the weight of the transaction. Weight
+    /// accounts for the execution time of a transaction.
+    ///
+    /// adjusted_weight_fee = targeted_fee_adjustment * weight_fee
+    pub adjusted_weight_fee: u128,
+}
+
+#[tokio::test]
+async fn partial_fee_estimate_correct() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let hans = pair_signer(Sr25519Pair::generate().0);
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(hans.account_id().clone().into(), 1_000_000_000_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    // Method I: TransactionPaymentApi_query_info
+    let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
+
+    // Method II: TransactionPaymentApi_query_fee_details + calculations
+    let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
+    let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
+    let InclusionFee {
+        base_fee,
+        len_fee,
+        adjusted_weight_fee,
+    } = api
+        .rpc()
+        .state_call::<FeeDetails>(
+            "TransactionPaymentApi_query_fee_details",
+            Some(&encoded_with_len),
+            None,
+        )
+        .await
+        .unwrap()
+        .inclusion_fee
+        .unwrap();
+    let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
+
+    // Both methods should yield the same fee
+    assert_eq!(partial_fee_1, partial_fee_2);
 }

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,18 +10,13 @@
 //! polkadot --dev --tmp
 //! ```
 
-use subxt::{
-    config::Header,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{config::Header, OnlineClient, PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api =
-        OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
+    let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks = api.rpc().subscribe_finalized_block_headers().await?;

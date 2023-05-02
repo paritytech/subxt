@@ -1,27 +1,13 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    RpcClientT,
-    RpcSubscription,
-    RpcSubscriptionId,
-};
+use super::{RpcClientT, RpcSubscription, RpcSubscriptionId};
 use crate::error::Error;
-use futures::{
-    Stream,
-    StreamExt,
-};
-use serde::{
-    de::DeserializeOwned,
-    Serialize,
-};
+use futures::{Stream, StreamExt};
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
-use std::{
-    pin::Pin,
-    sync::Arc,
-    task::Poll,
-};
+use std::{pin::Pin, sync::Arc, task::Poll};
 
 /// A concrete wrapper around an [`RpcClientT`] which exposes the udnerlying interface via some
 /// higher level methods that make it a little easier to work with.
@@ -180,7 +166,8 @@ impl<Res> std::fmt::Debug for Subscription<Res> {
 }
 
 impl<Res> Subscription<Res> {
-    fn new(inner: RpcSubscription) -> Self {
+    /// Creates a new [`Subscription`].
+    pub fn new(inner: RpcSubscription) -> Self {
         Self {
             inner,
             _marker: std::marker::PhantomData,
@@ -214,9 +201,8 @@ impl<Res: DeserializeOwned> Stream for Subscription<Res> {
         // Decode the inner RawValue to the type we're expecting and map
         // any errors to the right shape:
         let res = res.map(|r| {
-            r.map_err(|e| e.into()).and_then(|raw_val| {
-                serde_json::from_str(raw_val.get()).map_err(|e| e.into())
-            })
+            r.map_err(|e| e.into())
+                .and_then(|raw_val| serde_json::from_str(raw_val.get()).map_err(|e| e.into()))
         });
 
         Poll::Ready(res)

@@ -1,24 +1,23 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::CratePath;
 
-use proc_macro2::{
-    Ident,
-    TokenStream,
-};
+use proc_macro2::{Ident, TokenStream};
 use quote::format_ident;
-use scale_info::{
-    form::PortableForm,
-    Path,
-    TypeDefPrimitive,
-};
+use scale_info::{form::PortableForm, Path, TypeDefPrimitive};
 use std::collections::BTreeSet;
 use syn::parse_quote;
 
+/// An opaque struct representing a type path. The main usage of this is
+/// to spit out as tokens in some `quote!{ ... }` macro; the inner structure
+/// should be unimportant.
 #[derive(Clone, Debug)]
-pub enum TypePath {
+pub struct TypePath(TypePathInner);
+
+#[derive(Clone, Debug)]
+pub enum TypePathInner {
     Parameter(TypeParameter),
     Type(TypePathType),
 }
@@ -31,15 +30,35 @@ impl quote::ToTokens for TypePath {
 }
 
 impl TypePath {
+    /// Construct a [`TypePath`] from a [`TypeParameter`]
+    pub fn from_parameter(param: TypeParameter) -> TypePath {
+        TypePath(TypePathInner::Parameter(param))
+    }
+
+    /// Construct a [`TypePath`] from a [`TypeParameter`]
+    pub fn from_type(ty: TypePathType) -> TypePath {
+        TypePath(TypePathInner::Type(ty))
+    }
+
+    /// Construct a [`TypePath`] from a [`syn::TypePath`]
+    pub fn from_syn_path(path: syn::Path) -> TypePath {
+        // Note; this doesn't parse the parameters or anything, but since nothing external
+        // can inspect this structure, and the ToTokens impl works either way, it should be ok.
+        TypePath(TypePathInner::Type(TypePathType::Path {
+            path,
+            params: Vec::new(),
+        }))
+    }
+
     pub(crate) fn to_syn_type(&self) -> syn::Type {
-        match self {
-            TypePath::Parameter(ty_param) => syn::Type::Path(parse_quote! { #ty_param }),
-            TypePath::Type(ty) => ty.to_syn_type(),
+        match &self.0 {
+            TypePathInner::Parameter(ty_param) => syn::Type::Path(parse_quote! { #ty_param }),
+            TypePathInner::Type(ty) => ty.to_syn_type(),
         }
     }
 
     pub(crate) fn is_compact(&self) -> bool {
-        matches!(self, Self::Type(ty) if ty.is_compact())
+        matches!(&self.0, TypePathInner::Type(ty) if ty.is_compact())
     }
 
     /// Returns the type parameters in a path which are inherited from the containing type.
@@ -52,11 +71,11 @@ impl TypePath {
     /// }
     /// ```
     pub fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
-        match self {
-            Self::Parameter(type_parameter) => {
+        match &self.0 {
+            TypePathInner::Parameter(type_parameter) => {
                 acc.insert(type_parameter.clone());
             }
-            Self::Type(type_path) => type_path.parent_type_params(acc),
+            TypePathInner::Type(type_path) => type_path.parent_type_params(acc),
         }
     }
 
@@ -64,13 +83,13 @@ impl TypePath {
     ///
     /// **Note:** Utilized for transforming `std::vec::Vec<T>` into slices `&[T]` for the storage API.
     pub fn vec_type_param(&self) -> Option<&TypePath> {
-        let ty = match self {
-            TypePath::Type(ty) => ty,
+        let ty = match &self.0 {
+            TypePathInner::Type(ty) => ty,
             _ => return None,
         };
 
         match ty {
-            TypePathType::Vec { ref of } => Some(of),
+            TypePathType::Vec { of } => Some(of),
             _ => None,
         }
     }
@@ -79,7 +98,7 @@ impl TypePath {
 #[derive(Clone, Debug)]
 pub enum TypePathType {
     Path {
-        path: syn::TypePath,
+        path: syn::Path,
         params: Vec<TypePath>,
     },
     Vec {
@@ -113,9 +132,9 @@ impl TypePathType {
         root_mod_ident: Ident,
         params: Vec<TypePath>,
     ) -> Self {
-        let path_segments = path.segments();
+        let path_segments = &*path.segments;
 
-        let path: syn::TypePath = match path_segments {
+        let path: syn::Path = match path_segments {
             [] => panic!("Type has no ident"),
             [ident] => {
                 // paths to prelude types
@@ -135,10 +154,7 @@ impl TypePathType {
                 let mut ty_path = path_segments
                     .iter()
                     .map(|s| syn::PathSegment::from(format_ident!("{}", s)))
-                    .collect::<syn::punctuated::Punctuated<
-                        syn::PathSegment,
-                        syn::Token![::],
-                    >>();
+                    .collect::<syn::punctuated::Punctuated<syn::PathSegment, syn::Token![::]>>();
                 ty_path.insert(0, syn::PathSegment::from(root_mod_ident));
                 parse_quote!( #ty_path )
             }
@@ -208,25 +224,23 @@ impl TypePathType {
                 let tuple = parse_quote! { (#( # elements, )* ) };
                 syn::Type::Tuple(tuple)
             }
-            TypePathType::Primitive { def } => {
-                syn::Type::Path(match def {
-                    TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
-                    TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
-                    TypeDefPrimitive::Str => parse_quote!(::std::string::String),
-                    TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
-                    TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
-                    TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
-                    TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
-                    TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
-                    TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
-                    TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
-                    TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
-                    TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
-                    TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
-                    TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
-                    TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
-                })
-            }
+            TypePathType::Primitive { def } => syn::Type::Path(match def {
+                TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
+                TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
+                TypeDefPrimitive::Str => parse_quote!(::std::string::String),
+                TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
+                TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
+                TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
+                TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
+                TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
+                TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
+                TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
+                TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
+                TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
+                TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
+                TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
+                TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
+            }),
             TypePathType::Compact {
                 inner,
                 is_field,

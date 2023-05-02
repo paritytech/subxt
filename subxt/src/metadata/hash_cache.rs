@@ -1,12 +1,9 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use parking_lot::RwLock;
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-};
+use std::{borrow::Cow, collections::HashMap};
 
 /// A cache with the simple goal of storing 32 byte hashes against pallet+item keys
 #[derive(Default, Debug)]
@@ -17,12 +14,7 @@ pub struct HashCache {
 impl HashCache {
     /// get a hash out of the cache by its pallet and item key. If the item doesn't exist,
     /// run the function provided to obtain a hash to insert (or bail with some error on failure).
-    pub fn get_or_insert<F, E>(
-        &self,
-        pallet: &str,
-        item: &str,
-        f: F,
-    ) -> Result<[u8; 32], E>
+    pub fn get_or_insert<F, E>(&self, pallet: &str, item: &str, f: F) -> Result<[u8; 32], E>
     where
         F: FnOnce() -> Result<[u8; 32], E>,
     {
@@ -33,7 +25,7 @@ impl HashCache {
             .copied();
 
         if let Some(hash) = maybe_hash {
-            return Ok(hash)
+            return Ok(hash);
         }
 
         let hash = f()?;

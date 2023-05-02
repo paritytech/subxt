@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -12,15 +12,9 @@ pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 use core::fmt::Debug;
-use serde::{
-    de::DeserializeOwned,
-    Serialize,
-};
+use serde::{de::DeserializeOwned, Serialize};
 
 pub use extrinsic_params::ExtrinsicParams;
 pub use polkadot::PolkadotConfig;
@@ -110,10 +104,7 @@ pub trait Header: Sized + Encode {
 /// // This is how PolkadotConfig is implemented:
 /// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
 /// ```
-pub struct WithExtrinsicParams<
-    T: Config,
-    E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>,
-> {
+pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> {
     _marker: std::marker::PhantomData<(T, E)>,
 }
 
@@ -128,4 +119,41 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
     type Hasher = T::Hasher;
     type Header = T::Header;
     type ExtrinsicParams = E;
+}
+
+/// implement subxt's Hasher and Header traits for some substrate structs
+#[cfg(feature = "substrate-compat")]
+mod substrate_impls {
+    use super::*;
+    use primitive_types::{H256, U256};
+
+    impl<N, H> Header for sp_runtime::generic::Header<N, H>
+    where
+        Self: Encode,
+        N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
+        H: sp_runtime::traits::Hash + Hasher,
+    {
+        type Number = N;
+        type Hasher = H;
+
+        fn number(&self) -> Self::Number {
+            self.number
+        }
+    }
+
+    impl Hasher for sp_core::Blake2Hasher {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
+
+    impl Hasher for sp_core::KeccakHasher {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
 }

@@ -1,34 +1,19 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{
-    StorageAddress,
-    Yes,
-};
+use super::storage_address::{StorageAddress, Yes};
 use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
+    client::OnlineClientT,
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        Metadata,
-    },
-    rpc::types::{
-        StorageData,
-        StorageKey,
-    },
+    metadata::{DecodeWithMetadata, Metadata},
+    rpc::types::{StorageData, StorageKey},
     Config,
 };
 use derivative::Derivative;
-use frame_metadata::StorageEntryType;
+use frame_metadata::v15::StorageEntryType;
 use scale_info::form::PortableForm;
-use std::{
-    future::Future,
-    marker::PhantomData,
-};
+use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -53,29 +38,13 @@ impl<T: Config, Client> Storage<T, Client> {
 impl<T, Client> Storage<T, Client>
 where
     T: Config,
-    Client: OfflineClientT<T>,
-{
-    /// Run the validation logic against some storage address you'd like to access.
-    ///
-    /// Method has the same meaning as [`StorageClient::validate`](super::storage_client::StorageClient::validate).
-    pub fn validate<Address: StorageAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
-        validate_storage_address(address, &self.client.metadata())
-    }
-}
-
-impl<T, Client> Storage<T, Client>
-where
-    T: Config,
     Client: OnlineClientT<T>,
 {
     /// Fetch the raw encoded value at the address/key given.
-    pub fn fetch_raw<'a>(
+    pub fn fetch_raw<'address>(
         &self,
-        key: &'a [u8],
-    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'a {
+        key: &'address [u8],
+    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'address {
         let client = self.client.clone();
         let block_hash = self.block_hash;
         // Ensure that the returned future doesn't have a lifetime tied to api.storage(),
@@ -106,7 +75,7 @@ where
     /// // Fetch just the keys, returning up to 10 keys.
     /// let value = api
     ///     .storage()
-    ///     .at(None)
+    ///     .at_latest()
     ///     .await
     ///     .unwrap()
     ///     .fetch(&address)
@@ -116,14 +85,12 @@ where
     /// println!("Value: {:?}", value);
     /// # }
     /// ```
-    pub fn fetch<'a, Address>(
+    pub fn fetch<'address, Address>(
         &self,
-        address: &'a Address,
-    ) -> impl Future<
-        Output = Result<Option<<Address::Target as DecodeWithMetadata>::Target>, Error>,
-    > + 'a
+        address: &'address Address,
+    ) -> impl Future<Output = Result<Option<Address::Target>, Error>> + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -131,13 +98,13 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            client.validate(address)?;
+            validate_storage_address(address, &client.client.metadata())?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
             let metadata = client.client.metadata();
             let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(&lookup_bytes).await? {
-                let val = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
+                let val = decode_storage_with_metadata::<Address::Target>(
                     &mut &*data,
                     address.pallet_name(),
                     address.entry_name(),
@@ -151,13 +118,12 @@ where
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub fn fetch_or_default<'a, Address>(
+    pub fn fetch_or_default<'address, Address>(
         &self,
-        address: &'a Address,
-    ) -> impl Future<Output = Result<<Address::Target as DecodeWithMetadata>::Target, Error>>
-           + 'a
+        address: &'address Address,
+    ) -> impl Future<Output = Result<Address::Target, Error>> + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'a,
+        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -172,15 +138,10 @@ where
                 // We have to dig into metadata already, so no point using the optimised `decode_storage_with_metadata` call.
                 let pallet_metadata = metadata.pallet(pallet_name)?;
                 let storage_metadata = pallet_metadata.storage(storage_name)?;
-                let return_ty_id =
-                    return_type_from_storage_entry_type(&storage_metadata.ty);
+                let return_ty_id = return_type_from_storage_entry_type(&storage_metadata.ty);
                 let bytes = &mut &storage_metadata.default[..];
 
-                let val = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
-                    bytes,
-                    return_ty_id,
-                    &metadata,
-                )?;
+                let val = Address::Target::decode_with_metadata(bytes, return_ty_id, &metadata)?;
                 Ok(val)
             }
         }
@@ -189,12 +150,12 @@ where
     /// Fetch up to `count` keys for a storage map in lexicographic order.
     ///
     /// Supports pagination by passing a value to `start_key`.
-    pub fn fetch_keys<'a>(
+    pub fn fetch_keys<'address>(
         &self,
-        key: &'a [u8],
+        key: &'address [u8],
         count: u32,
-        start_key: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'a {
+        start_key: Option<&'address [u8]>,
+    ) -> impl Future<Output = Result<Vec<StorageKey>, Error>> + 'address {
         let client = self.client.clone();
         let block_hash = self.block_hash;
         async move {
@@ -224,7 +185,7 @@ where
     /// // Iterate over keys and values at that address.
     /// let mut iter = api
     ///     .storage()
-    ///     .at(None)
+    ///     .at_latest()
     ///     .await
     ///     .unwrap()
     ///     .iter(address, 10)
@@ -252,18 +213,15 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            client.validate(&address)?;
+            validate_storage_address(&address, &client.client.metadata())?;
 
             let metadata = client.client.metadata();
 
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id = lookup_storage_return_type(
-                &metadata,
-                address.pallet_name(),
-                address.entry_name(),
-            )?;
+            let return_type_id =
+                lookup_storage_return_type(&metadata, address.pallet_name(), address.entry_name())?;
 
             // The root pallet/entry bytes for this storage entry:
             let address_root_bytes = super::utils::storage_address_root_bytes(&address);
@@ -303,9 +261,7 @@ where
     ReturnTy: DecodeWithMetadata,
 {
     /// Returns the next key value pair from a map.
-    pub async fn next(
-        &mut self,
-    ) -> Result<Option<(StorageKey, ReturnTy::Target)>, Error> {
+    pub async fn next(&mut self) -> Result<Option<(StorageKey, ReturnTy)>, Error> {
         loop {
             if let Some((k, v)) = self.buffer.pop() {
                 let val = ReturnTy::decode_with_metadata(
@@ -313,7 +269,7 @@ where
                     self.return_type_id,
                     &self.metadata,
                 )?;
-                return Ok(Some((k, val)))
+                return Ok(Some((k, val)));
             } else {
                 let start_key = self.start_key.take();
                 let keys = self
@@ -326,7 +282,7 @@ where
                     .await?;
 
                 if keys.is_empty() {
-                    return Ok(None)
+                    return Ok(None);
                 }
 
                 self.start_key = keys.last().cloned();
@@ -374,13 +330,11 @@ fn validate_storage(
     };
     match expected_hash == hash {
         true => Ok(()),
-        false => {
-            Err(crate::error::MetadataError::IncompatibleStorageMetadata(
-                pallet_name.into(),
-                storage_name.into(),
-            )
-            .into())
-        }
+        false => Err(crate::error::MetadataError::IncompatibleStorageMetadata(
+            pallet_name.into(),
+            storage_name.into(),
+        )
+        .into()),
     }
 }
 
@@ -398,7 +352,25 @@ fn lookup_storage_return_type(
 /// Fetch the return type out of a [`StorageEntryType`].
 fn return_type_from_storage_entry_type(entry: &StorageEntryType<PortableForm>) -> u32 {
     match entry {
-        StorageEntryType::Plain(ty) => ty.id(),
-        StorageEntryType::Map { value, .. } => value.id(),
+        StorageEntryType::Plain(ty) => ty.id,
+        StorageEntryType::Map { value, .. } => value.id,
     }
+}
+
+/// Given some bytes, a pallet and storage name, decode the response.
+fn decode_storage_with_metadata<T: DecodeWithMetadata>(
+    bytes: &mut &[u8],
+    pallet_name: &str,
+    storage_entry: &str,
+    metadata: &Metadata,
+) -> Result<T, Error> {
+    let ty = &metadata.pallet(pallet_name)?.storage(storage_entry)?.ty;
+
+    let id = match ty {
+        StorageEntryType::Plain(ty) => ty.id,
+        StorageEntryType::Map { value, .. } => value.id,
+    };
+
+    let val = T::decode_with_metadata(bytes, id, metadata)?;
+    Ok(val)
 }

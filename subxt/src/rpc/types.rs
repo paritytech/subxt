@@ -1,58 +1,54 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Types sent to/from the Substrate RPC interface.
 
-use crate::Config;
-use codec::{
-    Decode,
-    Encode,
-};
+use crate::{metadata::Metadata, Config};
+use codec::{Decode, Encode};
 use primitive_types::U256;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 // Subscription types are returned from some calls, so expose it with the rest of the returned types.
 pub use super::rpc_client::Subscription;
 
-/// Signal what the result of doing a dry run of an extrinsic is.
-pub type DryRunResult = Result<(), DryRunError>;
-
 /// An error dry running an extrinsic.
-#[derive(Clone, PartialEq, Eq, Debug)]
-pub enum DryRunError {
-    /// The extrinsic will not be included in the block
+#[derive(Debug, PartialEq, Eq)]
+pub enum DryRunResult {
+    /// The transaction could be included in the block and executed.
+    Success,
+    /// The transaction could be included in the block, but the call failed to dispatch.
+    DispatchError(crate::error::DispatchError),
+    /// The transaction could not be included in the block.
     TransactionValidityError,
-    /// The extrinsic will be included in the block, but the call failed to dispatch.
-    DispatchError,
 }
 
-/// dryRun returns an ApplyExtrinsicResult, which is basically a
-/// `Result<Result<(), DispatchError>, TransactionValidityError>`. We want to convert this to
-/// a [`DryRunResult`].
-///
-/// - if `Ok(inner)`, the transaction will be included in the block
-/// - if `Ok(Ok(()))`, the transaction will be included and the call will be dispatched
-///   successfully
-/// - if `Ok(Err(e))`, the transaction will be included but there is some error dispatching
-///   the call to the module.
-///
-/// The errors get a bit involved and have been known to change over time. At the moment
-/// then, we will keep things simple here and just decode the Result portion (ie the initial bytes)
-/// and ignore the rest.
-pub(crate) fn decode_dry_run_result<I: codec::Input>(
-    input: &mut I,
-) -> Result<DryRunResult, codec::Error> {
-    let res = match <Result<Result<(), ()>, ()>>::decode(input)? {
-        Ok(Ok(())) => Ok(()),
-        Ok(Err(())) => Err(DryRunError::DispatchError),
-        Err(()) => Err(DryRunError::TransactionValidityError),
-    };
-    Ok(res)
+/// The bytes representing an error dry running an extrinsic.
+pub struct DryRunResultBytes(pub Vec<u8>);
+
+impl DryRunResultBytes {
+    /// Attempt to decode the error bytes into a [`DryRunResult`] using the provided [`Metadata`].
+    pub fn into_dry_run_result(self, metadata: &Metadata) -> Result<DryRunResult, crate::Error> {
+        // dryRun returns an ApplyExtrinsicResult, which is basically a
+        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
+        let bytes = self.0;
+        if bytes[0] == 0 && bytes[1] == 0 {
+            // Ok(Ok(())); transaction is valid and executed ok
+            Ok(DryRunResult::Success)
+        } else if bytes[0] == 0 && bytes[1] == 1 {
+            // Ok(Err(dispatch_error)); transaction is valid but execution failed
+            let dispatch_error =
+                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
+            Ok(DryRunResult::DispatchError(dispatch_error))
+        } else if bytes[0] == 1 {
+            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
+            Ok(DryRunResult::TransactionValidityError)
+        } else {
+            // unable to decode the bytes; they aren't what we expect.
+            Err(crate::Error::Unknown(bytes))
+        }
+    }
 }
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -334,17 +330,7 @@ pub struct BlockStats {
 
 /// Storage key.
 #[derive(
-    Serialize,
-    Deserialize,
-    Hash,
-    PartialOrd,
-    Ord,
-    PartialEq,
-    Eq,
-    Clone,
-    Encode,
-    Decode,
-    Debug,
+    Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode, Debug,
 )]
 pub struct StorageKey(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 impl AsRef<[u8]> for StorageKey {
@@ -355,17 +341,7 @@ impl AsRef<[u8]> for StorageKey {
 
 /// Storage data.
 #[derive(
-    Serialize,
-    Deserialize,
-    Hash,
-    PartialOrd,
-    Ord,
-    PartialEq,
-    Eq,
-    Clone,
-    Encode,
-    Decode,
-    Debug,
+    Serialize, Deserialize, Hash, PartialOrd, Ord, PartialEq, Eq, Clone, Encode, Decode, Debug,
 )]
 pub struct StorageData(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 impl AsRef<[u8]> for StorageData {
@@ -709,14 +685,10 @@ impl<Hash> From<TransactionEvent<Hash>> for TransactionEventIR<Hash> {
                 TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Validated)
             }
             TransactionEvent::Broadcasted(event) => {
-                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Broadcasted(
-                    event,
-                ))
+                TransactionEventIR::NonBlock(TransactionEventNonBlockIR::Broadcasted(event))
             }
             TransactionEvent::BestChainBlockIncluded(event) => {
-                TransactionEventIR::Block(
-                    TransactionEventBlockIR::BestChainBlockIncluded(event),
-                )
+                TransactionEventIR::Block(TransactionEventBlockIR::BestChainBlockIncluded(event))
             }
             TransactionEvent::Finalized(event) => {
                 TransactionEventIR::Block(TransactionEventBlockIR::Finalized(event))
@@ -737,33 +709,21 @@ impl<Hash> From<TransactionEvent<Hash>> for TransactionEventIR<Hash> {
 impl<Hash> From<TransactionEventIR<Hash>> for TransactionEvent<Hash> {
     fn from(value: TransactionEventIR<Hash>) -> Self {
         match value {
-            TransactionEventIR::NonBlock(status) => {
-                match status {
-                    TransactionEventNonBlockIR::Validated => TransactionEvent::Validated,
-                    TransactionEventNonBlockIR::Broadcasted(event) => {
-                        TransactionEvent::Broadcasted(event)
-                    }
-                    TransactionEventNonBlockIR::Error(event) => {
-                        TransactionEvent::Error(event)
-                    }
-                    TransactionEventNonBlockIR::Invalid(event) => {
-                        TransactionEvent::Invalid(event)
-                    }
-                    TransactionEventNonBlockIR::Dropped(event) => {
-                        TransactionEvent::Dropped(event)
-                    }
+            TransactionEventIR::NonBlock(status) => match status {
+                TransactionEventNonBlockIR::Validated => TransactionEvent::Validated,
+                TransactionEventNonBlockIR::Broadcasted(event) => {
+                    TransactionEvent::Broadcasted(event)
                 }
-            }
-            TransactionEventIR::Block(block) => {
-                match block {
-                    TransactionEventBlockIR::Finalized(event) => {
-                        TransactionEvent::Finalized(event)
-                    }
-                    TransactionEventBlockIR::BestChainBlockIncluded(event) => {
-                        TransactionEvent::BestChainBlockIncluded(event)
-                    }
+                TransactionEventNonBlockIR::Error(event) => TransactionEvent::Error(event),
+                TransactionEventNonBlockIR::Invalid(event) => TransactionEvent::Invalid(event),
+                TransactionEventNonBlockIR::Dropped(event) => TransactionEvent::Dropped(event),
+            },
+            TransactionEventIR::Block(block) => match block {
+                TransactionEventBlockIR::Finalized(event) => TransactionEvent::Finalized(event),
+                TransactionEventBlockIR::BestChainBlockIncluded(event) => {
+                    TransactionEvent::BestChainBlockIncluded(event)
                 }
-            }
+            },
         }
     }
 }
@@ -773,9 +733,7 @@ mod as_string {
     use super::*;
     use serde::Deserializer;
 
-    pub fn deserialize<'de, D: Deserializer<'de>>(
-        deserializer: D,
-    ) -> Result<usize, D::Error> {
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<usize, D::Error> {
         String::deserialize(deserializer)?
             .parse()
             .map_err(|e| serde::de::Error::custom(format!("Parsing failed: {e}")))
@@ -789,10 +747,7 @@ mod test {
     /// A util function to assert the result of serialization and deserialization is the same.
     pub fn assert_deser<T>(s: &str, expected: T)
     where
-        T: std::fmt::Debug
-            + serde::ser::Serialize
-            + serde::de::DeserializeOwned
-            + PartialEq,
+        T: std::fmt::Debug + serde::ser::Serialize + serde::de::DeserializeOwned + PartialEq,
     {
         assert_eq!(serde_json::from_str::<T>(s).unwrap(), expected);
         assert_eq!(serde_json::to_string(&expected).unwrap(), s);
@@ -820,10 +775,8 @@ mod test {
             ..Default::default()
         };
 
-        let json = serde_json::to_string(&substrate_runtime_version)
-            .expect("serializing failed");
-        let val: RuntimeVersion =
-            serde_json::from_str(&json).expect("deserializing failed");
+        let json = serde_json::to_string(&substrate_runtime_version).expect("serializing failed");
+        let val: RuntimeVersion = serde_json::from_str(&json).expect("deserializing failed");
 
         // We ignore any other properties.
         assert_eq!(val.spec_version, 123);
@@ -867,40 +820,6 @@ mod test {
     }
 
     #[test]
-    fn dry_run_result_is_substrate_compatible() {
-        use sp_runtime::{
-            transaction_validity::{
-                InvalidTransaction as SpInvalidTransaction,
-                TransactionValidityError as SpTransactionValidityError,
-            },
-            ApplyExtrinsicResult as SpApplyExtrinsicResult,
-            DispatchError as SpDispatchError,
-        };
-
-        let pairs = vec![
-            // All ok
-            (SpApplyExtrinsicResult::Ok(Ok(())), Ok(())),
-            // Some transaction error
-            (
-                SpApplyExtrinsicResult::Err(SpTransactionValidityError::Invalid(
-                    SpInvalidTransaction::BadProof,
-                )),
-                Err(DryRunError::TransactionValidityError),
-            ),
-            // Some dispatch error
-            (
-                SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
-                Err(DryRunError::DispatchError),
-            ),
-        ];
-
-        for (actual, expected) in pairs {
-            let encoded = actual.encode();
-            assert_eq!(decode_dry_run_result(&mut &*encoded).unwrap(), expected);
-        }
-    }
-
-    #[test]
     fn justification_is_substrate_compatible() {
         use sp_runtime::Justification as SpJustification;
 
@@ -915,8 +834,7 @@ mod test {
     #[test]
     fn storage_types_are_substrate_compatible() {
         use sp_core::storage::{
-            StorageChangeSet as SpStorageChangeSet,
-            StorageData as SpStorageData,
+            StorageChangeSet as SpStorageChangeSet, StorageData as SpStorageData,
             StorageKey as SpStorageKey,
         };
 

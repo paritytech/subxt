@@ -1,28 +1,16 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use super::CodegenError;
 use crate::{
-    types::{
-        CompositeDefFields,
-        TypeGenerator,
-    },
+    types::{CompositeDefFields, TypeGenerator},
     CratePath,
 };
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletMetadata,
-};
-use heck::{
-    ToSnakeCase as _,
-    ToUpperCamelCase as _,
-};
+use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
+use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 
 /// Generate calls from the provided pallet's metadata. Each call returns a `StaticTxPayload`
@@ -35,7 +23,7 @@ use scale_info::form::PortableForm;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
@@ -49,7 +37,7 @@ pub fn generate_calls(
 
     let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
-        call.ty.id(),
+        call.ty.id,
         |name| name.to_upper_camel_case().into(),
         "Call",
         crate_path,
@@ -59,23 +47,21 @@ pub fn generate_calls(
         .iter_mut()
         .map(|(variant_name, struct_def)| {
             let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match struct_def.fields {
-                CompositeDefFields::Named(ref named_fields) => {
-                    named_fields
-                        .iter()
-                        .map(|(name, field)| {
-                            let fn_arg_type = &field.type_path;
-                            let call_arg = if field.is_boxed() {
-                                quote! { #name: ::std::boxed::Box::new(#name) }
-                            } else {
-                                quote! { #name }
-                            };
-                            (quote!( #name: #fn_arg_type ), call_arg)
-                        })
-                        .unzip()
-                }
+                CompositeDefFields::Named(ref named_fields) => named_fields
+                    .iter()
+                    .map(|(name, field)| {
+                        let fn_arg_type = &field.type_path;
+                        let call_arg = if field.is_boxed() {
+                            quote! { #name: ::std::boxed::Box::new(#name) }
+                        } else {
+                            quote! { #name }
+                        };
+                        (quote!( #name: #fn_arg_type ), call_arg)
+                    })
+                    .unzip(),
                 CompositeDefFields::NoFields => Default::default(),
                 CompositeDefFields::Unnamed(_) => {
-                    return Err(CodegenError::InvalidCallVariant(call.ty.id()))
+                    return Err(CodegenError::InvalidCallVariant(call.ty.id))
                 }
             };
 
@@ -104,8 +90,8 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::StaticTxPayload<#struct_name> {
-                    #crate_path::tx::StaticTxPayload::new(
+                ) -> #crate_path::tx::Payload<#struct_name> {
+                    #crate_path::tx::Payload::new_static(
                         #pallet_name,
                         #call_name,
                         #struct_name { #( #call_args, )* },
@@ -120,8 +106,8 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
-    let call_ty = type_gen.resolve_type(call.ty.id());
-    let docs = call_ty.docs();
+    let call_ty = type_gen.resolve_type(call.ty.id);
+    let docs = &call_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();

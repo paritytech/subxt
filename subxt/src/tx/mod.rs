@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -21,19 +21,7 @@ pub use self::signer::PairSigner;
 
 pub use self::{
     signer::Signer,
-    tx_client::{
-        SubmittableExtrinsic,
-        TxClient,
-    },
-    tx_payload::{
-        dynamic,
-        DynamicTxPayload,
-        StaticTxPayload,
-        TxPayload,
-    },
-    tx_progress::{
-        TxInBlock,
-        TxProgress,
-        TxStatus,
-    },
+    tx_client::{SubmittableExtrinsic, TxClient},
+    tx_payload::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
+    tx_progress::{TxInBlock, TxProgress, TxStatus},
 };

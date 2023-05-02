@@ -1,32 +1,28 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Miscellaneous utility helpers.
 
-pub mod account_id;
+mod account_id;
 pub mod bits;
-pub mod multi_address;
-pub mod multi_signature;
+mod multi_address;
+mod multi_signature;
+mod static_type;
+mod wrapper_opaque;
 
-use codec::{
-    Decode,
-    DecodeAll,
-    Encode,
-};
+use codec::{Decode, Encode};
 use derivative::Derivative;
 
 pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
+pub use static_type::Static;
+pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
 #[doc(hidden)]
-pub use primitive_types::{
-    H160,
-    H256,
-    H512,
-};
+pub use primitive_types::{H160, H256, H512};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
@@ -36,51 +32,6 @@ pub struct Encoded(pub Vec<u8>);
 impl codec::Encode for Encoded {
     fn encode(&self) -> Vec<u8> {
         self.0.to_owned()
-    }
-}
-
-/// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
-///
-/// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
-/// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Derivative, Encode, Decode)]
-#[derivative(
-    Debug(bound = ""),
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-pub struct WrapperKeepOpaque<T> {
-    data: Vec<u8>,
-    _phantom: PhantomDataSendSync<T>,
-}
-
-impl<T: Decode> WrapperKeepOpaque<T> {
-    /// Try to decode the wrapped type from the inner `data`.
-    ///
-    /// Returns `None` if the decoding failed.
-    pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
-    }
-
-    /// Returns the length of the encoded `T`.
-    pub fn encoded_len(&self) -> usize {
-        self.data.len()
-    }
-
-    /// Returns the encoded data.
-    pub fn encoded(&self) -> &[u8] {
-        &self.data
-    }
-
-    /// Create from the given encoded `data`.
-    pub fn from_encoded(data: Vec<u8>) -> Self {
-        Self {
-            data,
-            _phantom: PhantomDataSendSync::new(),
-        }
     }
 }
 

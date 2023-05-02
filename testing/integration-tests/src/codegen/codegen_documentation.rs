@@ -1,14 +1,9 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use regex::Regex;
-use subxt_codegen::{
-    CratePath,
-    DerivesRegistry,
-    RuntimeGenerator,
-    TypeSubstitutes,
-};
+use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
 
 fn load_test_metadata() -> frame_metadata::RuntimeMetadataPrefixed {
     let bytes = test_runtime::METADATA;
@@ -19,14 +14,15 @@ fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let meta = load_test_metadata();
     let metadata = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(v14) => v14,
+        frame_metadata::RuntimeMetadata::V14(v14) => subxt_metadata::metadata_v14_to_latest(v14),
+        frame_metadata::RuntimeMetadata::V15(v15) => v15,
         _ => panic!("Unsupported metadata version {:?}", meta.1),
     };
 
     // Inspect the metadata types and collect the documentation.
     let mut docs = Vec::new();
-    for ty in metadata.types.types() {
-        docs.extend_from_slice(ty.ty().docs());
+    for ty in &metadata.types.types {
+        docs.extend_from_slice(&ty.ty.docs);
     }
 
     for pallet in metadata.pallets {
@@ -56,8 +52,8 @@ fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> S
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let derives = DerivesRegistry::new(&crate_path);
-    let type_substitutes = TypeSubstitutes::new(&crate_path);
+    let derives = DerivesRegistry::with_default_derives(&crate_path);
+    let type_substitutes = TypeSubstitutes::with_default_substitutes(&crate_path);
     generator
         .generate_runtime(
             item_mod,
@@ -146,8 +142,8 @@ fn check_root_attrs_preserved() {
 
     // Generate a runtime interface from the provided metadata.
     let generator = RuntimeGenerator::new(metadata);
-    let derives = DerivesRegistry::new(&CratePath::default());
-    let type_substitutes = TypeSubstitutes::new(&CratePath::default());
+    let derives = DerivesRegistry::with_default_derives(&CratePath::default());
+    let type_substitutes = TypeSubstitutes::with_default_substitutes(&CratePath::default());
     let generated_code = generator
         .generate_runtime(
             item_mod,
@@ -162,7 +158,8 @@ fn check_root_attrs_preserved() {
     let doc_str_loc = generated_code
         .find("Some root level documentation")
         .expect("root docs should be preserved");
-    let attr_loc = generated_code.find("some_root_attribute") // '#' is space separated in generated output.
+    let attr_loc = generated_code
+        .find("some_root_attribute") // '#' is space separated in generated output.
         .expect("root attr should be preserved");
     let mod_start = generated_code
         .find("pub mod api")

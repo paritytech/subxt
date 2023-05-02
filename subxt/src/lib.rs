@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -144,7 +144,9 @@ pub use subxt_macro::subxt;
 pub use getrandom as _;
 
 #[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
-std::compile_error!("Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive");
+std::compile_error!(
+    "Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive"
+);
 
 pub mod blocks;
 pub mod client;
@@ -163,15 +165,8 @@ pub mod utils;
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
-    client::{
-        OfflineClient,
-        OnlineClient,
-    },
-    config::{
-        Config,
-        PolkadotConfig,
-        SubstrateConfig,
-    },
+    client::{OfflineClient, OnlineClient},
+    config::{Config, PolkadotConfig, SubstrateConfig},
     error::Error,
     metadata::Metadata,
 };
@@ -181,6 +176,8 @@ pub mod ext {
     pub use codec;
     pub use frame_metadata;
     pub use scale_bits;
+    pub use scale_decode;
+    pub use scale_encode;
     pub use scale_value;
     #[cfg(feature = "substrate-compat")]
     pub use sp_core;

@@ -1,21 +1,12 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    types::TypeGenerator,
-    CratePath,
-};
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-    PalletMetadata,
-};
+use crate::{types::TypeGenerator, CratePath};
+use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 
 use super::CodegenError;
@@ -44,7 +35,7 @@ use super::CodegenError;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_constants(
-    metadata: &RuntimeMetadataV14,
+    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
@@ -53,7 +44,7 @@ pub fn generate_constants(
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
     if pallet.constants.is_empty() {
-        return Ok(quote!())
+        return Ok(quote!());
     }
     let constants = &pallet.constants;
 
@@ -65,7 +56,7 @@ pub fn generate_constants(
             return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
         };
 
-        let return_ty = type_gen.resolve_type_path(constant.ty.id());
+        let return_ty = type_gen.resolve_type_path(constant.ty.id);
         let docs = &constant.docs;
         let docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
@@ -73,8 +64,8 @@ pub fn generate_constants(
 
         Ok(quote! {
             #docs
-            pub fn #fn_name(&self) -> #crate_path::constants::StaticConstantAddress<#crate_path::metadata::DecodeStaticType<#return_ty>> {
-                #crate_path::constants::StaticConstantAddress::new(
+            pub fn #fn_name(&self) -> #crate_path::constants::Address<#return_ty> {
+                #crate_path::constants::Address::new_static(
                     #pallet_name,
                     #constant_name,
                     [#(#constant_hash,)*]

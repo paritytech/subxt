@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,16 +10,9 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_core::{
-    sr25519,
-    Pair,
-};
+use sp_core::{sr25519, Pair};
 use sp_keyring::AccountKeyring;
-use subxt::{
-    utils::AccountId32,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{utils::AccountId32, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -34,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let active_era_addr = polkadot::storage().staking().active_era();
     let era = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&active_era_addr)
         .await?
@@ -58,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let controller_acc_addr = polkadot::storage().staking().bonded(&alice_stash_id);
     let controller_acc = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&controller_acc_addr)
         .await?
@@ -68,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let era_reward_addr = polkadot::storage().staking().eras_reward_points(era.index);
     let era_result = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&era_reward_addr)
         .await?;

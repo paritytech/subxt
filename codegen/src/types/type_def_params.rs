@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -27,10 +27,7 @@ impl TypeDefParameters {
 
     /// Update the set of unused type parameters by removing those that are used in the given
     /// fields.
-    pub fn update_unused<'a>(
-        &mut self,
-        fields: impl Iterator<Item = &'a CompositeDefFieldType>,
-    ) {
+    pub fn update_unused<'a>(&mut self, fields: impl Iterator<Item = &'a CompositeDefFieldType>) {
         let mut used_type_params = BTreeSet::new();
         for field in fields {
             field.type_path.parent_type_params(&mut used_type_params)
@@ -43,7 +40,7 @@ impl TypeDefParameters {
     /// Construct a [`core::marker::PhantomData`] for the type unused type params.
     pub fn unused_params_phantom_data(&self) -> Option<syn::TypePath> {
         if self.unused.is_empty() {
-            return None
+            return None;
         }
         let params = if self.unused.len() == 1 {
             let param = self

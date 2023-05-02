@@ -1,6 +1,6 @@
 [package]
 name = "subxt-examples"
-version = "0.27.1"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,12 +13,12 @@ homepage.workspace = true
 description = "Subxt example usage"
 
 [dev-dependencies]
-subxt = { path = "../subxt" }
-tokio = { version = "1.26", features = ["rt-multi-thread", "macros", "time"] }
-sp-keyring = "20.0.0"
-futures = "0.3.27"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-hex = "0.4.3"
-tracing-subscriber = "0.3.11"
-sp-core = { version = "18.0.0", default-features = false }
-sp-runtime = "20.0.0"
+subxt = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
+hex = { workspace = true }
+sp-keyring = { workspace = true }
+sp-core = { workspace = true }
+sp-runtime = { workspace = true }
+tracing-subscriber = { workspace = true }

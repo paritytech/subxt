@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -9,60 +9,41 @@
 //!
 //! # Example
 //!
-//! Fetching storage keys
+//! Fetching the chain genesis hash.
 //!
 //! ```no_run
+//! # #[tokio::main]
+//! # async fn main() {
 //! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
-//! # #[tokio::main]
-//! # async fn main() {
 //! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 //!
-//! let key = polkadot::storage()
-//!     .xcm_pallet()
-//!     .version_notifiers_root()
-//!     .to_bytes();
-//!
-//! // Fetch up to 10 keys.
-//! let keys = api
+//! let genesis_hash = api
 //!     .rpc()
-//!     .storage_keys_paged(&key, 10, None, None)
+//!     .genesis_hash()
 //!     .await
 //!     .unwrap();
 //!
-//! for key in keys.iter() {
-//!     println!("Key: 0x{}", hex::encode(&key));
-//! }
+//! println!("{genesis_hash}");
 //! # }
 //! ```
 
-use super::{
-    rpc_params,
-    types::{
-        self,
-        ChainHeadEvent,
-        FollowEvent,
-    },
-    RpcClient,
-    RpcClientT,
-    Subscription,
-};
-use crate::{
-    error::Error,
-    utils::PhantomDataSendSync,
-    Config,
-    Metadata,
-};
-use codec::{
-    Decode,
-    Encode,
-};
+use std::sync::Arc;
+
+use codec::{Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 use serde::Serialize;
-use std::sync::Arc;
+
+use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
+
+use super::{
+    rpc_params,
+    types::{self, ChainHeadEvent, FollowEvent},
+    RpcClient, RpcClientT, Subscription,
+};
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
@@ -173,25 +154,6 @@ impl<T: Config> Rpc<T> {
         Ok(metadata)
     }
 
-    /// Execute a runtime API call.
-    pub async fn call(
-        &self,
-        function: String,
-        call_parameters: Option<&[u8]>,
-        at: Option<T::Hash>,
-    ) -> Result<types::Bytes, Error> {
-        let call_parameters = call_parameters.unwrap_or_default();
-
-        let bytes: types::Bytes = self
-            .client
-            .request(
-                "state_call",
-                rpc_params![function, to_hex(call_parameters), at],
-            )
-            .await?;
-        Ok(bytes)
-    }
-
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<types::SystemProperties, Error> {
         self.client
@@ -230,10 +192,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Get a header
-    pub async fn header(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, Error> {
+    pub async fn header(&self, hash: Option<T::Hash>) -> Result<Option<T::Header>, Error> {
         let params = rpc_params![hash];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -308,9 +267,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn subscribe_best_block_headers(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_best_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -327,9 +284,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to all new block headers.
-    pub async fn subscribe_all_block_headers(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_all_block_headers(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -382,10 +337,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<X: Encode>(
-        &self,
-        extrinsic: X,
-    ) -> Result<T::Hash, Error> {
+    pub async fn submit_extrinsic<X: Encode>(&self, extrinsic: X) -> Result<T::Hash, Error> {
         let bytes: types::Bytes = extrinsic.encode().into();
         let params = rpc_params![bytes];
         let xt_hash = self
@@ -396,14 +348,13 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Execute a runtime API call.
-    pub async fn state_call(
+    pub async fn state_call<Res: Decode>(
         &self,
         function: &str,
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<types::Bytes, Error> {
+    ) -> Result<Res, Error> {
         let call_parameters = call_parameters.unwrap_or_default();
-
         let bytes: types::Bytes = self
             .client
             .request(
@@ -411,7 +362,9 @@ impl<T: Config> Rpc<T> {
                 rpc_params![function, to_hex(call_parameters), at],
             )
             .await?;
-        Ok(bytes)
+        let cursor = &mut &bytes[..];
+        let res: Res = Decode::decode(cursor)?;
+        Ok(res)
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
@@ -456,10 +409,7 @@ impl<T: Config> Rpc<T> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(
-        &self,
-        session_keys: types::Bytes,
-    ) -> Result<bool, Error> {
+    pub async fn has_session_keys(&self, session_keys: types::Bytes) -> Result<bool, Error> {
         let params = rpc_params![session_keys];
         self.client.request("author_hasSessionKeys", params).await
     }
@@ -467,11 +417,7 @@ impl<T: Config> Rpc<T> {
     /// Checks if the keystore has private keys for the given public key and key type.
     ///
     /// Returns `true` if a private key could be found.
-    pub async fn has_key(
-        &self,
-        public_key: types::Bytes,
-        key_type: String,
-    ) -> Result<bool, Error> {
+    pub async fn has_key(&self, public_key: types::Bytes, key_type: String) -> Result<bool, Error> {
         let params = rpc_params![public_key, key_type];
         self.client.request("author_hasKey", params).await
     }
@@ -483,11 +429,10 @@ impl<T: Config> Rpc<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<types::DryRunResult, Error> {
+    ) -> Result<types::DryRunResultBytes, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
-        let result_bytes: types::Bytes =
-            self.client.request("system_dryRun", params).await?;
-        Ok(types::decode_dry_run_result(&mut &*result_bytes.0)?)
+        let result_bytes: types::Bytes = self.client.request("system_dryRun", params).await?;
+        Ok(types::DryRunResultBytes(result_bytes.0))
     }
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.

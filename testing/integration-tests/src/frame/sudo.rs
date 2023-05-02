@@ -1,18 +1,14 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
     node_runtime::{
         self,
-        runtime_types::{
-            self,
-            sp_weights::weight_v2::Weight,
-        },
+        runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    pair_signer,
-    test_context,
+    pair_signer, test_context,
 };
 use sp_keyring::AccountKeyring;
 

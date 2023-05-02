@@ -1,36 +1,18 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Substrate specific configuration
 
 use super::{
-    extrinsic_params::{
-        BaseExtrinsicParams,
-        BaseExtrinsicParamsBuilder,
-    },
-    Config,
-    Hasher,
-    Header,
+    extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder},
+    Config, Hasher, Header,
 };
-use codec::{
-    Decode,
-    Encode,
-};
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use codec::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
-pub use crate::utils::{
-    account_id::AccountId32,
-    multi_address::MultiAddress,
-    multi_signature::MultiSignature,
-};
-pub use primitive_types::{
-    H256,
-    U256,
-};
+pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
+pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
@@ -137,9 +119,7 @@ where
 }
 
 /// Generic header digest. From `sp_runtime::generic::digest`.
-#[derive(
-    Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Default,
-)]
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Default)]
 pub struct Digest {
     /// A list of digest items.
     pub logs: Vec<DigestItem>,
@@ -240,9 +220,7 @@ impl Decode for DigestItem {
                 Ok(Self::Seal(vals.0, vals.1))
             }
             DigestItemType::Other => Ok(Self::Other(Decode::decode(input)?)),
-            DigestItemType::RuntimeEnvironmentUpdated => {
-                Ok(Self::RuntimeEnvironmentUpdated)
-            }
+            DigestItemType::RuntimeEnvironmentUpdated => Ok(Self::RuntimeEnvironmentUpdated),
         }
     }
 }

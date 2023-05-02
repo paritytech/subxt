@@ -1,29 +1,17 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
-use color_eyre::eyre::{
-    self,
-    WrapErr,
-};
+use codec::Decode;
+use color_eyre::eyre::{self, WrapErr};
 use frame_metadata::{
-    RuntimeMetadata,
-    RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
-    META_RESERVED,
+    v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
 };
 use jsonrpsee::client_transport::ws::Uri;
-use scale::Decode;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use subxt_metadata::{
-    get_metadata_hash,
-    get_pallet_hash,
-};
+use subxt_metadata::{get_metadata_hash, get_pallet_hash, metadata_v14_to_latest};
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
@@ -41,9 +29,7 @@ pub struct Opts {
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     match opts.pallet {
-        Some(pallet) => {
-            handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str()).await
-        }
+        Some(pallet) => handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str()).await,
         None => handle_full_metadata(opts.nodes.as_slice()).await,
     }
 }
@@ -110,7 +96,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
     Ok(())
 }
 
-async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV14> {
+async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadataV15> {
     let bytes = subxt_codegen::utils::fetch_metadata_bytes(url).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
@@ -120,17 +106,16 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
             url,
             metadata.0,
             META_RESERVED
-        ))
+        ));
     }
 
     match metadata.1 {
-        RuntimeMetadata::V14(v14) => Ok(v14),
-        _ => {
-            Err(eyre::eyre!(
-                "Node {:?} with unsupported metadata version: {:?}",
-                url,
-                metadata.1
-            ))
-        }
+        RuntimeMetadata::V14(v14) => Ok(metadata_v14_to_latest(v14)),
+        RuntimeMetadata::V15(v15) => Ok(v15),
+        _ => Err(eyre::eyre!(
+            "Node {:?} with unsupported metadata version: {:?}",
+            url,
+            metadata.1
+        )),
     }
 }

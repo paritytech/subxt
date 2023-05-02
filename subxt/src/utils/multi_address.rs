@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -6,15 +6,23 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_runtime::MultiAddress`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 
 /// A multi-format address wrapper for on-chain accounts. This is a simplified version of Substrate's
 /// `sp_runtime::MultiAddress`. To obtain more functionality, convert this into that type (this conversion
 /// functionality is provided via `From` impls if the `substrate-compat` feature is enabled).
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug)]
+#[derive(
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Encode,
+    Decode,
+    Debug,
+    scale_encode::EncodeAsType,
+    scale_decode::DecodeAsType,
+)]
 pub enum MultiAddress<AccountId, AccountIndex> {
     /// It's an account ID (pubkey).
     Id(AccountId),
@@ -37,10 +45,7 @@ impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, Accoun
 // Improve compat with the substrate version if we're using those crates:
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
-    use super::{
-        super::AccountId32,
-        *,
-    };
+    use super::{super::AccountId32, *};
 
     impl<N> From<sp_runtime::AccountId32> for MultiAddress<AccountId32, N> {
         fn from(value: sp_runtime::AccountId32) -> Self {

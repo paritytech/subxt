@@ -1,6 +1,6 @@
 [package]
 name = "ui-tests"
-version = "0.27.1"
+version.workspace = true
 edition = "2021"
 publish = false
 
@@ -9,8 +9,9 @@ publish = false
 [dependencies]
 
 [dev-dependencies]
-trybuild = "1.0.79"
-scale-info = { version = "2.3.0", features = ["bit-vec"] }
-frame-metadata = "15.0.0"
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-subxt = { path = "../../subxt" }
+trybuild = { workspace = true }
+scale-info = { workspace = true, features = ["bit-vec"] }
+frame-metadata ={ workspace = true }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
+subxt = { workspace = true }
+subxt-metadata = { workspace = true }

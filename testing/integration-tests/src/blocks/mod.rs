@@ -1,12 +1,9 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::test_context;
-use codec::{
-    Compact,
-    Decode,
-};
+use codec::Compact;
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
 
@@ -104,13 +101,15 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let block = sub.next().await.unwrap()?;
     let rt = block.runtime_api().await?;
 
-    let bytes = rt.call_raw("Metadata_metadata", None).await?;
-    let cursor = &mut &*bytes;
-    let _ = <Compact<u32>>::decode(cursor)?;
-    let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+    let (_, meta) = rt
+        .call_raw::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None)
+        .await?;
     let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => metadata,
-        _ => panic!("Metadata V14 unavailable"),
+        frame_metadata::RuntimeMetadata::V14(metadata) => {
+            subxt_metadata::metadata_v14_to_latest(metadata)
+        }
+        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
+        _ => panic!("Metadata V14 or V15 unavailable"),
     };
 
     // Compare the runtime API call against the `state_getMetadata`.

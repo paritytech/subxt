@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -8,26 +8,16 @@ use crate::{
     node_runtime::{
         self,
         contracts::events,
-        runtime_types::{
-            pallet_contracts::wasm::Determinism,
-            sp_weights::weight_v2::Weight,
-        },
+        runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    test_context,
-    TestContext,
+    test_context, TestContext,
 };
 use sp_core::sr25519::Pair;
 use subxt::{
-    tx::{
-        PairSigner,
-        TxProgress,
-    },
+    tx::{PairSigner, TxProgress},
     utils::MultiAddress,
-    Config,
-    Error,
-    OnlineClient,
-    SubstrateConfig,
+    Config, Error, OnlineClient, SubstrateConfig,
 };
 
 struct ContractsTestContext {
@@ -113,9 +103,7 @@ impl ContractsTestContext {
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
         let _extrinsic_success = events
             .find_first::<system::events::ExtrinsicSuccess>()?
-            .ok_or_else(|| {
-                Error::Other("Failed to find a ExtrinsicSuccess event".into())
-            })?;
+            .ok_or_else(|| Error::Other("Failed to find a ExtrinsicSuccess event".into()))?;
 
         tracing::info!("  Block hash: {:?}", events.block_hash());
         tracing::info!("  Code hash: {:?}", code_stored.code_hash);
@@ -219,10 +207,12 @@ async fn tx_call() {
         .contracts()
         .contract_info_of(&contract);
 
+    let info_addr_bytes = cxt.client().storage().address_bytes(&info_addr).unwrap();
+
     let contract_info = cxt
         .client()
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch(&info_addr)
@@ -232,10 +222,10 @@ async fn tx_call() {
     let keys = cxt
         .client()
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
-        .fetch_keys(&info_addr.to_bytes(), 10, None)
+        .fetch_keys(&info_addr_bytes, 10, None)
         .await
         .unwrap()
         .iter()

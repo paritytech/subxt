@@ -1,70 +1,61 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
 
-use codec::{
-    Compact,
-    Input,
-};
+use codec::{Compact, Input};
 use scale_bits::{
-    scale::format::{
-        Format,
-        OrderFormat,
-        StoreFormat,
-    },
+    scale::format::{Format, OrderFormat, StoreFormat},
     Bits,
 };
+use scale_decode::IntoVisitor;
 use std::marker::PhantomData;
 
-macro_rules! store {
-        ($ident: ident; $(($ty: ident, $wrapped: ty)),*) => {
-            /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
-            ///
-            /// Used to decode bit sequences by providing `scale_bits::StoreFormat` using
-            /// `bitvec`-like type type parameters.
-            pub trait $ident {
-                /// Corresponding `scale_bits::StoreFormat` value.
-                const FORMAT: StoreFormat;
-                /// Number of bits that the backing store types holds.
-                const BITS: u32;
-            }
+/// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
+///
+/// Used to decode bit sequences by providing `scale_bits::StoreFormat` using
+/// `bitvec`-like type type parameters.
+pub trait BitStore {
+    /// Corresponding `scale_bits::StoreFormat` value.
+    const FORMAT: StoreFormat;
+    /// Number of bits that the backing store types holds.
+    const BITS: u32;
+}
+macro_rules! impl_store {
+    ($ty:ident, $wrapped:ty) => {
+        impl BitStore for $wrapped {
+            const FORMAT: StoreFormat = StoreFormat::$ty;
+            const BITS: u32 = <$wrapped>::BITS;
+        }
+    };
+}
+impl_store!(U8, u8);
+impl_store!(U16, u16);
+impl_store!(U32, u32);
+impl_store!(U64, u64);
 
-            $(
-                impl $ident for $wrapped {
-                    const FORMAT: StoreFormat = StoreFormat::$ty;
-                    const BITS: u32 = <$wrapped>::BITS;
-                }
-            )*
-        };
-    }
-
-macro_rules! order {
-        ($ident: ident; $($ty: ident),*) => {
-            /// Associates `bitvec::order::BitOrder` trait with corresponding, type-erased `scale_bits::OrderFormat` enum.
-            ///
-            /// Used to decode bit sequences in runtime by providing `scale_bits::OrderFormat` using
-            /// `bitvec`-like type type parameters.
-            pub trait $ident {
-                /// Corresponding `scale_bits::OrderFormat` value.
-                const FORMAT: OrderFormat;
-            }
-
-            $(
-                #[doc = concat!("Type-level value that corresponds to `scale_bits::OrderFormat::", stringify!($ty), "` at run-time")]
-                #[doc = concat!(" and `bitvec::order::BitOrder::", stringify!($ty), "` at the type level.")]
-                #[derive(Clone, Debug, PartialEq, Eq)]
-                pub enum $ty {}
-                impl $ident for $ty {
-                    const FORMAT: OrderFormat = OrderFormat::$ty;
-                }
-            )*
-        };
-    }
-
-store!(BitStore; (U8, u8), (U16, u16), (U32, u32), (U64, u64));
-order!(BitOrder; Lsb0, Msb0);
+/// Associates `bitvec::order::BitOrder` trait with corresponding, type-erased `scale_bits::OrderFormat` enum.
+///
+/// Used to decode bit sequences in runtime by providing `scale_bits::OrderFormat` using
+/// `bitvec`-like type type parameters.
+pub trait BitOrder {
+    /// Corresponding `scale_bits::OrderFormat` value.
+    const FORMAT: OrderFormat;
+}
+macro_rules! impl_order {
+    ($ty:ident) => {
+        #[doc = concat!("Type-level value that corresponds to `scale_bits::OrderFormat::", stringify!($ty), "` at run-time")]
+        #[doc = concat!(" and `bitvec::order::BitOrder::", stringify!($ty), "` at the type level.")]
+        #[derive(Clone, Debug, PartialEq, Eq)]
+        pub enum $ty {}
+        impl BitOrder for $ty {
+            const FORMAT: OrderFormat = OrderFormat::$ty;
+        }
+    };
+}
+impl_order!(Lsb0);
+impl_order!(Msb0);
 
 /// Constructs a run-time format parameters based on the corresponding type-level parameters.
 fn bit_format<Store: BitStore, Order: BitOrder>() -> Format {
@@ -77,29 +68,29 @@ fn bit_format<Store: BitStore, Order: BitOrder>() -> Format {
 /// `scale_bits::Bits` generic over the bit store (`u8`/`u16`/`u32`/`u64`) and bit order (LSB, MSB)
 /// used for SCALE encoding/decoding. Uses `scale_bits::Bits`-default `u8` and LSB format underneath.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DecodedBits<Store: BitStore, Order: BitOrder>(
-    Bits,
-    PhantomData<Store>,
-    PhantomData<Order>,
-);
+pub struct DecodedBits<Store, Order> {
+    bits: Bits,
+    _marker: PhantomData<(Store, Order)>,
+}
 
-impl<Store: BitStore, Order: BitOrder> DecodedBits<Store, Order> {
+impl<Store, Order> DecodedBits<Store, Order> {
     /// Extracts the underlying `scale_bits::Bits` value.
     pub fn into_bits(self) -> Bits {
-        self.0
+        self.bits
     }
 
     /// References the underlying `scale_bits::Bits` value.
     pub fn as_bits(&self) -> &Bits {
-        &self.0
+        &self.bits
     }
 }
 
-impl<Store: BitStore, Order: BitOrder> core::iter::FromIterator<bool>
-    for DecodedBits<Store, Order>
-{
+impl<Store, Order> core::iter::FromIterator<bool> for DecodedBits<Store, Order> {
     fn from_iter<T: IntoIterator<Item = bool>>(iter: T) -> Self {
-        DecodedBits(Bits::from_iter(iter), PhantomData, PhantomData)
+        DecodedBits {
+            bits: Bits::from_iter(iter),
+            _marker: PhantomData,
+        }
     }
 }
 
@@ -111,7 +102,7 @@ impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Orde
         let Compact(bits) = <Compact<u32>>::decode(input)?;
         // Otherwise it is impossible to store it on 32bit machine.
         if bits > ARCH32BIT_BITSLICE_MAX_BITS {
-            return Err("Attempt to decode a BitVec with too many bits".into())
+            return Err("Attempt to decode a BitVec with too many bits".into());
         }
         // NOTE: Replace with `bits.div_ceil(Store::BITS)` if `int_roundings` is stabilised
         let elements = (bits / Store::BITS) + u32::from(bits % Store::BITS != 0);
@@ -127,26 +118,74 @@ impl<Store: BitStore, Order: BitOrder> codec::Decode for DecodedBits<Store, Orde
         storage.extend(vec![0; bytes_needed]);
         input.read(&mut storage[prefix_len..])?;
 
-        let decoder =
-            scale_bits::decode_using_format_from(&storage, bit_format::<Store, Order>())?;
+        let decoder = scale_bits::decode_using_format_from(&storage, bit_format::<Store, Order>())?;
         let bits = decoder.collect::<Result<Vec<_>, _>>()?;
         let bits = Bits::from_iter(bits);
 
-        Ok(DecodedBits(bits, PhantomData, PhantomData))
+        Ok(DecodedBits {
+            bits,
+            _marker: PhantomData,
+        })
     }
 }
 
 impl<Store: BitStore, Order: BitOrder> codec::Encode for DecodedBits<Store, Order> {
     fn size_hint(&self) -> usize {
-        self.0.size_hint()
+        self.bits.size_hint()
     }
 
     fn encoded_size(&self) -> usize {
-        self.0.encoded_size()
+        self.bits.encoded_size()
     }
 
     fn encode(&self) -> Vec<u8> {
-        scale_bits::encode_using_format(self.0.iter(), bit_format::<Store, Order>())
+        scale_bits::encode_using_format(self.bits.iter(), bit_format::<Store, Order>())
+    }
+}
+
+#[doc(hidden)]
+pub struct DecodedBitsVisitor<S, O>(std::marker::PhantomData<(S, O)>);
+impl<Store, Order> scale_decode::Visitor for DecodedBitsVisitor<Store, Order> {
+    type Value<'scale, 'info> = DecodedBits<Store, Order>;
+    type Error = scale_decode::Error;
+
+    fn unchecked_decode_as_type<'scale, 'info>(
+        self,
+        input: &mut &'scale [u8],
+        type_id: scale_decode::visitor::TypeId,
+        types: &'info scale_info::PortableRegistry,
+    ) -> scale_decode::visitor::DecodeAsTypeResult<
+        Self,
+        Result<Self::Value<'scale, 'info>, Self::Error>,
+    > {
+        let res = scale_decode::visitor::decode_with_visitor(
+            input,
+            type_id.0,
+            types,
+            Bits::into_visitor(),
+        )
+        .map(|bits| DecodedBits {
+            bits,
+            _marker: PhantomData,
+        });
+        scale_decode::visitor::DecodeAsTypeResult::Decoded(res)
+    }
+}
+impl<Store, Order> scale_decode::IntoVisitor for DecodedBits<Store, Order> {
+    type Visitor = DecodedBitsVisitor<Store, Order>;
+    fn into_visitor() -> Self::Visitor {
+        DecodedBitsVisitor(PhantomData)
+    }
+}
+
+impl<Store, Order> scale_encode::EncodeAsType for DecodedBits<Store, Order> {
+    fn encode_as_type_to(
+        &self,
+        type_id: u32,
+        types: &scale_info::PortableRegistry,
+        out: &mut Vec<u8>,
+    ) -> Result<(), scale_encode::Error> {
+        self.bits.encode_as_type_to(type_id, types, out)
     }
 }
 

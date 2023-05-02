@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -9,16 +9,15 @@
 mod events_client;
 mod events_type;
 
+use codec::{Decode, Encode};
 pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,
     Events,
+    // Used in codegen but hidden from docs:
+    RootEvent,
 };
-
-use codec::{
-    Decode,
-    Encode,
-};
+use scale_decode::DecodeAsFields;
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///
@@ -26,7 +25,7 @@ use codec::{
 ///
 /// The trait is utilized to decode emitted events from a block, via obtaining the
 /// form of the `Event` from the metadata.
-pub trait StaticEvent: Decode {
+pub trait StaticEvent: DecodeAsFields {
     /// Pallet name.
     const PALLET: &'static str;
     /// Event name.

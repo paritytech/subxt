@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -35,12 +35,8 @@ mod pair_signer {
     use crate::Config;
     use sp_core::Pair as PairT;
     use sp_runtime::{
-        traits::{
-            IdentifyAccount,
-            Verify,
-        },
-        AccountId32 as SpAccountId32,
-        MultiSignature as SpMultiSignature,
+        traits::{IdentifyAccount, Verify},
+        AccountId32 as SpAccountId32, MultiSignature as SpMultiSignature,
     };
 
     /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
@@ -62,8 +58,8 @@ mod pair_signer {
     {
         /// Creates a new [`Signer`] from an [`sp_core::Pair`].
         pub fn new(signer: Pair) -> Self {
-            let account_id = <SpMultiSignature as Verify>::Signer::from(signer.public())
-                .into_account();
+            let account_id =
+                <SpMultiSignature as Verify>::Signer::from(signer.public()).into_account();
             Self {
                 account_id: account_id.into(),
                 signer,

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -6,19 +6,24 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use codec::{
-    Decode,
-    Encode,
-};
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use codec::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into
 /// that type.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug)]
+#[derive(
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Encode,
+    Decode,
+    Debug,
+    scale_encode::EncodeAsType,
+    scale_decode::DecodeAsType,
+)]
 pub struct AccountId32(pub [u8; 32]);
 
 impl AsRef<[u8]> for AccountId32 {
@@ -69,7 +74,7 @@ impl AccountId32 {
         use base58::FromBase58;
         let data = s.from_base58().map_err(|_| FromSs58Error::BadBase58)?;
         if data.len() < 2 {
-            return Err(FromSs58Error::BadLength)
+            return Err(FromSs58Error::BadLength);
         }
         let prefix_len = match data[0] {
             0..=63 => 1,
@@ -77,14 +82,13 @@ impl AccountId32 {
             _ => return Err(FromSs58Error::InvalidPrefix),
         };
         if data.len() != prefix_len + body_len + CHECKSUM_LEN {
-            return Err(FromSs58Error::BadLength)
+            return Err(FromSs58Error::BadLength);
         }
         let hash = ss58hash(&data[0..body_len + prefix_len]);
         let checksum = &hash[0..CHECKSUM_LEN];
-        if data[body_len + prefix_len..body_len + prefix_len + CHECKSUM_LEN] != *checksum
-        {
+        if data[body_len + prefix_len..body_len + prefix_len + CHECKSUM_LEN] != *checksum {
             // Invalid checksum.
-            return Err(FromSs58Error::InvalidChecksum)
+            return Err(FromSs58Error::InvalidChecksum);
         }
 
         let result = data[prefix_len..body_len + prefix_len]
@@ -110,10 +114,7 @@ pub enum FromSs58Error {
 
 // We do this just to get a checksum to help verify the validity of the address in to_ss58check
 fn ss58hash(data: &[u8]) -> Vec<u8> {
-    use blake2::{
-        Blake2b512,
-        Digest,
-    };
+    use blake2::{Blake2b512, Digest};
     const PREFIX: &[u8] = b"SS58PRE";
     let mut ctx = Blake2b512::new();
     ctx.update(PREFIX);

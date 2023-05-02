@@ -1,31 +1,17 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use super::Block;
 use crate::{
     client::OnlineClientT,
-    config::{
-        Config,
-        Header,
-    },
-    error::{
-        BlockError,
-        Error,
-    },
+    config::{Config, Header},
+    error::{BlockError, Error},
     utils::PhantomDataSendSync,
 };
 use derivative::Derivative;
-use futures::{
-    future::Either,
-    stream,
-    Stream,
-    StreamExt,
-};
-use std::{
-    future::Future,
-    pin::Pin,
-};
+use futures::{future::Either, stream, Stream, StreamExt};
+use std::{future::Future, pin::Pin};
 
 type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
@@ -53,8 +39,7 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Obtain block details given the provided block hash, or the latest block if `None` is
-    /// provided.
+    /// Obtain block details given the provided block hash.
     ///
     /// # Warning
     ///
@@ -62,6 +47,22 @@ where
     /// runtime upgrade. You can attempt to retrieve older blocks,
     /// but may run into errors attempting to work with them.
     pub fn at(
+        &self,
+        block_hash: T::Hash,
+    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+        self.at_or_latest(Some(block_hash))
+    }
+
+    /// Obtain block details of the latest block hash.
+    pub fn at_latest(
+        &self,
+    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+        self.at_or_latest(None)
+    }
+
+    /// Obtain block details given the provided block hash, or the latest block if `None` is
+    /// provided.
+    fn at_or_latest(
         &self,
         block_hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
@@ -71,18 +72,16 @@ where
             // for the latest block and use that.
             let block_hash = match block_hash {
                 Some(hash) => hash,
-                None => {
-                    client
-                        .rpc()
-                        .block_hash(None)
-                        .await?
-                        .expect("didn't pass a block number; qed")
-                }
+                None => client
+                    .rpc()
+                    .block_hash(None)
+                    .await?
+                    .expect("didn't pass a block number; qed"),
             };
 
             let block_header = match client.rpc().header(Some(block_hash)).await? {
                 Some(header) => header,
-                None => return Err(BlockError::block_hash_not_found(block_hash).into()),
+                None => return Err(BlockError::not_found(block_hash).into()),
             };
 
             Ok(Block::new(block_header, client))
@@ -145,12 +144,8 @@ where
 
             // Adjust the subscription stream to fill in any missing blocks.
             BlockStreamRes::Ok(
-                subscribe_to_block_headers_filling_in_gaps(
-                    client,
-                    last_finalized_block_num,
-                    sub,
-                )
-                .boxed(),
+                subscribe_to_block_headers_filling_in_gaps(client, last_finalized_block_num, sub)
+                    .boxed(),
             )
         })
     }

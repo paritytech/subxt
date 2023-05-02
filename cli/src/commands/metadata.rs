@@ -1,58 +1,72 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
+use codec::{Decode, Encode};
 use color_eyre::eyre;
-use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee::client_transport::ws::Uri;
-use scale::Decode;
-use std::io::{
-    self,
-    Write,
-};
-use subxt_codegen::utils::fetch_metadata_hex;
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use std::io::{self, Write};
+use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    /// The url of the substrate node to query for metadata.
-    #[clap(
-        name = "url",
-        long,
-        value_parser,
-        default_value = "http://localhost:9933"
-    )]
-    url: Uri,
+    #[command(flatten)]
+    file_or_url: FileOrUrl,
     /// The format of the metadata to display: `json`, `hex` or `bytes`.
     #[clap(long, short, default_value = "bytes")]
     format: String,
+    /// Generate a subset of the metadata that contains only the
+    /// types needed to represent the provided pallets.
+    ///
+    /// The returned metadata is updated to the latest available version
+    /// when using the option.
+    #[clap(long, use_value_delimiter = true, value_parser)]
+    pallets: Option<Vec<String>>,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
-    let hex_data = fetch_metadata_hex(&opts.url).await?;
+    let bytes = opts.file_or_url.fetch().await?;
+    let mut metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+
+    if let Some(pallets) = opts.pallets {
+        let mut metadata_v15 = match metadata.1 {
+            RuntimeMetadata::V14(metadata_v14) => metadata_v14_to_latest(metadata_v14),
+            RuntimeMetadata::V15(metadata_v15) => metadata_v15,
+            _ => {
+                return Err(eyre::eyre!(
+                    "Unsupported metadata version {:?}, expected V14.",
+                    metadata.1
+                ))
+            }
+        };
+
+        retain_metadata_pallets(&mut metadata_v15, |pallet_name| {
+            pallets.iter().any(|p| &**p == pallet_name)
+        });
+        metadata = metadata_v15.into();
+    }
 
     match opts.format.as_str() {
         "json" => {
-            let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
-            let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
             let json = serde_json::to_string_pretty(&metadata)?;
             println!("{json}");
             Ok(())
         }
         "hex" => {
+            let hex_data = format!("0x{:?}", hex::encode(metadata.encode()));
             println!("{hex_data}");
             Ok(())
         }
         "bytes" => {
-            let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
+            let bytes = metadata.encode();
             Ok(io::stdout().write_all(&bytes)?)
         }
-        _ => {
-            Err(eyre::eyre!(
-                "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
-                opts.format
-            ))
-        }
+        _ => Err(eyre::eyre!(
+            "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
+            opts.format
+        )),
     }
 }

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,10 +10,7 @@
 //! polkadot --dev --tmp
 //! ```
 
-use subxt::{
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -26,7 +23,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let address = polkadot::storage().system().account_root();
 
-    let mut iter = api.storage().at(None).await?.iter(address, 10).await?;
+    let mut iter = api.storage().at_latest().await?.iter(address, 10).await?;
 
     while let Some((key, account)) = iter.next().await? {
         println!("{}: {}", hex::encode(key), account.data.free);

@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -6,10 +6,7 @@ use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        MetadataError,
-    },
+    metadata::{DecodeWithMetadata, MetadataError},
     Config,
 };
 use derivative::Derivative;
@@ -37,10 +34,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or constant in question do not exist at all).
-    pub fn validate<Address: ConstantAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
+    pub fn validate<Address: ConstantAddress>(&self, address: &Address) -> Result<(), Error> {
         if let Some(actual_hash) = address.validation_hash() {
             let expected_hash = self
                 .client
@@ -51,7 +45,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
                     address.pallet_name().into(),
                     address.constant_name().into(),
                 )
-                .into())
+                .into());
             }
         }
         Ok(())
@@ -63,7 +57,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     pub fn at<Address: ConstantAddress>(
         &self,
         address: &Address,
-    ) -> Result<<Address::Target as DecodeWithMetadata>::Target, Error> {
+    ) -> Result<Address::Target, Error> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:
@@ -72,9 +66,9 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         // 2. Attempt to decode the constant into the type given:
         let pallet = metadata.pallet(address.pallet_name())?;
         let constant = pallet.constant(address.constant_name())?;
-        let value = Address::Target::decode_with_metadata(
+        let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut &*constant.value,
-            constant.ty.id(),
+            constant.ty.id,
             &metadata,
         )?;
         Ok(value)

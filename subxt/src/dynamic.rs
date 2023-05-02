@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -7,11 +7,9 @@
 
 use crate::{
     error::Error,
-    metadata::{
-        DecodeWithMetadata,
-        Metadata,
-    },
+    metadata::{DecodeWithMetadata, Metadata},
 };
+use scale_decode::DecodeAsType;
 
 pub use scale_value::Value;
 
@@ -28,10 +26,7 @@ pub use crate::tx::dynamic as tx;
 pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::{
-    dynamic as storage,
-    dynamic_root as storage_root,
-};
+pub use crate::storage::{dynamic as storage, dynamic_root as storage_root};
 
 /// This is the result of making a dynamic request to a node. From this,
 /// we can return the raw SCALE bytes that we were handed back, or we can
@@ -43,13 +38,11 @@ pub struct DecodedValueThunk {
 }
 
 impl DecodeWithMetadata for DecodedValueThunk {
-    type Target = Self;
-
     fn decode_with_metadata(
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<Self::Target, Error> {
+    ) -> Result<Self, Error> {
         let mut v = Vec::with_capacity(bytes.len());
         v.extend_from_slice(bytes);
         *bytes = &[];
@@ -72,10 +65,11 @@ impl DecodedValueThunk {
     }
     /// Decode the SCALE encoded storage entry into a dynamic [`DecodedValue`] type.
     pub fn to_value(&self) -> Result<DecodedValue, Error> {
-        DecodedValue::decode_with_metadata(
+        let val = DecodedValue::decode_as_type(
             &mut &*self.scale_bytes,
             self.type_id,
-            &self.metadata,
-        )
+            self.metadata.types(),
+        )?;
+        Ok(val)
     }
 }

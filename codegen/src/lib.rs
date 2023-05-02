@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -32,9 +32,9 @@
 //!     pub mod api {}
 //! );
 //! // Default module derivatives.
-//! let mut derives = DerivesRegistry::new(&CratePath::default());
+//! let mut derives = DerivesRegistry::with_default_derives(&CratePath::default());
 //! // Default type substitutes.
-//! let substs = TypeSubstitutes::new(&CratePath::default());
+//! let substs = TypeSubstitutes::with_default_substitutes(&CratePath::default());
 //! // Generate the Runtime API.
 //! let generator = subxt_codegen::RuntimeGenerator::new(metadata);
 //! // Include metadata documentation in the Runtime API.
@@ -43,9 +43,10 @@
 //! println!("{}", runtime_api);
 //! ```
 
-#![deny(unused_crate_dependencies)]
+#![deny(unused_crate_dependencies, missing_docs)]
 
 mod api;
+mod error;
 mod ir;
 mod types;
 
@@ -53,18 +54,9 @@ pub mod utils;
 
 pub use self::{
     api::{
-        generate_runtime_api_from_bytes,
-        generate_runtime_api_from_path,
-        generate_runtime_api_from_url,
-        CodegenError,
-        RuntimeGenerator,
+        generate_runtime_api_from_bytes, generate_runtime_api_from_path,
+        generate_runtime_api_from_url, RuntimeGenerator,
     },
-    types::{
-        CratePath,
-        Derives,
-        DerivesRegistry,
-        Module,
-        TypeGenerator,
-        TypeSubstitutes,
-    },
+    error::{CodegenError, TypeSubstitutionError},
+    types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
 };

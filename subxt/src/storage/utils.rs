@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -7,14 +7,11 @@
 //! the trait itself.
 
 use super::StorageAddress;
-use crate::{
-    error::Error,
-    metadata::Metadata,
-};
+use crate::{error::Error, metadata::Metadata};
 
 /// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name
 /// and append those bytes to the output.
-pub fn write_storage_address_root_bytes<Address: StorageAddress>(
+pub(crate) fn write_storage_address_root_bytes<Address: StorageAddress>(
     addr: &Address,
     out: &mut Vec<u8>,
 ) {
@@ -24,7 +21,7 @@ pub fn write_storage_address_root_bytes<Address: StorageAddress>(
 
 /// Outputs the [`storage_address_root_bytes`] as well as any additional bytes that represent
 /// a lookup in a storage map at that location.
-pub fn storage_address_bytes<Address: StorageAddress>(
+pub(crate) fn storage_address_bytes<Address: StorageAddress>(
     addr: &Address,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
@@ -35,7 +32,7 @@ pub fn storage_address_bytes<Address: StorageAddress>(
 }
 
 /// Outputs a vector containing the bytes written by [`write_storage_address_root_bytes`].
-pub fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address) -> Vec<u8> {
+pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address) -> Vec<u8> {
     let mut bytes = Vec::new();
     write_storage_address_root_bytes(addr, &mut bytes);
     bytes

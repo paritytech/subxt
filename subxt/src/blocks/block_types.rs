@@ -1,21 +1,11 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
-    config::{
-        Config,
-        Hasher,
-        Header,
-    },
-    error::{
-        BlockError,
-        Error,
-    },
+    client::{OfflineClientT, OnlineClientT},
+    config::{Config, Hasher, Header},
+    error::{BlockError, Error},
     events,
     rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
@@ -82,7 +72,7 @@ where
         let block_hash = self.header.hash();
         let block_details = match self.client.rpc().block(Some(block_hash)).await? {
             Some(block) => block,
-            None => return Err(BlockError::block_hash_not_found(block_hash).into()),
+            None => return Err(BlockError::not_found(block_hash).into()),
         };
 
         Ok(BlockBody::new(
@@ -135,15 +125,13 @@ where
             .extrinsics
             .iter()
             .enumerate()
-            .map(|(idx, e)| {
-                Extrinsic {
-                    index: idx as u32,
-                    bytes: &e.0,
-                    client: self.client.clone(),
-                    block_hash: self.details.block.header.hash(),
-                    cached_events: self.cached_events.clone(),
-                    _marker: std::marker::PhantomData,
-                }
+            .map(|(idx, e)| Extrinsic {
+                index: idx as u32,
+                bytes: &e.0,
+                client: self.client.clone(),
+                block_hash: self.details.block.header.hash(),
+                cached_events: self.cached_events.clone(),
+                _marker: std::marker::PhantomData,
             })
     }
 }
@@ -181,8 +169,7 @@ where
 {
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
-        let events =
-            get_events(&self.client, self.block_hash, &self.cached_events).await?;
+        let events = get_events(&self.client, self.block_hash, &self.cached_events).await?;
         let ext_hash = T::Hasher::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
@@ -248,9 +235,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: events::StaticEvent>(
-        &self,
-    ) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
+    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
         self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()
@@ -302,7 +287,7 @@ where
         Some(events) => events.clone(),
         None => {
             events::EventsClient::new(client.clone())
-                .at(Some(block_hash))
+                .at(block_hash)
                 .await?
         }
     };

@@ -1,39 +1,31 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
     node_runtime::{
         self,
-        runtime_types::pallet_staking::{
-            RewardDestination,
-            ValidatorPrefs,
+        runtime_types::{
+            pallet_staking::{RewardDestination, ValidatorPrefs},
+            sp_arithmetic::per_things::Perbill,
         },
         staking,
     },
-    pair_signer,
-    test_context,
+    pair_signer, test_context,
 };
 use assert_matches::assert_matches;
-use sp_core::{
-    sr25519,
-    Pair,
-};
+use sp_core::{sr25519, Pair};
 use sp_keyring::AccountKeyring;
-use subxt::error::{
-    DispatchError,
-    Error,
-};
+use subxt::error::{DispatchError, Error};
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
-    sr25519::Pair::from_string(&format!("//{seed}"), None)
-        .expect("static values are valid; qed")
+    sr25519::Pair::from_string(&format!("//{seed}"), None).expect("static values are valid; qed")
 }
 
 fn default_validator_prefs() -> ValidatorPrefs {
     ValidatorPrefs {
-        commission: sp_runtime::Perbill::default(),
+        commission: Perbill(0),
         blocked: false,
     }
 }
@@ -76,8 +68,9 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        let details = err.details().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
     Ok(())
 }
@@ -124,8 +117,9 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
         .await;
 
     assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        let details = err.details().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
     Ok(())
 }
@@ -152,7 +146,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     let ledger_addr = node_runtime::storage().staking().ledger(alice.account_id());
     let ledger = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&ledger_addr)
         .await?
@@ -169,8 +163,9 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .await;
 
     assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "NotController");
+        let details = err.details().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
 
     let is_chilled = api
@@ -215,8 +210,9 @@ async fn tx_bond() -> Result<(), Error> {
         .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
-        assert_eq!(err.pallet, "Staking");
-        assert_eq!(err.error, "AlreadyBonded");
+        let details = err.details().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "AlreadyBonded");
     });
     Ok(())
 }
@@ -238,7 +234,7 @@ async fn storage_current_era() -> Result<(), Error> {
     let current_era_addr = node_runtime::storage().staking().current_era();
     let _current_era = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&current_era_addr)
         .await?
@@ -253,7 +249,7 @@ async fn storage_era_reward_points() -> Result<(), Error> {
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
     let current_era_result = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch(&reward_points_addr)
         .await;

@@ -1,34 +1,20 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::TxPayload;
-use crate::{
-    client::{
-        OfflineClientT,
-        OnlineClientT,
-    },
-    config::{
-        Config,
-        ExtrinsicParams,
-        Hasher,
-    },
-    error::Error,
-    tx::{
-        Signer as SignerT,
-        TxProgress,
-    },
-    utils::{
-        Encoded,
-        PhantomDataSendSync,
-    },
-};
-use codec::{
-    Compact,
-    Encode,
-};
-use derivative::Derivative;
 use std::borrow::Cow;
+
+use codec::{Compact, Encode};
+use derivative::Derivative;
+use sp_core_hashing::blake2_256;
+
+use crate::{
+    client::{OfflineClientT, OnlineClientT},
+    config::{Config, ExtrinsicParams, Hasher},
+    error::Error,
+    tx::{Signer as SignerT, TxPayload, TxProgress},
+    utils::{Encoded, PhantomDataSendSync},
+};
 
 // This is returned from an API below, so expose it here.
 pub use crate::rpc::types::DryRunResult;
@@ -62,14 +48,13 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     {
         if let Some(details) = call.validation_details() {
             let metadata = self.client.metadata();
-            let expected_hash =
-                metadata.call_hash(details.pallet_name, details.call_name)?;
+            let expected_hash = metadata.call_hash(details.pallet_name, details.call_name)?;
             if details.hash != expected_hash {
                 return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
                     details.pallet_name.into(),
                     details.call_name.into(),
                 )
-                .into())
+                .into());
             }
         }
         Ok(())
@@ -87,10 +72,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates an unsigned extrinsic without submitting it.
-    pub fn create_unsigned<Call>(
-        &self,
-        call: &Call,
-    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
@@ -107,8 +89,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             call.encode_call_data_to(&self.client.metadata(), &mut encoded_inner)?;
             // now, prefix byte length:
             let len = Compact(
-                u32::try_from(encoded_inner.len())
-                    .expect("extrinsic size expected to be <4GB"),
+                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
             );
             let mut encoded = Vec::new();
             len.encode_to(&mut encoded);
@@ -193,10 +174,7 @@ where
     C: OnlineClientT<T>,
 {
     // Get the next account nonce to use.
-    async fn next_account_nonce(
-        &self,
-        account_id: &T::AccountId,
-    ) -> Result<T::Index, Error> {
+    async fn next_account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
         self.client
             .rpc()
             .system_account_next_index(account_id)
@@ -343,7 +321,7 @@ where
         self.additional_and_extra_params
             .encode_additional_to(&mut bytes);
         if bytes.len() > 256 {
-            f(Cow::Borrowed(T::Hasher::hash_of(&Encoded(bytes)).as_ref()))
+            f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
         } else {
             f(Cow::Owned(bytes))
         }
@@ -399,8 +377,7 @@ where
             encoded_inner.extend(&self.call_data);
             // now, prefix byte length:
             let len = Compact(
-                u32::try_from(encoded_inner.len())
-                    .expect("extrinsic size expected to be <4GB"),
+                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
             );
             let mut encoded = Vec::new();
             len.encode_to(&mut encoded);
@@ -487,6 +464,26 @@ where
     ///
     /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
     pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
-        self.client.rpc().dry_run(self.encoded(), at).await
+        let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
+        dry_run_bytes.into_dry_run_result(&self.client.metadata())
+    }
+
+    /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
+    /// The actual amount paid can vary from block to block based on node traffic and other factors.
+    pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
+        let mut params = self.encoded().to_vec();
+        (self.encoded().len() as u32).encode_to(&mut params);
+        // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
+        // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
+        let (_, _, _, partial_fee) = self
+            .client
+            .rpc()
+            .state_call::<(Compact<u64>, Compact<u64>, u8, u128)>(
+                "TransactionPaymentApi_query_info",
+                Some(&params),
+                None,
+            )
+            .await?;
+        Ok(partial_fee)
     }
 }

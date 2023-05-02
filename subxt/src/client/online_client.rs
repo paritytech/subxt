@@ -1,34 +1,23 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    OfflineClient,
-    OfflineClientT,
-};
+use super::{OfflineClient, OfflineClientT};
 use crate::{
     blocks::BlocksClient,
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
     rpc::{
-        types::{
-            RuntimeVersion,
-            Subscription,
-        },
-        Rpc,
-        RpcClientT,
+        types::{RuntimeVersion, Subscription},
+        Rpc, RpcClientT,
     },
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
-    Config,
-    Metadata,
+    Config, Metadata,
 };
-use codec::{
-    Compact,
-    Decode,
-};
+use codec::Compact;
 use derivative::Derivative;
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
@@ -114,12 +103,7 @@ impl<T: Config> OnlineClient<T> {
         )
         .await;
 
-        OnlineClient::from_rpc_client_with(
-            genesis_hash?,
-            runtime_version?,
-            metadata?,
-            rpc_client,
-        )
+        OnlineClient::from_rpc_client_with(genesis_hash?, runtime_version?, metadata?, rpc_client)
     }
 
     /// Construct a new [`OnlineClient`] by providing all of the underlying details needed
@@ -152,10 +136,9 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let bytes = rpc.state_call("Metadata_metadata", None, None).await?;
-        let cursor = &mut &*bytes;
-        let _ = <Compact<u32>>::decode(cursor)?;
-        let meta: RuntimeMetadataPrefixed = Decode::decode(cursor)?;
+        let (_, meta) = rpc
+            .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
+            .await?;
         Ok(meta.try_into()?)
     }
 
@@ -341,7 +324,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Tries to apply a new update.
     pub fn apply_update(&self, update: Update) -> Result<(), UpgradeError> {
         if !self.is_runtime_version_different(&update.runtime_version) {
-            return Err(UpgradeError::SameVersion)
+            return Err(UpgradeError::SameVersion);
         }
 
         self.do_update(update);
@@ -442,18 +425,9 @@ impl Update {
 #[cfg(feature = "jsonrpsee-ws")]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
-        client_transport::ws::{
-            InvalidUri,
-            Receiver,
-            Sender,
-            Uri,
-            WsTransportClientBuilder,
-        },
+        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
         core::{
-            client::{
-                Client,
-                ClientBuilder,
-            },
+            client::{Client, ClientBuilder},
             Error,
         },
     };
@@ -483,10 +457,7 @@ mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,
         core::{
-            client::{
-                Client,
-                ClientBuilder,
-            },
+            client::{Client, ClientBuilder},
             Error,
         },
     };

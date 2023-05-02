@@ -1,4 +1,4 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -12,11 +12,7 @@
 
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
-use subxt::{
-    tx::PairSigner,
-    OnlineClient,
-    PolkadotConfig,
-};
+use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -50,8 +46,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .wait_for_finalized_success()
         .await?;
 
-    let transfer_event =
-        balance_transfer.find_first::<polkadot::balances::events::Transfer>()?;
+    let transfer_event = balance_transfer.find_first::<polkadot::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: {event:?}");
@@ -88,8 +83,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     // the above, but does not check for success, and leaves it up to you:
     let events = balance_transfer.fetch_events().await?;
 
-    let failed_event =
-        events.find_first::<polkadot::system::events::ExtrinsicFailed>()?;
+    let failed_event = events.find_first::<polkadot::system::events::ExtrinsicFailed>()?;
 
     if let Some(_ev) = failed_event {
         // We found a failed event; the transfer didn't succeed.
@@ -97,8 +91,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     } else {
         // We didn't find a failed event; the transfer succeeded. Find
         // more details about it to report..
-        let transfer_event =
-            events.find_first::<polkadot::balances::events::Transfer>()?;
+        let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
         if let Some(event) = transfer_event {
             println!("Balance transfer success: {event:?}");
         } else {
@@ -138,13 +131,10 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event =
-                events.find_first::<polkadot::balances::events::Transfer>()?;
+            let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
-                println!(
-                    "Balance transfer is now in block (but not finalized): {event:?}"
-                );
+                println!("Balance transfer is now in block (but not finalized): {event:?}");
             } else {
                 println!("Failed to find Balances::Transfer Event");
             }
@@ -158,8 +148,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event =
-                events.find_first::<polkadot::balances::events::Transfer>()?;
+            let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
                 println!("Balance transfer success: {event:?}");

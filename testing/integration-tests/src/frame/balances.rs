@@ -1,22 +1,17 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{
-        self,
-        balances,
-        runtime_types,
-        system,
-    },
-    pair_signer,
-    test_context,
+    node_runtime::{self, balances, runtime_types, system},
+    pair_signer, test_context,
 };
 use codec::Decode;
+use sp_core::Pair;
 use sp_keyring::AccountKeyring;
-use subxt::utils::{
-    AccountId32,
-    MultiAddress,
+use subxt::{
+    error::{DispatchError, Error, TokenError},
+    utils::{AccountId32, MultiAddress},
 };
 
 #[tokio::test]
@@ -32,13 +27,13 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_pre = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -69,13 +64,13 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -87,11 +82,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
-    use subxt::ext::scale_value::{
-        At,
-        Composite,
-        Value,
-    };
+    use subxt::ext::scale_value::{At, Composite, Value};
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -111,13 +102,13 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let alice_pre = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_pre = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -161,13 +152,13 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let alice_post = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&alice_account_addr)
         .await?;
     let bob_post = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -220,7 +211,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_pre = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -229,8 +220,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .balances()
         .transfer(bob_address.clone(), 10_000);
     for _ in 0..3 {
-        api
-            .tx()
+        api.tx()
             .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
@@ -241,7 +231,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let bob_post = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&bob_account_addr)
         .await?;
@@ -258,7 +248,7 @@ async fn storage_total_issuance() {
     let addr = node_runtime::storage().balances().total_issuance();
     let total_issuance = api
         .storage()
-        .at(None)
+        .at_latest()
         .await
         .unwrap()
         .fetch_or_default(&addr)
@@ -293,7 +283,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     let locks = api
         .storage()
-        .at(None)
+        .at_latest()
         .await?
         .fetch_or_default(&locks_addr)
         .await?;
@@ -310,46 +300,48 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-//// [jsdw] Commented out until Subxt decodes these new Token errors better
-// #[tokio::test]
-// async fn transfer_error() {
-//     let alice = pair_signer(AccountKeyring::Alice.pair());
-//     let alice_addr = alice.account_id().clone().into();
-//     let hans = pair_signer(Pair::generate().0);
-//     let hans_address = hans.account_id().clone().into();
-//     let ctx = test_context().await;
-//     let api = ctx.client();
-//
-//     let to_hans_tx = node_runtime::tx()
-//         .balances()
-//         .transfer(hans_address, 100_000_000_000_000_000);
-//     let to_alice_tx = node_runtime::tx()
-//         .balances()
-//         .transfer(alice_addr, 100_000_000_000_000_000);
-//
-//     api.tx()
-//         .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await
-//         .unwrap();
-//
-//     let res = api
-//         .tx()
-//         .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
-//         .await
-//         .unwrap()
-//         .wait_for_finalized_success()
-//         .await;
-//
-//     if let Err(Error::Runtime(DispatchError::Module(err))) = res {
-//         assert_eq!(err.pallet, "Balances");
-//         assert_eq!(err.error, "InsufficientBalance");
-//     } else {
-//         panic!("expected a runtime module error");
-//     }
-// }
+#[tokio::test]
+async fn transfer_error() {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice_addr = alice.account_id().clone().into();
+    let hans = pair_signer(Pair::generate().0);
+    let hans_address = hans.account_id().clone().into();
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let to_hans_tx = node_runtime::tx()
+        .balances()
+        .transfer(hans_address, 100_000_000_000_000_000);
+    let to_alice_tx = node_runtime::tx()
+        .balances()
+        .transfer(alice_addr, 100_000_000_000_000_000);
+
+    api.tx()
+        .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
+
+    let res = api
+        .tx()
+        .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
+
+    assert!(
+        matches!(
+            res,
+            Err(Error::Runtime(DispatchError::Token(
+                TokenError::FundsUnavailable
+            )))
+        ),
+        "Expected an insufficient balance, got {res:?}"
+    );
+}
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {

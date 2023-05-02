@@ -1,41 +1,23 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    node_runtime,
-    test_context,
-    TestContext,
-};
+use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::{
-    ExtrinsicMetadata,
-    PalletCallMetadata,
-    PalletMetadata,
-    PalletStorageMetadata,
+    v15::{
+        ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+        RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    },
     RuntimeMetadataPrefixed,
-    RuntimeMetadataV14,
-    StorageEntryMetadata,
-    StorageEntryModifier,
-    StorageEntryType,
 };
 use scale_info::{
-    build::{
-        Fields,
-        Variants,
-    },
-    meta_type,
-    Path,
-    Type,
-    TypeInfo,
+    build::{Fields, Variants},
+    meta_type, Path, Type, TypeInfo,
 };
-use subxt::{
-    Metadata,
-    OfflineClient,
-    SubstrateConfig,
-};
+use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
 async fn metadata_to_api(
-    metadata: RuntimeMetadataV14,
+    metadata: RuntimeMetadataV15,
     ctx: &TestContext,
 ) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
@@ -57,7 +39,7 @@ async fn full_metadata_check() {
     assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata = api.metadata().runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
     let api = metadata_to_api(metadata, &ctx).await;
@@ -79,7 +61,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
+    let mut metadata = api.metadata().runtime_metadata().clone();
 
     let mut existential = metadata
         .pallets
@@ -109,11 +91,12 @@ fn default_pallet() -> PalletMetadata {
         constants: vec![],
         error: None,
         index: 0,
+        docs: vec![],
     }
 }
 
-fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
-    RuntimeMetadataV14::new(
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+    RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
             ty: meta_type::<()>(),
@@ -121,6 +104,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
             signed_extensions: vec![],
         },
         meta_type::<()>(),
+        vec![],
     )
 }
 
@@ -147,9 +131,7 @@ async fn calls_check() {
                     Variants::new()
                         .variant("unbond", |v| {
                             v.index(0).fields(Fields::named().field(|f| {
-                                f.compact::<u128>()
-                                    .name("value")
-                                    .type_name("BalanceOf<T>")
+                                f.compact::<u128>().name("value").type_name("BalanceOf<T>")
                             }))
                         })
                         .variant("withdraw_unbonded", |v| {

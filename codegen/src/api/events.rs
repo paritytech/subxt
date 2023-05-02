@@ -1,12 +1,9 @@
-// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    types::TypeGenerator,
-    CratePath,
-};
-use frame_metadata::PalletMetadata;
+use crate::{types::TypeGenerator, CratePath};
+use frame_metadata::v15::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use scale_info::form::PortableForm;
@@ -56,7 +53,7 @@ pub fn generate_events(
 
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
-        event.ty.id(),
+        event.ty.id,
         |name| name.into(),
         "Event",
         crate_path,
@@ -77,9 +74,9 @@ pub fn generate_events(
             }
         }
     });
-    let event_type = type_gen.resolve_type_path(event.ty.id());
-    let event_ty = type_gen.resolve_type(event.ty.id());
-    let docs = event_ty.docs();
+    let event_type = type_gen.resolve_type_path(event.ty.id);
+    let event_ty = type_gen.resolve_type(event.ty.id);
+    let docs = &event_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
