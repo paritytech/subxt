@@ -790,4 +790,28 @@ mod tests {
             ))
         );
     }
+
+    #[test]
+    fn unsupported_version_extrinsic() {
+        let metadata = metadata();
+        let client = client(metadata.clone());
+        let ids = ExtrinsicIds::new(metadata.runtime_metadata()).unwrap();
+
+        // Decode with invalid version.
+        let result = ExtrinsicDetails::decode_from(
+            1,
+            3u8.encode().into(),
+            client.clone(),
+            H256::random(),
+            Default::default(),
+            ids,
+        );
+
+        assert_matches!(
+            result.err(),
+            Some(crate::Error::Block(
+                crate::error::BlockError::UnsupportedVersion(3)
+            ))
+        );
+    }
 }
