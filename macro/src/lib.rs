@@ -113,7 +113,7 @@ extern crate proc_macro;
 
 use std::str::FromStr;
 
-use darling::FromMeta;
+use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
@@ -180,7 +180,12 @@ struct SubstituteType {
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as syn::punctuated::Punctuated<syn::Meta, syn::Token![,]>);
+    let attr_args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(darling::Error::from(e).write_errors());
+        }
+    };
     let item_mod = parse_macro_input!(input as syn::ItemMod);
     let args = match RuntimeMetadataArgs::from_list(&attr_args) {
         Ok(v) => v,
