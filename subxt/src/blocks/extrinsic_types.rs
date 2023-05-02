@@ -778,7 +778,7 @@ mod tests {
         let result = ExtrinsicDetails::decode_from(
             1,
             vec![].into(),
-            client.clone(),
+            client,
             H256::random(),
             Default::default(),
             ids,
@@ -801,7 +801,7 @@ mod tests {
         let result = ExtrinsicDetails::decode_from(
             1,
             3u8.encode().into(),
-            client.clone(),
+            client,
             H256::random(),
             Default::default(),
             ids,
