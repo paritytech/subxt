@@ -10,6 +10,9 @@ use core::fmt::Debug;
 use scale_decode::visitor::DecodeAsTypeResult;
 use std::borrow::Cow;
 
+use super::Error;
+use crate::error::RootError;
+
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
@@ -133,12 +136,13 @@ impl PartialEq for ModuleError {
         self.raw == other.raw
     }
 }
+
 impl Eq for ModuleError {}
 
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Ok(details) = self.details() else {
-            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)")
+            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
         };
 
         let pallet = details.pallet();
@@ -158,6 +162,12 @@ impl ModuleError {
     /// Return the underlying module error data that was decoded.
     pub fn raw(&self) -> RawModuleError {
         self.raw
+    }
+
+    /// Attempts to decode the ModuleError into a value implementing the trait `RootError`
+    /// where the actual type of value is the generated top level enum `Error`.
+    pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
+        E::root_error(&self.raw.error, self.details()?.pallet(), &self.metadata)
     }
 }
 
