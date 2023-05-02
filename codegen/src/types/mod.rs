@@ -11,7 +11,6 @@ mod type_def;
 mod type_def_params;
 mod type_path;
 
-use darling::FromMeta;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
