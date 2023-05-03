@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::FetchMetadataError;
-use codec::Decode;
+use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -135,7 +135,7 @@ async fn fetch_metadata(
     async fn fetch_inner(
         client: &impl ClientT,
         version: MetadataVersion,
-    ) -> Result<String, FetchMetadataError> {
+    ) -> Result<Vec<u8>, FetchMetadataError> {
         // Look up supported versions:
         let supported_versions: Vec<u32> = {
             let res: String = client
@@ -177,26 +177,33 @@ async fn fetch_metadata(
             }
         };
 
+        let bytes = version.encode();
+        let version: String = format!("0x{}", hex::encode(&bytes));
+
         // Fetch the metadata at that version:
-        let metadata_string = client
-            .request::<Option<String>, _>(
+        let metadata_string: String = client
+            .request(
                 "state_call",
                 rpc_params!["Metadata_metadata_at_version", &version],
             )
-            .await?
-            .ok_or_else(|| {
-                FetchMetadataError::Other(format!(
-                    "The node does not have version {version} available"
-                ))
-            })?;
-        Ok(metadata_string)
+            .await?;
+        // Decode the metadata.
+        let metadata_bytes = hex::decode(metadata_string.trim_start_matches("0x"))?;
+        let metadata: Option<frame_metadata::OpaqueMetadata> =
+            Decode::decode(&mut &metadata_bytes[..])?;
+        let Some(metadata) = metadata else {
+            return Err(FetchMetadataError::Other(format!(
+                "The node does not have version {version} available"
+            )));
+        };
+        Ok(metadata.0)
     }
 
     // Fetch metadata using the "old" state_call interface
     async fn fetch_inner_legacy(
         client: &impl ClientT,
         version: MetadataVersion,
-    ) -> Result<String, FetchMetadataError> {
+    ) -> Result<Vec<u8>, FetchMetadataError> {
         if !matches!(
             version,
             MetadataVersion::Latest | MetadataVersion::Version(14)
@@ -211,17 +218,16 @@ async fn fetch_metadata(
         let metadata_string: String = client
             .request("state_call", rpc_params!["Metadata_metadata", "0x"])
             .await?;
-        Ok(metadata_string)
+
+        // Decode the metadata.
+        let metadata_bytes = hex::decode(metadata_string.trim_start_matches("0x"))?;
+        let metadata: frame_metadata::OpaqueMetadata = Decode::decode(&mut &metadata_bytes[..])?;
+        Ok(metadata.0)
     }
 
     // Fetch using the new interface, falling back to trying old one if there's an error.
-    let metadata_string = match fetch_inner(&client, version).await {
-        Ok(s) => s,
-        Err(_) => fetch_inner_legacy(&client, version).await?,
-    };
-
-    // Decode the metadata.
-    let metadata_bytes = hex::decode(metadata_string.trim_start_matches("0x"))?;
-    let metadata: frame_metadata::OpaqueMetadata = Decode::decode(&mut &metadata_bytes[..])?;
-    Ok(metadata.0)
+    match fetch_inner(&client, version).await {
+        Ok(s) => Ok(s),
+        Err(_) => fetch_inner_legacy(&client, version).await,
+    }
 }
