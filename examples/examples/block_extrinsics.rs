@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Ask for the extrinsics for this block.
         let extrinsics = block.body().await?.extrinsics();
 
-        let transfer_tx = extrinsics.find_first::<polkadot::balances::calls::Transfer>();
+        let transfer_tx = extrinsics.find_first::<polkadot::balances::calls::types::Transfer>();
         println!(" Transfer tx: {:?}", transfer_tx);
 
         // Ask for the extrinsics for this block.
@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 pallet_extrinsic
             );
 
-            let call = extrinsic.as_extrinsic::<polkadot::balances::calls::Transfer>()?;
+            let call = extrinsic.as_extrinsic::<polkadot::balances::calls::types::Transfer>()?;
             println!(
                 "   Extrinsic as polkadot::balances::calls::Transfer: {:?}\n\n",
                 call

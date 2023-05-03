@@ -156,11 +156,11 @@ async fn decode_extrinsics() {
     assert_eq!(extrinsics.block_hash(), block_hash);
 
     assert!(extrinsics
-        .has::<node_runtime::balances::calls::Transfer>()
+        .has::<node_runtime::balances::calls::types::Transfer>()
         .unwrap());
 
     assert!(extrinsics
-        .find_first::<node_runtime::balances::calls::Transfer>()
+        .find_first::<node_runtime::balances::calls::types::Transfer>()
         .unwrap()
         .is_some());
 
@@ -176,7 +176,7 @@ async fn decode_extrinsics() {
         .as_pallet_extrinsic::<node_runtime::runtime_types::pallet_timestamp::pallet::Call>()
         .unwrap();
     timestamp
-        .as_extrinsic::<node_runtime::timestamp::calls::Set>()
+        .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
         .unwrap();
     assert!(!timestamp.is_signed());
 
@@ -184,7 +184,7 @@ async fn decode_extrinsics() {
     tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
     tx.as_pallet_extrinsic::<node_runtime::runtime_types::pallet_balances::pallet::Call>()
         .unwrap();
-    tx.as_extrinsic::<node_runtime::balances::calls::Transfer>()
+    tx.as_extrinsic::<node_runtime::balances::calls::types::Transfer>()
         .unwrap();
     assert!(tx.is_signed());
 }
