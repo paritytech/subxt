@@ -365,20 +365,20 @@ where
     }
 
     /// The name of the pallet from whence the extrinsic originated.
-    pub fn pallet_name(&self) -> &str {
-        self.extrinsic_metadata().pallet()
+    pub fn pallet_name(&self) -> Result<&str, Error> {
+        Ok(self.extrinsic_metadata()?.pallet())
     }
 
     /// The name of the call (ie the name of the variant that it corresponds to).
-    pub fn variant_name(&self) -> &str {
-        self.extrinsic_metadata().call()
+    pub fn variant_name(&self) -> Result<&str, Error> {
+        Ok(self.extrinsic_metadata()?.call())
     }
 
     /// Fetch the metadata for this extrinsic.
-    pub fn extrinsic_metadata(&self) -> &ExtrinsicMetadata {
-        self.metadata
-            .extrinsic(self.pallet_index(), self.variant_index())
-            .expect("this must exist in order to have produced the ExtrinsicDetails")
+    pub fn extrinsic_metadata(&self) -> Result<&ExtrinsicMetadata, Error> {
+        Ok(self
+            .metadata
+            .extrinsic(self.pallet_index(), self.variant_index())?)
     }
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
@@ -388,7 +388,7 @@ where
         &self,
     ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
         let bytes = &mut self.field_bytes();
-        let extrinsic_metadata = self.extrinsic_metadata();
+        let extrinsic_metadata = self.extrinsic_metadata()?;
 
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
@@ -404,7 +404,7 @@ where
     /// of the extrinsic using [`Self::as_root_extrinsic()`], which is more lenient because it's able
     /// to lean on [`scale_decode::DecodeAsType`].
     pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
-        let extrinsic_metadata = self.extrinsic_metadata();
+        let extrinsic_metadata = self.extrinsic_metadata()?;
         if extrinsic_metadata.pallet() == E::PALLET && extrinsic_metadata.call() == E::CALL {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),
@@ -421,7 +421,7 @@ where
     /// the pallet enum variants as well as the extrinsic fields). These extrinsics can be found in
     /// the static codegen under a path like `pallet_name::Call`.
     pub fn as_pallet_extrinsic<E: DecodeWithMetadata>(&self) -> Result<E, Error> {
-        let pallet = self.metadata.pallet(self.pallet_name())?;
+        let pallet = self.metadata.pallet(self.pallet_name()?)?;
         let extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
             Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
                 pallet.index(),
@@ -439,7 +439,7 @@ where
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
     pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
-        let pallet = self.metadata.pallet(self.pallet_name())?;
+        let pallet = self.metadata.pallet(self.pallet_name()?)?;
         let pallet_extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
             Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
                 pallet.index(),
@@ -450,7 +450,7 @@ where
         // Ignore root enum index.
         E::root_extrinsic(
             &self.call_bytes()[1..],
-            self.pallet_name(),
+            self.pallet_name()?,
             pallet_extrinsic_ty,
             &self.metadata,
         )
@@ -865,10 +865,20 @@ mod tests {
         assert_eq!(extrinsic.index(), 1);
 
         assert_eq!(extrinsic.pallet_index(), 0);
-        assert_eq!(extrinsic.pallet_name(), "Test");
+        assert_eq!(
+            extrinsic
+                .pallet_name()
+                .expect("Valid metadata contains pallet name"),
+            "Test"
+        );
 
         assert_eq!(extrinsic.variant_index(), 2);
-        assert_eq!(extrinsic.variant_name(), "TestCall");
+        assert_eq!(
+            extrinsic
+                .variant_name()
+                .expect("Valid metadata contains variant name"),
+            "TestCall"
+        );
 
         // Decode the extrinsic to the root enum.
         let decoded_extrinsic = extrinsic
