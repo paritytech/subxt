@@ -17,8 +17,8 @@
     // mapping the type path to the derives which should be added for that type only.
     // Note that these derives will be in addition to those specified above in
     // `derive_for_all_types`
-    derive_for_type(type = "frame_support::PalletId", derive = "Eq, Ord, PartialOrd"),
-    derive_for_type(type = "sp_runtime::ModuleError", derive = "Eq, Hash"),
+    derive_for_type(path = "frame_support::PalletId", derive = "Eq, Ord, PartialOrd"),
+    derive_for_type(path = "sp_runtime::ModuleError", derive = "Eq, Hash"),
 )]
 pub mod polkadot {}
 
