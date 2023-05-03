@@ -103,9 +103,17 @@ impl PalletMetadataTestRunner {
 impl Drop for PalletMetadataTestRunner {
     fn drop(&mut self) {
         for i in 0..self.index {
-            let mut tmp_dir = std::env::temp_dir();
-            tmp_dir.push(format!("{TEST_DIR_PREFIX}{i}"));
-            std::fs::remove_dir_all(tmp_dir).expect("cannot cleanup temp files");
+            if let Some(pallet) = self.metadata.pallets.get(self.index) {
+                if let Some(name_filter) = self.pallet_names.as_ref() {
+                    if !name_filter.contains(&pallet.name) {
+                        continue;
+                    }
+                }
+
+                let mut tmp_dir = std::env::temp_dir();
+                tmp_dir.push(format!("{TEST_DIR_PREFIX}{i}"));
+                std::fs::remove_dir_all(tmp_dir).expect("cannot cleanup temp files");
+            };
         }
     }
 }
