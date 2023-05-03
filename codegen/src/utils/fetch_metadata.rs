@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::FetchMetadataError;
-use codec::{Decode, Encode};
+use codec::Decode;
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -96,124 +96,6 @@ pub async fn fetch_metadata_hex(
     Ok(hex_data)
 }
 
-async fn fetch_latest_stable(client: impl ClientT) -> Result<Vec<u8>, FetchMetadataError> {
-    // Fetch latest stable metadata of a node via `Metadata_metadata`.
-    let raw: String = client
-        .request("state_call", rpc_params!["Metadata_metadata", "0x"])
-        .await?;
-    let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-    let bytes: frame_metadata::OpaqueMetadata = Decode::decode(&mut &raw_bytes[..])?;
-    Ok(bytes.0)
-}
-
-/// Execute runtime API call and return the specified runtime metadata version.
-async fn fetch_metadata(
-    client: impl ClientT,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
-
-    // Note: `Metadata_metadata_versions` may not be present on all nodes.
-    // Once every node supports the new RPC methods, we can simplify the code a bit.
-    let supported: Option<Vec<u32>> = client
-        .request(
-            "state_call",
-            rpc_params!["Metadata_metadata_versions", "0x"],
-        )
-        .await
-        .ok()
-        .map(|raw: String| {
-            let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-            let versions: Vec<u32> = Decode::decode(&mut &raw_bytes[..])?;
-            Ok::<Vec<u32>, FetchMetadataError>(versions)
-        })
-        .transpose()?;
-
-    // Ensure the user requested a valid version if done implicitly.
-    if let (Some(supported_versions), MetadataVersion::Version(request_version)) =
-        (&supported, &version)
-    {
-        if !supported_versions.is_empty()
-            && !supported_versions
-                .iter()
-                .any(|value| value == request_version)
-        {
-            return Err(FetchMetadataError::Other(format!(
-                "Metadata version {} not supported",
-                request_version
-            )))?;
-        }
-    }
-
-    let mut is_latest = false;
-    let version_num = match version {
-        MetadataVersion::Latest => {
-            // If he have a valid supported version, find the latest stable version number.
-            let version_num = if let Some(supported_versions) = &supported {
-                supported_versions
-                    .iter()
-                    .fold(None, |max, value| match (max, value) {
-                        (None, value) => Some(value),
-                        (Some(old_max), value) => {
-                            if value != &UNSTABLE_METADATA_VERSION && value > old_max {
-                                Some(value)
-                            } else {
-                                Some(old_max)
-                            }
-                        }
-                    })
-            } else {
-                // List not exposed by node.
-                None
-            };
-
-            if let Some(version_num) = version_num {
-                // Use the latest stable from the provided list.
-                is_latest = true;
-                *version_num
-            } else {
-                // List is empty or the node does not expose the list of supported versions.
-                return fetch_latest_stable(client).await;
-            }
-        }
-        MetadataVersion::Version(version) => version,
-        MetadataVersion::Unstable => UNSTABLE_METADATA_VERSION,
-    };
-
-    // Other versions (including unstable) are fetched with `Metadata_metadata_at_version`.
-    let bytes = version_num.encode();
-    let version: String = format!("0x{}", hex::encode(&bytes));
-
-    let result: Result<String, _> = client
-        .request(
-            "state_call",
-            rpc_params!["Metadata_metadata_at_version", &version],
-        )
-        .await;
-
-    match result {
-        Ok(raw) => {
-            let raw_bytes = hex::decode(raw.trim_start_matches("0x"))?;
-
-            let opaque: Option<frame_metadata::OpaqueMetadata> =
-                Decode::decode(&mut &raw_bytes[..])?;
-            let bytes = opaque.ok_or(FetchMetadataError::Other(
-                "Metadata version not found".into(),
-            ))?;
-
-            Ok(bytes.0)
-        }
-        Err(err) => {
-            // Try to fetch the latest with `Metadata_metadata`.
-            if is_latest {
-                fetch_latest_stable(client).await
-            } else {
-                Err(err.into())
-            }
-        }
-    }
-}
-
 async fn fetch_metadata_ws(
     url: &Uri,
     version: MetadataVersion,
@@ -240,4 +122,106 @@ async fn fetch_metadata_http(
         .build(url.to_string())?;
 
     fetch_metadata(client, version).await
+}
+
+/// The innermost call to fetch metadata:
+async fn fetch_metadata(
+    client: impl ClientT,
+    version: MetadataVersion,
+) -> Result<Vec<u8>, FetchMetadataError> {
+    const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
+
+    // Fetch metadata using the "new" state_call interface
+    async fn fetch_inner(
+        client: &impl ClientT,
+        version: MetadataVersion,
+    ) -> Result<String, FetchMetadataError> {
+        // Look up supported versions:
+        let supported_versions: Vec<u32> = {
+            let res: String = client
+                .request(
+                    "state_call",
+                    rpc_params!["Metadata_metadata_versions", "0x"],
+                )
+                .await?;
+            let raw_bytes = hex::decode(res.trim_start_matches("0x"))?;
+            Decode::decode(&mut &raw_bytes[..])?
+        };
+
+        // Return the version the user wants if it's supported:
+        let version = match version {
+            MetadataVersion::Latest => *supported_versions
+                .iter()
+                .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
+                .max()
+                .ok_or_else(|| {
+                    FetchMetadataError::Other("No valid metadata versions returned".to_string())
+                })?,
+            MetadataVersion::Unstable => {
+                if supported_versions.contains(&UNSTABLE_METADATA_VERSION) {
+                    UNSTABLE_METADATA_VERSION
+                } else {
+                    return Err(FetchMetadataError::Other(
+                        "The node does not have an unstable metadata version available".to_string(),
+                    ));
+                }
+            }
+            MetadataVersion::Version(version) => {
+                if supported_versions.contains(&version) {
+                    version
+                } else {
+                    return Err(FetchMetadataError::Other(format!(
+                        "The node does not have version {version} available"
+                    )));
+                }
+            }
+        };
+
+        // Fetch the metadata at that version:
+        let metadata_string = client
+            .request::<Option<String>, _>(
+                "state_call",
+                rpc_params!["Metadata_metadata_at_version", &version],
+            )
+            .await?
+            .ok_or_else(|| {
+                FetchMetadataError::Other(format!(
+                    "The node does not have version {version} available"
+                ))
+            })?;
+        Ok(metadata_string)
+    }
+
+    // Fetch metadata using the "old" state_call interface
+    async fn fetch_inner_legacy(
+        client: &impl ClientT,
+        version: MetadataVersion,
+    ) -> Result<String, FetchMetadataError> {
+        if !matches!(
+            version,
+            MetadataVersion::Latest | MetadataVersion::Version(14)
+        ) {
+            return Err(FetchMetadataError::Other(
+                "The node can only return version 14 metadata but you've asked for something else"
+                    .to_string(),
+            ));
+        }
+
+        // Fetch the metadata at that version:
+        let metadata_string: String = client
+            .request("state_call", rpc_params!["Metadata_metadata", "0x"])
+            .await?;
+        Ok(metadata_string)
+    }
+
+    // Fetch using the new interface, falling back to trying old one if there's an error.
+    let metadata_string = match fetch_inner(&client, version).await {
+        Ok(s) => s,
+        Err(_) => fetch_inner_legacy(&client, version).await?,
+    };
+
+    // Decode the metadata.
+    let metadata_bytes = hex::decode(metadata_string.trim_start_matches("0x"))?;
+    let metadata: frame_metadata::OpaqueMetadata = Decode::decode(&mut &metadata_bytes[..])?;
+    Ok(metadata.0)
 }
