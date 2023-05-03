@@ -143,7 +143,7 @@ async fn fetch_metadata(
                     UNSTABLE_METADATA_VERSION
                 } else {
                     return Err(FetchMetadataError::Other(
-                        "The node does not have an unstable metadata version available".to_string()
+                        "The node does not have an unstable metadata version available".to_string(),
                     ));
                 }
             }
@@ -183,7 +183,8 @@ async fn fetch_metadata(
             MetadataVersion::Latest | MetadataVersion::Version(14)
         ) {
             return Err(FetchMetadataError::Other(
-                "The node can only return version 14 metadata but you've asked for something else".to_string()
+                "The node can only return version 14 metadata but you've asked for something else"
+                    .to_string(),
             ));
         }
 
