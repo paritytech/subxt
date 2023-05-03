@@ -6,7 +6,7 @@ use subxt::{config::PolkadotConfig, OfflineClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // We need to obtain these details for an OfflineClient to be instantiated..
+    // We need to obtain the following details for an OfflineClient to be instantiated:
 
     // 1. Genesis hash (RPC call: chain_getBlockHash(0)):
     let genesis_hash = {
