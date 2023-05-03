@@ -18,6 +18,8 @@ mod frame;
 #[cfg(test)]
 mod metadata;
 #[cfg(test)]
+mod runtime_api;
+#[cfg(test)]
 mod storage;
 
 #[cfg(test)]

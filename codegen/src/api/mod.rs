@@ -8,6 +8,7 @@ mod calls;
 mod constants;
 mod errors;
 mod events;
+mod runtime_apis;
 mod storage;
 
 use frame_metadata::v15::RuntimeMetadataV15;
@@ -18,7 +19,7 @@ use crate::error::CodegenError;
 use crate::{
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-    utils::{fetch_metadata_bytes_blocking, Uri},
+    utils::{fetch_metadata_bytes_blocking, MetadataVersion, Uri},
     CratePath,
 };
 use codec::Decode;
@@ -95,7 +96,11 @@ pub fn generate_runtime_api_from_url(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let bytes = fetch_metadata_bytes_blocking(url)?;
+    // Fetch latest unstable version, if that fails fall back to the latest stable.
+    let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
+        Ok(bytes) => bytes,
+        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
+    };
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -439,6 +444,14 @@ impl RuntimeGenerator {
 
         let rust_items = item_mod_ir.rust_items();
 
+        let apis_mod = runtime_apis::generate_runtime_apis(
+            &self.metadata,
+            &type_gen,
+            types_mod_ident,
+            &crate_path,
+            should_gen_docs,
+        )?;
+
         Ok(quote! {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
@@ -491,6 +504,12 @@ impl RuntimeGenerator {
                 pub fn tx() -> TransactionApi {
                     TransactionApi
                 }
+
+                pub fn apis() -> runtime_apis::RuntimeApi {
+                    runtime_apis::RuntimeApi
+                }
+
+                #apis_mod
 
                 pub struct ConstantsApi;
                 impl ConstantsApi {

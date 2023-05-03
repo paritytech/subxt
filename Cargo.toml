@@ -38,7 +38,7 @@ criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
-darling = "0.14.4"
+darling = "0.20.0"
 derivative = "2.2.0"
 either = "1.8.1"
 frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
@@ -61,7 +61,7 @@ scale-decode = "0.5.0"
 scale-encode = "0.1.0"
 serde = { version = "1.0.159" }
 serde_json = { version = "1.0.96" }
-syn = "1.0.109"
+syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.40"
 tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
 tracing = "0.1.34"

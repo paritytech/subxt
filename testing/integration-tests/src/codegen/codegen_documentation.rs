@@ -40,6 +40,14 @@ fn metadata_docs() -> Vec<String> {
     // Note: Extrinsics do not have associated documentation, but is implied by
     // associated Type.
 
+    // Inspect the runtime API types and collect the documentation.
+    for api in metadata.apis {
+        docs.extend(api.docs);
+        for method in api.methods {
+            docs.extend(method.docs);
+        }
+    }
+
     docs
 }
 
