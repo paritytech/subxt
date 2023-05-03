@@ -76,7 +76,7 @@ impl<T: Config> Events<T> {
     ///     .await?
     ///     .expect("didn't pass a block number; qed");
     ///  // Fetch the metadata of the given block.
-    ///  let metadata = client.rpc().metadata(Some(block_hash)).await?;
+    ///  let metadata = client.rpc().metadata_legacy(Some(block_hash)).await?;
     ///  // Fetch the events from the client.
     ///  let events = Events::new_from_client(metadata, block_hash, client);
     /// # Ok(())

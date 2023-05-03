@@ -95,11 +95,11 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::Payload<#struct_name> {
+                ) -> #crate_path::tx::Payload<types::#struct_name> {
                     #crate_path::tx::Payload::new_static(
                         #pallet_name,
                         #call_name,
-                        #struct_name { #( #call_args, )* },
+                        types::#struct_name { #( #call_args, )* },
                         [#(#call_hash,)*]
                     )
                 }
@@ -127,7 +127,11 @@ pub fn generate_calls(
 
             type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
-            #( #call_structs )*
+            pub mod types {
+                use super::#types_mod_ident;
+
+                #( #call_structs )*
+            }
 
             pub struct TransactionApi;
 

@@ -143,8 +143,8 @@ impl<T: Config> Rpc<T> {
         genesis_hash.ok_or_else(|| "Genesis hash not found".into())
     }
 
-    /// Fetch the metadata
-    pub async fn metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
+    /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
+    pub async fn metadata_legacy(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
         let bytes: types::Bytes = self
             .client
             .request("state_getMetadata", rpc_params![at])
@@ -347,13 +347,13 @@ impl<T: Config> Rpc<T> {
         Ok(xt_hash)
     }
 
-    /// Execute a runtime API call.
-    pub async fn state_call<Res: Decode>(
+    /// Execute a runtime API call via `state_call` RPC method.
+    pub async fn state_call_raw(
         &self,
         function: &str,
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Res, Error> {
+    ) -> Result<types::Bytes, Error> {
         let call_parameters = call_parameters.unwrap_or_default();
         let bytes: types::Bytes = self
             .client
@@ -362,9 +362,52 @@ impl<T: Config> Rpc<T> {
                 rpc_params![function, to_hex(call_parameters), at],
             )
             .await?;
+        Ok(bytes)
+    }
+
+    /// Execute a runtime API call and decode the result.
+    pub async fn state_call<Res: Decode>(
+        &self,
+        function: &str,
+        call_parameters: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<Res, Error> {
+        let bytes = self.state_call_raw(function, call_parameters, at).await?;
         let cursor = &mut &bytes[..];
         let res: Res = Decode::decode(cursor)?;
         Ok(res)
+    }
+
+    /// Execute runtime API call and return the specified runtime metadata version.
+    pub async fn metadata_at_version(&self, version: u32) -> Result<Metadata, Error> {
+        let param = version.encode();
+        let opaque: Option<frame_metadata::OpaqueMetadata> = self
+            .state_call("Metadata_metadata_at_version", Some(&param), None)
+            .await?;
+
+        let bytes = opaque.ok_or(Error::Other("Metadata version not found".into()))?;
+
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
+    }
+
+    /// Execute a runtime API call into `Metadata_metadata` method
+    /// to fetch the latest available metadata.
+    ///
+    /// # Note
+    ///
+    /// This returns the same output as [`Self::metadata`], but calls directly
+    /// into the runtime.
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
+        let bytes: frame_metadata::OpaqueMetadata =
+            self.state_call("Metadata_metadata", None, None).await?;
+
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
+
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.

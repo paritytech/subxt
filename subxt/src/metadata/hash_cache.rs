@@ -5,23 +5,23 @@
 use parking_lot::RwLock;
 use std::{borrow::Cow, collections::HashMap};
 
-/// A cache with the simple goal of storing 32 byte hashes against pallet+item keys
+/// A cache with the simple goal of storing 32 byte hashes against root+item keys
 #[derive(Default, Debug)]
 pub struct HashCache {
-    inner: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
+    inner: RwLock<HashMap<RootItemKey<'static>, [u8; 32]>>,
 }
 
 impl HashCache {
-    /// get a hash out of the cache by its pallet and item key. If the item doesn't exist,
+    /// get a hash out of the cache by its root and item key. If the item doesn't exist,
     /// run the function provided to obtain a hash to insert (or bail with some error on failure).
-    pub fn get_or_insert<F, E>(&self, pallet: &str, item: &str, f: F) -> Result<[u8; 32], E>
+    pub fn get_or_insert<F, E>(&self, root: &str, item: &str, f: F) -> Result<[u8; 32], E>
     where
         F: FnOnce() -> Result<[u8; 32], E>,
     {
         let maybe_hash = self
             .inner
             .read()
-            .get(&PalletItemKey::new(pallet, item))
+            .get(&RootItemKey::new(root, item))
             .copied();
 
         if let Some(hash) = maybe_hash {
@@ -29,10 +29,9 @@ impl HashCache {
         }
 
         let hash = f()?;
-        self.inner.write().insert(
-            PalletItemKey::new(pallet.to_string(), item.to_string()),
-            hash,
-        );
+        self.inner
+            .write()
+            .insert(RootItemKey::new(root.to_string(), item.to_string()), hash);
 
         Ok(hash)
     }
@@ -41,14 +40,14 @@ impl HashCache {
 /// This exists so that we can look items up in the cache using &strs, without having to allocate
 /// Strings first (as you'd have to do to construct something like an `&(String,String)` key).
 #[derive(Debug, PartialEq, Eq, Hash)]
-struct PalletItemKey<'a> {
+struct RootItemKey<'a> {
     pallet: Cow<'a, str>,
     item: Cow<'a, str>,
 }
 
-impl<'a> PalletItemKey<'a> {
+impl<'a> RootItemKey<'a> {
     fn new(pallet: impl Into<Cow<'a, str>>, item: impl Into<Cow<'a, str>>) -> Self {
-        PalletItemKey {
+        RootItemKey {
             pallet: pallet.into(),
             item: item.into(),
         }
@@ -75,7 +74,7 @@ mod tests {
             cache
                 .inner
                 .read()
-                .get(&PalletItemKey::new(pallet, item))
+                .get(&RootItemKey::new(pallet, item))
                 .unwrap(),
             &value.unwrap()
         );

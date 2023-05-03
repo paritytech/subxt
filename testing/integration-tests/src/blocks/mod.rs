@@ -115,7 +115,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     };
 
     // Compare the runtime API call against the `state_getMetadata`.
-    let metadata = api.rpc().metadata(None).await?;
+    let metadata = api.rpc().metadata_legacy(None).await?;
     let metadata = metadata.runtime_metadata();
     assert_eq!(&metadata_call, metadata);
     Ok(())
