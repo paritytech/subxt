@@ -667,10 +667,10 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(InvalidMetadataError::MissingCallType);
         };
 
-        let type_def_variant = get_type_def_variant(call_id)?;
+        let call_type_variants = get_type_def_variant(call_id)?;
 
         let mut extrinsics = HashMap::<(u8, u8), ExtrinsicMetadata>::new();
-        for variant in &type_def_variant.variants {
+        for variant in &call_type_variants.variants {
             let pallet_name: Arc<str> = variant.name.to_string().into();
             let pallet_index = variant.index;
 
@@ -688,8 +688,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             };
 
             // Get the call variant.
-            let type_def_variant = get_type_def_variant(ty.ty.id)?;
-            for variant in &type_def_variant.variants {
+            let call_type_variant = get_type_def_variant(ty.ty.id)?;
+            for variant in &call_type_variant.variants {
                 extrinsics.insert(
                     (pallet_index, variant.index),
                     ExtrinsicMetadata {
