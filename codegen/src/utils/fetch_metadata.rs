@@ -159,12 +159,17 @@ async fn fetch_metadata(
         };
 
         // Fetch the metadata at that version:
-        let metadata_string: String = client
-            .request(
+        let metadata_string = client
+            .request::<Option<String>, _>(
                 "state_call",
                 rpc_params!["Metadata_metadata_at_version", &version],
             )
-            .await?;
+            .await?
+            .ok_or_else(|| {
+                FetchMetadataError::Other(format!(
+                    "The node does not have version {version} available"
+                ))
+            })?;
         Ok(metadata_string)
     }
 
