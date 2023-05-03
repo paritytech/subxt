@@ -8,7 +8,6 @@ use codec::{Decode, Encode};
 use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::io::{self, Write};
-use subxt_codegen::utils::MetadataVersion;
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
@@ -26,19 +25,6 @@ pub struct Opts {
     /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     pallets: Option<Vec<String>>,
-    /// Specify the metadata version.
-    ///
-    ///  - unstable:
-    ///
-    ///    Use the latest unstable metadata of the node.
-    ///
-    ///  - number
-    ///
-    ///    Use this specific metadata version.
-    ///
-    /// Defaults to latest.
-    #[clap(long = "version", default_value = "latest")]
-    version: MetadataVersion,
 }
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
