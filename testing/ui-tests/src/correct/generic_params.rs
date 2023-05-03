@@ -22,7 +22,7 @@ pub struct DoesntImplEncodeDecodeAsType(u16);
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Discarding both params:
         with = "crate::CustomAddress"
     )
@@ -32,7 +32,7 @@ pub mod node_runtime {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Discarding second param:
         with = "crate::Generic<A>"
     )
@@ -42,7 +42,7 @@ pub mod node_runtime2 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Discarding first param:
         with = "crate::Generic<B>"
     )
@@ -52,7 +52,7 @@ pub mod node_runtime3 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Swapping params:
         with = "crate::Second<B, A>"
     )
@@ -62,7 +62,7 @@ pub mod node_runtime4 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress",
+        path = "sp_runtime::multiaddress::MultiAddress",
         // Ignore input params and just use concrete types on output:
         with = "crate::Second<bool, ::std::vec::Vec<u8>>"
     )
@@ -72,7 +72,7 @@ pub mod node_runtime5 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // We can put a static type in, too:
         with = "crate::Second<B, u16>"
     )
@@ -82,7 +82,7 @@ pub mod node_runtime6 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Check that things can be wrapped in our Static type:
         with = "::subxt::utils::Static<crate::DoesntImplEncodeDecodeAsType>"
     )
@@ -92,7 +92,7 @@ pub mod node_runtime7 {}
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+        path = "sp_runtime::multiaddress::MultiAddress<A, B>",
         // Recursive type param substitution should work too (swapping out nested A and B):
         with = "::subxt::utils::Static<crate::Second<A, B>>"
     )
