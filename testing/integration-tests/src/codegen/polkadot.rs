@@ -469,6 +469,312 @@ pub mod api {
             .into())
         }
     }
+    #[derive(
+        :: subxt :: ext :: codec :: Decode,
+        :: subxt :: ext :: codec :: Encode,
+        :: subxt :: ext :: scale_decode :: DecodeAsType,
+        :: subxt :: ext :: scale_encode :: EncodeAsType,
+        Debug,
+    )]
+    # [codec (crate = :: subxt :: ext :: codec)]
+    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+    pub enum Error {
+        #[codec(index = 0)]
+        System(system::Error),
+        #[codec(index = 1)]
+        Scheduler(scheduler::Error),
+        #[codec(index = 10)]
+        Preimage(preimage::Error),
+        #[codec(index = 2)]
+        Babe(babe::Error),
+        #[codec(index = 4)]
+        Indices(indices::Error),
+        #[codec(index = 5)]
+        Balances(balances::Error),
+        #[codec(index = 6)]
+        Authorship(authorship::Error),
+        #[codec(index = 7)]
+        Staking(staking::Error),
+        #[codec(index = 9)]
+        Session(session::Error),
+        #[codec(index = 11)]
+        Grandpa(grandpa::Error),
+        #[codec(index = 12)]
+        ImOnline(im_online::Error),
+        #[codec(index = 14)]
+        Democracy(democracy::Error),
+        #[codec(index = 15)]
+        Council(council::Error),
+        #[codec(index = 16)]
+        TechnicalCommittee(technical_committee::Error),
+        #[codec(index = 17)]
+        PhragmenElection(phragmen_election::Error),
+        #[codec(index = 18)]
+        TechnicalMembership(technical_membership::Error),
+        #[codec(index = 19)]
+        Treasury(treasury::Error),
+        #[codec(index = 24)]
+        Claims(claims::Error),
+        #[codec(index = 25)]
+        Vesting(vesting::Error),
+        #[codec(index = 26)]
+        Utility(utility::Error),
+        #[codec(index = 28)]
+        Identity(identity::Error),
+        #[codec(index = 29)]
+        Proxy(proxy::Error),
+        #[codec(index = 30)]
+        Multisig(multisig::Error),
+        #[codec(index = 34)]
+        Bounties(bounties::Error),
+        #[codec(index = 38)]
+        ChildBounties(child_bounties::Error),
+        #[codec(index = 35)]
+        Tips(tips::Error),
+        #[codec(index = 36)]
+        ElectionProviderMultiPhase(election_provider_multi_phase::Error),
+        #[codec(index = 37)]
+        VoterList(voter_list::Error),
+        #[codec(index = 39)]
+        NominationPools(nomination_pools::Error),
+        #[codec(index = 40)]
+        FastUnstake(fast_unstake::Error),
+        #[codec(index = 51)]
+        Configuration(configuration::Error),
+        #[codec(index = 53)]
+        ParaInclusion(para_inclusion::Error),
+        #[codec(index = 54)]
+        ParaInherent(para_inherent::Error),
+        #[codec(index = 56)]
+        Paras(paras::Error),
+        #[codec(index = 59)]
+        Ump(ump::Error),
+        #[codec(index = 60)]
+        Hrmp(hrmp::Error),
+        #[codec(index = 62)]
+        ParasDisputes(paras_disputes::Error),
+        #[codec(index = 70)]
+        Registrar(registrar::Error),
+        #[codec(index = 71)]
+        Slots(slots::Error),
+        #[codec(index = 72)]
+        Auctions(auctions::Error),
+        #[codec(index = 73)]
+        Crowdloan(crowdloan::Error),
+        #[codec(index = 99)]
+        XcmPallet(xcm_pallet::Error),
+    }
+    impl ::subxt::error::RootError for Error {
+        fn root_error(
+            pallet_bytes: &[u8],
+            pallet_name: &str,
+            metadata: &::subxt::Metadata,
+        ) -> Result<Self, ::subxt::Error> {
+            use subxt::metadata::DecodeWithMetadata;
+            let cursor = &mut &pallet_bytes[..];
+            if pallet_name == "System" {
+                let variant_error = system::Error::decode_with_metadata(cursor, 176u32, metadata)?;
+                return Ok(Error::System(variant_error));
+            }
+            if pallet_name == "Scheduler" {
+                let variant_error =
+                    scheduler::Error::decode_with_metadata(cursor, 450u32, metadata)?;
+                return Ok(Error::Scheduler(variant_error));
+            }
+            if pallet_name == "Preimage" {
+                let variant_error =
+                    preimage::Error::decode_with_metadata(cursor, 455u32, metadata)?;
+                return Ok(Error::Preimage(variant_error));
+            }
+            if pallet_name == "Babe" {
+                let variant_error = babe::Error::decode_with_metadata(cursor, 467u32, metadata)?;
+                return Ok(Error::Babe(variant_error));
+            }
+            if pallet_name == "Indices" {
+                let variant_error = indices::Error::decode_with_metadata(cursor, 469u32, metadata)?;
+                return Ok(Error::Indices(variant_error));
+            }
+            if pallet_name == "Balances" {
+                let variant_error =
+                    balances::Error::decode_with_metadata(cursor, 478u32, metadata)?;
+                return Ok(Error::Balances(variant_error));
+            }
+            if pallet_name == "Authorship" {
+                let variant_error =
+                    authorship::Error::decode_with_metadata(cursor, 484u32, metadata)?;
+                return Ok(Error::Authorship(variant_error));
+            }
+            if pallet_name == "Staking" {
+                let variant_error = staking::Error::decode_with_metadata(cursor, 508u32, metadata)?;
+                return Ok(Error::Staking(variant_error));
+            }
+            if pallet_name == "Session" {
+                let variant_error = session::Error::decode_with_metadata(cursor, 515u32, metadata)?;
+                return Ok(Error::Session(variant_error));
+            }
+            if pallet_name == "Grandpa" {
+                let variant_error = grandpa::Error::decode_with_metadata(cursor, 519u32, metadata)?;
+                return Ok(Error::Grandpa(variant_error));
+            }
+            if pallet_name == "ImOnline" {
+                let variant_error =
+                    im_online::Error::decode_with_metadata(cursor, 527u32, metadata)?;
+                return Ok(Error::ImOnline(variant_error));
+            }
+            if pallet_name == "Democracy" {
+                let variant_error =
+                    democracy::Error::decode_with_metadata(cursor, 544u32, metadata)?;
+                return Ok(Error::Democracy(variant_error));
+            }
+            if pallet_name == "Council" {
+                let variant_error = council::Error::decode_with_metadata(cursor, 547u32, metadata)?;
+                return Ok(Error::Council(variant_error));
+            }
+            if pallet_name == "TechnicalCommittee" {
+                let variant_error =
+                    technical_committee::Error::decode_with_metadata(cursor, 549u32, metadata)?;
+                return Ok(Error::TechnicalCommittee(variant_error));
+            }
+            if pallet_name == "PhragmenElection" {
+                let variant_error =
+                    phragmen_election::Error::decode_with_metadata(cursor, 553u32, metadata)?;
+                return Ok(Error::PhragmenElection(variant_error));
+            }
+            if pallet_name == "TechnicalMembership" {
+                let variant_error =
+                    technical_membership::Error::decode_with_metadata(cursor, 555u32, metadata)?;
+                return Ok(Error::TechnicalMembership(variant_error));
+            }
+            if pallet_name == "Treasury" {
+                let variant_error =
+                    treasury::Error::decode_with_metadata(cursor, 561u32, metadata)?;
+                return Ok(Error::Treasury(variant_error));
+            }
+            if pallet_name == "Claims" {
+                let variant_error = claims::Error::decode_with_metadata(cursor, 562u32, metadata)?;
+                return Ok(Error::Claims(variant_error));
+            }
+            if pallet_name == "Vesting" {
+                let variant_error = vesting::Error::decode_with_metadata(cursor, 566u32, metadata)?;
+                return Ok(Error::Vesting(variant_error));
+            }
+            if pallet_name == "Utility" {
+                let variant_error = utility::Error::decode_with_metadata(cursor, 567u32, metadata)?;
+                return Ok(Error::Utility(variant_error));
+            }
+            if pallet_name == "Identity" {
+                let variant_error =
+                    identity::Error::decode_with_metadata(cursor, 578u32, metadata)?;
+                return Ok(Error::Identity(variant_error));
+            }
+            if pallet_name == "Proxy" {
+                let variant_error = proxy::Error::decode_with_metadata(cursor, 587u32, metadata)?;
+                return Ok(Error::Proxy(variant_error));
+            }
+            if pallet_name == "Multisig" {
+                let variant_error =
+                    multisig::Error::decode_with_metadata(cursor, 591u32, metadata)?;
+                return Ok(Error::Multisig(variant_error));
+            }
+            if pallet_name == "Bounties" {
+                let variant_error =
+                    bounties::Error::decode_with_metadata(cursor, 595u32, metadata)?;
+                return Ok(Error::Bounties(variant_error));
+            }
+            if pallet_name == "ChildBounties" {
+                let variant_error =
+                    child_bounties::Error::decode_with_metadata(cursor, 598u32, metadata)?;
+                return Ok(Error::ChildBounties(variant_error));
+            }
+            if pallet_name == "Tips" {
+                let variant_error = tips::Error::decode_with_metadata(cursor, 600u32, metadata)?;
+                return Ok(Error::Tips(variant_error));
+            }
+            if pallet_name == "ElectionProviderMultiPhase" {
+                let variant_error = election_provider_multi_phase::Error::decode_with_metadata(
+                    cursor, 612u32, metadata,
+                )?;
+                return Ok(Error::ElectionProviderMultiPhase(variant_error));
+            }
+            if pallet_name == "VoterList" {
+                let variant_error =
+                    voter_list::Error::decode_with_metadata(cursor, 616u32, metadata)?;
+                return Ok(Error::VoterList(variant_error));
+            }
+            if pallet_name == "NominationPools" {
+                let variant_error =
+                    nomination_pools::Error::decode_with_metadata(cursor, 633u32, metadata)?;
+                return Ok(Error::NominationPools(variant_error));
+            }
+            if pallet_name == "FastUnstake" {
+                let variant_error =
+                    fast_unstake::Error::decode_with_metadata(cursor, 638u32, metadata)?;
+                return Ok(Error::FastUnstake(variant_error));
+            }
+            if pallet_name == "Configuration" {
+                let variant_error =
+                    configuration::Error::decode_with_metadata(cursor, 642u32, metadata)?;
+                return Ok(Error::Configuration(variant_error));
+            }
+            if pallet_name == "ParaInclusion" {
+                let variant_error =
+                    para_inclusion::Error::decode_with_metadata(cursor, 647u32, metadata)?;
+                return Ok(Error::ParaInclusion(variant_error));
+            }
+            if pallet_name == "ParaInherent" {
+                let variant_error =
+                    para_inherent::Error::decode_with_metadata(cursor, 653u32, metadata)?;
+                return Ok(Error::ParaInherent(variant_error));
+            }
+            if pallet_name == "Paras" {
+                let variant_error = paras::Error::decode_with_metadata(cursor, 680u32, metadata)?;
+                return Ok(Error::Paras(variant_error));
+            }
+            if pallet_name == "Ump" {
+                let variant_error = ump::Error::decode_with_metadata(cursor, 686u32, metadata)?;
+                return Ok(Error::Ump(variant_error));
+            }
+            if pallet_name == "Hrmp" {
+                let variant_error = hrmp::Error::decode_with_metadata(cursor, 695u32, metadata)?;
+                return Ok(Error::Hrmp(variant_error));
+            }
+            if pallet_name == "ParasDisputes" {
+                let variant_error =
+                    paras_disputes::Error::decode_with_metadata(cursor, 703u32, metadata)?;
+                return Ok(Error::ParasDisputes(variant_error));
+            }
+            if pallet_name == "Registrar" {
+                let variant_error =
+                    registrar::Error::decode_with_metadata(cursor, 705u32, metadata)?;
+                return Ok(Error::Registrar(variant_error));
+            }
+            if pallet_name == "Slots" {
+                let variant_error = slots::Error::decode_with_metadata(cursor, 707u32, metadata)?;
+                return Ok(Error::Slots(variant_error));
+            }
+            if pallet_name == "Auctions" {
+                let variant_error =
+                    auctions::Error::decode_with_metadata(cursor, 712u32, metadata)?;
+                return Ok(Error::Auctions(variant_error));
+            }
+            if pallet_name == "Crowdloan" {
+                let variant_error =
+                    crowdloan::Error::decode_with_metadata(cursor, 715u32, metadata)?;
+                return Ok(Error::Crowdloan(variant_error));
+            }
+            if pallet_name == "XcmPallet" {
+                let variant_error =
+                    xcm_pallet::Error::decode_with_metadata(cursor, 727u32, metadata)?;
+                return Ok(Error::XcmPallet(variant_error));
+            }
+            Err(::subxt::ext::scale_decode::Error::custom(format!(
+                "Pallet name '{}' not found in root Error enum",
+                pallet_name
+            ))
+            .into())
+        }
+    }
     pub fn constants() -> ConstantsApi {
         ConstantsApi
     }
@@ -891,6 +1197,8 @@ pub mod api {
     pub mod system {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "Error for the System pallet"]
+        pub type Error = runtime_types::frame_system::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -1903,6 +2211,8 @@ pub mod api {
     pub mod scheduler {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_scheduler::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -2474,6 +2784,8 @@ pub mod api {
     pub mod preimage {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_preimage::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -2777,6 +3089,8 @@ pub mod api {
     pub mod babe {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_babe::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -3532,6 +3846,8 @@ pub mod api {
     pub mod indices {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_indices::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -3926,6 +4242,8 @@ pub mod api {
     pub mod balances {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_balances::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -4822,6 +5140,8 @@ pub mod api {
     pub mod authorship {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_authorship::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -4975,6 +5295,8 @@ pub mod api {
     pub mod staking {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_staking::pallet::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -8038,6 +8360,8 @@ pub mod api {
     pub mod session {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "Error for the session pallet."]
+        pub type Error = runtime_types::pallet_session::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -8377,6 +8701,8 @@ pub mod api {
     pub mod grandpa {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_grandpa::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -8779,6 +9105,8 @@ pub mod api {
     pub mod im_online {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_im_online::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -9094,6 +9422,8 @@ pub mod api {
     pub mod democracy {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_democracy::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -10756,6 +11086,8 @@ pub mod api {
     pub mod council {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_collective::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -11529,6 +11861,8 @@ pub mod api {
     pub mod technical_committee {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_collective::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -12302,6 +12636,8 @@ pub mod api {
     pub mod phragmen_election {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_elections_phragmen::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -13040,6 +13376,8 @@ pub mod api {
     pub mod technical_membership {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_membership::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -13427,6 +13765,8 @@ pub mod api {
     pub mod treasury {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "Error for the treasury pallet."]
+        pub type Error = runtime_types::pallet_treasury::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -14016,6 +14356,8 @@ pub mod api {
     pub mod claims {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_common::claims::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -14573,6 +14915,8 @@ pub mod api {
     pub mod vesting {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "Error for the vesting pallet."]
+        pub type Error = runtime_types::pallet_vesting::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -14995,6 +15339,8 @@ pub mod api {
     pub mod utility {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_utility::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -15363,6 +15709,8 @@ pub mod api {
     pub mod identity {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_identity::pallet::Error;
         #[doc = "Identity pallet declaration."]
         pub mod calls {
             use super::root_mod;
@@ -16556,6 +16904,8 @@ pub mod api {
     pub mod proxy {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_proxy::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -17382,6 +17732,8 @@ pub mod api {
     pub mod multisig {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_multisig::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -17887,6 +18239,8 @@ pub mod api {
     pub mod bounties {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_bounties::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -18711,6 +19065,8 @@ pub mod api {
     pub mod child_bounties {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_child_bounties::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -19472,6 +19828,8 @@ pub mod api {
     pub mod tips {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_tips::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -20072,6 +20430,8 @@ pub mod api {
     pub mod election_provider_multi_phase {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "Error of the pallet that can be returned in response to dispatches."]
+        pub type Error = runtime_types::pallet_election_provider_multi_phase::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -21041,6 +21401,8 @@ pub mod api {
     pub mod voter_list {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_bags_list::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -21362,6 +21724,8 @@ pub mod api {
     pub mod nomination_pools {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_nomination_pools::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -22867,6 +23231,8 @@ pub mod api {
     pub mod fast_unstake {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_fast_unstake::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -23229,6 +23595,8 @@ pub mod api {
     pub mod configuration {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::configuration::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -24767,6 +25135,8 @@ pub mod api {
     pub mod para_inclusion {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::inclusion::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -24957,6 +25327,8 @@ pub mod api {
     pub mod para_inherent {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -25240,6 +25612,8 @@ pub mod api {
     pub mod paras {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::paras::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -26794,6 +27168,8 @@ pub mod api {
     pub mod ump {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::ump::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -27257,6 +27633,8 @@ pub mod api {
     pub mod hrmp {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::hrmp::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -28441,6 +28819,8 @@ pub mod api {
     pub mod paras_disputes {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_parachains::disputes::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -28771,6 +29151,8 @@ pub mod api {
     pub mod registrar {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_common::paras_registrar::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -29345,6 +29727,8 @@ pub mod api {
     pub mod slots {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_common::slots::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -29642,6 +30026,8 @@ pub mod api {
     pub mod auctions {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_common::auctions::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -30155,6 +30541,8 @@ pub mod api {
     pub mod crowdloan {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::polkadot_runtime_common::crowdloan::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
@@ -30899,6 +31287,8 @@ pub mod api {
     pub mod xcm_pallet {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
+        pub type Error = runtime_types::pallet_xcm::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::root_mod;
