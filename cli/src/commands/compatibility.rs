@@ -120,7 +120,7 @@ async fn fetch_runtime_metadata(
     url: &Uri,
     version: MetadataVersion,
 ) -> color_eyre::Result<RuntimeMetadataV15> {
-    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version.into()).await?;
+    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version).await?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
     if metadata.0 != META_RESERVED {
