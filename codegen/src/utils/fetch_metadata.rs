@@ -136,15 +136,15 @@ async fn fetch_metadata(
                 .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
                 .max()
                 .ok_or_else(|| {
-                    FetchMetadataError::Other(format!("No valid metadata versions returned"))
+                    FetchMetadataError::Other("No valid metadata versions returned".to_string())
                 })?,
             MetadataVersion::Unstable => {
                 if supported_versions.contains(&UNSTABLE_METADATA_VERSION) {
                     UNSTABLE_METADATA_VERSION
                 } else {
-                    return Err(FetchMetadataError::Other(format!(
-                        "The node does not have an unstable metadata version available"
-                    )));
+                    return Err(FetchMetadataError::Other(
+                        "The node does not have an unstable metadata version available".to_string()
+                    ));
                 }
             }
             MetadataVersion::Version(version) => {
@@ -182,9 +182,9 @@ async fn fetch_metadata(
             version,
             MetadataVersion::Latest | MetadataVersion::Version(14)
         ) {
-            return Err(FetchMetadataError::Other(format!(
-                "The node can only return version 14 metadata but you've asked for something else"
-            )));
+            return Err(FetchMetadataError::Other(
+                "The node can only return version 14 metadata but you've asked for something else".to_string()
+            ));
         }
 
         // Fetch the metadata at that version:
