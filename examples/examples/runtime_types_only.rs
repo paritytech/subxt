@@ -17,7 +17,7 @@ use sp_runtime::{
 use subxt::PolkadotConfig;
 
 #[subxt::subxt(
-    runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+    runtime_metadata_path = "../artifacts/polkadot_metadata_tiny.scale",
     derive_for_all_types = "Clone, PartialEq, Eq",
     runtime_types_only
 )]

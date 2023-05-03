@@ -60,11 +60,100 @@ pub mod api {
         "Crowdloan",
         "XcmPallet",
     ];
-    #[doc = r" The statically generated runtime call type."]
-    pub type Call = runtime_types::polkadot_runtime::RuntimeCall;
     #[doc = r" The error type returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-    pub type Event = runtime_types::polkadot_runtime::RuntimeEvent;
+    #[derive(
+        :: subxt :: ext :: codec :: Decode,
+        :: subxt :: ext :: codec :: Encode,
+        :: subxt :: ext :: scale_decode :: DecodeAsType,
+        :: subxt :: ext :: scale_encode :: EncodeAsType,
+        Debug,
+    )]
+    # [codec (crate = :: subxt :: ext :: codec)]
+    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+    pub enum Event {
+        #[codec(index = 0)]
+        System(system::Event),
+        #[codec(index = 1)]
+        Scheduler(scheduler::Event),
+        #[codec(index = 10)]
+        Preimage(preimage::Event),
+        #[codec(index = 4)]
+        Indices(indices::Event),
+        #[codec(index = 5)]
+        Balances(balances::Event),
+        #[codec(index = 32)]
+        TransactionPayment(transaction_payment::Event),
+        #[codec(index = 7)]
+        Staking(staking::Event),
+        #[codec(index = 8)]
+        Offences(offences::Event),
+        #[codec(index = 9)]
+        Session(session::Event),
+        #[codec(index = 11)]
+        Grandpa(grandpa::Event),
+        #[codec(index = 12)]
+        ImOnline(im_online::Event),
+        #[codec(index = 14)]
+        Democracy(democracy::Event),
+        #[codec(index = 15)]
+        Council(council::Event),
+        #[codec(index = 16)]
+        TechnicalCommittee(technical_committee::Event),
+        #[codec(index = 17)]
+        PhragmenElection(phragmen_election::Event),
+        #[codec(index = 18)]
+        TechnicalMembership(technical_membership::Event),
+        #[codec(index = 19)]
+        Treasury(treasury::Event),
+        #[codec(index = 24)]
+        Claims(claims::Event),
+        #[codec(index = 25)]
+        Vesting(vesting::Event),
+        #[codec(index = 26)]
+        Utility(utility::Event),
+        #[codec(index = 28)]
+        Identity(identity::Event),
+        #[codec(index = 29)]
+        Proxy(proxy::Event),
+        #[codec(index = 30)]
+        Multisig(multisig::Event),
+        #[codec(index = 34)]
+        Bounties(bounties::Event),
+        #[codec(index = 38)]
+        ChildBounties(child_bounties::Event),
+        #[codec(index = 35)]
+        Tips(tips::Event),
+        #[codec(index = 36)]
+        ElectionProviderMultiPhase(election_provider_multi_phase::Event),
+        #[codec(index = 37)]
+        VoterList(voter_list::Event),
+        #[codec(index = 39)]
+        NominationPools(nomination_pools::Event),
+        #[codec(index = 40)]
+        FastUnstake(fast_unstake::Event),
+        #[codec(index = 53)]
+        ParaInclusion(para_inclusion::Event),
+        #[codec(index = 56)]
+        Paras(paras::Event),
+        #[codec(index = 59)]
+        Ump(ump::Event),
+        #[codec(index = 60)]
+        Hrmp(hrmp::Event),
+        #[codec(index = 62)]
+        ParasDisputes(paras_disputes::Event),
+        #[codec(index = 70)]
+        Registrar(registrar::Event),
+        #[codec(index = 71)]
+        Slots(slots::Event),
+        #[codec(index = 72)]
+        Auctions(auctions::Event),
+        #[codec(index = 73)]
+        Crowdloan(crowdloan::Event),
+        #[codec(index = 99)]
+        XcmPallet(xcm_pallet::Event),
+    }
     impl ::subxt::events::RootEvent for Event {
         fn root_event(
             pallet_bytes: &[u8],
@@ -814,6 +903,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct FillBlock {
@@ -826,6 +916,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Remark {
@@ -839,6 +930,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHeapPages {
@@ -851,6 +943,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetCode {
@@ -863,6 +956,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetCodeWithoutChecks {
@@ -875,6 +969,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetStorage {
@@ -890,6 +985,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct KillStorage {
@@ -902,6 +998,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct KillPrefix {
@@ -915,6 +1012,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemarkWithEvent {
@@ -1114,6 +1212,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An extrinsic completed successfully."]
@@ -1131,6 +1230,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An extrinsic failed."]
@@ -1149,6 +1249,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "`:code` was updated."]
@@ -1164,6 +1265,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new account was created."]
@@ -1181,6 +1283,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account was reaped."]
@@ -1198,6 +1301,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "On on-chain remark happened."]
@@ -1811,6 +1915,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Schedule {
@@ -1827,6 +1932,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Cancel {
@@ -1840,6 +1946,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ScheduleNamed {
@@ -1857,6 +1964,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelNamed {
@@ -1869,6 +1977,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ScheduleAfter {
@@ -1885,6 +1994,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ScheduleNamedAfter {
@@ -2065,6 +2175,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Scheduled some task."]
@@ -2083,6 +2194,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Canceled some task."]
@@ -2101,6 +2213,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Dispatched some task."]
@@ -2120,6 +2233,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The call for the provided hash was not found so the task has been aborted."]
@@ -2138,6 +2252,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given task was unable to be renewed since the agenda is full at that block."]
@@ -2156,6 +2271,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given task can never be executed since it is overweight."]
@@ -2370,6 +2486,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct NotePreimage {
@@ -2382,6 +2499,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnnotePreimage {
@@ -2394,6 +2512,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RequestPreimage {
@@ -2406,6 +2525,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnrequestPreimage {
@@ -2503,6 +2623,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A preimage has been noted."]
@@ -2520,6 +2641,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A preimage has been requested."]
@@ -2537,6 +2659,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A preimage has ben cleared."]
@@ -2666,6 +2789,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReportEquivocation {
@@ -2687,6 +2811,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReportEquivocationUnsigned {
@@ -2708,6 +2833,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PlanConfigChange {
@@ -3291,6 +3417,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Set {
@@ -3418,6 +3545,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Claim {
@@ -3430,6 +3558,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Transfer {
@@ -3444,6 +3573,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Free {
@@ -3456,6 +3586,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceTransfer {
@@ -3471,6 +3602,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Freeze {
@@ -3660,6 +3792,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A account index was assigned."]
@@ -3679,6 +3812,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A account index has been freed up (unassigned)."]
@@ -3696,6 +3830,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A account index has been frozen to its current account ID."]
@@ -3803,6 +3938,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Transfer {
@@ -3817,6 +3953,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetBalance {
@@ -3833,6 +3970,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceTransfer {
@@ -3848,6 +3986,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct TransferKeepAlive {
@@ -3862,6 +4001,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct TransferAll {
@@ -3875,6 +4015,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceUnreserve {
@@ -4073,6 +4214,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account was created with some free balance."]
@@ -4091,6 +4233,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account was removed whose balance was non-zero but below ExistentialDeposit,"]
@@ -4110,6 +4253,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Transfer succeeded."]
@@ -4129,6 +4273,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A balance was set by root."]
@@ -4148,6 +4293,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some balance was reserved (moved from free to reserved)."]
@@ -4166,6 +4312,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some balance was unreserved (moved from reserved to free)."]
@@ -4184,6 +4331,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some balance was moved from the reserve of the first account to the second account."]
@@ -4206,6 +4354,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some amount was deposited (e.g. for transaction fees)."]
@@ -4224,6 +4373,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some amount was withdrawn from the account (e.g. for transaction fees)."]
@@ -4242,6 +4392,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some amount was removed from the account (e.g. for misbehavior)."]
@@ -4564,6 +4715,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,"]
@@ -4682,6 +4834,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetUncles {
@@ -4834,6 +4987,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Bond {
@@ -4850,6 +5004,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BondExtra {
@@ -4863,6 +5018,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Unbond {
@@ -4877,6 +5033,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct WithdrawUnbonded {
@@ -4889,6 +5046,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Validate {
@@ -4901,6 +5059,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Nominate {
@@ -4914,6 +5073,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Chill;
@@ -4924,6 +5084,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetPayee {
@@ -4937,6 +5098,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetController {
@@ -4949,6 +5111,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetValidatorCount {
@@ -4962,6 +5125,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct IncreaseValidatorCount {
@@ -4975,6 +5139,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ScaleValidatorCount {
@@ -4987,6 +5152,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceNoEras;
@@ -4997,6 +5163,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceNewEra;
@@ -5007,6 +5174,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetInvulnerables {
@@ -5019,6 +5187,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceUnstake {
@@ -5032,6 +5201,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceNewEraAlways;
@@ -5042,6 +5212,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelDeferredSlash {
@@ -5055,6 +5226,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PayoutStakers {
@@ -5068,6 +5240,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Rebond {
@@ -5081,6 +5254,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReapStash {
@@ -5094,6 +5268,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Kick {
@@ -5107,6 +5282,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetStakingConfigs {
@@ -5134,6 +5310,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ChillOther {
@@ -5146,6 +5323,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceApplyMinCommission {
@@ -5892,6 +6070,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The era payout has been set; the first balance is the validator-payout; the second is"]
@@ -5912,6 +6091,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The nominator has been rewarded by this amount."]
@@ -5930,6 +6110,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "One staker (and potentially its nominators) has been slashed by the given amount."]
@@ -5949,6 +6130,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An old slashing report from a prior era was discarded because it could"]
@@ -5967,6 +6149,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new set of stakers was elected."]
@@ -5982,6 +6165,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has bonded this amount. \\[stash, amount\\]"]
@@ -6003,6 +6187,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has unbonded this amount."]
@@ -6021,6 +6206,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`"]
@@ -6040,6 +6226,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A nominator has been kicked from a validator."]
@@ -6058,6 +6245,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The election failed. No new era is planned."]
@@ -6073,6 +6261,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has stopped participating as either a validator or nominator."]
@@ -6090,6 +6279,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The stakers' rewards are getting paid."]
@@ -6108,6 +6298,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A validator has set their preferences."]
@@ -7651,6 +7842,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
@@ -7858,6 +8050,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetKeys {
@@ -7871,6 +8064,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PurgeKeys;
@@ -7948,6 +8142,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "New session has happened. Note that the argument is the session index, not the"]
@@ -8194,6 +8389,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReportEquivocation {
@@ -8212,6 +8408,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReportEquivocationUnsigned {
@@ -8230,6 +8427,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct NoteStalled {
@@ -8341,6 +8539,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "New authority set has been applied."]
@@ -8361,6 +8560,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current authority set has been paused."]
@@ -8376,6 +8576,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current authority set has been resumed."]
@@ -8590,6 +8791,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Heartbeat {
@@ -8640,6 +8842,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new heartbeat was received from `AuthorityId`."]
@@ -8657,6 +8860,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "At the end of the session, no offence was committed."]
@@ -8672,6 +8876,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "At the end of the session, at least one validator was found to be offline."]
@@ -8901,6 +9106,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Propose {
@@ -8917,6 +9123,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Second {
@@ -8930,6 +9137,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Vote {
@@ -8946,6 +9154,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct EmergencyCancel {
@@ -8958,6 +9167,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ExternalPropose {
@@ -8972,6 +9182,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ExternalProposeMajority {
@@ -8986,6 +9197,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ExternalProposeDefault {
@@ -9000,6 +9212,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct FastTrack {
@@ -9014,6 +9227,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct VetoExternal {
@@ -9026,6 +9240,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelReferendum {
@@ -9039,6 +9254,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Delegate {
@@ -9053,6 +9269,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Undelegate;
@@ -9063,6 +9280,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClearPublicProposals;
@@ -9073,6 +9291,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Unlock {
@@ -9086,6 +9305,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveVote {
@@ -9098,6 +9318,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveOtherVote {
@@ -9111,6 +9332,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Blacklist {
@@ -9124,6 +9346,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelProposal {
@@ -9646,6 +9869,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion has been proposed by a public account."]
@@ -9664,6 +9888,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A public proposal has been tabled for referendum vote."]
@@ -9682,6 +9907,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An external proposal has been tabled."]
@@ -9697,6 +9923,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A referendum has begun."]
@@ -9716,6 +9943,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal has been approved by referendum."]
@@ -9734,6 +9962,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal has been rejected by referendum."]
@@ -9752,6 +9981,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A referendum has been cancelled."]
@@ -9769,6 +9999,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has delegated their vote to another account."]
@@ -9787,6 +10018,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has cancelled a previous delegation operation."]
@@ -9804,6 +10036,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An external proposal has been vetoed."]
@@ -9823,6 +10056,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal_hash has been blacklisted permanently."]
@@ -9840,6 +10074,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has voted in a referendum"]
@@ -9860,6 +10095,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has secconded a proposal"]
@@ -9879,6 +10115,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal got canceled."]
@@ -10531,6 +10768,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMembers {
@@ -10545,6 +10783,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Execute {
@@ -10559,6 +10798,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Propose {
@@ -10575,6 +10815,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Vote {
@@ -10590,6 +10831,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CloseOldWeight {
@@ -10608,6 +10850,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct DisapproveProposal {
@@ -10620,6 +10863,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Close {
@@ -10954,6 +11198,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion (given hash) has been proposed (by given account) with a threshold (given"]
@@ -10975,6 +11220,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion (given hash) has been voted on by given account, leaving"]
@@ -10997,6 +11243,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was approved by the required threshold."]
@@ -11014,6 +11261,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was not approved by the required threshold."]
@@ -11031,6 +11279,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was executed; result will be `Ok` if it returned without error."]
@@ -11049,6 +11298,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A single member did some action; result will be `Ok` if it returned without error."]
@@ -11067,6 +11317,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal was closed because its threshold was reached or after its duration was up."]
@@ -11290,6 +11541,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMembers {
@@ -11304,6 +11556,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Execute {
@@ -11318,6 +11571,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Propose {
@@ -11334,6 +11588,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Vote {
@@ -11349,6 +11604,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CloseOldWeight {
@@ -11367,6 +11623,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct DisapproveProposal {
@@ -11379,6 +11636,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Close {
@@ -11713,6 +11971,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion (given hash) has been proposed (by given account) with a threshold (given"]
@@ -11734,6 +11993,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion (given hash) has been voted on by given account, leaving"]
@@ -11756,6 +12016,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was approved by the required threshold."]
@@ -11773,6 +12034,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was not approved by the required threshold."]
@@ -11790,6 +12052,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A motion was executed; result will be `Ok` if it returned without error."]
@@ -11808,6 +12071,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A single member did some action; result will be `Ok` if it returned without error."]
@@ -11826,6 +12090,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal was closed because its threshold was reached or after its duration was up."]
@@ -12049,6 +12314,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Vote {
@@ -12063,6 +12329,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveVoter;
@@ -12073,6 +12340,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SubmitCandidacy {
@@ -12086,6 +12354,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RenounceCandidacy {
@@ -12098,6 +12367,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveMember {
@@ -12112,6 +12382,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CleanDefunctVoters {
@@ -12322,6 +12593,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new term with new_members. This indicates that enough candidates existed to run"]
@@ -12344,6 +12616,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "No (or not enough) candidates existed for this round. This is different from"]
@@ -12360,6 +12633,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Internal error happened while trying to perform election."]
@@ -12375,6 +12649,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A member has been removed. This should always be followed by either `NewTerm` or"]
@@ -12393,6 +12668,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Someone has renounced their candidacy."]
@@ -12410,6 +12686,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate was slashed by amount due to failing to obtain a seat as member or"]
@@ -12431,6 +12708,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A seat holder was slashed by amount by being forcefully removed from the set."]
@@ -12774,6 +13052,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddMember {
@@ -12786,6 +13065,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveMember {
@@ -12798,6 +13078,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SwapMember {
@@ -12811,6 +13092,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ResetMembers {
@@ -12823,6 +13105,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ChangeKey {
@@ -12835,6 +13118,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetPrime {
@@ -12847,6 +13131,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClearPrime;
@@ -12997,6 +13282,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given member was added; see the transaction for who."]
@@ -13012,6 +13298,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given member was removed; see the transaction for who."]
@@ -13027,6 +13314,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Two members were swapped; see the transaction for who."]
@@ -13042,6 +13330,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The membership was reset; see the transaction for who the new set is."]
@@ -13057,6 +13346,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "One of the members' keys changed."]
@@ -13072,6 +13362,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Phantom member, never used."]
@@ -13148,6 +13439,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProposeSpend {
@@ -13162,6 +13454,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RejectProposal {
@@ -13175,6 +13468,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ApproveProposal {
@@ -13188,6 +13482,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Spend {
@@ -13202,6 +13497,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveApproval {
@@ -13356,6 +13652,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "New proposal."]
@@ -13374,6 +13671,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "We have ended a spend period and will now allocate funds."]
@@ -13391,6 +13689,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some funds have been allocated."]
@@ -13410,6 +13709,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proposal was rejected; funds were slashed."]
@@ -13429,6 +13729,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some of our funds have been burnt."]
@@ -13447,6 +13748,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Spending has finished; this is the amount that rolls over until next spend."]
@@ -13465,6 +13767,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some funds have been deposited."]
@@ -13482,6 +13785,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new spend proposal has been approved."]
@@ -13724,6 +14028,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Claim {
@@ -13738,6 +14043,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct MintClaim {
@@ -13759,6 +14065,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClaimAttest {
@@ -13774,6 +14081,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Attest {
@@ -13786,6 +14094,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct MoveClaim {
@@ -13997,6 +14306,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Someone claimed some DOTs."]
@@ -14275,6 +14585,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Vest;
@@ -14285,6 +14596,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct VestOther {
@@ -14297,6 +14609,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct VestedTransfer {
@@ -14313,6 +14626,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceVestedTransfer {
@@ -14330,6 +14644,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct MergeSchedules {
@@ -14526,6 +14841,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The amount vested has been updated. This could indicate a change in funds available."]
@@ -14545,6 +14861,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An \\[account\\] has become fully vested."]
@@ -14690,6 +15007,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Batch {
@@ -14702,6 +15020,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AsDerivative {
@@ -14715,6 +15034,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BatchAll {
@@ -14727,6 +15047,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct DispatchAs {
@@ -14740,6 +15061,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceBatch {
@@ -14918,6 +15240,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Batch of dispatches did not complete fully. Index of first failing dispatch given, as"]
@@ -14937,6 +15260,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Batch of dispatches completed fully with no error."]
@@ -14952,6 +15276,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Batch of dispatches completed but has errors."]
@@ -14967,6 +15292,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A single item within a Batch of dispatches has completed with no error."]
@@ -14982,6 +15308,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A single item within a Batch of dispatches has completed with error."]
@@ -14999,6 +15326,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A call was dispatched."]
@@ -15047,6 +15375,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddRegistrar {
@@ -15059,6 +15388,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetIdentity {
@@ -15071,6 +15401,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetSubs {
@@ -15086,6 +15417,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClearIdentity;
@@ -15096,6 +15428,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RequestJudgement {
@@ -15112,6 +15445,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelRequest {
@@ -15124,6 +15458,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetFee {
@@ -15139,6 +15474,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetAccountId {
@@ -15153,6 +15489,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetFields {
@@ -15169,6 +15506,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProvideJudgement {
@@ -15186,6 +15524,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct KillIdentity {
@@ -15198,6 +15537,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddSub {
@@ -15211,6 +15551,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RenameSub {
@@ -15224,6 +15565,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveSub {
@@ -15236,6 +15578,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct QuitSub;
@@ -15719,6 +16062,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A name was set or reset (which will remove all judgements)."]
@@ -15736,6 +16080,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A name was cleared, and the given balance returned."]
@@ -15754,6 +16099,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A name was removed and the given balance slashed."]
@@ -15772,6 +16118,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A judgement was asked from a registrar."]
@@ -15790,6 +16137,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A judgement request was retracted."]
@@ -15808,6 +16156,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A judgement was given by a registrar."]
@@ -15827,6 +16176,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A registrar was added."]
@@ -15844,6 +16194,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A sub-identity was added to an identity and the deposit paid."]
@@ -15863,6 +16214,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A sub-identity was removed from an identity and the deposit freed."]
@@ -15882,6 +16234,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A sub-identity was cleared, and the given deposit repatriated from the"]
@@ -16215,6 +16568,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Proxy {
@@ -16230,6 +16584,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddProxy {
@@ -16244,6 +16599,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveProxy {
@@ -16258,6 +16614,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveProxies;
@@ -16268,6 +16625,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CreatePure {
@@ -16282,6 +16640,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct KillPure {
@@ -16300,6 +16659,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Announce {
@@ -16313,6 +16673,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveAnnouncement {
@@ -16326,6 +16687,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RejectAnnouncement {
@@ -16339,6 +16701,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProxyAnnounced {
@@ -16682,6 +17045,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proxy was executed correctly, with the given."]
@@ -16699,6 +17063,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A pure account has been created by new proxy with given"]
@@ -16720,6 +17085,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An announcement was placed to make a call in the future."]
@@ -16739,6 +17105,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proxy was added."]
@@ -16759,6 +17126,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A proxy was removed."]
@@ -17026,6 +17394,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AsMultiThreshold1 {
@@ -17039,6 +17408,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AsMulti {
@@ -17057,6 +17427,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ApproveAsMulti {
@@ -17075,6 +17446,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelAsMulti {
@@ -17318,6 +17690,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new multisig operation has begun."]
@@ -17337,6 +17710,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A multisig operation has been approved by someone."]
@@ -17357,6 +17731,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A multisig operation has been executed."]
@@ -17378,6 +17753,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A multisig operation has been cancelled."]
@@ -17523,6 +17899,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProposeBounty {
@@ -17537,6 +17914,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ApproveBounty {
@@ -17550,6 +17928,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProposeCurator {
@@ -17566,6 +17945,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnassignCurator {
@@ -17579,6 +17959,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AcceptCurator {
@@ -17592,6 +17973,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AwardBounty {
@@ -17606,6 +17988,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClaimBounty {
@@ -17619,6 +18002,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CloseBounty {
@@ -17632,6 +18016,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ExtendBountyExpiry {
@@ -17900,6 +18285,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "New bounty proposal."]
@@ -17917,6 +18303,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty proposal was rejected; funds were slashed."]
@@ -17936,6 +18323,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty proposal is funded and became active."]
@@ -17953,6 +18341,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty is awarded to a beneficiary."]
@@ -17971,6 +18360,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty is claimed by beneficiary."]
@@ -17991,6 +18381,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty is cancelled."]
@@ -18009,6 +18400,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A bounty expiry is extended."]
@@ -18331,6 +18723,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddChildBounty {
@@ -18347,6 +18740,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProposeCurator {
@@ -18365,6 +18759,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AcceptCurator {
@@ -18380,6 +18775,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnassignCurator {
@@ -18395,6 +18791,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AwardChildBounty {
@@ -18411,6 +18808,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClaimChildBounty {
@@ -18426,6 +18824,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CloseChildBounty {
@@ -18736,6 +19135,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A child-bounty is added."]
@@ -18754,6 +19154,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A child-bounty is awarded to a beneficiary."]
@@ -18773,6 +19174,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A child-bounty is claimed by beneficiary."]
@@ -18793,6 +19195,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A child-bounty is cancelled."]
@@ -19081,6 +19484,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReportAwesome {
@@ -19094,6 +19498,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RetractTip {
@@ -19106,6 +19511,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct TipNew {
@@ -19121,6 +19527,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Tip {
@@ -19135,6 +19542,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CloseTip {
@@ -19147,6 +19555,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SlashTip {
@@ -19379,6 +19788,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new tip suggestion has been opened."]
@@ -19396,6 +19806,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A tip suggestion has reached threshold and is closing."]
@@ -19413,6 +19824,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A tip suggestion has been closed."]
@@ -19432,6 +19844,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A tip suggestion has been retracted."]
@@ -19449,6 +19862,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A tip suggestion has been slashed."]
@@ -19670,6 +20084,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SubmitUnsigned {
@@ -19688,6 +20103,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMinimumUntrustedScore {
@@ -19701,6 +20117,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetEmergencyElectionResult {
@@ -19716,6 +20133,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Submit {
@@ -19732,6 +20150,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct GovernanceFallback {
@@ -19888,6 +20307,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A solution was stored with the given compute."]
@@ -19911,6 +20331,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The election has been finalized, with the given computation and score."]
@@ -19929,6 +20350,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An election failed."]
@@ -19946,6 +20368,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has been rewarded for their signed submission being finalized."]
@@ -19964,6 +20387,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has been slashed for submitting an invalid signed submission."]
@@ -19983,6 +20407,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The signed phase of the given round has started."]
@@ -20001,6 +20426,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The unsigned phase of the given round has started."]
@@ -20627,6 +21053,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Rebag {
@@ -20639,6 +21066,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PutInFrontOf {
@@ -20709,6 +21137,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Moved an account from one bag to another."]
@@ -20728,6 +21157,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Updated the score of some account to the given amount."]
@@ -20944,6 +21374,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Join {
@@ -20958,6 +21389,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BondExtra {
@@ -20971,6 +21403,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClaimPayout;
@@ -20981,6 +21414,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Unbond {
@@ -20995,6 +21429,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PoolWithdrawUnbonded {
@@ -21008,6 +21443,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct WithdrawUnbonded {
@@ -21021,6 +21457,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Create {
@@ -21037,6 +21474,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CreateWithPoolId {
@@ -21054,6 +21492,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Nominate {
@@ -21067,6 +21506,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetState {
@@ -21080,6 +21520,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMetadata {
@@ -21093,6 +21534,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetConfigs {
@@ -21114,6 +21556,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UpdateRoles {
@@ -21133,6 +21576,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Chill {
@@ -21581,6 +22025,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A pool has been created."]
@@ -21599,6 +22044,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A member has became bonded in a pool."]
@@ -21619,6 +22065,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A payout has been made to a member."]
@@ -21638,6 +22085,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A member has unbonded from their pool."]
@@ -21669,6 +22117,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A member has withdrawn from their pool."]
@@ -21695,6 +22144,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A pool has been destroyed."]
@@ -21712,6 +22162,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The state of a pool has changed"]
@@ -21730,6 +22181,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A member has been removed from a pool."]
@@ -21750,6 +22202,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The roles of a pool have been updated to the given new roles. Note that the depositor"]
@@ -21770,6 +22223,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The active balance of pool `pool_id` has been slashed to `balance`."]
@@ -21788,6 +22242,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The unbond pool at `era` of pool `pool_id` has been slashed to `balance`."]
@@ -22424,6 +22879,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RegisterFastUnstake;
@@ -22434,6 +22890,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Deregister;
@@ -22445,6 +22902,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Control {
@@ -22536,6 +22994,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A staker was unstaked."]
@@ -22554,6 +23013,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A staker was slashed for requesting fast-unstake whilst being exposed."]
@@ -22572,6 +23032,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some internal error happened while migrating stash. They are removed as head as a"]
@@ -22590,6 +23051,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An internal error happened. Operations will be paused now."]
@@ -22605,6 +23067,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A batch was partially checked for the given eras, but the process did not finish."]
@@ -22622,6 +23085,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A batch was terminated."]
@@ -22778,6 +23242,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetValidationUpgradeCooldown {
@@ -22791,6 +23256,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetValidationUpgradeDelay {
@@ -22804,6 +23270,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetCodeRetentionPeriod {
@@ -22817,6 +23284,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxCodeSize {
@@ -22830,6 +23298,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxPovSize {
@@ -22843,6 +23312,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxHeadDataSize {
@@ -22856,6 +23326,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetParathreadCores {
@@ -22869,6 +23340,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetParathreadRetries {
@@ -22882,6 +23354,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetGroupRotationFrequency {
@@ -22895,6 +23368,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetChainAvailabilityPeriod {
@@ -22908,6 +23382,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetThreadAvailabilityPeriod {
@@ -22921,6 +23396,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetSchedulingLookahead {
@@ -22933,6 +23409,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxValidatorsPerCore {
@@ -22945,6 +23422,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxValidators {
@@ -22958,6 +23436,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetDisputePeriod {
@@ -22971,6 +23450,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetDisputePostConclusionAcceptancePeriod {
@@ -22984,6 +23464,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetDisputeMaxSpamSlots {
@@ -22997,6 +23478,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetDisputeConclusionByTimeOutPeriod {
@@ -23010,6 +23492,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetNoShowSlots {
@@ -23023,6 +23506,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetNDelayTranches {
@@ -23036,6 +23520,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetZerothDelayTrancheWidth {
@@ -23049,6 +23534,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetNeededApprovals {
@@ -23062,6 +23548,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetRelayVrfModuloSamples {
@@ -23075,6 +23562,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxUpwardQueueCount {
@@ -23088,6 +23576,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxUpwardQueueSize {
@@ -23101,6 +23590,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxDownwardMessageSize {
@@ -23113,6 +23603,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetUmpServiceTotalWeight {
@@ -23126,6 +23617,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxUpwardMessageSize {
@@ -23139,6 +23631,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMaxUpwardMessageNumPerCandidate {
@@ -23152,6 +23645,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpOpenRequestTtl {
@@ -23165,6 +23659,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpSenderDeposit {
@@ -23178,6 +23673,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpRecipientDeposit {
@@ -23191,6 +23687,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpChannelMaxCapacity {
@@ -23204,6 +23701,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpChannelMaxTotalSize {
@@ -23217,6 +23715,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpMaxParachainInboundChannels {
@@ -23230,6 +23729,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpMaxParathreadInboundChannels {
@@ -23243,6 +23743,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpChannelMaxMessageSize {
@@ -23256,6 +23757,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpMaxParachainOutboundChannels {
@@ -23269,6 +23771,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpMaxParathreadOutboundChannels {
@@ -23282,6 +23785,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetHrmpMaxMessageNumPerCandidate {
@@ -23294,6 +23798,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetUmpMaxIndividualWeight {
@@ -23306,6 +23811,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetPvfCheckingEnabled {
@@ -23319,6 +23825,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetPvfVotingTtl {
@@ -23332,6 +23839,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetMinimumValidationUpgradeDelay {
@@ -23344,6 +23852,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetBypassConsistencyCheck {
@@ -24277,6 +24786,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate was backed. `[candidate, head_data]`"]
@@ -24297,6 +24807,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate was included. `[candidate, head_data]`"]
@@ -24317,6 +24828,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate timed out. `[candidate, head_data]`"]
@@ -24457,6 +24969,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Enter {
@@ -24739,6 +25252,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceSetCurrentCode {
@@ -24752,6 +25266,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceSetCurrentHead {
@@ -24765,6 +25280,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceScheduleCodeUpgrade {
@@ -24779,6 +25295,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceNoteNewHead {
@@ -24792,6 +25309,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceQueueAction {
@@ -24804,6 +25322,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddTrustedValidationCode {
@@ -24816,6 +25335,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PokeUnusedValidationCode {
@@ -24829,6 +25349,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct IncludePvfCheckStatement {
@@ -25011,6 +25532,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current code has been updated for a Para. `para_id`"]
@@ -25026,6 +25548,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current head has been updated for a Para. `para_id`"]
@@ -25041,6 +25564,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A code upgrade has been scheduled for a Para. `para_id`"]
@@ -25056,6 +25580,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new head has been noted for a Para. `para_id`"]
@@ -25071,6 +25596,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A para has been queued to execute pending actions. `para_id`"]
@@ -25089,6 +25615,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given para either initiated or subscribed to a PVF check for the given validation"]
@@ -25108,6 +25635,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given validation code was accepted by the PVF pre-checking vote."]
@@ -25127,6 +25655,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The given validation code was rejected by the PVF pre-checking vote."]
@@ -26049,6 +26578,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceApprove {
@@ -26276,6 +26806,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ServiceOverweight {
@@ -26329,6 +26860,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Upward message is invalid XCM."]
@@ -26345,6 +26877,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Upward message is unsupported version of XCM."]
@@ -26361,6 +26894,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Upward message executed with the given outcome."]
@@ -26380,6 +26914,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The weight limit for handling upward messages was reached."]
@@ -26400,6 +26935,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some upward messages have been received and will be processed."]
@@ -26420,6 +26956,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The weight budget was exceeded for an individual upward message."]
@@ -26445,6 +26982,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Upward message from the overweight queue was executed with the given actual weight"]
@@ -26731,6 +27269,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct HrmpInitOpenChannel {
@@ -26745,6 +27284,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct HrmpAcceptOpenChannel {
@@ -26757,6 +27297,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct HrmpCloseChannel {
@@ -26769,6 +27310,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceCleanHrmp {
@@ -26784,6 +27326,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceProcessHrmpOpen {
@@ -26797,6 +27340,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceProcessHrmpClose {
@@ -26809,6 +27353,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct HrmpCancelOpenRequest {
@@ -26822,6 +27367,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceOpenHrmpChannel {
@@ -27044,6 +27590,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Open HRMP channel requested."]
@@ -27065,6 +27612,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An HRMP channel request sent by the receiver was canceled by either party."]
@@ -27084,6 +27632,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Open HRMP channel accepted. `[sender, recipient]`"]
@@ -27102,6 +27651,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "HRMP channel closed. `[by_parachain, channel_id]`"]
@@ -27120,6 +27670,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An HRMP channel was opened via Root origin."]
@@ -27902,6 +28453,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceUnfreeze;
@@ -27933,6 +28485,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A dispute has been initiated. \\[candidate hash, dispute location\\]"]
@@ -27951,6 +28504,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A dispute has concluded for or against a candidate."]
@@ -27970,6 +28524,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A dispute has timed out due to insufficient participation."]
@@ -27987,6 +28542,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A dispute has concluded with supermajority against a candidate."]
@@ -28227,6 +28783,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Register {
@@ -28241,6 +28798,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceRegister {
@@ -28257,6 +28815,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Deregister {
@@ -28269,6 +28828,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Swap {
@@ -28282,6 +28842,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RemoveLock {
@@ -28294,6 +28855,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Reserve;
@@ -28304,6 +28866,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddLock {
@@ -28316,6 +28879,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ScheduleCodeUpgrade {
@@ -28329,6 +28893,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SetCurrentHead {
@@ -28565,6 +29130,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Registered {
@@ -28582,6 +29148,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Deregistered {
@@ -28598,6 +29165,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Reserved {
@@ -28789,6 +29357,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceLease {
@@ -28805,6 +29374,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ClearAllLeases {
@@ -28817,6 +29387,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct TriggerOnboard {
@@ -28907,6 +29478,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new `[lease_period]` is beginning."]
@@ -28924,6 +29496,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A para has won the right to a continuous set of lease periods as a parachain."]
@@ -29081,6 +29654,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct NewAuction {
@@ -29096,6 +29670,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Bid {
@@ -29117,6 +29692,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CancelAuction;
@@ -29217,6 +29793,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An auction started. Provides its index and the block number where it will begin to"]
@@ -29238,6 +29815,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An auction ended. All funds become unreserved."]
@@ -29255,6 +29833,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Funds were reserved for a winning bid. First balance is the extra amount reserved."]
@@ -29275,6 +29854,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Funds were unreserved since bidder is no longer active. `[bidder, amount]`"]
@@ -29293,6 +29873,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Someone attempted to lease the same slot twice for a parachain. The amount is held in reserve"]
@@ -29313,6 +29894,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new bid has been accepted as the current winner."]
@@ -29334,6 +29916,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The winning offset was chosen for an auction. This will map into the `Winning` storage map."]
@@ -29584,6 +30167,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Create {
@@ -29606,6 +30190,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Contribute {
@@ -29622,6 +30207,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Withdraw {
@@ -29636,6 +30222,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Refund {
@@ -29649,6 +30236,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Dissolve {
@@ -29662,6 +30250,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Edit {
@@ -29684,6 +30273,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AddMemo {
@@ -29697,6 +30287,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Poke {
@@ -29709,6 +30300,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ContributeAll {
@@ -29944,6 +30536,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Create a new crowdloaning campaign."]
@@ -29961,6 +30554,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Contributed to a crowd sale."]
@@ -29980,6 +30574,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Withdrew full balance of a contributor."]
@@ -29999,6 +30594,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The loans in a fund have been partially dissolved, i.e. there are some left"]
@@ -30017,6 +30613,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "All loans in a fund have been refunded."]
@@ -30034,6 +30631,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Fund is dissolved."]
@@ -30051,6 +30649,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The result of trying to submit a new bid to the Slots pallet."]
@@ -30069,6 +30668,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The configuration to a crowdloan has been edited."]
@@ -30086,6 +30686,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A memo has been updated."]
@@ -30105,6 +30706,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A parachain has been moved to `NewRaise`"]
@@ -30309,6 +30911,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Send {
@@ -30322,6 +30925,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct TeleportAssets {
@@ -30337,6 +30941,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReserveTransferAssets {
@@ -30352,6 +30957,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Execute {
@@ -30365,6 +30971,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceXcmVersion {
@@ -30379,6 +30986,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceDefaultXcmVersion {
@@ -30391,6 +30999,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceSubscribeVersionNotify {
@@ -30403,6 +31012,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ForceUnsubscribeVersionNotify {
@@ -30415,6 +31025,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct LimitedReserveTransferAssets {
@@ -30431,6 +31042,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct LimitedTeleportAssets {
@@ -30758,6 +31370,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Execution of an XCM message was attempted."]
@@ -30775,6 +31388,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A XCM message was sent."]
@@ -30796,6 +31410,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response received which does not match a registered query. This may be because a"]
@@ -30818,6 +31433,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response has been received and is ready for taking with `take_response`. There is"]
@@ -30839,6 +31455,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response has been received and query is removed. The registered notification has"]
@@ -30861,6 +31478,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response has been received and query is removed. The registered notification could"]
@@ -30886,6 +31504,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response has been received and query is removed. There was a general error with"]
@@ -30908,6 +31527,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Query response has been received and query is removed. The dispatch was unable to be"]
@@ -30931,6 +31551,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Expected query response has been received but the origin location of the response does"]
@@ -30954,6 +31575,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Expected query response has been received but the expected origin location placed in"]
@@ -30981,6 +31603,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Received query response has been read and removed."]
@@ -30998,6 +31621,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some assets have been placed in an asset trap."]
@@ -31019,6 +31643,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An XCM version change notification message has been attempted to be sent."]
@@ -31039,6 +31664,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The supported version of a location has been changed. This might be through an"]
@@ -31060,6 +31686,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A given location which had a version change subscription was dropped owing to an error"]
@@ -31082,6 +31709,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A given location which had a version change subscription was dropped owing to an error"]
@@ -31103,6 +31731,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Some assets have been claimed from an asset trap"]
@@ -31480,6 +32109,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Equivocation<_0, _1, _2> {
@@ -31495,6 +32125,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Precommit<_0, _1> {
@@ -31508,6 +32139,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Prevote<_0, _1> {
@@ -31526,6 +32158,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum DispatchClass {
@@ -31543,6 +32176,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DispatchInfo {
@@ -31557,6 +32191,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Pays {
@@ -31572,6 +32207,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PerDispatchClass<_0> {
@@ -31586,6 +32222,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum RawOrigin<_0> {
@@ -31608,6 +32245,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct WrapperOpaque<_0>(
@@ -31624,6 +32262,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Bounded<_0> {
@@ -31656,6 +32295,7 @@ pub mod api {
                             :: subxt :: ext :: scale_encode :: EncodeAsType,
                             Debug,
                         )]
+                        # [codec (crate = :: subxt :: ext :: codec)]
                         #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                         #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                         pub enum BalanceStatus {
@@ -31674,6 +32314,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PalletId(pub [::core::primitive::u8; 8usize]);
@@ -31691,6 +32332,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckGenesis;
@@ -31704,6 +32346,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckMortality(pub runtime_types::sp_runtime::generic::era::Era);
@@ -31717,6 +32360,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckNonZeroSender;
@@ -31730,6 +32374,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckNonce(#[codec(compact)] pub ::core::primitive::u32);
@@ -31743,6 +32388,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckSpecVersion;
@@ -31756,6 +32402,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckTxVersion;
@@ -31769,6 +32416,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct CheckWeight;
@@ -31783,6 +32431,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BlockLength {
@@ -31797,6 +32446,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BlockWeights {
@@ -31813,6 +32463,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct WeightsPerClass {
@@ -31834,6 +32485,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -31919,6 +32571,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Error for the System pallet"]
@@ -31953,6 +32606,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Event for the System pallet."]
@@ -31996,6 +32650,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AccountInfo<_0, _1> {
@@ -32012,6 +32667,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct EventRecord<_0, _1> {
@@ -32026,6 +32682,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct LastRuntimeUpgradeInfo {
@@ -32040,6 +32697,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Phase {
@@ -32062,6 +32720,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -32084,6 +32743,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -32118,6 +32778,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum UncleEntryItem<_0, _1, _2> {
@@ -32138,6 +32799,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -32196,6 +32858,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -32226,6 +32889,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Bag {
@@ -32239,6 +32903,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum ListError {
@@ -32258,6 +32923,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Node {
@@ -32277,6 +32943,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -32315,6 +32982,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -32330,6 +32998,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -32361,6 +33030,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -32475,6 +33145,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -32511,6 +33182,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -32591,6 +33263,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct AccountData<_0> {
@@ -32606,6 +33279,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BalanceLock<_0> {
@@ -32620,6 +33294,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Reasons {
@@ -32637,6 +33312,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Releases {
@@ -32652,6 +33328,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReserveData<_0, _1> {
@@ -32670,6 +33347,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -32826,6 +33504,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -32872,6 +33551,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -32916,6 +33596,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Bounty<_0, _1, _2> {
@@ -32933,6 +33614,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum BountyStatus<_0, _1> {
@@ -32965,6 +33647,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -33173,6 +33856,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -33194,6 +33878,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -33234,6 +33919,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ChildBounty<_0, _1, _2> {
@@ -33250,6 +33936,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum ChildBountyStatus<_0, _1> {
@@ -33278,6 +33965,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -33501,6 +34189,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -33543,6 +34232,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -33602,6 +34292,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum RawOrigin<_0> {
@@ -33619,6 +34310,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Votes<_0, _1> {
@@ -33640,6 +34332,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Conviction {
@@ -33668,6 +34361,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -33963,6 +34657,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -34045,6 +34740,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -34129,6 +34825,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Delegations<_0> {
@@ -34142,6 +34839,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum ReferendumInfo<_0, _1, _2> {
@@ -34160,6 +34858,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ReferendumStatus<_0, _1, _2> {
@@ -34176,6 +34875,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Tally<_0> {
@@ -34193,6 +34893,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum AccountVote<_0> {
@@ -34211,6 +34912,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PriorLock<_0, _1>(pub _0, pub _1);
@@ -34222,6 +34924,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Vote(pub ::core::primitive::u8);
@@ -34232,6 +34935,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Voting<_0, _1, _2> {
@@ -34263,6 +34967,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum VoteThreshold {
@@ -34286,6 +34991,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -34298,6 +35004,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Error of the pallet that can be returned in response to dispatches."]
@@ -34352,6 +35059,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -34409,6 +35117,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SignedSubmission<_0, _1, _2> {
@@ -34426,6 +35135,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum ElectionCompute {
@@ -34447,6 +35157,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Phase<_0> {
@@ -34466,6 +35177,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RawSolution<_0> {
@@ -34480,6 +35192,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ReadySolution {
@@ -34497,6 +35210,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RoundSnapshot {
@@ -34516,6 +35230,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SolutionOrSnapshotSize {
@@ -34536,6 +35251,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -34665,6 +35381,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -34728,6 +35445,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -34782,6 +35500,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Renouncing {
@@ -34799,6 +35518,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SeatHolder<_0, _1> {
@@ -34813,6 +35533,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Voter<_0, _1> {
@@ -34832,6 +35553,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -34880,6 +35602,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -34912,6 +35635,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "The events of this pallet."]
@@ -34958,6 +35682,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct UnstakeRequest {
@@ -34982,6 +35707,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -35044,6 +35770,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -35079,6 +35806,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -35106,6 +35834,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct StoredPendingChange<_0> {
@@ -35125,6 +35854,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum StoredState<_0> {
@@ -35149,6 +35879,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Identity pallet declaration."]
@@ -35456,6 +36187,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -35522,6 +36254,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -35598,6 +36331,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BitFlags<_0>(
@@ -35611,6 +36345,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Data {
@@ -35698,6 +36433,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum IdentityField {
@@ -35725,6 +36461,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct IdentityInfo {
@@ -35748,6 +36485,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Judgement<_0> {
@@ -35773,6 +36511,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RegistrarInfo<_0, _1> {
@@ -35789,6 +36528,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Registration<_0> {
@@ -35812,6 +36552,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -35839,6 +36580,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -35857,6 +36599,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -35893,6 +36636,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -35903,6 +36647,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Signature(pub runtime_types::sp_core::sr25519::Signature);
@@ -35915,6 +36660,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BoundedOpaqueNetworkState {
@@ -35935,6 +36681,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Heartbeat<_0> {
@@ -35956,6 +36703,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -36080,6 +36828,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -36107,6 +36856,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -36140,6 +36890,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -36205,6 +36956,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -36226,6 +36978,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -36262,6 +37015,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -36429,6 +37183,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -36483,6 +37238,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -36532,6 +37288,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Multisig<_0, _1, _2> {
@@ -36547,6 +37304,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Timepoint<_0> {
@@ -36565,6 +37323,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -36819,6 +37578,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum DefensiveError {
@@ -36840,6 +37600,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -36929,6 +37690,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Events of this pallet."]
@@ -37033,6 +37795,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum BondExtra<_0> {
@@ -37048,6 +37811,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BondedPoolInner {
@@ -37064,6 +37828,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum ConfigOp<_0> {
@@ -37081,6 +37846,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PoolMember {
@@ -37101,6 +37867,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct PoolRoles<_0> {
@@ -37116,6 +37883,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum PoolState {
@@ -37133,6 +37901,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RewardPool {
@@ -37148,6 +37917,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SubPools {
@@ -37164,6 +37934,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnbondPool {
@@ -37182,6 +37953,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Events type."]
@@ -37208,6 +37980,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -37247,6 +38020,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -37277,6 +38051,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -37299,6 +38074,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum RequestStatus<_0, _1> {
@@ -37326,6 +38102,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -37511,6 +38288,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -37547,6 +38325,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -37598,6 +38377,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Announcement<_0, _1, _2> {
@@ -37612,6 +38392,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ProxyDefinition<_0, _1, _2> {
@@ -37631,6 +38412,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -37708,6 +38490,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -37735,6 +38518,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Events type."]
@@ -37786,6 +38570,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Scheduled<_0, _1, _2, _3, _4> {
@@ -37809,6 +38594,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -37858,6 +38644,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Error for the session pallet."]
@@ -37885,6 +38672,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -37911,6 +38699,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -38358,6 +39147,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum ConfigOp<_0> {
@@ -38375,6 +39165,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -38466,6 +39257,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -38557,6 +39349,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SlashingSpans {
@@ -38572,6 +39365,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SpanRecord<_0> {
@@ -38586,6 +39380,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ActiveEraInfo {
@@ -38599,6 +39394,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct EraRewardPoints<_0> {
@@ -38612,6 +39408,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Exposure<_0, _1> {
@@ -38629,6 +39426,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Forcing {
@@ -38648,6 +39446,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct IndividualExposure<_0, _1> {
@@ -38662,6 +39461,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Nominations {
@@ -38678,6 +39478,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Releases {
@@ -38713,6 +39514,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum RewardDestination<_0> {
@@ -38734,6 +39536,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct StakingLedger {
@@ -38756,6 +39559,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnappliedSlash<_0, _1> {
@@ -38772,6 +39576,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct UnlockChunk<_0> {
@@ -38787,6 +39592,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ValidatorPrefs {
@@ -38806,6 +39612,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -38845,6 +39652,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -38993,6 +39801,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -39023,6 +39832,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -39059,6 +39869,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct OpenTip<_0, _1, _2, _3> {
@@ -39082,6 +39893,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -39103,6 +39915,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ChargeTransactionPayment(#[codec(compact)] pub ::core::primitive::u128);
@@ -39113,6 +39926,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Releases {
@@ -39133,6 +39947,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -39223,6 +40038,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Error for the treasury pallet."]
@@ -39251,6 +40067,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -39307,6 +40124,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Proposal<_0, _1> {
@@ -39327,6 +40145,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -39431,6 +40250,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -39446,6 +40266,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -39491,6 +40312,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -39615,6 +40437,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Error for the vesting pallet."]
@@ -39643,6 +40466,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -39670,6 +40494,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct VestingInfo<_0, _1> {
@@ -39685,6 +40510,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Releases {
@@ -39705,6 +40531,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -39873,6 +40700,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -39927,6 +40755,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -40099,6 +40928,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Origin {
@@ -40114,6 +40944,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum QueryStatus<_0> {
@@ -40142,6 +40973,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum VersionMigrationStage {
@@ -40167,6 +40999,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct CandidateHash(pub ::subxt::utils::H256);
@@ -40177,6 +41010,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct InboundDownwardMessage<_0> {
@@ -40190,6 +41024,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct InboundHrmpMessage<_0> {
@@ -40203,6 +41038,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct OutboundHrmpMessage<_0> {
@@ -40221,6 +41057,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HeadData(pub ::std::vec::Vec<::core::primitive::u8>);
@@ -40231,6 +41068,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HrmpChannelId {
@@ -40245,6 +41083,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Id(pub ::core::primitive::u32);
@@ -40255,6 +41094,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ValidationCode(pub ::std::vec::Vec<::core::primitive::u8>);
@@ -40265,6 +41105,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ValidationCodeHash(pub ::subxt::utils::H256);
@@ -40283,6 +41124,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -40296,6 +41138,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -40306,6 +41149,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Signature(pub runtime_types::sp_core::sr25519::Signature);
@@ -40319,6 +41163,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct UncheckedSigned<_0, _1> {
@@ -40339,6 +41184,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -40349,6 +41195,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Signature(pub runtime_types::sp_core::sr25519::Signature);
@@ -40360,6 +41207,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct AvailabilityBitfield(
@@ -40375,6 +41223,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BackedCandidate<_0> {
@@ -40395,6 +41244,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CandidateCommitments<_0> {
@@ -40418,6 +41268,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CandidateDescriptor<_0> {
@@ -40439,6 +41290,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CandidateReceipt<_0> {
@@ -40452,6 +41304,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CommittedCandidateReceipt<_0> {
@@ -40468,6 +41321,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CoreIndex(pub ::core::primitive::u32);
@@ -40478,6 +41332,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum CoreOccupied {
@@ -40493,6 +41348,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DisputeState<_0> {
@@ -40514,6 +41370,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum DisputeStatement {
@@ -40529,6 +41386,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DisputeStatementSet {
@@ -40548,6 +41406,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct GroupIndex(pub ::core::primitive::u32);
@@ -40558,6 +41417,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct IndexedVec<_0, _1>(
@@ -40571,6 +41431,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct InherentData<_0> {
@@ -40597,6 +41458,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum InvalidDisputeStatementKind {
@@ -40610,6 +41472,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParathreadClaim(
@@ -40623,6 +41486,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParathreadEntry {
@@ -40636,6 +41500,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PvfCheckStatement {
@@ -40651,6 +41516,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ScrapedOnChainVotes<_0> {
@@ -40673,6 +41539,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SessionInfo {
@@ -40707,6 +41574,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum UpgradeGoAhead {
@@ -40722,6 +41590,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum UpgradeRestriction {
@@ -40735,6 +41604,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum ValidDisputeStatementKind {
@@ -40755,6 +41625,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ValidatorIndex(pub ::core::primitive::u32);
@@ -40765,6 +41636,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum ValidityAttestation {
@@ -40784,6 +41656,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct NposCompactSolution16 {
@@ -40949,6 +41822,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum OriginCaller {
@@ -40978,6 +41852,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum ProxyType {
@@ -41003,6 +41878,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Runtime;
@@ -41013,6 +41889,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum RuntimeCall {
@@ -41122,6 +41999,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum RuntimeEvent {
@@ -41215,6 +42093,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct SessionKeys {
@@ -41239,6 +42118,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -41297,6 +42177,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -41330,6 +42211,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -41398,6 +42280,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -41528,6 +42411,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -41559,6 +42443,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -41580,6 +42465,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct EcdsaSignature(pub [::core::primitive::u8; 65usize]);
@@ -41590,6 +42476,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct EthereumAddress(pub [::core::primitive::u8; 20usize]);
@@ -41600,6 +42487,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PrevalidateAttests;
@@ -41610,6 +42498,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum StatementKind {
@@ -41630,6 +42519,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -41753,6 +42643,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -41834,6 +42725,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -41908,6 +42800,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct FundInfo<_0, _1, _2, _3> {
@@ -41932,6 +42825,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum LastContribution<_0> {
@@ -41954,6 +42848,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42073,6 +42968,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -42128,6 +43024,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -42155,6 +43052,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParaInfo<_0, _1> {
@@ -42174,6 +43072,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42216,6 +43115,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -42234,6 +43134,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -42272,6 +43173,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42435,6 +43337,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -42451,6 +43354,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HostConfiguration<_0> {
@@ -42510,6 +43414,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42524,6 +43429,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -42557,6 +43463,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -42593,6 +43500,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum DisputeLocation {
@@ -42608,6 +43516,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum DisputeResult {
@@ -42628,6 +43537,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42645,6 +43555,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42745,6 +43656,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -42814,6 +43726,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -42864,6 +43777,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HrmpChannel {
@@ -42883,6 +43797,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HrmpOpenChannelRequest {
@@ -42905,6 +43820,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -42916,6 +43832,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -43018,6 +43935,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -43060,6 +43978,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct AvailabilityBitfieldRecord<_0> {
@@ -43073,6 +43992,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CandidatePendingAvailability<_0, _1> {
@@ -43103,6 +44023,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -43121,6 +44042,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BufferedSessionChange {
@@ -43144,6 +44066,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Origin {
@@ -43163,6 +44086,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -43243,6 +44167,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -43295,6 +44220,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -43347,6 +44273,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParaGenesisArgs {
@@ -43362,6 +44289,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum ParaLifecycle {
@@ -43387,6 +44315,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParaPastCodeMeta<_0> {
@@ -43402,6 +44331,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PvfCheckActiveVoteState<_0> {
@@ -43426,6 +44356,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum PvfCheckCause<_0> {
@@ -43444,6 +44375,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ReplacementTimes<_0> {
@@ -43462,6 +44394,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -43484,6 +44417,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -43519,6 +44453,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum AssignmentKind {
@@ -43537,6 +44472,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CoreAssignment {
@@ -43552,6 +44488,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ParathreadClaimQueue {
@@ -43567,6 +44504,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct QueuedParathread {
@@ -43585,6 +44523,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -43602,6 +44541,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
@@ -43631,6 +44571,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
@@ -43649,6 +44590,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/main-docs/build/events-errors/) emitted\n\t\t\tby this pallet.\n\t\t\t"]
@@ -43722,6 +44664,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct FixedU128(pub ::core::primitive::u128);
@@ -43736,6 +44679,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PerU16(pub ::core::primitive::u16);
@@ -43747,6 +44691,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Perbill(pub ::core::primitive::u32);
@@ -43758,6 +44703,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Percent(pub ::core::primitive::u8);
@@ -43769,6 +44715,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Permill(pub ::core::primitive::u32);
@@ -43785,6 +44732,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -43801,6 +44749,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub runtime_types::sp_core::sr25519::Public);
@@ -43814,6 +44763,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum NextConfigDescriptor {
@@ -43830,6 +44780,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum PreDigest {
@@ -43849,6 +44800,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PrimaryPreDigest {
@@ -43864,6 +44816,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SecondaryPlainPreDigest {
@@ -43877,6 +44830,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SecondaryVRFPreDigest {
@@ -43893,6 +44847,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum AllowedSlots {
@@ -43910,6 +44865,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct BabeEpochConfiguration {
@@ -43926,6 +44882,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct EquivocationProof<_0, _1> {
@@ -43942,6 +44899,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Slot(pub ::core::primitive::u64);
@@ -43959,6 +44917,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct BoundedBTreeMap<_0, _1>(pub ::subxt::utils::KeyedVec<_0, _1>);
@@ -43972,6 +44931,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct BoundedVec<_0>(pub ::std::vec::Vec<_0>);
@@ -43985,6 +44945,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct WeakBoundedVec<_0>(pub ::std::vec::Vec<_0>);
@@ -43999,6 +44960,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct KeyTypeId(pub [::core::primitive::u8; 4usize]);
@@ -44012,6 +44974,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub [::core::primitive::u8; 33usize]);
@@ -44022,6 +44985,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Signature(pub [::core::primitive::u8; 65usize]);
@@ -44035,6 +44999,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub [::core::primitive::u8; 32usize]);
@@ -44045,6 +45010,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Signature(pub [::core::primitive::u8; 64usize]);
@@ -44058,6 +45024,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct OpaqueMultiaddr(pub ::std::vec::Vec<::core::primitive::u8>);
@@ -44068,6 +45035,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct OpaqueNetworkState {
@@ -44085,6 +45053,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub [::core::primitive::u8; 32usize]);
@@ -44095,6 +45064,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Signature(pub [::core::primitive::u8; 64usize]);
@@ -44106,6 +45076,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct OpaquePeerId(pub ::std::vec::Vec<::core::primitive::u8>);
@@ -44116,6 +45087,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Void {}
@@ -44131,6 +45103,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Public(pub runtime_types::sp_core::ed25519::Public);
@@ -44141,6 +45114,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Signature(pub runtime_types::sp_core::ed25519::Signature);
@@ -44152,6 +45126,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum Equivocation<_0, _1> {
@@ -44179,6 +45154,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct EquivocationProof<_0, _1> {
@@ -44195,6 +45171,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ElectionScore {
@@ -44209,6 +45186,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct Support<_0> {
@@ -44229,6 +45207,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Digest {
@@ -44242,6 +45221,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum DigestItem {
@@ -44275,6 +45255,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Era {
@@ -44801,6 +45782,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct Header<_0, _1> {
@@ -44823,6 +45805,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct UncheckedExtrinsic<_0, _1, _2, _3>(
@@ -44840,6 +45823,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BlakeTwo256;
@@ -44851,6 +45835,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum ArithmeticError {
@@ -44868,6 +45853,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum DispatchError {
@@ -44905,6 +45891,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct ModuleError {
@@ -44918,6 +45905,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum MultiSignature {
@@ -44935,6 +45923,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum MultiSigner {
@@ -44952,6 +45941,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum TokenError {
@@ -44977,6 +45967,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum TransactionalError {
@@ -44995,6 +45986,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct MembershipProof {
@@ -45014,6 +46006,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct OffenceDetails<_0, _1> {
@@ -45031,6 +46024,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RuntimeVersion {
@@ -45056,6 +46050,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Weight {
@@ -45073,6 +46068,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct OldWeight(pub ::core::primitive::u64);
@@ -45083,6 +46079,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub struct RuntimeDbWeight {
@@ -45101,6 +46098,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DoubleEncoded {
@@ -45118,6 +46116,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum BodyId {
@@ -45147,6 +46146,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum BodyPart {
@@ -45186,6 +46186,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Junction {
@@ -45234,6 +46235,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum NetworkId {
@@ -45260,6 +46262,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum MultiAsset {
@@ -45320,6 +46323,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum MultiLocation {
@@ -45394,6 +46398,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Order {
@@ -45457,6 +46462,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum OriginKind {
@@ -45476,6 +46482,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Response {
@@ -45489,6 +46496,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Xcm {
@@ -45571,6 +46579,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Junction {
@@ -45620,6 +46629,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum AssetId {
@@ -45635,6 +46645,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum AssetInstance {
@@ -45660,6 +46671,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Fungibility {
@@ -45675,6 +46687,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct MultiAsset {
@@ -45688,6 +46701,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum MultiAssetFilter {
@@ -45703,6 +46717,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct MultiAssets(
@@ -45715,6 +46730,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum WildFungibility {
@@ -45730,6 +46746,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum WildMultiAsset {
@@ -45751,6 +46768,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Junctions {
@@ -45822,6 +46840,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct MultiLocation {
@@ -45838,6 +46857,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Order {
@@ -45897,6 +46917,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Response {
@@ -45912,6 +46933,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Xcm {
@@ -46003,6 +47025,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Error {
@@ -46066,6 +47089,7 @@ pub mod api {
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
                         Debug,
                     )]
+                    # [codec (crate = :: subxt :: ext :: codec)]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub enum Outcome {
@@ -46087,6 +47111,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Instruction {
@@ -46235,6 +47260,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum Response {
@@ -46259,6 +47285,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub enum WeightLimit {
@@ -46274,6 +47301,7 @@ pub mod api {
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
                     Debug,
                 )]
+                # [codec (crate = :: subxt :: ext :: codec)]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Xcm(pub ::std::vec::Vec<runtime_types::xcm::v2::Instruction>);
@@ -46285,6 +47313,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum VersionedMultiAssets {
@@ -46300,6 +47329,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum VersionedMultiLocation {
@@ -46315,6 +47345,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum VersionedResponse {
@@ -46332,6 +47363,7 @@ pub mod api {
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
                 Debug,
             )]
+            # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             pub enum VersionedXcm {

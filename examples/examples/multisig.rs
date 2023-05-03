@@ -13,7 +13,7 @@
 use sp_keyring::AccountKeyring;
 use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

@@ -13,7 +13,7 @@
 use subxt::{OnlineClient, PolkadotConfig};
 
 // Generate the API from a static metadata path.
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

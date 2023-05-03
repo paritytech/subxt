@@ -25,7 +25,7 @@
 //! # async fn main() {
 //! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();

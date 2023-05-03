@@ -8,7 +8,7 @@ use std::io::Read;
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";
-static METADATA_FILE: &str = "../../artifacts/polkadot_metadata.scale";
+static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";
 
 pub struct PalletMetadataTestRunner {
     metadata: RuntimeMetadataV15,

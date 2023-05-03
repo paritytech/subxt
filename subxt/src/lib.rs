@@ -80,7 +80,7 @@
 //! ```no_run
 //! use subxt::{OnlineClient, PolkadotConfig};
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! # #[tokio::main]

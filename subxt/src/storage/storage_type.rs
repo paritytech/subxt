@@ -62,7 +62,7 @@ where
     /// ```no_run
     /// use subxt::{ PolkadotConfig, OnlineClient };
     ///
-    /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+    /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
     /// pub mod polkadot {}
     ///
     /// # #[tokio::main]
@@ -172,7 +172,7 @@ where
     /// ```no_run
     /// use subxt::{ PolkadotConfig, OnlineClient };
     ///
-    /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+    /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
     /// pub mod polkadot {}
     ///
     /// # #[tokio::main]
