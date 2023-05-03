@@ -61,7 +61,7 @@ scale-decode = "0.5.0"
 scale-encode = "0.1.0"
 serde = { version = "1.0.159" }
 serde_json = { version = "1.0.96" }
-syn = "2.0.15"
+syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.40"
 tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
 tracing = "0.1.34"
