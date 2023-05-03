@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::FetchMetadataError;
-use codec::{Decode};
+use codec::Decode;
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -113,7 +113,10 @@ async fn fetch_metadata(
     const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
 
     // Fetch metadata using the "new" state_call interface
-    async fn fetch_inner(client: &impl ClientT, version: MetadataVersion) -> Result<String, FetchMetadataError> {
+    async fn fetch_inner(
+        client: &impl ClientT,
+        version: MetadataVersion,
+    ) -> Result<String, FetchMetadataError> {
         // Look up supported versions:
         let supported_versions: Vec<u32> = {
             let res: String = client
@@ -128,42 +131,55 @@ async fn fetch_metadata(
 
         // Return the version the user wants if it's supported:
         let version = match version {
-            MetadataVersion::Latest => {
-                *supported_versions
-                    .iter()
-                    .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
-                    .max()
-                    .ok_or_else(|| FetchMetadataError::Other(format!("No valid metadata versions returned")))?
-            },
+            MetadataVersion::Latest => *supported_versions
+                .iter()
+                .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
+                .max()
+                .ok_or_else(|| {
+                    FetchMetadataError::Other(format!("No valid metadata versions returned"))
+                })?,
             MetadataVersion::Unstable => {
                 if supported_versions.contains(&UNSTABLE_METADATA_VERSION) {
                     UNSTABLE_METADATA_VERSION
                 } else {
-                    return Err(FetchMetadataError::Other(format!("The node does not have an unstable metadata version available")))
+                    return Err(FetchMetadataError::Other(format!(
+                        "The node does not have an unstable metadata version available"
+                    )));
                 }
-            },
+            }
             MetadataVersion::Version(version) => {
                 if supported_versions.contains(&version) {
                     version
                 } else {
-                    return Err(FetchMetadataError::Other(format!("The node does not have version {version} available")))
+                    return Err(FetchMetadataError::Other(format!(
+                        "The node does not have version {version} available"
+                    )));
                 }
             }
         };
 
         // Fetch the metadata at that version:
         let metadata_string: String = client
-            .request("state_call", rpc_params!["Metadata_metadata_at_version", &version])
+            .request(
+                "state_call",
+                rpc_params!["Metadata_metadata_at_version", &version],
+            )
             .await?;
         Ok(metadata_string)
     }
 
     // Fetch metadata using the "old" state_call interface
-    async fn fetch_inner_legacy(client: &impl ClientT, version: MetadataVersion) -> Result<String, FetchMetadataError> {
-        if !matches!(version, MetadataVersion::Latest | MetadataVersion::Version(14)) {
-            return Err(FetchMetadataError::Other(
-                format!("The node can only return version 14 metadata but you've asked for something else"))
-            )
+    async fn fetch_inner_legacy(
+        client: &impl ClientT,
+        version: MetadataVersion,
+    ) -> Result<String, FetchMetadataError> {
+        if !matches!(
+            version,
+            MetadataVersion::Latest | MetadataVersion::Version(14)
+        ) {
+            return Err(FetchMetadataError::Other(format!(
+                "The node can only return version 14 metadata but you've asked for something else"
+            )));
         }
 
         // Fetch the metadata at that version:
@@ -176,7 +192,7 @@ async fn fetch_metadata(
     // Fetch using the new interface, falling back to trying old one if there's an error.
     let metadata_string = match fetch_inner(&client, version).await {
         Ok(s) => s,
-        Err(_) => fetch_inner_legacy(&client, version).await?
+        Err(_) => fetch_inner_legacy(&client, version).await?,
     };
 
     // Decode the metadata.
