@@ -115,7 +115,7 @@ jobs:
                   args: --doc
 
     nonwasm_tests:
-        name: "Test: UI tests"
+        name: "Test nonwasm"
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
