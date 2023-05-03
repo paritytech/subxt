@@ -36,8 +36,8 @@ pub struct Opts {
     ///
     ///    Use this specific metadata version.
     ///
-    /// Defaults to 14.
-    #[clap(long = "version", default_value = "14")]
+    /// Defaults to latest.
+    #[clap(long = "version", default_value = "latest")]
     version: MetadataVersion,
 }
 
