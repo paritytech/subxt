@@ -469,7 +469,9 @@ pub(crate) struct ExtrinsicPartTypeIds {
     /// The address (source) of the extrinsic.
     address: u32,
     /// The extrinsic call type.
-    call: u32,
+    // Note: the call type can be used to skip over the extrinsic bytes to check
+    // they are in line with our metadata. This operation is currently postponed.
+    _call: u32,
     /// The signature of the extrinsic.
     signature: u32,
     /// The extra parameters of the extrinsic.
@@ -517,7 +519,7 @@ impl ExtrinsicPartTypeIds {
 
         Ok(ExtrinsicPartTypeIds {
             address: *address,
-            call: *call,
+            _call: *call,
             signature: *signature,
             extra: *extra,
         })
