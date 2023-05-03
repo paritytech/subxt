@@ -267,15 +267,6 @@ where
 
         let call_start_idx = extrinsic_bytes.len() - cursor.len();
 
-        // Ensure the provided bytes are sound.
-        scale_decode::visitor::decode_with_visitor(
-            &mut *cursor,
-            ids.call,
-            &metadata.runtime_metadata().types,
-            scale_decode::visitor::IgnoreVisitor,
-        )
-        .map_err(scale_decode::Error::from)?;
-
         // Decode the pallet index, then the call variant.
         let cursor = &mut &extrinsic_bytes[call_start_idx..];
 
