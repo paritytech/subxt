@@ -13,6 +13,7 @@ use crate::{
     Metadata,
 };
 
+use codec::Decode;
 use derivative::Derivative;
 use frame_metadata::v15::RuntimeMetadataV15;
 use scale_decode::DecodeAsFields;
@@ -219,16 +220,14 @@ where
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
-        if extrinsic_bytes.is_empty() {
-            return Err(BlockError::InsufficientData.into());
-        }
+        let first_byte: u8 = Decode::decode(&mut &extrinsic_bytes[..])?;
 
-        let version = extrinsic_bytes[0] & VERSION_MASK;
+        let version = first_byte & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
             return Err(BlockError::UnsupportedVersion(version).into());
         }
 
-        let is_signed = extrinsic_bytes[0] & SIGNATURE_MASK != 0;
+        let is_signed = first_byte & SIGNATURE_MASK != 0;
 
         // Skip over the first byte which denotes the version and signing.
         let cursor = &mut &extrinsic_bytes[1..];
@@ -280,11 +279,8 @@ where
         // Decode the pallet index, then the call variant.
         let cursor = &mut &extrinsic_bytes[call_start_idx..];
 
-        if cursor.len() < 2 {
-            return Err(BlockError::InsufficientData.into());
-        }
-        let pallet_index = cursor[0];
-        let variant_index = cursor[1];
+        let pallet_index: u8 = Decode::decode(cursor)?;
+        let variant_index: u8 = Decode::decode(cursor)?;
 
         Ok(ExtrinsicDetails {
             index,
@@ -805,12 +801,7 @@ mod tests {
             Default::default(),
             ids,
         );
-        assert_matches!(
-            result.err(),
-            Some(crate::Error::Block(
-                crate::error::BlockError::InsufficientData
-            ))
-        );
+        assert_matches!(result.err(), Some(crate::Error::Codec(_)));
     }
 
     #[test]

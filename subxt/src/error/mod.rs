@@ -105,9 +105,6 @@ pub enum BlockError {
     /// Extrinsic type ID cannot be resolved with the provided metadata.
     #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
     MissingType,
-    /// Expected more extrinsic bytes.
-    #[error("Expected more extrinsic bytes")]
-    InsufficientData,
     /// Unsupported signature.
     #[error("Unsupported extrinsic version, only version 4 is supported currently")]
     /// The extrinsic has an unsupported version.
