@@ -30,6 +30,9 @@ pub enum MetadataError {
     /// Event is not in metadata.
     #[error("Pallet {0}, Error {0} not found")]
     ErrorNotFound(u8, u8),
+    /// Runtime function is not in metadata.
+    #[error("Runtime function not found")]
+    RuntimeFnNotFound,
     /// Storage is not in metadata.
     #[error("Storage not found")]
     StorageNotFound,
@@ -57,6 +60,9 @@ pub enum MetadataError {
     /// Runtime storage metadata is incompatible with the static one.
     #[error("Pallet {0} Storage {0} has incompatible metadata")]
     IncompatibleStorageMetadata(String, String),
+    /// Runtime API metadata is incompatible with the static one.
+    #[error("Runtime API Trait {0} Method {0} has incompatible metadata")]
+    IncompatibleRuntimeApiMetadata(String, String),
     /// Runtime metadata is not fully compatible with the static one.
     #[error("Node metadata is not fully compatible")]
     IncompatibleMetadata,
@@ -79,6 +85,9 @@ struct MetadataInner {
     // an extrinsic fails.
     dispatch_error_ty: Option<u32>,
 
+    // Runtime API metadata
+    runtime_apis: HashMap<String, RuntimeFnMetadata>,
+
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -86,6 +95,7 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
+    cached_runtime_hashes: HashCache,
 }
 
 /// A representation of the runtime metadata received from a node.
@@ -95,6 +105,14 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    /// Returns a reference to [`RuntimeFnMetadata`].
+    pub fn runtime_fn(&self, name: &str) -> Result<&RuntimeFnMetadata, MetadataError> {
+        self.inner
+            .runtime_apis
+            .get(name)
+            .ok_or(MetadataError::RuntimeFnNotFound)
+    }
+
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &str) -> Result<&PalletMetadata, MetadataError> {
         self.inner
@@ -158,7 +176,7 @@ impl Metadata {
             .get_or_insert(pallet, storage, || {
                 subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage).map_err(
                     |e| match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
                     },
                 )
@@ -172,7 +190,7 @@ impl Metadata {
             .get_or_insert(pallet, constant, || {
                 subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant).map_err(
                     |e| match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
                     },
                 )
@@ -186,10 +204,24 @@ impl Metadata {
             .get_or_insert(pallet, function, || {
                 subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function).map_err(|e| {
                     match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
                     }
                 })
+            })
+    }
+
+    /// Obtain the unique hash for a runtime API function.
+    pub fn runtime_api_hash(
+        &self,
+        trait_name: &str,
+        method_name: &str,
+    ) -> Result<[u8; 32], MetadataError> {
+        self.inner
+            .cached_runtime_hashes
+            .get_or_insert(trait_name, method_name, || {
+                subxt_metadata::get_runtime_api_hash(&self.inner.metadata, trait_name, method_name)
+                    .map_err(|_| MetadataError::RuntimeFnNotFound)
             })
     }
 
@@ -203,6 +235,42 @@ impl Metadata {
         *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
+    }
+}
+
+/// Metadata for a specific runtime API function.
+#[derive(Clone, Debug)]
+pub struct RuntimeFnMetadata {
+    /// The trait name of the runtime function.
+    trait_name: String,
+    /// The method name of the runtime function.
+    method_name: String,
+    /// The parameter name and type IDs interpreted as `scale_info::Field`
+    /// for ease of decoding.
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
+    /// The type ID of the return type.
+    return_id: u32,
+}
+
+impl RuntimeFnMetadata {
+    /// Get the parameters as fields.
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
+        &self.fields
+    }
+
+    /// Return the trait name of the runtime function.
+    pub fn trait_name(&self) -> &str {
+        &self.trait_name
+    }
+
+    /// Return the method name of the runtime function.
+    pub fn method_name(&self) -> &str {
+        &self.method_name
+    }
+
+    /// Get the type ID of the return type.
+    pub fn return_id(&self) -> u32 {
+        self.return_id
     }
 }
 
@@ -376,6 +444,49 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
+        let runtime_apis: HashMap<String, RuntimeFnMetadata> = metadata
+            .apis
+            .iter()
+            .flat_map(|trait_metadata| {
+                let trait_name = &trait_metadata.name;
+
+                trait_metadata
+                    .methods
+                    .iter()
+                    .map(|method_metadata| {
+                        // Function named used by substrate to identify the runtime call.
+                        let fn_name = format!("{}_{}", trait_name, method_metadata.name);
+
+                        // Parameters mapped as `scale_info::Field` to allow dynamic decoding.
+                        let fields: Vec<_> = method_metadata
+                            .inputs
+                            .iter()
+                            .map(|input| {
+                                let name = input.name.clone();
+                                let ty = input.ty.id;
+                                scale_info::Field {
+                                    name: Some(name),
+                                    ty: ty.into(),
+                                    type_name: None,
+                                    docs: Default::default(),
+                                }
+                            })
+                            .collect();
+
+                        let return_id = method_metadata.output.id;
+                        let metadata = RuntimeFnMetadata {
+                            fields,
+                            return_id,
+                            trait_name: trait_name.clone(),
+                            method_name: method_metadata.name.clone(),
+                        };
+
+                        (fn_name, metadata)
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+
         let get_type_def_variant = |type_id: u32| {
             let ty = metadata
                 .types
@@ -492,10 +603,12 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 events,
                 errors,
                 dispatch_error_ty,
+                runtime_apis,
                 cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
+                cached_runtime_hashes: Default::default(),
             }),
         })
     }

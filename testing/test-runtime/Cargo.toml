@@ -14,3 +14,5 @@ serde = { workspace = true }
 tokio = { workspace = true }
 which = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport"] }
+hex = { workspace = true }
+codec = { workspace = true }
