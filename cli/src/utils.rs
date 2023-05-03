@@ -5,7 +5,7 @@
 use clap::Args;
 use color_eyre::eyre;
 use std::{fs, io::Read, path::PathBuf};
-use subxt_codegen::utils::{MetadataVersion as CodegenMetadataVersion, Uri};
+use subxt_codegen::utils::{MetadataVersion, Uri};
 
 /// The source of the metadata.
 #[derive(Debug, Args)]
@@ -34,7 +34,7 @@ pub struct FileOrUrl {
 impl FileOrUrl {
     /// Fetch the metadata bytes.
     pub async fn fetch(&self) -> color_eyre::Result<Vec<u8>> {
-        match (&self.file, &self.url, &self.version) {
+        match (&self.file, &self.url, self.version) {
             // Can't provide both --file and --url
             (Some(_), Some(_), _) => {
                 eyre::bail!("specify one of `--url` or `--file` but not both")
@@ -57,51 +57,17 @@ impl FileOrUrl {
             // Fetch from --url
             (None, Some(uri), version) => Ok(subxt_codegen::utils::fetch_metadata_bytes(
                 uri,
-                version.map(Into::into).unwrap_or_default(),
+                version.unwrap_or_default(),
             )
             .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let uri = Uri::from_static("http://localhost:9933");
-                Ok(subxt_codegen::utils::fetch_metadata_bytes(
-                    &uri,
-                    version.map(Into::into).unwrap_or_default(),
+                Ok(
+                    subxt_codegen::utils::fetch_metadata_bytes(&uri, version.unwrap_or_default())
+                        .await?,
                 )
-                .await?)
             }
-        }
-    }
-}
-
-/// The metadata version to fetch from the node.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct MetadataVersion {
-    version: u32,
-}
-
-impl std::str::FromStr for MetadataVersion {
-    type Err = String;
-
-    fn from_str(input: &str) -> Result<Self, Self::Err> {
-        match input {
-            "unstable" => Ok(MetadataVersion { version: u32::MAX }),
-            version => {
-                let num: u32 = version
-                    .parse()
-                    .map_err(|_| format!("Invalid metadata version specified {:?}", version))?;
-
-                Ok(MetadataVersion { version: num })
-            }
-        }
-    }
-}
-
-impl From<MetadataVersion> for CodegenMetadataVersion {
-    fn from(input: MetadataVersion) -> CodegenMetadataVersion {
-        match input.version {
-            u32::MAX => CodegenMetadataVersion::Unstable,
-            14 => CodegenMetadataVersion::Latest,
-            v => CodegenMetadataVersion::Version(v),
         }
     }
 }

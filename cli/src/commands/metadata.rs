@@ -3,12 +3,12 @@
 // see LICENSE for license details.
 
 use crate::utils::FileOrUrl;
-use crate::utils::MetadataVersion;
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::io::{self, Write};
+use subxt_codegen::utils::MetadataVersion;
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.

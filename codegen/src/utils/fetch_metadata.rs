@@ -14,7 +14,7 @@ use jsonrpsee::{
 use std::time::Duration;
 
 /// The metadata version that is fetched from the node.
-#[derive(Default)]
+#[derive(Default, Debug, Clone, Copy)]
 pub enum MetadataVersion {
     /// Latest stable version of the metadata.
     #[default]
@@ -23,6 +23,25 @@ pub enum MetadataVersion {
     Version(u32),
     /// Latest unstable version of the metadata.
     Unstable,
+}
+
+// Note: Implementation needed for the CLI tool.
+impl std::str::FromStr for MetadataVersion {
+    type Err = String;
+
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input {
+            "unstable" => Ok(MetadataVersion::Unstable),
+            "latest" => Ok(MetadataVersion::Latest),
+            version => {
+                let num: u32 = version
+                    .parse()
+                    .map_err(|_| format!("Invalid metadata version specified {:?}", version))?;
+
+                Ok(MetadataVersion::Version(num))
+            }
+        }
+    }
 }
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
