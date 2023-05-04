@@ -139,15 +139,15 @@ pub mod ext {
 /// This is useful if you write a library which uses this macro, but don't want to force users to depend on `subxt`
 /// at the top level too. By default the path `::subxt` is used.
 ///
-/// ## `substitute_type(type = "...", with = "...")`
+/// ## `substitute_type(path = "...", with = "...")`
 ///
-/// This attribute replaces any reference to the generated type at the path given by `type` with a
+/// This attribute replaces any reference to the generated type at the path given by `path` with a
 /// reference to the path given by `with`.
 ///
 /// ```rust
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
-///     substitute_type(type = "sp_arithmetic::per_things::Perbill", with = "crate::Foo")
+///     substitute_type(path = "sp_arithmetic::per_things::Perbill", with = "crate::Foo")
 /// )]
 /// mod polkadot {}
 ///
@@ -186,7 +186,7 @@ pub mod ext {
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
 ///     substitute_type(
-///         type = "sp_runtime::multiaddress::MultiAddress<A, B>",
+///         path = "sp_runtime::multiaddress::MultiAddress<A, B>",
 ///         with = "::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>"
 ///     )
 /// )]
@@ -213,7 +213,7 @@ pub mod ext {
 /// Any substituted types (including the default substitutes) must also implement these traits in order to avoid errors
 /// here.
 ///
-/// ## `derive_for_type(type = "...", derive = "...")`
+/// ## `derive_for_type(path = "...", derive = "...")`
 ///
 /// Unlike the above, which derives some trait on every generated type, this attribute allows you to derive traits only
 /// for specific types. Note that any types which are used inside the specified type may also need to derive the same traits.
@@ -222,8 +222,8 @@ pub mod ext {
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
 ///     derive_for_all_types = "Eq, PartialEq",
-///     derive_for_type(type = "frame_support::PalletId", derive = "Ord, PartialOrd"),
-///     derive_for_type(type = "sp_runtime::ModuleError", derive = "Hash"),
+///     derive_for_type(path = "frame_support::PalletId", derive = "Ord, PartialOrd"),
+///     derive_for_type(path = "sp_runtime::ModuleError", derive = "Hash"),
 /// )]
 /// mod polkadot {}
 /// ```

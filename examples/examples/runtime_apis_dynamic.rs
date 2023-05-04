@@ -15,8 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let account = AccountKeyring::Alice.to_account_id();
     let runtime_api_call = subxt::dynamic::runtime_api_call(
         "AccountNonceApi_account_nonce",
-        vec![Value::from_bytes(account)],
-        None,
+        vec![Value::from_bytes(account)]
     );
 
     // Submit the call to get back a result.

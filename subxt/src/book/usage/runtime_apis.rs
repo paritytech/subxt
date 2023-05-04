@@ -11,6 +11,12 @@
 //! 1. [Constructing a runtime call](#constructing-a-runtime-call)
 //! 2. [Submitting it to get back the response](#submitting-it)
 //!
+//! **Note:** Runtime APIs are only available when using V15 metadata, which is currently unstable.
+//! You'll need to use `subxt metadata --version unstable` command to download the unstable V15 metadata,
+//! and activate the `unstable-metadata` feature in Subxt for it to also use this metadata from a node. The
+//! metadata format is unstable because it may change and break compatibility with Subxt at any moment, so
+//! use at your own risk.
+//!
 //! ## Constructing a runtime call
 //!
 //! We can use the statically generated interface to build runtime calls:
@@ -31,18 +37,43 @@
 //! use subxt::dynamic::Value;
 //!
 //! let account = AccountKeyring::Alice.to_account_id();
-//! let storage_query = subxt::dynamic::runtime_api_call("Metadata_metadata_versions", vec![], None)
+//! let runtime_call = subxt::dynamic::runtime_api_call(
+//!     "Metadata_metadata_versions",
+//!     Vec::<Value<()>>::new()
+//! );
 //! ```
 //!
-//! At the moment, this interface is simply a wrapper around the `state_call` RPC method. This means
-//! that you need to know which runtime calls are available and how to encode their parameters (if
-//! needed). Eventually, Subxt will be able to generate an interface to the Runtime APIs exposed
-//! here to make this as easy to do as constructing extrinsics or storage queries.
+//! All valid runtime calls implement [`subxt::runtime_api::RuntimeApiPayload`], a trait which
+//! describes how to encode the runtime call arguments and what return type to decode from the
+//! response.
 //!
-//! ## Example
+//! ## Submitting it
 //!
-//! Downloading node metadata via the Metadata runtime API interface:
+//! Runtime calls can be handed to [`subxt::runtime_api::RuntimeApi::call()`], which will submit
+//! them and hand back the associated response.
 //!
+//! ### Making a static Runtime API call
+//!
+//! The easiest way to make a runtime API call is to use the statically generated interface.
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/runtime_apis_static.rs")]
+//! ```
+//!
+//! ### Making a dynamic Runtime API call
+//!
+//! If you'd prefer to construct the call at runtime, you can do this using the
+//! [`subxt::dynamic::runtime_api_call`] method.
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/runtime_apis_dynamic.rs")]
+//! ```
+//!
+//! ### Making a raw call
+//!
+//! This is generally discouraged in favour of one of the above, but may be necessary (especially if
+//! the node you're talking to does not yet serve V15 metadata). Here, you must manually encode
+//! the argument bytes and manually provide a type for the response bytes to be decoded into.
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/runtime_apis_raw.rs")]
