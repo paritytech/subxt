@@ -1,7 +1,3 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
-// This file is dual-licensed as Apache-2.0 or GPL-3.0.
-// see LICENSE for license details.
-
 use std::{
     fmt::Write,
     pin::Pin,
@@ -64,13 +60,8 @@ impl RpcClientT for MyLoggingClient {
     }
 }
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-pub mod polkadot {}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
-
     // Instantiate our replacement RPC client.
     let log = Arc::default();
     let rpc_client = MyLoggingClient {
