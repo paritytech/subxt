@@ -24,7 +24,7 @@
 //! We can use the statically generated interface to build extrinsic payloads:
 //!
 //! ```rust,no_run
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! let remark = "Hello there".as_bytes().to_vec();

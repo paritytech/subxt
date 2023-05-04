@@ -17,7 +17,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! let account = AccountKeyring::Alice.to_account_id().into();
@@ -44,7 +44,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! // A static query capable of iterating over accounts:
