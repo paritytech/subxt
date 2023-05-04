@@ -68,10 +68,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("AccountNonceApi_account_nonce for Alice: {:?}", nonce);
 
     // Dynamic calls.
-    let runtime_api_call = subxt::dynamic::runtime_api_call(
-        "Metadata_metadata_versions",
-        Vec::<Value<()>>::new()
-    );
+    let runtime_api_call =
+        subxt::dynamic::runtime_api_call("Metadata_metadata_versions", Vec::<Value<()>>::new());
     let versions = api
         .runtime_api()
         .at_latest()
