@@ -1,15 +1,3 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
-// This file is dual-licensed as Apache-2.0 or GPL-3.0.
-// see LICENSE for license details.
-
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.29-41a9d84b152.
-//!
-//! E.g.
-//! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.29/polkadot" --output /usr/local/bin/polkadot --location
-//! polkadot --dev --tmp
-//! ```
-
 use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig};
 
@@ -18,14 +6,13 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
-
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Subscribe to all finalized blocks:
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;
 
+    // For each block, print a bunch of information about it:
     while let Some(block) = blocks_sub.next().await {
         let block = block?;
 
@@ -36,6 +23,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  Hash: {block_hash}");
         println!("  Extrinsics:");
 
+        // Log each of the extrinsic with it's associated events:
         let body = block.body().await?;
         for ext in body.extrinsics() {
             let idx = ext.index();
@@ -51,8 +39,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 let pallet_name = evt.pallet_name();
                 let event_name = evt.variant_name();
+                let event_values = evt.field_values()?;
 
                 println!("        {pallet_name}_{event_name}");
+                println!("          {}", event_values);
             }
         }
     }
