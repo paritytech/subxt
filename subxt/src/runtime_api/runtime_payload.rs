@@ -148,5 +148,5 @@ pub fn dynamic(
     fn_name: impl Into<String>,
     args_data: impl Into<Composite<()>>,
 ) -> DynamicRuntimeApiPayload {
-    Payload::new(fn_name, args_data)
+    Payload::new(fn_name, args_data.into())
 }
