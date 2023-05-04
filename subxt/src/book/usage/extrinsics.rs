@@ -43,7 +43,7 @@
 //! use subxt::dynamic::Value;
 //!
 //! let extrinsic_payload = subxt::dynamic::tx("System", "remark", vec![
-//! Value::from_bytes("Hello there")
+//!     Value::from_bytes("Hello there")
 //! ]);
 //! ```
 //!
