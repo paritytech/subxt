@@ -43,13 +43,13 @@
 //! );
 //! ```
 //!
-//! All valid runtime calls implement [`subxt::runtime_api::RuntimeApiPayload`], a trait which
+//! All valid runtime calls implement [`crate::runtime_api::RuntimeApiPayload`], a trait which
 //! describes how to encode the runtime call arguments and what return type to decode from the
 //! response.
 //!
 //! ## Submitting it
 //!
-//! Runtime calls can be handed to [`subxt::runtime_api::RuntimeApi::call()`], which will submit
+//! Runtime calls can be handed to [`crate::runtime_api::RuntimeApi::call()`], which will submit
 //! them and hand back the associated response.
 //!
 //! ### Making a static Runtime API call
@@ -63,7 +63,7 @@
 //! ### Making a dynamic Runtime API call
 //!
 //! If you'd prefer to construct the call at runtime, you can do this using the
-//! [`subxt::dynamic::runtime_api_call`] method.
+//! [`crate::dynamic::runtime_api_call`] method.
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/runtime_apis_dynamic.rs")]
