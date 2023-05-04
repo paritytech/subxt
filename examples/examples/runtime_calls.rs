@@ -70,8 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Dynamic calls.
     let runtime_api_call = subxt::dynamic::runtime_api_call(
         "Metadata_metadata_versions",
-        Vec::<Value<()>>::new(),
-        None,
+        Vec::<Value<()>>::new()
     );
     let versions = api
         .runtime_api()
