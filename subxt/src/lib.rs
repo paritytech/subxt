@@ -109,7 +109,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 /// )]
 /// mod polkadot {}
 /// ```
@@ -130,7 +130,7 @@ pub mod ext {
 /// # pub mod path { pub mod to { pub use subxt; } }
 /// # fn main() {}
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     crate = "crate::path::to::subxt"
 /// )]
 /// mod polkadot {}
@@ -146,7 +146,7 @@ pub mod ext {
 ///
 /// ```rust
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(path = "sp_arithmetic::per_things::Perbill", with = "crate::Foo")
 /// )]
 /// mod polkadot {}
@@ -184,7 +184,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(
 ///         path = "sp_runtime::multiaddress::MultiAddress<A, B>",
 ///         with = "::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>"
@@ -204,7 +204,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     derive_for_all_types = "Eq, PartialEq"
 /// )]
 /// mod polkadot {}
@@ -220,7 +220,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     derive_for_all_types = "Eq, PartialEq",
 ///     derive_for_type(path = "frame_support::PalletId", derive = "Ord, PartialOrd"),
 ///     derive_for_type(path = "sp_runtime::ModuleError", derive = "Hash"),
@@ -248,7 +248,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     generate_docs
 /// )]
 /// mod polkadot {}
@@ -261,7 +261,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     runtime_types_only
 /// )]
 /// mod polkadot {}
@@ -273,7 +273,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
+///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     runtime_types_only,
 ///     no_default_derives,
 ///     derive_for_all_types="codec::Encode, codec::Decode"
