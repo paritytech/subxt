@@ -97,15 +97,11 @@ pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
 
 impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Create a new [`Payload`].
-    pub fn new(
-        fn_name: impl Into<String>,
-        args_data: ArgsData,
-        validation_hash: Option<[u8; 32]>,
-    ) -> Self {
+    pub fn new(fn_name: impl Into<String>, args_data: ArgsData) -> Self {
         Payload {
             fn_name: Cow::Owned(fn_name.into()),
             args_data,
-            validation_hash,
+            validation_hash: None,
             _marker: PhantomData,
         }
     }
@@ -151,12 +147,6 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
 pub fn dynamic(
     fn_name: impl Into<String>,
     args_data: impl Into<Composite<()>>,
-    hash: Option<[u8; 32]>,
 ) -> DynamicRuntimeApiPayload {
-    DynamicRuntimeApiPayload {
-        fn_name: Cow::Owned(fn_name.into()),
-        args_data: args_data.into(),
-        validation_hash: hash,
-        _marker: std::marker::PhantomData,
-    }
+    Payload::new(fn_name, args_data.into())
 }

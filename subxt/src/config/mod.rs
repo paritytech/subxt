@@ -29,7 +29,7 @@ pub trait Config: 'static {
     /// transactions associated with a sender account.
     type Index: Debug + Copy + DeserializeOwned + Into<u64>;
 
-    /// The output of the `Hashing` function.
+    /// The output of the `Hasher` function.
     type Hash: Debug
         + Copy
         + Send
@@ -95,7 +95,6 @@ pub trait Header: Sized + Encode {
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
 /// additional and extra parameters to pass to an extrinsic (see [`ExtrinsicParams`]),
 /// and returns a type implementing [`Config`] with those new [`ExtrinsicParams`].
-/// ```
 pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> {
     _marker: std::marker::PhantomData<(T, E)>,
 }

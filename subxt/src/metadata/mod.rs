@@ -13,7 +13,7 @@ pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
     ErrorMetadata, EventMetadata, ExtrinsicMetadata, InvalidMetadataError, Metadata, MetadataError,
-    PalletMetadata,
+    PalletMetadata, RuntimeFnMetadata,
 };
 
 pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};
