@@ -22,8 +22,6 @@ pub mod polkadot {}
 /// pluck out the events that we care about.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
-
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
