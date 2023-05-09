@@ -218,6 +218,7 @@ impl RuntimeGenerator {
         let types_mod = type_gen.generate_types_mod()?;
 
         Ok(quote! {
+            extern crate alloc;
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
@@ -453,6 +454,7 @@ impl RuntimeGenerator {
         )?;
 
         Ok(quote! {
+            extern crate alloc;
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
