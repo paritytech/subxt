@@ -142,7 +142,7 @@ fn generate_storage_entry_fns(
             Some(ty) => quote!([#ty]),
             _ => quote!(#field_type),
         };
-        quote!( #field_name: impl ::std::borrow::Borrow<#field_ty> )
+        quote!( #field_name: impl ::core::borrow::Borrow<#field_ty> )
     });
 
     let is_map_type = matches!(storage_entry.ty, StorageEntryType::Map { .. });

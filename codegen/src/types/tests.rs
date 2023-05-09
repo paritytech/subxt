@@ -485,7 +485,7 @@ fn compact_generic_parameter() {
                 pub struct S {
                     pub a: ::core::option::Option<::subxt_path::ext::codec::Compact<::core::primitive::u128> >,
                     pub nested: ::core::option::Option<::core::result::Result<::subxt_path::ext::codec::Compact<::core::primitive::u128>, ::core::primitive::u8 > >,
-                    pub vector: ::std::vec::Vec<::subxt_path::ext::codec::Compact<::core::primitive::u16> >,
+                    pub vector: ::alloc::vec::Vec<::subxt_path::ext::codec::Compact<::core::primitive::u16> >,
                     pub array: [::subxt_path::ext::codec::Compact<::core::primitive::u8>; 32usize],
                     pub tuple: (::subxt_path::ext::codec::Compact<::core::primitive::u8>, ::subxt_path::ext::codec::Compact<::core::primitive::u16>,),
                 }
@@ -618,8 +618,8 @@ fn box_fields_struct() {
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
-                    pub a: ::std::boxed::Box<::core::primitive::bool>,
-                    pub b: ::std::boxed::Box<::core::primitive::u32>,
+                    pub a: ::alloc::boxed::Box<::core::primitive::bool>,
+                    pub b: ::alloc::boxed::Box<::core::primitive::u32>,
                 }
             }
         }
@@ -665,9 +665,9 @@ fn box_fields_enum() {
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub enum E {
                     # [codec (index = 0)]
-                    A(::std::boxed::Box<::core::primitive::bool>,),
+                    A(::alloc::boxed::Box<::core::primitive::bool>,),
                     # [codec (index = 1)]
-                    B { a: ::std::boxed::Box<::core::primitive::u32>, },
+                    B { a: ::alloc::boxed::Box<::core::primitive::u32>, },
                 }
             }
         }
@@ -1315,7 +1315,7 @@ fn opt_out_from_default_substitutes() {
                 #[decode_as_type(crate_path = ":: subxt_path :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt_path :: ext :: scale_encode")]
                 pub struct S {
-                    pub map: ::std::collections::BTreeMap<:: core :: primitive :: u8,:: core :: primitive :: u8>,
+                    pub map: ::alloc::collections::BTreeMap<:: core :: primitive :: u8,:: core :: primitive :: u8>,
                 }
             }
         }.to_string()

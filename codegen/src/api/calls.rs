@@ -52,7 +52,7 @@ pub fn generate_calls(
                     .map(|(name, field)| {
                         let fn_arg_type = &field.type_path;
                         let call_arg = if field.is_boxed() {
-                            quote! { #name: ::std::boxed::Box::new(#name) }
+                            quote! { #name: ::alloc::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };

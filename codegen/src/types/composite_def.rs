@@ -320,7 +320,7 @@ impl quote::ToTokens for CompositeDefFieldType {
         let ty_path = &self.type_path;
 
         if self.is_boxed() {
-            tokens.extend(quote! { ::std::boxed::Box<#ty_path> })
+            tokens.extend(quote! { ::alloc::boxed::Box<#ty_path> })
         } else {
             tokens.extend(quote! { #ty_path })
         };

@@ -98,7 +98,7 @@ impl TypeSubstitutes {
                 path_segments!(BTreeMap),
                 parse_quote!(#crate_path::utils::KeyedVec),
             ),
-            (path_segments!(BTreeSet), parse_quote!(::std::vec::Vec)),
+            (path_segments!(BTreeSet), parse_quote!(::alloc::vec::Vec)),
         ];
 
         let default_substitutes = defaults
