@@ -11,7 +11,7 @@ use crate::{
 };
 use scale_decode::DecodeAsType;
 
-pub use scale_value::Value;
+pub use scale_value::{At, Value};
 
 /// A [`scale_value::Value`] type endowed with contextual information
 /// regarding what type was used to decode each part of it. This implements
@@ -27,6 +27,9 @@ pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
 pub use crate::storage::{dynamic as storage, dynamic_root as storage_root};
+
+// Execute runtime API function call dynamically.
+pub use crate::runtime_api::dynamic as runtime_api_call;
 
 /// This is the result of making a dynamic request to a node. From this,
 /// we can return the raw SCALE bytes that we were handed back, or we can

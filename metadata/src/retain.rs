@@ -5,7 +5,7 @@
 //! Utility functions to generate a subset of the metadata.
 
 use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletMetadata, RuntimeMetadataV15, StorageEntryType,
+    ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeMetadataV15, StorageEntryType,
 };
 use scale_info::{form::PortableForm, interner::UntrackedSymbol, TypeDef};
 use std::{
@@ -105,6 +105,36 @@ fn update_extrinsic_types(
     }
 }
 
+/// Collect all type IDs needed to represent the runtime APIs.
+fn collect_runtime_api_types(
+    apis: &[RuntimeApiMetadata<PortableForm>],
+    type_ids: &mut HashSet<u32>,
+) {
+    for api in apis {
+        for method in &api.methods {
+            for input in &method.inputs {
+                type_ids.insert(input.ty.id);
+            }
+            type_ids.insert(method.output.id);
+        }
+    }
+}
+
+/// Update all type IDs of the provided runtime APIs metadata using the new type IDs from the portable registry.
+fn update_runtime_api_types(
+    apis: &mut [RuntimeApiMetadata<PortableForm>],
+    map_ids: &BTreeMap<u32, u32>,
+) {
+    for api in apis {
+        for method in &mut api.methods {
+            for input in &mut method.inputs {
+                update_type(&mut input.ty, map_ids);
+            }
+            update_type(&mut method.output, map_ids);
+        }
+    }
+}
+
 /// Update the given type using the new type ID from the portable registry.
 ///
 /// # Panics
@@ -191,6 +221,9 @@ where
     // Keep the "runtime" type ID, since it's referenced in our metadata.
     type_ids.insert(metadata.ty.id);
 
+    // Keep the runtime APIs types.
+    collect_runtime_api_types(&metadata.apis, &mut type_ids);
+
     // Additionally, subxt depends on the `DispatchError` type existing; we use the same
     // logic here that is used when building our `Metadata`.
     let dispatch_error_ty = metadata
@@ -211,6 +244,7 @@ where
     }
     update_extrinsic_types(&mut metadata.extrinsic, &map_ids);
     update_type(&mut metadata.ty, &map_ids);
+    update_runtime_api_types(&mut metadata.apis, &map_ids);
 }
 
 #[cfg(test)]

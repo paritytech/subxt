@@ -438,7 +438,7 @@ async fn rpc_state_call() {
         _ => panic!("Metadata V14 or V15 unavailable"),
     };
     // Compare the runtime API call against the `state_getMetadata`.
-    let metadata = api.rpc().metadata(None).await.unwrap();
+    let metadata = api.rpc().metadata_legacy(None).await.unwrap();
     let metadata = metadata.runtime_metadata();
     assert_eq!(&metadata_call, metadata);
 }

@@ -34,6 +34,12 @@ integration-tests = []
 jsonrpsee-ws = ["jsonrpsee/async-client", "jsonrpsee/client-ws-transport"]
 jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"]
 
+# Activate this to fetch and utilize the latest unstabl metadata from a node.
+# The unstable metadata is subject to breaking changes and the subxt might
+# fail to decode the metadata properly. Use this to experiment with the
+# latest features exposed by the metadata.
+unstable-metadata = []
+
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 scale-info = { workspace = true }

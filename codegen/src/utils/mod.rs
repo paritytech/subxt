@@ -11,5 +11,5 @@ pub use jsonrpsee::client_transport::ws::Uri;
 
 pub use fetch_metadata::{
     fetch_metadata_bytes, fetch_metadata_bytes_blocking, fetch_metadata_hex,
-    fetch_metadata_hex_blocking,
+    fetch_metadata_hex_blocking, MetadataVersion,
 };
