@@ -177,10 +177,8 @@
 //!
 //! ## Decoding Extrinsics
 //!
-//! Subxt uses a block-centric API to allow users to decode extrinsics. This approach requires users to retrieve
-//! a block's body from the chain before being able to decode the extrinsics. By considering that the block's body
-//! consists of the extrinsics and an additional justification, this API aligns well with the operational nature of the chain
-//! and with how subscriptions work.
+//! The block body is made up of extrinsics representing the generalization of the concept of transactions.
+//! Extrinsics can contain any external data the underlying chain wishes to validate and track.
 //!
 //! The process of decoding extrinsics generally involves the following steps:
 //!
