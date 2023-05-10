@@ -102,6 +102,16 @@ pub enum BlockError {
     /// An error containing the hash of the block that was not found.
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
     NotFound(String),
+    /// Extrinsic type ID cannot be resolved with the provided metadata.
+    #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
+    MissingType,
+    /// Unsupported signature.
+    #[error("Unsupported extrinsic version, only version 4 is supported currently")]
+    /// The extrinsic has an unsupported version.
+    UnsupportedVersion(u8),
+    /// Decoding error.
+    #[error("Cannot decode extrinsic: {0}")]
+    DecodingError(codec::Error),
 }
 
 impl BlockError {

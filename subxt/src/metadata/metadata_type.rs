@@ -27,6 +27,9 @@ pub enum MetadataError {
     /// Event is not in metadata.
     #[error("Pallet {0}, Event {0} not found")]
     EventNotFound(u8, u8),
+    /// Extrinsic is not in metadata.
+    #[error("Pallet {0}, Extrinsic {0} not found")]
+    ExtrinsicNotFound(u8, u8),
     /// Event is not in metadata.
     #[error("Pallet {0}, Error {0} not found")]
     ErrorNotFound(u8, u8),
@@ -75,6 +78,8 @@ struct MetadataInner {
 
     // Events are hashed by pallet an error index (decode oriented)
     events: HashMap<(u8, u8), EventMetadata>,
+    // Extrinsics are hashed by pallet an error index (decode oriented)
+    extrinsics: HashMap<(u8, u8), ExtrinsicMetadata>,
     // Errors are hashed by pallet and error index (decode oriented)
     errors: HashMap<(u8, u8), ErrorMetadata>,
 
@@ -132,6 +137,20 @@ impl Metadata {
             .events
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
+        Ok(event)
+    }
+
+    /// Returns the metadata for the extrinsic at the given pallet and call indices.
+    pub fn extrinsic(
+        &self,
+        pallet_index: u8,
+        call_index: u8,
+    ) -> Result<&ExtrinsicMetadata, MetadataError> {
+        let event = self
+            .inner
+            .extrinsics
+            .get(&(pallet_index, call_index))
+            .ok_or(MetadataError::ExtrinsicNotFound(pallet_index, call_index))?;
         Ok(event)
     }
 
@@ -386,6 +405,39 @@ impl EventMetadata {
     }
 }
 
+/// Metadata for specific extrinsics.
+#[derive(Clone, Debug)]
+pub struct ExtrinsicMetadata {
+    // The pallet name is shared across every extrinsic, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
+    pallet: Arc<str>,
+    call: String,
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
+    docs: Vec<String>,
+}
+
+impl ExtrinsicMetadata {
+    /// Get the name of the pallet from which the extrinsic was emitted.
+    pub fn pallet(&self) -> &str {
+        &self.pallet
+    }
+
+    /// Get the name of the extrinsic call.
+    pub fn call(&self) -> &str {
+        &self.call
+    }
+
+    /// The names, type names & types of each field in the extrinsic.
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
+        &self.fields
+    }
+
+    /// Documentation for this extrinsic.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
+    }
+}
+
 /// Details about a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
@@ -426,6 +478,12 @@ pub enum InvalidMetadataError {
     /// Type missing from type registry
     #[error("Type {0} missing from type registry")]
     MissingType(u32),
+    /// Type missing extrinsic "Call" type
+    #[error("Missing extrinsic Call type")]
+    MissingCallType,
+    /// The extrinsic variant expected to contain a single field.
+    #[error("Extrinsic variant at index {0} expected to contain a single field")]
+    InvalidExtrinsicVariant(u8),
     /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type")]
     TypeDefNotVariant(u32),
@@ -596,11 +654,60 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id);
 
+        let extrinsic_ty = metadata
+            .types
+            .resolve(metadata.extrinsic.ty.id)
+            .ok_or(InvalidMetadataError::MissingType(metadata.extrinsic.ty.id))?;
+
+        let Some(call_id) = extrinsic_ty.type_params
+            .iter()
+            .find(|ty| ty.name == "Call")
+            .and_then(|ty| ty.ty)
+            .map(|ty| ty.id) else {
+            return Err(InvalidMetadataError::MissingCallType);
+        };
+
+        let call_type_variants = get_type_def_variant(call_id)?;
+
+        let mut extrinsics = HashMap::<(u8, u8), ExtrinsicMetadata>::new();
+        for variant in &call_type_variants.variants {
+            let pallet_name: Arc<str> = variant.name.to_string().into();
+            let pallet_index = variant.index;
+
+            // Pallet variants must contain one single call variant.
+            // In the following form:
+            //
+            // enum RuntimeCall {
+            //   Pallet(pallet_call)
+            // }
+            if variant.fields.len() != 1 {
+                return Err(InvalidMetadataError::InvalidExtrinsicVariant(pallet_index));
+            }
+            let Some(ty) = variant.fields.first() else {
+                return Err(InvalidMetadataError::InvalidExtrinsicVariant(pallet_index));
+            };
+
+            // Get the call variant.
+            let call_type_variant = get_type_def_variant(ty.ty.id)?;
+            for variant in &call_type_variant.variants {
+                extrinsics.insert(
+                    (pallet_index, variant.index),
+                    ExtrinsicMetadata {
+                        pallet: pallet_name.clone(),
+                        call: variant.name.to_string(),
+                        fields: variant.fields.clone(),
+                        docs: variant.docs.clone(),
+                    },
+                );
+            }
+        }
+
         Ok(Metadata {
             inner: Arc::new(MetadataInner {
                 metadata,
                 pallets,
                 events,
+                extrinsics,
                 errors,
                 dispatch_error_ty,
                 runtime_apis,
@@ -624,6 +731,30 @@ mod tests {
     use scale_info::{meta_type, TypeInfo};
 
     fn load_metadata() -> Metadata {
+        // Extrinsic needs to contain at least the generic type parameter "Call"
+        // for the metadata to be valid.
+        // The "Call" type from the metadata is used to decode extrinsics.
+        // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Call> {
+            call: Call,
+        }
+        // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+        // Each pallet must contain one single variant.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum RuntimeCall {
+            PalletName(Pallet),
+        }
+        // The calls of the pallet.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum Pallet {
+            #[allow(unused)]
+            SomeCall,
+        }
+
         #[allow(dead_code)]
         #[allow(non_camel_case_types)]
         #[derive(TypeInfo)]
@@ -662,7 +793,7 @@ mod tests {
         let metadata = RuntimeMetadataV15::new(
             vec![pallet],
             ExtrinsicMetadata {
-                ty: meta_type::<()>(),
+                ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
                 version: 0,
                 signed_extensions: vec![],
             },

@@ -19,6 +19,8 @@
 //! > can construct unsigned extrinsics, but overwhelmingly you'll need to sign them, and so the
 //! > documentation tends to use the terms _extrinsic_ and _transaction_ interchangeably.
 //!
+//! Furthermore, Subxt is capable of decoding extrinsics included in blocks.
+//!
 //! ## Constructing an extrinsic payload
 //!
 //! We can use the statically generated interface to build extrinsic payloads:
@@ -172,4 +174,51 @@
 //! ```
 //! Take a look at the API docs for [`crate::tx::TxProgress`], [`crate::tx::TxStatus`] and
 //! [`crate::tx::TxInBlock`] for more options.
+//!
+//! ## Decoding Extrinsics
+//!
+//! The block body is made up of extrinsics representing the generalization of the concept of transactions.
+//! Extrinsics can contain any external data the underlying chain wishes to validate and track.
+//!
+//! The process of decoding extrinsics generally involves the following steps:
+//!
+//! 1. Retrieve a block from the chain: This can be done directly by providing a specific hash using [crate::blocks::BlocksClient::at()]
+//! and [crate::blocks::BlocksClient::at_latest()], or indirectly by subscribing to the latest produced blocks of the chain using
+//! [crate::blocks::BlocksClient::subscribe_finalized()].
+//!
+//! 2. Fetch the block's body using [crate::blocks::Block::body()].
+//!
+//! 3. Obtain the extrinsics from the block's body using [crate::blocks::BlockBody::extrinsics()].
+//!
+//! ```rust,no_run
+//! # #[tokio::main]
+//! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//! use subxt::client::OnlineClient;
+//! use subxt::config::PolkadotConfig;
+//!
+//! // Create client:
+//! let client = OnlineClient::<PolkadotConfig>::new().await?;
+//!
+//! // Get the lastest block (or use .at() to specify a block hash):
+//! let block = client.blocks().at_latest().await?;
+//!
+//! // Get the block's body which contains the extrinsics.
+//! let body = block.body().await?;
+//!
+//! // Fetch the extrinsics of the block's body.
+//! let extrinsics = block.body().await?.extrinsics();
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! Once the extrinsics are loaded, similar to events, you can iterate through the extrinsics or search for specific extrinsics using methods
+//! such as [crate::blocks::Extrinsics::iter()] and [crate::blocks::Extrinsics::find()]. For more information, refer to [crate::blocks::ExtrinsicDetails].
+//!
+//! ### Example
+//!
+//! Here's an example that demonstrates the usage of these concepts:
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../../examples/examples/block_extrinsics.rs")]
+//! ```
 //!
