@@ -20,19 +20,19 @@ use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
 ///
 /// Show the pallets that are available:
 /// ```
-/// subxt show --file=../artifacts/polkadot_metadata.scale
+/// subxt show --file=polkadot_metadata.scale
 /// ```
 /// Show the calls in a pallet:
 /// ```
-/// subxt show --file=../artifacts/polkadot_metadata.scale Balances
+/// subxt show Balances
 /// ```
 /// Show the call parameters a call expects:
 /// ```
-/// subxt show --file=../artifacts/polkadot_metadata.scale Balances transfer
+/// subxt show Balances transfer
 /// ```
 /// Create an unsigned extrinsic from a scale value, validate it and output its hex representation
 /// ```
-/// subxt show --file=../artifacts/polkadot_metadata.scale Grandpa note_stalled { "delay": 5, "best_finalized_block_number": 5 }
+/// subxt show Grandpa note_stalled { "delay": 5, "best_finalized_block_number": 5 }
 /// ```
 ///
 #[derive(Debug, ClapParser)]
@@ -86,7 +86,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     if trailing_args.is_empty() {
         let call_description = print_call_description(call, &metadata.runtime_metadata().types)?;
         println!(
-            "If you want to create an unsigned extrinsic for {pallet_name}/{call_name} representing a scale value of the type {}::{call_name}:\nsubxt show {pallet_name} {call_name} <SCALE_VALUE>\n{call_description}",
+            "If you want to create an unsigned extrinsic for {pallet_name}/{call_name}\nrepresenting a scale value of the type {}::{call_name}:\nsubxt show {pallet_name} {call_name} <SCALE_VALUE>\n{call_description}",
             calls_enum_type.path
         );
         return Ok(());
