@@ -1,15 +1,9 @@
 use color_eyre::eyre::eyre;
-use std::{fs, process::Output};
 
-use frame_metadata::RuntimeMetadataPrefixed;
 use scale_info::{
-    form::PortableForm,
-    scale::{Decode, Encode},
-    Field, PortableRegistry, Type, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact,
-    TypeDefComposite, TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, TypeInfo,
-    Variant,
+    form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefArray, TypeDefBitSequence,
+    TypeDefCompact, TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, Variant,
 };
-use scale_value::Value;
 
 pub trait TypeDescription {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String>;
@@ -149,7 +143,7 @@ impl TypeDescription for Variant<PortableForm> {
         let fields_string = self.fields.type_description(registry)?;
         let output = if fields_string.is_empty() {
             self.name.to_string()
-        } else if fields_string.starts_with("(") {
+        } else if fields_string.starts_with('(') {
             format!("{}{}", &self.name, fields_string)
         } else {
             format!("{} {}", &self.name, fields_string)

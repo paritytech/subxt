@@ -4,7 +4,7 @@
 
 use clap::Args;
 use color_eyre::eyre;
-use scale_info::PortableRegistry;
+
 use std::{fs, io::Read, path::PathBuf};
 use subxt_codegen::utils::{MetadataVersion, Uri};
 

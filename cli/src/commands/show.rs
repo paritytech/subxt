@@ -2,17 +2,17 @@ use crate::utils::type_description::{format_type_description, TypeDescription};
 use crate::utils::type_example::TypeExample;
 use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
-use clap::Subcommand;
+
 use codec::Decode;
 use color_eyre::eyre::eyre;
 use frame_metadata::v15::RuntimeMetadataV15;
-use frame_metadata::{PalletMetadata, RuntimeMetadata, RuntimeMetadataPrefixed};
+use frame_metadata::RuntimeMetadataPrefixed;
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant, Variant};
-use scale_value::{Composite, Value, ValueDef};
+use scale_value::{Composite, ValueDef};
+use subxt::tx;
 use subxt::utils::H256;
 use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
-use subxt::{tx, PolkadotConfig};
 
 /// Shows the pallets and calls available for a node and lets you build unsigned extrinsics.
 ///
@@ -65,18 +65,18 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     };
 
     // get the enum that stores the possible calls:
-    let (calls_enum_type_def, calls_enum_type, calls_type_id) =
+    let (calls_enum_type_def, calls_enum_type, _calls_type_id) =
         get_calls_enum_type(pallet, &metadata.runtime_metadata().types)?;
 
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = opts.call else {
-        println!("If you want to explore a pallet: subxt show {pallet_name} <CALL>\n{}", print_available_calls(&calls_enum_type_def));
+        println!("If you want to explore a pallet: subxt show {pallet_name} <CALL>\n{}", print_available_calls(calls_enum_type_def));
         return Ok(());
     };
 
     // if specified call is wrong, show user the calls to choose from (but this time as an error):
     let Some(call) = calls_enum_type_def.variants.iter().find(|variant| variant.name == call_name)   else {
-        return Err(eyre!("call \"{}\" not found in pallet \"{}\"!\n{}", call_name,  pallet_name, print_available_calls(&calls_enum_type_def)));
+        return Err(eyre!("call \"{}\" not found in pallet \"{}\"!\n{}", call_name,  pallet_name, print_available_calls(calls_enum_type_def)));
     };
 
     // collect all the trailing arguments into a single string that is later into a scale_value::Value
@@ -173,10 +173,14 @@ fn print_call_description(
     output.push_str("\n\n");
     match type_examples.len() {
         0 => {
-            output.push_str(format!("There are no examples available for this type.").as_str());
+            output.push_str(
+                "There are no examples available for this type."
+                    .to_string()
+                    .as_str(),
+            );
         }
         1 => {
-            output.push_str(format!("Here is an example of this type:").as_str());
+            output.push_str("Here is an example of this type:".to_string().as_str());
         }
         i => {
             output.push_str(format!("Here are {i} examples of this type:").as_str());
@@ -189,7 +193,7 @@ fn print_call_description(
             context: (),
         };
         let example_str = scale_value::stringify::to_string(&value);
-        output.push_str("\n");
+        output.push('\n');
         output.push_str(example_str.as_str());
     }
 

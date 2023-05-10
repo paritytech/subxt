@@ -1,15 +1,9 @@
 use color_eyre::eyre::eyre;
-use std::{fs, process::Output};
 
-use frame_metadata::RuntimeMetadataPrefixed;
 use scale_info::{
-    form::PortableForm,
-    scale::{Decode, Encode},
-    Field, PortableRegistry, Type, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact,
-    TypeDefComposite, TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, TypeInfo,
-    Variant,
+    form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefArray, TypeDefPrimitive,
+    TypeDefTuple, TypeDefVariant,
 };
-use scale_value::Value;
 
 pub trait TypeExample {
     type Value;
@@ -73,13 +67,13 @@ impl TypeExample for u32 {
                     len: 3,
                     type_param: sequence.type_param,
                 }
-                    .type_example(registry)?
-                    .into_iter()
-                    .map(|e| scale_value::Value {
-                        value: scale_value::ValueDef::Composite(e),
-                        context: (),
-                    })
-                    .collect()
+                .type_example(registry)?
+                .into_iter()
+                .map(|e| scale_value::Value {
+                    value: scale_value::ValueDef::Composite(e),
+                    context: (),
+                })
+                .collect()
             }
         };
         Ok(examples)
@@ -220,7 +214,7 @@ impl TypeExample for Vec<Field<PortableForm>> {
 impl TypeExample for TypeDefPrimitive {
     type Value = scale_value::Primitive;
 
-    fn type_example(&self, registry: &PortableRegistry) -> color_eyre::Result<Vec<Self::Value>> {
+    fn type_example(&self, _registry: &PortableRegistry) -> color_eyre::Result<Vec<Self::Value>> {
         let value = match &self {
             TypeDefPrimitive::Bool => vec![
                 scale_value::Primitive::Bool(true),
