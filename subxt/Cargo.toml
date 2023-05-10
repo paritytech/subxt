@@ -90,3 +90,4 @@ sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
+assert_matches = { workspace = true }

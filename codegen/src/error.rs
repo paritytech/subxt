@@ -53,6 +53,11 @@ pub enum CodegenError {
         "{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata"
     )]
     InvalidType(String),
+    /// Extrinsic call type could not be found.
+    #[error(
+        "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
+    MissingCallType,
 }
 
 impl CodegenError {
