@@ -4,7 +4,7 @@
 
 //! This modules contains examples of using Subxt; follow the links for more:
 //!
-//! - [Extrinsics](extrinsics)
+//! - [Transactions](transactions)
 //! - [Storage](storage)
 //! - [Events](events)
 //! - [Constants](constants)
@@ -16,6 +16,6 @@
 pub mod blocks;
 pub mod constants;
 pub mod events;
-pub mod extrinsics;
+pub mod transactions;
 pub mod runtime_apis;
 pub mod storage;
