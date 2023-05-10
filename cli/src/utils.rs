@@ -4,8 +4,12 @@
 
 use clap::Args;
 use color_eyre::eyre;
+use scale_info::PortableRegistry;
 use std::{fs, io::Read, path::PathBuf};
 use subxt_codegen::utils::{MetadataVersion, Uri};
+
+pub mod type_description;
+pub mod type_example;
 
 /// The source of the metadata.
 #[derive(Debug, Args)]
