@@ -11,18 +11,16 @@ mod multi_signature;
 mod static_type;
 mod wrapper_opaque;
 
+pub use account_id::AccountId32;
 use codec::{Decode, Encode};
 use derivative::Derivative;
-
-pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
-pub use static_type::Static;
-pub use wrapper_opaque::WrapperKeepOpaque;
-
 // Used in codegen
 #[doc(hidden)]
 pub use primitive_types::{H160, H256, H512};
+pub use static_type::Static;
+pub use wrapper_opaque::WrapperKeepOpaque;
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload

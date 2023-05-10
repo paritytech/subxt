@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CratePath};
 use frame_metadata::v15::{
     PalletMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
     StorageEntryType,
@@ -13,6 +12,7 @@ use quote::{format_ident, quote};
 use scale_info::{form::PortableForm, TypeDef};
 
 use super::CodegenError;
+use crate::{types::TypeGenerator, CratePath};
 
 /// Generate functions which create storage addresses from the provided pallet's metadata.
 /// These addresses can be used to access and iterate over storage values.

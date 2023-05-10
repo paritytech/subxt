@@ -12,12 +12,12 @@ pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
 
-use codec::{Decode, Encode};
 use core::fmt::Debug;
-use serde::{de::DeserializeOwned, Serialize};
 
+use codec::{Decode, Encode};
 pub use extrinsic_params::ExtrinsicParams;
 pub use polkadot::PolkadotConfig;
+use serde::{de::DeserializeOwned, Serialize};
 pub use substrate::SubstrateConfig;
 
 /// Runtime types.
@@ -115,8 +115,9 @@ impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
 /// implement subxt's Hasher and Header traits for some substrate structs
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
-    use super::*;
     use primitive_types::{H256, U256};
+
+    use super::*;
 
     impl<N, H> Header for sp_runtime::generic::Header<N, H>
     where

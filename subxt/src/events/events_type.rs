@@ -4,6 +4,11 @@
 
 //! A representation of a block of events.
 
+use std::sync::Arc;
+
+use codec::{Compact, Decode};
+use derivative::Derivative;
+
 use super::{Phase, StaticEvent};
 use crate::{
     client::OnlineClientT,
@@ -12,9 +17,6 @@ use crate::{
     metadata::{DecodeWithMetadata, EventMetadata},
     Config, Metadata,
 };
-use codec::{Compact, Decode};
-use derivative::Derivative;
-use std::sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -426,15 +428,17 @@ pub trait RootEvent: Sized {
 /// Event related test utilities used outside this module.
 #[cfg(test)]
 pub(crate) mod test_utils {
-    use super::*;
-    use crate::{Config, SubstrateConfig};
+    use std::convert::TryFrom;
+
     use codec::Encode;
     use frame_metadata::{
         v15::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
-    use std::convert::TryFrom;
+
+    use super::*;
+    use crate::{Config, SubstrateConfig};
 
     /// An "outer" events enum containing exactly one event.
     #[derive(
@@ -576,13 +580,14 @@ pub(crate) mod test_utils {
 
 #[cfg(test)]
 mod tests {
+    use codec::Encode;
+    use scale_info::TypeInfo;
+    use scale_value::Value;
+
     use super::{
         test_utils::{event_record, events, events_raw, AllEvents},
         *,
     };
-    use codec::Encode;
-    use scale_info::TypeInfo;
-    use scale_value::Value;
 
     /// Build a fake wrapped metadata.
     fn metadata<E: TypeInfo + 'static>() -> Metadata {

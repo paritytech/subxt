@@ -11,24 +11,24 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use frame_metadata::v15::RuntimeMetadataV15;
+use std::{fs, io::Read, path, string::ToString};
+
+use codec::Decode;
+use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
+use heck::ToSnakeCase as _;
+use proc_macro2::TokenStream as TokenStream2;
+use quote::{format_ident, quote};
 use subxt_metadata::{get_metadata_per_pallet_hash, metadata_v14_to_latest};
+use syn::parse_quote;
 
 use super::DerivesRegistry;
-use crate::error::CodegenError;
 use crate::{
+    error::CodegenError,
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
     utils::{fetch_metadata_bytes_blocking, MetadataVersion, Uri},
     CratePath,
 };
-use codec::Decode;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
-use heck::ToSnakeCase as _;
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
-use std::{fs, io::Read, path, string::ToString};
-use syn::parse_quote;
 
 /// Generates the API for interacting with a Substrate runtime.
 ///

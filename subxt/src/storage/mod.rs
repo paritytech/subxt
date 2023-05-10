@@ -11,7 +11,6 @@ mod storage_type;
 pub mod utils;
 
 pub use storage_client::StorageClient;
-
 pub use storage_type::{KeyIter, Storage};
 
 // Re-export as this is used in the public API in this module:

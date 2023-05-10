@@ -2,7 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::error::FetchMetadataError;
+use std::time::Duration;
+
 use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
@@ -11,7 +12,8 @@ use jsonrpsee::{
     http_client::HttpClientBuilder,
     rpc_params,
 };
-use std::time::Duration;
+
+use crate::error::FetchMetadataError;
 
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]

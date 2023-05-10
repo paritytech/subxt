@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub(crate) use crate::{node_runtime, TestNodeProcess};
-
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{tx::PairSigner, SubstrateConfig};
+
+pub(crate) use crate::{node_runtime, TestNodeProcess};
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";

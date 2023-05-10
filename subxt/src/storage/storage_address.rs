@@ -2,15 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::borrow::Cow;
+
+use frame_metadata::v15::{StorageEntryType, StorageHasher};
+use scale_info::TypeDef;
+
 use crate::{
     dynamic::{DecodedValueThunk, Value},
     error::{Error, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-use frame_metadata::v15::{StorageEntryType, StorageHasher};
-use scale_info::TypeDef;
-use std::borrow::Cow;
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.

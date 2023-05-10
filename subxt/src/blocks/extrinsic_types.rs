@@ -2,6 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::{collections::HashMap, sync::Arc};
+
+use codec::Decode;
+use derivative::Derivative;
+use frame_metadata::v15::RuntimeMetadataV15;
+use scale_decode::DecodeAsFields;
+
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
@@ -12,12 +19,6 @@ use crate::{
     rpc::types::ChainBlockExtrinsic,
     Metadata,
 };
-
-use codec::Decode;
-use derivative::Derivative;
-use frame_metadata::v15::RuntimeMetadataV15;
-use scale_decode::DecodeAsFields;
-use std::{collections::HashMap, sync::Arc};
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -622,8 +623,6 @@ impl<T: Config> ExtrinsicEvents<T> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
     use frame_metadata::{
@@ -633,6 +632,9 @@ mod tests {
     use primitive_types::H256;
     use scale_info::{meta_type, TypeInfo};
     use scale_value::Value;
+
+    use super::*;
+    use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
 
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.

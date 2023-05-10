@@ -13,10 +13,9 @@ use frame_metadata::{
     },
     RuntimeMetadataPrefixed,
 };
-use scale_info::{meta_type, IntoPortable, TypeInfo};
-
 pub use metadata_test_runner::MetadataTestRunner;
 pub use pallet_metadata_test_runner::PalletMetadataTestRunner;
+use scale_info::{meta_type, IntoPortable, TypeInfo};
 
 /// Given some pallet metadata, generate a [`RuntimeMetadataPrefixed`] struct.
 /// We default to a useless extrinsic type, and register a fake `DispatchError`

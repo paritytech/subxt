@@ -2,9 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::Error, events::Events, rpc::types::StorageKey, Config};
-use derivative::Derivative;
 use std::future::Future;
+
+use derivative::Derivative;
+
+use crate::{client::OnlineClientT, error::Error, events::Events, rpc::types::StorageKey, Config};
 
 /// A client for working with events.
 #[derive(Derivative)]

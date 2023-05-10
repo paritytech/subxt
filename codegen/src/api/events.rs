@@ -2,13 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CratePath};
 use frame_metadata::v15::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use scale_info::form::PortableForm;
 
 use super::CodegenError;
+use crate::{types::TypeGenerator, CratePath};
 
 /// Generate events from the provided pallet metadata.
 ///

@@ -2,10 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::CratePath;
+use std::collections::{HashMap, HashSet};
+
 use syn::{parse_quote, Path};
 
-use std::collections::{HashMap, HashSet};
+use crate::CratePath;
 
 /// A struct containing the derives that we'll be applying to types;
 /// a combination of some common derives for all types, plus type

@@ -12,11 +12,11 @@ use core::fmt::Debug;
 pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
 };
+pub use scale_decode::Error as DecodeError;
+pub use scale_encode::Error as EncodeError;
 
 // Re-expose the errors we use from other crates here:
 pub use crate::metadata::{InvalidMetadataError, Metadata, MetadataError};
-pub use scale_decode::Error as DecodeError;
-pub use scale_encode::Error as EncodeError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over

@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::error::CodegenError;
-
-use super::{CratePath, Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use scale_info::{form::PortableForm, Type, TypeDef, TypeDefPrimitive};
+
+use super::{CratePath, Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
+use crate::error::CodegenError;
 
 /// Representation of a type which consists of a set of fields. Used to generate Rust code for
 /// either a standalone `struct` definition, or an `enum` variant.

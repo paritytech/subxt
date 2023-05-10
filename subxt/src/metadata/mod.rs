@@ -9,11 +9,9 @@ mod hash_cache;
 mod metadata_location;
 mod metadata_type;
 
+pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};
 pub use metadata_location::MetadataLocation;
-
 pub use metadata_type::{
     ErrorMetadata, EventMetadata, ExtrinsicMetadata, InvalidMetadataError, Metadata, MetadataError,
     PalletMetadata, RuntimeFnMetadata,
 };
-
-pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};

@@ -2,16 +2,16 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::error::CodegenError;
+use proc_macro2::TokenStream;
+use quote::{format_ident, quote};
+use scale_info::{form::PortableForm, Type, TypeDef};
+use syn::parse_quote;
 
 use super::{
     CompositeDef, CompositeDefFields, CratePath, Derives, TypeDefParameters, TypeGenerator,
     TypeParameter,
 };
-use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use scale_info::{form::PortableForm, Type, TypeDef};
-use syn::parse_quote;
+use crate::error::CodegenError;
 
 /// Generates a Rust `struct` or `enum` definition based on the supplied [`scale-info::Type`].
 ///

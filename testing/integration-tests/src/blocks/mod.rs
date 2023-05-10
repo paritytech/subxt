@@ -2,12 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{pair_signer, test_context, utils::node_runtime};
 use codec::Compact;
 use frame_metadata::RuntimeMetadataPrefixed;
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::blocks::BlocksClient;
+
+use crate::{pair_signer, test_context, utils::node_runtime};
 
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]

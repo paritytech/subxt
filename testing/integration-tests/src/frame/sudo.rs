@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use sp_keyring::AccountKeyring;
+
 use crate::{
     node_runtime::{
         self,
@@ -10,7 +12,6 @@ use crate::{
     },
     pair_signer, test_context,
 };
-use sp_keyring::AccountKeyring;
 
 type Call = runtime_types::kitchensink_runtime::RuntimeCall;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;

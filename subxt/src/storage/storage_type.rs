@@ -2,6 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::{future::Future, marker::PhantomData};
+
+use derivative::Derivative;
+use frame_metadata::v15::StorageEntryType;
+use scale_info::form::PortableForm;
+
 use super::storage_address::{StorageAddress, Yes};
 use crate::{
     client::OnlineClientT,
@@ -10,10 +16,6 @@ use crate::{
     rpc::types::{StorageData, StorageKey},
     Config,
 };
-use derivative::Derivative;
-use frame_metadata::v15::StorageEntryType;
-use scale_info::form::PortableForm;
-use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]

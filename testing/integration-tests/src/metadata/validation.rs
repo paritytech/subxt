@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::{
     v15::{
         ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
@@ -15,6 +14,8 @@ use scale_info::{
     meta_type, Path, Type, TypeInfo,
 };
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
+
+use crate::{node_runtime, test_context, TestContext};
 
 async fn metadata_to_api(
     metadata: RuntimeMetadataV15,

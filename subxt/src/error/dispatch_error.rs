@@ -5,13 +5,16 @@
 //! A representation of the dispatch error; an error returned when
 //! something fails in trying to submit/execute a transaction.
 
-use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::visitor::DecodeAsTypeResult;
 use std::borrow::Cow;
 
+use scale_decode::visitor::DecodeAsTypeResult;
+
 use super::Error;
-use crate::error::RootError;
+use crate::{
+    error::RootError,
+    metadata::{DecodeWithMetadata, Metadata},
+};
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]

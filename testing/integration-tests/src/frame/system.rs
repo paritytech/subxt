@@ -2,12 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use assert_matches::assert_matches;
+use sp_keyring::AccountKeyring;
+
 use crate::{
     node_runtime::{self, system},
     pair_signer, test_context,
 };
-use assert_matches::assert_matches;
-use sp_keyring::AccountKeyring;
 
 #[tokio::test]
 async fn storage_account() -> Result<(), subxt::Error> {

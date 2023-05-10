@@ -2,6 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::{future::Future, pin::Pin};
+
+use derivative::Derivative;
+use futures::{future::Either, stream, Stream, StreamExt};
+
 use super::Block;
 use crate::{
     client::OnlineClientT,
@@ -9,9 +14,6 @@ use crate::{
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
 };
-use derivative::Derivative;
-use futures::{future::Either, stream, Stream, StreamExt};
-use std::{future::Future, pin::Pin};
 
 type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;

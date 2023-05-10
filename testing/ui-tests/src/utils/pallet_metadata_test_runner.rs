@@ -2,9 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::io::Read;
+
 use codec::{Decode, Encode};
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
-use std::io::Read;
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";

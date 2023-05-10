@@ -2,10 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::*;
 use pretty_assertions::assert_eq;
 use scale_info::{meta_type, scale, Registry, TypeInfo};
 use syn::parse_quote;
+
+use super::*;
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
 

@@ -1,6 +1,8 @@
 use sp_keyring::AccountKeyring;
-use subxt::dynamic::{At, Value};
-use subxt::{OnlineClient, PolkadotConfig};
+use subxt::{
+    dynamic::{At, Value},
+    OnlineClient, PolkadotConfig,
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

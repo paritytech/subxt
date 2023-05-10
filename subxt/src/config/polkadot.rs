@@ -4,15 +4,15 @@
 
 //! Polkadot specific configuration
 
+use codec::Encode;
+pub use primitive_types::{H256, U256};
+
 use super::{
     extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder},
     Config,
 };
-use codec::Encode;
-
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 use crate::SubstrateConfig;
-pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.
 pub enum PolkadotConfig {}

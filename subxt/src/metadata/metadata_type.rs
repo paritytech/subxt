@@ -2,15 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::hash_cache::HashCache;
+use std::{collections::HashMap, convert::TryFrom, sync::Arc};
+
 use codec::Error as CodecError;
 use frame_metadata::{
-    v15::PalletConstantMetadata, v15::RuntimeMetadataV15, v15::StorageEntryMetadata,
+    v15::{PalletConstantMetadata, RuntimeMetadataV15, StorageEntryMetadata},
     RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
 };
 use parking_lot::RwLock;
 use scale_info::{form::PortableForm, PortableRegistry, Type};
-use std::{collections::HashMap, convert::TryFrom, sync::Arc};
+
+use super::hash_cache::HashCache;
 
 /// Metadata error originated from inspecting the internal representation of the runtime metadata.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -723,12 +725,13 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use frame_metadata::v15::{
         ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
         StorageEntryModifier, StorageEntryType,
     };
     use scale_info::{meta_type, TypeInfo};
+
+    use super::*;
 
     fn load_metadata() -> Metadata {
         // Extrinsic needs to contain at least the generic type parameter "Call"

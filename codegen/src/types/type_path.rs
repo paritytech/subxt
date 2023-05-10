@@ -2,13 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::CratePath;
+use std::collections::BTreeSet;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::format_ident;
 use scale_info::{form::PortableForm, Path, TypeDefPrimitive};
-use std::collections::BTreeSet;
 use syn::parse_quote;
+
+use crate::CratePath;
 
 /// An opaque struct representing a type path. The main usage of this is
 /// to spit out as tokens in some `quote!{ ... }` macro; the inner structure

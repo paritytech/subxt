@@ -38,12 +38,11 @@ pub mod book;
 
 // Suppress an unused dependency warning because tokio is
 // only used in example code snippets at the time of writing.
-#[cfg(test)]
-use tokio as _;
-
 // Used to enable the js feature for wasm.
 #[cfg(target_arch = "wasm32")]
 pub use getrandom as _;
+#[cfg(test)]
+use tokio as _;
 
 #[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
 std::compile_error!(

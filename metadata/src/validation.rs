@@ -4,12 +4,13 @@
 
 //! Utility functions for metadata validation.
 
+use std::collections::HashSet;
+
 use frame_metadata::v15::{
     ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
     RuntimeMetadataV15, StorageEntryMetadata, StorageEntryType,
 };
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
-use std::collections::HashSet;
 
 /// Start with a predefined hashing value for the pallets.
 const MAGIC_PALLET_VALUE: &[u8] = &[19];
@@ -576,7 +577,6 @@ pub enum NotFound {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use bitvec::{order::Lsb0, vec::BitVec};
     use frame_metadata::v15::{
         ExtrinsicMetadata, PalletCallMetadata, PalletConstantMetadata, PalletErrorMetadata,
@@ -584,6 +584,8 @@ mod tests {
         StorageEntryMetadata, StorageEntryModifier,
     };
     use scale_info::meta_type;
+
+    use super::*;
 
     // Define recursive types.
     #[allow(dead_code)]

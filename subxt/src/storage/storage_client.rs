@@ -2,18 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::{future::Future, marker::PhantomData};
+
+use derivative::Derivative;
+
 use super::{
     storage_type::{validate_storage_address, Storage},
     utils, StorageAddress,
 };
-
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     error::Error,
     Config,
 };
-use derivative::Derivative;
-use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]

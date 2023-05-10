@@ -2,8 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use parking_lot::RwLock;
 use std::{borrow::Cow, collections::HashMap};
+
+use parking_lot::RwLock;
 
 /// A cache with the simple goal of storing 32 byte hashes against root+item keys
 #[derive(Default, Debug)]

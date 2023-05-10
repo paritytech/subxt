@@ -2,6 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::sync::Arc;
+
+use futures::lock::Mutex as AsyncMutex;
+
 use crate::{
     blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
     client::{OfflineClientT, OnlineClientT},
@@ -12,9 +16,6 @@ use crate::{
     runtime_api::RuntimeApi,
     storage::Storage,
 };
-
-use futures::lock::Mutex as AsyncMutex;
-use std::sync::Arc;
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {

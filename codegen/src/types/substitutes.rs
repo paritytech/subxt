@@ -2,11 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{error::TypeSubstitutionError, CratePath};
 use std::{borrow::Borrow, collections::HashMap};
+
 use syn::{parse_quote, spanned::Spanned as _};
 
 use super::{TypePath, TypePathType};
+use crate::{error::TypeSubstitutionError, CratePath};
 
 /// A map of type substitutes. We match on the paths to generated types in order
 /// to figure out when to swap said type with some provided substitute.

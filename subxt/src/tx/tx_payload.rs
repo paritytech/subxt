@@ -5,11 +5,13 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::{dynamic::Value, error::Error, metadata::Metadata};
+use std::{borrow::Cow, sync::Arc};
+
 use codec::Encode;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, ValueDef, Variant};
-use std::{borrow::Cow, sync::Arc};
+
+use crate::{dynamic::Value, error::Error, metadata::Metadata};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.

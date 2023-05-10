@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use derivative::Derivative;
+
 use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
@@ -9,7 +11,6 @@ use crate::{
     metadata::{DecodeWithMetadata, MetadataError},
     Config,
 };
-use derivative::Derivative;
 
 /// A client for accessing constants.
 #[derive(Derivative)]

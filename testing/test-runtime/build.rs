@@ -2,8 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use codec::{Decode, Encode};
 use std::{env, fs, path::Path};
+
+use codec::{Decode, Encode};
 use substrate_runner::{Error as SubstrateNodeError, SubstrateNode};
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
@@ -100,12 +101,10 @@ mod client {
     pub use jsonrpsee::{
         client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
         core::{
-            client::{Client, ClientBuilder},
-            Error,
+            client::{Client, ClientBuilder, ClientT},
+            rpc_params, Error,
         },
     };
-
-    pub use jsonrpsee::core::{client::ClientT, rpc_params};
 
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {

@@ -2,12 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::Error, metadata::DecodeWithMetadata, Config};
-use codec::Decode;
-use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 
+use codec::Decode;
+use derivative::Derivative;
+
 use super::RuntimeApiPayload;
+use crate::{client::OnlineClientT, error::Error, metadata::DecodeWithMetadata, Config};
 
 /// Execute runtime API calls.
 #[derive(Derivative)]

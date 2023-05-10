@@ -31,13 +31,14 @@ pub use pair_signer::PairSigner;
 // packages like sp_keyring and such, and so relies on sp_core and sp_runtime to be included.
 #[cfg(feature = "substrate-compat")]
 mod pair_signer {
-    use super::Signer;
-    use crate::Config;
     use sp_core::Pair as PairT;
     use sp_runtime::{
         traits::{IdentifyAccount, Verify},
         AccountId32 as SpAccountId32, MultiSignature as SpMultiSignature,
     };
+
+    use super::Signer;
+    use crate::Config;
 
     /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
     #[derive(Clone, Debug)]

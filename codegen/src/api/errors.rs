@@ -7,9 +7,8 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use scale_info::form::PortableForm;
 
-use crate::types::TypeGenerator;
-
 use super::CodegenError;
+use crate::types::TypeGenerator;
 
 /// Generate error type alias from the provided pallet metadata.
 pub fn generate_error_type_alias(

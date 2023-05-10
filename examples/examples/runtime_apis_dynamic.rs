@@ -1,6 +1,5 @@
 use sp_keyring::AccountKeyring;
-use subxt::dynamic::Value;
-use subxt::{config::PolkadotConfig, OnlineClient};
+use subxt::{config::PolkadotConfig, dynamic::Value, OnlineClient};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}

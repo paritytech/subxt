@@ -2,6 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::sync::Arc;
+
+use derivative::Derivative;
+use futures::future;
+use parking_lot::RwLock;
+
 use super::{OfflineClient, OfflineClientT};
 use crate::{
     blocks::BlocksClient,
@@ -17,10 +23,6 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use derivative::Derivative;
-use futures::future;
-use parking_lot::RwLock;
-use std::sync::Arc;
 
 /// A trait representing a client that can perform
 /// online actions.

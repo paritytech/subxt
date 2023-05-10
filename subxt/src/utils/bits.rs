@@ -4,13 +4,14 @@
 
 //! Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
 
+use std::marker::PhantomData;
+
 use codec::{Compact, Input};
 use scale_bits::{
     scale::format::{Format, OrderFormat, StoreFormat},
     Bits,
 };
 use scale_decode::IntoVisitor;
-use std::marker::PhantomData;
 
 /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
 ///
@@ -191,12 +192,12 @@ impl<Store, Order> scale_encode::EncodeAsType for DecodedBits<Store, Order> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use core::fmt::Debug;
 
     use bitvec::vec::BitVec;
     use codec::Decode as _;
+
+    use super::*;
 
     // NOTE: We don't use `bitvec::order` types in our implementation, since we
     // don't want to depend on `bitvec`. Rather than reimplementing the unsafe

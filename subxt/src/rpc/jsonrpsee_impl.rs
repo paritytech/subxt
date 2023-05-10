@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{RpcClientT, RpcFuture, RpcSubscription};
-use crate::error::RpcError;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{
@@ -14,6 +12,9 @@ use jsonrpsee::{
     types::SubscriptionId,
 };
 use serde_json::value::RawValue;
+
+use super::{RpcClientT, RpcFuture, RpcSubscription};
+use crate::error::RpcError;
 
 struct Params(Option<Box<RawValue>>);
 

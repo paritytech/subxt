@@ -2,6 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use assert_matches::assert_matches;
+use sp_core::{sr25519, Pair};
+use sp_keyring::AccountKeyring;
+use subxt::error::{DispatchError, Error};
+
 use crate::{
     node_runtime::{
         self,
@@ -13,10 +18,6 @@ use crate::{
     },
     pair_signer, test_context,
 };
-use assert_matches::assert_matches;
-use sp_core::{sr25519, Pair};
-use sp_keyring::AccountKeyring;
-use subxt::error::{DispatchError, Error};
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {

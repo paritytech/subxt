@@ -4,14 +4,15 @@
 
 //! Types sent to/from the Substrate RPC interface.
 
-use crate::{metadata::Metadata, Config};
+use std::collections::HashMap;
+
 use codec::{Decode, Encode};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 // Subscription types are returned from some calls, so expose it with the rest of the returned types.
 pub use super::rpc_client::Subscription;
+use crate::{metadata::Metadata, Config};
 
 /// An error dry running an extrinsic.
 #[derive(Debug, PartialEq, Eq)]
@@ -730,8 +731,9 @@ impl<Hash> From<TransactionEventIR<Hash>> for TransactionEvent<Hash> {
 
 /// Serialize and deserialize helper as string.
 mod as_string {
-    use super::*;
     use serde::Deserializer;
+
+    use super::*;
 
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<usize, D::Error> {
         String::deserialize(deserializer)?

@@ -11,12 +11,11 @@ mod type_def;
 mod type_def_params;
 mod type_path;
 
+use std::collections::BTreeMap;
+
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
-use std::collections::BTreeMap;
-
-use crate::error::CodegenError;
 
 pub use self::{
     composite_def::{CompositeDef, CompositeDefFieldType, CompositeDefFields},
@@ -26,6 +25,7 @@ pub use self::{
     type_def_params::TypeDefParameters,
     type_path::{TypeParameter, TypePath, TypePathType},
 };
+use crate::error::CodegenError;
 
 pub type Field = scale_info::Field<PortableForm>;
 

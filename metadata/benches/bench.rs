@@ -2,11 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::{fs, path::Path};
+
 use codec::Decode;
 use criterion::*;
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info::{form::PortableForm, TypeDef, TypeDefVariant};
-use std::{fs, path::Path};
 use subxt_metadata::{
     get_call_hash, get_constant_hash, get_metadata_hash, get_pallet_hash, get_storage_hash,
     metadata_v14_to_latest,

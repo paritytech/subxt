@@ -2,7 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
+use subxt::{
+    tx::{PairSigner, TxProgress},
+    utils::MultiAddress,
+    Config, Error, OnlineClient, SubstrateConfig,
+};
 
 use crate::{
     node_runtime::{
@@ -12,12 +18,6 @@ use crate::{
         system,
     },
     test_context, TestContext,
-};
-use sp_core::sr25519::Pair;
-use subxt::{
-    tx::{PairSigner, TxProgress},
-    utils::MultiAddress,
-    Config, Error, OnlineClient, SubstrateConfig,
 };
 
 struct ContractsTestContext {

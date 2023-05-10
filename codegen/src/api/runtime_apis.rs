@@ -2,14 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CodegenError, CratePath};
 use frame_metadata::v15::{RuntimeApiMetadata, RuntimeMetadataV15};
-use heck::ToSnakeCase as _;
-use heck::ToUpperCamelCase as _;
-
+use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
+
+use crate::{types::TypeGenerator, CodegenError, CratePath};
 
 /// Generates runtime functions for the given API metadata.
 fn generate_runtime_api(

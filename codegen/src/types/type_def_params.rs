@@ -2,10 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::BTreeSet;
+
+use quote::quote;
+
 use super::TypeParameter;
 use crate::types::CompositeDefFieldType;
-use quote::quote;
-use std::collections::BTreeSet;
 
 /// Represents the set of generic type parameters for generating a type definition e.g. the `T` in
 /// `Foo<T>`.

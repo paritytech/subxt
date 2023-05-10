@@ -12,12 +12,11 @@ mod offline_client;
 mod online_client;
 
 pub use offline_client::{OfflineClient, OfflineClientT};
-pub use online_client::{
-    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
-};
-
 #[cfg(any(
     feature = "jsonrpsee-ws",
     all(feature = "jsonrpsee-web", target_arch = "wasm32")
 ))]
 pub use online_client::default_rpc_client;
+pub use online_client::{
+    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
+};

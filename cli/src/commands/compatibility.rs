@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashMap;
+
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::{self, WrapErr};
@@ -10,7 +12,6 @@ use frame_metadata::{
 };
 use jsonrpsee::client_transport::ws::Uri;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use subxt_codegen::utils::MetadataVersion;
 use subxt_metadata::{get_metadata_hash, get_pallet_hash, metadata_v14_to_latest};
 

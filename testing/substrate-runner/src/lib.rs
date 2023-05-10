@@ -4,11 +4,13 @@
 
 mod error;
 
-use std::borrow::Cow;
-use std::collections::HashMap;
-use std::ffi::OsString;
-use std::io::{BufRead, BufReader, Read};
-use std::process::{self, Command};
+use std::{
+    borrow::Cow,
+    collections::HashMap,
+    ffi::OsString,
+    io::{BufRead, BufReader, Read},
+    process::{self, Command},
+};
 
 pub use error::Error;
 

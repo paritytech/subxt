@@ -2,9 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, pair_signer, test_context};
 use sp_keyring::AccountKeyring;
 use subxt::utils::AccountId32;
+
+use crate::{node_runtime, pair_signer, test_context};
 
 #[tokio::test]
 async fn account_nonce() -> Result<(), subxt::Error> {

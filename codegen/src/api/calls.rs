@@ -2,16 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::CodegenError;
-use crate::{
-    types::{CompositeDefFields, TypeGenerator},
-    CratePath,
-};
 use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
 use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
+
+use super::CodegenError;
+use crate::{
+    types::{CompositeDefFields, TypeGenerator},
+    CratePath,
+};
 
 /// Generate calls from the provided pallet's metadata. Each call returns a `StaticTxPayload`
 /// that can be passed to the subxt client to submit/sign/encode.

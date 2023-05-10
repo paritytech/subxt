@@ -18,7 +18,6 @@ mod tx_progress;
 // feature if we want to avoid needing sp_core and sp_runtime.
 #[cfg(feature = "substrate-compat")]
 pub use self::signer::PairSigner;
-
 pub use self::{
     signer::Signer,
     tx_client::{SubmittableExtrinsic, TxClient},

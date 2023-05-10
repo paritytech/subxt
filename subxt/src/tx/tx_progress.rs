@@ -6,6 +6,9 @@
 
 use std::task::Poll;
 
+use derivative::Derivative;
+use futures::{Stream, StreamExt};
+
 use crate::{
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
@@ -13,8 +16,6 @@ use crate::{
     rpc::types::{Subscription, SubstrateTxStatus},
     Config,
 };
-use derivative::Derivative;
-use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
@@ -413,6 +414,7 @@ mod test {
     use std::pin::Pin;
 
     use futures::Stream;
+    use serde_json::value::RawValue;
 
     use crate::{
         client::{OfflineClientT, OnlineClientT},
@@ -422,8 +424,6 @@ mod test {
         tx::TxProgress,
         Config, Error, SubstrateConfig,
     };
-
-    use serde_json::value::RawValue;
 
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;
     type MockHash = <WithExtrinsicParams<

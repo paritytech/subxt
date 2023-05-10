@@ -4,14 +4,15 @@
 
 //! Utility functions to generate a subset of the metadata.
 
-use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeMetadataV15, StorageEntryType,
-};
-use scale_info::{form::PortableForm, interner::UntrackedSymbol, TypeDef};
 use std::{
     any::TypeId,
     collections::{BTreeMap, HashSet},
 };
+
+use frame_metadata::v15::{
+    ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeMetadataV15, StorageEntryType,
+};
+use scale_info::{form::PortableForm, interner::UntrackedSymbol, TypeDef};
 
 /// Collect all type IDs needed to represent the provided pallet.
 fn collect_pallet_types(pallet: &PalletMetadata<PortableForm>, type_ids: &mut HashSet<u32>) {
@@ -249,11 +250,13 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::metadata_v14_to_latest;
+    use std::{fs, path::Path};
+
     use codec::Decode;
     use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-    use std::{fs, path::Path};
+
+    use super::*;
+    use crate::metadata_v14_to_latest;
 
     fn load_metadata() -> RuntimeMetadataV15 {
         let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))

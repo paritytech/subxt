@@ -8,6 +8,8 @@ use codec::{Compact, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
 
+// This is returned from an API below, so expose it here.
+pub use crate::rpc::types::DryRunResult;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
@@ -15,9 +17,6 @@ use crate::{
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-
-// This is returned from an API below, so expose it here.
-pub use crate::rpc::types::DryRunResult;
 
 /// A client for working with transactions.
 #[derive(Derivative)]

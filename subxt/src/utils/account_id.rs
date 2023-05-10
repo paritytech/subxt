@@ -180,10 +180,10 @@ mod substrate_impls {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use sp_core::crypto::Ss58Codec;
     use sp_keyring::AccountKeyring;
+
+    use super::*;
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {
