@@ -2,118 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Generate a strongly typed API for interacting with a Substrate runtime from its metadata.
-//!
-//! Usage:
-//!
-//! Download metadata from a running Substrate node using `subxt-cli`:
-//!
-//! ```bash
-//! subxt metadata > polkadot_metadata.scale
-//! ```
-//!
-//! Annotate a Rust module with the `subxt` attribute referencing the aforementioned metadata file.
-//!
-//! ```ignore
-//! #[subxt::subxt(
-//!     runtime_metadata_path = "polkadot_metadata.scale",
-//! )]
-//! pub mod polkadot {}
-//! ```
-//!
-//! The `subxt` macro will populate the annotated module with all of the methods and types required
-//! for submitting extrinsics and reading from storage for the given runtime.
-//!
-//! ## Substituting types
-//!
-//! In order to replace a generated type by a user-defined type, use `substitute_type`:
-//!
-//! ```ignore
-//! #[subxt::subxt(
-//!     runtime_metadata_path = "polkadot_metadata.scale",
-//!     substitute_type(type = "sp_arithmetic::per_things::Perbill", with = "sp_runtime::Perbill")
-//! )]
-//! pub mod polkadot {}
-//! ```
-//!
-//! This will replace the generated type and any usages with the specified type at the `use` import.
-//! It is useful for using custom decoding for specific types, or to provide a type with foreign
-//! trait implementations, or other specialized functionality.
-
-//! ## Custom Derives
-//!
-//! By default all generated types are annotated with `scale::Encode` and `scale::Decode` derives.
-//! However when using the generated types in the client, they may require additional derives to be
-//! useful.
-//!
-//! ### Adding derives for all types
-//!
-//! Add `derive_for_all_types` with a comma separated list of the derives to apply to *all* types
-//!
-//! ```ignore
-//! #[subxt::subxt(
-//!     runtime_metadata_path = "polkadot_metadata.scale",
-//!     derive_for_all_types = "Eq, PartialEq"
-//! )]
-//! pub mod polkadot {}
-//! ```
-//!
-//! ### Adding derives for specific types
-//!
-//! Add `derive_for_type` for each specific type with a comma separated list of the derives to
-//! apply for that type only.
-//!
-//! ```ignore
-//! #[subxt::subxt(
-//!     runtime_metadata_path = "polkadot_metadata.scale",
-//!     derive_for_all_types = "Eq, PartialEq",
-//!     derive_for_type(type = "frame_support::PalletId", derive = "Ord, PartialOrd"),
-//!     derive_for_type(type = "sp_runtime::ModuleError", derive = "Hash"),
-//! )]
-//! pub mod polkadot {}
-//! ```
-//!
-//! ### Custom crate path
-//!
-//! In order to specify a custom crate path to be used for the code generation:
-//!
-//! ```ignore
-//! #[subxt::subxt(crate = "crate::path::to::subxt")]
-//! pub mod polkadot {}
-//! ```
-//!
-//! By default the path `::subxt` is used.
-//!
-//! ### Expose documentation
-//!
-//! In order to expose the documentation from the runtime metadata on the generated
-//! code, users must specify the `generate_docs` flag:
-//!
-//! ```ignore
-//! #[subxt::subxt(generate_docs)]
-//! pub mod polkadot {}
-//! ```
-//!
-//! By default the documentation is not generated.
-//!
-//! ### Runtime types generation
-//!
-//! In some cases, you may be interested only in the runtime types, like `RuntimeCall` enum. You can
-//! limit code generation to just `runtime_types` module with `runtime_types_only` flag:
-//!
-//! ```ignore
-//! #[subxt::subxt(runtime_types_only)]
-//! // or equivalently
-//! #[subxt::subxt(runtime_types_only = true)]
-//! ```
-
-#![deny(unused_crate_dependencies)]
-
 extern crate proc_macro;
 
 use std::str::FromStr;
 
-use darling::FromMeta;
+use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
@@ -152,33 +45,38 @@ struct RuntimeMetadataArgs {
     runtime_types_only: bool,
     #[darling(default)]
     no_default_derives: bool,
+    #[darling(default)]
+    no_default_substitutions: bool,
 }
 
 #[derive(Debug, FromMeta)]
 struct DeriveForType {
-    #[darling(rename = "type")]
-    ty: syn::TypePath,
+    path: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
 struct AttributesForType {
-    #[darling(rename = "type")]
-    ty: syn::TypePath,
+    path: syn::TypePath,
     attributes: Punctuated<OuterAttribute, syn::Token![,]>,
 }
 
 #[derive(Debug, FromMeta)]
 struct SubstituteType {
-    #[darling(rename = "type")]
-    ty: syn::Path,
+    path: syn::Path,
     with: syn::Path,
 }
 
+// Note: docs for this are in the subxt library; don't add any here as they will be appended.
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as syn::AttributeArgs);
+    let attr_args = match NestedMeta::parse_meta_list(args.into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream::from(darling::Error::from(e).write_errors());
+        }
+    };
     let item_mod = parse_macro_input!(input as syn::ItemMod);
     let args = match RuntimeMetadataArgs::from_list(&attr_args) {
         Ok(v) => v,
@@ -203,21 +101,29 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     );
 
     for derives in &args.derive_for_type {
-        derives_registry.extend_for_type(derives.ty.clone(), derives.derive.iter().cloned(), vec![])
+        derives_registry.extend_for_type(
+            derives.path.clone(),
+            derives.derive.iter().cloned(),
+            vec![],
+        )
     }
     for attributes in &args.attributes_for_type {
         derives_registry.extend_for_type(
-            attributes.ty.clone(),
+            attributes.path.clone(),
             vec![],
             attributes.attributes.iter().map(|a| a.0.clone()),
         )
     }
 
-    let mut type_substitutes = TypeSubstitutes::new(&crate_path);
+    let mut type_substitutes = if args.no_default_substitutions {
+        TypeSubstitutes::new()
+    } else {
+        TypeSubstitutes::with_default_substitutes(&crate_path)
+    };
     let substitute_args_res: Result<(), _> = args.substitute_type.into_iter().try_for_each(|sub| {
         sub.with
             .try_into()
-            .and_then(|with| type_substitutes.insert(sub.ty, with))
+            .and_then(|with| type_substitutes.insert(sub.path, with))
     });
 
     if let Err(err) = substitute_args_res {

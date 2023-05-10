@@ -76,7 +76,7 @@ impl<T: Config> Events<T> {
     ///     .await?
     ///     .expect("didn't pass a block number; qed");
     ///  // Fetch the metadata of the given block.
-    ///  let metadata = client.rpc().metadata(Some(block_hash)).await?;
+    ///  let metadata = client.rpc().metadata_legacy(Some(block_hash)).await?;
     ///  // Fetch the events from the client.
     ///  let events = Events::new_from_client(metadata, block_hash, client);
     /// # Ok(())
@@ -493,6 +493,30 @@ pub(crate) mod test_utils {
     /// Build fake metadata consisting of a single pallet that knows
     /// about the event type provided.
     pub fn metadata<E: TypeInfo + 'static>() -> Metadata {
+        // Extrinsic needs to contain at least the generic type parameter "Call"
+        // for the metadata to be valid.
+        // The "Call" type from the metadata is used to decode extrinsics.
+        // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Call> {
+            call: Call,
+        }
+        // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+        // Each pallet must contain one single variant.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum RuntimeCall {
+            PalletName(Pallet),
+        }
+        // The calls of the pallet.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum Pallet {
+            #[allow(unused)]
+            SomeCall,
+        }
+
         let pallets = vec![PalletMetadata {
             name: "Test",
             storage: None,
@@ -507,7 +531,7 @@ pub(crate) mod test_utils {
         }];
 
         let extrinsic = ExtrinsicMetadata {
-            ty: meta_type::<()>(),
+            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
         };

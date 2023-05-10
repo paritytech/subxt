@@ -6,7 +6,9 @@
 
 mod calls;
 mod constants;
+mod errors;
 mod events;
+mod runtime_apis;
 mod storage;
 
 use frame_metadata::v15::RuntimeMetadataV15;
@@ -17,7 +19,7 @@ use crate::error::CodegenError;
 use crate::{
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-    utils::{fetch_metadata_bytes_blocking, Uri},
+    utils::{fetch_metadata_bytes_blocking, MetadataVersion, Uri},
     CratePath,
 };
 use codec::Decode;
@@ -94,7 +96,11 @@ pub fn generate_runtime_api_from_url(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let bytes = fetch_metadata_bytes_blocking(url)?;
+    // Fetch latest unstable version, if that fails fall back to the latest stable.
+    let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
+        Ok(bytes) => bytes,
+        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
+    };
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -219,8 +225,13 @@ impl RuntimeGenerator {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *
 
-                // Make it easy to access the root via `root_mod` at different levels:
-                use super::#mod_ident as root_mod;
+                // Make it easy to access the root items via `root_mod` at different levels
+                // without reaching out of this module.
+                #[allow(unused_imports)]
+                mod root_mod {
+                    pub use super::*;
+                }
+
                 #types_mod
             }
         })
@@ -320,10 +331,13 @@ impl RuntimeGenerator {
                     should_gen_docs,
                 )?;
 
+                let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
+
                 Ok(quote! {
                     pub mod #mod_name {
                         use super::root_mod;
                         use super::#types_mod_ident;
+                        #errors
                         #calls
                         #event
                         #storage_mod
@@ -353,6 +367,26 @@ impl RuntimeGenerator {
             }
         };
 
+        let outer_extrinsic_variants = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name);
+            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+
+            p.calls.as_ref().map(|_| {
+                quote! {
+                    #[codec(index = #index)]
+                    #variant_name(#mod_name::Call),
+                }
+            })
+        });
+
+        let outer_extrinsic = quote! {
+            #default_derives
+            pub enum Call {
+                #( #outer_extrinsic_variants )*
+            }
+        };
+
         let root_event_if_arms = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name_str = &p.name;
             let variant_name = format_ident!("{}", variant_name_str);
@@ -369,6 +403,61 @@ impl RuntimeGenerator {
                     }
                 }
             })
+        });
+
+        let root_extrinsic_if_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
+            p.calls.as_ref().map(|_| {
+                // An 'if' arm for the RootExtrinsic impl to match this variant name:
+                quote! {
+                    if pallet_name == #variant_name_str {
+                        return Ok(Call::#variant_name(#mod_name::Call::decode_with_metadata(
+                            &mut &*pallet_bytes,
+                            pallet_ty,
+                            metadata
+                        )?));
+                    }
+                }
+            })
+        });
+
+        let outer_error_variants = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name);
+            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+
+            p.error.as_ref().map(|_| {
+                quote! {
+                    #[codec(index = #index)]
+                    #variant_name(#mod_name::Error),
+                }
+            })
+        });
+
+        let outer_error = quote! {
+            #default_derives
+            pub enum Error {
+                #( #outer_error_variants )*
+            }
+        };
+
+        let root_error_if_arms = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name_str = &p.name;
+            let variant_name = format_ident!("{}", variant_name_str);
+            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
+            p.error.as_ref().map(|err|
+                {
+                    let type_id = err.ty.id;
+                    quote! {
+                    if pallet_name == #variant_name_str {
+                        let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
+                        return Ok(Error::#variant_name(variant_error));
+                    }
+                }
+                }
+            )
         });
 
         let mod_ident = &item_mod_ir.ident;
@@ -392,6 +481,14 @@ impl RuntimeGenerator {
             .collect();
 
         let rust_items = item_mod_ir.rust_items();
+
+        let apis_mod = runtime_apis::generate_runtime_apis(
+            &self.metadata,
+            &type_gen,
+            types_mod_ident,
+            &crate_path,
+            should_gen_docs,
+        )?;
 
         Ok(quote! {
             #( #item_mod_attrs )*
@@ -424,6 +521,27 @@ impl RuntimeGenerator {
                     }
                 }
 
+                #outer_extrinsic
+
+                impl #crate_path::blocks::RootExtrinsic for Call {
+                    fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        #( #root_extrinsic_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Call enum", pallet_name)).into())
+                    }
+                }
+
+                #outer_error
+
+                impl #crate_path::error::RootError for Error {
+                    fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
+                        use #crate_path::metadata::DecodeWithMetadata;
+                        let cursor = &mut &pallet_bytes[..];
+                        #( #root_error_if_arms )*
+                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Error enum", pallet_name)).into())
+                    }
+                }
+
                 pub fn constants() -> ConstantsApi {
                     ConstantsApi
                 }
@@ -435,6 +553,12 @@ impl RuntimeGenerator {
                 pub fn tx() -> TransactionApi {
                     TransactionApi
                 }
+
+                pub fn apis() -> runtime_apis::RuntimeApi {
+                    runtime_apis::RuntimeApi
+                }
+
+                #apis_mod
 
                 pub struct ConstantsApi;
                 impl ConstantsApi {
@@ -495,7 +619,7 @@ where
     let ty = type_gen.resolve_type(type_id);
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
-        return Err(CodegenError::InvalidType(error_message_type_name.into()))
+        return Err(CodegenError::InvalidType(error_message_type_name.into()));
     };
 
     variant

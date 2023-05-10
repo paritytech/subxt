@@ -22,8 +22,6 @@ pub mod polkadot {}
 /// pluck out the events that we care about.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tracing_subscriber::fmt::init();
-
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
@@ -57,31 +55,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(block) = block_sub.next().await {
         let block = block?;
 
-        // Ask for the events for this block.
-        let events = block.events().await?;
-
         let block_hash = block.hash();
+        println!(" Block {:?}", block_hash);
 
-        // We can dynamically decode events:
-        println!("  Dynamic event details: {block_hash:?}:");
-        for event in events.iter() {
-            let event = event?;
-            let is_balance_transfer = event
-                .as_event::<polkadot::balances::events::Transfer>()?
-                .is_some();
-            let pallet = event.pallet_name();
-            let variant = event.variant_name();
-            println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
+        // Ask for the extrinsics for this block.
+        let extrinsics = block.body().await?.extrinsics();
+
+        let transfer_tx = extrinsics.find_first::<polkadot::balances::calls::types::Transfer>();
+        println!(" Transfer tx: {:?}", transfer_tx);
+
+        // Ask for the extrinsics for this block.
+        for extrinsic in extrinsics.iter() {
+            let extrinsic = extrinsic?;
+
+            println!(
+                "  Extrinsic block index {:?}, pallet index {:?}, variant index {:?}",
+                extrinsic.index(),
+                extrinsic.pallet_index(),
+                extrinsic.variant_index()
+            );
+
+            let root_extrinsic = extrinsic.as_root_extrinsic::<polkadot::Call>();
+            println!("   As root extrinsic {:?}\n", root_extrinsic);
+
+            let pallet_extrinsic = extrinsic
+                .as_pallet_extrinsic::<polkadot::runtime_types::pallet_balances::pallet::Call>();
+            println!(
+                "   Extrinsic as Balances Pallet call: {:?}\n",
+                pallet_extrinsic
+            );
+
+            let call = extrinsic.as_extrinsic::<polkadot::balances::calls::types::Transfer>()?;
+            println!(
+                "   Extrinsic as polkadot::balances::calls::Transfer: {:?}\n\n",
+                call
+            );
         }
 
-        // Or we can find the first transfer event, ignoring any others:
-        let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
-
-        if let Some(ev) = transfer_event {
-            println!("  - Balance transfer success: value: {:?}", ev.amount);
-        } else {
-            println!("  - No balance transfer event found in this block");
-        }
+        println!("\n");
     }
 
     Ok(())

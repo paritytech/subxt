@@ -17,9 +17,7 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use codec::Compact;
 use derivative::Derivative;
-use frame_metadata::RuntimeMetadataPrefixed;
 use futures::future;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -136,10 +134,19 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        let (_, meta) = rpc
-            .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
-            .await?;
-        Ok(meta.try_into()?)
+        #[cfg(feature = "unstable-metadata")]
+        {
+            // Try to fetch the latest unstable metadata, if that fails fall back to
+            // fetching the latest stable metadata.
+            const V15_METADATA_VERSION: u32 = u32::MAX;
+            match rpc.metadata_at_version(V15_METADATA_VERSION).await {
+                Ok(bytes) => Ok(bytes),
+                Err(_) => rpc.metadata().await,
+            }
+        }
+
+        #[cfg(not(feature = "unstable-metadata"))]
+        rpc.metadata().await
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -383,7 +390,7 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let metadata = match self.client.rpc().metadata(None).await {
+        let metadata = match self.client.rpc().metadata().await {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };

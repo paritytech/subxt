@@ -83,6 +83,11 @@ pub fn generate_calls(
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
+
+                impl #crate_path::blocks::StaticExtrinsic for #struct_name {
+                    const PALLET: &'static str = #pallet_name;
+                    const CALL: &'static str = #call_name;
+                }
             };
 
             let client_fn = quote! {
@@ -90,11 +95,11 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::Payload<#struct_name> {
+                ) -> #crate_path::tx::Payload<types::#struct_name> {
                     #crate_path::tx::Payload::new_static(
                         #pallet_name,
                         #call_name,
-                        #struct_name { #( #call_args, )* },
+                        types::#struct_name { #( #call_args, )* },
                         [#(#call_hash,)*]
                     )
                 }
@@ -106,6 +111,7 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
+    let call_type = type_gen.resolve_type_path(call.ty.id);
     let call_ty = type_gen.resolve_type(call.ty.id);
     let docs = &call_ty.docs;
     let docs = should_gen_docs
@@ -114,13 +120,18 @@ pub fn generate_calls(
 
     Ok(quote! {
         #docs
+        pub type Call = #call_type;
         pub mod calls {
             use super::root_mod;
             use super::#types_mod_ident;
 
             type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
-            #( #call_structs )*
+            pub mod types {
+                use super::#types_mod_ident;
+
+                #( #call_structs )*
+            }
 
             pub struct TransactionApi;
 

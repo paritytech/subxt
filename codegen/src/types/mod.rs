@@ -11,7 +11,6 @@ mod type_def;
 mod type_def_params;
 mod type_path;
 
-use darling::FromMeta;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use scale_info::{form::PortableForm, PortableRegistry, Type, TypeDef};
@@ -353,7 +352,7 @@ impl ToTokens for CratePath {
 
 impl From<&str> for CratePath {
     fn from(crate_path: &str) -> Self {
-        Self(syn::Path::from_string(crate_path).unwrap_or_else(|err| {
+        Self(syn::parse_str(crate_path).unwrap_or_else(|err| {
             panic!("failed converting {crate_path:?} to `syn::Path`: {err:?}");
         }))
     }

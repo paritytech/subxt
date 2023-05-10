@@ -351,6 +351,43 @@ async fn submit_large_extrinsic() {
 }
 
 #[tokio::test]
+async fn decode_a_module_error() {
+    use node_runtime::runtime_types::pallet_assets::pallet as assets;
+
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice_addr = alice.account_id().clone().into();
+
+    // Trying to work with an asset ID 1 which doesn't exist should return an
+    // "unknown" module error from the assets pallet.
+    let freeze_unknown_asset = node_runtime::tx().assets().freeze(1, alice_addr);
+
+    let err = api
+        .tx()
+        .sign_and_submit_then_watch_default(&freeze_unknown_asset, &alice)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .expect_err("an 'unknown asset' error");
+
+    let Error::Runtime(DispatchError::Module(module_err)) = err else {
+        panic!("Expected a ModuleError, got {err:?}");
+    };
+
+    // Decode the error into our generated Error type.
+    let decoded_err = module_err.as_root_error::<node_runtime::Error>().unwrap();
+
+    // Decoding should result in an Assets.Unknown error:
+    assert_eq!(
+        decoded_err,
+        node_runtime::Error::Assets(assets::Error::Unknown)
+    );
+}
+
+#[tokio::test]
 async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -401,7 +438,7 @@ async fn rpc_state_call() {
         _ => panic!("Metadata V14 or V15 unavailable"),
     };
     // Compare the runtime API call against the `state_getMetadata`.
-    let metadata = api.rpc().metadata(None).await.unwrap();
+    let metadata = api.rpc().metadata_legacy(None).await.unwrap();
     let metadata = metadata.runtime_metadata();
     assert_eq!(&metadata_call, metadata);
 }

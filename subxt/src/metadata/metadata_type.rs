@@ -27,9 +27,15 @@ pub enum MetadataError {
     /// Event is not in metadata.
     #[error("Pallet {0}, Event {0} not found")]
     EventNotFound(u8, u8),
+    /// Extrinsic is not in metadata.
+    #[error("Pallet {0}, Extrinsic {0} not found")]
+    ExtrinsicNotFound(u8, u8),
     /// Event is not in metadata.
     #[error("Pallet {0}, Error {0} not found")]
     ErrorNotFound(u8, u8),
+    /// Runtime function is not in metadata.
+    #[error("Runtime function not found")]
+    RuntimeFnNotFound,
     /// Storage is not in metadata.
     #[error("Storage not found")]
     StorageNotFound,
@@ -57,6 +63,9 @@ pub enum MetadataError {
     /// Runtime storage metadata is incompatible with the static one.
     #[error("Pallet {0} Storage {0} has incompatible metadata")]
     IncompatibleStorageMetadata(String, String),
+    /// Runtime API metadata is incompatible with the static one.
+    #[error("Runtime API Trait {0} Method {0} has incompatible metadata")]
+    IncompatibleRuntimeApiMetadata(String, String),
     /// Runtime metadata is not fully compatible with the static one.
     #[error("Node metadata is not fully compatible")]
     IncompatibleMetadata,
@@ -69,6 +78,8 @@ struct MetadataInner {
 
     // Events are hashed by pallet an error index (decode oriented)
     events: HashMap<(u8, u8), EventMetadata>,
+    // Extrinsics are hashed by pallet an error index (decode oriented)
+    extrinsics: HashMap<(u8, u8), ExtrinsicMetadata>,
     // Errors are hashed by pallet and error index (decode oriented)
     errors: HashMap<(u8, u8), ErrorMetadata>,
 
@@ -79,6 +90,9 @@ struct MetadataInner {
     // an extrinsic fails.
     dispatch_error_ty: Option<u32>,
 
+    // Runtime API metadata
+    runtime_apis: HashMap<String, RuntimeFnMetadata>,
+
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
@@ -86,6 +100,7 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
+    cached_runtime_hashes: HashCache,
 }
 
 /// A representation of the runtime metadata received from a node.
@@ -95,6 +110,14 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    /// Returns a reference to [`RuntimeFnMetadata`].
+    pub fn runtime_fn(&self, name: &str) -> Result<&RuntimeFnMetadata, MetadataError> {
+        self.inner
+            .runtime_apis
+            .get(name)
+            .ok_or(MetadataError::RuntimeFnNotFound)
+    }
+
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &str) -> Result<&PalletMetadata, MetadataError> {
         self.inner
@@ -114,6 +137,20 @@ impl Metadata {
             .events
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
+        Ok(event)
+    }
+
+    /// Returns the metadata for the extrinsic at the given pallet and call indices.
+    pub fn extrinsic(
+        &self,
+        pallet_index: u8,
+        call_index: u8,
+    ) -> Result<&ExtrinsicMetadata, MetadataError> {
+        let event = self
+            .inner
+            .extrinsics
+            .get(&(pallet_index, call_index))
+            .ok_or(MetadataError::ExtrinsicNotFound(pallet_index, call_index))?;
         Ok(event)
     }
 
@@ -158,7 +195,7 @@ impl Metadata {
             .get_or_insert(pallet, storage, || {
                 subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage).map_err(
                     |e| match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
                     },
                 )
@@ -172,7 +209,7 @@ impl Metadata {
             .get_or_insert(pallet, constant, || {
                 subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant).map_err(
                     |e| match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
                     },
                 )
@@ -186,10 +223,24 @@ impl Metadata {
             .get_or_insert(pallet, function, || {
                 subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function).map_err(|e| {
                     match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Root => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
                     }
                 })
+            })
+    }
+
+    /// Obtain the unique hash for a runtime API function.
+    pub fn runtime_api_hash(
+        &self,
+        trait_name: &str,
+        method_name: &str,
+    ) -> Result<[u8; 32], MetadataError> {
+        self.inner
+            .cached_runtime_hashes
+            .get_or_insert(trait_name, method_name, || {
+                subxt_metadata::get_runtime_api_hash(&self.inner.metadata, trait_name, method_name)
+                    .map_err(|_| MetadataError::RuntimeFnNotFound)
             })
     }
 
@@ -203,6 +254,42 @@ impl Metadata {
         *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
+    }
+}
+
+/// Metadata for a specific runtime API function.
+#[derive(Clone, Debug)]
+pub struct RuntimeFnMetadata {
+    /// The trait name of the runtime function.
+    trait_name: String,
+    /// The method name of the runtime function.
+    method_name: String,
+    /// The parameter name and type IDs interpreted as `scale_info::Field`
+    /// for ease of decoding.
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
+    /// The type ID of the return type.
+    return_id: u32,
+}
+
+impl RuntimeFnMetadata {
+    /// Get the parameters as fields.
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
+        &self.fields
+    }
+
+    /// Return the trait name of the runtime function.
+    pub fn trait_name(&self) -> &str {
+        &self.trait_name
+    }
+
+    /// Return the method name of the runtime function.
+    pub fn method_name(&self) -> &str {
+        &self.method_name
+    }
+
+    /// Get the type ID of the return type.
+    pub fn return_id(&self) -> u32 {
+        self.return_id
     }
 }
 
@@ -318,6 +405,39 @@ impl EventMetadata {
     }
 }
 
+/// Metadata for specific extrinsics.
+#[derive(Clone, Debug)]
+pub struct ExtrinsicMetadata {
+    // The pallet name is shared across every extrinsic, so put it
+    // behind an Arc to avoid lots of needless clones of it existing.
+    pallet: Arc<str>,
+    call: String,
+    fields: Vec<scale_info::Field<scale_info::form::PortableForm>>,
+    docs: Vec<String>,
+}
+
+impl ExtrinsicMetadata {
+    /// Get the name of the pallet from which the extrinsic was emitted.
+    pub fn pallet(&self) -> &str {
+        &self.pallet
+    }
+
+    /// Get the name of the extrinsic call.
+    pub fn call(&self) -> &str {
+        &self.call
+    }
+
+    /// The names, type names & types of each field in the extrinsic.
+    pub fn fields(&self) -> &[scale_info::Field<scale_info::form::PortableForm>] {
+        &self.fields
+    }
+
+    /// Documentation for this extrinsic.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
+    }
+}
+
 /// Details about a specific runtime error.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
@@ -358,6 +478,12 @@ pub enum InvalidMetadataError {
     /// Type missing from type registry
     #[error("Type {0} missing from type registry")]
     MissingType(u32),
+    /// Type missing extrinsic "Call" type
+    #[error("Missing extrinsic Call type")]
+    MissingCallType,
+    /// The extrinsic variant expected to contain a single field.
+    #[error("Extrinsic variant at index {0} expected to contain a single field")]
+    InvalidExtrinsicVariant(u8),
     /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type")]
     TypeDefNotVariant(u32),
@@ -375,6 +501,49 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             RuntimeMetadata::V15(v15) => v15,
             _ => return Err(InvalidMetadataError::InvalidVersion),
         };
+
+        let runtime_apis: HashMap<String, RuntimeFnMetadata> = metadata
+            .apis
+            .iter()
+            .flat_map(|trait_metadata| {
+                let trait_name = &trait_metadata.name;
+
+                trait_metadata
+                    .methods
+                    .iter()
+                    .map(|method_metadata| {
+                        // Function named used by substrate to identify the runtime call.
+                        let fn_name = format!("{}_{}", trait_name, method_metadata.name);
+
+                        // Parameters mapped as `scale_info::Field` to allow dynamic decoding.
+                        let fields: Vec<_> = method_metadata
+                            .inputs
+                            .iter()
+                            .map(|input| {
+                                let name = input.name.clone();
+                                let ty = input.ty.id;
+                                scale_info::Field {
+                                    name: Some(name),
+                                    ty: ty.into(),
+                                    type_name: None,
+                                    docs: Default::default(),
+                                }
+                            })
+                            .collect();
+
+                        let return_id = method_metadata.output.id;
+                        let metadata = RuntimeFnMetadata {
+                            fields,
+                            return_id,
+                            trait_name: trait_name.clone(),
+                            method_name: method_metadata.name.clone(),
+                        };
+
+                        (fn_name, metadata)
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect();
 
         let get_type_def_variant = |type_id: u32| {
             let ty = metadata
@@ -485,17 +654,68 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id);
 
+        let extrinsic_ty = metadata
+            .types
+            .resolve(metadata.extrinsic.ty.id)
+            .ok_or(InvalidMetadataError::MissingType(metadata.extrinsic.ty.id))?;
+
+        let Some(call_id) = extrinsic_ty.type_params
+            .iter()
+            .find(|ty| ty.name == "Call")
+            .and_then(|ty| ty.ty)
+            .map(|ty| ty.id) else {
+            return Err(InvalidMetadataError::MissingCallType);
+        };
+
+        let call_type_variants = get_type_def_variant(call_id)?;
+
+        let mut extrinsics = HashMap::<(u8, u8), ExtrinsicMetadata>::new();
+        for variant in &call_type_variants.variants {
+            let pallet_name: Arc<str> = variant.name.to_string().into();
+            let pallet_index = variant.index;
+
+            // Pallet variants must contain one single call variant.
+            // In the following form:
+            //
+            // enum RuntimeCall {
+            //   Pallet(pallet_call)
+            // }
+            if variant.fields.len() != 1 {
+                return Err(InvalidMetadataError::InvalidExtrinsicVariant(pallet_index));
+            }
+            let Some(ty) = variant.fields.first() else {
+                return Err(InvalidMetadataError::InvalidExtrinsicVariant(pallet_index));
+            };
+
+            // Get the call variant.
+            let call_type_variant = get_type_def_variant(ty.ty.id)?;
+            for variant in &call_type_variant.variants {
+                extrinsics.insert(
+                    (pallet_index, variant.index),
+                    ExtrinsicMetadata {
+                        pallet: pallet_name.clone(),
+                        call: variant.name.to_string(),
+                        fields: variant.fields.clone(),
+                        docs: variant.docs.clone(),
+                    },
+                );
+            }
+        }
+
         Ok(Metadata {
             inner: Arc::new(MetadataInner {
                 metadata,
                 pallets,
                 events,
+                extrinsics,
                 errors,
                 dispatch_error_ty,
+                runtime_apis,
                 cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
+                cached_runtime_hashes: Default::default(),
             }),
         })
     }
@@ -511,6 +731,30 @@ mod tests {
     use scale_info::{meta_type, TypeInfo};
 
     fn load_metadata() -> Metadata {
+        // Extrinsic needs to contain at least the generic type parameter "Call"
+        // for the metadata to be valid.
+        // The "Call" type from the metadata is used to decode extrinsics.
+        // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Call> {
+            call: Call,
+        }
+        // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+        // Each pallet must contain one single variant.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum RuntimeCall {
+            PalletName(Pallet),
+        }
+        // The calls of the pallet.
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        enum Pallet {
+            #[allow(unused)]
+            SomeCall,
+        }
+
         #[allow(dead_code)]
         #[allow(non_camel_case_types)]
         #[derive(TypeInfo)]
@@ -549,7 +793,7 @@ mod tests {
         let metadata = RuntimeMetadataV15::new(
             vec![pallet],
             ExtrinsicMetadata {
-                ty: meta_type::<()>(),
+                ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
                 version: 0,
                 signed_extensions: vec![],
             },

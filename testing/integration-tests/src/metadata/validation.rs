@@ -96,10 +96,34 @@ fn default_pallet() -> PalletMetadata {
 }
 
 fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+    // Extrinsic needs to contain at least the generic type parameter "Call"
+    // for the metadata to be valid.
+    // The "Call" type from the metadata is used to decode extrinsics.
+    // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct ExtrinsicType<Call> {
+        call: Call,
+    }
+    // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+    // Each pallet must contain one single variant.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    enum RuntimeCall {
+        PalletName(Pallet),
+    }
+    // The calls of the pallet.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    enum Pallet {
+        #[allow(unused)]
+        SomeCall,
+    }
+
     RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
-            ty: meta_type::<()>(),
+            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
         },

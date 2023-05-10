@@ -42,6 +42,9 @@ pub enum CodegenError {
     /// Metadata for call could not be found.
     #[error("Metadata for call entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
     MissingCallMetadata(String, String),
+    /// Metadata for call could not be found.
+    #[error("Metadata for runtime API entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
+    MissingRuntimeApiMetadata(String, String),
     /// Call variant must have all named fields.
     #[error("Call variant for type {0} must have all named fields. Make sure you are providing a valid substrate-based metadata")]
     InvalidCallVariant(u32),
@@ -50,6 +53,11 @@ pub enum CodegenError {
         "{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata"
     )]
     InvalidType(String),
+    /// Extrinsic call type could not be found.
+    #[error(
+        "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
+    MissingCallType,
 }
 
 impl CodegenError {
@@ -77,10 +85,14 @@ impl CodegenError {
 pub enum FetchMetadataError {
     #[error("Cannot decode hex value: {0}")]
     DecodeError(#[from] hex::FromHexError),
+    #[error("Cannot scale encode/decode value: {0}")]
+    CodecError(#[from] codec::Error),
     #[error("Request error: {0}")]
     RequestError(#[from] jsonrpsee::core::Error),
     #[error("'{0}' not supported, supported URI schemes are http, https, ws or wss.")]
     InvalidScheme(String),
+    #[error("Other error: {0}")]
+    Other(String),
 }
 
 /// Error attempting to do type substitution.

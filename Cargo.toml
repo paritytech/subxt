@@ -11,14 +11,79 @@ members = [
     "metadata",
     "subxt"
 ]
+
+# This cannot be a workspace dependency, because it requires
+# mutually exclusive jsonrpsee features to work, and workspaces
+# will aggregate features used across crates:
 exclude = ["testing/wasm-tests"]
 resolver = "2"
 
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
+version = "0.28.0"
 rust-version = "1.64.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
+
+[workspace.dependencies]
+assert_matches = "1.5.0"
+base58 = { version = "0.2.0" }
+bitvec = { version = "1", default-features = false }
+blake2 = { version = "0.10.4", default-features = false }
+clap = { version = "4.2.5", features = ["derive", "cargo"] }
+criterion = "0.4"
+codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
+color-eyre = "0.6.1"
+console_error_panic_hook = "0.1.7"
+darling = "0.20.0"
+derivative = "2.2.0"
+either = "1.8.1"
+frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
+futures = { version = "0.3.27", default-features = false, features = ["std"] }
+getrandom = "0.2"
+hex = "0.4.3"
+heck = "0.4.1"
+impl-serde = { version = "0.4.0" }
+jsonrpsee = { version = "0.16" }
+parking_lot = "0.12.0"
+pretty_assertions = "1.0.0"
+primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
+proc-macro2 = "1.0.55"
+quote = "1.0.8"
+regex = "1.8.1"
+scale-info = "2.6.0"
+scale-value = "0.7.0"
+scale-bits = "0.3"
+scale-decode = "0.5.0"
+scale-encode = "0.1.0"
+serde = { version = "1.0.162" }
+serde_json = { version = "1.0.96" }
+syn = { version = "2.0.15", features = ["full", "extra-traits"] }
+thiserror = "1.0.40"
+tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
+tracing = "0.1.34"
+tracing-wasm = "0.2.1"
+tracing-subscriber = "0.3.17"
+trybuild = "1.0.79"
+proc-macro-error = "1.0.4"
+wabt = "0.10.0"
+wasm-bindgen-test = "0.3.24"
+which = "4.4.0"
+
+# Substrate crates:
+sp-core = { version = "20.0.0", default-features = false }
+sp-core-hashing = "8.0.0"
+sp-keyring = "23.0.0"
+sp-runtime = "23.0.0"
+sp-version = "21.0.0"
+
+# Subxt workspace crates:
+subxt = { version = "0.28.0", path = "subxt" }
+subxt-macro = { version = "0.28.0", path = "macro" }
+subxt-metadata = { version = "0.28.0", path = "metadata" }
+subxt-codegen = { version = "0.28.0", path = "codegen" }
+test-runtime = { path = "testing/test-runtime" }
+substrate-runner = { path = "testing/substrate-runner" }
