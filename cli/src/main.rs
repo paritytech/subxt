@@ -15,7 +15,7 @@ enum Command {
     Codegen(commands::codegen::Opts),
     Compatibility(commands::compatibility::Opts),
     Version(commands::version::Opts),
-    Show(commands::show::Opts),
+    Explore(commands::explore::Opts),
 }
 
 #[tokio::main]
@@ -28,6 +28,6 @@ async fn main() -> color_eyre::Result<()> {
         Command::Codegen(opts) => commands::codegen::run(opts).await,
         Command::Compatibility(opts) => commands::compatibility::run(opts).await,
         Command::Version(opts) => commands::version::run(opts),
-        Command::Show(opts) => commands::show::run(opts).await,
+        Command::Explore(opts) => commands::explore::run(opts).await,
     }
 }
