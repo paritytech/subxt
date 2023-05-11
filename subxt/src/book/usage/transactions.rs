@@ -174,4 +174,3 @@
 //! Take a look at the API docs for [`crate::tx::TxProgress`], [`crate::tx::TxStatus`] and
 //! [`crate::tx::TxInBlock`] for more options.
 //!
-
