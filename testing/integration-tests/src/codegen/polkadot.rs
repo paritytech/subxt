@@ -591,14 +591,14 @@ pub mod api {
         Paras(paras::Call),
         #[codec(index = 57)]
         Initializer(initializer::Call),
-        #[codec(index = 58)]
-        Dmp(dmp::Call),
         #[codec(index = 59)]
         Ump(ump::Call),
         #[codec(index = 60)]
         Hrmp(hrmp::Call),
         #[codec(index = 62)]
         ParasDisputes(paras_disputes::Call),
+        #[codec(index = 63)]
+        ParasSlashing(paras_slashing::Call),
         #[codec(index = 70)]
         Registrar(registrar::Call),
         #[codec(index = 71)]
@@ -911,13 +911,6 @@ pub mod api {
                     metadata,
                 )?));
             }
-            if pallet_name == "Dmp" {
-                return Ok(Call::Dmp(dmp::Call::decode_with_metadata(
-                    &mut &*pallet_bytes,
-                    pallet_ty,
-                    metadata,
-                )?));
-            }
             if pallet_name == "Ump" {
                 return Ok(Call::Ump(ump::Call::decode_with_metadata(
                     &mut &*pallet_bytes,
@@ -935,6 +928,15 @@ pub mod api {
             if pallet_name == "ParasDisputes" {
                 return Ok(Call::ParasDisputes(
                     paras_disputes::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "ParasSlashing" {
+                return Ok(Call::ParasSlashing(
+                    paras_slashing::Call::decode_with_metadata(
                         &mut &*pallet_bytes,
                         pallet_ty,
                         metadata,
@@ -36322,6 +36324,8 @@ pub mod api {
         pub type Error =
             runtime_types::polkadot_runtime_parachains::disputes::slashing::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call =
+            runtime_types::polkadot_runtime_parachains::disputes::slashing::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -36339,6 +36343,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ReportDisputeLostUnsigned { pub dispute_proof : :: std :: boxed :: Box < runtime_types :: polkadot_runtime_parachains :: disputes :: slashing :: DisputeProof > , pub key_owner_proof : runtime_types :: sp_session :: MembershipProof , }
+                impl ::subxt::blocks::StaticExtrinsic for ReportDisputeLostUnsigned {
+                    const PALLET: &'static str = "ParasSlashing";
+                    const CALL: &'static str = "report_dispute_lost_unsigned";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -38934,6 +38942,10 @@ pub mod api {
                     pub fee_asset_item: ::core::primitive::u32,
                     pub weight_limit: runtime_types::xcm::v3::WeightLimit,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for LimitedTeleportAssets {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "limited_teleport_assets";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -38946,6 +38958,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceSuspension {
                     pub suspended: ::core::primitive::bool,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceSuspension {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "force_suspension";
                 }
             }
             pub struct TransactionApi;
