@@ -512,6 +512,487 @@ pub mod api {
     # [codec (crate = :: subxt :: ext :: codec)]
     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+    pub enum Call {
+        #[codec(index = 0)]
+        System(system::Call),
+        #[codec(index = 1)]
+        Scheduler(scheduler::Call),
+        #[codec(index = 10)]
+        Preimage(preimage::Call),
+        #[codec(index = 2)]
+        Babe(babe::Call),
+        #[codec(index = 3)]
+        Timestamp(timestamp::Call),
+        #[codec(index = 4)]
+        Indices(indices::Call),
+        #[codec(index = 5)]
+        Balances(balances::Call),
+        #[codec(index = 7)]
+        Staking(staking::Call),
+        #[codec(index = 9)]
+        Session(session::Call),
+        #[codec(index = 11)]
+        Grandpa(grandpa::Call),
+        #[codec(index = 12)]
+        ImOnline(im_online::Call),
+        #[codec(index = 14)]
+        Democracy(democracy::Call),
+        #[codec(index = 15)]
+        Council(council::Call),
+        #[codec(index = 16)]
+        TechnicalCommittee(technical_committee::Call),
+        #[codec(index = 17)]
+        PhragmenElection(phragmen_election::Call),
+        #[codec(index = 18)]
+        TechnicalMembership(technical_membership::Call),
+        #[codec(index = 19)]
+        Treasury(treasury::Call),
+        #[codec(index = 20)]
+        ConvictionVoting(conviction_voting::Call),
+        #[codec(index = 21)]
+        Referenda(referenda::Call),
+        #[codec(index = 23)]
+        Whitelist(whitelist::Call),
+        #[codec(index = 24)]
+        Claims(claims::Call),
+        #[codec(index = 25)]
+        Vesting(vesting::Call),
+        #[codec(index = 26)]
+        Utility(utility::Call),
+        #[codec(index = 28)]
+        Identity(identity::Call),
+        #[codec(index = 29)]
+        Proxy(proxy::Call),
+        #[codec(index = 30)]
+        Multisig(multisig::Call),
+        #[codec(index = 34)]
+        Bounties(bounties::Call),
+        #[codec(index = 38)]
+        ChildBounties(child_bounties::Call),
+        #[codec(index = 35)]
+        Tips(tips::Call),
+        #[codec(index = 36)]
+        ElectionProviderMultiPhase(election_provider_multi_phase::Call),
+        #[codec(index = 37)]
+        VoterList(voter_list::Call),
+        #[codec(index = 39)]
+        NominationPools(nomination_pools::Call),
+        #[codec(index = 40)]
+        FastUnstake(fast_unstake::Call),
+        #[codec(index = 51)]
+        Configuration(configuration::Call),
+        #[codec(index = 52)]
+        ParasShared(paras_shared::Call),
+        #[codec(index = 53)]
+        ParaInclusion(para_inclusion::Call),
+        #[codec(index = 54)]
+        ParaInherent(para_inherent::Call),
+        #[codec(index = 56)]
+        Paras(paras::Call),
+        #[codec(index = 57)]
+        Initializer(initializer::Call),
+        #[codec(index = 58)]
+        Dmp(dmp::Call),
+        #[codec(index = 59)]
+        Ump(ump::Call),
+        #[codec(index = 60)]
+        Hrmp(hrmp::Call),
+        #[codec(index = 62)]
+        ParasDisputes(paras_disputes::Call),
+        #[codec(index = 70)]
+        Registrar(registrar::Call),
+        #[codec(index = 71)]
+        Slots(slots::Call),
+        #[codec(index = 72)]
+        Auctions(auctions::Call),
+        #[codec(index = 73)]
+        Crowdloan(crowdloan::Call),
+        #[codec(index = 99)]
+        XcmPallet(xcm_pallet::Call),
+    }
+    impl ::subxt::blocks::RootExtrinsic for Call {
+        fn root_extrinsic(
+            pallet_bytes: &[u8],
+            pallet_name: &str,
+            pallet_ty: u32,
+            metadata: &::subxt::Metadata,
+        ) -> Result<Self, ::subxt::Error> {
+            use subxt::metadata::DecodeWithMetadata;
+            if pallet_name == "System" {
+                return Ok(Call::System(system::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Scheduler" {
+                return Ok(Call::Scheduler(scheduler::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Preimage" {
+                return Ok(Call::Preimage(preimage::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Babe" {
+                return Ok(Call::Babe(babe::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Timestamp" {
+                return Ok(Call::Timestamp(timestamp::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Indices" {
+                return Ok(Call::Indices(indices::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Balances" {
+                return Ok(Call::Balances(balances::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Staking" {
+                return Ok(Call::Staking(staking::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Session" {
+                return Ok(Call::Session(session::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Grandpa" {
+                return Ok(Call::Grandpa(grandpa::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ImOnline" {
+                return Ok(Call::ImOnline(im_online::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Democracy" {
+                return Ok(Call::Democracy(democracy::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Council" {
+                return Ok(Call::Council(council::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "TechnicalCommittee" {
+                return Ok(Call::TechnicalCommittee(
+                    technical_committee::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "PhragmenElection" {
+                return Ok(Call::PhragmenElection(
+                    phragmen_election::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "TechnicalMembership" {
+                return Ok(Call::TechnicalMembership(
+                    technical_membership::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "Treasury" {
+                return Ok(Call::Treasury(treasury::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ConvictionVoting" {
+                return Ok(Call::ConvictionVoting(
+                    conviction_voting::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "Referenda" {
+                return Ok(Call::Referenda(referenda::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Whitelist" {
+                return Ok(Call::Whitelist(whitelist::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Claims" {
+                return Ok(Call::Claims(claims::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Vesting" {
+                return Ok(Call::Vesting(vesting::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Utility" {
+                return Ok(Call::Utility(utility::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Identity" {
+                return Ok(Call::Identity(identity::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Proxy" {
+                return Ok(Call::Proxy(proxy::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Multisig" {
+                return Ok(Call::Multisig(multisig::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Bounties" {
+                return Ok(Call::Bounties(bounties::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ChildBounties" {
+                return Ok(Call::ChildBounties(
+                    child_bounties::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "Tips" {
+                return Ok(Call::Tips(tips::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ElectionProviderMultiPhase" {
+                return Ok(Call::ElectionProviderMultiPhase(
+                    election_provider_multi_phase::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "VoterList" {
+                return Ok(Call::VoterList(voter_list::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "NominationPools" {
+                return Ok(Call::NominationPools(
+                    nomination_pools::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "FastUnstake" {
+                return Ok(Call::FastUnstake(fast_unstake::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Configuration" {
+                return Ok(Call::Configuration(
+                    configuration::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "ParasShared" {
+                return Ok(Call::ParasShared(paras_shared::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ParaInclusion" {
+                return Ok(Call::ParaInclusion(
+                    para_inclusion::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "ParaInherent" {
+                return Ok(Call::ParaInherent(
+                    para_inherent::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "Paras" {
+                return Ok(Call::Paras(paras::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Initializer" {
+                return Ok(Call::Initializer(initializer::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Dmp" {
+                return Ok(Call::Dmp(dmp::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Ump" {
+                return Ok(Call::Ump(ump::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Hrmp" {
+                return Ok(Call::Hrmp(hrmp::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "ParasDisputes" {
+                return Ok(Call::ParasDisputes(
+                    paras_disputes::Call::decode_with_metadata(
+                        &mut &*pallet_bytes,
+                        pallet_ty,
+                        metadata,
+                    )?,
+                ));
+            }
+            if pallet_name == "Registrar" {
+                return Ok(Call::Registrar(registrar::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Slots" {
+                return Ok(Call::Slots(slots::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Auctions" {
+                return Ok(Call::Auctions(auctions::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "Crowdloan" {
+                return Ok(Call::Crowdloan(crowdloan::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            if pallet_name == "XcmPallet" {
+                return Ok(Call::XcmPallet(xcm_pallet::Call::decode_with_metadata(
+                    &mut &*pallet_bytes,
+                    pallet_ty,
+                    metadata,
+                )?));
+            }
+            Err(::subxt::ext::scale_decode::Error::custom(format!(
+                "Pallet name '{}' not found in root Call enum",
+                pallet_name
+            ))
+            .into())
+        }
+    }
+    #[derive(
+        :: subxt :: ext :: codec :: Decode,
+        :: subxt :: ext :: codec :: Encode,
+        :: subxt :: ext :: scale_decode :: DecodeAsType,
+        :: subxt :: ext :: scale_encode :: EncodeAsType,
+        Debug,
+    )]
+    # [codec (crate = :: subxt :: ext :: codec)]
+    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
     pub enum Error {
         #[codec(index = 0)]
         System(system::Error),
@@ -3897,6 +4378,7 @@ pub mod api {
         #[doc = "Error for the System pallet"]
         pub type Error = runtime_types::frame_system::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::frame_system::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -3916,6 +4398,10 @@ pub mod api {
                 pub struct Remark {
                     pub remark: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Remark {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "remark";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -3930,6 +4416,10 @@ pub mod api {
                 pub struct SetHeapPages {
                     pub pages: ::core::primitive::u64,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHeapPages {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "set_heap_pages";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -3943,6 +4433,10 @@ pub mod api {
                 pub struct SetCode {
                     pub code: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetCode {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "set_code";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -3955,6 +4449,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetCodeWithoutChecks {
                     pub code: ::std::vec::Vec<::core::primitive::u8>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetCodeWithoutChecks {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "set_code_without_checks";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -3972,6 +4470,10 @@ pub mod api {
                         ::std::vec::Vec<::core::primitive::u8>,
                     )>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetStorage {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "set_storage";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -3984,6 +4486,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct KillStorage {
                     pub keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for KillStorage {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "kill_storage";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -3999,6 +4505,10 @@ pub mod api {
                     pub prefix: ::std::vec::Vec<::core::primitive::u8>,
                     pub subkeys: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for KillPrefix {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "kill_prefix";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -4011,6 +4521,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RemarkWithEvent {
                     pub remark: ::std::vec::Vec<::core::primitive::u8>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemarkWithEvent {
+                    const PALLET: &'static str = "System";
+                    const CALL: &'static str = "remark_with_event";
                 }
             }
             pub struct TransactionApi;
@@ -4872,6 +5386,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_scheduler::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_scheduler::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -4895,6 +5410,10 @@ pub mod api {
                     pub priority: ::core::primitive::u8,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Schedule {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "schedule";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -4908,6 +5427,10 @@ pub mod api {
                 pub struct Cancel {
                     pub when: ::core::primitive::u32,
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Cancel {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "cancel";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -4927,6 +5450,10 @@ pub mod api {
                     pub priority: ::core::primitive::u8,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ScheduleNamed {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "schedule_named";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -4939,6 +5466,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CancelNamed {
                     pub id: [::core::primitive::u8; 32usize],
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelNamed {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "cancel_named";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -4957,6 +5488,10 @@ pub mod api {
                     pub priority: ::core::primitive::u8,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ScheduleAfter {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "schedule_after";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -4974,6 +5509,10 @@ pub mod api {
                         ::core::option::Option<(::core::primitive::u32, ::core::primitive::u32)>,
                     pub priority: ::core::primitive::u8,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ScheduleNamedAfter {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "schedule_named_after";
                 }
             }
             pub struct TransactionApi;
@@ -5448,6 +5987,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_preimage::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_preimage::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -5467,6 +6007,10 @@ pub mod api {
                 pub struct NotePreimage {
                     pub bytes: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for NotePreimage {
+                    const PALLET: &'static str = "Preimage";
+                    const CALL: &'static str = "note_preimage";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -5479,6 +6023,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct UnnotePreimage {
                     pub hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for UnnotePreimage {
+                    const PALLET: &'static str = "Preimage";
+                    const CALL: &'static str = "unnote_preimage";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -5493,6 +6041,10 @@ pub mod api {
                 pub struct RequestPreimage {
                     pub hash: ::subxt::utils::H256,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RequestPreimage {
+                    const PALLET: &'static str = "Preimage";
+                    const CALL: &'static str = "request_preimage";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -5505,6 +6057,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct UnrequestPreimage {
                     pub hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for UnrequestPreimage {
+                    const PALLET: &'static str = "Preimage";
+                    const CALL: &'static str = "unrequest_preimage";
                 }
             }
             pub struct TransactionApi;
@@ -5760,6 +6316,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_babe::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_babe::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -5788,6 +6345,10 @@ pub mod api {
                     >,
                     pub key_owner_proof: runtime_types::sp_session::MembershipProof,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocation {
+                    const PALLET: &'static str = "Babe";
+                    const CALL: &'static str = "report_equivocation";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -5810,6 +6371,10 @@ pub mod api {
                     >,
                     pub key_owner_proof: runtime_types::sp_session::MembershipProof,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocationUnsigned {
+                    const PALLET: &'static str = "Babe";
+                    const CALL: &'static str = "report_equivocation_unsigned";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -5822,6 +6387,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PlanConfigChange {
                     pub config: runtime_types::sp_consensus_babe::digests::NextConfigDescriptor,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for PlanConfigChange {
+                    const PALLET: &'static str = "Babe";
+                    const CALL: &'static str = "plan_config_change";
                 }
             }
             pub struct TransactionApi;
@@ -6421,6 +6990,7 @@ pub mod api {
         use super::root_mod;
         use super::runtime_types;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_timestamp::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -6440,6 +7010,10 @@ pub mod api {
                 pub struct Set {
                     #[codec(compact)]
                     pub now: ::core::primitive::u64,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Set {
+                    const PALLET: &'static str = "Timestamp";
+                    const CALL: &'static str = "set";
                 }
             }
             pub struct TransactionApi;
@@ -6552,6 +7126,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_indices::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_indices::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -6572,6 +7147,10 @@ pub mod api {
                 pub struct Claim {
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Claim {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "claim";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -6586,6 +7165,10 @@ pub mod api {
                     pub new: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Transfer {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "transfer";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -6599,6 +7182,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Free {
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Free {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "free";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -6615,6 +7202,10 @@ pub mod api {
                     pub index: ::core::primitive::u32,
                     pub freeze: ::core::primitive::bool,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceTransfer {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "force_transfer";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -6628,6 +7219,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Freeze {
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Freeze {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "freeze";
                 }
             }
             pub struct TransactionApi;
@@ -6923,6 +7518,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_balances::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_balances::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -6944,6 +7540,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for TransferAllowDeath {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "transfer_allow_death";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -6961,6 +7561,10 @@ pub mod api {
                     #[codec(compact)]
                     pub old_reserved: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetBalanceDeprecated {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "set_balance_deprecated";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -6977,6 +7581,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceTransfer {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "force_transfer";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -6992,6 +7600,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for TransferKeepAlive {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "transfer_keep_alive";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -7005,6 +7617,10 @@ pub mod api {
                 pub struct TransferAll {
                     pub dest: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub keep_alive: ::core::primitive::bool,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for TransferAll {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "transfer_all";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -7020,6 +7636,10 @@ pub mod api {
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub amount: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceUnreserve {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "force_unreserve";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -7032,6 +7652,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct UpgradeAccounts {
                     pub who: ::std::vec::Vec<::subxt::utils::AccountId32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for UpgradeAccounts {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "upgrade_accounts";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -7048,6 +7672,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Transfer {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "transfer";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -7062,6 +7690,10 @@ pub mod api {
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     #[codec(compact)]
                     pub new_free: ::core::primitive::u128,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceSetBalance {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "force_set_balance";
                 }
             }
             pub struct TransactionApi;
@@ -8284,6 +8916,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_staking::pallet::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_staking::pallet::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -8308,6 +8941,10 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Bond {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "bond";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8321,6 +8958,10 @@ pub mod api {
                 pub struct BondExtra {
                     #[codec(compact)]
                     pub max_additional: ::core::primitive::u128,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for BondExtra {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "bond_extra";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8336,6 +8977,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Unbond {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "unbond";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -8350,6 +8995,10 @@ pub mod api {
                 pub struct WithdrawUnbonded {
                     pub num_slashing_spans: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for WithdrawUnbonded {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "withdraw_unbonded";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8362,6 +9011,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Validate {
                     pub prefs: runtime_types::pallet_staking::ValidatorPrefs,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Validate {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "validate";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8378,6 +9031,10 @@ pub mod api {
                         ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Nominate {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "nominate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8389,6 +9046,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Chill;
+                impl ::subxt::blocks::StaticExtrinsic for Chill {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "chill";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8404,6 +9065,10 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetPayee {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_payee";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8416,6 +9081,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetController {
                     pub controller: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetController {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_controller";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8431,6 +9100,10 @@ pub mod api {
                     #[codec(compact)]
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetValidatorCount {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_validator_count";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8445,6 +9118,10 @@ pub mod api {
                     #[codec(compact)]
                     pub additional: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for IncreaseValidatorCount {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "increase_validator_count";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8458,6 +9135,10 @@ pub mod api {
                 pub struct ScaleValidatorCount {
                     pub factor: runtime_types::sp_arithmetic::per_things::Percent,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ScaleValidatorCount {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "scale_validator_count";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8469,6 +9150,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceNoEras;
+                impl ::subxt::blocks::StaticExtrinsic for ForceNoEras {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "force_no_eras";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8480,6 +9165,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceNewEra;
+                impl ::subxt::blocks::StaticExtrinsic for ForceNewEra {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "force_new_era";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8492,6 +9181,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetInvulnerables {
                     pub invulnerables: ::std::vec::Vec<::subxt::utils::AccountId32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetInvulnerables {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_invulnerables";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8507,6 +9200,10 @@ pub mod api {
                     pub stash: ::subxt::utils::AccountId32,
                     pub num_slashing_spans: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceUnstake {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "force_unstake";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8518,6 +9215,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceNewEraAlways;
+                impl ::subxt::blocks::StaticExtrinsic for ForceNewEraAlways {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "force_new_era_always";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8531,6 +9232,10 @@ pub mod api {
                 pub struct CancelDeferredSlash {
                     pub era: ::core::primitive::u32,
                     pub slash_indices: ::std::vec::Vec<::core::primitive::u32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelDeferredSlash {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "cancel_deferred_slash";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8546,6 +9251,10 @@ pub mod api {
                     pub validator_stash: ::subxt::utils::AccountId32,
                     pub era: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for PayoutStakers {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "payout_stakers";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8559,6 +9268,10 @@ pub mod api {
                 pub struct Rebond {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Rebond {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "rebond";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8574,6 +9287,10 @@ pub mod api {
                     pub stash: ::subxt::utils::AccountId32,
                     pub num_slashing_spans: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReapStash {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "reap_stash";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8588,6 +9305,10 @@ pub mod api {
                     pub who: ::std::vec::Vec<
                         ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     >,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Kick {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "kick";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8621,6 +9342,10 @@ pub mod api {
                         runtime_types::sp_arithmetic::per_things::Perbill,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetStakingConfigs {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_staking_configs";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8633,6 +9358,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ChillOther {
                     pub controller: ::subxt::utils::AccountId32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ChillOther {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "chill_other";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -8647,6 +9376,10 @@ pub mod api {
                 pub struct ForceApplyMinCommission {
                     pub validator_stash: ::subxt::utils::AccountId32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceApplyMinCommission {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "force_apply_min_commission";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -8659,6 +9392,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMinCommission {
                     pub new: runtime_types::sp_arithmetic::per_things::Perbill,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMinCommission {
+                    const PALLET: &'static str = "Staking";
+                    const CALL: &'static str = "set_min_commission";
                 }
             }
             pub struct TransactionApi;
@@ -11355,6 +12092,7 @@ pub mod api {
         #[doc = "Error for the session pallet."]
         pub type Error = runtime_types::pallet_session::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_session::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -11375,6 +12113,10 @@ pub mod api {
                     pub keys: runtime_types::polkadot_runtime::SessionKeys,
                     pub proof: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetKeys {
+                    const PALLET: &'static str = "Session";
+                    const CALL: &'static str = "set_keys";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -11386,6 +12128,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PurgeKeys;
+                impl ::subxt::blocks::StaticExtrinsic for PurgeKeys {
+                    const PALLET: &'static str = "Session";
+                    const CALL: &'static str = "purge_keys";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -11690,6 +12436,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_grandpa::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_grandpa::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -11715,6 +12462,10 @@ pub mod api {
                     >,
                     pub key_owner_proof: runtime_types::sp_session::MembershipProof,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocation {
+                    const PALLET: &'static str = "Grandpa";
+                    const CALL: &'static str = "report_equivocation";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -11734,6 +12485,10 @@ pub mod api {
                     >,
                     pub key_owner_proof: runtime_types::sp_session::MembershipProof,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocationUnsigned {
+                    const PALLET: &'static str = "Grandpa";
+                    const CALL: &'static str = "report_equivocation_unsigned";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -11747,6 +12502,10 @@ pub mod api {
                 pub struct NoteStalled {
                     pub delay: ::core::primitive::u32,
                     pub best_finalized_block_number: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for NoteStalled {
+                    const PALLET: &'static str = "Grandpa";
+                    const CALL: &'static str = "note_stalled";
                 }
             }
             pub struct TransactionApi;
@@ -12129,6 +12888,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_im_online::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_im_online::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -12149,6 +12909,10 @@ pub mod api {
                     pub heartbeat:
                         runtime_types::pallet_im_online::Heartbeat<::core::primitive::u32>,
                     pub signature: runtime_types::pallet_im_online::sr25519::app_sr25519::Signature,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Heartbeat {
+                    const PALLET: &'static str = "ImOnline";
+                    const CALL: &'static str = "heartbeat";
                 }
             }
             pub struct TransactionApi;
@@ -12446,6 +13210,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_democracy::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_democracy::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -12469,6 +13234,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Propose {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "propose";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12482,6 +13251,10 @@ pub mod api {
                 pub struct Second {
                     #[codec(compact)]
                     pub proposal: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Second {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "second";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12499,6 +13272,10 @@ pub mod api {
                     pub vote:
                         runtime_types::pallet_democracy::vote::AccountVote<::core::primitive::u128>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Vote {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -12512,6 +13289,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct EmergencyCancel {
                     pub ref_index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for EmergencyCancel {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "emergency_cancel";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12528,6 +13309,10 @@ pub mod api {
                         runtime_types::polkadot_runtime::RuntimeCall,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ExternalPropose {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "external_propose";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12542,6 +13327,10 @@ pub mod api {
                     pub proposal: runtime_types::frame_support::traits::preimages::Bounded<
                         runtime_types::polkadot_runtime::RuntimeCall,
                     >,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ExternalProposeMajority {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "external_propose_majority";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12558,6 +13347,10 @@ pub mod api {
                         runtime_types::polkadot_runtime::RuntimeCall,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ExternalProposeDefault {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "external_propose_default";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12573,6 +13366,10 @@ pub mod api {
                     pub voting_period: ::core::primitive::u32,
                     pub delay: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for FastTrack {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "fast_track";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12585,6 +13382,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct VetoExternal {
                     pub proposal_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for VetoExternal {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "veto_external";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12599,6 +13400,10 @@ pub mod api {
                 pub struct CancelReferendum {
                     #[codec(compact)]
                     pub ref_index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelReferendum {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "cancel_referendum";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12615,6 +13420,10 @@ pub mod api {
                     pub conviction: runtime_types::pallet_democracy::conviction::Conviction,
                     pub balance: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Delegate {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "delegate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12626,6 +13435,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Undelegate;
+                impl ::subxt::blocks::StaticExtrinsic for Undelegate {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "undelegate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12637,6 +13450,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClearPublicProposals;
+                impl ::subxt::blocks::StaticExtrinsic for ClearPublicProposals {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "clear_public_proposals";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12649,6 +13466,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Unlock {
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Unlock {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "unlock";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -12664,6 +13485,10 @@ pub mod api {
                 pub struct RemoveVote {
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveVote {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "remove_vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12677,6 +13502,10 @@ pub mod api {
                 pub struct RemoveOtherVote {
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveOtherVote {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "remove_other_vote";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -12692,6 +13521,10 @@ pub mod api {
                     pub proposal_hash: ::subxt::utils::H256,
                     pub maybe_ref_index: ::core::option::Option<::core::primitive::u32>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Blacklist {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "blacklist";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12706,6 +13539,10 @@ pub mod api {
                     #[codec(compact)]
                     pub prop_index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for CancelProposal {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "cancel_proposal";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -12719,6 +13556,10 @@ pub mod api {
                 pub struct SetMetadata {
                     pub owner: runtime_types::pallet_democracy::types::MetadataOwner,
                     pub maybe_hash: ::core::option::Option<::subxt::utils::H256>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMetadata {
+                    const PALLET: &'static str = "Democracy";
+                    const CALL: &'static str = "set_metadata";
                 }
             }
             pub struct TransactionApi;
@@ -14277,6 +15118,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_collective::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_collective::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -14298,6 +15140,10 @@ pub mod api {
                     pub prime: ::core::option::Option<::subxt::utils::AccountId32>,
                     pub old_count: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMembers {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "set_members";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -14312,6 +15158,10 @@ pub mod api {
                     pub proposal: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Execute {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "execute";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -14330,6 +15180,10 @@ pub mod api {
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Propose {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "propose";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -14346,6 +15200,10 @@ pub mod api {
                     pub index: ::core::primitive::u32,
                     pub approve: ::core::primitive::bool,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Vote {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -14358,6 +15216,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DisapproveProposal {
                     pub proposal_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for DisapproveProposal {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "disapprove_proposal";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -14376,6 +15238,10 @@ pub mod api {
                     pub proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Close {
+                    const PALLET: &'static str = "Council";
+                    const CALL: &'static str = "close";
                 }
             }
             pub struct TransactionApi;
@@ -14960,6 +15826,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_collective::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_collective::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -14981,6 +15848,10 @@ pub mod api {
                     pub prime: ::core::option::Option<::subxt::utils::AccountId32>,
                     pub old_count: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMembers {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "set_members";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -14995,6 +15866,10 @@ pub mod api {
                     pub proposal: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Execute {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "execute";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -15013,6 +15888,10 @@ pub mod api {
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Propose {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "propose";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15029,6 +15908,10 @@ pub mod api {
                     pub index: ::core::primitive::u32,
                     pub approve: ::core::primitive::bool,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Vote {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15041,6 +15924,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DisapproveProposal {
                     pub proposal_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for DisapproveProposal {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "disapprove_proposal";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -15059,6 +15946,10 @@ pub mod api {
                     pub proposal_weight_bound: runtime_types::sp_weights::weight_v2::Weight,
                     #[codec(compact)]
                     pub length_bound: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Close {
+                    const PALLET: &'static str = "TechnicalCommittee";
+                    const CALL: &'static str = "close";
                 }
             }
             pub struct TransactionApi;
@@ -15643,6 +16534,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_elections_phragmen::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_elections_phragmen::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -15664,6 +16556,10 @@ pub mod api {
                     #[codec(compact)]
                     pub value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Vote {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15675,6 +16571,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RemoveVoter;
+                impl ::subxt::blocks::StaticExtrinsic for RemoveVoter {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "remove_voter";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15689,6 +16589,10 @@ pub mod api {
                     #[codec(compact)]
                     pub candidate_count: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SubmitCandidacy {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "submit_candidacy";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15701,6 +16605,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RenounceCandidacy {
                     pub renouncing: runtime_types::pallet_elections_phragmen::Renouncing,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RenounceCandidacy {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "renounce_candidacy";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -15717,6 +16625,10 @@ pub mod api {
                     pub slash_bond: ::core::primitive::bool,
                     pub rerun_election: ::core::primitive::bool,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveMember {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "remove_member";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -15730,6 +16642,10 @@ pub mod api {
                 pub struct CleanDefunctVoters {
                     pub num_voters: ::core::primitive::u32,
                     pub num_defunct: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CleanDefunctVoters {
+                    const PALLET: &'static str = "PhragmenElection";
+                    const CALL: &'static str = "clean_defunct_voters";
                 }
             }
             pub struct TransactionApi;
@@ -16402,6 +17318,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_membership::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_membership::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -16421,6 +17338,10 @@ pub mod api {
                 pub struct AddMember {
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddMember {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "add_member";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16433,6 +17354,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RemoveMember {
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveMember {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "remove_member";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -16448,6 +17373,10 @@ pub mod api {
                     pub remove: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub add: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SwapMember {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "swap_member";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16460,6 +17389,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ResetMembers {
                     pub members: ::std::vec::Vec<::subxt::utils::AccountId32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ResetMembers {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "reset_members";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -16474,6 +17407,10 @@ pub mod api {
                 pub struct ChangeKey {
                     pub new: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ChangeKey {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "change_key";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16487,6 +17424,10 @@ pub mod api {
                 pub struct SetPrime {
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetPrime {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "set_prime";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16498,6 +17439,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClearPrime;
+                impl ::subxt::blocks::StaticExtrinsic for ClearPrime {
+                    const PALLET: &'static str = "TechnicalMembership";
+                    const CALL: &'static str = "clear_prime";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -16794,6 +17739,7 @@ pub mod api {
         #[doc = "Error for the treasury pallet."]
         pub type Error = runtime_types::pallet_treasury::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_treasury::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -16815,6 +17761,10 @@ pub mod api {
                     pub value: ::core::primitive::u128,
                     pub beneficiary: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ProposeSpend {
+                    const PALLET: &'static str = "Treasury";
+                    const CALL: &'static str = "propose_spend";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16829,6 +17779,10 @@ pub mod api {
                     #[codec(compact)]
                     pub proposal_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RejectProposal {
+                    const PALLET: &'static str = "Treasury";
+                    const CALL: &'static str = "reject_proposal";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16842,6 +17796,10 @@ pub mod api {
                 pub struct ApproveProposal {
                     #[codec(compact)]
                     pub proposal_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ApproveProposal {
+                    const PALLET: &'static str = "Treasury";
+                    const CALL: &'static str = "approve_proposal";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -16858,6 +17816,10 @@ pub mod api {
                     pub amount: ::core::primitive::u128,
                     pub beneficiary: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Spend {
+                    const PALLET: &'static str = "Treasury";
+                    const CALL: &'static str = "spend";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -16871,6 +17833,10 @@ pub mod api {
                 pub struct RemoveApproval {
                     #[codec(compact)]
                     pub proposal_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveApproval {
+                    const PALLET: &'static str = "Treasury";
+                    const CALL: &'static str = "remove_approval";
                 }
             }
             pub struct TransactionApi;
@@ -17417,6 +18383,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_conviction_voting::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_conviction_voting::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -17440,6 +18407,10 @@ pub mod api {
                         ::core::primitive::u128,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Vote {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "vote";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -17456,6 +18427,10 @@ pub mod api {
                     pub conviction: runtime_types::pallet_conviction_voting::conviction::Conviction,
                     pub balance: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Delegate {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "delegate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -17469,6 +18444,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Undelegate {
                     pub class: ::core::primitive::u16,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Undelegate {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "undelegate";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -17484,6 +18463,10 @@ pub mod api {
                     pub class: ::core::primitive::u16,
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Unlock {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "unlock";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -17497,6 +18480,10 @@ pub mod api {
                 pub struct RemoveVote {
                     pub class: ::core::option::Option<::core::primitive::u16>,
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveVote {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "remove_vote";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -17512,6 +18499,10 @@ pub mod api {
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub class: ::core::primitive::u16,
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveOtherVote {
+                    const PALLET: &'static str = "ConvictionVoting";
+                    const CALL: &'static str = "remove_other_vote";
                 }
             }
             pub struct TransactionApi;
@@ -17937,6 +18928,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_referenda::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_referenda::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -17964,6 +18956,10 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Submit {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "submit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -17977,6 +18973,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PlaceDecisionDeposit {
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for PlaceDecisionDeposit {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "place_decision_deposit";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -17992,6 +18992,10 @@ pub mod api {
                 pub struct RefundDecisionDeposit {
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RefundDecisionDeposit {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "refund_decision_deposit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -18005,6 +19009,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Cancel {
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Cancel {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "cancel";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -18020,6 +19028,10 @@ pub mod api {
                 pub struct Kill {
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Kill {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "kill";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -18033,6 +19045,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct NudgeReferendum {
                     pub index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for NudgeReferendum {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "nudge_referendum";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -18048,6 +19064,10 @@ pub mod api {
                 pub struct OneFewerDeciding {
                     pub track: ::core::primitive::u16,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for OneFewerDeciding {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "one_fewer_deciding";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -18062,6 +19082,10 @@ pub mod api {
                 pub struct RefundSubmissionDeposit {
                     pub index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RefundSubmissionDeposit {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "refund_submission_deposit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -18075,6 +19099,10 @@ pub mod api {
                 pub struct SetMetadata {
                     pub index: ::core::primitive::u32,
                     pub maybe_hash: ::core::option::Option<::subxt::utils::H256>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMetadata {
+                    const PALLET: &'static str = "Referenda";
+                    const CALL: &'static str = "set_metadata";
                 }
             }
             pub struct TransactionApi;
@@ -18974,6 +20002,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_whitelist::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_whitelist::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -18993,6 +20022,10 @@ pub mod api {
                 pub struct WhitelistCall {
                     pub call_hash: ::subxt::utils::H256,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for WhitelistCall {
+                    const PALLET: &'static str = "Whitelist";
+                    const CALL: &'static str = "whitelist_call";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19005,6 +20038,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RemoveWhitelistedCall {
                     pub call_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveWhitelistedCall {
+                    const PALLET: &'static str = "Whitelist";
+                    const CALL: &'static str = "remove_whitelisted_call";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -19021,6 +20058,10 @@ pub mod api {
                     pub call_encoded_len: ::core::primitive::u32,
                     pub call_weight_witness: runtime_types::sp_weights::weight_v2::Weight,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for DispatchWhitelistedCall {
+                    const PALLET: &'static str = "Whitelist";
+                    const CALL: &'static str = "dispatch_whitelisted_call";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19033,6 +20074,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct DispatchWhitelistedCallWithPreimage {
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for DispatchWhitelistedCallWithPreimage {
+                    const PALLET: &'static str = "Whitelist";
+                    const CALL: &'static str = "dispatch_whitelisted_call_with_preimage";
                 }
             }
             pub struct TransactionApi;
@@ -19228,6 +20273,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_common::claims::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_common::claims::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -19248,6 +20294,10 @@ pub mod api {
                     pub dest: ::subxt::utils::AccountId32,
                     pub ethereum_signature:
                         runtime_types::polkadot_runtime_common::claims::EcdsaSignature,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Claim {
+                    const PALLET: &'static str = "Claims";
+                    const CALL: &'static str = "claim";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -19271,6 +20321,10 @@ pub mod api {
                         runtime_types::polkadot_runtime_common::claims::StatementKind,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for MintClaim {
+                    const PALLET: &'static str = "Claims";
+                    const CALL: &'static str = "mint_claim";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19287,6 +20341,10 @@ pub mod api {
                         runtime_types::polkadot_runtime_common::claims::EcdsaSignature,
                     pub statement: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ClaimAttest {
+                    const PALLET: &'static str = "Claims";
+                    const CALL: &'static str = "claim_attest";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19299,6 +20357,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Attest {
                     pub statement: ::std::vec::Vec<::core::primitive::u8>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Attest {
+                    const PALLET: &'static str = "Claims";
+                    const CALL: &'static str = "attest";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -19314,6 +20376,10 @@ pub mod api {
                     pub old: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     pub new: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     pub maybe_preclaim: ::core::option::Option<::subxt::utils::AccountId32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for MoveClaim {
+                    const PALLET: &'static str = "Claims";
+                    const CALL: &'static str = "move_claim";
                 }
             }
             pub struct TransactionApi;
@@ -19790,6 +20856,7 @@ pub mod api {
         #[doc = "Error for the vesting pallet."]
         pub type Error = runtime_types::pallet_vesting::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_vesting::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -19807,6 +20874,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Vest;
+                impl ::subxt::blocks::StaticExtrinsic for Vest {
+                    const PALLET: &'static str = "Vesting";
+                    const CALL: &'static str = "vest";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19819,6 +20890,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct VestOther {
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for VestOther {
+                    const PALLET: &'static str = "Vesting";
+                    const CALL: &'static str = "vest_other";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -19836,6 +20911,10 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for VestedTransfer {
+                    const PALLET: &'static str = "Vesting";
+                    const CALL: &'static str = "vested_transfer";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -19855,6 +20934,10 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceVestedTransfer {
+                    const PALLET: &'static str = "Vesting";
+                    const CALL: &'static str = "force_vested_transfer";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -19868,6 +20951,10 @@ pub mod api {
                 pub struct MergeSchedules {
                     pub schedule1_index: ::core::primitive::u32,
                     pub schedule2_index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for MergeSchedules {
+                    const PALLET: &'static str = "Vesting";
+                    const CALL: &'static str = "merge_schedules";
                 }
             }
             pub struct TransactionApi;
@@ -20201,6 +21288,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_utility::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_utility::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -20220,6 +21308,10 @@ pub mod api {
                 pub struct Batch {
                     pub calls: ::std::vec::Vec<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Batch {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "batch";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20234,6 +21326,10 @@ pub mod api {
                     pub index: ::core::primitive::u16,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AsDerivative {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "as_derivative";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20246,6 +21342,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct BatchAll {
                     pub calls: ::std::vec::Vec<runtime_types::polkadot_runtime::RuntimeCall>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for BatchAll {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "batch_all";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20261,6 +21361,10 @@ pub mod api {
                     pub as_origin: ::std::boxed::Box<runtime_types::polkadot_runtime::OriginCaller>,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for DispatchAs {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "dispatch_as";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20273,6 +21377,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceBatch {
                     pub calls: ::std::vec::Vec<runtime_types::polkadot_runtime::RuntimeCall>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceBatch {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "force_batch";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20287,6 +21395,10 @@ pub mod api {
                 pub struct WithWeight {
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                     pub weight: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for WithWeight {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "with_weight";
                 }
             }
             pub struct TransactionApi;
@@ -20603,6 +21715,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_identity::pallet::Error;
         #[doc = "Identity pallet declaration."]
+        pub type Call = runtime_types::pallet_identity::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -20622,6 +21735,10 @@ pub mod api {
                 pub struct AddRegistrar {
                     pub account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddRegistrar {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "add_registrar";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20635,6 +21752,10 @@ pub mod api {
                 pub struct SetIdentity {
                     pub info:
                         ::std::boxed::Box<runtime_types::pallet_identity::types::IdentityInfo>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetIdentity {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "set_identity";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20652,6 +21773,10 @@ pub mod api {
                         runtime_types::pallet_identity::types::Data,
                     )>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetSubs {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "set_subs";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20663,6 +21788,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClearIdentity;
+                impl ::subxt::blocks::StaticExtrinsic for ClearIdentity {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "clear_identity";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20679,6 +21808,10 @@ pub mod api {
                     #[codec(compact)]
                     pub max_fee: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RequestJudgement {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "request_judgement";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -20692,6 +21825,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CancelRequest {
                     pub reg_index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelRequest {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "cancel_request";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20709,6 +21846,10 @@ pub mod api {
                     #[codec(compact)]
                     pub fee: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetFee {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "set_fee";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20723,6 +21864,10 @@ pub mod api {
                     #[codec(compact)]
                     pub index: ::core::primitive::u32,
                     pub new: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetAccountId {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "set_account_id";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20740,6 +21885,10 @@ pub mod api {
                     pub fields: runtime_types::pallet_identity::types::BitFlags<
                         runtime_types::pallet_identity::types::IdentityField,
                     >,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetFields {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "set_fields";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20759,6 +21908,10 @@ pub mod api {
                         runtime_types::pallet_identity::types::Judgement<::core::primitive::u128>,
                     pub identity: ::subxt::utils::H256,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ProvideJudgement {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "provide_judgement";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20771,6 +21924,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct KillIdentity {
                     pub target: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for KillIdentity {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "kill_identity";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -20786,6 +21943,10 @@ pub mod api {
                     pub sub: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub data: runtime_types::pallet_identity::types::Data,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddSub {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "add_sub";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20800,6 +21961,10 @@ pub mod api {
                     pub sub: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub data: runtime_types::pallet_identity::types::Data,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RenameSub {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "rename_sub";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20813,6 +21978,10 @@ pub mod api {
                 pub struct RemoveSub {
                     pub sub: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveSub {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "remove_sub";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -20824,6 +21993,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct QuitSub;
+                impl ::subxt::blocks::StaticExtrinsic for QuitSub {
+                    const PALLET: &'static str = "Identity";
+                    const CALL: &'static str = "quit_sub";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -21770,6 +22943,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_proxy::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_proxy::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -21792,6 +22966,10 @@ pub mod api {
                         ::core::option::Option<runtime_types::polkadot_runtime::ProxyType>,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Proxy {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "proxy";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -21806,6 +22984,10 @@ pub mod api {
                     pub delegate: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     pub delay: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for AddProxy {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "add_proxy";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -21822,6 +23004,10 @@ pub mod api {
                     pub proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     pub delay: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveProxy {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "remove_proxy";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -21833,6 +23019,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RemoveProxies;
+                impl ::subxt::blocks::StaticExtrinsic for RemoveProxies {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "remove_proxies";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -21847,6 +23037,10 @@ pub mod api {
                     pub proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     pub delay: ::core::primitive::u32,
                     pub index: ::core::primitive::u16,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CreatePure {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "create_pure";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -21867,6 +23061,10 @@ pub mod api {
                     #[codec(compact)]
                     pub ext_index: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for KillPure {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "kill_pure";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -21880,6 +23078,10 @@ pub mod api {
                 pub struct Announce {
                     pub real: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub call_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Announce {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "announce";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -21895,6 +23097,10 @@ pub mod api {
                     pub real: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub call_hash: ::subxt::utils::H256,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveAnnouncement {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "remove_announcement";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -21908,6 +23114,10 @@ pub mod api {
                 pub struct RejectAnnouncement {
                     pub delegate: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub call_hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RejectAnnouncement {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "reject_announcement";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -21925,6 +23135,10 @@ pub mod api {
                     pub force_proxy_type:
                         ::core::option::Option<runtime_types::polkadot_runtime::ProxyType>,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ProxyAnnounced {
+                    const PALLET: &'static str = "Proxy";
+                    const CALL: &'static str = "proxy_announced";
                 }
             }
             pub struct TransactionApi;
@@ -22598,6 +23812,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_multisig::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_multisig::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -22618,6 +23833,10 @@ pub mod api {
                     pub other_signatories: ::std::vec::Vec<::subxt::utils::AccountId32>,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AsMultiThreshold1 {
+                    const PALLET: &'static str = "Multisig";
+                    const CALL: &'static str = "as_multi_threshold_1";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -22636,6 +23855,10 @@ pub mod api {
                     >,
                     pub call: ::std::boxed::Box<runtime_types::polkadot_runtime::RuntimeCall>,
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for AsMulti {
+                    const PALLET: &'static str = "Multisig";
+                    const CALL: &'static str = "as_multi";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -22656,6 +23879,10 @@ pub mod api {
                     pub call_hash: [::core::primitive::u8; 32usize],
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ApproveAsMulti {
+                    const PALLET: &'static str = "Multisig";
+                    const CALL: &'static str = "approve_as_multi";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -22672,6 +23899,10 @@ pub mod api {
                     pub timepoint:
                         runtime_types::pallet_multisig::Timepoint<::core::primitive::u32>,
                     pub call_hash: [::core::primitive::u8; 32usize],
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelAsMulti {
+                    const PALLET: &'static str = "Multisig";
+                    const CALL: &'static str = "cancel_as_multi";
                 }
             }
             pub struct TransactionApi;
@@ -23090,6 +24321,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_bounties::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_bounties::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -23111,6 +24343,10 @@ pub mod api {
                     pub value: ::core::primitive::u128,
                     pub description: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ProposeBounty {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "propose_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23124,6 +24360,10 @@ pub mod api {
                 pub struct ApproveBounty {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ApproveBounty {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "approve_bounty";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -23142,6 +24382,10 @@ pub mod api {
                     #[codec(compact)]
                     pub fee: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ProposeCurator {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "propose_curator";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23156,6 +24400,10 @@ pub mod api {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for UnassignCurator {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "unassign_curator";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23169,6 +24417,10 @@ pub mod api {
                 pub struct AcceptCurator {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for AcceptCurator {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "accept_curator";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -23185,6 +24437,10 @@ pub mod api {
                     pub bounty_id: ::core::primitive::u32,
                     pub beneficiary: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AwardBounty {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "award_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23198,6 +24454,10 @@ pub mod api {
                 pub struct ClaimBounty {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ClaimBounty {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "claim_bounty";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -23213,6 +24473,10 @@ pub mod api {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for CloseBounty {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "close_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23227,6 +24491,10 @@ pub mod api {
                     #[codec(compact)]
                     pub bounty_id: ::core::primitive::u32,
                     pub remark: ::std::vec::Vec<::core::primitive::u8>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ExtendBountyExpiry {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "extend_bounty_expiry";
                 }
             }
             pub struct TransactionApi;
@@ -23915,6 +25183,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_child_bounties::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_child_bounties::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -23938,6 +25207,10 @@ pub mod api {
                     pub value: ::core::primitive::u128,
                     pub description: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddChildBounty {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "add_child_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23957,6 +25230,10 @@ pub mod api {
                     #[codec(compact)]
                     pub fee: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ProposeCurator {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "propose_curator";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23973,6 +25250,10 @@ pub mod api {
                     #[codec(compact)]
                     pub child_bounty_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AcceptCurator {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "accept_curator";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -23988,6 +25269,10 @@ pub mod api {
                     pub parent_bounty_id: ::core::primitive::u32,
                     #[codec(compact)]
                     pub child_bounty_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for UnassignCurator {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "unassign_curator";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -24006,6 +25291,10 @@ pub mod api {
                     pub child_bounty_id: ::core::primitive::u32,
                     pub beneficiary: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AwardChildBounty {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "award_child_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24022,6 +25311,10 @@ pub mod api {
                     #[codec(compact)]
                     pub child_bounty_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ClaimChildBounty {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "claim_child_bounty";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24037,6 +25330,10 @@ pub mod api {
                     pub parent_bounty_id: ::core::primitive::u32,
                     #[codec(compact)]
                     pub child_bounty_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CloseChildBounty {
+                    const PALLET: &'static str = "ChildBounties";
+                    const CALL: &'static str = "close_child_bounty";
                 }
             }
             pub struct TransactionApi;
@@ -24685,6 +25982,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_tips::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_tips::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -24705,6 +26003,10 @@ pub mod api {
                     pub reason: ::std::vec::Vec<::core::primitive::u8>,
                     pub who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReportAwesome {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "report_awesome";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24717,6 +26019,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RetractTip {
                     pub hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for RetractTip {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "retract_tip";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -24734,6 +26040,10 @@ pub mod api {
                     #[codec(compact)]
                     pub tip_value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for TipNew {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "tip_new";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24749,6 +26059,10 @@ pub mod api {
                     #[codec(compact)]
                     pub tip_value: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Tip {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "tip";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24762,6 +26076,10 @@ pub mod api {
                 pub struct CloseTip {
                     pub hash: ::subxt::utils::H256,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for CloseTip {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "close_tip";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -24774,6 +26092,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SlashTip {
                     pub hash: ::subxt::utils::H256,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SlashTip {
+                    const PALLET: &'static str = "Tips";
+                    const CALL: &'static str = "slash_tip";
                 }
             }
             pub struct TransactionApi;
@@ -25273,6 +26595,7 @@ pub mod api {
         #[doc = "Error of the pallet that can be returned in response to dispatches."]
         pub type Error = runtime_types::pallet_election_provider_multi_phase::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_election_provider_multi_phase::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -25298,6 +26621,10 @@ pub mod api {
                     pub witness:
                         runtime_types::pallet_election_provider_multi_phase::SolutionOrSnapshotSize,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SubmitUnsigned {
+                    const PALLET: &'static str = "ElectionProviderMultiPhase";
+                    const CALL: &'static str = "submit_unsigned";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -25311,6 +26638,10 @@ pub mod api {
                 pub struct SetMinimumUntrustedScore {
                     pub maybe_next_score:
                         ::core::option::Option<runtime_types::sp_npos_elections::ElectionScore>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMinimumUntrustedScore {
+                    const PALLET: &'static str = "ElectionProviderMultiPhase";
+                    const CALL: &'static str = "set_minimum_untrusted_score";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -25327,6 +26658,10 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         runtime_types::sp_npos_elections::Support<::subxt::utils::AccountId32>,
                     )>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetEmergencyElectionResult {
+                    const PALLET: &'static str = "ElectionProviderMultiPhase";
+                    const CALL: &'static str = "set_emergency_election_result";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -25345,6 +26680,10 @@ pub mod api {
                         >,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Submit {
+                    const PALLET: &'static str = "ElectionProviderMultiPhase";
+                    const CALL: &'static str = "submit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -25358,6 +26697,10 @@ pub mod api {
                 pub struct GovernanceFallback {
                     pub maybe_max_voters: ::core::option::Option<::core::primitive::u32>,
                     pub maybe_max_targets: ::core::option::Option<::core::primitive::u32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for GovernanceFallback {
+                    const PALLET: &'static str = "ElectionProviderMultiPhase";
+                    const CALL: &'static str = "governance_fallback";
                 }
             }
             pub struct TransactionApi;
@@ -26258,6 +27601,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_bags_list::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_bags_list::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -26277,6 +27621,10 @@ pub mod api {
                 pub struct Rebag {
                     pub dislocated: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Rebag {
+                    const PALLET: &'static str = "VoterList";
+                    const CALL: &'static str = "rebag";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26289,6 +27637,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct PutInFrontOf {
                     pub lighter: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for PutInFrontOf {
+                    const PALLET: &'static str = "VoterList";
+                    const CALL: &'static str = "put_in_front_of";
                 }
             }
             pub struct TransactionApi;
@@ -26584,6 +27936,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_nomination_pools::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_nomination_pools::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -26605,6 +27958,10 @@ pub mod api {
                     pub amount: ::core::primitive::u128,
                     pub pool_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Join {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "join";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26619,6 +27976,10 @@ pub mod api {
                     pub extra:
                         runtime_types::pallet_nomination_pools::BondExtra<::core::primitive::u128>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for BondExtra {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "bond_extra";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26630,6 +27991,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClaimPayout;
+                impl ::subxt::blocks::StaticExtrinsic for ClaimPayout {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "claim_payout";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26646,6 +28011,10 @@ pub mod api {
                     #[codec(compact)]
                     pub unbonding_points: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Unbond {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "unbond";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26659,6 +28028,10 @@ pub mod api {
                 pub struct PoolWithdrawUnbonded {
                     pub pool_id: ::core::primitive::u32,
                     pub num_slashing_spans: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for PoolWithdrawUnbonded {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "pool_withdraw_unbonded";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26674,6 +28047,10 @@ pub mod api {
                     pub member_account:
                         ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub num_slashing_spans: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for WithdrawUnbonded {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "withdraw_unbonded";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26691,6 +28068,10 @@ pub mod api {
                     pub root: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub nominator: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub bouncer: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Create {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "create";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26710,6 +28091,10 @@ pub mod api {
                     pub bouncer: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     pub pool_id: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for CreateWithPoolId {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "create_with_pool_id";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26723,6 +28108,10 @@ pub mod api {
                 pub struct Nominate {
                     pub pool_id: ::core::primitive::u32,
                     pub validators: ::std::vec::Vec<::subxt::utils::AccountId32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Nominate {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "nominate";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26738,6 +28127,10 @@ pub mod api {
                     pub pool_id: ::core::primitive::u32,
                     pub state: runtime_types::pallet_nomination_pools::PoolState,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetState {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_state";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26751,6 +28144,10 @@ pub mod api {
                 pub struct SetMetadata {
                     pub pool_id: ::core::primitive::u32,
                     pub metadata: ::std::vec::Vec<::core::primitive::u8>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMetadata {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_metadata";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26777,6 +28174,10 @@ pub mod api {
                         runtime_types::sp_arithmetic::per_things::Perbill,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetConfigs {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_configs";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26799,6 +28200,10 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for UpdateRoles {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "update_roles";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -26812,6 +28217,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Chill {
                     pub pool_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Chill {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "chill";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26828,6 +28237,10 @@ pub mod api {
                     pub extra:
                         runtime_types::pallet_nomination_pools::BondExtra<::core::primitive::u128>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for BondExtraOther {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "bond_extra_other";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26841,6 +28254,10 @@ pub mod api {
                 pub struct SetClaimPermission {
                     pub permission: runtime_types::pallet_nomination_pools::ClaimPermission,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetClaimPermission {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_claim_permission";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26853,6 +28270,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClaimPayoutOther {
                     pub other: ::subxt::utils::AccountId32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ClaimPayoutOther {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "claim_payout_other";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26871,6 +28292,10 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                     )>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetCommission {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_commission";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -26884,6 +28309,10 @@ pub mod api {
                 pub struct SetCommissionMax {
                     pub pool_id: ::core::primitive::u32,
                     pub max_commission: runtime_types::sp_arithmetic::per_things::Perbill,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetCommissionMax {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_commission_max";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -26901,6 +28330,10 @@ pub mod api {
                         ::core::primitive::u32,
                     >,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetCommissionChangeRate {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "set_commission_change_rate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -26914,6 +28347,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ClaimCommission {
                     pub pool_id: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ClaimCommission {
+                    const PALLET: &'static str = "NominationPools";
+                    const CALL: &'static str = "claim_commission";
                 }
             }
             pub struct TransactionApi;
@@ -28553,6 +29990,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_fast_unstake::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_fast_unstake::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -28570,6 +30008,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct RegisterFastUnstake;
+                impl ::subxt::blocks::StaticExtrinsic for RegisterFastUnstake {
+                    const PALLET: &'static str = "FastUnstake";
+                    const CALL: &'static str = "register_fast_unstake";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -28581,6 +30023,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Deregister;
+                impl ::subxt::blocks::StaticExtrinsic for Deregister {
+                    const PALLET: &'static str = "FastUnstake";
+                    const CALL: &'static str = "deregister";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -28594,6 +30040,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Control {
                     pub eras_to_check: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Control {
+                    const PALLET: &'static str = "FastUnstake";
+                    const CALL: &'static str = "control";
                 }
             }
             pub struct TransactionApi;
@@ -28927,6 +30377,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::configuration::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::configuration::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -28947,6 +30398,10 @@ pub mod api {
                 pub struct SetValidationUpgradeCooldown {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetValidationUpgradeCooldown {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_validation_upgrade_cooldown";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -28960,6 +30415,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetValidationUpgradeDelay {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetValidationUpgradeDelay {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_validation_upgrade_delay";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -28975,6 +30434,10 @@ pub mod api {
                 pub struct SetCodeRetentionPeriod {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetCodeRetentionPeriod {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_code_retention_period";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -28988,6 +30451,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMaxCodeSize {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxCodeSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_code_size";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29003,6 +30470,10 @@ pub mod api {
                 pub struct SetMaxPovSize {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxPovSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_pov_size";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29016,6 +30487,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMaxHeadDataSize {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxHeadDataSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_head_data_size";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29031,6 +30506,10 @@ pub mod api {
                 pub struct SetParathreadCores {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetParathreadCores {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_parathread_cores";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29044,6 +30523,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetParathreadRetries {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetParathreadRetries {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_parathread_retries";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29059,6 +30542,10 @@ pub mod api {
                 pub struct SetGroupRotationFrequency {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetGroupRotationFrequency {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_group_rotation_frequency";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29072,6 +30559,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetChainAvailabilityPeriod {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetChainAvailabilityPeriod {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_chain_availability_period";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29087,6 +30578,10 @@ pub mod api {
                 pub struct SetThreadAvailabilityPeriod {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetThreadAvailabilityPeriod {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_thread_availability_period";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29101,6 +30596,10 @@ pub mod api {
                 pub struct SetSchedulingLookahead {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetSchedulingLookahead {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_scheduling_lookahead";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29114,6 +30613,10 @@ pub mod api {
                 pub struct SetMaxValidatorsPerCore {
                     pub new: ::core::option::Option<::core::primitive::u32>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxValidatorsPerCore {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_validators_per_core";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29126,6 +30629,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMaxValidators {
                     pub new: ::core::option::Option<::core::primitive::u32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxValidators {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_validators";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29141,6 +30648,10 @@ pub mod api {
                 pub struct SetDisputePeriod {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetDisputePeriod {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_dispute_period";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29154,6 +30665,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetDisputePostConclusionAcceptancePeriod {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetDisputePostConclusionAcceptancePeriod {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_dispute_post_conclusion_acceptance_period";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29169,6 +30684,10 @@ pub mod api {
                 pub struct SetNoShowSlots {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetNoShowSlots {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_no_show_slots";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29182,6 +30701,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetNDelayTranches {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetNDelayTranches {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_n_delay_tranches";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29197,6 +30720,10 @@ pub mod api {
                 pub struct SetZerothDelayTrancheWidth {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetZerothDelayTrancheWidth {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_zeroth_delay_tranche_width";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29210,6 +30737,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetNeededApprovals {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetNeededApprovals {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_needed_approvals";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29225,6 +30756,10 @@ pub mod api {
                 pub struct SetRelayVrfModuloSamples {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetRelayVrfModuloSamples {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_relay_vrf_modulo_samples";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29238,6 +30773,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMaxUpwardQueueCount {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxUpwardQueueCount {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_upward_queue_count";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29253,6 +30792,10 @@ pub mod api {
                 pub struct SetMaxUpwardQueueSize {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxUpwardQueueSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_upward_queue_size";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29267,6 +30810,10 @@ pub mod api {
                 pub struct SetMaxDownwardMessageSize {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxDownwardMessageSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_downward_message_size";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29279,6 +30826,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetUmpServiceTotalWeight {
                     pub new: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetUmpServiceTotalWeight {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_ump_service_total_weight";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29294,6 +30845,10 @@ pub mod api {
                 pub struct SetMaxUpwardMessageSize {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxUpwardMessageSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_upward_message_size";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29307,6 +30862,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetMaxUpwardMessageNumPerCandidate {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetMaxUpwardMessageNumPerCandidate {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_max_upward_message_num_per_candidate";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29322,6 +30881,10 @@ pub mod api {
                 pub struct SetHrmpOpenRequestTtl {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpOpenRequestTtl {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_open_request_ttl";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29335,6 +30898,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetHrmpSenderDeposit {
                     pub new: ::core::primitive::u128,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpSenderDeposit {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_sender_deposit";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29350,6 +30917,10 @@ pub mod api {
                 pub struct SetHrmpRecipientDeposit {
                     pub new: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpRecipientDeposit {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_recipient_deposit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29363,6 +30934,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetHrmpChannelMaxCapacity {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpChannelMaxCapacity {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_channel_max_capacity";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29378,6 +30953,10 @@ pub mod api {
                 pub struct SetHrmpChannelMaxTotalSize {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpChannelMaxTotalSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_channel_max_total_size";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29391,6 +30970,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetHrmpMaxParachainInboundChannels {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpMaxParachainInboundChannels {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_max_parachain_inbound_channels";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29406,6 +30989,10 @@ pub mod api {
                 pub struct SetHrmpMaxParathreadInboundChannels {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpMaxParathreadInboundChannels {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_max_parathread_inbound_channels";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29419,6 +31006,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetHrmpChannelMaxMessageSize {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpChannelMaxMessageSize {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_channel_max_message_size";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29434,6 +31025,10 @@ pub mod api {
                 pub struct SetHrmpMaxParachainOutboundChannels {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpMaxParachainOutboundChannels {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_max_parachain_outbound_channels";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29447,6 +31042,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetHrmpMaxParathreadOutboundChannels {
                     pub new: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpMaxParathreadOutboundChannels {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_max_parathread_outbound_channels";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29462,6 +31061,10 @@ pub mod api {
                 pub struct SetHrmpMaxMessageNumPerCandidate {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetHrmpMaxMessageNumPerCandidate {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_hrmp_max_message_num_per_candidate";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29475,6 +31078,10 @@ pub mod api {
                 pub struct SetUmpMaxIndividualWeight {
                     pub new: runtime_types::sp_weights::weight_v2::Weight,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetUmpMaxIndividualWeight {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_ump_max_individual_weight";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29487,6 +31094,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetPvfCheckingEnabled {
                     pub new: ::core::primitive::bool,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetPvfCheckingEnabled {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_pvf_checking_enabled";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -29502,6 +31113,10 @@ pub mod api {
                 pub struct SetPvfVotingTtl {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetPvfVotingTtl {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_pvf_voting_ttl";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -29516,6 +31131,10 @@ pub mod api {
                 pub struct SetMinimumValidationUpgradeDelay {
                     pub new: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetMinimumValidationUpgradeDelay {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_minimum_validation_upgrade_delay";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29528,6 +31147,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct SetBypassConsistencyCheck {
                     pub new: ::core::primitive::bool,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetBypassConsistencyCheck {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_bypass_consistency_check";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -29542,6 +31165,10 @@ pub mod api {
                 pub struct SetAsyncBackingParams {
                     pub new: runtime_types::polkadot_primitives::vstaging::AsyncBackingParams,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for SetAsyncBackingParams {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_async_backing_params";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -29555,6 +31182,10 @@ pub mod api {
                 pub struct SetExecutorParams {
                     pub new:
                         runtime_types::polkadot_primitives::v4::executor_params::ExecutorParams,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetExecutorParams {
+                    const PALLET: &'static str = "Configuration";
+                    const CALL: &'static str = "set_executor_params";
                 }
             }
             pub struct TransactionApi;
@@ -30391,6 +32022,7 @@ pub mod api {
         use super::root_mod;
         use super::runtime_types;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::shared::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -30480,6 +32112,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::inclusion::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::inclusion::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -30673,6 +32306,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -30696,6 +32330,10 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     >,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Enter {
+                    const PALLET: &'static str = "ParaInherent";
+                    const CALL: &'static str = "enter";
                 }
             }
             pub struct TransactionApi;
@@ -30962,6 +32600,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::paras::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::paras::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -30982,6 +32621,10 @@ pub mod api {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                     pub new_code: runtime_types::polkadot_parachain::primitives::ValidationCode,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceSetCurrentCode {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "force_set_current_code";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -30995,6 +32638,10 @@ pub mod api {
                 pub struct ForceSetCurrentHead {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                     pub new_head: runtime_types::polkadot_parachain::primitives::HeadData,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceSetCurrentHead {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "force_set_current_head";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -31011,6 +32658,10 @@ pub mod api {
                     pub new_code: runtime_types::polkadot_parachain::primitives::ValidationCode,
                     pub relay_parent_number: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceScheduleCodeUpgrade {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "force_schedule_code_upgrade";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -31025,6 +32676,10 @@ pub mod api {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                     pub new_head: runtime_types::polkadot_parachain::primitives::HeadData,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceNoteNewHead {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "force_note_new_head";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -31037,6 +32692,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceQueueAction {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceQueueAction {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "force_queue_action";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -31052,6 +32711,10 @@ pub mod api {
                     pub validation_code:
                         runtime_types::polkadot_parachain::primitives::ValidationCode,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddTrustedValidationCode {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "add_trusted_validation_code";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -31066,6 +32729,10 @@ pub mod api {
                     pub validation_code_hash:
                         runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for PokeUnusedValidationCode {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "poke_unused_validation_code";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -31079,6 +32746,10 @@ pub mod api {
                 pub struct IncludePvfCheckStatement {
                     pub stmt: runtime_types::polkadot_primitives::v4::PvfCheckStatement,
                     pub signature: runtime_types::polkadot_primitives::v4::validator_app::Signature,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for IncludePvfCheckStatement {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "include_pvf_check_statement";
                 }
             }
             pub struct TransactionApi;
@@ -32291,6 +33962,7 @@ pub mod api {
         use super::root_mod;
         use super::runtime_types;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::initializer::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -32310,6 +33982,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceApprove {
                     pub up_to: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceApprove {
+                    const PALLET: &'static str = "Initializer";
+                    const CALL: &'static str = "force_approve";
                 }
             }
             pub struct TransactionApi;
@@ -32564,6 +34240,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::ump::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::ump::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -32583,6 +34260,10 @@ pub mod api {
                 pub struct ServiceOverweight {
                     pub index: ::core::primitive::u64,
                     pub weight_limit: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ServiceOverweight {
+                    const PALLET: &'static str = "Ump";
+                    const CALL: &'static str = "service_overweight";
                 }
             }
             pub struct TransactionApi;
@@ -33054,6 +34735,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::hrmp::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::hrmp::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -33075,6 +34757,10 @@ pub mod api {
                     pub proposed_max_capacity: ::core::primitive::u32,
                     pub proposed_max_message_size: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for HrmpInitOpenChannel {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "hrmp_init_open_channel";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -33088,6 +34774,10 @@ pub mod api {
                 pub struct HrmpAcceptOpenChannel {
                     pub sender: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for HrmpAcceptOpenChannel {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "hrmp_accept_open_channel";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -33100,6 +34790,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct HrmpCloseChannel {
                     pub channel_id: runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for HrmpCloseChannel {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "hrmp_close_channel";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -33116,6 +34810,10 @@ pub mod api {
                     pub inbound: ::core::primitive::u32,
                     pub outbound: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceCleanHrmp {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "force_clean_hrmp";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
                     :: subxt :: ext :: codec :: Decode,
@@ -33129,6 +34827,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceProcessHrmpOpen {
                     pub channels: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceProcessHrmpOpen {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "force_process_hrmp_open";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: CompactAs,
@@ -33144,6 +34846,10 @@ pub mod api {
                 pub struct ForceProcessHrmpClose {
                     pub channels: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceProcessHrmpClose {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "force_process_hrmp_close";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -33157,6 +34863,10 @@ pub mod api {
                 pub struct HrmpCancelOpenRequest {
                     pub channel_id: runtime_types::polkadot_parachain::primitives::HrmpChannelId,
                     pub open_requests: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for HrmpCancelOpenRequest {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "hrmp_cancel_open_request";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -33173,6 +34883,10 @@ pub mod api {
                     pub recipient: runtime_types::polkadot_parachain::primitives::Id,
                     pub max_capacity: ::core::primitive::u32,
                     pub max_message_size: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceOpenHrmpChannel {
+                    const PALLET: &'static str = "Hrmp";
+                    const CALL: &'static str = "force_open_hrmp_channel";
                 }
             }
             pub struct TransactionApi;
@@ -34288,6 +36002,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_parachains::disputes::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_parachains::disputes::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -34305,6 +36020,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceUnfreeze;
+                impl ::subxt::blocks::StaticExtrinsic for ForceUnfreeze {
+                    const PALLET: &'static str = "ParasDisputes";
+                    const CALL: &'static str = "force_unfreeze";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -34754,6 +36473,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_common::paras_registrar::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_common::paras_registrar::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -34776,6 +36496,10 @@ pub mod api {
                     pub validation_code:
                         runtime_types::polkadot_parachain::primitives::ValidationCode,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Register {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "register";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34794,6 +36518,10 @@ pub mod api {
                     pub validation_code:
                         runtime_types::polkadot_parachain::primitives::ValidationCode,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceRegister {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "force_register";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34806,6 +36534,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Deregister {
                     pub id: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Deregister {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "deregister";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -34821,6 +36553,10 @@ pub mod api {
                     pub id: runtime_types::polkadot_parachain::primitives::Id,
                     pub other: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Swap {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "swap";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34834,6 +36570,10 @@ pub mod api {
                 pub struct RemoveLock {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for RemoveLock {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "remove_lock";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34845,6 +36585,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Reserve;
+                impl ::subxt::blocks::StaticExtrinsic for Reserve {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "reserve";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34857,6 +36601,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct AddLock {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for AddLock {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "add_lock";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -34872,6 +36620,10 @@ pub mod api {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                     pub new_code: runtime_types::polkadot_parachain::primitives::ValidationCode,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ScheduleCodeUpgrade {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "schedule_code_upgrade";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -34885,6 +36637,10 @@ pub mod api {
                 pub struct SetCurrentHead {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                     pub new_head: runtime_types::polkadot_parachain::primitives::HeadData,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetCurrentHead {
+                    const PALLET: &'static str = "Registrar";
+                    const CALL: &'static str = "set_current_head";
                 }
             }
             pub struct TransactionApi;
@@ -35353,6 +37109,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_common::slots::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_common::slots::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -35376,6 +37133,10 @@ pub mod api {
                     pub period_begin: ::core::primitive::u32,
                     pub period_count: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceLease {
+                    const PALLET: &'static str = "Slots";
+                    const CALL: &'static str = "force_lease";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -35389,6 +37150,10 @@ pub mod api {
                 pub struct ClearAllLeases {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ClearAllLeases {
+                    const PALLET: &'static str = "Slots";
+                    const CALL: &'static str = "clear_all_leases";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -35401,6 +37166,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct TriggerOnboard {
                     pub para: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for TriggerOnboard {
+                    const PALLET: &'static str = "Slots";
+                    const CALL: &'static str = "trigger_onboard";
                 }
             }
             pub struct TransactionApi;
@@ -35655,6 +37424,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_common::auctions::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_common::auctions::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -35676,6 +37446,10 @@ pub mod api {
                     pub duration: ::core::primitive::u32,
                     #[codec(compact)]
                     pub lease_period_index: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for NewAuction {
+                    const PALLET: &'static str = "Auctions";
+                    const CALL: &'static str = "new_auction";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -35699,6 +37473,10 @@ pub mod api {
                     #[codec(compact)]
                     pub amount: ::core::primitive::u128,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Bid {
+                    const PALLET: &'static str = "Auctions";
+                    const CALL: &'static str = "bid";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -35710,6 +37488,10 @@ pub mod api {
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct CancelAuction;
+                impl ::subxt::blocks::StaticExtrinsic for CancelAuction {
+                    const PALLET: &'static str = "Auctions";
+                    const CALL: &'static str = "cancel_auction";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -36173,6 +37955,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::polkadot_runtime_common::crowdloan::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::polkadot_runtime_common::crowdloan::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -36202,6 +37985,10 @@ pub mod api {
                     pub end: ::core::primitive::u32,
                     pub verifier: ::core::option::Option<runtime_types::sp_runtime::MultiSigner>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Create {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "create";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36220,6 +38007,10 @@ pub mod api {
                     pub signature:
                         ::core::option::Option<runtime_types::sp_runtime::MultiSignature>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Contribute {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "contribute";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36235,6 +38026,10 @@ pub mod api {
                     #[codec(compact)]
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Withdraw {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "withdraw";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36249,6 +38044,10 @@ pub mod api {
                     #[codec(compact)]
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Refund {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "refund";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36262,6 +38061,10 @@ pub mod api {
                 pub struct Dissolve {
                     #[codec(compact)]
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Dissolve {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "dissolve";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -36286,6 +38089,10 @@ pub mod api {
                     pub end: ::core::primitive::u32,
                     pub verifier: ::core::option::Option<runtime_types::sp_runtime::MultiSigner>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Edit {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "edit";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36300,6 +38107,10 @@ pub mod api {
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
                     pub memo: ::std::vec::Vec<::core::primitive::u8>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for AddMemo {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "add_memo";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36312,6 +38123,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct Poke {
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Poke {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "poke";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -36328,6 +38143,10 @@ pub mod api {
                     pub index: runtime_types::polkadot_parachain::primitives::Id,
                     pub signature:
                         ::core::option::Option<runtime_types::sp_runtime::MultiSignature>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ContributeAll {
+                    const PALLET: &'static str = "Crowdloan";
+                    const CALL: &'static str = "contribute_all";
                 }
             }
             pub struct TransactionApi;
@@ -36924,6 +38743,7 @@ pub mod api {
         #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/main-docs/build/events-errors/)\n\t\t\tof this pallet.\n\t\t\t"]
         pub type Error = runtime_types::pallet_xcm::pallet::Error;
         #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
+        pub type Call = runtime_types::pallet_xcm::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -36944,6 +38764,10 @@ pub mod api {
                     pub dest: ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
                     pub message: ::std::boxed::Box<runtime_types::xcm::VersionedXcm>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for Send {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "send";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36959,6 +38783,10 @@ pub mod api {
                     pub beneficiary: ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
                     pub assets: ::std::boxed::Box<runtime_types::xcm::VersionedMultiAssets>,
                     pub fee_asset_item: ::core::primitive::u32,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for TeleportAssets {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "teleport_assets";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -36976,6 +38804,10 @@ pub mod api {
                     pub assets: ::std::boxed::Box<runtime_types::xcm::VersionedMultiAssets>,
                     pub fee_asset_item: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ReserveTransferAssets {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "reserve_transfer_assets";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -36989,6 +38821,10 @@ pub mod api {
                 pub struct Execute {
                     pub message: ::std::boxed::Box<runtime_types::xcm::VersionedXcm>,
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for Execute {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "execute";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -37005,6 +38841,10 @@ pub mod api {
                         ::std::boxed::Box<runtime_types::xcm::v3::multilocation::MultiLocation>,
                     pub xcm_version: ::core::primitive::u32,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceXcmVersion {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "force_xcm_version";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -37017,6 +38857,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceDefaultXcmVersion {
                     pub maybe_xcm_version: ::core::option::Option<::core::primitive::u32>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceDefaultXcmVersion {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "force_default_xcm_version";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -37031,6 +38875,10 @@ pub mod api {
                 pub struct ForceSubscribeVersionNotify {
                     pub location: ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
                 }
+                impl ::subxt::blocks::StaticExtrinsic for ForceSubscribeVersionNotify {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "force_subscribe_version_notify";
+                }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
                     :: subxt :: ext :: codec :: Encode,
@@ -37043,6 +38891,10 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 pub struct ForceUnsubscribeVersionNotify {
                     pub location: ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceUnsubscribeVersionNotify {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "force_unsubscribe_version_notify";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -37060,6 +38912,10 @@ pub mod api {
                     pub assets: ::std::boxed::Box<runtime_types::xcm::VersionedMultiAssets>,
                     pub fee_asset_item: ::core::primitive::u32,
                     pub weight_limit: runtime_types::xcm::v3::WeightLimit,
+                }
+                impl ::subxt::blocks::StaticExtrinsic for LimitedReserveTransferAssets {
+                    const PALLET: &'static str = "XcmPallet";
+                    const CALL: &'static str = "limited_reserve_transfer_assets";
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,

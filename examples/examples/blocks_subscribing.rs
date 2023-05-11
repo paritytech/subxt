@@ -25,13 +25,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Log each of the extrinsic with it's associated events:
         let body = block.body().await?;
-        for ext in body.extrinsics() {
+        for ext in body.extrinsics().iter() {
+            let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
 
+            // See the API docs for more ways to decode extrinsics:
+            let decoded_ext = ext.as_root_extrinsic::<polkadot::Call>();
+
             println!("    Extrinsic #{idx}:");
             println!("      Bytes: {bytes_hex}");
+            println!("      Decoded: {decoded_ext:?}");
             println!("      Events:");
 
             for evt in events.iter() {

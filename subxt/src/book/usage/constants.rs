@@ -48,12 +48,11 @@
 //!
 //! Here's an example using a static query:
 //!
-//!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/constants_static.rs")]
 //! ```
-//! And here's one using a dynamic query:
 //!
+//! And here's one using a dynamic query:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/constants_dynamic.rs")]

@@ -24,14 +24,14 @@
 //! - [events](crate::blocks::Block::events())
 //! - [runtime APIs](crate::blocks::Block::runtime_api())
 //!
+//! Aside from these links to other Subxt APIs, the main thing that we can do here is iterate over and
+//! decode the extrinsics in a block body.
+//!
 //! ## Example
 //!
 //! Given a block, you can [download the block body](crate::blocks::Block::body()) and iterate over
-//! the extrinsics stored within it using [`crate::blocks::BlockBody::extrinsics()`].
-//!
-//! Here's an example in which we subscribe to blocks and print a bunch of information about each
-//! one:
-//!
+//! the extrinsics stored within it using [`crate::blocks::BlockBody::extrinsics()`]. From there, you
+//! can decode the extrinsics and access various details, including the associated events:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/blocks_subscribing.rs")]

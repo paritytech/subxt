@@ -5,7 +5,7 @@
 //! # Runtime API interface
 //!
 //! The Runtime API interface allows Subxt to call runtime APIs exposed by certain pallets in order
-//! to obtain information. Much like [`super::storage`] and [`super::extrinsics`], Making a runtime
+//! to obtain information. Much like [`super::storage`] and [`super::transactions`], Making a runtime
 //! call to a node and getting the response back takes the following steps:
 //!
 //! 1. [Constructing a runtime call](#constructing-a-runtime-call)
