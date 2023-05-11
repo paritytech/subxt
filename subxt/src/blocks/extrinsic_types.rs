@@ -8,7 +8,7 @@ use crate::{
     config::{Config, Hasher},
     error::{BlockError, Error},
     events,
-    metadata::{DecodeWithMetadata, ExtrinsicMetadata},
+    metadata::ExtrinsicMetadata,
     rpc::types::ChainBlockExtrinsic,
     Metadata,
 };
@@ -373,8 +373,7 @@ where
     }
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
-    /// type which represents the named or unnamed fields that were
-    /// present in the extrinsic.
+    /// type which represents the named or unnamed fields that were present in the extrinsic.
     pub fn field_values(
         &self,
     ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
@@ -390,10 +389,8 @@ where
         Ok(decoded)
     }
 
-    /// Attempt to statically decode these [`ExtrinsicDetails`] into a type representing the extrinsic
-    /// fields. This leans directly on [`codec::Decode`]. You can also attempt to decode the entirety
-    /// of the extrinsic using [`Self::as_root_extrinsic()`], which is more lenient because it's able
-    /// to lean on [`scale_decode::DecodeAsType`].
+    /// Attempt to decode these [`ExtrinsicDetails`] into a type representing the extrinsic fields.
+    /// Such types are exposed in the codegen as `pallet_name::calls::types::CallName` types.
     pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
         let extrinsic_metadata = self.extrinsic_metadata()?;
         if extrinsic_metadata.pallet() == E::PALLET && extrinsic_metadata.call() == E::CALL {
@@ -406,24 +403,6 @@ where
         } else {
             Ok(None)
         }
-    }
-
-    /// Attempt to decode these [`ExtrinsicDetails`] into a pallet extrinsic type (which includes
-    /// the pallet enum variants as well as the extrinsic fields). These extrinsics can be found in
-    /// the static codegen under a path like `pallet_name::Call`.
-    pub fn as_pallet_extrinsic<E: DecodeWithMetadata>(&self) -> Result<E, Error> {
-        let pallet = self.metadata.pallet(self.pallet_name()?)?;
-        let extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
-            Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
-                pallet.index(),
-                self.variant_index(),
-            ))
-        })?;
-
-        // Ignore the root enum index, so start 1 byte after that:
-        let decoded =
-            E::decode_with_metadata(&mut &self.call_bytes()[1..], extrinsic_ty, &self.metadata)?;
-        Ok(decoded)
     }
 
     /// Attempt to decode these [`ExtrinsicDetails`] into a root extrinsic type (which includes
@@ -623,6 +602,7 @@ impl<T: Config> ExtrinsicEvents<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::metadata::DecodeWithMetadata;
     use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
@@ -885,20 +865,6 @@ mod tests {
                 signed: true,
                 name: "SomeValue".into(),
             })
-        );
-
-        // Decode the extrinsic to the pallet enum.
-        let decoded_extrinsic = extrinsic
-            .as_pallet_extrinsic::<Pallet>()
-            .expect("can decode extrinsic to pallet enum");
-
-        assert_eq!(
-            decoded_extrinsic,
-            Pallet::TestCall {
-                value: 10,
-                signed: true,
-                name: "SomeValue".into(),
-            }
         );
 
         // Decode the extrinsic to the extrinsic variant.
