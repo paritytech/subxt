@@ -35,19 +35,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Or we can attempt to decode them into a specific arbitraty pallet enum
-    // (We could also set the output type to Value to dynamically decode, here):
-    println!("Event details for Balances pallet:");
-    for event in events.iter() {
-        let event = event?;
-
-        if let Ok(ev) = event.as_pallet_event::<polkadot::balances::Event>() {
-            println!("{ev:?}");
-        } else {
-            continue;
-        }
-    }
-
     // Or we can look for specific events which match our statically defined ones:
     let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
     if let Some(ev) = transfer_event {
