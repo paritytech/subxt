@@ -13,7 +13,7 @@ use subxt_metadata::{
 };
 
 fn load_metadata() -> RuntimeMetadataV15 {
-    let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))
+    let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
         .expect("Cannot read metadata blob");
     let meta: RuntimeMetadataPrefixed =
         Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");

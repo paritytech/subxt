@@ -14,7 +14,7 @@
 //! Using this macro looks something like:
 //!
 //! ```rust,no_run
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_tiny.scale")]
 //! pub mod polkadot {}
 //! ```
 //!

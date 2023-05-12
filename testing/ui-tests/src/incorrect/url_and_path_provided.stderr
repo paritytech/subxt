@@ -2,7 +2,7 @@ error: Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be prov
  --> src/incorrect/url_and_path_provided.rs:1:1
   |
 1 | / #[subxt::subxt(
-2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata.scale",
+2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_tiny.scale",
 3 | |     runtime_metadata_url = "wss://rpc.polkadot.io:443"
 4 | | )]
   | |__^

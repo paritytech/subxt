@@ -18,7 +18,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! let constant_query = polkadot::constants().system().block_length();
