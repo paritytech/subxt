@@ -16,10 +16,10 @@ pub mod type_example;
 pub struct FileOrUrl {
     /// The url of the substrate node to query for metadata for codegen.
     #[clap(long, value_parser)]
-    url: Option<Uri>,
+    pub(crate) url: Option<Uri>,
     /// The path to the encoded metadata file.
     #[clap(long, value_parser)]
-    file: Option<PathBuf>,
+    pub(crate) file: Option<PathBuf>,
     /// Specify the metadata version.
     ///
     ///  - unstable:

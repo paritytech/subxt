@@ -4,10 +4,12 @@ use scale_info::{
     form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefArray, TypeDefPrimitive,
     TypeDefTuple, TypeDefVariant,
 };
+use scale_value::{Value, ValueDef};
 
 pub trait TypeExample {
     type Value;
     fn type_example(&self, registry: &PortableRegistry) -> color_eyre::Result<Vec<Self::Value>>;
+    fn upcast(self_value: Self::Value) -> scale_value::Value;
 }
 
 impl TypeExample for u32 {
@@ -78,6 +80,10 @@ impl TypeExample for u32 {
         };
         Ok(examples)
     }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        self_value
+    }
 }
 
 impl TypeExample for TypeDefVariant<PortableForm> {
@@ -102,6 +108,13 @@ impl TypeExample for TypeDefVariant<PortableForm> {
 
         Ok(examples)
     }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        Value {
+            value: ValueDef::Variant(self_value),
+            context: (),
+        }
+    }
 }
 
 impl TypeExample for TypeDefArray<PortableForm> {
@@ -123,6 +136,13 @@ impl TypeExample for TypeDefArray<PortableForm> {
         };
         Ok(vec![one_example])
     }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        Value {
+            value: ValueDef::Composite(self_value),
+            context: (),
+        }
+    }
 }
 
 impl TypeExample for TypeDefTuple<PortableForm> {
@@ -141,6 +161,13 @@ impl TypeExample for TypeDefTuple<PortableForm> {
             })
             .collect();
         fields_vector.type_example(registry)
+    }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        Value {
+            value: ValueDef::Composite(self_value),
+            context: (),
+        }
     }
 }
 
@@ -207,6 +234,13 @@ impl TypeExample for Vec<Field<PortableForm>> {
             })
             .collect();
         Ok(composite_examples)
+    }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        Value {
+            value: ValueDef::Composite(self_value),
+            context: (),
+        }
     }
 }
 
@@ -294,5 +328,12 @@ impl TypeExample for TypeDefPrimitive {
             ],
         };
         Ok(value)
+    }
+
+    fn upcast(self_value: Self::Value) -> Value {
+        Value {
+            value: ValueDef::Primitive(self_value),
+            context: (),
+        }
     }
 }
