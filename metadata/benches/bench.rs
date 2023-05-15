@@ -8,8 +8,8 @@ use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPr
 use scale_info::{form::PortableForm, TypeDef, TypeDefVariant};
 use std::{fs, path::Path};
 use subxt_metadata::{
-    get_call_hash, get_constant_hash, get_metadata_hash, get_pallet_hash, get_storage_hash,
-    metadata_v14_to_latest,
+    get_call_hash, get_constant_hash, get_pallet_hash, get_storage_hash, metadata_v14_to_latest,
+    MetadataHasher,
 };
 
 fn load_metadata() -> RuntimeMetadataV15 {
@@ -36,7 +36,7 @@ fn bench_get_metadata_hash(c: &mut Criterion) {
     let metadata = load_metadata();
 
     c.bench_function("get_metadata_hash", |b| {
-        b.iter(|| get_metadata_hash(&metadata))
+        b.iter(|| MetadataHasher::new().hash(&metadata))
     });
 }
 

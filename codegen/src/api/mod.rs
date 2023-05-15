@@ -12,7 +12,7 @@ mod runtime_apis;
 mod storage;
 
 use frame_metadata::v15::RuntimeMetadataV15;
-use subxt_metadata::{get_metadata_per_pallet_hash, metadata_v14_to_latest};
+use subxt_metadata::{metadata_v14_to_latest, MetadataHasher};
 
 use super::DerivesRegistry;
 use crate::error::CodegenError;
@@ -291,7 +291,9 @@ impl RuntimeGenerator {
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
+        let metadata_hash = MetadataHasher::new()
+            .only_these_pallets(&pallet_names)
+            .hash(&self.metadata);
 
         let modules = pallets_with_mod_names
             .iter()
