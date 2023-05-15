@@ -327,15 +327,15 @@ async fn explore_storage(
             Some(url) => OnlineClient::<SubstrateConfig>::from_url(url).await?,
         };
         let storage_query = subxt::dynamic::storage(pallet_name, entry_name, key_scale_values);
-        let result = online_client
+        let decoded_value_thunk_or_none = online_client
             .storage()
             .at_latest()
             .await?
             .fetch(&storage_query)
-            .await?
-            .ok_or(eyre!("Decoding ValueThunk failed"))?;
+            .await?;
+        let decoded_value_thunk = decoded_value_thunk_or_none.ok_or(eyre!("DecodedValueThunk was None"))?;
 
-        let value = result.to_value()?;
+        let value = decoded_value_thunk.to_value()?;
         let value_string = scale_value::stringify::to_string(&value);
         println!("\nValue in storage: {value_string}");
     } else {
@@ -456,7 +456,6 @@ fn with_indent_and_first_dash(s: String, indent: usize) -> String {
         .enumerate()
         .map(|(i, line)| {
             if i == 0 {
-                dbg!(&line);
                 format!("{}- {line}", make_indent(indent - 2))
             } else {
                 format!("{blank_indent}{line}")
