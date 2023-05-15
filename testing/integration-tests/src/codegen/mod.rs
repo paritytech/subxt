@@ -8,7 +8,7 @@
 /// Generate by running this at the root of the repository:
 ///
 /// ```
-/// cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata.scale | rustfmt > testing/integration-tests/src/codegen/polkadot.rs
+/// cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/codegen/polkadot.rs
 /// ```
 #[rustfmt::skip]
 #[allow(clippy::all)]

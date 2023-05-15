@@ -1,7 +1,6 @@
 use subxt::{OnlineClient, PolkadotConfig};
 
-// Generate an interface that we can use from the node's metadata.
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

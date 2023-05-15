@@ -2,7 +2,7 @@ use sp_keyring::AccountKeyring;
 use subxt::dynamic::Value;
 use subxt::{config::PolkadotConfig, OnlineClient};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

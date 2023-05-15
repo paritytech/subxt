@@ -18,7 +18,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
 //! let constant_query = polkadot::constants().system().block_length();
@@ -48,12 +48,11 @@
 //!
 //! Here's an example using a static query:
 //!
-//!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/constants_static.rs")]
 //! ```
-//! And here's one using a dynamic query:
 //!
+//! And here's one using a dynamic query:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/constants_dynamic.rs")]

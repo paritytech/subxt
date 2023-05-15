@@ -64,7 +64,7 @@
 //! accounts, Alice to Bob:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../examples/examples/balance_transfer_basic.rs")]
+#![doc = include_str!("../../../examples/examples/tx_basic.rs")]
 //! ```
 //!
 //! This example assumes that a Polkadot node is running locally (Subxt endeavors to support all
@@ -81,7 +81,7 @@
 //! Once Subxt is configured, the next step is interacting with a node. Follow the links
 //! below to learn more about how to use Subxt for each of the following things:
 //!
-//! - [Extrinsics](usage::extrinsics): Subxt can build and submit extrinsics, wait until they are in
+//! - [Transactions](usage::transactions): Subxt can build and submit transactions, wait until they are in
 //!   blocks, and retrieve the associated events.
 //! - [Storage](usage::storage): Subxt can query the node storage.
 //! - [Events](usage::events): Subxt can read the events emitted for recent blocks.

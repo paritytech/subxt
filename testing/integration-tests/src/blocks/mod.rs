@@ -173,17 +173,12 @@ async fn decode_extrinsics() {
     let timestamp = block_extrinsics.get(0).unwrap();
     timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
     timestamp
-        .as_pallet_extrinsic::<node_runtime::runtime_types::pallet_timestamp::pallet::Call>()
-        .unwrap();
-    timestamp
         .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
         .unwrap();
     assert!(!timestamp.is_signed());
 
     let tx = block_extrinsics.get(1).unwrap();
     tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    tx.as_pallet_extrinsic::<node_runtime::runtime_types::pallet_balances::pallet::Call>()
-        .unwrap();
     tx.as_extrinsic::<node_runtime::balances::calls::types::Transfer>()
         .unwrap();
     assert!(tx.is_signed());

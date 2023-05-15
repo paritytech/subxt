@@ -2,7 +2,7 @@ use subxt::ext::codec::Compact;
 use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::{OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

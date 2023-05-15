@@ -52,14 +52,14 @@ parking_lot = "0.12.0"
 pretty_assertions = "1.0.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro2 = "1.0.55"
-quote = "1.0.8"
+quote = "1.0.27"
 regex = "1.8.1"
 scale-info = "2.6.0"
 scale-value = "0.7.0"
 scale-bits = "0.3"
 scale-decode = "0.5.0"
 scale-encode = "0.1.0"
-serde = { version = "1.0.162" }
+serde = { version = "1.0.163" }
 serde_json = { version = "1.0.96" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.40"

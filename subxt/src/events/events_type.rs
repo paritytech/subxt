@@ -6,11 +6,8 @@
 
 use super::{Phase, StaticEvent};
 use crate::{
-    client::OnlineClientT,
-    error::Error,
-    events::events_client::get_event_bytes,
-    metadata::{DecodeWithMetadata, EventMetadata},
-    Config, Metadata,
+    client::OnlineClientT, error::Error, events::events_client::get_event_bytes,
+    metadata::EventMetadata, Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
@@ -325,8 +322,7 @@ impl EventDetails {
     }
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
-    /// type which represents the named or unnamed fields that were
-    /// present in the event.
+    /// type which represents the named or unnamed fields that were present in the event.
     pub fn field_values(
         &self,
     ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
@@ -343,10 +339,8 @@ impl EventDetails {
         Ok(decoded)
     }
 
-    /// Attempt to statically decode these [`EventDetails`] into a type representing the event
-    /// fields. This leans directly on [`codec::Decode`]. You can also attempt to decode the entirety
-    /// of the event using [`EventDetails::as_root_event()`], which is more lenient because it's able
-    /// to lean on [`scale_decode::DecodeAsType`].
+    /// Attempt to decode these [`EventDetails`] into a type representing the event fields.
+    /// Such types are exposed in the codegen as `pallet_name::events::EventName` types.
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
         if ev_metadata.pallet() == E::PALLET && ev_metadata.event() == E::EVENT {
@@ -359,29 +353,6 @@ impl EventDetails {
         } else {
             Ok(None)
         }
-    }
-
-    /// Attempt to decode these [`EventDetails`] into a pallet event type (which includes
-    /// the pallet enum variants as well as the event fields). These events can be found in
-    /// the static codegen under a path like `pallet_name::Event`.
-    pub fn as_pallet_event<E: DecodeWithMetadata>(&self) -> Result<E, Error> {
-        let pallet = self.metadata.pallet(self.pallet_name())?;
-        let event_ty = pallet.event_ty_id().ok_or_else(|| {
-            Error::Metadata(crate::metadata::MetadataError::EventNotFound(
-                pallet.index(),
-                self.variant_index(),
-            ))
-        })?;
-
-        // Ignore the root enum index, so start 1 byte after that:
-        let start_idx = self.event_start_idx + 1;
-
-        let decoded = E::decode_with_metadata(
-            &mut &self.all_bytes[start_idx..self.event_fields_end_idx],
-            event_ty,
-            &self.metadata,
-        )?;
-        Ok(decoded)
     }
 
     /// Attempt to decode these [`EventDetails`] into a root event type (which includes
@@ -427,6 +398,7 @@ pub trait RootEvent: Sized {
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
+    use crate::metadata::DecodeWithMetadata;
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
@@ -673,39 +645,6 @@ mod tests {
 
         // It should equal the event we put in:
         assert_eq!(decoded_event, AllEvents::Test(event));
-    }
-
-    #[test]
-    fn statically_decode_single_pallet_event() {
-        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType)]
-        enum Event {
-            A(u8, bool, Vec<String>),
-        }
-
-        // Create fake metadata that knows about our single event, above:
-        let metadata = metadata::<Event>();
-
-        // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
-        let event = Event::A(1, true, vec!["Hi".into()]);
-        let events = events::<Event>(
-            metadata,
-            vec![event_record(Phase::ApplyExtrinsic(123), event.clone())],
-        );
-
-        let ev = events
-            .iter()
-            .next()
-            .expect("one event expected")
-            .expect("event should be extracted OK");
-
-        // This is the line we're testing; decode into our "pallet event" enum.
-        let decoded_event = ev
-            .as_pallet_event::<Event>()
-            .expect("can decode event into root enum again");
-
-        // It should equal the event we put in:
-        assert_eq!(decoded_event, event);
     }
 
     #[test]

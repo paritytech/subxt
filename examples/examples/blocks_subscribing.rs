@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
@@ -31,8 +31,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
 
+            // See the API docs for more ways to decode extrinsics:
+            let decoded_ext = ext.as_root_extrinsic::<polkadot::Call>();
+
             println!("    Extrinsic #{idx}:");
             println!("      Bytes: {bytes_hex}");
+            println!("      Decoded: {decoded_ext:?}");
             println!("      Events:");
 
             for evt in events.iter() {

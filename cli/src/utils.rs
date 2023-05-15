@@ -66,7 +66,7 @@ impl FileOrUrl {
             .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
-                let uri = Uri::from_static("http://localhost:9933");
+                let uri = Uri::from_static("ws://localhost:9944");
                 Ok(
                     subxt_codegen::utils::fetch_metadata_bytes(&uri, version.unwrap_or_default())
                         .await?,

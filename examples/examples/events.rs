@@ -1,6 +1,6 @@
 use subxt::{OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
@@ -32,19 +32,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{ev:?}");
         } else {
             println!("<Cannot decode event>");
-        }
-    }
-
-    // Or we can attempt to decode them into a specific arbitraty pallet enum
-    // (We could also set the output type to Value to dynamically decode, here):
-    println!("Event details for Balances pallet:");
-    for event in events.iter() {
-        let event = event?;
-
-        if let Ok(ev) = event.as_pallet_event::<polkadot::balances::Event>() {
-            println!("{ev:?}");
-        } else {
-            continue;
         }
     }
 

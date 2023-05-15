@@ -8,15 +8,17 @@ use std::io::Read;
 use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";
-static METADATA_FILE: &str = "../../artifacts/polkadot_metadata.scale";
+static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";
 
 pub struct PalletMetadataTestRunner {
     metadata: RuntimeMetadataV15,
     index: usize,
+    pallet_names: Option<Vec<String>>,
 }
 
 impl PalletMetadataTestRunner {
-    pub fn new() -> PalletMetadataTestRunner {
+    /// if pallet_names is Some(..) only the provided pallets will be tested.
+    pub fn new(pallet_names: Option<&[&str]>) -> PalletMetadataTestRunner {
         let mut file =
             std::fs::File::open(METADATA_FILE).expect("Cannot open metadata.scale artifact");
 
@@ -32,8 +34,12 @@ impl PalletMetadataTestRunner {
             frame_metadata::RuntimeMetadata::V15(v15) => v15,
             _ => panic!("Unsupported metadata version {:?}", meta.1),
         };
-
-        PalletMetadataTestRunner { metadata, index: 0 }
+        let pallet_names = pallet_names.map(|v| v.iter().map(|e| e.to_string()).collect());
+        PalletMetadataTestRunner {
+            metadata,
+            index: 0,
+            pallet_names,
+        }
     }
 
     pub fn path_to_next_ui_test(&mut self) -> Option<String> {
@@ -41,10 +47,15 @@ impl PalletMetadataTestRunner {
             return None
         };
         let test_name = &pallet.name;
-
         // Increment test index to avoid overlaps.
         let index = self.index;
         self.index += 1;
+        // if a pallet filter is set (pallet_names is Some), return the next pallet if this pallet is not in the filter.
+        if let Some(name_filter) = self.pallet_names.as_ref() {
+            if !name_filter.contains(test_name) {
+                return self.path_to_next_ui_test();
+            }
+        }
 
         // Build custom metadata containing only this pallet.
         let mut metadata = self.metadata.clone();
@@ -92,9 +103,17 @@ impl PalletMetadataTestRunner {
 impl Drop for PalletMetadataTestRunner {
     fn drop(&mut self) {
         for i in 0..self.index {
-            let mut tmp_dir = std::env::temp_dir();
-            tmp_dir.push(format!("{TEST_DIR_PREFIX}{i}"));
-            std::fs::remove_dir_all(tmp_dir).expect("cannot cleanup temp files");
+            if let Some(pallet) = self.metadata.pallets.get(self.index) {
+                if let Some(name_filter) = self.pallet_names.as_ref() {
+                    if !name_filter.contains(&pallet.name) {
+                        continue;
+                    }
+                }
+
+                let mut tmp_dir = std::env::temp_dir();
+                tmp_dir.push(format!("{TEST_DIR_PREFIX}{i}"));
+                std::fs::remove_dir_all(tmp_dir).expect("cannot cleanup temp files");
+            };
         }
     }
 }

@@ -4,8 +4,9 @@
 
 //! # Storage
 //!
-//! A Substrate based chain has storage, whose values are determined by the extrinsics added to past
-//! blocks. Subxt allows you to query the storage of a node, which consists of the following steps:
+//! A Substrate based chain can be seen as a key/value database which starts off at some initial
+//! state, and is modified by the extrinsics in each block. This database is referred to as the
+//! node storage. With Subxt, you can query this key/value storage with the following steps:
 //!
 //! 1. [Constructing a storage query](#constructing-a-storage-query).
 //! 2. [Submitting the query to get back the associated values](#submitting-it).
@@ -17,7 +18,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
 //! let account = AccountKeyring::Alice.to_account_id().into();
@@ -44,7 +45,7 @@
 //! ```rust,no_run
 //! use sp_keyring::AccountKeyring;
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
 //! // A static query capable of iterating over accounts:
@@ -73,33 +74,33 @@
 //! [`crate::storage::Storage::fetch()`] or [`crate::storage::Storage::fetch_or_default()`] (the
 //! latter will only work for storage queries that have a default value when empty):
 //!
-//!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/storage_fetch.rs")]
 //! ```
+//!
 //! For completeness, below is an example using a dynamic query instead. The return type from a
 //! dynamic query is a [`crate::dynamic::DecodedValueThunk`], which can be decoded into a
 //! [`crate::dynamic::Value`], or else the raw bytes can be accessed instead.
 //!
-//!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/storage_fetch_dynamic.rs")]
 //! ```
+//!
 //! ### Iterating storage entries
 //!
 //! Many storage entries are maps of values; as well as fetching individual values, it's possible to
 //! iterate over all of the values stored at that location:
 //!
-//!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/storage_iterating.rs")]
 //! ```
-//! Here's the same logic but using dynamically constructed values instead:
 //!
+//! Here's the same logic but using dynamically constructed values instead:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/storage_iterating_dynamic.rs")]
 //! ```
+//!
 //! ### Advanced
 //!
 //! For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and

@@ -13,10 +13,10 @@
 //! keep a snapshot of the state at a small number of previous blocks, so you can sometimes access
 //! older events by using [`crate::events::EventsClient::at()`] and providing an older block hash.
 //!
-//! When we submit extrinsics using Subxt, methods like [`crate::tx::TxProgress::wait_for_finalized_success()`]
+//! When we submit transactions using Subxt, methods like [`crate::tx::TxProgress::wait_for_finalized_success()`]
 //! return [`crate::blocks::ExtrinsicEvents`], which can be used to iterate and inspect the events produced
-//! for a specific extrinsic. We can also access _all_ of the events produced in a single block using one of these
-//! two interfaces:
+//! by that transaction being executed. We can also access _all_ of the events produced in a single block using one
+//! of these two interfaces:
 //!
 //! ```rust,no_run
 //! # #[tokio::main]
@@ -42,7 +42,6 @@
 //! ## Example
 //!
 //! Here's an example which puts this all together:
-//!
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../../examples/examples/events.rs")]
