@@ -1,9 +1,10 @@
-use crate::utils::type_description::{format_type_description, TypeDescription};
-use crate::utils::type_example::TypeExample;
+use crate::utils::type_description::{print_description, TypeDescription};
+use crate::utils::type_example::{print_examples, TypeExample};
 use crate::utils::FileOrUrl;
 use clap::{Args, Parser as ClapParser, Subcommand};
 use std::fmt::format;
-use std::io::Write;
+use std::fmt::Write;
+use std::write;
 
 use codec::Decode;
 use color_eyre::eyre::eyre;
@@ -43,6 +44,11 @@ use subxt::{tx, OnlineClient};
 /// Create an unsigned extrinsic from a scale value, validate it and output its hex representation
 /// ```
 /// subxt explore Grandpa calls note_stalled { "delay": 5, "best_finalized_block_number": 5 }
+/// # Encoded call data:
+/// # 0x2c0411020500000005000000
+/// subxt explore Balances calls transfer  "{ \"dest\": v\"Raw\"((255, 255, 255)), \"value\": 0 }"
+/// # Encoded call data:
+/// # 0x24040607020cffffff00
 /// ```
 /// ## Constants
 ///
@@ -92,8 +98,8 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
 
     // if no pallet specified, show user the pallets to choose from:
     let Some(pallet_name) = opts.pallet else {
-        println!("If you want to explore a pallet: subxt explore <PALLET>");
-        println!("{}", print_available_pallets(metadata.runtime_metadata()));
+        let available_pallets = print_available_pallets(metadata.runtime_metadata());
+        println!("{available_pallets}\n\nIf you want to explore a pallet:\n  - subxt explore <PALLET>", );
         return Ok(());
     };
 
@@ -105,13 +111,14 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     // if correct pallet was specified but no subcommand, instruct the user how to proceed:
     let Some(pallet_subcomand) = opts.pallet_subcommand else {
         let docs_string = print_docs_with_indent(&pallet_metadata.docs, 4);
-        if !docs_string.is_empty(){
-            println!("Pallet \"{pallet_name}\":{docs_string}");
+        if !docs_string.is_empty() {
+            // currently it seems like all doc strings are empty
+            println!("Pallet \"{pallet_name}\":\n{docs_string}");
         }
         println!("To explore the \"{pallet_name}\" pallet further, use one of the following:\n\
-        subxt explore {pallet_name} calls\n\
-        subxt explore {pallet_name} constants\n\
-        subxt explore {pallet_name} storage");
+          - subxt explore {pallet_name} calls\n\
+          - subxt explore {pallet_name} constants\n\
+          - subxt explore {pallet_name} storage");
         return Ok(());
     };
 
@@ -141,14 +148,14 @@ fn explore_calls(
 
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = calls_subcommand.call else {
-        println!("If you want to explore a call: subxt explore {pallet_name} call <CALL>");
-        println!("{}", print_available_calls(calls_enum_type_def, pallet_name));
+        let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
+        println!("{available_calls}\n\nIf you want to explore a call: \n  - subxt explore {pallet_name} calls <CALL>", );
         return Ok(());
     };
 
     // if specified call is wrong, show user the calls to choose from (but this time as an error):
     let Some(call) = calls_enum_type_def.variants.iter().find(|variant| variant.name == call_name)   else {
-        return Err(eyre!("call \"{}\" not found in pallet \"{}\"!\n{}", call_name,  pallet_name, print_available_calls(calls_enum_type_def, pallet_name)));
+        return Err(eyre!("\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n{}", print_available_calls(calls_enum_type_def, pallet_name)));
     };
 
     // collect all the trailing arguments into a single string that is later into a scale_value::Value
@@ -156,11 +163,19 @@ fn explore_calls(
 
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
-        let type_and_examples =
-            print_type_and_examples(&call.fields, &metadata.runtime_metadata().types)?;
-        println!("The call \"{call_name}\" of pallet \"{pallet_name}\" expects a value of type {}::{call_name}\n", calls_enum_type.path);
-        println!("You can create an unsigned extrinsic, by providing a scale value of this type to:\n    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>\n");
-        println!("{type_and_examples}");
+        let mut type_description =
+            print_description(&call.fields, &metadata.runtime_metadata().types)?;
+        type_description = with_indent(type_description, 4);
+        let mut type_examples = print_examples(&call.fields, &metadata.runtime_metadata().types)?;
+        type_examples = with_indent(type_examples, 4);
+        let mut output = String::new();
+        write!(output, "Call \"{call_name}\" in \"{pallet_name}\" pallet:\n  - expects a value of type {}::{call_name}\n", calls_enum_type.path)?;
+        write!(
+            output,
+            "  - The type looks like this:\n{type_description}\n{type_examples}"
+        )?;
+        write!(output, "\n\nYou can create an unsigned extrinsic, by providing a scale value of this type to:\n  - subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>\n")?;
+        println!("{output}");
 
         return Ok(());
     }
@@ -179,13 +194,193 @@ fn explore_calls(
     Ok(())
 }
 
+fn explore_constants(
+    metadata: &Metadata,
+    pallet_metadata: &PalletMetadata<PortableForm>,
+) -> color_eyre::Result<()> {
+    // print all constants in this pallet together with their type, value and the docs as an explanation:
+    let pallet_name = pallet_metadata.name.as_str();
+    let output = if pallet_metadata.constants.is_empty() {
+        format!("The \"{pallet_name}\" pallet has no constants.")
+    } else {
+        let mut output = format!("The \"{pallet_name}\" pallet has the following constants:");
+        for constant in pallet_metadata.constants.iter() {
+            let type_description = constant.ty.id.type_description(metadata.types())?;
+            let scale_val = scale_value::scale::decode_as_type(
+                &mut &constant.value[..],
+                constant.ty.id,
+                metadata.types(),
+            )?;
+            let name_and_type = format!(
+                "\n  - {}: {} = {}",
+                constant.name,
+                type_description,
+                scale_value::stringify::to_string(&scale_val)
+            );
+            write!(
+                output,
+                "{}\n{}",
+                name_and_type,
+                print_docs_with_indent(&constant.docs, 8)
+            )?;
+        }
+        output
+    };
+    println!("{output}");
+    Ok(())
+}
+
+async fn explore_storage(
+    storage_subcommand: StorageSubcommand,
+    metadata: &Metadata,
+    pallet_metadata: &PalletMetadata<PortableForm>,
+    custom_online_client_url: Option<String>,
+) -> color_eyre::Result<()> {
+    let pallet_name = pallet_metadata.name.as_str();
+    let trailing_args = storage_subcommand.trailing_args.join(" ");
+    let trailing_args = trailing_args.trim();
+
+    let Some(storage_metadata) = &pallet_metadata.storage else {
+        println!("The \"{pallet_name}\" pallet has no storage entries.");
+        return Ok(());
+    };
+
+    // if no storage entry specified, show user the calls to choose from:
+    let Some(entry_name) = storage_subcommand.storage_entry else {
+        let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
+        println!("{storage_entries}\n\nIf you want to explore a storage entry:\n  - subxt explore {pallet_name} storage <STORAGE_ENTRY>", );
+        return Ok(());
+    };
+
+    // if specified call storage entry wrong, show user the storage entries to choose from (but this time as an error):
+    let Some(storage) = storage_metadata.entries.iter().find(|entry| entry.name == entry_name)   else {
+        return Err(eyre!("Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n{}", print_available_storage_entries(storage_metadata, pallet_name)));
+    };
+
+    let (return_ty_id, key_ty_id) = match storage.ty {
+        StorageEntryType::Plain(value) => (value.id, None),
+        StorageEntryType::Map { value, key, .. } => (value.id, Some(key.id)),
+    };
+
+    // get the type and type description for the return and key type:
+    let mut output = format!("Storage entry \"{entry_name}\" in \"{pallet_name}\" pallet:");
+
+    let docs_string = print_docs_with_indent(&storage.docs, 4);
+    if !docs_string.is_empty() {
+        write!(output, "\n{docs_string}")?;
+    }
+
+    if let Some(key_ty_id) = key_ty_id {
+        let key_ty_description = print_description(&key_ty_id, metadata.types())?;
+        write!(
+            output,
+            "\n  - Can be accessed by providing a key of type: {}",
+            key_ty_description
+        )?;
+        let mut key_ty_examples = print_examples(&key_ty_id, metadata.types())?;
+        key_ty_examples = with_indent_and_first_dash(key_ty_examples, 4);
+        write!(output, "\n{}", key_ty_examples)?;
+    } else {
+        write!(output, "\n  - Can be accessed without providing a key.")?;
+    }
+
+    let mut return_ty_description = print_description(&return_ty_id, metadata.types())?;
+    return_ty_description = if return_ty_description.contains('\n') {
+        format!("\n{}", with_indent(return_ty_description, 4))
+    } else {
+        return_ty_description
+    };
+    write!(
+        output,
+        "\n  - The storage entry \"{entry_name}\" has a value of type: {}",
+        return_ty_description
+    )?;
+
+    // construct the vector of scale_values that should be used as a key to the storage (often empty)
+    let key_scale_values: Vec<scale_value::Value> = if trailing_args.is_empty()
+        || key_ty_id.is_none()
+    {
+        Vec::new()
+    } else {
+        let key_scale_value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
+        let stringified_key = scale_value::stringify::to_string(&key_scale_value);
+        write!(
+            output,
+            "\nYou submitted the following value as a key: {stringified_key}"
+        )?;
+        let scale_val_as_composite = value_into_composite(key_scale_value);
+        match scale_val_as_composite {
+            Composite::Named(e) => e.into_iter().map(|(s, v)| v).collect(),
+            Composite::Unnamed(e) => e,
+        }
+    };
+
+    if key_ty_id.is_none() && !trailing_args.is_empty() {
+        write!(output, "\nWarning: You submitted the following value as a key, but it will be ignored, because the storage entry does not require a key: \"{}\"\n", trailing_args)?;
+    }
+    println!("{output}");
+    // construct and submit the storage query if either no key is needed or som key was provided as a scale value
+
+    if key_ty_id.is_none() || !key_scale_values.is_empty() {
+        let online_client = match custom_online_client_url {
+            None => OnlineClient::<SubstrateConfig>::new().await?,
+            Some(url) => OnlineClient::<SubstrateConfig>::from_url(url).await?,
+        };
+        let storage_query = subxt::dynamic::storage(pallet_name, entry_name, key_scale_values);
+        let result = online_client
+            .storage()
+            .at_latest()
+            .await?
+            .fetch(&storage_query)
+            .await?
+            .ok_or(eyre!("Decoding ValueThunk failed"))?;
+
+        let value = result.to_value()?;
+        let value_string = scale_value::stringify::to_string(&value);
+        println!("\nValue in storage: {value_string}");
+    } else {
+        println!("\nIf you want to get the value of storage entry \"{entry_name}\" in pallet \"{pallet_name}\":\n  - subxt explore {pallet_name} storage {entry_name} <KEY_SCALE_VALUE>", );
+    }
+
+    Ok(())
+}
+
 fn print_available_pallets(metadata_v15: &RuntimeMetadataV15) -> String {
     if metadata_v15.pallets.is_empty() {
         "There are no pallets in this node.".to_string()
     } else {
         let mut output = "Available pallets are:".to_string();
         for pallet in metadata_v15.pallets.iter() {
-            output.push_str(format!("\n    {}", pallet.name).as_str())
+            write!(output, "\n  - {}", pallet.name).unwrap();
+        }
+        output
+    }
+}
+
+fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
+    if pallet_calls.variants.is_empty() {
+        return format!("The \"{}\" pallet has no calls.", pallet_name);
+    }
+    let mut output = format!("Calls in \"{pallet_name}\" pallet:");
+    for variant in pallet_calls.variants.iter() {
+        write!(output, "\n  - {}", variant.name).unwrap();
+    }
+    output
+}
+
+fn print_available_storage_entries(
+    storage_metadata: &PalletStorageMetadata<PortableForm>,
+    pallet_name: &str,
+) -> String {
+    if storage_metadata.entries.is_empty() {
+        format!("The \"{}\" pallet has no storage entries.", pallet_name)
+    } else {
+        let mut output = format!(
+            "The \"{}\" pallet has the following storage entries:",
+            pallet_name
+        );
+        for entry in storage_metadata.entries.iter() {
+            write!(output, "\n  - {}", entry.name).unwrap();
         }
         output
     }
@@ -212,61 +407,6 @@ fn get_calls_enum_type<'a>(
     Ok((calls_enum_type_def, calls_enum_type))
 }
 
-fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
-    if pallet_calls.variants.is_empty() {
-        return format!("The \"{}\" pallet has no calls.", pallet_name);
-    }
-    let mut output = "Available calls are:".to_string();
-    for variant in pallet_calls.variants.iter() {
-        output.push_str(format!("\n    {}", variant.name).as_str())
-    }
-    output
-}
-
-fn print_type_and_examples<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
-where
-    T: TypeExample + TypeDescription,
-{
-    let type_description = ty.type_description(registry)?;
-    let type_description = format_type_description(&type_description);
-    let type_examples = ty.type_example(registry).unwrap_or(Vec::new());
-
-    let mut output = String::new();
-    output.push_str("The type looks like this:\n");
-    output.push_str(type_description.as_str());
-
-    output.push_str("\n\n");
-    match type_examples.len() {
-        0 => {
-            output.push_str(
-                "There are no examples available for this type."
-                    .to_string()
-                    .as_str(),
-            );
-        }
-        1 => {
-            output.push_str(
-                "Here is an example of this type as a scale value:"
-                    .to_string()
-                    .as_str(),
-            );
-        }
-        i => {
-            output
-                .push_str(format!("Here are {i} examples of this type as a scale value:").as_str());
-        }
-    };
-
-    for self_value in type_examples {
-        let value = <T as TypeExample>::upcast(self_value);
-        let example_str = scale_value::stringify::to_string(&value);
-        output.push('\n');
-        output.push_str(example_str.as_str());
-    }
-
-    Ok(output)
-}
-
 /// composites stay composites, all other types are converted into a 1-fielded unnamed composite
 fn value_into_composite(value: scale_value::Value) -> scale_value::Composite<()> {
     match value.value {
@@ -291,196 +431,45 @@ fn new_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
     OfflineClient::<SubstrateConfig>::new(genesis_hash, runtime_version, metadata)
 }
 
-fn explore_constants(
-    metadata: &Metadata,
-    pallet_metadata: &PalletMetadata<PortableForm>,
-) -> color_eyre::Result<()> {
-    // print all constants in this pallet together with their type, value and the docs as an explanation:
-    let pallet_name = pallet_metadata.name.as_str();
-    let output = if pallet_metadata.constants.is_empty() {
-        format!("The \"{pallet_name}\" pallet has no constants.")
-    } else {
-        let mut output = format!("The \"{pallet_name}\" pallet has the following constants:");
-        for constant in pallet_metadata.constants.iter() {
-            let type_description = constant.ty.id.type_description(metadata.types())?;
-            let scale_val = scale_value::scale::decode_as_type(
-                &mut &constant.value[..],
-                constant.ty.id,
-                metadata.types(),
-            )?;
-            let name_and_type = format!(
-                "\n\n    {}: {} = {}",
-                constant.name,
-                type_description,
-                scale_value::stringify::to_string(&scale_val)
-            );
-            output.push_str(name_and_type.as_str());
-            output.push_str(print_docs_with_indent(&constant.docs, 8).as_str());
-        }
-        output
-    };
-    println!("{output}");
-    Ok(())
-}
-
-async fn explore_storage(
-    storage_subcommand: StorageSubcommand,
-    metadata: &Metadata,
-    pallet_metadata: &PalletMetadata<PortableForm>,
-    custom_online_client_url: Option<String>,
-) -> color_eyre::Result<()> {
-    let pallet_name = pallet_metadata.name.as_str();
-    let trailing_args = storage_subcommand.trailing_args.join(" ");
-    let trailing_args = trailing_args.trim();
-
-    let Some(storage_metadata) = &pallet_metadata.storage else{
-        println!("The \"{pallet_name}\" pallet has no storage entries.");
-        return Ok(());
-    };
-
-    // if no storage entry specified, show user the calls to choose from:
-    let Some(entry_name) = storage_subcommand.storage_entry else{
-        println!("If you want to explore a storage entry: subxt explore {pallet_name} storage <entry>\n{}", print_available_storage_entries(storage_metadata, pallet_name));
-        return Ok(());
-    };
-
-    // if specified call storage entry wrong, show user the storage entries to choose from (but this time as an error):
-    let Some(storage) = storage_metadata.entries.iter().find(|entry| entry.name == entry_name)   else {
-        return Err(eyre!("Storage entry \"{entry_name}\" not found in the \"{pallet_name}\" pallet!\n{}", print_available_storage_entries(storage_metadata, pallet_name)));
-    };
-
-    let (return_ty_id, key_ty_id) = match storage.ty {
-        StorageEntryType::Plain(value) => (value.id, None),
-        StorageEntryType::Map { value, key, .. } => (value.id, Some(key.id)),
-    };
-
-    // get the type and type description for the return and key type:
-    let mut output =
-        format!("Storage entry \"{entry_name}\" in the \"{pallet_name}\" pallet can be accessed ");
-    if let Some(key_ty_id) = key_ty_id {
-        let key_ty_description_and_example = print_type_and_examples(&key_ty_id, metadata.types())?;
-        let key_ty = metadata
-            .types()
-            .resolve(key_ty_id)
-            .ok_or(eyre!("type with id {key_ty_id} not found."))?;
-        output.push_str(
-            format!(
-                "by providing a key of type {}.\n{}",
-                key_ty.path, key_ty_description_and_example
-            )
-            .as_str(),
-        );
-    } else {
-        output.push_str("without providing a key.");
-    }
-
-    let return_ty = metadata
-        .types()
-        .resolve(return_ty_id)
-        .ok_or(eyre!("type with id {return_ty_id} not found."))?;
-    let return_ty_description_and_example =
-        print_type_and_examples(&return_ty_id, metadata.types())?;
-    output.push_str(
-        format!(
-            "\nIt returns a value of type {}\n{}",
-            return_ty.path, return_ty_description_and_example
-        )
-        .as_str(),
-    );
-
-    // print docs at the end if there are some:
-    let docs_string = print_docs_with_indent(&storage.docs, 4);
-    if !docs_string.is_empty() {
-        output.push_str(
-            format!(
-                "Here is some more information about this storage entry:{}",
-                docs_string
-            )
-            .as_str(),
-        );
-    }
-
-    // construct the scale_value that should be used as a key to the storage (often empty)
-    let key_scale_val: scale_value::Value = if trailing_args.is_empty() || key_ty_id.is_none() {
-        scale_value::Value {
-            value: ValueDef::Composite(scale_value::Composite::Unnamed(Vec::new())),
-            context: (),
-        }
-    } else {
-        scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?
-    };
-
-    if key_ty_id.is_none() {
-        if !trailing_args.is_empty() {
-            output.push_str(format!("\nWarning: You submitted the following value as a key, but it will be ignored, because the storage entry does not require a key: \"{}\"\n", trailing_args).as_str())
-        }
-    } else {
-        let stringified_key = scale_value::stringify::to_string(&key_scale_val);
-        output.push_str(
-            format!("You submitted the following value as a key: {stringified_key}").as_str(),
-        );
-    }
-
-    println!("{output}");
-    println!(
-        "...communicating with node at {}",
-        custom_online_client_url
-            .as_ref()
-            .map(|e| e.as_str())
-            .unwrap_or("ws://127.0.0.1:9944")
-    );
-
-    // construct and submit the storage query
-    let online_client = match custom_online_client_url {
-        None => OnlineClient::<SubstrateConfig>::new().await?,
-        Some(url) => OnlineClient::<SubstrateConfig>::from_url(url).await?,
-    };
-    let storage_query = subxt::dynamic::storage(pallet_name, entry_name, vec![key_scale_val]);
-    let result = online_client
-        .storage()
-        .at_latest()
-        .await?
-        .fetch(&storage_query)
-        .await?;
-    let value = result.unwrap().to_value()?;
-    dbg!(value);
-
-    Ok(())
-}
-
-fn print_available_storage_entries(
-    storage_metadata: &PalletStorageMetadata<PortableForm>,
-    pallet_name: &str,
-) -> String {
-    if storage_metadata.entries.is_empty() {
-        format!("The \"{}\" pallet has no storage entries.", pallet_name)
-    } else {
-        let mut output = format!(
-            "The \"{}\" pallet has the following storage entries:",
-            pallet_name
-        );
-        for entry in storage_metadata.entries.iter() {
-            output.push_str(format!("\n    {}", entry.name).as_str())
-        }
-        output
-    }
-}
-
 fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
-    let indent = {
-        let mut s = String::new();
-        for _ in 0..indent {
-            s.push(' ');
-        }
-        s
-    };
+    // take at most the first paragraph of documentation, such that it does not get too long.
+    let docs_str = docs
+        .iter()
+        .map(|e| e.trim())
+        .take_while(|e| !e.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n");
+    with_indent_and_first_dash(docs_str, indent)
+}
 
-    let mut output = String::new();
-    for doc in docs.iter() {
-        let trimmed = doc.trim();
-        if !trimmed.is_empty() {
-            output.push_str(format!("\n{indent}{trimmed}").as_str());
-        }
+fn with_indent(s: String, indent: usize) -> String {
+    let indent = make_indent(indent);
+    s.lines()
+        .map(|line| format!("{indent}{line}"))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn with_indent_and_first_dash(s: String, indent: usize) -> String {
+    let blank_indent = make_indent(indent);
+    s.lines()
+        .enumerate()
+        .map(|(i, line)| {
+            if i == 0 {
+                dbg!(&line);
+                format!("{}- {line}", make_indent(indent - 2))
+            } else {
+                format!("{blank_indent}{line}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn make_indent(indent: usize) -> String {
+    let mut s = String::new();
+    for _ in 0..indent {
+        s.push(' ');
     }
-    output
+    s
 }

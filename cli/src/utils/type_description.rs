@@ -1,9 +1,21 @@
 use color_eyre::eyre::eyre;
+use std::fmt::Write;
+use std::write;
 
 use scale_info::{
     form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefArray, TypeDefBitSequence,
     TypeDefCompact, TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, Variant,
 };
+
+/// pretty formatted type description
+pub fn print_description<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
+where
+    T: TypeDescription,
+{
+    let type_description = ty.type_description(registry)?;
+    let type_description = format_type_description(&type_description);
+    Ok(type_description)
+}
 
 pub trait TypeDescription {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String>;
@@ -52,8 +64,7 @@ impl TypeDescription for TypeDef<PortableForm> {
 
 impl TypeDescription for TypeDefTuple<PortableForm> {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String> {
-        let mut output = String::new();
-        output.push('(');
+        let mut output = "(".to_string();
         for (is_last, ty) in mark_last(self.fields.iter(), self.fields.len()) {
             let type_description = ty.id.type_description(registry)?;
             output.push_str(&type_description);
@@ -200,7 +211,7 @@ impl TypeDescription for Field<PortableForm> {
     }
 }
 
-pub fn format_type_description(input: &str) -> String {
+fn format_type_description(input: &str) -> String {
     fn add_indentation(output: &mut String, indent_level: i32) {
         for _ in 0..indent_level {
             output.push_str("    ");

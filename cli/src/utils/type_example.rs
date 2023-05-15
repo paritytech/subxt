@@ -5,6 +5,36 @@ use scale_info::{
     TypeDefTuple, TypeDefVariant,
 };
 use scale_value::{Value, ValueDef};
+use std::fmt::Write;
+use std::write;
+
+pub fn print_examples<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
+where
+    T: TypeExample,
+{
+    let type_examples = ty.type_example(registry)?;
+    let mut output = String::new();
+    match type_examples.len() {
+        0 => {
+            write!(output, "There are no examples available for this type.")?;
+        }
+        1 => {
+            write!(output, "Here is an example of this type as a scale value:")?;
+        }
+        i => {
+            write!(
+                output,
+                "Here are {i} examples of this type as a scale value:"
+            )?;
+        }
+    };
+    for self_value in type_examples {
+        let value = <T as TypeExample>::upcast(self_value);
+        let example_str = scale_value::stringify::to_string(&value);
+        write!(output, "\n{}", example_str)?;
+    }
+    Ok(output)
+}
 
 pub trait TypeExample {
     type Value;
