@@ -8,7 +8,7 @@ use scale_value::{Value, ValueDef};
 use std::fmt::Write;
 use std::write;
 
-pub fn print_examples<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
+pub fn print_type_examples<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
 where
     T: TypeExample,
 {
@@ -36,6 +36,7 @@ where
     Ok(output)
 }
 
+/// a trait for producing scale value examples for a type.
 pub trait TypeExample {
     type Value;
     fn type_example(&self, registry: &PortableRegistry) -> color_eyre::Result<Vec<Self::Value>>;

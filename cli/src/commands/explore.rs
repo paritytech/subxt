@@ -1,5 +1,5 @@
-use crate::utils::type_description::{print_description, TypeDescription};
-use crate::utils::type_example::{print_examples};
+use crate::utils::type_description::print_type_description;
+use crate::utils::type_example::print_type_examples;
 use crate::utils::FileOrUrl;
 use clap::{Args, Parser as ClapParser, Subcommand};
 
@@ -20,7 +20,7 @@ use subxt::utils::H256;
 use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
 use subxt::{tx, OnlineClient};
 
-/// Shows the pallets and calls available for a node and lets you build unsigned extrinsics.
+/// Explore pallets, calls, call parameters, storage entries and constants. Also allows for creating (unsigned) extrinsics.
 ///
 /// # Example
 ///
@@ -58,6 +58,14 @@ use subxt::{tx, OnlineClient};
 /// ```
 /// ## Storage
 ///
+/// Show the storage entries in a pallet
+/// ```
+/// subxt explore Alliance storage
+/// ```
+/// Show the types and value of a specific storage entry
+/// ```
+/// subxt explore Alliance storage Announcements [KEY_SCALE_VALUE]
+/// ```
 ///
 #[derive(Debug, ClapParser)]
 pub struct Opts {
@@ -164,9 +172,10 @@ fn explore_calls(
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
         let mut type_description =
-            print_description(&call.fields, &metadata.runtime_metadata().types)?;
+            print_type_description(&call.fields, &metadata.runtime_metadata().types)?;
         type_description = with_indent(type_description, 4);
-        let mut type_examples = print_examples(&call.fields, &metadata.runtime_metadata().types)?;
+        let mut type_examples =
+            print_type_examples(&call.fields, &metadata.runtime_metadata().types)?;
         type_examples = with_indent(type_examples, 4);
         let mut output = String::new();
         write!(output, "Call \"{call_name}\" in \"{pallet_name}\" pallet:\n  - expects a value of type {}::{call_name}\n", calls_enum_type.path)?;
@@ -205,7 +214,7 @@ fn explore_constants(
     } else {
         let mut output = format!("The \"{pallet_name}\" pallet has the following constants:");
         for constant in pallet_metadata.constants.iter() {
-            let type_description = constant.ty.id.type_description(metadata.types())?;
+            let type_description = print_type_description(&constant.ty.id, metadata.types())?;
             let scale_val = scale_value::scale::decode_as_type(
                 &mut &constant.value[..],
                 constant.ty.id,
@@ -271,20 +280,20 @@ async fn explore_storage(
     }
 
     if let Some(key_ty_id) = key_ty_id {
-        let key_ty_description = print_description(&key_ty_id, metadata.types())?;
+        let key_ty_description = print_type_description(&key_ty_id, metadata.types())?;
         write!(
             output,
             "\n  - Can be accessed by providing a key of type: {}",
             key_ty_description
         )?;
-        let mut key_ty_examples = print_examples(&key_ty_id, metadata.types())?;
+        let mut key_ty_examples = print_type_examples(&key_ty_id, metadata.types())?;
         key_ty_examples = with_indent_and_first_dash(key_ty_examples, 4);
         write!(output, "\n{}", key_ty_examples)?;
     } else {
         write!(output, "\n  - Can be accessed without providing a key.")?;
     }
 
-    let mut return_ty_description = print_description(&return_ty_id, metadata.types())?;
+    let mut return_ty_description = print_type_description(&return_ty_id, metadata.types())?;
     return_ty_description = if return_ty_description.contains('\n') {
         format!("\n{}", with_indent(return_ty_description, 4))
     } else {
@@ -333,7 +342,8 @@ async fn explore_storage(
             .await?
             .fetch(&storage_query)
             .await?;
-        let decoded_value_thunk = decoded_value_thunk_or_none.ok_or(eyre!("DecodedValueThunk was None"))?;
+        let decoded_value_thunk =
+            decoded_value_thunk_or_none.ok_or(eyre!("DecodedValueThunk was None"))?;
 
         let value = decoded_value_thunk.to_value()?;
         let value_string = scale_value::stringify::to_string(&value);

@@ -1,14 +1,12 @@
 use color_eyre::eyre::eyre;
 
-
-
 use scale_info::{
     form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefArray, TypeDefBitSequence,
     TypeDefCompact, TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, Variant,
 };
 
 /// pretty formatted type description
-pub fn print_description<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
+pub fn print_type_description<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
 where
     T: TypeDescription,
 {
@@ -17,6 +15,7 @@ where
     Ok(type_description)
 }
 
+/// a trait for producing human readable type descriptions with a rust-like syntax.
 pub trait TypeDescription {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String>;
 }
