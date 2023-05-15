@@ -486,6 +486,12 @@ pub struct MetadataHasher<'a> {
     specific_pallets: Option<Vec<&'a str>>,
 }
 
+impl<'a> Default for MetadataHasher<'a> {
+    fn default() -> Self {
+        MetadataHasher::new()
+    }
+}
+
 impl<'a> MetadataHasher<'a> {
     /// Create a new [`MetadataHasher`]
     pub fn new() -> Self {
