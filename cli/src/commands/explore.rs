@@ -1,8 +1,8 @@
 use crate::utils::type_description::{print_description, TypeDescription};
-use crate::utils::type_example::{print_examples, TypeExample};
+use crate::utils::type_example::{print_examples};
 use crate::utils::FileOrUrl;
 use clap::{Args, Parser as ClapParser, Subcommand};
-use std::fmt::format;
+
 use std::fmt::Write;
 use std::write;
 
@@ -13,9 +13,9 @@ use frame_metadata::v15::{
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use scale_info::form::PortableForm;
-use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant, Variant};
+use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
-use subxt::storage::DynamicAddress;
+
 use subxt::utils::H256;
 use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
 use subxt::{tx, OnlineClient};
@@ -310,7 +310,7 @@ async fn explore_storage(
         )?;
         let scale_val_as_composite = value_into_composite(key_scale_value);
         match scale_val_as_composite {
-            Composite::Named(e) => e.into_iter().map(|(s, v)| v).collect(),
+            Composite::Named(e) => e.into_iter().map(|(_s, v)| v).collect(),
             Composite::Unnamed(e) => e,
         }
     };
