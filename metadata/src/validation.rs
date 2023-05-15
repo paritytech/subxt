@@ -36,10 +36,8 @@ fn hash(data: &[u8]) -> [u8; HASH_LEN] {
     sp_core_hashing::twox_256(data)
 }
 
-/// XOR two hashes together. If we have two pseudorandom hashes, then this will
-/// lead to another pseudorandom value. If there is potentially some pattern to
-/// the hashes we are xoring (eg we might be xoring the same hashes a few times),
-/// prefer `concat_and_hash` to give us stronger pseudorandomness guarantees.
+/// XOR two hashes together. Only use this when you don't care about the order
+/// of the things you're hashing together.
 fn xor(a: [u8; HASH_LEN], b: [u8; HASH_LEN]) -> [u8; HASH_LEN] {
     let mut out = [0u8; HASH_LEN];
     for (idx, (a, b)) in a.into_iter().zip(b).enumerate() {
@@ -200,9 +198,11 @@ fn get_extrinsic_hash(
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    let mut bytes = get_type_hash(registry, extrinsic.ty.id, &mut visited_ids);
+    let mut bytes = concat_and_hash2(
+        &get_type_hash(registry, extrinsic.ty.id, &mut visited_ids),
+        &[extrinsic.version; 32],
+    );
 
-    bytes = xor(bytes, hash(&[extrinsic.version]));
     for signed_extension in extrinsic.signed_extensions.iter() {
         bytes = concat_and_hash4(
             &bytes,
@@ -234,7 +234,7 @@ fn get_storage_entry_hash(
 
     match &entry.ty {
         StorageEntryType::Plain(ty) => {
-            bytes = xor(bytes, get_type_hash(registry, ty.id, visited_ids));
+            concat_and_hash2(&bytes, &get_type_hash(registry, ty.id, visited_ids))
         }
         StorageEntryType::Map {
             hashers,
@@ -245,15 +245,13 @@ fn get_storage_entry_hash(
                 // Cloning the hasher should essentially be a copy.
                 bytes = concat_and_hash2(&bytes, &[hasher.clone() as u8; HASH_LEN]);
             }
-            bytes = concat_and_hash3(
+            concat_and_hash3(
                 &bytes,
                 &get_type_hash(registry, key.id, visited_ids),
                 &get_type_hash(registry, value.id, visited_ids),
-            );
+            )
         }
     }
-
-    bytes
 }
 
 /// Get the hash corresponding to a single runtime API method.
