@@ -293,24 +293,30 @@ fn get_runtime_trait_hash(
     metadata: &RuntimeMetadataV15,
     trait_metadata: &RuntimeApiMetadata<PortableForm>,
 ) -> [u8; HASH_LEN] {
-    // Start out with any hash, the trait name is already part of the
-    // runtime method hash.
-    let mut bytes = hash(trait_metadata.name.as_bytes());
     let mut visited_ids = HashSet::new();
+    let method_name = hash(trait_metadata.name.as_bytes());
 
-    // We don't care what order the trait methods exist in, and want the hash to
-    // be identical regardless. For this, we can just XOR the hashes for each method
-    // together; we'll get the same output whichever order they are XOR'd together in,
-    // so long as each individual method is the same.
-    let method_hashes = trait_metadata.methods.iter().map(|method_metadata| {
-        get_runtime_method_hash(metadata, trait_metadata, method_metadata, &mut visited_ids)
-    });
+    let method_bytes =
+        trait_metadata
+            .methods
+            .iter()
+            .fold([0u8; HASH_LEN], |bytes, method_metadata| {
+                // We don't care what order the trait methods exist in, and want the hash to
+                // be identical regardless. For this, we can just XOR the hashes for each method
+                // together; we'll get the same output whichever order they are XOR'd together in,
+                // so long as each individual method is the same.
+                xor(
+                    bytes,
+                    get_runtime_method_hash(
+                        metadata,
+                        trait_metadata,
+                        method_metadata,
+                        &mut visited_ids,
+                    ),
+                )
+            });
 
-    for method_hash in method_hashes {
-        bytes = xor(bytes, method_hash);
-    }
-
-    bytes
+    concat_and_hash2(&method_name, &method_bytes)
 }
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
