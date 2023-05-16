@@ -8,7 +8,11 @@ use scale_value::{Value, ValueDef};
 use std::fmt::Write;
 use std::write;
 
-pub fn print_type_examples<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
+pub fn print_type_examples<T>(
+    ty: &T,
+    registry: &PortableRegistry,
+    type_placeholder: &str,
+) -> color_eyre::Result<String>
 where
     T: TypeExample,
 {
@@ -16,15 +20,21 @@ where
     let mut output = String::new();
     match type_examples.len() {
         0 => {
-            write!(output, "There are no examples available for this type.")?;
+            write!(
+                output,
+                "There are no examples available for a {type_placeholder} matching this shape:"
+            )?;
         }
         1 => {
-            write!(output, "Here is an example of this type as a scale value:")?;
+            write!(
+                output,
+                "Here is an example of a {type_placeholder} matching this shape:"
+            )?;
         }
         i => {
             write!(
                 output,
-                "Here are {i} examples of this type as a scale value:"
+                "Here are {i} examples of a {type_placeholder} matching this shape:"
             )?;
         }
     };

@@ -75,3 +75,25 @@ impl FileOrUrl {
         }
     }
 }
+
+pub(crate) fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
+    // take at most the first paragraph of documentation, such that it does not get too long.
+    let docs_str = docs
+        .iter()
+        .map(|e| e.trim())
+        .take_while(|e| !e.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n");
+    with_indent(docs_str, indent)
+}
+
+pub(crate) fn with_indent(s: String, indent: usize) -> String {
+    let mut indent_str = String::new();
+    for _ in 0..indent {
+        indent_str.push(' ');
+    }
+    s.lines()
+        .map(|line| format!("{indent_str}{line}"))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
