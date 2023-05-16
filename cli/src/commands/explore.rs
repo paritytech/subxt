@@ -306,22 +306,26 @@ async fn explore_storage(
     )?;
 
     // construct the vector of scale_values that should be used as a key to the storage (often empty)
-    let key_scale_values: Vec<scale_value::Value> = if trailing_args.is_empty()
-        || key_ty_id.is_none()
+
+    let key_scale_values = if let Some(key_ty_id) = key_ty_id.filter(|_| !trailing_args.is_empty())
     {
-        Vec::new()
-    } else {
         let key_scale_value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
-        let stringified_key = scale_value::stringify::to_string(&key_scale_value);
         write!(
             output,
-            "\nYou submitted the following value as a key: {stringified_key}"
+            "\nYou submitted the following value as a key: {}",
+            scale_value::stringify::to_string(&key_scale_value)
         )?;
-        let scale_val_as_composite = value_into_composite(key_scale_value);
-        match scale_val_as_composite {
-            Composite::Named(e) => e.into_iter().map(|(_s, v)| v).collect(),
-            Composite::Unnamed(e) => e,
-        }
+        let mut key_bytes: Vec<u8> = Vec::new();
+        scale_value::scale::encode_as_type(
+            &key_scale_value,
+            key_ty_id,
+            metadata.types(),
+            &mut key_bytes,
+        )?;
+        let bytes_composite = scale_value::Value::from_bytes(&key_bytes);
+        vec![bytes_composite]
+    } else {
+        Vec::new()
     };
 
     if key_ty_id.is_none() && !trailing_args.is_empty() {
@@ -342,8 +346,9 @@ async fn explore_storage(
             .await?
             .fetch(&storage_query)
             .await?;
+
         let decoded_value_thunk =
-            decoded_value_thunk_or_none.ok_or(eyre!("DecodedValueThunk was None"))?;
+            decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
 
         let value = decoded_value_thunk.to_value()?;
         let value_string = scale_value::stringify::to_string(&value);

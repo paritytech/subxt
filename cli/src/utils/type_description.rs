@@ -221,7 +221,9 @@ fn format_type_description(input: &str) -> String {
     let mut indent_level = 0;
     // in a tuple we will not set line breaks on comma, so we keep track of it here:
     let mut in_tuple = 0;
+    let mut tokens_since_last_bracket_or_comma: usize = 0;
     for ch in input.chars() {
+        let mut token_is_bracket_or_comma = true;
         match ch {
             '{' => {
                 indent_level += 1;
@@ -237,14 +239,14 @@ fn format_type_description(input: &str) -> String {
             }
             ',' => {
                 output.push(ch);
-                if in_tuple > 0 {
+                // makes small tuples e.g. (u8, u16, u8, u8) not cause line breaks.
+                if in_tuple > 0 && tokens_since_last_bracket_or_comma < 5 {
                     output.push(' ');
                 } else {
                     output.push('\n');
                     add_indentation(&mut output, indent_level);
                 }
             }
-
             '(' => {
                 output.push(ch);
                 in_tuple += 1;
@@ -254,8 +256,14 @@ fn format_type_description(input: &str) -> String {
                 in_tuple -= 1;
             }
             _ => {
+                token_is_bracket_or_comma = false;
                 output.push(ch);
             }
+        }
+        if token_is_bracket_or_comma {
+            tokens_since_last_bracket_or_comma = 0;
+        } else {
+            tokens_since_last_bracket_or_comma += 1;
         }
     }
     output
