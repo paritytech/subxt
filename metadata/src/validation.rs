@@ -11,9 +11,6 @@ use frame_metadata::v15::{
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
 
-/// Start with a predefined hashing value for the pallets.
-const MAGIC_PALLET_VALUE: &[u8] = &[19];
-
 /// Predefined value to be returned when we already visited a type.
 const MAGIC_RECURSIVE_TYPE_VALUE: &[u8] = &[123];
 
@@ -35,47 +32,60 @@ enum TypeBeingHashed {
 }
 
 /// Hashing function utilized internally.
-fn hash(data: &[u8]) -> [u8; 32] {
+fn hash(data: &[u8]) -> [u8; HASH_LEN] {
     sp_core_hashing::twox_256(data)
 }
 
-/// XOR two hashes together. If we have two pseudorandom hashes, then this will
-/// lead to another pseudorandom value. If there is potentially some pattern to
-/// the hashes we are xoring (eg we might be xoring the same hashes a few times),
-/// prefer `concat_and_hash` to give us stronger pseudorandomness guarantees.
-fn xor(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
-    let mut out = [0u8; 32];
+/// XOR two hashes together. Only use this when you don't care about the order
+/// of the things you're hashing together.
+fn xor(a: [u8; HASH_LEN], b: [u8; HASH_LEN]) -> [u8; HASH_LEN] {
+    let mut out = [0u8; HASH_LEN];
     for (idx, (a, b)) in a.into_iter().zip(b).enumerate() {
         out[idx] = a ^ b;
     }
     out
 }
 
-/// Combine two hashes or hash-like sets of bytes together into a single hash.
-/// `xor` is OK for one-off combinations of bytes, but if we are merging
-/// potentially identical hashes, this is a safer way to ensure the result is
-/// unique.
-fn concat_and_hash(a: [u8; 32], b: [u8; 32]) -> [u8; 32] {
-    let mut out = [0u8; HASH_LEN * 2];
-    out[0..HASH_LEN].copy_from_slice(&a[..]);
-    out[HASH_LEN..].copy_from_slice(&b[..]);
-    hash(&out)
+// Combine some number of HASH_LEN byte hashes and output a single HASH_LEN
+// byte hash to uniquely represent the inputs.
+macro_rules! count_idents {
+    () => { 0 };
+    ($n:ident $($rest:ident)*) => { 1 + count_idents!($($rest)*) }
 }
+macro_rules! concat_and_hash_n {
+    ($name:ident($($arg:ident)+)) => {
+        fn $name($($arg: &[u8; HASH_LEN]),+) -> [u8; HASH_LEN] {
+            let mut out = [0u8; HASH_LEN * count_idents!($($arg)+)];
+            let mut start = 0;
+            $(
+                out[start..start+HASH_LEN].copy_from_slice(&$arg[..]);
+                #[allow(unused_assignments)]
+                { start += HASH_LEN; }
+            )+
+            hash(&out)
+        }
+    }
+}
+concat_and_hash_n!(concat_and_hash2(a b));
+concat_and_hash_n!(concat_and_hash3(a b c));
+concat_and_hash_n!(concat_and_hash4(a b c d));
+concat_and_hash_n!(concat_and_hash5(a b c d e));
 
 /// Obtain the hash representation of a `scale_info::Field`.
 fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
-    let mut bytes = get_type_hash(registry, field.ty.id, visited_ids);
+) -> [u8; HASH_LEN] {
+    let field_name_bytes = match &field.name {
+        Some(name) => hash(name.as_bytes()),
+        None => [0u8; HASH_LEN],
+    };
 
-    // XOR name and field name with the type hash if they exist
-    if let Some(name) = &field.name {
-        bytes = xor(bytes, hash(name.as_bytes()));
-    }
-
-    bytes
+    concat_and_hash2(
+        &field_name_bytes,
+        &get_type_hash(registry, field.ty.id, visited_ids),
+    )
 }
 
 /// Obtain the hash representation of a `scale_info::Variant`.
@@ -83,14 +93,15 @@ fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
-    // Merge our hashes of the name and each field together using xor.
-    let mut bytes = hash(var.name.as_bytes());
-    for field in &var.fields {
-        bytes = concat_and_hash(bytes, get_field_hash(registry, field, visited_ids))
-    }
+) -> [u8; HASH_LEN] {
+    let variant_name_bytes = hash(var.name.as_bytes());
+    let variant_field_bytes = var.fields.iter().fold([0u8; HASH_LEN], |bytes, field| {
+        // EncodeAsType and DecodeAsType don't care about variant field ordering,
+        // so XOR the fields to ensure that it doesn't matter.
+        xor(bytes, get_field_hash(registry, field, visited_ids))
+    });
 
-    bytes
+    concat_and_hash2(&variant_name_bytes, &variant_field_bytes)
 }
 
 /// Obtain the hash representation of a `scale_info::TypeDef`.
@@ -98,48 +109,52 @@ fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
+) -> [u8; HASH_LEN] {
     match ty_def {
         TypeDef::Composite(composite) => {
-            let mut bytes = hash(&[TypeBeingHashed::Composite as u8]);
-            for field in &composite.fields {
-                bytes = concat_and_hash(bytes, get_field_hash(registry, field, visited_ids));
-            }
-            bytes
+            let composite_id_bytes = [TypeBeingHashed::Composite as u8; HASH_LEN];
+            let composite_field_bytes =
+                composite
+                    .fields
+                    .iter()
+                    .fold([0u8; HASH_LEN], |bytes, field| {
+                        // With EncodeAsType and DecodeAsType we no longer care which order the fields are in,
+                        // as long as all of the names+types are there. XOR to not care about ordering.
+                        xor(bytes, get_field_hash(registry, field, visited_ids))
+                    });
+            concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
         TypeDef::Variant(variant) => {
-            let mut bytes = hash(&[TypeBeingHashed::Variant as u8]);
-            for var in &variant.variants {
-                bytes = concat_and_hash(bytes, get_variant_hash(registry, var, visited_ids));
-            }
-            bytes
+            let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
+            let variant_field_bytes =
+                variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
+                    // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
+                    // as long as all of the names+types are there. XOR to not care about ordering.
+                    xor(bytes, get_variant_hash(registry, var, visited_ids))
+                });
+            concat_and_hash2(&variant_id_bytes, &variant_field_bytes)
         }
-        TypeDef::Sequence(sequence) => {
-            let bytes = hash(&[TypeBeingHashed::Sequence as u8]);
-            xor(
-                bytes,
-                get_type_hash(registry, sequence.type_param.id, visited_ids),
-            )
-        }
+        TypeDef::Sequence(sequence) => concat_and_hash2(
+            &[TypeBeingHashed::Sequence as u8; HASH_LEN],
+            &get_type_hash(registry, sequence.type_param.id, visited_ids),
+        ),
         TypeDef::Array(array) => {
-            // Take length into account; different length must lead to different hash.
-            let len_bytes = array.len.to_be_bytes();
-            let bytes = hash(&[
-                TypeBeingHashed::Array as u8,
-                len_bytes[0],
-                len_bytes[1],
-                len_bytes[2],
-                len_bytes[3],
-            ]);
-            xor(
-                bytes,
-                get_type_hash(registry, array.type_param.id, visited_ids),
+            // Take length into account too; different length must lead to different hash.
+            let array_id_bytes = {
+                let mut a = [0u8; HASH_LEN];
+                a[0] = TypeBeingHashed::Array as u8;
+                a[1..5].copy_from_slice(&array.len.to_be_bytes());
+                a
+            };
+            concat_and_hash2(
+                &array_id_bytes,
+                &get_type_hash(registry, array.type_param.id, visited_ids),
             )
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
             for field in &tuple.fields {
-                bytes = concat_and_hash(bytes, get_type_hash(registry, field.id, visited_ids));
+                bytes = concat_and_hash2(&bytes, &get_type_hash(registry, field.id, visited_ids));
             }
             bytes
         }
@@ -147,30 +162,24 @@ fn get_type_def_hash(
             // Cloning the 'primitive' type should essentially be a copy.
             hash(&[TypeBeingHashed::Primitive as u8, primitive.clone() as u8])
         }
-        TypeDef::Compact(compact) => {
-            let bytes = hash(&[TypeBeingHashed::Compact as u8]);
-            xor(
-                bytes,
-                get_type_hash(registry, compact.type_param.id, visited_ids),
-            )
-        }
-        TypeDef::BitSequence(bitseq) => {
-            let mut bytes = hash(&[TypeBeingHashed::BitSequence as u8]);
-            bytes = xor(
-                bytes,
-                get_type_hash(registry, bitseq.bit_order_type.id, visited_ids),
-            );
-            bytes = xor(
-                bytes,
-                get_type_hash(registry, bitseq.bit_store_type.id, visited_ids),
-            );
-            bytes
-        }
+        TypeDef::Compact(compact) => concat_and_hash2(
+            &[TypeBeingHashed::Compact as u8; HASH_LEN],
+            &get_type_hash(registry, compact.type_param.id, visited_ids),
+        ),
+        TypeDef::BitSequence(bitseq) => concat_and_hash3(
+            &[TypeBeingHashed::BitSequence as u8; HASH_LEN],
+            &get_type_hash(registry, bitseq.bit_order_type.id, visited_ids),
+            &get_type_hash(registry, bitseq.bit_store_type.id, visited_ids),
+        ),
     }
 }
 
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
-fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet<u32>) -> [u8; 32] {
+fn get_type_hash(
+    registry: &PortableRegistry,
+    id: u32,
+    visited_ids: &mut HashSet<u32>,
+) -> [u8; HASH_LEN] {
     // Guard against recursive types and return a fixed arbitrary hash
     if !visited_ids.insert(id) {
         return hash(MAGIC_RECURSIVE_TYPE_VALUE);
@@ -186,27 +195,25 @@ fn get_type_hash(registry: &PortableRegistry, id: u32, visited_ids: &mut HashSet
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata<PortableForm>,
-) -> [u8; 32] {
+) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    let mut bytes = get_type_hash(registry, extrinsic.ty.id, &mut visited_ids);
+    let mut bytes = concat_and_hash2(
+        &get_type_hash(registry, extrinsic.ty.id, &mut visited_ids),
+        &[extrinsic.version; 32],
+    );
 
-    bytes = xor(bytes, hash(&[extrinsic.version]));
     for signed_extension in extrinsic.signed_extensions.iter() {
-        let mut ext_bytes = hash(signed_extension.identifier.as_bytes());
-        ext_bytes = xor(
-            ext_bytes,
-            get_type_hash(registry, signed_extension.ty.id, &mut visited_ids),
-        );
-        ext_bytes = xor(
-            ext_bytes,
-            get_type_hash(
+        bytes = concat_and_hash4(
+            &bytes,
+            &hash(signed_extension.identifier.as_bytes()),
+            &get_type_hash(registry, signed_extension.ty.id, &mut visited_ids),
+            &get_type_hash(
                 registry,
                 signed_extension.additional_signed.id,
                 &mut visited_ids,
             ),
-        );
-        bytes = concat_and_hash(bytes, ext_bytes);
+        )
     }
 
     bytes
@@ -217,15 +224,17 @@ fn get_storage_entry_hash(
     registry: &PortableRegistry,
     entry: &StorageEntryMetadata<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
-    let mut bytes = hash(entry.name.as_bytes());
-    // Cloning 'entry.modifier' should essentially be a copy.
-    bytes = xor(bytes, hash(&[entry.modifier.clone() as u8]));
-    bytes = xor(bytes, hash(&entry.default));
+) -> [u8; HASH_LEN] {
+    let mut bytes = concat_and_hash3(
+        &hash(entry.name.as_bytes()),
+        // Cloning 'entry.modifier' should essentially be a copy.
+        &[entry.modifier.clone() as u8; HASH_LEN],
+        &hash(&entry.default),
+    );
 
     match &entry.ty {
         StorageEntryType::Plain(ty) => {
-            bytes = xor(bytes, get_type_hash(registry, ty.id, visited_ids));
+            concat_and_hash2(&bytes, &get_type_hash(registry, ty.id, visited_ids))
         }
         StorageEntryType::Map {
             hashers,
@@ -234,14 +243,78 @@ fn get_storage_entry_hash(
         } => {
             for hasher in hashers {
                 // Cloning the hasher should essentially be a copy.
-                bytes = concat_and_hash(bytes, [hasher.clone() as u8; 32]);
+                bytes = concat_and_hash2(&bytes, &[hasher.clone() as u8; HASH_LEN]);
             }
-            bytes = xor(bytes, get_type_hash(registry, key.id, visited_ids));
-            bytes = xor(bytes, get_type_hash(registry, value.id, visited_ids));
+            concat_and_hash3(
+                &bytes,
+                &get_type_hash(registry, key.id, visited_ids),
+                &get_type_hash(registry, value.id, visited_ids),
+            )
         }
     }
+}
+
+/// Get the hash corresponding to a single runtime API method.
+fn get_runtime_method_hash(
+    metadata: &RuntimeMetadataV15,
+    trait_metadata: &RuntimeApiMetadata<PortableForm>,
+    method_metadata: &RuntimeApiMethodMetadata<PortableForm>,
+    visited_ids: &mut HashSet<u32>,
+) -> [u8; HASH_LEN] {
+    // The trait name is part of the runtime API call that is being
+    // generated for this method. Therefore the trait name is strongly
+    // connected to the method in the same way as a parameter is
+    // to the method.
+    let mut bytes = concat_and_hash2(
+        &hash(trait_metadata.name.as_bytes()),
+        &hash(method_metadata.name.as_bytes()),
+    );
+
+    for input in &method_metadata.inputs {
+        bytes = concat_and_hash3(
+            &bytes,
+            &hash(input.name.as_bytes()),
+            &get_type_hash(&metadata.types, input.ty.id, visited_ids),
+        );
+    }
+
+    bytes = concat_and_hash2(
+        &bytes,
+        &get_type_hash(&metadata.types, method_metadata.output.id, visited_ids),
+    );
 
     bytes
+}
+
+/// Obtain the hash of all of a runtime API trait, including all of its methods.
+fn get_runtime_trait_hash(
+    metadata: &RuntimeMetadataV15,
+    trait_metadata: &RuntimeApiMetadata<PortableForm>,
+) -> [u8; HASH_LEN] {
+    let mut visited_ids = HashSet::new();
+    let method_name = hash(trait_metadata.name.as_bytes());
+
+    let method_bytes =
+        trait_metadata
+            .methods
+            .iter()
+            .fold([0u8; HASH_LEN], |bytes, method_metadata| {
+                // We don't care what order the trait methods exist in, and want the hash to
+                // be identical regardless. For this, we can just XOR the hashes for each method
+                // together; we'll get the same output whichever order they are XOR'd together in,
+                // so long as each individual method is the same.
+                xor(
+                    bytes,
+                    get_runtime_method_hash(
+                        metadata,
+                        trait_metadata,
+                        method_metadata,
+                        &mut visited_ids,
+                    ),
+                )
+            });
+
+    concat_and_hash2(&method_name, &method_bytes)
 }
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
@@ -249,7 +322,7 @@ pub fn get_storage_hash(
     metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     storage_name: &str,
-) -> Result<[u8; 32], NotFound> {
+) -> Result<[u8; HASH_LEN], NotFound> {
     let pallet = metadata
         .pallets
         .iter()
@@ -273,7 +346,7 @@ pub fn get_constant_hash(
     metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     constant_name: &str,
-) -> Result<[u8; 32], NotFound> {
+) -> Result<[u8; HASH_LEN], NotFound> {
     let pallet = metadata
         .pallets
         .iter()
@@ -296,7 +369,7 @@ pub fn get_call_hash(
     metadata: &RuntimeMetadataV15,
     pallet_name: &str,
     call_name: &str,
-) -> Result<[u8; 32], NotFound> {
+) -> Result<[u8; HASH_LEN], NotFound> {
     let pallet = metadata
         .pallets
         .iter()
@@ -322,76 +395,12 @@ pub fn get_call_hash(
     Ok(hash)
 }
 
-fn get_runtime_method_hash(
-    metadata: &RuntimeMetadataV15,
-    trait_metadata: &RuntimeApiMetadata<PortableForm>,
-    method_metadata: &RuntimeApiMethodMetadata<PortableForm>,
-    visited_ids: &mut HashSet<u32>,
-) -> [u8; 32] {
-    // The trait name is part of the runtime API call that is being
-    // generated for this method. Therefore the trait name is strongly
-    // connected to the method in the same way as a parameter is
-    // to the method.
-    let mut bytes = hash(trait_metadata.name.as_bytes());
-    bytes = xor(bytes, hash(method_metadata.name.as_bytes()));
-
-    for input in &method_metadata.inputs {
-        bytes = xor(bytes, hash(input.name.as_bytes()));
-        bytes = xor(
-            bytes,
-            get_type_hash(&metadata.types, input.ty.id, visited_ids),
-        );
-    }
-
-    bytes = xor(
-        bytes,
-        get_type_hash(&metadata.types, method_metadata.output.id, visited_ids),
-    );
-
-    bytes
-}
-
-/// Obtain the hash of a specific runtime trait.
-pub fn get_runtime_trait_hash(
-    metadata: &RuntimeMetadataV15,
-    trait_metadata: &RuntimeApiMetadata<PortableForm>,
-) -> [u8; 32] {
-    // Start out with any hash, the trait name is already part of the
-    // runtime method hash.
-    let mut bytes = hash(trait_metadata.name.as_bytes());
-    let mut visited_ids = HashSet::new();
-
-    let mut methods: Vec<_> = trait_metadata
-        .methods
-        .iter()
-        .map(|method_metadata| {
-            let bytes = get_runtime_method_hash(
-                metadata,
-                trait_metadata,
-                method_metadata,
-                &mut visited_ids,
-            );
-            (&*method_metadata.name, bytes)
-        })
-        .collect();
-
-    // Sort by method name to create a deterministic representation of the underlying metadata.
-    methods.sort_by_key(|&(name, _hash)| name);
-
-    // Note: Hash already takes into account the method name.
-    for (_, hash) in methods {
-        bytes = xor(bytes, hash);
-    }
-
-    bytes
-}
-
 /// Obtain the hash of a specific runtime API function, or an error if it's not found.
 pub fn get_runtime_api_hash(
     metadata: &RuntimeMetadataV15,
     trait_name: &str,
     method_name: &str,
-) -> Result<[u8; 32], NotFound> {
+) -> Result<[u8; HASH_LEN], NotFound> {
     let trait_metadata = metadata
         .apis
         .iter()
@@ -416,141 +425,117 @@ pub fn get_runtime_api_hash(
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
     pallet: &PalletMetadata<PortableForm>,
-) -> [u8; 32] {
-    // The pallet could potentially be empty and not contain any calls, events and so on.
-    // Use a magic (arbitrary) value as a base for hashing.
-    let mut bytes = hash(MAGIC_PALLET_VALUE);
+) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    if let Some(calls) = &pallet.calls {
-        bytes = xor(
-            bytes,
-            get_type_hash(registry, calls.ty.id, &mut visited_ids),
-        );
-    }
-    if let Some(ref event) = pallet.event {
-        bytes = xor(
-            bytes,
-            get_type_hash(registry, event.ty.id, &mut visited_ids),
-        );
-    }
-    for constant in pallet.constants.iter() {
-        bytes = xor(bytes, hash(constant.name.as_bytes()));
-        bytes = xor(
-            bytes,
-            get_type_hash(registry, constant.ty.id, &mut visited_ids),
-        );
-    }
-    if let Some(ref error) = pallet.error {
-        bytes = xor(
-            bytes,
-            get_type_hash(registry, error.ty.id, &mut visited_ids),
-        );
-    }
-    if let Some(ref storage) = pallet.storage {
-        bytes = xor(bytes, hash(storage.prefix.as_bytes()));
-        for entry in storage.entries.iter() {
-            bytes = concat_and_hash(
-                bytes,
-                get_storage_entry_hash(registry, entry, &mut visited_ids),
+    let call_bytes = match &pallet.calls {
+        Some(calls) => get_type_hash(registry, calls.ty.id, &mut visited_ids),
+        None => [0u8; HASH_LEN],
+    };
+    let event_bytes = match &pallet.event {
+        Some(event) => get_type_hash(registry, event.ty.id, &mut visited_ids),
+        None => [0u8; HASH_LEN],
+    };
+    let error_bytes = match &pallet.error {
+        Some(error) => get_type_hash(registry, error.ty.id, &mut visited_ids),
+        None => [0u8; HASH_LEN],
+    };
+    let constant_bytes = pallet
+        .constants
+        .iter()
+        .fold([0u8; HASH_LEN], |bytes, constant| {
+            // We don't care what order the constants occur in, so XOR together the combinations
+            // of (constantName, constantType) to make the order we see them irrelevant.
+            let constant_hash = concat_and_hash2(
+                &hash(constant.name.as_bytes()),
+                &get_type_hash(registry, constant.ty.id, &mut visited_ids),
             );
+            xor(bytes, constant_hash)
+        });
+    let storage_bytes = match &pallet.storage {
+        Some(storage) => {
+            let prefix_hash = hash(storage.prefix.as_bytes());
+            let entries_hash = storage
+                .entries
+                .iter()
+                .fold([0u8; HASH_LEN], |bytes, entry| {
+                    // We don't care what order the storage entries occur in, so XOR them together
+                    // to make the order irrelevant.
+                    xor(
+                        bytes,
+                        get_storage_entry_hash(registry, entry, &mut visited_ids),
+                    )
+                });
+            concat_and_hash2(&prefix_hash, &entries_hash)
         }
-    }
+        None => [0u8; HASH_LEN],
+    };
 
-    bytes
+    // Hash all of the above together:
+    concat_and_hash5(
+        &call_bytes,
+        &event_bytes,
+        &error_bytes,
+        &constant_bytes,
+        &storage_bytes,
+    )
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`.
-pub fn get_metadata_hash(metadata: &RuntimeMetadataV15) -> [u8; 32] {
-    // The number of metadata components, other than variable number of pallets that produce a unique hash.
-    const STATIC_METADATA_COMPONENTS: usize = 2;
-
-    // Collect all pairs of (pallet name, pallet hash).
-    let mut pallets: Vec<(&str, [u8; 32])> = metadata
-        .pallets
-        .iter()
-        .map(|pallet| {
-            let hash = get_pallet_hash(&metadata.types, pallet);
-            (&*pallet.name, hash)
-        })
-        .collect();
-
-    // Sort by pallet name to create a deterministic representation of the underlying metadata.
-    pallets.sort_by_key(|&(name, _hash)| name);
-
-    // Note: pallet name is excluded from hashing.
-    // The number of hashes that we take into account, each having a `HASH_LEN` output.
-    let metadata_components = pallets.len() + STATIC_METADATA_COMPONENTS;
-    let mut bytes = Vec::with_capacity(metadata_components * HASH_LEN);
-    for (_, hash) in pallets.iter() {
-        bytes.extend(hash)
-    }
-
-    bytes.extend(get_extrinsic_hash(&metadata.types, &metadata.extrinsic));
-
-    let mut visited_ids = HashSet::<u32>::new();
-    bytes.extend(get_type_hash(
-        &metadata.types,
-        metadata.ty.id,
-        &mut visited_ids,
-    ));
-
-    let mut apis: Vec<_> = metadata
-        .apis
-        .iter()
-        .map(|api| (&*api.name, get_runtime_trait_hash(metadata, api)))
-        .collect();
-
-    // Sort the runtime APIs by trait name to provide a deterministic output.
-    apis.sort_by_key(|&(name, _hash)| name);
-
-    for (_, hash) in apis.iter() {
-        bytes.extend(hash)
-    }
-
-    hash(&bytes)
+pub struct MetadataHasher<'a> {
+    specific_pallets: Option<Vec<&'a str>>,
 }
 
-/// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`
-/// hashing only the provided pallets.
-///
-/// **Note:** This is similar to `get_metadata_hash`, but performs hashing only of the provided
-/// pallets if they exist. There are cases where the runtime metadata contains a subset of
-/// the pallets from the static metadata. In those cases, the static API can communicate
-/// properly with the subset of pallets from the runtime node.
-pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
-    metadata: &RuntimeMetadataV15,
-    pallets: &[T],
-) -> [u8; 32] {
-    // Collect all pairs of (pallet name, pallet hash).
-    let mut pallets_hashed: Vec<(&str, [u8; 32])> = metadata
-        .pallets
-        .iter()
-        .filter_map(|pallet| {
-            // Make sure to filter just the pallets we are interested in.
-            let in_pallet = pallets
-                .iter()
-                .any(|pallet_ref| pallet_ref.as_ref() == pallet.name);
-            if in_pallet {
-                let hash = get_pallet_hash(&metadata.types, pallet);
-                Some((&*pallet.name, hash))
-            } else {
-                None
-            }
-        })
-        .collect();
+impl<'a> Default for MetadataHasher<'a> {
+    fn default() -> Self {
+        MetadataHasher::new()
+    }
+}
 
-    // Sort by pallet name to create a deterministic representation of the underlying metadata.
-    pallets_hashed.sort_by_key(|&(name, _hash)| name);
-
-    // Note: pallet name is excluded from hashing.
-    // We are only hashing the hashes of the pallets.
-    let mut bytes = Vec::with_capacity(pallets_hashed.len() * HASH_LEN);
-    for (_, hash) in pallets_hashed.iter() {
-        bytes.extend(hash)
+impl<'a> MetadataHasher<'a> {
+    /// Create a new [`MetadataHasher`]
+    pub fn new() -> Self {
+        Self {
+            specific_pallets: None,
+        }
     }
 
-    hash(&bytes)
+    /// Only hash the provided pallets instead of hashing every pallet.
+    pub fn only_these_pallets<S: AsRef<str>>(&mut self, specific_pallets: &'a [S]) -> &mut Self {
+        self.specific_pallets = Some(specific_pallets.iter().map(|n| n.as_ref()).collect());
+        self
+    }
+
+    /// Hash the given metadata.
+    pub fn hash(&self, metadata: &RuntimeMetadataV15) -> [u8; HASH_LEN] {
+        let mut visited_ids = HashSet::<u32>::new();
+
+        let pallet_hash = metadata
+            .pallets
+            .iter()
+            .fold([0u8; HASH_LEN], |bytes, pallet| {
+                // If specific pallets are given, only include this pallet if it's
+                // in the list.
+                if let Some(specific_pallets) = &self.specific_pallets {
+                    if specific_pallets.iter().all(|&p| p != pallet.name) {
+                        return bytes;
+                    }
+                }
+                // We don't care what order the pallets are seen in, so XOR their
+                // hashes together to be order independent.
+                xor(bytes, get_pallet_hash(&metadata.types, pallet))
+            });
+
+        let apis_hash = metadata.apis.iter().fold([0u8; HASH_LEN], |bytes, api| {
+            // We don't care what order the runtime APIs are seen in, so XOR
+            xor(bytes, get_runtime_trait_hash(metadata, api))
+        });
+
+        let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
+        let runtime_hash = get_type_hash(&metadata.types, metadata.ty.id, &mut visited_ids);
+
+        concat_and_hash4(&pallet_hash, &apis_hash, &extrinsic_hash, &runtime_hash)
+    }
 }
 
 /// An error returned if we attempt to get the hash for a specific call, constant,
@@ -601,7 +586,7 @@ mod tests {
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Composite with TypeDef::Array with Typedef::Primitive.
-    struct AccountId32([u8; 32]);
+    struct AccountId32([u8; HASH_LEN]);
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Variant.
@@ -701,8 +686,8 @@ mod tests {
         pallets_swap[1].index = 1;
         let metadata_swap = pallets_to_metadata(pallets_swap);
 
-        let hash = get_metadata_hash(&metadata);
-        let hash_swap = get_metadata_hash(&metadata_swap);
+        let hash = MetadataHasher::new().hash(&metadata);
+        let hash_swap = MetadataHasher::new().hash(&metadata_swap);
 
         // Changing pallet order must still result in a deterministic unique hash.
         assert_eq!(hash, hash_swap);
@@ -717,7 +702,7 @@ mod tests {
         let metadata = pallets_to_metadata(vec![pallet]);
 
         // Check hashing algorithm finishes on a recursive type.
-        get_metadata_hash(&metadata);
+        MetadataHasher::new().hash(&metadata);
     }
 
     #[test]
@@ -743,8 +728,8 @@ mod tests {
         pallets_swap[1].index = 1;
         let metadata_swap = pallets_to_metadata(pallets_swap);
 
-        let hash = get_metadata_hash(&metadata);
-        let hash_swap = get_metadata_hash(&metadata_swap);
+        let hash = MetadataHasher::new().hash(&metadata);
+        let hash_swap = MetadataHasher::new().hash(&metadata_swap);
 
         // Changing pallet order must still result in a deterministic unique hash.
         assert_eq!(hash, hash_swap);
@@ -754,10 +739,10 @@ mod tests {
     fn pallet_hash_correctness() {
         let compare_pallets_hash = |lhs: &PalletMetadata, rhs: &PalletMetadata| {
             let metadata = pallets_to_metadata(vec![lhs.clone()]);
-            let hash = get_metadata_hash(&metadata);
+            let hash = MetadataHasher::new().hash(&metadata);
 
             let metadata = pallets_to_metadata(vec![rhs.clone()]);
-            let new_hash = get_metadata_hash(&metadata);
+            let new_hash = MetadataHasher::new().hash(&metadata);
 
             assert_ne!(hash, new_hash);
         };
@@ -824,19 +809,27 @@ mod tests {
         let metadata_both = pallets_to_metadata(pallets);
 
         // Hashing will ignore any non-existant pallet and return the same result.
-        let hash = get_metadata_per_pallet_hash(&metadata_one, &["First", "Second"]);
-        let hash_rhs = get_metadata_per_pallet_hash(&metadata_one, &["First"]);
+        let hash = MetadataHasher::new()
+            .only_these_pallets(&["First", "Second"])
+            .hash(&metadata_one);
+        let hash_rhs = MetadataHasher::new()
+            .only_these_pallets(&["First"])
+            .hash(&metadata_one);
         assert_eq!(hash, hash_rhs, "hashing should ignore non-existant pallets");
 
         // Hashing one pallet from metadata with 2 pallets inserted will ignore the second pallet.
-        let hash_second = get_metadata_per_pallet_hash(&metadata_both, &["First"]);
+        let hash_second = MetadataHasher::new()
+            .only_these_pallets(&["First"])
+            .hash(&metadata_both);
         assert_eq!(
             hash_second, hash,
             "hashing one pallet should ignore the others"
         );
 
         // Check hashing with all pallets.
-        let hash_second = get_metadata_per_pallet_hash(&metadata_both, &["First", "Second"]);
+        let hash_second = MetadataHasher::new()
+            .only_these_pallets(&["First", "Second"])
+            .hash(&metadata_both);
         assert_ne!(
             hash_second, hash,
             "hashing both pallets should produce a different result from hashing just one pallet"
@@ -853,129 +846,103 @@ mod tests {
                 ..default_pallet()
             };
             let metadata = pallets_to_metadata(vec![pallet]);
-            get_metadata_hash(&metadata)
+            MetadataHasher::new().hash(&metadata)
         };
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNotNamedA {
-            First(u8),
+        enum EnumA1 {
+            First { hi: u8, bye: String },
+            Second(u32),
+            Third,
         }
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNotNamedB {
-            First(u8),
+        enum EnumA2 {
+            Second(u32),
+            Third,
+            First { bye: String, hi: u8 },
         }
-        // Semantic changes apply only to field names.
-        // This is considered to be a good tradeoff in hashing performance, as refactoring
-        // a structure / enum 's name is less likely to cause a breaking change.
-        // Even if the enums have different names, 'EnumFieldNotNamedA' and 'EnumFieldNotNamedB',
-        // they are equal in meaning (i.e, both contain `First(u8)`).
+
+        // EncodeAsType and DecodeAsType only care about enum variant names
+        // and not indexes or field ordering or the enum name itself..
         assert_eq!(
-            to_hash(meta_type::<EnumFieldNotNamedA>()),
-            to_hash(meta_type::<EnumFieldNotNamedB>())
+            to_hash(meta_type::<EnumA1>()),
+            to_hash(meta_type::<EnumA2>())
         );
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        struct StructFieldNotNamedA([u8; 32]);
+        struct StructB1 {
+            hello: bool,
+            another: [u8; 32],
+        }
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        struct StructFieldNotNamedSecondB([u8; 32]);
-        // Similarly to enums, semantic changes apply only inside the structure fields.
+        struct StructB2 {
+            another: [u8; 32],
+            hello: bool,
+        }
+
+        // As with enums, struct names and field orders are irrelevant as long as
+        // the field names and types are the same.
         assert_eq!(
-            to_hash(meta_type::<StructFieldNotNamedA>()),
-            to_hash(meta_type::<StructFieldNotNamedSecondB>())
+            to_hash(meta_type::<StructB1>()),
+            to_hash(meta_type::<StructB2>())
         );
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNotNamed {
+        enum EnumC1 {
             First(u8),
         }
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNotNamedSecond {
+        enum EnumC2 {
             Second(u8),
         }
-        // The enums are binary compatible, they contain a different semantic meaning:
-        // `First(u8)` and `Second(u8)`.
+
+        // The enums are binary compatible, but the variants have different names, so
+        // semantically they are different and should not be equal.
         assert_ne!(
-            to_hash(meta_type::<EnumFieldNotNamed>()),
-            to_hash(meta_type::<EnumFieldNotNamedSecond>())
+            to_hash(meta_type::<EnumC1>()),
+            to_hash(meta_type::<EnumC2>())
         );
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNamed {
+        enum EnumD1 {
             First { a: u8 },
         }
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        enum EnumFieldNamedSecond {
+        enum EnumD2 {
             First { b: u8 },
         }
-        // Named fields contain a different semantic meaning ('a' and 'b').
+
+        // Named fields contain a different semantic meaning ('a' and 'b')  despite
+        // being binary compatible, so hashes should be different.
         assert_ne!(
-            to_hash(meta_type::<EnumFieldNamed>()),
-            to_hash(meta_type::<EnumFieldNamedSecond>())
+            to_hash(meta_type::<EnumD1>()),
+            to_hash(meta_type::<EnumD2>())
         );
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        struct StructFieldNamed {
+        struct StructE1 {
             a: u32,
         }
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
-        struct StructFieldNamedSecond {
-            b: u32,
-        }
-        // Similar to enums, struct fields contain a different semantic meaning ('a' and 'b').
-        assert_ne!(
-            to_hash(meta_type::<StructFieldNamed>()),
-            to_hash(meta_type::<StructFieldNamedSecond>())
-        );
-
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        enum EnumField {
-            First,
-            // Field is unnamed, but has type name `u8`.
-            Second(u8),
-            // File is named and has type name `u8`.
-            Third { named: u8 },
-        }
-
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        enum EnumFieldSwap {
-            Second(u8),
-            First,
-            Third { named: u8 },
-        }
-        // Swapping the registration order should also be taken into account.
-        assert_ne!(
-            to_hash(meta_type::<EnumField>()),
-            to_hash(meta_type::<EnumFieldSwap>())
-        );
-
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct StructField {
-            a: u32,
+        struct StructE2 {
             b: u32,
         }
 
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct StructFieldSwap {
-            b: u32,
-            a: u32,
-        }
+        // Similar to enums, struct fields that contain a different semantic meaning
+        // ('a' and 'b') despite being binary compatible will have different hashes.
         assert_ne!(
-            to_hash(meta_type::<StructField>()),
-            to_hash(meta_type::<StructFieldSwap>())
+            to_hash(meta_type::<StructE1>()),
+            to_hash(meta_type::<StructE2>())
         );
     }
 }

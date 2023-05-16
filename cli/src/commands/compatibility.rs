@@ -12,7 +12,7 @@ use jsonrpsee::client_transport::ws::Uri;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_codegen::utils::MetadataVersion;
-use subxt_metadata::{get_metadata_hash, get_pallet_hash, metadata_v14_to_latest};
+use subxt_metadata::{get_pallet_hash, metadata_v14_to_latest, MetadataHasher};
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
@@ -97,7 +97,7 @@ async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node, version).await?;
-        let hash = get_metadata_hash(&metadata);
+        let hash = MetadataHasher::new().hash(&metadata);
         let hex_hash = hex::encode(hash);
         println!("Node {node:?} has metadata hash {hex_hash:?}",);
 

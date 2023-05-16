@@ -250,7 +250,9 @@ impl Metadata {
             return hash;
         }
 
-        let hash = subxt_metadata::get_metadata_per_pallet_hash(self.runtime_metadata(), pallets);
+        let hash = subxt_metadata::MetadataHasher::new()
+            .only_these_pallets(pallets)
+            .hash(self.runtime_metadata());
         *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
