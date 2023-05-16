@@ -1,24 +1,18 @@
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
-use crate::utils::{print_docs_with_indent, with_indent, FileOrUrl};
-use clap::{Args, Parser as ClapParser, Subcommand};
+use crate::utils::{print_docs_with_indent, with_indent};
+use clap::Args;
 
 use std::fmt::Write;
 use std::write;
 
-use codec::Decode;
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::{
-    PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15, StorageEntryType,
-};
-use frame_metadata::RuntimeMetadataPrefixed;
-use scale_info::form::PortableForm;
-use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
-use scale_value::{Composite, ValueDef};
+use frame_metadata::v15::{PalletMetadata, PalletStorageMetadata, StorageEntryType};
 
-use subxt::utils::H256;
-use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
-use subxt::{tx, OnlineClient};
+use scale_info::form::PortableForm;
+
+use subxt::OnlineClient;
+use subxt::{config::SubstrateConfig, Metadata};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {

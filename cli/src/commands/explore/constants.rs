@@ -1,23 +1,16 @@
 use crate::utils::type_description::print_type_description;
 use crate::utils::{print_docs_with_indent, with_indent};
-use clap::{Args, Parser as ClapParser, Subcommand};
+use clap::Args;
 
 use std::fmt::Write;
 use std::write;
 
-use codec::Decode;
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::{
-    PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15, StorageEntryType,
-};
-use frame_metadata::RuntimeMetadataPrefixed;
-use scale_info::form::PortableForm;
-use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
-use scale_value::{Composite, ValueDef};
+use frame_metadata::v15::PalletMetadata;
 
-use subxt::utils::H256;
-use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
-use subxt::{tx, OnlineClient};
+use scale_info::form::PortableForm;
+
+use subxt::Metadata;
 
 #[derive(Debug, Clone, Args)]
 pub struct ConstantsSubcommand {
@@ -31,14 +24,14 @@ pub(crate) fn explore_constants(
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name.as_str();
     let Some(constant_name) = command.constant else {
-        let available_constants = print_available_constants(&pallet_metadata, pallet_name);
+        let available_constants = print_available_constants(pallet_metadata, pallet_name);
         println!("Usage:\n    subxt explore {pallet_name} constants <CONSTANT>\n        explore a specific call within this pallet\n\n{available_constants}", );
         return Ok(());
     };
 
     // if specified constant is wrong, show user the constants to choose from (but this time as an error):
     let Some(constant) = pallet_metadata.constants.iter().find(|constant| constant.name.to_lowercase() == constant_name.to_lowercase())   else {
-        let available_constants = print_available_constants(&pallet_metadata, pallet_name);
+        let available_constants = print_available_constants(pallet_metadata, pallet_name);
         let description = format!("Usage:\n    subxt explore {pallet_name} constants <CONSTANT>\n        explore a specific call within this pallet\n\n{available_constants}", );
         let err = eyre!("constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}");
         return Err(err);

@@ -1,29 +1,22 @@
-use crate::utils::type_description::print_type_description;
-use crate::utils::type_example::print_type_examples;
 use crate::utils::{print_docs_with_indent, FileOrUrl};
-use clap::{Args, Parser as ClapParser, Subcommand};
+use clap::{Parser as ClapParser, Subcommand};
 
 use std::fmt::Write;
-use std::ptr::write;
+
 use std::write;
 
 use codec::Decode;
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::{
-    PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15, StorageEntryType,
-};
+use frame_metadata::v15::RuntimeMetadataV15;
 use frame_metadata::RuntimeMetadataPrefixed;
-use scale_info::form::PortableForm;
-use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
-use scale_value::{Composite, ValueDef};
+
 use syn::__private::str;
 
 use crate::commands::explore::calls::{explore_calls, CallsSubcommand};
 use crate::commands::explore::constants::{explore_constants, ConstantsSubcommand};
 use crate::commands::explore::storage::{explore_storage, StorageSubcommand};
-use subxt::utils::H256;
-use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
-use subxt::{tx, OnlineClient};
+
+use subxt::Metadata;
 
 mod calls;
 mod constants;

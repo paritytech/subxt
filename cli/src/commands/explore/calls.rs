@@ -1,24 +1,21 @@
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
-use crate::utils::{with_indent, FileOrUrl};
-use clap::{Args, Parser as ClapParser, Subcommand};
+use crate::utils::with_indent;
+use clap::Args;
 
 use std::fmt::Write;
 use std::write;
 
-use codec::Decode;
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::{
-    PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15, StorageEntryType,
-};
-use frame_metadata::RuntimeMetadataPrefixed;
+use frame_metadata::v15::PalletMetadata;
+
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
 
+use subxt::tx;
 use subxt::utils::H256;
 use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
-use subxt::{tx, OnlineClient};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -35,7 +32,7 @@ pub(crate) fn explore_calls(
     let pallet_name = pallet_metadata.name.as_str();
 
     // get the enum that stores the possible calls:
-    let (calls_enum_type_def, calls_enum_type) =
+    let (calls_enum_type_def, _calls_enum_type) =
         get_calls_enum_type(pallet_metadata, &metadata.runtime_metadata().types)?;
 
     // if no call specified, show user the calls to choose from:
