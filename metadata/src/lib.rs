@@ -7,7 +7,7 @@ mod validation;
 
 use frame_metadata::{v14::RuntimeMetadataV14, v15::RuntimeMetadataV15};
 
-pub use retain::retain_metadata_pallets;
+pub use retain::retain_metadata;
 pub use validation::{
     get_call_hash, get_constant_hash, get_pallet_hash, get_runtime_api_hash, get_storage_hash,
     MetadataHasher, NotFound,
