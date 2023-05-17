@@ -59,16 +59,16 @@ pub(crate) async fn explore_storage(
     let mut output = String::new();
 
     // only inform user about usage if a key can be provided:
-    if key_ty_id.is_some() {
+    if key_ty_id.is_some() && trailing_args.is_empty() {
         write!(
             output,
-            "Usage:\n    subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>"
+            "Usage:\n    subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>\n\n"
         )?;
     }
 
     let docs_string = print_docs_with_indent(&storage.docs, 4);
     if !docs_string.is_empty() {
-        write!(output, "\n\nDescription:\n{docs_string}")?;
+        write!(output, "Description:\n{docs_string}")?;
     }
 
     // inform user about shape of key if it can be provided:
