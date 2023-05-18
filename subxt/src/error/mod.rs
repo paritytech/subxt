@@ -8,6 +8,9 @@ mod dispatch_error;
 
 use core::fmt::Debug;
 
+#[cfg(feature = "experimental-light-client")]
+pub use crate::rpc::LightClientError;
+
 // Re-export dispatch error types:
 pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
@@ -63,6 +66,10 @@ pub enum Error {
     /// The bytes representing an error that we were unable to decode.
     #[error("An error occurred but it could not be decoded: {0:?}")]
     Unknown(Vec<u8>),
+    /// Light client error.
+    #[cfg(feature = "experimental-light-client")]
+    #[error("An error occurred but it could not be decoded: {0:?}")]
+    LightClient(#[from] LightClientError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
