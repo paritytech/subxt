@@ -9,8 +9,11 @@ use scale_info::{TypeDef, PortableRegistry, Variant, form::PortableForm};
 use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
+use utils::hash_cache::HashCache;
 
 type ArcStr = Arc<str>;
+
+pub use utils::validation::MetadataHasher;
 
 //// TODO expose these as methods on Metadata:
 ////
@@ -36,7 +39,7 @@ pub struct Metadata {
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
     dispatch_error_ty: u32,
 	/// Details about each of the runtime API traits.
-	apis: OrderedMap<ArcStr, RuntimeApiMetadata>,
+	apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
 }
 
 impl Metadata {
@@ -84,13 +87,21 @@ impl Metadata {
     }
 
     /// An iterator over all of the runtime APIs.
-    pub fn runtime_api_traits(&self) -> impl Iterator<Item=&RuntimeApiMetadata> {
-        self.apis.values().iter()
+    pub fn runtime_api_traits(&self) -> impl Iterator<Item=RuntimeApiMetadata<'_>> {
+        self.apis.values().iter().map(|inner| {
+            RuntimeApiMetadata { inner, types: self.types() }
+        })
     }
 
     /// Access a runtime API trait given its name.
-    pub fn runtime_api_trait_by_name(&'_ self, name: &str) -> Option<&'_ RuntimeApiMetadata> {
-        self.apis.get_by_key(name)
+    pub fn runtime_api_trait_by_name(&'_ self, name: &str) -> Option<RuntimeApiMetadata<'_>> {
+        let inner = self.apis.get_by_key(name)?;
+        Some(RuntimeApiMetadata { inner, types: self.types() })
+    }
+
+    /// Obtain a unique hash representing this metadata or specific parts of it.
+    pub fn generate_hash(&self) -> MetadataHasher {
+        MetadataHasher::new(self)
     }
 
     /// Filter out any pallets that we don't want to keep, retaining only those that we do.
@@ -208,6 +219,33 @@ impl <'a> PalletMetadata<'a> {
         self.inner.constants.values().iter()
     }
 
+    /// Return a hash for the storage entry, or None if it was not found.
+    pub fn storage_hash(&self, entry_name: &str) -> Option<[u8; 32]> {
+        self.inner
+            .cached_storage_hashes
+            .get_or_insert(entry_name, || {
+                crate::utils::validation::get_storage_hash(self, entry_name)
+            })
+    }
+
+    /// Return a hash for the constant, or None if it was not found.
+    pub fn constant_hash(&self, constant_name: &str) -> Option<[u8; 32]> {
+        self.inner
+            .cached_constant_hashes
+            .get_or_insert(constant_name, || {
+                crate::utils::validation::get_constant_hash(self, constant_name)
+            })
+    }
+
+    /// Return a hash for the call, or None if it was not found.
+    pub fn call_hash(&self, call_name: &str) -> Option<[u8; 32]> {
+        self.inner
+            .cached_call_hashes
+            .get_or_insert(call_name, || {
+                crate::utils::validation::get_call_hash(self, call_name)
+            })
+    }
+
     fn variant_by_pos(&self, variant_type_id: u32, variant_pos: usize) -> Option<&'a Variant<PortableForm>> {
         let TypeDef::Variant(v) = &self.types.resolve(variant_type_id)?.type_def else {
             return None;
@@ -240,7 +278,15 @@ struct PalletMetadataInner {
     /// Map from constant name to constant details.
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Pallet documentation.
-    docs: Vec<String>
+    docs: Vec<String>,
+
+    // The hashes uniquely identify parts of the metadata; different
+    // hashes mean some type difference exists between static and runtime
+    // versions. We cache them here to avoid recalculating. Caches take
+    // the item name and return back the associated hash.
+    cached_call_hashes: HashCache,
+    cached_constant_hashes: HashCache,
+    cached_storage_hashes: HashCache,
 }
 
 pub struct StorageMetadata {
@@ -424,32 +470,51 @@ impl SignedExtensionMetadata {
     }
 }
 
-pub struct RuntimeApiMetadata {
+#[derive(Clone,Copy)]
+pub struct RuntimeApiMetadata<'a> {
+    inner: &'a RuntimeApiMetadataInner,
+    types: &'a PortableRegistry
+}
+
+impl <'a> RuntimeApiMetadata<'a> {
+    /// Trait name.
+    pub fn name(&self) -> &str {
+        &self.inner.name
+    }
+    /// Trait documentation.
+    pub fn docs(&self) -> &[String] {
+        &self.inner.docs
+    }
+    /// An iterator over the trait methods.
+    pub fn methods(&self) -> impl Iterator<Item=&'a RuntimeApiMethodMetadata> {
+        self.inner
+            .methods.values().iter()
+    }
+    /// Get a specific trait method given its name.
+    pub fn method_by_name(&self, name: &str) -> Option<&'a RuntimeApiMethodMetadata> {
+        self.inner
+            .methods.get_by_key(name)
+    }
+    /// Return a hash for the constant, or None if it was not found.
+    pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
+        self.inner
+            .cached_runtime_hashes
+            .get_or_insert(method_name, || {
+                crate::utils::validation::get_runtime_api_hash(self, method_name)
+            })
+    }
+}
+
+pub struct RuntimeApiMetadataInner {
     /// Trait name.
 	name: ArcStr,
 	/// Trait methods.
 	methods: OrderedMap<ArcStr, RuntimeApiMethodMetadata>,
 	/// Trait documentation.
 	docs: Vec<String>,
-}
-
-impl RuntimeApiMetadata {
-    /// Trait name.
-    pub fn name(&self) -> &str {
-        &self.name
-    }
-    /// Trait documentation.
-    pub fn docs(&self) -> &[String] {
-        &self.docs
-    }
-    /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl Iterator<Item=&RuntimeApiMethodMetadata> {
-        self.methods.values().iter()
-    }
-    /// Get a specific trait method given its name.
-    pub fn method_by_name(&self, name: &str) -> Option<&RuntimeApiMethodMetadata> {
-        self.methods.get_by_key(name)
-    }
+    /// Unique hashes for each runtime method are cached here
+    /// to avoid needing to be recalculated.
+    cached_runtime_hashes: HashCache,
 }
 
 pub struct RuntimeApiMethodMetadata {

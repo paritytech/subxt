@@ -9,7 +9,7 @@ use scale_info::{form::PortableForm, PortableRegistry, TypeDef};
 use crate::{
     ArcStr, Metadata, PalletMetadataInner, StorageMetadata, StorageEntryMetadata, StorageEntryModifier,
     StorageEntryType, StorageHasher, utils::ordered_map::OrderedMap, ConstantMetadata, ExtrinsicMetadata,
-    SignedExtensionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata
+    SignedExtensionMetadata, RuntimeApiMetadataInner, RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata
 };
 
 // Converting from V15 metadata into our Subxt repr.
@@ -69,6 +69,9 @@ mod from_v15 {
                     error_variants_by_index,
                     constants: constants.collect(),
                     docs: p.docs,
+                    cached_call_hashes: Default::default(),
+                    cached_constant_hashes: Default::default(),
+                    cached_storage_hashes: Default::default(),
                 });
             }
 
@@ -164,14 +167,15 @@ mod from_v15 {
         }
     }
 
-    fn from_runtime_api_metadata(name: ArcStr, s: v15::RuntimeApiMetadata<PortableForm>) -> RuntimeApiMetadata {
-        RuntimeApiMetadata {
+    fn from_runtime_api_metadata(name: ArcStr, s: v15::RuntimeApiMetadata<PortableForm>) -> RuntimeApiMetadataInner {
+        RuntimeApiMetadataInner {
             name,
             docs: s.docs,
             methods: s.methods.into_iter().map(|m| {
                 let name: ArcStr = m.name.clone().into();
                 (name.clone(), from_runtime_api_method_metadata(name, m))
-            }).collect()
+            }).collect(),
+            cached_runtime_hashes: Default::default()
         }
     }
 
@@ -260,7 +264,7 @@ mod into_v15 {
         }
     }
 
-    fn from_runtime_api_metadata(r: RuntimeApiMetadata) -> v15::RuntimeApiMetadata<PortableForm> {
+    fn from_runtime_api_metadata(r: RuntimeApiMetadataInner) -> v15::RuntimeApiMetadata<PortableForm> {
         v15::RuntimeApiMetadata {
             name: (*r.name).to_owned(),
             methods: r.methods.into_values().into_iter().map(from_runtime_api_method_metadata).collect(),

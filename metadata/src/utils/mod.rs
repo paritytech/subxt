@@ -5,3 +5,4 @@
 pub mod retain;
 pub mod validation;
 pub mod ordered_map;
+pub mod hash_cache;
