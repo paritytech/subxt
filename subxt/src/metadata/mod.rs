@@ -6,10 +6,7 @@
 
 mod decode_encode_traits;
 mod hash_cache;
-mod metadata_location;
 mod metadata_type;
-
-pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
     ErrorMetadata, EventMetadata, ExtrinsicMetadata, InvalidMetadataError, Metadata, MetadataError,

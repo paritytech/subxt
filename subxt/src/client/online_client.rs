@@ -19,8 +19,7 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::future;
-use parking_lot::RwLock;
-use std::sync::Arc;
+use std::sync::{Arc,RwLock};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -196,7 +195,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
-        let inner = self.inner.read();
+        let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.metadata.clone()
     }
 
@@ -207,13 +206,13 @@ impl<T: Config> OnlineClient<T> {
     /// Setting custom metadata may leave Subxt unable to work with certain blocks,
     /// subscribe to latest blocks or submit valid transactions.
     pub fn set_metadata(&self, metadata: Metadata) {
-        let mut inner = self.inner.write();
+        let mut inner = self.inner.write().expect("shouldn't be poisoned");
         inner.metadata = metadata;
     }
 
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
-        let inner = self.inner.read();
+        let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.genesis_hash
     }
 
@@ -224,13 +223,13 @@ impl<T: Config> OnlineClient<T> {
     /// Setting a custom genesis hash may leave Subxt unable to
     /// submit valid transactions.
     pub fn set_genesis_hash(&self, genesis_hash: T::Hash) {
-        let mut inner = self.inner.write();
+        let mut inner = self.inner.write().expect("shouldn't be poisoned");
         inner.genesis_hash = genesis_hash;
     }
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        let inner = self.inner.read();
+        let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.runtime_version.clone()
     }
 
@@ -241,7 +240,7 @@ impl<T: Config> OnlineClient<T> {
     /// Setting a custom runtime version may leave Subxt unable to
     /// submit valid transactions.
     pub fn set_runtime_version(&self, runtime_version: RuntimeVersion) {
-        let mut inner = self.inner.write();
+        let mut inner = self.inner.write().expect("shouldn't be poisoned");
         inner.runtime_version = runtime_version;
     }
 
@@ -252,7 +251,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Return an offline client with the same configuration as this.
     pub fn offline(&self) -> OfflineClient<T> {
-        let inner = self.inner.read();
+        let inner = self.inner.read().expect("shouldn't be poisoned");
         OfflineClient::new(
             inner.genesis_hash,
             inner.runtime_version.clone(),
@@ -318,12 +317,12 @@ pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
 
 impl<T: Config> ClientRuntimeUpdater<T> {
     fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
-        let curr = self.0.inner.read();
+        let curr = self.0.inner.read().expect("shouldn't be poisoned");
         &curr.runtime_version != new
     }
 
     fn do_update(&self, update: Update) {
-        let mut writable = self.0.inner.write();
+        let mut writable = self.0.inner.write().expect("shouldn't be poisoned");
         writable.metadata = update.metadata;
         writable.runtime_version = update.runtime_version;
     }

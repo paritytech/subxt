@@ -242,7 +242,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.address,
-                &metadata.runtime_metadata().types,
+                &metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -251,7 +251,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.signature,
-                &metadata.runtime_metadata().types,
+                &metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -259,7 +259,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.extra,
-                &metadata.runtime_metadata().types,
+                &metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -383,7 +383,7 @@ where
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
             extrinsic_metadata.fields(),
-            &self.metadata.runtime_metadata().types,
+            &self.metadata.types(),
         )?;
 
         Ok(decoded)

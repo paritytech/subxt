@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use parking_lot::RwLock;
+use std::sync::RwLock;
 use std::{borrow::Cow, collections::HashMap};
 
 /// A cache with the simple goal of storing 32 byte hashes against root+item keys
@@ -21,6 +21,7 @@ impl HashCache {
         let maybe_hash = self
             .inner
             .read()
+            .expect("shouldn't be poisoned")
             .get(&RootItemKey::new(root, item))
             .copied();
 
@@ -31,6 +32,7 @@ impl HashCache {
         let hash = f()?;
         self.inner
             .write()
+            .expect("shouldn't be poisoned")
             .insert(RootItemKey::new(root.to_string(), item.to_string()), hash);
 
         Ok(hash)
@@ -74,6 +76,7 @@ mod tests {
             cache
                 .inner
                 .read()
+                .expect("shouldn't be poisoned")
                 .get(&RootItemKey::new(pallet, item))
                 .unwrap(),
             &value.unwrap()

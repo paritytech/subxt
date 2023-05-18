@@ -3550,7 +3550,6 @@ dependencies = [
  "impl-serde",
  "jsonrpsee",
  "parity-scale-codec",
- "parking_lot",
  "primitive-types",
  "scale-bits",
  "scale-decode",
@@ -3640,6 +3639,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-core-hashing",
+ "thiserror",
 ]
 
 [[package]]

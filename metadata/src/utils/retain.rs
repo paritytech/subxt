@@ -250,10 +250,10 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metadata_v14_to_latest;
     use codec::Decode;
     use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
+    use crate::Metadata;
 
     fn load_metadata() -> RuntimeMetadataV15 {
         let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
@@ -262,7 +262,7 @@ mod tests {
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
         match meta.1 {
-            RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
+            RuntimeMetadata::V14(v14) => Metadata::try_from(v14).unwrap().into(),
             RuntimeMetadata::V15(v15) => v15,
             _ => panic!("Unsupported metadata version {:?}", meta.1),
         }

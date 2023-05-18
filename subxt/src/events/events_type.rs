@@ -237,7 +237,7 @@ impl EventDetails {
             scale_decode::visitor::decode_with_visitor(
                 input,
                 field_metadata.ty.id,
-                &metadata.runtime_metadata().types,
+                &metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -333,7 +333,7 @@ impl EventDetails {
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
             event_metadata.fields(),
-            &self.metadata.runtime_metadata().types,
+            &self.metadata.types(),
         )?;
 
         Ok(decoded)
@@ -584,7 +584,7 @@ mod tests {
         actual: EventDetails,
         expected: TestRawEventDetails,
     ) {
-        let types = &metadata.runtime_metadata().types;
+        let types = &metadata.types();
 
         // Make sure that the bytes handed back line up with the fields handed back;
         // encode the fields back into bytes and they should be equal.

@@ -8,7 +8,6 @@ use frame_metadata::{
     v15::PalletConstantMetadata, v15::RuntimeMetadataV15, v15::StorageEntryMetadata,
     RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
 };
-use parking_lot::RwLock;
 use scale_info::{form::PortableForm, PortableRegistry, Type};
 use std::{collections::HashMap, convert::TryFrom, sync::Arc};
 
@@ -96,7 +95,6 @@ struct MetadataInner {
     // The hashes uniquely identify parts of the metadata; different
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
-    cached_metadata_hash: RwLock<Option<[u8; 32]>>,
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
@@ -246,16 +244,9 @@ impl Metadata {
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
-        if let Some(hash) = *self.inner.cached_metadata_hash.read() {
-            return hash;
-        }
-
-        let hash = subxt_metadata::MetadataHasher::new()
+        subxt_metadata::MetadataHasher::new()
             .only_these_pallets(pallets)
-            .hash(self.runtime_metadata());
-        *self.inner.cached_metadata_hash.write() = Some(hash);
-
-        hash
+            .hash(&self.inner.metadata)
     }
 }
 
@@ -713,7 +704,6 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 errors,
                 dispatch_error_ty,
                 runtime_apis,
-                cached_metadata_hash: Default::default(),
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
@@ -806,23 +796,6 @@ mod tests {
 
         Metadata::try_from(prefixed)
             .expect("Cannot translate runtime metadata to internal Metadata")
-    }
-
-    #[test]
-    fn metadata_inner_cache() {
-        // Note: Dependency on test_runtime can be removed if complex metadata
-        // is manually constructed.
-        let metadata = load_metadata();
-
-        let hash = metadata.metadata_hash(&["System"]);
-        // Check inner caching.
-        assert_eq!(metadata.inner.cached_metadata_hash.read().unwrap(), hash);
-
-        // The cache `metadata.inner.cached_metadata_hash` is already populated from
-        // the previous call. Therefore, changing the pallets argument must not
-        // change the methods behavior.
-        let hash_old = metadata.metadata_hash(&["no-pallet"]);
-        assert_eq!(hash_old, hash);
     }
 
     #[test]
