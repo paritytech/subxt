@@ -40,6 +40,16 @@ jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"
 # latest features exposed by the metadata.
 unstable-metadata = []
 
+# Activate this to expose the Light Client functionality.
+# Note that this feature is experimental and things may break or not work as expected.
+experimental-light-client = [
+    "smoldot-light/std",
+    "tokio-stream",
+    "tokio/sync",
+    "tokio/rt",
+    "futures-util",
+]
+
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 scale-info = { workspace = true }
@@ -77,6 +87,12 @@ sp-runtime = { workspace = true, optional = true }
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
+
+# Light client support:
+smoldot-light = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+tokio-stream = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { workspace = true, features = ["js"] }

@@ -47,6 +47,9 @@
 #[cfg(feature = "jsonrpsee")]
 mod jsonrpsee_impl;
 
+#[cfg(feature = "experimental-light-client")]
+mod lightclient;
+
 mod rpc;
 mod rpc_client;
 mod rpc_client_t;
@@ -62,3 +65,6 @@ pub use rpc_client_t::{
 };
 
 pub use rpc_client::{rpc_params, RpcClient, RpcParams, Subscription};
+
+#[cfg(feature = "experimental-light-client")]
+pub use lightclient::{LightClient, LightClientError};

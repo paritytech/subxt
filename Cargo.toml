@@ -73,6 +73,11 @@ wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "4.4.0"
 
+# Light client support:
+smoldot-light = { git = "https://github.com/smol-dot/smoldot.git", default-features = false }
+tokio-stream = "0.1.14"
+futures-util = "0.3.28"
+
 # Substrate crates:
 sp-core = { version = "20.0.0", default-features = false }
 sp-core-hashing = "8.0.0"
