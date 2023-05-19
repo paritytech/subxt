@@ -198,12 +198,14 @@ impl RuntimeGenerator {
                 continue;
             }
 
-            let has_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
+            let has_valid_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
 
             // Ignore types which have generic params that the type generation will use.
-            // We expect that each place that uses these types will select the appropriate
-            // generic param to do so.
-            if has_type_params {
+            // Ordinarily we'd expect that any two types with identical paths must be parameterized
+            // in order to share the path. However scale-info doesn't understand all forms of generics
+            // properly I think (eg generics that have associated types that can differ), and so in
+            // those cases we need to fix the paths for Subxt to generate correct code.
+            if has_valid_type_params {
                 continue;
             }
 
