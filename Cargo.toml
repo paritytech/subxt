@@ -3,6 +3,7 @@ members = [
     "cli",
     "codegen",
     "examples",
+    "examples/wasm_examples",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
