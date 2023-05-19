@@ -175,13 +175,52 @@ impl RuntimeGenerator {
     ///
     /// Supported versions: v14 and v15.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
-        let metadata = match metadata.1 {
+        let mut metadata = match metadata.1 {
             RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
             RuntimeMetadata::V15(v15) => v15,
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         };
 
+        Self::ensure_unique_type_paths(&mut metadata);
+
         RuntimeGenerator { metadata }
+    }
+
+    /// Ensure that every unique type we'll be generating or referring to also has a
+    /// unique path, so that types with matching paths don't end up overwriting each other
+    /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
+    /// de-duplicate those into single types with a generic.
+    fn ensure_unique_type_paths(metadata: &mut RuntimeMetadataV15) {
+        let mut visited_path_counts = std::collections::HashMap::<Vec<String>, usize>::new();
+        for ty in &mut metadata.types.types {
+            // Ignore types without a path (ie prelude types).
+            if ty.ty.path.namespace().is_empty() {
+                continue;
+            }
+
+            let has_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
+
+            // Ignore types which have generic params that the type generation will use.
+            // We expect that each place that uses these types will select the appropriate
+            // generic param to do so.
+            if has_type_params {
+                continue;
+            }
+
+            // Count how many times we've seen the same path already.
+            let visited_count = visited_path_counts
+                .entry(ty.ty.path.segments.clone())
+                .or_default();
+            *visited_count += 1;
+
+            // alter the type so that if it's been seen more than once, we append a number to
+            // its name to ensure that every unique type has a unique path, too.
+            if *visited_count > 1 {
+                if let Some(name) = ty.ty.path.segments.last_mut() {
+                    *name = format!("{name}{visited_count}");
+                }
+            }
+        }
     }
 
     /// Generate the API for interacting with a Substrate runtime.
