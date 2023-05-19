@@ -14,5 +14,5 @@
 #[allow(clippy::all)]
 mod polkadot;
 
-mod codegen;
+mod codegen_tests;
 mod documentation;
