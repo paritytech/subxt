@@ -29,7 +29,9 @@ pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Err
 }
 
 /// subscribes to finalized blocks. When a block is received, it is formatted as a string and sent via the callback.
-pub(crate) async fn subscribe_to_finalized_blocks(cb: Callback<AttrValue>) -> Result<(), subxt::Error> {
+pub(crate) async fn subscribe_to_finalized_blocks(
+    cb: Callback<AttrValue>,
+) -> Result<(), subxt::Error> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
     // Subscribe to all finalized blocks:
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;
