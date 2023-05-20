@@ -49,24 +49,15 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
                 ));
             }
         };
-        match (opts.pallets.as_ref(), opts.runtime_apis.as_ref()) {
-            (Some(pallets), Some(runtime_apis)) => retain_metadata(
-                &mut metadata_v15,
-                |pallet_name| pallets.iter().any(|p| &**p == pallet_name),
-                |runtime_api_name| runtime_apis.iter().any(|p| &**p == runtime_api_name),
-            ),
-            (Some(pallets), None) => retain_metadata(
-                &mut metadata_v15,
-                |pallet_name| pallets.iter().any(|p| &**p == pallet_name),
-                |_| true,
-            ),
-            (None, Some(runtime_apis)) => retain_metadata(
-                &mut metadata_v15,
-                |_| true,
-                |runtime_api_name| runtime_apis.iter().any(|p| &**p == runtime_api_name),
-            ),
-            (None, None) => {}
-        }
+        let retain_pallets_fn: Box<dyn Fn(&str) -> bool> = match opts.pallets.as_ref() {
+            Some(pallets) => Box::new(|name| pallets.iter().any(|p| &**p == name)),
+            None => Box::new(|_| true),
+        };
+        let retain_runtime_apis_fn: Box<dyn Fn(&str) -> bool> = match opts.runtime_apis.as_ref() {
+            Some(apis) => Box::new(|name| apis.iter().any(|p| &**p == name)),
+            None => Box::new(|_| true),
+        };
+        retain_metadata(&mut metadata_v15, retain_pallets_fn, retain_runtime_apis_fn);
         metadata = metadata_v15.into();
     }
 
