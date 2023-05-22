@@ -85,7 +85,7 @@ impl BackgroundTask {
                         if sender.send(response).await.is_err() {
                             tracing::warn!(
                                 target: LOG_TARGET,
-                                "Cannot send notification to susbcription {:?}",
+                                "Cannot send notification to subscription {:?}",
                                 id
                             );
                         }
@@ -128,7 +128,7 @@ impl BackgroundTask {
                     if sender.send(result).await.is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            "Cannot send notification to susbcription {:?}",
+                            "Cannot send notification to subscription {:?}",
                             id
                         );
                     }
