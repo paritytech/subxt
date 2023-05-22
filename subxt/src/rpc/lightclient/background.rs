@@ -157,7 +157,7 @@ impl BackgroundTask {
                 };
             }
             Err(err) => {
-                tracing::warn!(target: LOG_TARGET, "annot decode RPC response {:?}", err);
+                tracing::warn!(target: LOG_TARGET, "cannot decode RPC response {:?}", err);
             }
         }
     }
