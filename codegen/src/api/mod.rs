@@ -207,7 +207,7 @@ impl RuntimeGenerator {
         let rust_items = item_mod_ir.rust_items();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types(),
+            self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives,
@@ -258,7 +258,7 @@ impl RuntimeGenerator {
         let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types(),
+            self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives.clone(),
