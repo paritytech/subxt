@@ -77,7 +77,7 @@ pub(crate) fn explore_calls(
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
     let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
     let value_as_composite = value_into_composite(value);
-    let offline_client = new_offline_client(metadata.clone());
+    let offline_client = mocked_offline_client(metadata.clone());
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
@@ -95,7 +95,7 @@ fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_nam
     let mut strings: Vec<_> = pallet_calls.variants.iter().map(|c| &c.name).collect();
     strings.sort();
     for variant in strings {
-        output.push_str("\n    {");
+        output.push_str("\n    ");
         output.push_str(variant);
     }
     output
@@ -122,7 +122,8 @@ fn get_calls_enum_type<'a>(
     Ok((calls_enum_type_def, calls_enum_type))
 }
 
-fn new_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
+/// The specific values used for construction do not matter too much, we just need any OfflineClient to create unsigned extrinsics
+fn mocked_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
     let genesis_hash =
         H256::from_str("91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3")
             .expect("Valid hash; qed");
