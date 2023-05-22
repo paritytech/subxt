@@ -2,7 +2,10 @@ use futures::stream::StreamExt;
 use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::{collections::HashMap, str::FromStr};
+use std::{
+    collections::{hash_map::Entry, HashMap},
+    str::FromStr,
+};
 use tokio::sync::{mpsc, oneshot};
 
 ///! The background task of the light client.
@@ -137,7 +140,7 @@ impl BackgroundTask {
                 // because it sees it as used on both closures and apparently cannot determine that only one
                 // closure can be executed.
                 match self.subscriptions_cache.entry(id) {
-                    std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    Entry::Occupied(mut entry) => {
                         let cached_responses: &mut Vec<_> = entry.get_mut();
                         // Do not cache notification if exceeded capacity.
                         if cached_responses.len() > BUFFER_NUM_NOTIFICATIONS {
@@ -146,7 +149,7 @@ impl BackgroundTask {
 
                         cached_responses.push(result);
                     }
-                    std::collections::hash_map::Entry::Vacant(entry) => {
+                    Entry::Vacant(entry) => {
                         let mut vec = Vec::with_capacity(BUFFER_NUM_NOTIFICATIONS);
                         vec.push(result);
                         entry.insert(vec);
