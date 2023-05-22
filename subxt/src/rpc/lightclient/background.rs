@@ -73,11 +73,18 @@ impl BackgroundTask {
                 // RPC server produced a notification before the user registered
                 // to receive notifications).
                 if let Some(cached_responses) = self.subscriptions_cache.remove(&id) {
-                    tracing::debug!(target: LOG_TARGET, "Some messages were cached before susbcribing");
+                    tracing::debug!(
+                        target: LOG_TARGET,
+                        "Some messages were cached before susbcribing"
+                    );
 
                     for response in cached_responses {
                         if sender.send(response).await.is_err() {
-                            tracing::warn!(target: LOG_TARGET, "Cannot send notification to susbcription {:?}", id);
+                            tracing::warn!(
+                                target: LOG_TARGET,
+                                "Cannot send notification to susbcription {:?}",
+                                id
+                            );
                         }
                     }
                 }
@@ -94,7 +101,11 @@ impl BackgroundTask {
                 // Send the response back.
                 if let Some(sender) = self.requests.remove(&id) {
                     if sender.send(result).is_err() {
-                        tracing::warn!(target: LOG_TARGET, " Cannot send method response to id {:?}", id);
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            " Cannot send method response to id {:?}",
+                            id
+                        );
                     }
                 }
             }
@@ -112,7 +123,11 @@ impl BackgroundTask {
                 if let Some(sender) = self.subscriptions.get_mut(&id) {
                     // Send the current notification response.
                     if sender.send(result).await.is_err() {
-                        tracing::warn!(target: LOG_TARGET, "Cannot send notification to susbcription {:?}", id);
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            "Cannot send notification to susbcription {:?}",
+                            id
+                        );
                     }
                     return;
                 }
@@ -174,7 +189,11 @@ impl BackgroundTask {
                         tracing::trace!(target: LOG_TARGET, "Frontend channel closed");
                         break;
                     };
-                    tracing::trace!(target: LOG_TARGET, "Received register message {:?}", message);
+                    tracing::trace!(
+                        target: LOG_TARGET,
+                        "Received register message {:?}",
+                        message
+                    );
 
                     self.handle_register(message).await;
 
@@ -188,7 +207,11 @@ impl BackgroundTask {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
                         break;
                     };
-                    tracing::trace!(target: LOG_TARGET, "Received smoldot RPC result {:?}", response);
+                    tracing::trace!(
+                        target: LOG_TARGET,
+                        "Received smoldot RPC result {:?}",
+                        response
+                    );
 
                     self.handle_rpc_response(response).await;
 

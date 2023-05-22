@@ -311,7 +311,12 @@ impl RpcClientT for LightClient {
         Box::pin(async move {
             let mut data = inner.lock().await;
 
-            tracing::trace!(target: LOG_TARGET, "Subscribe to {:?} with params {:?}", sub, params);
+            tracing::trace!(
+                target: LOG_TARGET,
+                "Subscribe to {:?} with params {:?}",
+                sub,
+                params
+            );
 
             let params = match params {
                 Some(params) => serde_json::to_string(&params).map_err(|_| {
