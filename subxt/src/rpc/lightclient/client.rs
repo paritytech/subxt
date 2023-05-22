@@ -282,7 +282,7 @@ impl RpcClientT for LightClient {
                 id, method, params
             );
             tracing::trace!(target: LOG_TARGET, "Submit request {:?}", request);
-            let chain_id = data.chain_id.clone();
+            let chain_id = data.chain_id;
 
             data.client
                 .json_rpc_request(request, chain_id)
@@ -338,7 +338,7 @@ impl RpcClientT for LightClient {
                 id, sub, params
             );
 
-            let chain_id = data.chain_id.clone();
+            let chain_id = data.chain_id;
             data.client
                 .json_rpc_request(request, chain_id)
                 .map_err(|err| {
@@ -368,7 +368,7 @@ impl RpcClientT for LightClient {
 
             let rpc_substription_stream: Pin<
                 Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
-            > = Box::pin(stream.map(|res| Ok(res)));
+            > = Box::pin(stream.map(Ok));
 
             let rpc_subscription: RpcSubscription = RpcSubscription {
                 stream: rpc_substription_stream,

@@ -280,7 +280,7 @@ impl std::str::FromStr for RpcResponse {
         }
 
         // Check if the response can be mapped as an RPC method response.
-        let result: Result<Response, _> = serde_json::from_str(&response);
+        let result: Result<Response, _> = serde_json::from_str(response);
         if let Ok(response) = result {
             return Ok(RpcResponse::Method {
                 id: response.id,
@@ -288,7 +288,7 @@ impl std::str::FromStr for RpcResponse {
             });
         }
 
-        let notification: ResponseNotification = serde_json::from_str(&response)?;
+        let notification: ResponseNotification = serde_json::from_str(response)?;
         Ok(RpcResponse::Subscription {
             id: notification.params.subscription,
             method: notification.method,
