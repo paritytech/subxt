@@ -69,9 +69,6 @@ mod from_v15 {
                     error_variants_by_index,
                     constants: constants.collect(),
                     docs: p.docs,
-                    cached_call_hashes: Default::default(),
-                    cached_constant_hashes: Default::default(),
-                    cached_storage_hashes: Default::default(),
                 });
             }
 
@@ -175,7 +172,6 @@ mod from_v15 {
                 let name: ArcStr = m.name.clone().into();
                 (name.clone(), from_runtime_api_method_metadata(name, m))
             }).collect(),
-            cached_runtime_hashes: Default::default()
         }
     }
 
