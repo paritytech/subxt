@@ -11,6 +11,7 @@ use crate::{
 };
 use core::time::Duration;
 use futures::{lock::Mutex as AsyncMutex, stream::StreamExt, Stream};
+#[cfg(feature = "jsonrpsee-ws")]
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -142,6 +143,7 @@ impl LightClient {
     /// Construct a new [`LightClient`], providing a URL to connect to.
     ///
     /// The URL is utilized to fetch the chain specification.
+    #[cfg(feature = "jsonrpsee-ws")]
     pub async fn from_url(url: impl AsRef<str>) -> Result<LightClient, Error> {
         let url = url
             .as_ref()
