@@ -121,7 +121,7 @@ impl Metadata {
 }
 
 /// Metadata for a specific pallet.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct PalletMetadata<'a> {
     inner: &'a PalletMetadataInner,
     types: &'a PortableRegistry,
@@ -129,7 +129,7 @@ pub struct PalletMetadata<'a> {
 
 impl<'a> PalletMetadata<'a> {
     /// The pallet name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
 
@@ -139,7 +139,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// The pallet docs.
-    pub fn docs(&self) -> &[String] {
+    pub fn docs(&self) -> &'a [String] {
         &self.inner.docs
     }
 
@@ -159,7 +159,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// Return metadata about the pallet's storage entries.
-    pub fn storage(&self) -> Option<&'_ StorageMetadata> {
+    pub fn storage(&self) -> Option<&'a StorageMetadata> {
         self.inner.storage.as_ref()
     }
 
@@ -211,12 +211,12 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// Return constant details given the constant name.
-    pub fn constant_by_name(&'_ self, name: &str) -> Option<&'_ ConstantMetadata> {
+    pub fn constant_by_name(&self, name: &str) -> Option<&'a ConstantMetadata> {
         self.inner.constants.get_by_key(name)
     }
 
     /// An iterator over the constants in this pallet.
-    pub fn constants(&self) -> impl Iterator<Item = &ConstantMetadata> {
+    pub fn constants(&self) -> impl Iterator<Item = &'a ConstantMetadata> {
         self.inner.constants.values().iter()
     }
 
@@ -456,7 +456,7 @@ impl SignedExtensionMetadata {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct RuntimeApiMetadata<'a> {
     inner: &'a RuntimeApiMetadataInner,
     types: &'a PortableRegistry,

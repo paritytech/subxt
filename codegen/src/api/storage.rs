@@ -3,14 +3,13 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::v15::{
-    PalletMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
-    StorageEntryType,
-};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use scale_info::{form::PortableForm, TypeDef};
+use scale_info::TypeDef;
+use subxt_metadata::{
+    PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+};
 
 use super::CodegenError;
 
@@ -24,29 +23,20 @@ use super::CodegenError;
 /// - `pallet` - Pallet metadata from which the storages are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_storage(
-    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
-    pallet: &PalletMetadata<PortableForm>,
+    pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let Some(storage) = &pallet.storage else {
+    let Some(storage) = pallet.storage() else {
         return Ok(quote!())
     };
 
     let storage_fns = storage
-        .entries
-        .iter()
+        .entries()
         .map(|entry| {
-            generate_storage_entry_fns(
-                metadata,
-                type_gen,
-                pallet,
-                entry,
-                crate_path,
-                should_gen_docs,
-            )
+            generate_storage_entry_fns(type_gen, pallet, entry, crate_path, should_gen_docs)
         })
         .collect::<Result<Vec<_>, CodegenError>>()?;
 
@@ -64,18 +54,16 @@ pub fn generate_storage(
 }
 
 fn generate_storage_entry_fns(
-    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
-    pallet: &PalletMetadata<PortableForm>,
-    storage_entry: &StorageEntryMetadata<PortableForm>,
+    pallet: &PalletMetadata,
+    storage_entry: &StorageEntryMetadata,
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let (fields, key_impl) = match &storage_entry.ty {
+    let (fields, key_impl) = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
-        StorageEntryType::Map { key, .. } => {
-            let key_ty = type_gen.resolve_type(key.id);
-            match &key_ty.type_def {
+        StorageEntryType::Map { key_ty, .. } => {
+            match &type_gen.resolve_type(*key_ty).type_def {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => {
                     let fields = tuple
@@ -102,7 +90,7 @@ fn generate_storage_entry_fns(
                 }
                 // A map with a single key; return the single key.
                 _ => {
-                    let ty_path = type_gen.resolve_type_path(key.id);
+                    let ty_path = type_gen.resolve_type_path(*key_ty);
                     let fields = vec![(format_ident!("_0"), ty_path)];
                     let key_impl = quote! {
                         vec![ #crate_path::storage::address::make_static_storage_map_key(_0.borrow()) ]
@@ -113,21 +101,20 @@ fn generate_storage_entry_fns(
         }
     };
 
-    let pallet_name = &pallet.name;
-    let storage_name = &storage_entry.name;
-    let storage_hash = subxt_metadata::get_storage_hash(metadata, pallet_name, storage_name)
-        .map_err(|_| {
-            CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into())
-        })?;
-
-    let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
-    let storage_entry_ty = match storage_entry.ty {
-        StorageEntryType::Plain(ref ty) => ty,
-        StorageEntryType::Map { ref value, .. } => value,
+    let pallet_name = pallet.name();
+    let storage_name = storage_entry.name();
+    let Some(storage_hash) = pallet.storage_hash(storage_name) else {
+        return Err(CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into()))
     };
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id);
 
-    let docs = &storage_entry.docs;
+    let fn_name = format_ident!("{}", storage_entry.name().to_snake_case());
+    let storage_entry_ty = match storage_entry.entry_type() {
+        StorageEntryType::Plain(ty) => *ty,
+        StorageEntryType::Map { value_ty, .. } => *value_ty,
+    };
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty);
+
+    let docs = storage_entry.docs();
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
@@ -145,7 +132,7 @@ fn generate_storage_entry_fns(
         quote!( #field_name: impl ::std::borrow::Borrow<#field_ty> )
     });
 
-    let is_map_type = matches!(storage_entry.ty, StorageEntryType::Map { .. });
+    let is_map_type = matches!(storage_entry.entry_type(), StorageEntryType::Map { .. });
 
     // Is the entry iterable?
     let is_iterable_type = if is_map_type {
@@ -154,7 +141,7 @@ fn generate_storage_entry_fns(
         quote!(())
     };
 
-    let has_default_value = match storage_entry.modifier {
+    let has_default_value = match storage_entry.modifier() {
         StorageEntryModifier::Default => true,
         StorageEntryModifier::Optional => false,
     };

@@ -11,8 +11,7 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use frame_metadata::v15::RuntimeMetadataV15;
-use subxt_metadata::{metadata_v14_to_latest, MetadataHasher};
+use subxt_metadata::Metadata;
 
 use super::DerivesRegistry;
 use crate::error::CodegenError;
@@ -159,7 +158,7 @@ pub fn generate_runtime_api_from_bytes(
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
-    metadata: RuntimeMetadataV15,
+    metadata: Metadata,
 }
 
 impl RuntimeGenerator {
@@ -176,8 +175,8 @@ impl RuntimeGenerator {
     /// Supported versions: v14 and v15.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         let metadata = match metadata.1 {
-            RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
-            RuntimeMetadata::V15(v15) => v15,
+            RuntimeMetadata::V14(v14) => v14.try_into().expect("V14 metadata was not valid"),
+            RuntimeMetadata::V15(v15) => v15.try_into().expect("V15 metadata was not valid"),
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         };
 
@@ -208,7 +207,7 @@ impl RuntimeGenerator {
         let rust_items = item_mod_ir.rust_items();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types,
+            &self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives,
@@ -259,7 +258,7 @@ impl RuntimeGenerator {
         let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types,
+            &self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives.clone(),
@@ -270,12 +269,11 @@ impl RuntimeGenerator {
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
             .metadata
-            .pallets
-            .iter()
+            .pallets()
             .map(|pallet| {
                 (
                     pallet,
-                    format_ident!("{}", pallet.name.to_string().to_snake_case()),
+                    format_ident!("{}", pallet.name().to_string().to_snake_case()),
                 )
             })
             .collect::<Vec<_>>();
@@ -285,21 +283,21 @@ impl RuntimeGenerator {
         // validation of just those pallets.
         let pallet_names: Vec<_> = self
             .metadata
-            .pallets
-            .iter()
-            .map(|pallet| &pallet.name)
+            .pallets()
+            .map(|pallet| pallet.name())
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash = MetadataHasher::new()
+        let metadata_hash = self
+            .metadata
+            .hasher()
             .only_these_pallets(&pallet_names)
-            .hash(&self.metadata);
+            .hash();
 
         let modules = pallets_with_mod_names
             .iter()
             .map(|(pallet, mod_name)| {
                 let calls = calls::generate_calls(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -316,7 +314,6 @@ impl RuntimeGenerator {
                 )?;
 
                 let storage_mod = storage::generate_storage(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -325,7 +322,6 @@ impl RuntimeGenerator {
                 )?;
 
                 let constants_mod = constants::generate_constants(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -349,12 +345,12 @@ impl RuntimeGenerator {
             })
             .collect::<Result<Vec<_>, CodegenError>>()?;
 
-        let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_event_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.event.as_ref().map(|_| {
+            p.event_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Event),
@@ -369,12 +365,12 @@ impl RuntimeGenerator {
             }
         };
 
-        let outer_extrinsic_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_extrinsic_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.calls.as_ref().map(|_| {
+            p.call_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Call),
@@ -389,11 +385,12 @@ impl RuntimeGenerator {
             }
         };
 
-        let root_event_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_event_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = &p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.event.as_ref().map(|_| {
+
+            p.event_ty_id().map(|_| {
                 // An 'if' arm for the RootEvent impl to match this variant name:
                 quote! {
                     if pallet_name == #variant_name_str {
@@ -407,11 +404,11 @@ impl RuntimeGenerator {
             })
         });
 
-        let root_extrinsic_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_extrinsic_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.calls.as_ref().map(|_| {
+            p.call_ty_id().map(|_| {
                 // An 'if' arm for the RootExtrinsic impl to match this variant name:
                 quote! {
                     if pallet_name == #variant_name_str {
@@ -425,12 +422,12 @@ impl RuntimeGenerator {
             })
         });
 
-        let outer_error_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_error_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.error.as_ref().map(|_| {
+            p.error_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Error),
@@ -445,41 +442,41 @@ impl RuntimeGenerator {
             }
         };
 
-        let root_error_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_error_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = &p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.error.as_ref().map(|err|
-                {
-                    let type_id = err.ty.id;
-                    quote! {
+
+            p.error_ty_id().map(|type_id| {
+                quote! {
                     if pallet_name == #variant_name_str {
                         let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
                         return Ok(Error::#variant_name(variant_error));
                     }
                 }
-                }
-            )
+            })
         });
 
         let mod_ident = &item_mod_ir.ident;
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
-                (!pallet.constants.is_empty()).then_some(pallet_mod_name)
+                pallet
+                    .constants()
+                    .next()
+                    .is_some()
+                    .then_some(pallet_mod_name)
             })
             .collect();
 
         let pallets_with_storage: Vec<_> = pallets_with_mod_names
             .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                pallet.storage.as_ref().map(|_| pallet_mod_name)
-            })
+            .filter_map(|(pallet, pallet_mod_name)| pallet.storage().map(|_| pallet_mod_name))
             .collect();
 
         let pallets_with_calls: Vec<_> = pallets_with_mod_names
             .iter()
-            .filter_map(|(pallet, pallet_mod_name)| pallet.calls.as_ref().map(|_| pallet_mod_name))
+            .filter_map(|(pallet, pallet_mod_name)| pallet.call_ty_id().map(|_| pallet_mod_name))
             .collect();
 
         let rust_items = item_mod_ir.rust_items();
