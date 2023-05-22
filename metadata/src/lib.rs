@@ -9,18 +9,10 @@ use scale_info::{TypeDef, PortableRegistry, Variant, form::PortableForm};
 use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
-use utils::hash_cache::HashCache;
 
 type ArcStr = Arc<str>;
 
 pub use utils::validation::MetadataHasher;
-
-//// TODO expose these as methods on Metadata:
-////
-// pub use validation::{
-//     get_call_hash, get_constant_hash, get_pallet_hash, get_runtime_api_hash, get_storage_hash,
-//     MetadataHasher, NotFound,
-// };
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
@@ -221,29 +213,17 @@ impl <'a> PalletMetadata<'a> {
 
     /// Return a hash for the storage entry, or None if it was not found.
     pub fn storage_hash(&self, entry_name: &str) -> Option<[u8; 32]> {
-        self.inner
-            .cached_storage_hashes
-            .get_or_insert(entry_name, || {
-                crate::utils::validation::get_storage_hash(self, entry_name)
-            })
+        crate::utils::validation::get_storage_hash(self, entry_name)
     }
 
     /// Return a hash for the constant, or None if it was not found.
     pub fn constant_hash(&self, constant_name: &str) -> Option<[u8; 32]> {
-        self.inner
-            .cached_constant_hashes
-            .get_or_insert(constant_name, || {
-                crate::utils::validation::get_constant_hash(self, constant_name)
-            })
+        crate::utils::validation::get_constant_hash(self, constant_name)
     }
 
     /// Return a hash for the call, or None if it was not found.
     pub fn call_hash(&self, call_name: &str) -> Option<[u8; 32]> {
-        self.inner
-            .cached_call_hashes
-            .get_or_insert(call_name, || {
-                crate::utils::validation::get_call_hash(self, call_name)
-            })
+        crate::utils::validation::get_call_hash(self, call_name)
     }
 
     fn variant_by_pos(&self, variant_type_id: u32, variant_pos: usize) -> Option<&'a Variant<PortableForm>> {
@@ -279,14 +259,6 @@ struct PalletMetadataInner {
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Pallet documentation.
     docs: Vec<String>,
-
-    // The hashes uniquely identify parts of the metadata; different
-    // hashes mean some type difference exists between static and runtime
-    // versions. We cache them here to avoid recalculating. Caches take
-    // the item name and return back the associated hash.
-    cached_call_hashes: HashCache,
-    cached_constant_hashes: HashCache,
-    cached_storage_hashes: HashCache,
 }
 
 pub struct StorageMetadata {
@@ -497,11 +469,7 @@ impl <'a> RuntimeApiMetadata<'a> {
     }
     /// Return a hash for the constant, or None if it was not found.
     pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
-        self.inner
-            .cached_runtime_hashes
-            .get_or_insert(method_name, || {
-                crate::utils::validation::get_runtime_api_hash(self, method_name)
-            })
+        crate::utils::validation::get_runtime_api_hash(self, method_name)
     }
 }
 
@@ -512,9 +480,6 @@ pub struct RuntimeApiMetadataInner {
 	methods: OrderedMap<ArcStr, RuntimeApiMethodMetadata>,
 	/// Trait documentation.
 	docs: Vec<String>,
-    /// Unique hashes for each runtime method are cached here
-    /// to avoid needing to be recalculated.
-    cached_runtime_hashes: HashCache,
 }
 
 pub struct RuntimeApiMethodMetadata {
