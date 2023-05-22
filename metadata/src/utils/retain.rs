@@ -106,17 +106,12 @@ fn update_extrinsic_types(
 }
 
 /// Collect all type IDs needed to represent the runtime APIs.
-fn collect_runtime_api_types(
-    apis: &[RuntimeApiMetadata<PortableForm>],
-    type_ids: &mut HashSet<u32>,
-) {
-    for api in apis {
-        for method in &api.methods {
-            for input in &method.inputs {
-                type_ids.insert(input.ty.id);
-            }
-            type_ids.insert(method.output.id);
+fn collect_runtime_api_types(api: &RuntimeApiMetadata<PortableForm>, type_ids: &mut HashSet<u32>) {
+    for method in &api.methods {
+        for input in &method.inputs {
+            type_ids.insert(input.ty.id);
         }
+        type_ids.insert(method.output.id);
     }
 }
 
@@ -165,7 +160,7 @@ where
     let Some(call_ty) = extrinsic_ty.ty.type_params
         .iter_mut()
         .find(|ty| ty.name == "Call")
-        .and_then(|ty| ty.ty) else { return };
+        .and_then(|ty| ty.ty) else { return; };
 
     let call_ty = metadata
         .types
@@ -182,7 +177,7 @@ where
 }
 
 /// Generate a subset of the metadata that contains only the
-/// types needed to represent the provided pallets.
+/// types needed to represent the provided pallets and runtime APIs.
 ///
 /// # Note
 ///
@@ -193,26 +188,29 @@ where
 ///
 /// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types,
 /// or the metadata does not contain the "sp_runtime::DispatchError" type.
-pub fn retain_metadata_pallets<F>(metadata: &mut RuntimeMetadataV15, mut filter: F)
-where
+pub fn retain_metadata<F, G>(
+    metadata: &mut RuntimeMetadataV15,
+    mut pallets_filter: F,
+    mut runtime_apis_filter: G,
+) where
     F: FnMut(&str) -> bool,
+    G: FnMut(&str) -> bool,
 {
     let mut type_ids = HashSet::new();
 
     // There is a special RuntimeCall type which points to all pallets and call types by default.
     // This brings in a significant chunk of types. We trim this down to only include variants
     // for the pallets we're retaining, to avoid this.
-    retain_pallets_in_runtime_call_type(metadata, &mut filter);
+    retain_pallets_in_runtime_call_type(metadata, &mut pallets_filter);
 
     // Filter our pallet list to only those pallets we want to keep. Keep hold of all
-    //type IDs in the pallets we're keeping.
+    // type IDs in the pallets we're keeping. Retain all, if no filter specified.
     metadata.pallets.retain(|pallet| {
-        if filter(&pallet.name) {
+        let should_retain = pallets_filter(&pallet.name);
+        if should_retain {
             collect_pallet_types(pallet, &mut type_ids);
-            true
-        } else {
-            false
         }
+        should_retain
     });
 
     // Keep the extrinsic stuff referenced in our metadata.
@@ -221,8 +219,15 @@ where
     // Keep the "runtime" type ID, since it's referenced in our metadata.
     type_ids.insert(metadata.ty.id);
 
-    // Keep the runtime APIs types.
-    collect_runtime_api_types(&metadata.apis, &mut type_ids);
+    // Keep only the runtime API types that the filter allows for. Keep hold of all
+    // type IDs in the runtime apis we're keeping. Retain all, if no filter specified.
+    metadata.apis.retain(|api| {
+        let should_retain = runtime_apis_filter(&api.name);
+        if should_retain {
+            collect_runtime_api_types(api, &mut type_ids);
+        }
+        should_retain
+    });
 
     // Additionally, subxt depends on the `DispatchError` type existing; we use the same
     // logic here that is used when building our `Metadata`.
@@ -275,10 +280,32 @@ mod tests {
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in &metadata_cache.pallets {
             let mut metadata = metadata_cache.clone();
-            retain_metadata_pallets(&mut metadata, |pallet_name| pallet_name == pallet.name);
+            retain_metadata(
+                &mut metadata,
+                |pallet_name| pallet_name == pallet.name,
+                |_| true,
+            );
 
             assert_eq!(metadata.pallets.len(), 1);
             assert_eq!(metadata.pallets.get(0).unwrap().name, pallet.name);
+        }
+    }
+
+    #[test]
+    fn retain_one_runtime_api() {
+        let metadata_cache = load_metadata();
+
+        // Retain one runtime API at a time ensuring the test does not panic.
+        for runtime_api in &metadata_cache.apis {
+            let mut metadata = metadata_cache.clone();
+            retain_metadata(
+                &mut metadata,
+                |_| true,
+                |runtime_api_name| runtime_api_name == runtime_api.name,
+            );
+
+            assert_eq!(metadata.apis.len(), 1);
+            assert_eq!(metadata.apis.get(0).unwrap().name, runtime_api.name);
         }
     }
 }

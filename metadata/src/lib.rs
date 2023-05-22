@@ -97,9 +97,10 @@ impl Metadata {
     }
 
     /// Filter out any pallets that we don't want to keep, retaining only those that we do.
-    pub fn retain_pallets<F>(&mut self, filter: F)
+    pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
     where
-        F: FnMut(&str) -> bool
+        F: FnMut(&str) -> bool,
+        G: FnMut(&str) -> bool,
     {
         // Something to swap `self` with to avoid needing to clone it.
         let placeholder_metadata = Metadata {
@@ -126,7 +127,7 @@ impl Metadata {
 
         // Filter the pallets we don't want and turn back into Metadata. This shouldn't
         // fail since we had valid Metadata to begin with, unless our logic is faulty.
-        utils::retain::retain_metadata_pallets(&mut v15_metadata, filter);
+        utils::retain::retain_metadata(&mut v15_metadata, pallet_filter, api_filter);
         *self = v15_metadata.try_into().expect("expecting metadata is still valid");
     }
 }
