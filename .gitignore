@@ -2,4 +2,4 @@
 **/*.rs.bk
 **/.DS_Store
 cargo-timing*
-/examples/wasm_examples/dist
+/examples/wasm-example/dist
