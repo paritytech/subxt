@@ -133,7 +133,7 @@ fn update_type(ty: &mut u32, map_ids: &BTreeMap<u32, u32>) {
         .get(&old_id)
         .copied()
         .unwrap_or_else(|| panic!("PortableRegistry did not retain type id {old_id}. This is a bug. Please open an issue."));
-    *ty = new_id.into();
+    *ty = new_id;
 }
 
 /// Strip any pallets out of the RuntimeCall type that aren't the ones we want to keep.

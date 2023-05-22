@@ -79,7 +79,7 @@ mod from_v15 {
                 .iter()
                 .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
                 .map(|ty| ty.id)
-                .ok_or_else(|| TryFromError::DispatchErrorTypeNotFound)?;
+                .ok_or(TryFromError::DispatchErrorTypeNotFound)?;
 
             Ok(Metadata {
                 types: m.types,
@@ -154,10 +154,10 @@ mod from_v15 {
         s: v15::StorageEntryMetadata<PortableForm>,
     ) -> StorageEntryMetadata {
         StorageEntryMetadata {
-            name: name,
+            name,
             modifier: from_storage_entry_modifier(s.modifier),
             entry_type: from_storage_entry_type(s.ty),
-            default: s.default.into(),
+            default: s.default,
             docs: s.docs,
         }
     }
@@ -167,7 +167,7 @@ mod from_v15 {
         s: v15::PalletConstantMetadata<PortableForm>,
     ) -> ConstantMetadata {
         ConstantMetadata {
-            name: name,
+            name,
             ty: s.ty.id,
             value: s.value,
             docs: s.docs,
@@ -197,7 +197,7 @@ mod from_v15 {
         s: v15::RuntimeApiMethodMetadata<PortableForm>,
     ) -> RuntimeApiMethodMetadata {
         RuntimeApiMethodMetadata {
-            name: name,
+            name,
             inputs: s
                 .inputs
                 .into_iter()

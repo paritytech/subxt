@@ -224,7 +224,7 @@ fn get_storage_entry_hash(
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
         // Cloning 'entry.modifier' should essentially be a copy.
-        &[entry.modifier.clone() as u8; HASH_LEN],
+        &[entry.modifier as u8; HASH_LEN],
         &hash(&entry.default),
     );
 
@@ -239,7 +239,7 @@ fn get_storage_entry_hash(
         } => {
             for hasher in hashers {
                 // Cloning the hasher should essentially be a copy.
-                bytes = concat_and_hash2(&bytes, &[hasher.clone() as u8; HASH_LEN]);
+                bytes = concat_and_hash2(&bytes, &[*hasher as u8; HASH_LEN]);
             }
             concat_and_hash3(
                 &bytes,
@@ -312,7 +312,7 @@ pub fn get_storage_hash(pallet: &PalletMetadata, entry_name: &str) -> Option<[u8
     let storage = pallet.storage()?;
     let entry = storage.entry_by_name(entry_name)?;
 
-    let hash = get_storage_entry_hash(&pallet.types, entry, &mut HashSet::new());
+    let hash = get_storage_entry_hash(pallet.types, entry, &mut HashSet::new());
     Some(hash)
 }
 
@@ -321,7 +321,7 @@ pub fn get_constant_hash(pallet: &PalletMetadata, constant_name: &str) -> Option
     let constant = pallet.constant_by_name(constant_name)?;
 
     // We only need to check that the type of the constant asked for matches.
-    let bytes = get_type_hash(&pallet.types, constant.ty, &mut HashSet::new());
+    let bytes = get_type_hash(pallet.types, constant.ty, &mut HashSet::new());
     Some(bytes)
 }
 
@@ -330,7 +330,7 @@ pub fn get_call_hash(pallet: &PalletMetadata, call_name: &str) -> Option<[u8; HA
     let call_variant = pallet.call_variant_by_name(call_name)?;
 
     // hash the specific variant representing the call we are interested in.
-    let hash = get_variant_hash(&pallet.types, call_variant, &mut HashSet::new());
+    let hash = get_variant_hash(pallet.types, call_variant, &mut HashSet::new());
     Some(hash)
 }
 
@@ -343,7 +343,7 @@ pub fn get_runtime_api_hash(
     let method_metadata = runtime_apis.method_by_name(method_name)?;
 
     Some(get_runtime_method_hash(
-        &runtime_apis.types,
+        runtime_apis.types,
         trait_name,
         method_metadata,
         &mut HashSet::new(),
