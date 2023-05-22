@@ -88,10 +88,7 @@ pub(crate) fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
 }
 
 pub(crate) fn with_indent(s: String, indent: usize) -> String {
-    let mut indent_str = String::new();
-    for _ in 0..indent {
-        indent_str.push(' ');
-    }
+    let indent_str = " ".repeat(indent);
     s.lines()
         .map(|line| format!("{indent_str}{line}"))
         .collect::<Vec<_>>()

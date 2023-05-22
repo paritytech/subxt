@@ -244,7 +244,7 @@ impl TypeExample for Vec<Field<PortableForm>> {
             .iter()
             .map(|(_, examples)| examples.len())
             .min()
-            .unwrap(); // safe to unwrap, because min could only be None if there are no fields. But in that case we already return an error above.
+            .expect("Iterator is not non-empty checked above; qed");
         let mut composite_examples: Vec<Vec<(&Field<PortableForm>, scale_value::Value)>> =
             Vec::new();
         for _ in 0..n {

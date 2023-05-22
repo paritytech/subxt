@@ -64,10 +64,11 @@ impl TypeDescription for TypeDef<PortableForm> {
 impl TypeDescription for TypeDefTuple<PortableForm> {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String> {
         let mut output = "(".to_string();
-        for (is_last, ty) in mark_last(self.fields.iter(), self.fields.len()) {
+        let mut iter = self.fields.iter().peekable();
+        while let Some(ty) = iter.next() {
             let type_description = ty.id.type_description(registry)?;
             output.push_str(&type_description);
-            if !is_last {
+            if iter.peek().is_some() {
                 output.push(',')
             }
         }
@@ -135,11 +136,12 @@ impl TypeDescription for TypeDefVariant<PortableForm> {
 
         let mut variants_string = String::new();
         variants_string.push('{');
-        for (is_last, variant) in mark_last(self.variants.iter(), self.variants.len()) {
+        let mut iter = self.variants.iter().peekable();
+        while let Some(variant) = iter.next() {
             let variant_string = variant.type_description(registry)?;
             variants_string.push_str(&variant_string);
 
-            if !is_last || add_trailing_comma {
+            if iter.peek().is_some() || add_trailing_comma {
                 variants_string.push(',');
             }
         }
@@ -185,11 +187,12 @@ impl TypeDescription for Vec<Field<PortableForm>> {
 
         let mut fields_string = String::new();
         fields_string.push(brackets.0);
-        for (is_last, field) in mark_last(self.iter(), self.len()) {
+        let mut iter = self.iter().peekable();
+        while let Some(field) = iter.next() {
             let field_description = field.type_description(registry)?;
             fields_string.push_str(&field_description);
 
-            if !is_last || add_trailing_comma {
+            if iter.peek().is_some() || add_trailing_comma {
                 fields_string.push(',')
             }
         }
@@ -267,8 +270,4 @@ fn format_type_description(input: &str) -> String {
         }
     }
     output
-}
-
-fn mark_last<T>(items: impl Iterator<Item = T>, len: usize) -> impl Iterator<Item = (bool, T)> {
-    items.enumerate().map(move |(i, e)| (i == len - 1, e))
 }

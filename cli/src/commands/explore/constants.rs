@@ -79,7 +79,8 @@ fn print_available_constants(
     let mut strings: Vec<_> = pallet_metadata.constants.iter().map(|c| &c.name).collect();
     strings.sort();
     for constant in strings {
-        write!(output, "\n    {}", constant).unwrap();
+        output.push_str("\n    ");
+        output.push_str(constant);
     }
     output
 }

@@ -4,6 +4,7 @@ use crate::utils::with_indent;
 use clap::Args;
 
 use std::fmt::Write;
+use std::str::FromStr;
 use std::write;
 
 use color_eyre::eyre::eyre;
@@ -43,7 +44,7 @@ pub(crate) fn explore_calls(
     };
 
     // if specified call is wrong, show user the calls to choose from (but this time as an error):
-    let Some(call) = calls_enum_type_def.variants.iter().find(|variant| variant.name.to_lowercase() == call_name.to_lowercase())   else {
+    let Some(call) = calls_enum_type_def.variants.iter().find(|variant| variant.name.to_lowercase() == call_name.to_lowercase()) else {
         let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
         let description = format!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", );
         return Err(eyre!("\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{description}"));
@@ -94,7 +95,8 @@ fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_nam
     let mut strings: Vec<_> = pallet_calls.variants.iter().map(|c| &c.name).collect();
     strings.sort();
     for variant in strings {
-        write!(output, "\n    {}", variant).unwrap();
+        output.push_str("\n    {");
+        output.push_str(variant);
     }
     output
 }
@@ -121,11 +123,9 @@ fn get_calls_enum_type<'a>(
 }
 
 fn new_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
-    let genesis_hash = {
-        let h = "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3";
-        let bytes = hex::decode(h).unwrap();
-        H256::from_slice(&bytes)
-    };
+    let genesis_hash =
+        H256::from_str("91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3")
+            .expect("Valid hash; qed");
 
     let runtime_version = subxt::rpc::types::RuntimeVersion {
         spec_version: 9370,
