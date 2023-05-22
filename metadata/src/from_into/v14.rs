@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use frame_metadata::{v14, v15};
-use crate::Metadata;
 use super::TryFromError;
+use crate::Metadata;
+use frame_metadata::{v14, v15};
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;

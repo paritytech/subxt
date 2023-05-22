@@ -5,10 +5,11 @@
 mod from_into;
 mod utils;
 
-use scale_info::{TypeDef, PortableRegistry, Variant, form::PortableForm};
+use scale_info::{form::PortableForm, PortableRegistry, TypeDef, Variant};
 use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
+use utils::variant_index::VariantIndex;
 
 type ArcStr = Arc<str>;
 
@@ -17,21 +18,22 @@ pub use utils::validation::MetadataHasher;
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
 /// the incoming metadata while optimizing the format a little for Subxt's use cases.
+#[derive(Debug, Clone)]
 pub struct Metadata {
-	/// Type registry containing all types used in the metadata.
-	types: PortableRegistry,
-	/// Metadata of all the pallets.
-	pallets: OrderedMap<ArcStr, PalletMetadataInner>,
+    /// Type registry containing all types used in the metadata.
+    types: PortableRegistry,
+    /// Metadata of all the pallets.
+    pallets: OrderedMap<ArcStr, PalletMetadataInner>,
     /// Find the location in the pallet Vec by pallet index.
     pallets_by_index: HashMap<u8, usize>,
-	/// Metadata of the extrinsic.
-	extrinsic: ExtrinsicMetadata,
-	/// The type ID of the `Runtime` type.
-	runtime_ty: u32,
+    /// Metadata of the extrinsic.
+    extrinsic: ExtrinsicMetadata,
+    /// The type ID of the `Runtime` type.
+    runtime_ty: u32,
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
     dispatch_error_ty: u32,
-	/// Details about each of the runtime API traits.
-	apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
+    /// Details about each of the runtime API traits.
+    apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
 }
 
 impl Metadata {
@@ -57,42 +59,54 @@ impl Metadata {
 
     /// An iterator over all of the available pallets.
     pub fn pallets(&self) -> impl Iterator<Item = PalletMetadata<'_>> {
-        self.pallets.values().iter().map(|inner| {
-            PalletMetadata { inner, types: self.types() }
+        self.pallets.values().iter().map(|inner| PalletMetadata {
+            inner,
+            types: self.types(),
         })
     }
 
     /// Access a pallet given its encoded variant index.
     pub fn pallet_by_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
-        let inner = self.pallets_by_index
+        let inner = self
+            .pallets_by_index
             .get(&variant_index)
             .and_then(|i| self.pallets.get_by_index(*i))?;
 
-        Some(PalletMetadata { inner, types: self.types() })
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
     }
 
     /// Access a pallet given its name.
     pub fn pallet_by_name(&self, pallet_name: &str) -> Option<PalletMetadata<'_>> {
         let inner = self.pallets.get_by_key(pallet_name)?;
 
-        Some(PalletMetadata { inner, types: self.types() })
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
     }
 
     /// An iterator over all of the runtime APIs.
-    pub fn runtime_api_traits(&self) -> impl Iterator<Item=RuntimeApiMetadata<'_>> {
-        self.apis.values().iter().map(|inner| {
-            RuntimeApiMetadata { inner, types: self.types() }
+    pub fn runtime_api_traits(&self) -> impl Iterator<Item = RuntimeApiMetadata<'_>> {
+        self.apis.values().iter().map(|inner| RuntimeApiMetadata {
+            inner,
+            types: self.types(),
         })
     }
 
     /// Access a runtime API trait given its name.
     pub fn runtime_api_trait_by_name(&'_ self, name: &str) -> Option<RuntimeApiMetadata<'_>> {
         let inner = self.apis.get_by_key(name)?;
-        Some(RuntimeApiMetadata { inner, types: self.types() })
+        Some(RuntimeApiMetadata {
+            inner,
+            types: self.types(),
+        })
     }
 
     /// Obtain a unique hash representing this metadata or specific parts of it.
-    pub fn generate_hash(&self) -> MetadataHasher {
+    pub fn hasher(&self) -> MetadataHasher {
         MetadataHasher::new(self)
     }
 
@@ -102,43 +116,18 @@ impl Metadata {
         F: FnMut(&str) -> bool,
         G: FnMut(&str) -> bool,
     {
-        // Something to swap `self` with to avoid needing to clone it.
-        let placeholder_metadata = Metadata {
-            types: PortableRegistry {
-                types: Default::default()
-            },
-            pallets: Default::default(),
-            pallets_by_index: Default::default(),
-            extrinsic: ExtrinsicMetadata {
-                ty: Default::default(),
-                version: Default::default(),
-                signed_extensions: Default::default()
-            },
-            runtime_ty: Default::default(),
-            dispatch_error_ty: Default::default(),
-            apis: Default::default(),
-        };
-
-        // Take self and convert into v15 metadata. This is partly to avoid rewriting
-        // the retain things to be based on Metadata, and partly to avoid needing to think
-        // about any cached values and ensure a clean slate.
-        let metadata = std::mem::replace(self, placeholder_metadata);
-        let mut v15_metadata = metadata.into();
-
-        // Filter the pallets we don't want and turn back into Metadata. This shouldn't
-        // fail since we had valid Metadata to begin with, unless our logic is faulty.
-        utils::retain::retain_metadata(&mut v15_metadata, pallet_filter, api_filter);
-        *self = v15_metadata.try_into().expect("expecting metadata is still valid");
+        utils::retain::retain_metadata(self, pallet_filter, api_filter);
     }
 }
 
 /// Metadata for a specific pallet.
+#[derive(Debug, Clone)]
 pub struct PalletMetadata<'a> {
     inner: &'a PalletMetadataInner,
-    types: &'a PortableRegistry
+    types: &'a PortableRegistry,
 }
 
-impl <'a> PalletMetadata<'a> {
+impl<'a> PalletMetadata<'a> {
     /// The pallet name.
     pub fn name(&self) -> &str {
         &self.inner.name
@@ -174,32 +163,51 @@ impl <'a> PalletMetadata<'a> {
         self.inner.storage.as_ref()
     }
 
+    /// Return all of the event variants, if an event type exists.
+    pub fn event_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
+        self.variants(self.inner.event_ty?)
+    }
+
     /// Return an event variant given it's encoded variant index.
     pub fn event_variant_by_index(&self, variant_index: u8) -> Option<&'a Variant<PortableForm>> {
-        let variant_pos = self.inner.event_variants_by_index.get(&variant_index)?;
-        let event_ty = self.inner.event_ty?;
-        self.variant_by_pos(event_ty, *variant_pos)
+        self.inner.event_variant_index.lookup_by_index(
+            variant_index,
+            self.inner.event_ty,
+            self.types,
+        )
+    }
+
+    /// Return all of the call variants, if a call type exists.
+    pub fn call_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
+        self.variants(self.inner.call_ty?)
     }
 
     /// Return a call variant given it's encoded variant index.
     pub fn call_variant_by_index(&self, variant_index: u8) -> Option<&'a Variant<PortableForm>> {
-        let variant_pos = self.inner.call_variants_by_index.get(&variant_index)?;
-        let call_ty = self.inner.call_ty?;
-        self.variant_by_pos(call_ty, *variant_pos)
+        self.inner
+            .call_variant_index
+            .lookup_by_index(variant_index, self.inner.call_ty, self.types)
     }
 
     /// Return a call variant given it's name.
     pub fn call_variant_by_name(&self, call_name: &str) -> Option<&'a Variant<PortableForm>> {
-        let variant_pos = self.inner.call_variants_by_name.get(call_name)?;
-        let call_ty = self.inner.call_ty?;
-        self.variant_by_pos(call_ty, *variant_pos)
+        self.inner
+            .call_variant_index
+            .lookup_by_name(call_name, self.inner.call_ty, self.types)
+    }
+
+    /// Return all of the error variants, if an error type exists.
+    pub fn error_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
+        self.variants(self.inner.error_ty?)
     }
 
     /// Return an error variant given it's encoded variant index.
     pub fn error_variant_by_index(&self, variant_index: u8) -> Option<&'a Variant<PortableForm>> {
-        let variant_pos = self.inner.error_variants_by_index.get(&variant_index)?;
-        let error_ty = self.inner.error_ty?;
-        self.variant_by_pos(error_ty, *variant_pos)
+        self.inner.error_variant_index.lookup_by_index(
+            variant_index,
+            self.inner.error_ty,
+            self.types,
+        )
     }
 
     /// Return constant details given the constant name.
@@ -208,7 +216,7 @@ impl <'a> PalletMetadata<'a> {
     }
 
     /// An iterator over the constants in this pallet.
-    pub fn constants(&self) -> impl Iterator<Item=&ConstantMetadata> {
+    pub fn constants(&self) -> impl Iterator<Item = &ConstantMetadata> {
         self.inner.constants.values().iter()
     }
 
@@ -227,46 +235,46 @@ impl <'a> PalletMetadata<'a> {
         crate::utils::validation::get_call_hash(self, call_name)
     }
 
-    fn variant_by_pos(&self, variant_type_id: u32, variant_pos: usize) -> Option<&'a Variant<PortableForm>> {
+    fn variants(&self, variant_type_id: u32) -> Option<&'a [Variant<PortableForm>]> {
         let TypeDef::Variant(v) = &self.types.resolve(variant_type_id)?.type_def else {
             return None;
         };
-        v.variants.get(variant_pos)
+        Some(&v.variants)
     }
 }
 
+#[derive(Debug, Clone)]
 struct PalletMetadataInner {
-	/// Pallet name.
+    /// Pallet name.
     name: ArcStr,
     /// Pallet index.
     index: u8,
-	/// Pallet storage metadata.
-	storage: Option<StorageMetadata>,
+    /// Pallet storage metadata.
+    storage: Option<StorageMetadata>,
     /// Type ID for the pallet Call enum.
     call_ty: Option<u32>,
-    /// Find the location in the call variants by variant index.
-    call_variants_by_index: HashMap<u8, usize>,
-    /// Find the location in the call variants by variant name.
-    call_variants_by_name: HashMap<String, usize>,
+    /// Call variants by name/u8.
+    call_variant_index: VariantIndex,
     /// Type ID for the pallet Event enum.
     event_ty: Option<u32>,
-    /// Find the location in the event variants by variant index.
-    event_variants_by_index: HashMap<u8, usize>,
+    /// Event variants by name/u8.
+    event_variant_index: VariantIndex,
     /// Type ID for the pallet Error enum.
     error_ty: Option<u32>,
-    /// Find the location in the error variants by variant index.
-    error_variants_by_index: HashMap<u8, usize>,
+    /// Error variants by name/u8.
+    error_variant_index: VariantIndex,
     /// Map from constant name to constant details.
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Pallet documentation.
     docs: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct StorageMetadata {
-	/// The common prefix used by all storage entries.
+    /// The common prefix used by all storage entries.
     prefix: String,
-	/// Map from storage entry name to details.
-    entries: OrderedMap<ArcStr, StorageEntryMetadata>
+    /// Map from storage entry name to details.
+    entries: OrderedMap<ArcStr, StorageEntryMetadata>,
 }
 
 impl StorageMetadata {
@@ -276,7 +284,7 @@ impl StorageMetadata {
     }
 
     /// An iterator over the storage entries.
-    pub fn entries(&self) -> impl Iterator<Item=&StorageEntryMetadata> {
+    pub fn entries(&self) -> impl Iterator<Item = &StorageEntryMetadata> {
         self.entries.values().iter()
     }
 
@@ -286,17 +294,18 @@ impl StorageMetadata {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct StorageEntryMetadata {
-	/// Variable name of the storage entry.
+    /// Variable name of the storage entry.
     name: ArcStr,
-	/// An `Option` modifier of that storage entry.
+    /// An `Option` modifier of that storage entry.
     modifier: StorageEntryModifier,
-	/// Type of the value stored in the entry.
+    /// Type of the value stored in the entry.
     entry_type: StorageEntryType,
-	/// Default value (SCALE encoded).
+    /// Default value (SCALE encoded).
     default: Vec<u8>,
-	/// Storage entry documentation.
-    docs: Vec<String>
+    /// Storage entry documentation.
+    docs: Vec<String>,
 }
 
 impl StorageEntryMetadata {
@@ -322,84 +331,87 @@ impl StorageEntryMetadata {
     }
 }
 
+#[derive(Debug, Clone)]
 pub enum StorageEntryType {
-	/// Plain storage entry (just the value).
+    /// Plain storage entry (just the value).
     Plain(u32),
-	/// A storage map.
+    /// A storage map.
     Map {
-		/// One or more hashers, should be one hasher per key element.
+        /// One or more hashers, should be one hasher per key element.
         hashers: Vec<StorageHasher>,
-		/// The type of the key, can be a tuple with elements for each of the hashers.
+        /// The type of the key, can be a tuple with elements for each of the hashers.
         key_ty: u32,
-		/// The type of the value.
-        value_ty: u32
-    }
+        /// The type of the value.
+        value_ty: u32,
+    },
 }
 
 /// Hasher used by storage maps
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum StorageHasher {
-	/// 128-bit Blake2 hash.
-	Blake2_128,
-	/// 256-bit Blake2 hash.
-	Blake2_256,
-	/// Multiple 128-bit Blake2 hashes concatenated.
-	Blake2_128Concat,
-	/// 128-bit XX hash.
-	Twox128,
-	/// 256-bit XX hash.
-	Twox256,
-	/// Multiple 64-bit XX hashes concatenated.
-	Twox64Concat,
-	/// Identity hashing (no hashing).
-	Identity,
+    /// 128-bit Blake2 hash.
+    Blake2_128,
+    /// 256-bit Blake2 hash.
+    Blake2_256,
+    /// Multiple 128-bit Blake2 hashes concatenated.
+    Blake2_128Concat,
+    /// 128-bit XX hash.
+    Twox128,
+    /// 256-bit XX hash.
+    Twox256,
+    /// Multiple 64-bit XX hashes concatenated.
+    Twox64Concat,
+    /// Identity hashing (no hashing).
+    Identity,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum StorageEntryModifier {
-	/// The storage entry returns an `Option<T>`, with `None` if the key is not present.
-	Optional,
-	/// The storage entry returns `T::Default` if the key is not present.
-	Default,
+    /// The storage entry returns an `Option<T>`, with `None` if the key is not present.
+    Optional,
+    /// The storage entry returns `T::Default` if the key is not present.
+    Default,
 }
 
+#[derive(Debug, Clone)]
 pub struct ConstantMetadata {
-	/// Name of the pallet constant.
-	name: ArcStr,
-	/// Type of the pallet constant.
-	ty: u32,
-	/// Value stored in the constant (SCALE encoded).
-	value: Vec<u8>,
-	/// Constant documentation.
-	docs: Vec<String>,
+    /// Name of the pallet constant.
+    name: ArcStr,
+    /// Type of the pallet constant.
+    ty: u32,
+    /// Value stored in the constant (SCALE encoded).
+    value: Vec<u8>,
+    /// Constant documentation.
+    docs: Vec<String>,
 }
 
 impl ConstantMetadata {
-	/// Name of the pallet constant.
+    /// Name of the pallet constant.
     pub fn name(&self) -> &str {
         &self.name
     }
-	/// Type of the pallet constant.
+    /// Type of the pallet constant.
     pub fn ty(&self) -> u32 {
         self.ty
     }
-	/// Value stored in the constant (SCALE encoded).
+    /// Value stored in the constant (SCALE encoded).
     pub fn value(&self) -> &[u8] {
         &self.value
     }
-	/// Constant documentation.
+    /// Constant documentation.
     pub fn docs(&self) -> &[String] {
         &self.docs
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-	/// The type of the extrinsic.
+    /// The type of the extrinsic.
     ty: u32,
-	/// Extrinsic version.
+    /// Extrinsic version.
     version: u8,
-	/// The signed extensions in the order they appear in the extrinsic.
-    signed_extensions: Vec<SignedExtensionMetadata>
+    /// The signed extensions in the order they appear in the extrinsic.
+    signed_extensions: Vec<SignedExtensionMetadata>,
 }
 
 impl ExtrinsicMetadata {
@@ -419,37 +431,38 @@ impl ExtrinsicMetadata {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct SignedExtensionMetadata {
-	/// The unique signed extension identifier, which may be different from the type name.
-	identifier: String,
-	/// The type of the signed extension, with the data to be included in the extrinsic.
-	extra_ty: u32,
-	/// The type of the additional signed data, with the data to be included in the signed payload
-	additional_ty: u32,
+    /// The unique signed extension identifier, which may be different from the type name.
+    identifier: String,
+    /// The type of the signed extension, with the data to be included in the extrinsic.
+    extra_ty: u32,
+    /// The type of the additional signed data, with the data to be included in the signed payload
+    additional_ty: u32,
 }
 
 impl SignedExtensionMetadata {
-	/// The unique signed extension identifier, which may be different from the type name.
+    /// The unique signed extension identifier, which may be different from the type name.
     pub fn identifier(&self) -> &str {
         &self.identifier
     }
-	/// The type of the signed extension, with the data to be included in the extrinsic.
+    /// The type of the signed extension, with the data to be included in the extrinsic.
     pub fn extra_ty(&self) -> u32 {
         self.extra_ty
     }
-	/// The type of the additional signed data, with the data to be included in the signed payload
+    /// The type of the additional signed data, with the data to be included in the signed payload
     pub fn additional_ty(&self) -> u32 {
         self.additional_ty
     }
 }
 
-#[derive(Clone,Copy)]
+#[derive(Clone, Copy)]
 pub struct RuntimeApiMetadata<'a> {
     inner: &'a RuntimeApiMetadataInner,
-    types: &'a PortableRegistry
+    types: &'a PortableRegistry,
 }
 
-impl <'a> RuntimeApiMetadata<'a> {
+impl<'a> RuntimeApiMetadata<'a> {
     /// Trait name.
     pub fn name(&self) -> &str {
         &self.inner.name
@@ -459,14 +472,12 @@ impl <'a> RuntimeApiMetadata<'a> {
         &self.inner.docs
     }
     /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl Iterator<Item=&'a RuntimeApiMethodMetadata> {
-        self.inner
-            .methods.values().iter()
+    pub fn methods(&self) -> impl Iterator<Item = &'a RuntimeApiMethodMetadata> {
+        self.inner.methods.values().iter()
     }
     /// Get a specific trait method given its name.
     pub fn method_by_name(&self, name: &str) -> Option<&'a RuntimeApiMethodMetadata> {
-        self.inner
-            .methods.get_by_key(name)
+        self.inner.methods.get_by_key(name)
     }
     /// Return a hash for the constant, or None if it was not found.
     pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
@@ -474,24 +485,26 @@ impl <'a> RuntimeApiMetadata<'a> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RuntimeApiMetadataInner {
     /// Trait name.
-	name: ArcStr,
-	/// Trait methods.
-	methods: OrderedMap<ArcStr, RuntimeApiMethodMetadata>,
-	/// Trait documentation.
-	docs: Vec<String>,
+    name: ArcStr,
+    /// Trait methods.
+    methods: OrderedMap<ArcStr, RuntimeApiMethodMetadata>,
+    /// Trait documentation.
+    docs: Vec<String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct RuntimeApiMethodMetadata {
-	/// Method name.
-	name: ArcStr,
-	/// Method parameters.
-	inputs: Vec<RuntimeApiMethodParamMetadata>,
-	/// Method output type.
-	output_ty: u32,
-	/// Method documentation.
-	docs: Vec<String>,
+    /// Method name.
+    name: ArcStr,
+    /// Method parameters.
+    inputs: Vec<RuntimeApiMethodParamMetadata>,
+    /// Method output type.
+    output_ty: u32,
+    /// Method documentation.
+    docs: Vec<String>,
 }
 
 impl RuntimeApiMethodMetadata {
@@ -504,7 +517,7 @@ impl RuntimeApiMethodMetadata {
         &self.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl Iterator<Item=&RuntimeApiMethodParamMetadata> {
+    pub fn inputs(&self) -> impl Iterator<Item = &RuntimeApiMethodParamMetadata> {
         self.inputs.iter()
     }
     /// Method return type.
@@ -513,9 +526,10 @@ impl RuntimeApiMethodMetadata {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct RuntimeApiMethodParamMetadata {
-	/// Parameter name.
-	pub name: String,
-	/// Parameter type.
-	pub ty: u32,
+    /// Parameter name.
+    pub name: String,
+    /// Parameter type.
+    pub ty: u32,
 }

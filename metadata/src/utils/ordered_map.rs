@@ -6,27 +6,64 @@ use std::collections::HashMap;
 
 /// A minimal, append-only ordered map to let one search for
 /// things by key or get the values in insert order.
-pub struct OrderedMap<K,V> {
+#[derive(Debug, Clone)]
+pub struct OrderedMap<K, V> {
     values: Vec<V>,
-    map: HashMap<K, usize>
+    map: HashMap<K, usize>,
 }
 
-impl <K, V> Default for OrderedMap<K, V> {
+impl<K, V> Default for OrderedMap<K, V> {
     fn default() -> Self {
         Self {
             values: Default::default(),
-            map: Default::default()
+            map: Default::default(),
         }
     }
 }
 
-impl <K, V> OrderedMap<K, V>
+impl<K, V> OrderedMap<K, V>
 where
-    K: PartialEq + Eq + std::hash::Hash
+    K: PartialEq + Eq + std::hash::Hash,
 {
     /// Create a new, empty [`OrderedMap`].
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Number of entries in the map.
+    #[allow(dead_code)]
+    pub fn len(&self) -> usize {
+        self.values.len()
+    }
+
+    /// Is the map empty.
+    #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
+    }
+
+    /// Retain specific entries.
+    pub fn retain<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&V) -> bool,
+    {
+        let values = std::mem::take(&mut self.values);
+
+        let mut new_values = Vec::new();
+        let mut old_pos_to_new_pos = HashMap::new();
+        for (pos, value) in values.into_iter().enumerate().filter(|(_, v)| f(v)) {
+            old_pos_to_new_pos.insert(pos, new_values.len());
+            new_values.push(value);
+        }
+
+        // Update the values now we've filtered them:
+        self.values = new_values;
+
+        // Update map entires to point to new positions:
+        for (_k, pos) in self.map.iter_mut() {
+            let old_pos = *pos;
+            *pos = old_pos_to_new_pos[&old_pos];
+        }
     }
 
     /// Push/insert an item to the end of the map.
@@ -40,11 +77,9 @@ where
     pub fn get_by_key<Q>(&self, key: &Q) -> Option<&V>
     where
         K: std::borrow::Borrow<Q>,
-        Q: std::hash::Hash + Eq + ?Sized
+        Q: std::hash::Hash + Eq + ?Sized,
     {
-        self.map
-            .get(key)
-            .and_then(|&v| self.values.get(v))
+        self.map.get(key).and_then(|&v| self.values.get(v))
     }
 
     /// Get an item by its index.
@@ -57,21 +92,44 @@ where
         &self.values
     }
 
+    /// Mutable access to the underlying values.
+    pub fn values_mut(&mut self) -> &mut [V] {
+        &mut self.values
+    }
+
     /// Return the underlying values.
     pub fn into_values(self) -> Vec<V> {
         self.values
     }
 }
 
-impl <K, V> FromIterator<(K, V)> for OrderedMap<K, V>
+impl<K, V> FromIterator<(K, V)> for OrderedMap<K, V>
 where
-    K: PartialEq + Eq + std::hash::Hash
+    K: PartialEq + Eq + std::hash::Hash,
 {
-    fn from_iter<T: IntoIterator<Item = (K,V)>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
         let mut map = OrderedMap::new();
-        for (k,v) in iter {
+        for (k, v) in iter {
             map.push_insert(k, v)
         }
         map
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn retain() {
+        let mut m = OrderedMap::from_iter([(1, 'a'), (2, 'b'), (3, 'c')]);
+
+        m.retain(|v| *v != 'b');
+
+        assert_eq!(m.get_by_key(&1), Some(&'a'));
+        assert_eq!(m.get_by_key(&2), None);
+        assert_eq!(m.get_by_key(&3), Some(&'c'));
+
+        assert_eq!(m.values(), &['a', 'c'])
     }
 }
