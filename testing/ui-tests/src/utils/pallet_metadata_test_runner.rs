@@ -5,7 +5,7 @@
 use codec::{Decode, Encode};
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
 use std::io::Read;
-use subxt_metadata::{metadata_v14_to_latest, retain_metadata_pallets};
+use subxt_metadata::{metadata_v14_to_latest, retain_metadata};
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";
 static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";
@@ -59,7 +59,11 @@ impl PalletMetadataTestRunner {
 
         // Build custom metadata containing only this pallet.
         let mut metadata = self.metadata.clone();
-        retain_metadata_pallets(&mut metadata, |pallet_filter| pallet_filter == pallet.name);
+        retain_metadata(
+            &mut metadata,
+            |pallet_filter| pallet_filter == pallet.name,
+            |_| true,
+        );
 
         let mut tmp_dir = std::env::temp_dir();
         tmp_dir.push(format!("{TEST_DIR_PREFIX}{index}"));
