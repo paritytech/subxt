@@ -54,7 +54,7 @@ primitive-types = { version = "0.12.1", default-features = false, features = ["c
 proc-macro2 = "1.0.55"
 quote = "1.0.27"
 regex = "1.8.1"
-scale-info = "2.6.0"
+scale-info = "2.7.0"
 scale-value = "0.7.0"
 scale-bits = "0.3"
 scale-decode = "0.5.0"
