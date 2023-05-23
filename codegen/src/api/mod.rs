@@ -27,7 +27,7 @@ use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use std::{fs, io::Read, path, string::ToString};
+use std::{collections::HashMap, fs, io::Read, path, string::ToString};
 use syn::parse_quote;
 
 /// Generates the API for interacting with a Substrate runtime.
@@ -191,7 +191,7 @@ impl RuntimeGenerator {
     /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
     /// de-duplicate those into single types with a generic.
     fn ensure_unique_type_paths(metadata: &mut RuntimeMetadataV15) {
-        let mut visited_path_counts = std::collections::HashMap::<Vec<String>, usize>::new();
+        let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
         for ty in &mut metadata.types.types {
             // Ignore types without a path (ie prelude types).
             if ty.ty.path.namespace().is_empty() {
