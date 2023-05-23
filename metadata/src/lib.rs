@@ -13,6 +13,7 @@ use utils::variant_index::VariantIndex;
 
 type ArcStr = Arc<str>;
 
+pub use from_into::TryFromError;
 pub use utils::validation::MetadataHasher;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
@@ -233,6 +234,11 @@ impl<'a> PalletMetadata<'a> {
     /// Return a hash for the call, or None if it was not found.
     pub fn call_hash(&self, call_name: &str) -> Option<[u8; 32]> {
         crate::utils::validation::get_call_hash(self, call_name)
+    }
+
+    /// Return a hash for the entire pallet.
+    pub fn hash(&self) -> [u8; 32] {
+        crate::utils::validation::get_pallet_hash(*self)
     }
 
     fn variants(&self, variant_type_id: u32) -> Option<&'a [Variant<PortableForm>]> {
@@ -532,4 +538,19 @@ pub struct RuntimeApiMethodParamMetadata {
     pub name: String,
     /// Parameter type.
     pub ty: u32,
+}
+
+// Support decoding metadata from the "wire" format directly into this.
+// Errors may be lost in the case that the metadata content is somehow invalid.
+impl codec::Decode for Metadata {
+    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(input)?;
+        let metadata = match metadata.1 {
+            frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
+            frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
+            _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into())
+        };
+
+        metadata.map_err(|_e| "Cannot try_into() to Metadata.".into())
+    }
 }

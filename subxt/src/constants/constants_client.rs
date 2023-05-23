@@ -5,8 +5,8 @@
 use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
-    error::Error,
-    metadata::{DecodeWithMetadata, MetadataError},
+    error::{ Error, MetadataError },
+    metadata::{DecodeWithMetadata},
     Config,
 };
 use derivative::Derivative;

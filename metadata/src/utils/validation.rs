@@ -351,8 +351,9 @@ pub fn get_runtime_api_hash(
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
-pub fn get_pallet_hash(registry: &PortableRegistry, pallet: PalletMetadata) -> [u8; HASH_LEN] {
+pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
+    let registry = pallet.types;
 
     let call_bytes = match pallet.call_ty_id() {
         Some(calls) => get_type_hash(registry, calls, &mut visited_ids),
@@ -438,7 +439,7 @@ impl<'a> MetadataHasher<'a> {
             }
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
-            xor(bytes, get_pallet_hash(&metadata.types, pallet))
+            xor(bytes, get_pallet_hash(pallet))
         });
 
         let apis_hash = metadata

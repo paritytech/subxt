@@ -13,8 +13,10 @@ pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
 };
 
+
 // Re-expose the errors we use from other crates here:
-pub use crate::metadata::{InvalidMetadataError, Metadata, MetadataError};
+pub use subxt_metadata::TryFromError as MetadataTryFromError;
+pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
 
@@ -36,12 +38,12 @@ pub enum Error {
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
-    /// Invalid metadata error
-    #[error("Invalid Metadata: {0}")]
-    InvalidMetadata(#[from] InvalidMetadataError),
-    /// Invalid metadata error
+    /// Error working with metadata.
     #[error("Metadata: {0}")]
     Metadata(#[from] MetadataError),
+    /// Error decoding metadata.
+    #[error("Metadata: {0}")]
+    MetadataDecoding(#[from] MetadataTryFromError),
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
     Runtime(#[from] DispatchError),
@@ -171,6 +173,20 @@ pub enum StorageAddressError {
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
     },
+}
+
+#[derive(Clone, Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum MetadataError {
+    /// Pallet not found.
+    #[error("Pallet with index {0} not found")]
+    PalletNotFound(u8),
+    /// Variant not found.
+    #[error("Variant with index {0} not found")]
+    VariantNotFound(u8),
+    /// Call type not found in metadata.
+    #[error("Call type not found")]
+    CallTypeNotFound(u8)
 }
 
 /// This trait is implemented on the statically generated root ModuleError type

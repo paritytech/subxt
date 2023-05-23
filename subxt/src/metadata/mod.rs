@@ -5,12 +5,10 @@
 //! Types representing the metadata obtained from a node.
 
 mod decode_encode_traits;
-mod hash_cache;
 mod metadata_type;
 
-pub use metadata_type::{
-    ErrorMetadata, EventMetadata, ExtrinsicMetadata, InvalidMetadataError, Metadata, MetadataError,
-    PalletMetadata, RuntimeFnMetadata,
-};
-
+pub use metadata_type::Metadata;
 pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};
+
+// Expose metadata types under a sub module in case somebody needs to reference them:
+pub use subxt_metadata as types;
