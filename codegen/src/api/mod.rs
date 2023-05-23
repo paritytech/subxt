@@ -26,7 +26,7 @@ use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use std::{fs, io::Read, path, string::ToString};
+use std::{collections::HashMap, fs, io::Read, path, string::ToString};
 use syn::parse_quote;
 
 /// Generates the API for interacting with a Substrate runtime.
@@ -174,13 +174,54 @@ impl RuntimeGenerator {
     ///
     /// Supported versions: v14 and v15.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
-        let metadata = match metadata.1 {
+        let mut metadata = match metadata.1 {
             RuntimeMetadata::V14(v14) => v14.try_into().expect("V14 metadata was not valid"),
             RuntimeMetadata::V15(v15) => v15.try_into().expect("V15 metadata was not valid"),
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         };
 
+        Self::ensure_unique_type_paths(&mut metadata);
+
         RuntimeGenerator { metadata }
+    }
+
+    /// Ensure that every unique type we'll be generating or referring to also has a
+    /// unique path, so that types with matching paths don't end up overwriting each other
+    /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
+    /// de-duplicate those into single types with a generic.
+    fn ensure_unique_type_paths(metadata: &mut Metadata) {
+        let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
+        for ty in metadata.types_mut().types.iter_mut() {
+            // Ignore types without a path (ie prelude types).
+            if ty.ty.path.namespace().is_empty() {
+                continue;
+            }
+
+            let has_valid_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
+
+            // Ignore types which have generic params that the type generation will use.
+            // Ordinarily we'd expect that any two types with identical paths must be parameterized
+            // in order to share the path. However scale-info doesn't understand all forms of generics
+            // properly I think (eg generics that have associated types that can differ), and so in
+            // those cases we need to fix the paths for Subxt to generate correct code.
+            if has_valid_type_params {
+                continue;
+            }
+
+            // Count how many times we've seen the same path already.
+            let visited_count = visited_path_counts
+                .entry(ty.ty.path.segments.clone())
+                .or_default();
+            *visited_count += 1;
+
+            // alter the type so that if it's been seen more than once, we append a number to
+            // its name to ensure that every unique type has a unique path, too.
+            if *visited_count > 1 {
+                if let Some(name) = ty.ty.path.segments.last_mut() {
+                    *name = format!("{name}{visited_count}");
+                }
+            }
+        }
     }
 
     /// Generate the API for interacting with a Substrate runtime.
