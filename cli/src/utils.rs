@@ -16,10 +16,10 @@ pub mod type_example;
 pub struct FileOrUrl {
     /// The url of the substrate node to query for metadata for codegen.
     #[clap(long, value_parser)]
-    pub(crate) url: Option<Uri>,
+    pub url: Option<Uri>,
     /// The path to the encoded metadata file.
     #[clap(long, value_parser)]
-    pub(crate) file: Option<PathBuf>,
+    pub file: Option<PathBuf>,
     /// Specify the metadata version.
     ///
     ///  - unstable:
@@ -32,7 +32,7 @@ pub struct FileOrUrl {
     ///
     /// Defaults to 14.
     #[clap(long)]
-    version: Option<MetadataVersion>,
+    pub version: Option<MetadataVersion>,
 }
 
 impl FileOrUrl {
@@ -76,7 +76,7 @@ impl FileOrUrl {
     }
 }
 
-pub(crate) fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
+pub fn print_first_paragraph_with_indent(docs: &[String], indent: usize) -> String {
     // take at most the first paragraph of documentation, such that it does not get too long.
     let docs_str = docs
         .iter()
@@ -87,7 +87,7 @@ pub(crate) fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
     with_indent(docs_str, indent)
 }
 
-pub(crate) fn with_indent(s: String, indent: usize) -> String {
+pub fn with_indent(s: String, indent: usize) -> String {
     let indent_str = " ".repeat(indent);
     s.lines()
         .map(|line| format!("{indent_str}{line}"))

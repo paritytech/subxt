@@ -131,9 +131,6 @@ impl TypeDescription for TypeDefPrimitive {
 
 impl TypeDescription for TypeDefVariant<PortableForm> {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String> {
-        const MIN_VARIANT_COUNT_FOR_TRAILING_COMMA: usize = 100;
-        let add_trailing_comma = self.variants.len() >= MIN_VARIANT_COUNT_FOR_TRAILING_COMMA;
-
         let mut variants_string = String::new();
         variants_string.push('{');
         let mut iter = self.variants.iter().peekable();
@@ -141,7 +138,7 @@ impl TypeDescription for TypeDefVariant<PortableForm> {
             let variant_string = variant.type_description(registry)?;
             variants_string.push_str(&variant_string);
 
-            if iter.peek().is_some() || add_trailing_comma {
+            if iter.peek().is_some() {
                 variants_string.push(',');
             }
         }
@@ -170,9 +167,6 @@ impl TypeDescription for Vec<Field<PortableForm>> {
             return Ok("()".to_string());
         }
 
-        const MIN_FIELD_COUNT_FOR_TRAILING_COMMA: usize = 100;
-        let add_trailing_comma = self.len() >= MIN_FIELD_COUNT_FOR_TRAILING_COMMA;
-
         let all_fields_named = self.iter().all(|f| f.name.is_some());
         let all_fields_unnamed = self.iter().all(|f| f.name.is_none());
         let brackets = match (all_fields_named, all_fields_unnamed) {
@@ -192,7 +186,7 @@ impl TypeDescription for Vec<Field<PortableForm>> {
             let field_description = field.type_description(registry)?;
             fields_string.push_str(&field_description);
 
-            if iter.peek().is_some() || add_trailing_comma {
+            if iter.peek().is_some() {
                 fields_string.push(',')
             }
         }

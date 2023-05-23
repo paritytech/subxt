@@ -6,6 +6,7 @@
 
 mod commands;
 mod utils;
+
 use clap::Parser as ClapParser;
 
 /// Subxt utilities for interacting with Substrate based nodes.
@@ -28,6 +29,10 @@ async fn main() -> color_eyre::Result<()> {
         Command::Codegen(opts) => commands::codegen::run(opts).await,
         Command::Compatibility(opts) => commands::compatibility::run(opts).await,
         Command::Version(opts) => commands::version::run(opts),
-        Command::Explore(opts) => commands::explore::run(opts).await,
+        Command::Explore(opts) => {
+            let output = commands::explore::run(opts).await?;
+            println!("{output}");
+            Ok(())
+        }
     }
 }
