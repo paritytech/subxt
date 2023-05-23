@@ -26,7 +26,7 @@ fn generate_runtime_interface_from_metadata(metadata: RuntimeMetadataPrefixed) -
 
 fn generate_runtime_interface_with_type_registry<F>(f: F) -> String
 where
-    F: Fn(&mut scale_info::Registry)
+    F: Fn(&mut scale_info::Registry),
 {
     #[derive(TypeInfo)]
     struct Runtime;
