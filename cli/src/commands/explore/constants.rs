@@ -61,7 +61,7 @@ pub(crate) fn explore_constants(
 }
 
 fn print_available_constants(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
-    if pallet_metadata.constants().next().is_none() {
+    if pallet_metadata.constants().len() == 0 {
         return format!("No <CONSTANT>'s available in the \"{pallet_name}\" pallet.");
     }
     let mut output = format!("Available <CONSTANT>'s in the \"{pallet_name}\" pallet:");

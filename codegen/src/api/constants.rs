@@ -41,7 +41,7 @@ pub fn generate_constants(
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
-    if pallet.constants().next().is_none() {
+    if pallet.constants().len() == 0 {
         return Ok(quote!());
     }
 

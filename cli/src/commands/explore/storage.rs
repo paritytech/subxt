@@ -163,7 +163,7 @@ fn print_available_storage_entries(
     storage_metadata: &StorageMetadata,
     pallet_name: &str,
 ) -> String {
-    if storage_metadata.entries().next().is_none() {
+    if storage_metadata.entries().len() == 0 {
         format!("No <STORAGE_ENTRY>'s available in the \"{pallet_name}\" pallet.")
     } else {
         let mut output = format!(

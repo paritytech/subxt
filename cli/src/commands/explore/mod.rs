@@ -128,7 +128,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
 }
 
 fn print_available_pallets(metadata: &Metadata) -> String {
-    if metadata.pallets().next().is_none() {
+    if metadata.pallets().len() == 0 {
         "There are no <PALLET> values available.".to_string()
     } else {
         let mut output = "Available <PALLET> values are:".to_string();
