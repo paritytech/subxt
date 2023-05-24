@@ -8,8 +8,6 @@ mod v15;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum TryFromError {
-    #[error("Expected an sp_runtime::DispatchError type to exist in the type registry, but there was none")]
-    DispatchErrorTypeNotFound,
     /// Type missing from type registry
     #[error("Type {0} is expected but not found in the type registry")]
     TypeNotFound(u32),

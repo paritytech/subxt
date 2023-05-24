@@ -78,8 +78,7 @@ mod from_v15 {
                 .types
                 .iter()
                 .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
-                .map(|ty| ty.id)
-                .ok_or(TryFromError::DispatchErrorTypeNotFound)?;
+                .map(|ty| ty.id);
 
             Ok(Metadata {
                 types: m.types,

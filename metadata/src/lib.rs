@@ -32,7 +32,7 @@ pub struct Metadata {
     /// The type ID of the `Runtime` type.
     runtime_ty: u32,
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
-    dispatch_error_ty: u32,
+    dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
 }
@@ -53,8 +53,8 @@ impl Metadata {
         self.runtime_ty
     }
 
-    /// The type ID of the `DispatchError` type.
-    pub fn dispatch_error_ty(&self) -> u32 {
+    /// The type ID of the `DispatchError` type, if it exists.
+    pub fn dispatch_error_ty(&self) -> Option<u32> {
         self.dispatch_error_ty
     }
 

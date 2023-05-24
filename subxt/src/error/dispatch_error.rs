@@ -217,7 +217,9 @@ impl DispatchError {
         metadata: Metadata,
     ) -> Result<Self, super::Error> {
         let bytes = bytes.into();
-        let dispatch_error_ty_id = metadata.dispatch_error_ty();
+        let dispatch_error_ty_id = metadata
+            .dispatch_error_ty()
+            .ok_or(MetadataError::DispatchErrorNotFound)?;
 
         // The aim is to decode our bytes into roughly this shape. This is copied from
         // `sp_runtime::DispatchError`; we need the variant names and any inner variant

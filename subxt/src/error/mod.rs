@@ -175,6 +175,9 @@ pub enum StorageAddressError {
 #[derive(Clone, Debug, PartialEq, thiserror::Error)]
 #[non_exhaustive]
 pub enum MetadataError {
+    /// The DispatchError type isn't available in the metadata
+    #[error("The DispatchError type isn't available")]
+    DispatchErrorNotFound,
     /// Type not found in metadata.
     #[error("Type with ID {0} not found")]
     TypeNotFound(u32),
