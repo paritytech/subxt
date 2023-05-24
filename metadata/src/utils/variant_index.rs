@@ -20,7 +20,7 @@ pub struct VariantIndex {
 impl VariantIndex {
     /// Build indexes from the optional variant ID.
     pub fn build(variant_id: Option<u32>, types: &PortableRegistry) -> Self {
-        let Some(variants) = variants(variant_id, types) else {
+        let Some(variants) = Self::get(variant_id, types) else {
             return Self::empty()
         };
 
@@ -42,6 +42,20 @@ impl VariantIndex {
         }
     }
 
+    /// Get the variants we're pointing at; None if this isn't possible.
+    pub fn get<'a>(
+        variant_id: Option<u32>,
+        types: &'a PortableRegistry,
+    ) -> Option<&'a [Variant<PortableForm>]> {
+        let Some(variant_id) = variant_id else {
+            return None
+        };
+        let TypeDef::Variant(v) = &types.resolve(variant_id)?.type_def else {
+            return None
+        };
+        Some(&v.variants)
+    }
+
     /// Lookup a variant by name; `None` if the type is not a variant or name isn't found.
     pub fn lookup_by_name<'a, K>(
         &self,
@@ -54,7 +68,7 @@ impl VariantIndex {
         K: std::hash::Hash + Eq + ?Sized,
     {
         let pos = *self.by_name.get(name)?;
-        let variants = variants(variant_id, types)?;
+        let variants = Self::get(variant_id, types)?;
         variants.get(pos)
     }
 
@@ -66,19 +80,7 @@ impl VariantIndex {
         types: &'a PortableRegistry,
     ) -> Option<&'a Variant<PortableForm>> {
         let pos = *self.by_index.get(&index)?;
-        let variants = variants(variant_id, types)?;
+        let variants = Self::get(variant_id, types)?;
         variants.get(pos)
     }
-}
-
-fn variants(variant_id: Option<u32>, types: &PortableRegistry) -> Option<&[Variant<PortableForm>]> {
-    let Some(variant_id) = variant_id else {
-        return None
-    };
-
-    let TypeDef::Variant(v) = &types.resolve(variant_id)?.type_def else {
-        return None
-    };
-
-    Some(&v.variants)
 }

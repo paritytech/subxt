@@ -5,7 +5,7 @@
 mod from_into;
 mod utils;
 
-use scale_info::{form::PortableForm, PortableRegistry, TypeDef, Variant};
+use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
@@ -171,7 +171,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return all of the event variants, if an event type exists.
     pub fn event_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
-        self.variants(self.inner.event_ty?)
+        VariantIndex::get(self.inner.event_ty, self.types)
     }
 
     /// Return an event variant given it's encoded variant index.
@@ -185,7 +185,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return all of the call variants, if a call type exists.
     pub fn call_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
-        self.variants(self.inner.call_ty?)
+        VariantIndex::get(self.inner.call_ty, self.types)
     }
 
     /// Return a call variant given it's encoded variant index.
@@ -204,7 +204,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return all of the error variants, if an error type exists.
     pub fn error_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
-        self.variants(self.inner.error_ty?)
+        VariantIndex::get(self.inner.error_ty, self.types)
     }
 
     /// Return an error variant given it's encoded variant index.
@@ -244,13 +244,6 @@ impl<'a> PalletMetadata<'a> {
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; 32] {
         crate::utils::validation::get_pallet_hash(*self)
-    }
-
-    fn variants(&self, variant_type_id: u32) -> Option<&'a [Variant<PortableForm>]> {
-        let TypeDef::Variant(v) = &self.types.resolve(variant_type_id)?.type_def else {
-            return None;
-        };
-        Some(&v.variants)
     }
 }
 

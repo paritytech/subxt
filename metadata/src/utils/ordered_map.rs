@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-/// A minimal, append-only ordered map to let one search for
+/// A minimal ordered map to let one search for
 /// things by key or get the values in insert order.
 #[derive(Debug, Clone)]
 pub struct OrderedMap<K, V> {
