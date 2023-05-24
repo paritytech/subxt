@@ -2,6 +2,20 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! A representation of the metadata provided by a substrate based node.
+//! This representation is optimized to be used by Subxt and related crates,
+//! and is independent of the different versions of metadata that can be
+//! provided from a node.
+//!
+//! Typically, this will be constructed by either:
+//!
+//! 1. Calling [`Metadata::decode()`] given some metadata bytes obtained
+//!    from a node.
+//! 2. Obtaining [`frame_metadata::RuntimeMetadataPrefixed`], and then
+//!    using `.try_into()` to convert it into [`Metadata`].
+
+#![deny(missing_docs)]
+
 mod from_into;
 mod utils;
 
@@ -273,6 +287,7 @@ struct PalletMetadataInner {
     docs: Vec<String>,
 }
 
+/// Metadata for the storage entries in a pallet.
 #[derive(Debug, Clone)]
 pub struct StorageMetadata {
     /// The common prefix used by all storage entries.
@@ -298,6 +313,7 @@ impl StorageMetadata {
     }
 }
 
+/// Metadata for a single storage entry.
 #[derive(Debug, Clone)]
 pub struct StorageEntryMetadata {
     /// Variable name of the storage entry.
@@ -335,6 +351,7 @@ impl StorageEntryMetadata {
     }
 }
 
+/// The type of a storage entry.
 #[derive(Debug, Clone)]
 pub enum StorageEntryType {
     /// Plain storage entry (just the value).
@@ -350,7 +367,7 @@ pub enum StorageEntryType {
     },
 }
 
-/// Hasher used by storage maps
+/// Hasher used by storage maps.
 #[derive(Debug, Clone, Copy)]
 pub enum StorageHasher {
     /// 128-bit Blake2 hash.
@@ -369,6 +386,7 @@ pub enum StorageHasher {
     Identity,
 }
 
+/// Is the storage entry optional, or does it have a default value.
 #[derive(Debug, Clone, Copy)]
 pub enum StorageEntryModifier {
     /// The storage entry returns an `Option<T>`, with `None` if the key is not present.
@@ -377,6 +395,7 @@ pub enum StorageEntryModifier {
     Default,
 }
 
+/// Metadata for a single constant.
 #[derive(Debug, Clone)]
 pub struct ConstantMetadata {
     /// Name of the pallet constant.
@@ -408,6 +427,7 @@ impl ConstantMetadata {
     }
 }
 
+/// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
     /// The type of the extrinsic.
@@ -435,6 +455,7 @@ impl ExtrinsicMetadata {
     }
 }
 
+/// Metadata for the signed extensions used by extrinsics.
 #[derive(Debug, Clone)]
 pub struct SignedExtensionMetadata {
     /// The unique signed extension identifier, which may be different from the type name.
@@ -460,6 +481,7 @@ impl SignedExtensionMetadata {
     }
 }
 
+/// Metadata for the available runtime APIs.
 #[derive(Debug, Clone, Copy)]
 pub struct RuntimeApiMetadata<'a> {
     inner: &'a RuntimeApiMetadataInner,
@@ -490,7 +512,7 @@ impl<'a> RuntimeApiMetadata<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub struct RuntimeApiMetadataInner {
+struct RuntimeApiMetadataInner {
     /// Trait name.
     name: ArcStr,
     /// Trait methods.
@@ -499,6 +521,7 @@ pub struct RuntimeApiMetadataInner {
     docs: Vec<String>,
 }
 
+/// Metadata for a single runtime API method.
 #[derive(Debug, Clone)]
 pub struct RuntimeApiMethodMetadata {
     /// Method name.
@@ -530,6 +553,7 @@ impl RuntimeApiMethodMetadata {
     }
 }
 
+/// Metadata for a single input parameter to a runtime API method.
 #[derive(Debug, Clone)]
 pub struct RuntimeApiMethodParamMetadata {
     /// Parameter name.

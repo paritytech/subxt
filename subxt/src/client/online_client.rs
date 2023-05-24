@@ -118,14 +118,14 @@ impl<T: Config> OnlineClient<T> {
     pub fn from_rpc_client_with<R: RpcClientT>(
         genesis_hash: T::Hash,
         runtime_version: RuntimeVersion,
-        metadata: Metadata,
+        metadata: impl Into<Metadata>,
         rpc_client: Arc<R>,
     ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
                 genesis_hash,
                 runtime_version,
-                metadata,
+                metadata: metadata.into(),
             })),
             rpc: Rpc::new(rpc_client),
         })
@@ -205,9 +205,9 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// Setting custom metadata may leave Subxt unable to work with certain blocks,
     /// subscribe to latest blocks or submit valid transactions.
-    pub fn set_metadata(&self, metadata: Metadata) {
+    pub fn set_metadata(&self, metadata: impl Into<Metadata>) {
         let mut inner = self.inner.write().expect("shouldn't be poisoned");
-        inner.metadata = metadata;
+        inner.metadata = metadata.into();
     }
 
     /// Return the genesis hash.

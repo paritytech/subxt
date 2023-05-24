@@ -5,6 +5,8 @@
 mod v14;
 mod v15;
 
+/// An error emitted if something goes wrong converting [`frame_metadata`]
+/// types into [`crate::Metadata`].
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum TryFromError {

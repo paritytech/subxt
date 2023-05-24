@@ -403,6 +403,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
 }
 
 /// Obtain a hash representation of our metadata or some part of it.
+/// This is obtained by calling [`crate::Metadata::hasher()`].
 pub struct MetadataHasher<'a> {
     metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,

@@ -43,10 +43,10 @@ impl VariantIndex {
     }
 
     /// Get the variants we're pointing at; None if this isn't possible.
-    pub fn get<'a>(
+    pub fn get(
         variant_id: Option<u32>,
-        types: &'a PortableRegistry,
-    ) -> Option<&'a [Variant<PortableForm>]> {
+        types: &PortableRegistry,
+    ) -> Option<&[Variant<PortableForm>]> {
         let Some(variant_id) = variant_id else {
             return None
         };
