@@ -9,8 +9,8 @@
 //!
 //! Typically, this will be constructed by either:
 //!
-//! 1. Calling [`Metadata::decode()`] given some metadata bytes obtained
-//!    from a node.
+//! 1. Calling `Metadata::decode()` given some metadata bytes obtained
+//!    from a node (this uses [`codec::Decode`]).
 //! 2. Obtaining [`frame_metadata::RuntimeMetadataPrefixed`], and then
 //!    using `.try_into()` to convert it into [`Metadata`].
 
