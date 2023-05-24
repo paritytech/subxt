@@ -587,3 +587,35 @@ impl codec::Encode for Metadata {
         m.encode_to(dest)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use codec::{ Encode, Decode };
+
+    fn load_metadata() -> Vec<u8> {
+        std::fs::read("../artifacts/polkadot_metadata_full.scale").unwrap()
+    }
+
+    // We don't expect to lose any information converting back and forth between
+    // our own representation and the latest version emitted from a node that we can
+    // work with.
+    #[test]
+    fn is_isomorphic_to_v15() {
+        let bytes = load_metadata();
+
+        // Decode into our metadata struct:
+        let metadata = Metadata::decode(&mut &*bytes).unwrap();
+
+        // Convert into v15 metadata:
+        let v15: frame_metadata::v15::RuntimeMetadataV15 = metadata.into();
+        let prefixed = frame_metadata::RuntimeMetadataPrefixed::from(v15);
+
+        // Re-encode that:
+        let new_bytes = prefixed.encode();
+
+        // The bytes should be identical:
+        assert_eq!(bytes, new_bytes);
+    }
+
+}
