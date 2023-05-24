@@ -7,10 +7,6 @@ use std::write;
 
 use codec::Decode;
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::RuntimeMetadataV15;
-use frame_metadata::RuntimeMetadataPrefixed;
-
-use syn::__private::str;
 
 use crate::commands::explore::calls::{explore_calls, CallsSubcommand};
 use crate::commands::explore::constants::{explore_constants, ConstantsSubcommand};
@@ -89,24 +85,23 @@ pub enum PalletSubcommand {
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     // get the metadata
     let bytes = opts.file_or_url.fetch().await?;
-    let metadata_prefixed = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
-    let metadata = Metadata::try_from(metadata_prefixed)?;
+    let metadata = Metadata::decode(&mut &bytes[..])?;
 
     // if no pallet specified, show user the pallets to choose from:
     let Some(pallet_name) = opts.pallet else {
-        let available_pallets = print_available_pallets(metadata.runtime_metadata());
+        let available_pallets = print_available_pallets(&metadata);
         println!("Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\n{available_pallets}", );
         return Ok(());
     };
 
     // if specified pallet is wrong, show user the pallets to choose from (but this time as an error):
-    let Some(pallet_metadata) = metadata.runtime_metadata().pallets.iter().find(|pallet| pallet.name.to_lowercase() == pallet_name.to_lowercase())else {
-        return Err(eyre!("pallet \"{}\" not found in metadata!\n{}", pallet_name, print_available_pallets(metadata.runtime_metadata())));
+    let Some(pallet_metadata) = metadata.pallets().find(|pallet| pallet.name().to_lowercase() == pallet_name.to_lowercase()) else {
+        return Err(eyre!("pallet \"{}\" not found in metadata!\n{}", pallet_name, print_available_pallets(&metadata)));
     };
 
     // if correct pallet was specified but no subcommand, instruct the user how to proceed:
     let Some(pallet_subcomand) = opts.pallet_subcommand else {
-        let docs_string = print_docs_with_indent(&pallet_metadata.docs, 4);
+        let docs_string = print_docs_with_indent(pallet_metadata.docs(), 4);
         let mut output = String::new();
         if !docs_string.is_empty() {
             write!(output, "Description:\n{docs_string}")?;
@@ -132,12 +127,12 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     }
 }
 
-fn print_available_pallets(metadata_v15: &RuntimeMetadataV15) -> String {
-    if metadata_v15.pallets.is_empty() {
+fn print_available_pallets(metadata: &Metadata) -> String {
+    if metadata.pallets().next().is_none() {
         "There are no <PALLET> values available.".to_string()
     } else {
         let mut output = "Available <PALLET> values are:".to_string();
-        let mut strings: Vec<_> = metadata_v15.pallets.iter().map(|p| &p.name).collect();
+        let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
             write!(output, "\n    {}", pallet).unwrap();

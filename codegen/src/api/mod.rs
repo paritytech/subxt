@@ -22,7 +22,6 @@ use crate::{
     CratePath,
 };
 use codec::Decode;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -134,7 +133,7 @@ pub fn generate_runtime_api_from_bytes(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
+    let metadata = Metadata::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
     if runtime_types_only {
@@ -173,15 +172,8 @@ impl RuntimeGenerator {
     /// Panics if the runtime metadata version is not supported.
     ///
     /// Supported versions: v14 and v15.
-    pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
-        let mut metadata = match metadata.1 {
-            RuntimeMetadata::V14(v14) => v14.try_into().expect("V14 metadata was not valid"),
-            RuntimeMetadata::V15(v15) => v15.try_into().expect("V15 metadata was not valid"),
-            _ => panic!("Unsupported metadata version {:?}", metadata.1),
-        };
-
+    pub fn new(mut metadata: Metadata) -> Self {
         Self::ensure_unique_type_paths(&mut metadata);
-
         RuntimeGenerator { metadata }
     }
 
@@ -629,9 +621,9 @@ impl RuntimeGenerator {
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
                 pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
+                    let runtime_metadata_hash = client.metadata().hasher().only_these_pallets(&PALLETS).hash();
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(#crate_path::error::MetadataError::IncompatibleMetadata)
+                        Err(#crate_path::error::MetadataError::IncompatibleCodegen)
                     } else {
                         Ok(())
                     }

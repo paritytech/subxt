@@ -43,6 +43,11 @@ impl Metadata {
         &self.types
     }
 
+    /// Mutable access to the underlying type registry.
+    pub fn types_mut(&mut self) -> &mut PortableRegistry {
+        &mut self.types
+    }
+
     /// The type ID of the `Runtime` type.
     pub fn runtime_ty(&self) -> u32 {
         self.runtime_ty
@@ -553,4 +558,15 @@ impl codec::Decode for Metadata {
 
         metadata.map_err(|_e| "Cannot try_into() to Metadata.".into())
     }
+}
+
+// Metadata can be encoded, too. It will encode into a format that's compatible with what
+// Subxt requires, and that it can be decoded back from. The actual specifics of the format
+// can change over time.
+impl codec::Encode for Metadata {
+    fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
+		let m: frame_metadata::v15::RuntimeMetadataV15 = self.clone().into();
+        let m: frame_metadata::RuntimeMetadataPrefixed = m.into();
+        m.encode_to(dest)
+	}
 }

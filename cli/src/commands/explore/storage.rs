@@ -1,18 +1,14 @@
+use clap::Args;
+use std::fmt::Write;
+use std::write;
+use color_eyre::eyre::eyre;
+
+use subxt::OnlineClient;
+use subxt::{config::SubstrateConfig, metadata::{ Metadata, types::{ PalletMetadata, StorageMetadata, StorageEntryType } }};
+
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
 use crate::utils::{print_docs_with_indent, with_indent};
-use clap::Args;
-
-use std::fmt::Write;
-use std::write;
-
-use color_eyre::eyre::eyre;
-use frame_metadata::v15::{PalletMetadata, PalletStorageMetadata, StorageEntryType};
-
-use scale_info::form::PortableForm;
-
-use subxt::OnlineClient;
-use subxt::{config::SubstrateConfig, Metadata};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
@@ -24,14 +20,14 @@ pub struct StorageSubcommand {
 pub(crate) async fn explore_storage(
     command: StorageSubcommand,
     metadata: &Metadata,
-    pallet_metadata: &PalletMetadata<PortableForm>,
+    pallet_metadata: PalletMetadata<'_>,
     custom_online_client_url: Option<String>,
 ) -> color_eyre::Result<()> {
-    let pallet_name = pallet_metadata.name.as_str();
+    let pallet_name = pallet_metadata.name();
     let trailing_args = command.trailing_args.join(" ");
     let trailing_args = trailing_args.trim();
 
-    let Some(storage_metadata) = &pallet_metadata.storage else {
+    let Some(storage_metadata) = pallet_metadata.storage() else {
         println!("The \"{pallet_name}\" pallet has no storage entries.");
         return Ok(());
     };
@@ -44,15 +40,15 @@ pub(crate) async fn explore_storage(
     };
 
     // if specified call storage entry wrong, show user the storage entries to choose from (but this time as an error):
-    let Some(storage) = storage_metadata.entries.iter().find(|entry| entry.name.to_lowercase() == entry_name.to_lowercase())   else {
+    let Some(storage) = storage_metadata.entries().find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase()) else {
         let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
         let description = format!("Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}");
         return Err(eyre!("Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}"));
     };
 
-    let (return_ty_id, key_ty_id) = match storage.ty {
-        StorageEntryType::Plain(value) => (value.id, None),
-        StorageEntryType::Map { value, key, .. } => (value.id, Some(key.id)),
+    let (return_ty_id, key_ty_id) = match storage.entry_type() {
+        StorageEntryType::Plain(value) => (*value, None),
+        StorageEntryType::Map { value_ty, key_ty, .. } => (*value_ty, Some(*key_ty)),
     };
 
     // get the type and type description for the return and key type:
@@ -66,7 +62,7 @@ pub(crate) async fn explore_storage(
         )?;
     }
 
-    let docs_string = print_docs_with_indent(&storage.docs, 4);
+    let docs_string = print_docs_with_indent(storage.docs(), 4);
     if !docs_string.is_empty() {
         write!(output, "Description:\n{docs_string}")?;
     }
@@ -156,17 +152,17 @@ pub(crate) async fn explore_storage(
 }
 
 fn print_available_storage_entries(
-    storage_metadata: &PalletStorageMetadata<PortableForm>,
+    storage_metadata: &StorageMetadata,
     pallet_name: &str,
 ) -> String {
-    if storage_metadata.entries.is_empty() {
+    if storage_metadata.entries().next().is_none() {
         format!("No <STORAGE_ENTRY>'s available in the \"{pallet_name}\" pallet.")
     } else {
         let mut output = format!(
             "Available <STORAGE_ENTRY>'s in the \"{}\" pallet:",
             pallet_name
         );
-        let mut strings: Vec<_> = storage_metadata.entries.iter().map(|s| &s.name).collect();
+        let mut strings: Vec<_> = storage_metadata.entries().map(|s| s.name()).collect();
         strings.sort();
         for entry in strings {
             write!(output, "\n    {}", entry).unwrap();

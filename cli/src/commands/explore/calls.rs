@@ -1,22 +1,19 @@
-use crate::utils::type_description::print_type_description;
-use crate::utils::type_example::print_type_examples;
-use crate::utils::with_indent;
 use clap::Args;
-
 use std::fmt::Write;
 use std::str::FromStr;
 use std::write;
-
 use color_eyre::eyre::eyre;
-use frame_metadata::v15::PalletMetadata;
-
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
 
 use subxt::tx;
 use subxt::utils::H256;
-use subxt::{config::SubstrateConfig, Metadata, OfflineClient};
+use subxt::{config::SubstrateConfig, metadata::{ Metadata, types::PalletMetadata }, OfflineClient};
+
+use crate::utils::type_description::print_type_description;
+use crate::utils::type_example::print_type_examples;
+use crate::utils::with_indent;
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -28,13 +25,13 @@ pub struct CallsSubcommand {
 pub(crate) fn explore_calls(
     command: CallsSubcommand,
     metadata: &Metadata,
-    pallet_metadata: &PalletMetadata<PortableForm>,
+    pallet_metadata: PalletMetadata,
 ) -> color_eyre::Result<()> {
-    let pallet_name = pallet_metadata.name.as_str();
+    let pallet_name = pallet_metadata.name();
 
     // get the enum that stores the possible calls:
     let (calls_enum_type_def, _calls_enum_type) =
-        get_calls_enum_type(pallet_metadata, &metadata.runtime_metadata().types)?;
+        get_calls_enum_type(pallet_metadata, metadata.types())?;
 
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
@@ -56,11 +53,11 @@ pub(crate) fn explore_calls(
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
         let mut type_description =
-            print_type_description(&call.fields, &metadata.runtime_metadata().types)?;
+            print_type_description(&call.fields, metadata.types())?;
         type_description = with_indent(type_description, 4);
         let mut type_examples = print_type_examples(
             &call.fields,
-            &metadata.runtime_metadata().types,
+            metadata.types(),
             "SCALE_VALUE",
         )?;
         type_examples = with_indent(type_examples, 4);
@@ -102,22 +99,19 @@ fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_nam
 }
 
 fn get_calls_enum_type<'a>(
-    pallet: &'a frame_metadata::v15::PalletMetadata<PortableForm>,
+    pallet: PalletMetadata,
     registry: &'a PortableRegistry,
 ) -> color_eyre::Result<(&'a TypeDefVariant<PortableForm>, &'a Type<PortableForm>)> {
-    let calls = pallet
-        .calls
-        .as_ref()
-        .ok_or(eyre!("The \"{}\" pallet has no calls.", pallet.name))?;
+    let call_ty = pallet
+        .call_ty_id()
+        .ok_or(eyre!("The \"{}\" pallet has no calls.", pallet.name()))?;
     let calls_enum_type = registry
-        .resolve(calls.ty.id)
-        .ok_or(eyre!("calls type with id {} not found.", calls.ty.id))?;
+        .resolve(call_ty)
+        .ok_or(eyre!("calls type with id {} not found.", call_ty))?;
+
     // should always be a variant type, where each variant corresponds to one call.
-    let calls_enum_type_def = match &calls_enum_type.type_def {
-        TypeDef::Variant(variant) => variant,
-        _ => {
-            return Err(eyre!("calls type is not a variant"));
-        }
+    let TypeDef::Variant(calls_enum_type_def) = &calls_enum_type.type_def else {
+        return Err(eyre!("calls type is not a variant"));
     };
     Ok((calls_enum_type_def, calls_enum_type))
 }

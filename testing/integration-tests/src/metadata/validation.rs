@@ -3,12 +3,10 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context, TestContext};
-use frame_metadata::{
-    v15::{
-        ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
-        RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    },
-    RuntimeMetadataPrefixed,
+use frame_metadata::v15::{
+    ExtrinsicMetadata, PalletMetadata, PalletStorageMetadata,
+    StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    RuntimeMetadataV15, PalletCallMetadata,
 };
 use scale_info::{
     build::{Fields, Variants},
@@ -17,17 +15,23 @@ use scale_info::{
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
 async fn metadata_to_api(
-    metadata: RuntimeMetadataV15,
+    metadata: Metadata,
     ctx: &TestContext,
 ) -> OfflineClient<SubstrateConfig> {
-    let prefixed = RuntimeMetadataPrefixed::from(metadata);
-    let metadata = Metadata::try_from(prefixed).unwrap();
-
     OfflineClient::new(
         ctx.client().genesis_hash(),
         ctx.client().runtime_version(),
         metadata,
     )
+}
+
+fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
+where
+    F: FnOnce(&mut RuntimeMetadataV15)
+{
+    let mut metadata = RuntimeMetadataV15::from(metadata);
+    f(&mut metadata);
+    metadata.try_into().unwrap()
 }
 
 #[tokio::test]
@@ -39,14 +43,15 @@ async fn full_metadata_check() {
     assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let mut metadata = api.metadata().runtime_metadata().clone();
-    metadata.pallets[0].name = "NewPallet".to_string();
+    let metadata = modified_metadata(api.metadata().clone(), |md| {
+        md.pallets[0].name = "NewPallet".to_string();
+    });
 
     let api = metadata_to_api(metadata, &ctx).await;
     assert_eq!(
         node_runtime::validate_codegen(&api)
             .expect_err("Validation should fail for incompatible metadata"),
-        ::subxt::error::MetadataError::IncompatibleMetadata
+        ::subxt::error::MetadataError::IncompatibleCodegen
     );
 }
 
@@ -61,20 +66,20 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let mut metadata = api.metadata().runtime_metadata().clone();
+    let metadata = modified_metadata(api.metadata().clone(), |md| {
+        let mut existential = md
+            .pallets
+            .iter_mut()
+            .find(|pallet| pallet.name == "Balances")
+            .expect("Metadata must contain Balances pallet")
+            .constants
+            .iter_mut()
+            .find(|constant| constant.name == "ExistentialDeposit")
+            .expect("ExistentialDeposit constant must be present");
 
-    let mut existential = metadata
-        .pallets
-        .iter_mut()
-        .find(|pallet| pallet.name == "Balances")
-        .expect("Metadata must contain Balances pallet")
-        .constants
-        .iter_mut()
-        .find(|constant| constant.name == "ExistentialDeposit")
-        .expect("ExistentialDeposit constant must be present");
-
-    // Modifying a constant value should not lead to an error:
-    existential.value = vec![0u8; 32];
+        // Modifying a constant value should not lead to an error:
+        existential.value = vec![0u8; 32];
+    });
 
     let api = metadata_to_api(metadata, &ctx).await;
 

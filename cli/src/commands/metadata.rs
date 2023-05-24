@@ -8,7 +8,7 @@ use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use std::io::{self, Write};
 use subxt_metadata::Metadata;
-use frame_metadata::{ RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED };
+use frame_metadata::{ RuntimeMetadata, RuntimeMetadataPrefixed, v15::RuntimeMetadataV15 };
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -61,8 +61,8 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
 
         // Convert back to wire format, preserving version:
         metadata = match version {
-            Version::V14 => RuntimeMetadataPrefixed(META_RESERVED, RuntimeMetadata::V14(md.into())),
-            Version::V15 => RuntimeMetadataPrefixed(META_RESERVED, RuntimeMetadata::V15(md.into())),
+            Version::V14 => RuntimeMetadataV15::from(md).into(),
+            Version::V15 => RuntimeMetadataV15::from(md).into(),
             Version::Unknown => bail!("Unsupported metadata version; V14 or V15 metadata is expected.")
         }
     }

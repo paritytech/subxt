@@ -9,7 +9,7 @@ use super::{
 
 use crate::{
     client::{OfflineClientT, OnlineClientT},
-    error::Error,
+    error::{ MetadataError, Error },
     Config,
 };
 use derivative::Derivative;
@@ -43,7 +43,10 @@ where
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
     pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
-        validate_storage_address(address, &self.client.metadata())
+        let metadata = self.client.metadata();
+        let pallet_metadata = metadata.pallet_by_name(address.pallet_name())
+            .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?;
+        validate_storage_address(address, pallet_metadata)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order

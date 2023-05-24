@@ -19,7 +19,7 @@ fn generate_runtime_api(
     should_gen_docs: bool,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
     // Trait name must remain as is (upper case) to identity the runtime call.
-    let trait_name = api.name();
+    let trait_name_str = api.name();
     // The snake case for the trait name.
     let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
     let docs = api.docs();
@@ -29,9 +29,8 @@ fn generate_runtime_api(
 
     let structs_and_methods: Vec<_> = api.methods().map(|method| {
         let method_name = format_ident!("{}", method.name());
+        let method_name_str = method.name();
 
-        // Runtime function name is `TraitName_MethodName`.
-        let runtime_fn_name = format!("{}_{}", trait_name, method_name);
         let docs = method.docs();
         let docs: TokenStream2 = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
@@ -65,8 +64,8 @@ fn generate_runtime_api(
 
         let Some(call_hash) = api.method_hash(method.name()) else {
             return Err(CodegenError::MissingRuntimeApiMetadata(
-                trait_name.into(),
-                method.name().to_owned(),
+                trait_name_str.to_owned(),
+                method_name_str.to_owned(),
             ))
         };
 
@@ -74,7 +73,8 @@ fn generate_runtime_api(
             #docs
             pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, #output> {
                 #crate_path::runtime_api::Payload::new_static(
-                    #runtime_fn_name,
+                    #trait_name_str,
+                    #method_name_str,
                     types::#struct_name { #( #param_names, )* },
                     [#(#call_hash,)*],
                 )
@@ -84,7 +84,7 @@ fn generate_runtime_api(
         Ok((struct_input, method))
     }).collect::<Result<_, _>>()?;
 
-    let trait_name = format_ident!("{}", trait_name);
+    let trait_name = format_ident!("{}", trait_name_str);
 
     let structs = structs_and_methods.iter().map(|(struct_, _)| struct_);
     let methods = structs_and_methods.iter().map(|(_, method)| method);

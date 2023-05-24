@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::Error, metadata::DecodeWithMetadata, Config};
+use crate::{client::OnlineClientT, error::{Error, MetadataError}, metadata::DecodeWithMetadata, Config};
 use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
@@ -64,26 +64,21 @@ where
         // which is a temporary thing we'll be throwing away quickly:
         async move {
             let metadata = client.metadata();
-            let function = payload.fn_name();
 
-            // Check if the function is present in the runtime metadata.
-            let fn_metadata = metadata.runtime_fn(function)?;
-            // Return type ID used for dynamic decoding.
-            let return_id = fn_metadata.return_id();
+            let api_trait = metadata
+                .runtime_api_trait_by_name(payload.trait_name())
+                .ok_or_else(|| MetadataError::RuntimeTraitNotFound(payload.trait_name().to_owned()))?;
+            let api_method = api_trait
+                .method_by_name(payload.method_name())
+                .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
 
             // Validate the runtime API payload hash against the compile hash from codegen.
             if let Some(static_hash) = payload.validation_hash() {
-                let runtime_hash = metadata
-                    .runtime_api_hash(fn_metadata.trait_name(), fn_metadata.method_name())?;
-
+                let Some(runtime_hash) = api_trait.method_hash(payload.method_name()) else {
+                    return Err(MetadataError::IncompatibleCodegen.into());
+                };
                 if static_hash != runtime_hash {
-                    return Err(
-                        crate::metadata::MetadataError::IncompatibleRuntimeApiMetadata(
-                            fn_metadata.trait_name().into(),
-                            fn_metadata.method_name().into(),
-                        )
-                        .into(),
-                    );
+                    return Err(MetadataError::IncompatibleCodegen.into());
                 }
             }
 
@@ -91,15 +86,16 @@ where
             // For static payloads (codegen) this is pass-through, bytes are not altered.
             // For dynamic payloads this relies on `scale_value::encode_as_fields_to`.
             let params = payload.encode_args(&metadata)?;
+            let call_name = format!("{}_{}", payload.trait_name(), payload.method_name());
 
             let bytes = client
                 .rpc()
-                .state_call_raw(function, Some(params.as_slice()), Some(block_hash))
+                .state_call_raw(&call_name, Some(params.as_slice()), Some(block_hash))
                 .await?;
 
             let value = <Call::ReturnType as DecodeWithMetadata>::decode_with_metadata(
                 &mut &bytes[..],
-                return_id,
+                api_method.output_ty(),
                 &metadata,
             )?;
             Ok(value)

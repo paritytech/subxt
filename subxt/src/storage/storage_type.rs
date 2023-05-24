@@ -5,14 +5,13 @@
 use super::storage_address::{StorageAddress, Yes};
 use crate::{
     client::OnlineClientT,
-    error::Error,
+    error::{Error, MetadataError},
     metadata::{DecodeWithMetadata, Metadata},
     rpc::types::{StorageData, StorageKey},
     Config,
 };
 use derivative::Derivative;
-use frame_metadata::v15::StorageEntryType;
-use scale_info::form::PortableForm;
+use subxt_metadata::{StorageEntryType, PalletMetadata, StorageEntryMetadata};
 use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
@@ -94,21 +93,22 @@ where
     {
         let client = self.clone();
         async move {
+            let metadata = client.client.metadata();
+            let (pallet, entry) = lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
+
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            validate_storage_address(address, &client.client.metadata())?;
+            validate_storage_address(address, pallet)?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
-            let metadata = client.client.metadata();
             let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(&lookup_bytes).await? {
                 let val = decode_storage_with_metadata::<Address::Target>(
                     &mut &*data,
-                    address.pallet_name(),
-                    address.entry_name(),
                     &metadata,
+                    entry
                 )?;
                 Ok(Some(val))
             } else {
@@ -128,18 +128,16 @@ where
         let client = self.clone();
         async move {
             let pallet_name = address.pallet_name();
-            let storage_name = address.entry_name();
+            let entry_name = address.entry_name();
             // Metadata validation happens via .fetch():
             if let Some(data) = client.fetch(address).await? {
                 Ok(data)
             } else {
                 let metadata = client.client.metadata();
+                let (_pallet_metadata, storage_entry) = lookup_entry_details(pallet_name, entry_name, &metadata)?;
 
-                // We have to dig into metadata already, so no point using the optimised `decode_storage_with_metadata` call.
-                let pallet_metadata = metadata.pallet(pallet_name)?;
-                let storage_metadata = pallet_metadata.storage(storage_name)?;
-                let return_ty_id = return_type_from_storage_entry_type(&storage_metadata.ty);
-                let bytes = &mut &storage_metadata.default[..];
+                let return_ty_id = return_type_from_storage_entry_type(storage_entry.entry_type());
+                let bytes = &mut storage_entry.default_bytes();
 
                 let val = Address::Target::decode_with_metadata(bytes, return_ty_id, &metadata)?;
                 Ok(val)
@@ -209,19 +207,19 @@ where
         let client = self.clone();
         let block_hash = self.block_hash;
         async move {
+            let metadata = client.client.metadata();
+            let (pallet, entry) = lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
+
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            validate_storage_address(&address, &client.client.metadata())?;
-
-            let metadata = client.client.metadata();
+            validate_storage_address(&address, pallet)?;
 
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id =
-                lookup_storage_return_type(&metadata, address.pallet_name(), address.entry_name())?;
+            let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
 
             // The root pallet/entry bytes for this storage entry:
             let address_root_bytes = super::utils::storage_address_root_bytes(&address);
@@ -309,68 +307,56 @@ where
 /// Validate a storage address against the metadata.
 pub(crate) fn validate_storage_address<Address: StorageAddress>(
     address: &Address,
-    metadata: &Metadata,
+    pallet: PalletMetadata<'_>,
 ) -> Result<(), Error> {
     if let Some(hash) = address.validation_hash() {
-        validate_storage(address.pallet_name(), address.entry_name(), hash, metadata)?;
+        validate_storage(pallet, address.entry_name(), hash)?;
     }
     Ok(())
 }
 
-/// Validate a storage entry against the metadata.
-fn validate_storage(
-    pallet_name: &str,
-    storage_name: &str,
-    hash: [u8; 32],
-    metadata: &Metadata,
-) -> Result<(), Error> {
-    let expected_hash = match metadata.storage_hash(pallet_name, storage_name) {
-        Ok(hash) => hash,
-        Err(e) => return Err(e.into()),
-    };
-    match expected_hash == hash {
-        true => Ok(()),
-        false => Err(crate::error::MetadataError::IncompatibleStorageMetadata(
-            pallet_name.into(),
-            storage_name.into(),
-        )
-        .into()),
-    }
+/// Return details about the given storage entry.
+fn lookup_entry_details<'a>(pallet_name: &str, entry_name: &str, metadata: &'a Metadata) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
+    let pallet_metadata = metadata.pallet_by_name(pallet_name)
+        .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.to_owned()))?;
+    let storage_metadata = pallet_metadata.storage()
+        .ok_or_else(|| MetadataError::StorageNotFoundInPallet(pallet_name.to_owned()))?;
+    let storage_entry = storage_metadata.entry_by_name(entry_name)
+        .ok_or_else(|| MetadataError::StorageEntryNotFound(entry_name.to_owned()))?;
+    Ok((pallet_metadata, storage_entry))
 }
 
-/// look up a return type ID for some storage entry.
-fn lookup_storage_return_type(
-    metadata: &Metadata,
-    pallet: &str,
-    entry: &str,
-) -> Result<u32, Error> {
-    let storage_entry_type = &metadata.pallet(pallet)?.storage(entry)?.ty;
-
-    Ok(return_type_from_storage_entry_type(storage_entry_type))
+/// Validate a storage entry against the metadata.
+fn validate_storage(
+    pallet: PalletMetadata<'_>,
+    storage_name: &str,
+    hash: [u8; 32],
+) -> Result<(), Error> {
+    let Some(expected_hash) = pallet.storage_hash(storage_name) else {
+        return Err(MetadataError::IncompatibleCodegen.into())
+    };
+    if expected_hash != hash {
+        return Err(MetadataError::IncompatibleCodegen.into())
+    }
+    Ok(())
 }
 
 /// Fetch the return type out of a [`StorageEntryType`].
-fn return_type_from_storage_entry_type(entry: &StorageEntryType<PortableForm>) -> u32 {
+fn return_type_from_storage_entry_type(entry: &StorageEntryType) -> u32 {
     match entry {
-        StorageEntryType::Plain(ty) => ty.id,
-        StorageEntryType::Map { value, .. } => value.id,
+        StorageEntryType::Plain(ty) => *ty,
+        StorageEntryType::Map { value_ty, .. } => *value_ty,
     }
 }
 
 /// Given some bytes, a pallet and storage name, decode the response.
 fn decode_storage_with_metadata<T: DecodeWithMetadata>(
     bytes: &mut &[u8],
-    pallet_name: &str,
-    storage_entry: &str,
     metadata: &Metadata,
+    storage_metadata: &StorageEntryMetadata,
 ) -> Result<T, Error> {
-    let ty = &metadata.pallet(pallet_name)?.storage(storage_entry)?.ty;
-
-    let id = match ty {
-        StorageEntryType::Plain(ty) => ty.id,
-        StorageEntryType::Map { value, .. } => value.id,
-    };
-
-    let val = T::decode_with_metadata(bytes, id, metadata)?;
+    let ty = storage_metadata.entry_type();
+    let return_ty = return_type_from_storage_entry_type(ty);
+    let val = T::decode_with_metadata(bytes, return_ty, metadata)?;
     Ok(val)
 }

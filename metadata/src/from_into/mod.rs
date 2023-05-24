@@ -21,6 +21,13 @@ pub enum TryFromError {
     UnsupportedMetadataVersion(u32)
 }
 
+impl From<crate::Metadata> for frame_metadata::RuntimeMetadataPrefixed {
+    fn from(value: crate::Metadata) -> Self {
+        let m: frame_metadata::v15::RuntimeMetadataV15 = value.into();
+        m.into()
+    }
+}
+
 impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
     type Error = TryFromError;
 
@@ -44,5 +51,4 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),
         }
     }
-
 }

@@ -365,16 +365,16 @@ where
     }
 
     /// Fetch the metadata for this extrinsic.
-    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadata, Error> {
+    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails, Error> {
         let pallet = self
             .metadata
             .pallet_by_index(self.pallet_index())
-            .ok_or_else(|| MetadataError::PalletNotFound(self.pallet_index()))?;
+            .ok_or_else(|| MetadataError::PalletIndexNotFound(self.pallet_index()))?;
         let variant = pallet
             .call_variant_by_index(self.variant_index())
-            .ok_or_else(|| MetadataError::VariantNotFound(self.variant_index()))?;
+            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))?;
 
-        Ok(ExtrinsicMetadata { pallet, variant })
+        Ok(ExtrinsicMetadataDetails { pallet, variant })
     }
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
@@ -416,7 +416,7 @@ where
     pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
         let md = self.extrinsic_metadata()?;
         let pallet_extrinsic_ty = md.pallet.call_ty_id().ok_or_else(|| {
-            Error::Metadata(MetadataError::CallTypeNotFound(md.pallet.index()))
+            Error::Metadata(MetadataError::CallTypeNotFoundInPallet(md.pallet.index()))
         })?;
 
         // Ignore root enum index.
@@ -442,7 +442,8 @@ where
     }
 }
 
-pub struct ExtrinsicMetadata<'a> {
+/// Details for the given extrinsic plucked from the metadata.
+pub struct ExtrinsicMetadataDetails<'a> {
     pub pallet: PalletMetadata<'a>,
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>
 }

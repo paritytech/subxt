@@ -48,7 +48,9 @@ where
         F: FnMut(&V) -> bool,
     {
         let values = std::mem::take(&mut self.values);
+        let map = std::mem::take(&mut self.map);
 
+        // Filter the values, storing a map from old to new positions:
         let mut new_values = Vec::new();
         let mut old_pos_to_new_pos = HashMap::new();
         for (pos, value) in values.into_iter().enumerate().filter(|(_, v)| f(v)) {
@@ -59,11 +61,13 @@ where
         // Update the values now we've filtered them:
         self.values = new_values;
 
-        // Update map entires to point to new positions:
-        for (_k, pos) in self.map.iter_mut() {
-            let old_pos = *pos;
-            *pos = old_pos_to_new_pos[&old_pos];
-        }
+        // Rebuild the map using the new positions:
+        self.map = map
+            .into_iter()
+            .filter_map(|(k, v)| {
+                old_pos_to_new_pos.get(&v).map(|v2| (k, *v2))
+            })
+            .collect();
     }
 
     /// Push/insert an item to the end of the map.

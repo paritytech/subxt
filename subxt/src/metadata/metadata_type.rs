@@ -28,3 +28,9 @@ impl From<subxt_metadata::Metadata> for Metadata {
         Metadata::new(md)
     }
 }
+
+impl codec::Decode for Metadata {
+    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        subxt_metadata::Metadata::decode(input).map(Metadata::new)
+    }
+}
