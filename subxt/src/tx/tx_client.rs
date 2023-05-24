@@ -50,9 +50,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             let expected_hash = self
                 .client
                 .metadata()
-                .pallet_by_name(&details.pallet_name)
+                .pallet_by_name(details.pallet_name)
                 .ok_or_else(|| MetadataError::PalletNameNotFound(details.pallet_name.to_owned()))?
-                .call_hash(&details.call_name)
+                .call_hash(details.call_name)
                 .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
 
             if details.hash != expected_hash {

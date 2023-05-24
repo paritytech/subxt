@@ -37,7 +37,7 @@ impl PalletMetadataTestRunner {
 
     pub fn path_to_next_ui_test(&mut self) -> Option<String> {
         let pallet = match self.pallet_names.as_ref() {
-            Some(names) => self.metadata.pallet_by_name(&names.get(self.index)?)?,
+            Some(names) => self.metadata.pallet_by_name(names.get(self.index)?)?,
             None => self.metadata.pallets().nth(self.index)?,
         };
 

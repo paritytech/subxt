@@ -143,10 +143,10 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
         let pallet = metadata
             .pallet_by_name(&self.pallet_name)
-            .ok_or_else(|| MetadataError::PalletNameNotFound((&*self.pallet_name).to_owned()))?;
+            .ok_or_else(|| MetadataError::PalletNameNotFound((*self.pallet_name).to_owned()))?;
         let call = pallet
             .call_variant_by_name(&self.call_name)
-            .ok_or_else(|| MetadataError::CallNameNotFound((&*self.call_name).to_owned()))?;
+            .ok_or_else(|| MetadataError::CallNameNotFound((*self.call_name).to_owned()))?;
 
         let pallet_index = pallet.index();
         let call_index = call.index;

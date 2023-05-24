@@ -157,7 +157,7 @@ impl ModuleError {
         let pallet = self
             .metadata
             .pallet_by_index(self.raw.pallet_index)
-            .ok_or_else(|| MetadataError::PalletIndexNotFound(self.raw.pallet_index))?;
+            .ok_or(MetadataError::PalletIndexNotFound(self.raw.pallet_index))?;
 
         let variant = pallet
             .error_variant_by_index(self.raw.error[0])

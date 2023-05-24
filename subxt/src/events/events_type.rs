@@ -229,10 +229,10 @@ impl EventDetails {
         // Get metadata for the event:
         let event_pallet = metadata
             .pallet_by_index(pallet_index)
-            .ok_or_else(|| MetadataError::PalletIndexNotFound(pallet_index))?;
+            .ok_or(MetadataError::PalletIndexNotFound(pallet_index))?;
         let event_variant = event_pallet
             .event_variant_by_index(variant_index)
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(variant_index))?;
+            .ok_or(MetadataError::VariantIndexNotFound(variant_index))?;
         tracing::debug!(
             "Decoding Event '{}::{}'",
             event_pallet.name(),
@@ -245,7 +245,7 @@ impl EventDetails {
             scale_decode::visitor::decode_with_visitor(
                 input,
                 field_metadata.ty.id,
-                &metadata.types(),
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -359,7 +359,7 @@ impl EventDetails {
     /// Such types are exposed in the codegen as `pallet_name::events::EventName` types.
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
-        if ev_metadata.pallet.name() == E::PALLET && &ev_metadata.variant.name == E::EVENT {
+        if ev_metadata.pallet.name() == E::PALLET && ev_metadata.variant.name == E::EVENT {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),
                 &ev_metadata.variant.fields,

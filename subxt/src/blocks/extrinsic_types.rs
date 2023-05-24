@@ -241,7 +241,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.address,
-                &metadata.types(),
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -250,7 +250,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.signature,
-                &metadata.types(),
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -258,7 +258,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.extra,
-                &metadata.types(),
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -388,7 +388,7 @@ where
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
             &extrinsic_metadata.variant.fields,
-            &self.metadata.types(),
+            self.metadata.types(),
         )?;
 
         Ok(decoded)
@@ -399,7 +399,7 @@ where
     pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
         let extrinsic_metadata = self.extrinsic_metadata()?;
         if extrinsic_metadata.pallet.name() == E::PALLET
-            && &extrinsic_metadata.variant.name == E::CALL
+            && extrinsic_metadata.variant.name == E::CALL
         {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),

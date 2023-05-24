@@ -14,9 +14,9 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     }
 }
 
-impl Into<v14::RuntimeMetadataV14> for Metadata {
-    fn into(self) -> v14::RuntimeMetadataV14 {
-        let v15 = self.into();
+impl From<Metadata> for v14::RuntimeMetadataV14 {
+    fn from(val: Metadata) -> Self {
+        let v15 = val.into();
         v15_to_v14(v15)
     }
 }

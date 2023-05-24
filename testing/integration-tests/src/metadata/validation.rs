@@ -117,7 +117,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let metadata = modified_metadata(api.metadata().clone(), |md| {
+    let metadata = modified_metadata(api.metadata(), |md| {
         let mut existential = md
             .pallets
             .iter_mut()
