@@ -591,7 +591,7 @@ impl codec::Encode for Metadata {
 #[cfg(test)]
 mod test {
     use super::*;
-    use codec::{ Encode, Decode };
+    use codec::{Decode, Encode};
 
     fn load_metadata() -> Vec<u8> {
         std::fs::read("../artifacts/polkadot_metadata_full.scale").unwrap()
@@ -617,5 +617,4 @@ mod test {
         // The bytes should be identical:
         assert_eq!(bytes, new_bytes);
     }
-
 }
