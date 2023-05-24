@@ -313,12 +313,10 @@ impl EventDetails {
         let pallet = self
             .metadata
             .pallet_by_index(self.pallet_index())
-            .ok_or_else(|| MetadataError::PalletIndexNotFound(self.pallet_index()))
-            .expect("event pallet to be found; we did this during decoding");
+            .expect("event pallet to be found; we did this already during decoding");
         let variant = pallet
             .event_variant_by_index(self.variant_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))
-            .expect("event variant to be found; we did this during decoding");
+            .expect("event variant to be found; we did this already during decoding");
 
         EventMetadataDetails { pallet, variant }
     }
