@@ -37,12 +37,8 @@ impl PalletMetadataTestRunner {
 
     pub fn path_to_next_ui_test(&mut self) -> Option<String> {
         let pallet = match self.pallet_names.as_ref() {
-            Some(names) => {
-                self.metadata.pallet_by_name(&names.get(self.index)?)?
-            },
-            None => {
-                self.metadata.pallets().nth(self.index)?
-            }
+            Some(names) => self.metadata.pallet_by_name(&names.get(self.index)?)?,
+            None => self.metadata.pallets().nth(self.index)?,
         };
 
         let test_name = pallet.name();
@@ -53,10 +49,7 @@ impl PalletMetadataTestRunner {
 
         // Build custom metadata containing only this pallet.
         let mut metadata = self.metadata.clone();
-        metadata.retain(
-            |pallet_filter| pallet_filter == pallet.name(),
-            |_| true,
-        );
+        metadata.retain(|pallet_filter| pallet_filter == pallet.name(), |_| true);
 
         let mut tmp_dir = std::env::temp_dir();
         tmp_dir.push(format!("{TEST_DIR_PREFIX}{index}"));

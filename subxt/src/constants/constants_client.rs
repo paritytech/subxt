@@ -5,8 +5,8 @@
 use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
-    error::{ Error, MetadataError },
-    metadata::{DecodeWithMetadata},
+    error::{Error, MetadataError},
+    metadata::DecodeWithMetadata,
     Config,
 };
 use derivative::Derivative;
@@ -42,9 +42,11 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
                 .pallet_by_name(address.pallet_name())
                 .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?
                 .constant_hash(address.constant_name())
-                .ok_or_else(|| MetadataError::ConstantNameNotFound(address.constant_name().to_owned()))?;
+                .ok_or_else(|| {
+                    MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+                })?;
             if actual_hash != expected_hash {
-                return Err(MetadataError::IncompatibleCodegen.into())
+                return Err(MetadataError::IncompatibleCodegen.into());
             }
         }
         Ok(())
@@ -68,7 +70,9 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
             .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?;
         let constant = pallet
             .constant_by_name(address.constant_name())
-            .ok_or_else(|| MetadataError::ConstantNameNotFound(address.constant_name().to_owned()))?;
+            .ok_or_else(|| {
+                MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+            })?;
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut constant.value(),
             constant.ty(),

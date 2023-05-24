@@ -11,7 +11,7 @@ use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitute
 
 fn generate_runtime_interface_from_metadata(metadata: RuntimeMetadataPrefixed) -> String {
     // Generate a runtime interface from the provided metadata.
-    let generator = RuntimeGenerator::new(metadata);
+    let generator = RuntimeGenerator::new(metadata.try_into().unwrap());
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );

@@ -4,13 +4,13 @@
 
 use crate::{
     dynamic::{DecodedValueThunk, Value},
-    error::{Error, StorageAddressError, MetadataError},
+    error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-use subxt_metadata::{StorageEntryType, StorageHasher};
 use scale_info::TypeDef;
 use std::borrow::Cow;
+use subxt_metadata::{StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -144,7 +144,8 @@ where
         let storage = pallet
             .storage()
             .ok_or_else(|| MetadataError::StorageNotFoundInPallet(self.pallet_name().to_owned()))?;
-        let entry = storage.entry_by_name(self.entry_name())
+        let entry = storage
+            .entry_by_name(self.entry_name())
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
         match entry.entry_type() {
@@ -159,7 +160,9 @@ where
                     Ok(())
                 }
             }
-            StorageEntryType::Map { hashers, key_ty, .. } => {
+            StorageEntryType::Map {
+                hashers, key_ty, ..
+            } => {
                 let ty = metadata
                     .types()
                     .resolve(*key_ty)

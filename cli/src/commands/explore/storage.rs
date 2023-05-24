@@ -1,10 +1,16 @@
 use clap::Args;
+use color_eyre::eyre::eyre;
 use std::fmt::Write;
 use std::write;
-use color_eyre::eyre::eyre;
 
 use subxt::OnlineClient;
-use subxt::{config::SubstrateConfig, metadata::{ Metadata, types::{ PalletMetadata, StorageMetadata, StorageEntryType } }};
+use subxt::{
+    config::SubstrateConfig,
+    metadata::{
+        types::{PalletMetadata, StorageEntryType, StorageMetadata},
+        Metadata,
+    },
+};
 
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
@@ -48,7 +54,9 @@ pub(crate) async fn explore_storage(
 
     let (return_ty_id, key_ty_id) = match storage.entry_type() {
         StorageEntryType::Plain(value) => (*value, None),
-        StorageEntryType::Map { value_ty, key_ty, .. } => (*value_ty, Some(*key_ty)),
+        StorageEntryType::Map {
+            value_ty, key_ty, ..
+        } => (*value_ty, Some(*key_ty)),
     };
 
     // get the type and type description for the return and key type:

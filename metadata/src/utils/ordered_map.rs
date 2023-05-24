@@ -64,9 +64,7 @@ where
         // Rebuild the map using the new positions:
         self.map = map
             .into_iter()
-            .filter_map(|(k, v)| {
-                old_pos_to_new_pos.get(&v).map(|v2| (k, *v2))
-            })
+            .filter_map(|(k, v)| old_pos_to_new_pos.get(&v).map(|v2| (k, *v2)))
             .collect();
     }
 

@@ -9,7 +9,7 @@ use super::{
 
 use crate::{
     client::{OfflineClientT, OnlineClientT},
-    error::{ MetadataError, Error },
+    error::{Error, MetadataError},
     Config,
 };
 use derivative::Derivative;
@@ -44,7 +44,8 @@ where
     /// the pallet or storage entry in question do not exist at all).
     pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
         let metadata = self.client.metadata();
-        let pallet_metadata = metadata.pallet_by_name(address.pallet_name())
+        let pallet_metadata = metadata
+            .pallet_by_name(address.pallet_name())
             .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?;
         validate_storage_address(address, pallet_metadata)
     }

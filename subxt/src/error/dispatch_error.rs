@@ -174,14 +174,20 @@ impl ModuleError {
     /// Attempts to decode the ModuleError into a value implementing the trait `RootError`
     /// where the actual type of value is the generated top level enum `Error`.
     pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
-        E::root_error(&self.raw.error, self.details()?.pallet.name(), &self.metadata)
+        E::root_error(
+            &self.raw.error,
+            self.details()?.pallet.name(),
+            &self.metadata,
+        )
     }
 }
 
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
-    pallet: crate::metadata::types::PalletMetadata<'a>,
-    variant: &'a scale_info::Variant<scale_info::form::PortableForm>
+    /// The pallet that the error came from
+    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    /// The variant representing the error
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// The error details about a module error that has occurred.

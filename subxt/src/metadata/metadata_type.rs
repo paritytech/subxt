@@ -18,8 +18,10 @@ impl std::ops::Deref for Metadata {
 }
 
 impl Metadata {
-    pub (crate) fn new(md: subxt_metadata::Metadata) -> Self {
-        Metadata { inner: Arc::new(md) }
+    pub(crate) fn new(md: subxt_metadata::Metadata) -> Self {
+        Metadata {
+            inner: Arc::new(md),
+        }
     }
 }
 

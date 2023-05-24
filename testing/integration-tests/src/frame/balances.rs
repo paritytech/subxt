@@ -383,9 +383,11 @@ async fn constant_existential_deposit() {
 
     // get and decode constant manually via metadata:
     let metadata = api.metadata();
-    let balances_metadata = metadata.pallet("Balances").unwrap();
-    let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
-    let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
+    let balances_metadata = metadata.pallet_by_name("Balances").unwrap();
+    let constant_metadata = balances_metadata
+        .constant_by_name("ExistentialDeposit")
+        .unwrap();
+    let existential_deposit = u128::decode(&mut constant_metadata.value()).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);
 
     // constant address for API access:

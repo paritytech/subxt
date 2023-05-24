@@ -1,15 +1,19 @@
 use clap::Args;
-use std::fmt::Write;
-use std::str::FromStr;
-use std::write;
 use color_eyre::eyre::eyre;
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
+use std::fmt::Write;
+use std::str::FromStr;
+use std::write;
 
 use subxt::tx;
 use subxt::utils::H256;
-use subxt::{config::SubstrateConfig, metadata::{ Metadata, types::PalletMetadata }, OfflineClient};
+use subxt::{
+    config::SubstrateConfig,
+    metadata::{types::PalletMetadata, Metadata},
+    OfflineClient,
+};
 
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
@@ -52,14 +56,9 @@ pub(crate) fn explore_calls(
 
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
-        let mut type_description =
-            print_type_description(&call.fields, metadata.types())?;
+        let mut type_description = print_type_description(&call.fields, metadata.types())?;
         type_description = with_indent(type_description, 4);
-        let mut type_examples = print_type_examples(
-            &call.fields,
-            metadata.types(),
-            "SCALE_VALUE",
-        )?;
+        let mut type_examples = print_type_examples(&call.fields, metadata.types(), "SCALE_VALUE")?;
         type_examples = with_indent(type_examples, 4);
         let mut output = String::new();
         write!(output, "Usage:\n    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>\n        construct the call by providing a valid argument\n\n")?;

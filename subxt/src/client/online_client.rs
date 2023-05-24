@@ -19,7 +19,7 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::future;
-use std::sync::{Arc,RwLock};
+use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
 /// online actions.

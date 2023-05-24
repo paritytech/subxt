@@ -11,7 +11,6 @@ use codec::{Compact, Decode, Encode};
 use sp_core::storage::well_known_keys;
 use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
-use subxt_metadata::Metadata;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
@@ -21,6 +20,7 @@ use subxt::{
     tx::Signer,
     utils::AccountId32,
 };
+use subxt_metadata::Metadata;
 
 #[tokio::test]
 async fn insert_key() {
@@ -420,7 +420,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 }
 
 #[tokio::test]
-async fn rpc_state_call() {
+async fn rpc_state_call() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 

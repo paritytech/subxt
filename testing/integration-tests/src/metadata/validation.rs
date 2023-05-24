@@ -4,9 +4,8 @@
 
 use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletMetadata, PalletStorageMetadata,
-    StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    RuntimeMetadataV15, PalletCallMetadata,
+    ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+    RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
 };
 use scale_info::{
     build::{Fields, Variants},
@@ -14,10 +13,7 @@ use scale_info::{
 };
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
-async fn metadata_to_api(
-    metadata: Metadata,
-    ctx: &TestContext,
-) -> OfflineClient<SubstrateConfig> {
+async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
     OfflineClient::new(
         ctx.client().genesis_hash(),
         ctx.client().runtime_version(),
@@ -25,13 +21,68 @@ async fn metadata_to_api(
     )
 }
 
+fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
+    let subxt_md: subxt_metadata::Metadata = v15.try_into().unwrap();
+    subxt_md.into()
+}
+
 fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
 where
-    F: FnOnce(&mut RuntimeMetadataV15)
+    F: FnOnce(&mut RuntimeMetadataV15),
 {
-    let mut metadata = RuntimeMetadataV15::from(metadata);
+    let mut metadata = RuntimeMetadataV15::from((*metadata).clone());
     f(&mut metadata);
-    metadata.try_into().unwrap()
+    v15_to_metadata(metadata)
+}
+
+fn default_pallet() -> PalletMetadata {
+    PalletMetadata {
+        name: "Test",
+        storage: None,
+        calls: None,
+        event: None,
+        constants: vec![],
+        error: None,
+        index: 0,
+        docs: vec![],
+    }
+}
+
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
+    // Extrinsic needs to contain at least the generic type parameter "Call"
+    // for the metadata to be valid.
+    // The "Call" type from the metadata is used to decode extrinsics.
+    // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct ExtrinsicType<Call> {
+        call: Call,
+    }
+    // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
+    // Each pallet must contain one single variant.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    enum RuntimeCall {
+        PalletName(Pallet),
+    }
+    // The calls of the pallet.
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    enum Pallet {
+        #[allow(unused)]
+        SomeCall,
+    }
+
+    v15_to_metadata(RuntimeMetadataV15::new(
+        pallets,
+        ExtrinsicMetadata {
+            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
+            version: 0,
+            signed_extensions: vec![],
+        },
+        meta_type::<()>(),
+        vec![],
+    ))
 }
 
 #[tokio::test]
@@ -43,7 +94,7 @@ async fn full_metadata_check() {
     assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let metadata = modified_metadata(api.metadata().clone(), |md| {
+    let metadata = modified_metadata(api.metadata(), |md| {
         md.pallets[0].name = "NewPallet".to_string();
     });
 
@@ -85,56 +136,6 @@ async fn constant_values_are_not_validated() {
 
     assert!(node_runtime::validate_codegen(&api).is_ok());
     assert!(api.constants().at(&deposit_addr).is_ok());
-}
-
-fn default_pallet() -> PalletMetadata {
-    PalletMetadata {
-        name: "Test",
-        storage: None,
-        calls: None,
-        event: None,
-        constants: vec![],
-        error: None,
-        index: 0,
-        docs: vec![],
-    }
-}
-
-fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
-    // Extrinsic needs to contain at least the generic type parameter "Call"
-    // for the metadata to be valid.
-    // The "Call" type from the metadata is used to decode extrinsics.
-    // In reality, the extrinsic type has "Call", "Address", "Extra", "Signature" generic types.
-    #[allow(unused)]
-    #[derive(TypeInfo)]
-    struct ExtrinsicType<Call> {
-        call: Call,
-    }
-    // Because this type is used to decode extrinsics, we expect this to be a TypeDefVariant.
-    // Each pallet must contain one single variant.
-    #[allow(unused)]
-    #[derive(TypeInfo)]
-    enum RuntimeCall {
-        PalletName(Pallet),
-    }
-    // The calls of the pallet.
-    #[allow(unused)]
-    #[derive(TypeInfo)]
-    enum Pallet {
-        #[allow(unused)]
-        SomeCall,
-    }
-
-    RuntimeMetadataV15::new(
-        pallets,
-        ExtrinsicMetadata {
-            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
-            version: 0,
-            signed_extensions: vec![],
-        },
-        meta_type::<()>(),
-        vec![],
-    )
 }
 
 #[tokio::test]

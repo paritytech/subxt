@@ -2,7 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{client::OnlineClientT, error::{Error, MetadataError}, metadata::DecodeWithMetadata, Config};
+use crate::{
+    client::OnlineClientT,
+    error::{Error, MetadataError},
+    metadata::DecodeWithMetadata,
+    Config,
+};
 use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
@@ -67,10 +72,14 @@ where
 
             let api_trait = metadata
                 .runtime_api_trait_by_name(payload.trait_name())
-                .ok_or_else(|| MetadataError::RuntimeTraitNotFound(payload.trait_name().to_owned()))?;
+                .ok_or_else(|| {
+                    MetadataError::RuntimeTraitNotFound(payload.trait_name().to_owned())
+                })?;
             let api_method = api_trait
                 .method_by_name(payload.method_name())
-                .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
+                .ok_or_else(|| {
+                    MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned())
+                })?;
 
             // Validate the runtime API payload hash against the compile hash from codegen.
             if let Some(static_hash) = payload.validation_hash() {

@@ -1,8 +1,8 @@
 use clap::Args;
+use color_eyre::eyre::eyre;
 use std::fmt::Write;
 use std::write;
-use color_eyre::eyre::eyre;
-use subxt::metadata::{ Metadata, types::PalletMetadata };
+use subxt::metadata::{types::PalletMetadata, Metadata};
 
 use crate::utils::type_description::print_type_description;
 use crate::utils::{print_docs_with_indent, with_indent};
@@ -48,11 +48,8 @@ pub(crate) fn explore_constants(
     )?;
 
     // value
-    let scale_val = scale_value::scale::decode_as_type(
-        &mut constant.value(),
-        constant.ty(),
-        metadata.types(),
-    )?;
+    let scale_val =
+        scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
     write!(
         output,
         "\n\nThe value of the constant is:\n    {}",
@@ -63,10 +60,7 @@ pub(crate) fn explore_constants(
     Ok(())
 }
 
-fn print_available_constants(
-    pallet_metadata: PalletMetadata,
-    pallet_name: &str,
-) -> String {
+fn print_available_constants(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
     if pallet_metadata.constants().next().is_none() {
         return format!("No <CONSTANT>'s available in the \"{pallet_name}\" pallet.");
     }

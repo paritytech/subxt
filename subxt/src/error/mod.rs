@@ -13,12 +13,11 @@ pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
 };
 
-
 // Re-expose the errors we use from other crates here:
-pub use subxt_metadata::TryFromError as MetadataTryFromError;
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
+pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -214,7 +213,7 @@ pub enum MetadataError {
     StorageEntryNotFound(String),
     /// The generated interface used is not compatible with the node.
     #[error("The generated code is not compatible with the node")]
-    IncompatibleCodegen
+    IncompatibleCodegen,
 }
 
 /// This trait is implemented on the statically generated root ModuleError type

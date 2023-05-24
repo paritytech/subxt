@@ -8,7 +8,7 @@ use crate::{
     config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
     events,
-    metadata::types::{ PalletMetadata },
+    metadata::types::PalletMetadata,
     rpc::types::ChainBlockExtrinsic,
     Metadata,
 };
@@ -398,7 +398,9 @@ where
     /// Such types are exposed in the codegen as `pallet_name::calls::types::CallName` types.
     pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
         let extrinsic_metadata = self.extrinsic_metadata()?;
-        if extrinsic_metadata.pallet.name() == E::PALLET && &extrinsic_metadata.variant.name == E::CALL {
+        if extrinsic_metadata.pallet.name() == E::PALLET
+            && &extrinsic_metadata.variant.name == E::CALL
+        {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),
                 &extrinsic_metadata.variant.fields,
@@ -445,7 +447,7 @@ where
 /// Details for the given extrinsic plucked from the metadata.
 pub struct ExtrinsicMetadataDetails<'a> {
     pub pallet: PalletMetadata<'a>,
-    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// The type IDs extracted from the metadata that represent the
@@ -760,9 +762,7 @@ mod tests {
         let metadata = metadata();
 
         // Except our metadata to contain the registered types.
-        let pallet = metadata
-            .pallet_by_index(0)
-            .expect("pallet exists");
+        let pallet = metadata.pallet_by_index(0).expect("pallet exists");
         let extrinsic = pallet
             .call_variant_by_index(2)
             .expect("metadata contains the RuntimeCall enum with this pallet");

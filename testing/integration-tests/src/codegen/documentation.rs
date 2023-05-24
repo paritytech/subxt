@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use regex::Regex;
 use codec::Decode;
-use subxt_metadata::Metadata;
+use regex::Regex;
 use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
+use subxt_metadata::Metadata;
 
 fn load_test_metadata() -> Metadata {
     let bytes = test_runtime::METADATA;

@@ -6,9 +6,9 @@ use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
+use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::io::{self, Write};
 use subxt_metadata::Metadata;
-use frame_metadata::{ RuntimeMetadata, RuntimeMetadataPrefixed, v15::RuntimeMetadataV15 };
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -41,7 +41,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     let version = match &metadata.1 {
         RuntimeMetadata::V14(_) => Version::V14,
         RuntimeMetadata::V15(_) => Version::V15,
-        _ => Version::Unknown
+        _ => Version::Unknown,
     };
 
     if opts.pallets.is_some() || opts.runtime_apis.is_some() {
@@ -63,7 +63,9 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         metadata = match version {
             Version::V14 => RuntimeMetadataV15::from(md).into(),
             Version::V15 => RuntimeMetadataV15::from(md).into(),
-            Version::Unknown => bail!("Unsupported metadata version; V14 or V15 metadata is expected.")
+            Version::Unknown => {
+                bail!("Unsupported metadata version; V14 or V15 metadata is expected.")
+            }
         }
     }
 
@@ -92,5 +94,5 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
 enum Version {
     V14,
     V15,
-    Unknown
+    Unknown,
 }

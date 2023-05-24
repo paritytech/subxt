@@ -6,8 +6,11 @@
 
 use super::{Phase, StaticEvent};
 use crate::{
-    client::OnlineClientT, error::{ Error, MetadataError }, events::events_client::get_event_bytes,
-    metadata::types::PalletMetadata, Config, Metadata,
+    client::OnlineClientT,
+    error::{Error, MetadataError},
+    events::events_client::get_event_bytes,
+    metadata::types::PalletMetadata,
+    Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
@@ -307,7 +310,8 @@ impl EventDetails {
 
     /// Fetch details from the metadata for this event.
     pub fn event_metadata(&self) -> EventMetadataDetails {
-        let pallet = self.metadata
+        let pallet = self
+            .metadata
             .pallet_by_index(self.pallet_index())
             .ok_or_else(|| MetadataError::PalletIndexNotFound(self.pallet_index()))
             .expect("event pallet to be found; we did this during decoding");
@@ -373,9 +377,10 @@ impl EventDetails {
     pub fn as_root_event<E: RootEvent>(&self) -> Result<E, Error> {
         let ev_metadata = self.event_metadata();
         let pallet_bytes = &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
-        let pallet_event_ty = ev_metadata.pallet.event_ty_id().ok_or_else(|| {
-            MetadataError::EventTypeNotFoundInPallet(ev_metadata.pallet.index())
-        })?;
+        let pallet_event_ty = ev_metadata
+            .pallet
+            .event_ty_id()
+            .ok_or_else(|| MetadataError::EventTypeNotFoundInPallet(ev_metadata.pallet.index()))?;
 
         E::root_event(
             pallet_bytes,
@@ -389,7 +394,7 @@ impl EventDetails {
 /// Details for the given event plucked from the metadata.
 pub struct EventMetadataDetails<'a> {
     pub pallet: PalletMetadata<'a>,
-    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// This trait is implemented on the statically generated root event type, so that we're able

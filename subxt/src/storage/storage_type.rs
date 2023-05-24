@@ -11,8 +11,8 @@ use crate::{
     Config,
 };
 use derivative::Derivative;
-use subxt_metadata::{StorageEntryType, PalletMetadata, StorageEntryMetadata};
 use std::{future::Future, marker::PhantomData};
+use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -94,7 +94,8 @@ where
         let client = self.clone();
         async move {
             let metadata = client.client.metadata();
-            let (pallet, entry) = lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
+            let (pallet, entry) =
+                lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
 
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
@@ -105,11 +106,8 @@ where
             // Look up the return type ID to enable DecodeWithMetadata:
             let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(&lookup_bytes).await? {
-                let val = decode_storage_with_metadata::<Address::Target>(
-                    &mut &*data,
-                    &metadata,
-                    entry
-                )?;
+                let val =
+                    decode_storage_with_metadata::<Address::Target>(&mut &*data, &metadata, entry)?;
                 Ok(Some(val))
             } else {
                 Ok(None)
@@ -134,7 +132,8 @@ where
                 Ok(data)
             } else {
                 let metadata = client.client.metadata();
-                let (_pallet_metadata, storage_entry) = lookup_entry_details(pallet_name, entry_name, &metadata)?;
+                let (_pallet_metadata, storage_entry) =
+                    lookup_entry_details(pallet_name, entry_name, &metadata)?;
 
                 let return_ty_id = return_type_from_storage_entry_type(storage_entry.entry_type());
                 let bytes = &mut storage_entry.default_bytes();
@@ -208,7 +207,8 @@ where
         let block_hash = self.block_hash;
         async move {
             let metadata = client.client.metadata();
-            let (pallet, entry) = lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
+            let (pallet, entry) =
+                lookup_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
 
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
@@ -316,12 +316,19 @@ pub(crate) fn validate_storage_address<Address: StorageAddress>(
 }
 
 /// Return details about the given storage entry.
-fn lookup_entry_details<'a>(pallet_name: &str, entry_name: &str, metadata: &'a Metadata) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
-    let pallet_metadata = metadata.pallet_by_name(pallet_name)
+fn lookup_entry_details<'a>(
+    pallet_name: &str,
+    entry_name: &str,
+    metadata: &'a Metadata,
+) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
+    let pallet_metadata = metadata
+        .pallet_by_name(pallet_name)
         .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.to_owned()))?;
-    let storage_metadata = pallet_metadata.storage()
+    let storage_metadata = pallet_metadata
+        .storage()
         .ok_or_else(|| MetadataError::StorageNotFoundInPallet(pallet_name.to_owned()))?;
-    let storage_entry = storage_metadata.entry_by_name(entry_name)
+    let storage_entry = storage_metadata
+        .entry_by_name(entry_name)
         .ok_or_else(|| MetadataError::StorageEntryNotFound(entry_name.to_owned()))?;
     Ok((pallet_metadata, storage_entry))
 }
@@ -336,7 +343,7 @@ fn validate_storage(
         return Err(MetadataError::IncompatibleCodegen.into())
     };
     if expected_hash != hash {
-        return Err(MetadataError::IncompatibleCodegen.into())
+        return Err(MetadataError::IncompatibleCodegen.into());
     }
     Ok(())
 }

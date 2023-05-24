@@ -103,16 +103,18 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
         //    need to allocate anyway. I'd like us to do this, and then we can
         //    remove allocations from this code and probably a couple of other
         //    places.
-        let fields: Vec<_> = api_method.inputs().map(|input| {
-            scale_info::Field {
+        let fields: Vec<_> = api_method
+            .inputs()
+            .map(|input| scale_info::Field {
                 name: Some(input.name.to_owned()),
                 ty: input.ty.into(),
                 type_name: None,
                 docs: Default::default(),
-            }
-        }).collect();
+            })
+            .collect();
 
-        self.args_data.encode_as_fields_to(&fields, metadata.types(), out)?;
+        self.args_data
+            .encode_as_fields_to(&fields, metadata.types(), out)?;
         Ok(())
     }
 
@@ -126,7 +128,11 @@ pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
 
 impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Create a new [`Payload`].
-    pub fn new(trait_name: impl Into<String>, method_name: impl Into<String>, args_data: ArgsData) -> Self {
+    pub fn new(
+        trait_name: impl Into<String>,
+        method_name: impl Into<String>,
+        args_data: ArgsData,
+    ) -> Self {
         Payload {
             trait_name: Cow::Owned(trait_name.into()),
             method_name: Cow::Owned(method_name.into()),

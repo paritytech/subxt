@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{pair_signer, test_context, utils::node_runtime};
-use codec::{ Encode, Compact };
+use codec::{Compact, Encode};
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::blocks::BlocksClient;

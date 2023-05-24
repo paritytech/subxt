@@ -11,7 +11,7 @@ use sp_core_hashing::blake2_256;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
-    error::{MetadataError, Error},
+    error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };

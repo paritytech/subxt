@@ -4,12 +4,12 @@
 
 use clap::Parser as ClapParser;
 use codec::Decode;
-use color_eyre::eyre::{WrapErr};
+use color_eyre::eyre::WrapErr;
 use jsonrpsee::client_transport::ws::Uri;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_codegen::utils::MetadataVersion;
-use subxt_metadata::{Metadata};
+use subxt_metadata::Metadata;
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]

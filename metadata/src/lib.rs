@@ -553,7 +553,7 @@ impl codec::Decode for Metadata {
         let metadata = match metadata.1 {
             frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
-            _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into())
+            _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
         };
 
         metadata.map_err(|_e| "Cannot try_into() to Metadata.".into())
@@ -565,8 +565,8 @@ impl codec::Decode for Metadata {
 // can change over time.
 impl codec::Encode for Metadata {
     fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
-		let m: frame_metadata::v15::RuntimeMetadataV15 = self.clone().into();
+        let m: frame_metadata::v15::RuntimeMetadataV15 = self.clone().into();
         let m: frame_metadata::RuntimeMetadataPrefixed = m.into();
         m.encode_to(dest)
-	}
+    }
 }
