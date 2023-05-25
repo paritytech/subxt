@@ -113,6 +113,8 @@ impl BackgroundTask {
                 }
             }
             Ok(RpcResponse::Subscription { method, id, result }) => {
+                println!(" BACKRGOUND response {result:?}\n");
+
                 // Subxt calls into `author_submitAndWatchExtrinsic`, however the smoldot produces
                 // `{"event":"broadcasted","numPeers":1}` which is part of the RPC V2 API. Ignore
                 // this spurious event.
@@ -131,6 +133,9 @@ impl BackgroundTask {
                             "Cannot send notification to subscription {:?}",
                             id
                         );
+
+                        // Remove the sender if the subscription dropped the receiver.
+                        self.subscriptions.remove(&id);
                     }
                     return;
                 }

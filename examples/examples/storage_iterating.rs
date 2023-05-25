@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let storage_query = polkadot::storage().system().account_root();
 
     // Get back an iterator of results (here, we are fetching 10 items at
-    // a time from the node, but we always iterate over oen at a time).
+    // a time from the node, but we always iterate over one at a time).
     let mut results = api
         .storage()
         .at_latest()
