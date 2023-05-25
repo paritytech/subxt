@@ -126,10 +126,11 @@ impl BackgroundTask {
             }
             Ok(RpcResponse::Subscription { method, id, result }) => {
                 // Subxt calls into `author_submitAndWatchExtrinsic`, however the smoldot produces
-                // `{"event":"broadcasted","numPeers":1}` which is part of the RPC V2 API. Ignore
-                // this spurious event.
+                // `{"event":"broadcasted","numPeers":1}` and `{"event":"validated"}` which are part
+                // of the RPC V2 API. Ignore those events.
                 if method == "transaction_unstable_watchEvent"
-                    && result.to_string().contains("broadcasted")
+                    && (result.to_string().contains("broadcasted")
+                        || result.to_string().contains("validated"))
                 {
                     tracing::debug!(target: LOG_TARGET, "Ignoring notification {:?}", result);
                     return;
