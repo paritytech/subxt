@@ -34,7 +34,7 @@ pub struct Opts {
     runtime_apis: Option<Vec<String>>,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
     let bytes = opts.file_or_url.fetch().await?;
     let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
@@ -72,17 +72,18 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     match opts.format.as_str() {
         "json" => {
             let json = serde_json::to_string_pretty(&metadata)?;
-            println!("{json}");
+            write!(output, "{json}")?;
             Ok(())
         }
         "hex" => {
             let hex_data = format!("0x{:?}", hex::encode(metadata.encode()));
-            println!("{hex_data}");
+            write!(output, "{hex_data}")?;
             Ok(())
         }
         "bytes" => {
             let bytes = metadata.encode();
-            Ok(io::stdout().write_all(&bytes)?)
+            output.write_all(&bytes)?;
+            Ok(())
         }
         _ => Err(eyre::eyre!(
             "Unsupported format `{}`, expected `json`, `hex` or `bytes`",

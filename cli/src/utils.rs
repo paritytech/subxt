@@ -63,7 +63,7 @@ impl FileOrUrl {
                 uri,
                 version.unwrap_or_default(),
             )
-            .await?),
+                .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let uri = Uri::from_static("ws://localhost:9944");
@@ -93,4 +93,15 @@ pub fn with_indent(s: String, indent: usize) -> String {
         .map(|line| format!("{indent_str}{line}"))
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+
+/// Given a type definition, return type ID and registry representing it.
+#[allow(dead_code)]
+pub fn make_type<T: scale_info::TypeInfo + 'static>() -> (u32, scale_info::PortableRegistry) {
+    let m = scale_info::MetaType::new::<T>();
+    let mut types = scale_info::Registry::new();
+    let id = types.register_type(&m);
+    let portable_registry: scale_info::PortableRegistry = types.into();
+    (id.id, portable_registry)
 }

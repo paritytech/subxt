@@ -26,7 +26,7 @@ pub struct CallsSubcommand {
     trailing_args: Vec<String>,
 }
 
-pub(crate) fn explore_calls(
+pub fn explore_calls(
     command: CallsSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata,
@@ -40,7 +40,8 @@ pub(crate) fn explore_calls(
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
         let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        return Ok(format!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", ));
+        write!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
+        return Ok(());
     };
 
     // if specified call is wrong, show user the calls to choose from (but this time as an error):
@@ -72,7 +73,7 @@ pub(crate) fn explore_calls(
             output,
             "The call expect expects a <SCALE_VALUE> with this shape:\n{type_description}\n\n{}\n\nYou may need to surround the value in single quotes when providing it as an argument."
             , &type_examples[4..])?;
-        return Ok(output);
+        return Ok(());
     }
 
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
@@ -82,7 +83,8 @@ pub(crate) fn explore_calls(
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
-    Ok(format!("Encoded call data:\n    {hex_bytes}"))
+    write!(output, "Encoded call data:\n    {hex_bytes}")?;
+    Ok(())
 }
 
 fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {

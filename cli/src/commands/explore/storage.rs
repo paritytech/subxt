@@ -23,7 +23,7 @@ pub struct StorageSubcommand {
     trailing_args: Vec<String>,
 }
 
-pub(crate) async fn explore_storage(
+pub async fn explore_storage(
     command: StorageSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata<'_>,
@@ -41,7 +41,8 @@ pub(crate) async fn explore_storage(
     // if no storage entry specified, show user the calls to choose from:
     let Some(entry_name) = command.storage_entry else {
         let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
-        return Ok(format!("Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}"));
+        write!(output, "Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}")?;
+        return Ok(());
     };
 
     // if specified call storage entry wrong, show user the storage entries to choose from (but this time as an error):
@@ -57,9 +58,6 @@ pub(crate) async fn explore_storage(
             value_ty, key_ty, ..
         } => (*value_ty, Some(*key_ty)),
     };
-
-    // get the type and type description for the return and key type:
-    let mut output = String::new();
 
     // only inform user about usage if a key can be provided:
     if key_ty_id.is_some() && trailing_args.is_empty() {
@@ -160,7 +158,7 @@ pub(crate) async fn explore_storage(
         )?;
     }
 
-    Ok(output)
+    Ok(())
 }
 
 fn print_available_storage_entries(

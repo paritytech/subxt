@@ -38,19 +38,20 @@ pub struct Opts {
     version: MetadataVersion,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     match opts.pallet {
         Some(pallet) => {
-            handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str(), opts.version).await
+            handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str(), opts.version, output).await
         }
-        None => handle_full_metadata(opts.nodes.as_slice(), opts.version).await,
+        None => handle_full_metadata(opts.nodes.as_slice(), opts.version, output).await,
     }
 }
 
 async fn handle_pallet_metadata(
     nodes: &[Uri],
     name: &str,
-    version: MetadataVersion,
+    version: MetadataVersion
+    , output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     #[derive(Serialize, Deserialize, Default)]
     #[serde(rename_all = "camelCase")]
@@ -67,7 +68,7 @@ async fn handle_pallet_metadata(
             Some(pallet_metadata) => {
                 let hash = pallet_metadata.hash();
                 let hex_hash = hex::encode(hash);
-                println!("Node {node:?} has pallet metadata hash {hex_hash:?}");
+                writeln!(output, "Node {node:?} has pallet metadata hash {hex_hash:?}")?;
 
                 compatibility
                     .pallet_present
@@ -81,22 +82,23 @@ async fn handle_pallet_metadata(
         }
     }
 
-    println!(
+    writeln!(
+        output,
         "\nCompatible nodes by pallet\n{}",
         serde_json::to_string_pretty(&compatibility)
             .context("Failed to parse compatibility map")?
-    );
+    )?;
 
     Ok(())
 }
 
-async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_eyre::Result<()> {
+async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node, version).await?;
         let hash = metadata.hasher().hash();
         let hex_hash = hex::encode(hash);
-        println!("Node {node:?} has metadata hash {hex_hash:?}",);
+        writeln!(output, "Node {node:?} has metadata hash {hex_hash:?}", )?;
 
         compatibility_map
             .entry(hex_hash)
@@ -104,11 +106,12 @@ async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_
             .push(node.to_string());
     }
 
-    println!(
+    writeln!(
+        output,
         "\nCompatible nodes\n{}",
         serde_json::to_string_pretty(&compatibility_map)
             .context("Failed to parse compatibility map")?
-    );
+    )?;
 
     Ok(())
 }

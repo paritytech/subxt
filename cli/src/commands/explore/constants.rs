@@ -12,7 +12,7 @@ pub struct ConstantsSubcommand {
     constant: Option<String>,
 }
 
-pub(crate) fn explore_constants(
+pub fn explore_constants(
     command: ConstantsSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata,
@@ -20,10 +20,10 @@ pub(crate) fn explore_constants(
     let pallet_name = pallet_metadata.name();
     let Some(constant_name) = command.constant else {
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
-        let mut output = "Usage:".to_string();
+        writeln!(output, "Usage:")?;
         writeln!(output, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        writeln!(output, "        explore a specific call within this pallet\n\n{available_constants}")?;
-        return Ok(output);
+        write!(output, "        explore a specific call within this pallet\n\n{available_constants}")?;
+        return Ok(());
     };
 
     // if specified constant is wrong, show user the constants to choose from (but this time as an error):
@@ -31,7 +31,7 @@ pub(crate) fn explore_constants(
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
         let mut description = "Usage:".to_string();
         writeln!(description, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        writeln!(description, "        explore a specific call within this pallet\n\n{available_constants}")?;
+        write!(description, "        explore a specific call within this pallet\n\n{available_constants}")?;
         let err = eyre!("constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}");
         return Err(err);
     };
@@ -46,7 +46,7 @@ pub(crate) fn explore_constants(
     // shape
     let mut type_description = print_type_description(&constant.ty(), metadata.types())?;
     type_description = with_indent(type_description, 4);
-    write!(
+    writeln!(
         output,
         "\n\nThe constant has the following shape:\n{type_description}"
     )?;
@@ -56,10 +56,10 @@ pub(crate) fn explore_constants(
         scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
     write!(
         output,
-        "\n\nThe value of the constant is:\n    {}",
+        "\nThe value of the constant is:\n    {}",
         scale_value::stringify::to_string(&scale_val)
     )?;
-    Ok(output)
+    Ok(())
 }
 
 fn print_available_constants(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {

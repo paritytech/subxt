@@ -1,8 +1,6 @@
 use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
 use clap::{Parser as ClapParser, Subcommand};
 
-use std::fmt::Write;
-
 use std::write;
 
 use codec::Decode;
@@ -82,7 +80,7 @@ pub enum PalletSubcommand {
 }
 
 /// cargo run -- explore --file=../artifacts/polkadot_metadata.scale
-pub async fn run(opts: Opts) -> color_eyre::Result<String> {
+pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     // get the metadata
     let bytes = opts.file_or_url.fetch().await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
@@ -104,30 +102,31 @@ pub async fn run(opts: Opts) -> color_eyre::Result<String> {
         let docs_string = print_docs_with_indent(pallet_metadata.docs(), 4);
         let mut output = String::new();
         if !docs_string.is_empty() {
-            write!(output, "Description:\n{docs_string}")?;
+            writeln!(output, "Description:\n{docs_string}")?;
         }
-        write!(output, "Usage:")?;
+        writeln!(output, "Usage:")?;
         writeln!(output, "    subxt explore {pallet_name} calls")?;
         writeln!(output, "        explore the calls that can be made into this pallet")?;
         writeln!(output, "    subxt explore {pallet_name} constants")?;
         writeln!(output, "        explore the constants held in this pallet")?;
         writeln!(output, "    subxt explore {pallet_name} storage")?;
-        writeln!(output, "        explore the storage values held in this pallet")?;
-        return Ok(output);
+        write!(output, "        explore the storage values held in this pallet")?;
+        return Ok(());
     };
 
-    let subcommand_output = match pallet_subcomand {
-        PalletSubcommand::Calls(command) => explore_calls(command, &metadata, pallet_metadata),
+    match pallet_subcomand {
+        PalletSubcommand::Calls(command) => {
+            explore_calls(command, &metadata, pallet_metadata, output)
+        }
         PalletSubcommand::Constants(command) => {
-            explore_constants(command, &metadata, pallet_metadata)
+            explore_constants(command, &metadata, pallet_metadata, output)
         }
         PalletSubcommand::Storage(command) => {
             // if the metadata came from some url, we use that same url to make storage calls against.
             let node_url = opts.file_or_url.url.map(|url| url.to_string());
-            explore_storage(command, &metadata, pallet_metadata, node_url).await
+            explore_storage(command, &metadata, pallet_metadata, node_url, output).await
         }
-    }?;
-    Ok(subcommand_output)
+    }
 }
 
 fn print_available_pallets(metadata: &Metadata) -> String {
@@ -138,9 +137,8 @@ fn print_available_pallets(metadata: &Metadata) -> String {
         let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
-            writeln!(output, "    {}", pallet).unwrap();
+            write!(output, "\n    {}", pallet).unwrap();
         }
-        output
     }
 }
 
@@ -164,11 +162,14 @@ pub mod tests {
         let mut split: Vec<&str> = cli_command.split(' ').filter(|e| !e.is_empty()).collect();
         args.append(&mut split);
         let opts: Opts = clap::Parser::try_parse_from(args)?;
-        run(opts).await
+        let mut output: Vec<u8> = Vec::new();
+        run(opts, &mut output)
+            .await
+            .map(|_| String::from_utf8(output).unwrap())
     }
 
     #[tokio::test]
-    async fn test_run_fn() {
+    async fn test_commands() {
         // show pallets:
         let output = simulate_run("").await;
         assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    Staking\n    System");
@@ -192,7 +193,6 @@ pub mod tests {
         // check that we can explore a certain call:
         let output = simulate_run("Balances calls transfer").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls transfer <SCALE_VALUE>\n        construct the call by providing a valid argument\n\nThe call expect expects a <SCALE_VALUE> with this shape:\n    {\n        dest: enum MultiAddress"));
-
         // check that unsigned extrinsic can be constructed:
         let output =
             simulate_run("Balances calls transfer {\"dest\":v\"Raw\"((255,255, 255)),\"value\":0}")
@@ -207,6 +207,6 @@ pub mod tests {
         // check that we can explore a certain storage entry:
         let output = simulate_run("System storage Account").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore System storage Account <KEY_VALUE>\n\nDescription:\n    The full account information for a particular account ID."));
-        // todo in the future: integrate with substrate-testrunner to spawn up a node and send an actual storage query to it: e.g. `subxt explore System storage Digest`
+        // in the future we could also integrate with substrate-testrunner to spawn up a node and send an actual storage query to it: e.g. `subxt explore System storage Digest`
     }
 }

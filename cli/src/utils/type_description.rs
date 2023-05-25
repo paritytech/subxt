@@ -7,8 +7,8 @@ use scale_info::{
 
 /// pretty formatted type description
 pub fn print_type_description<T>(ty: &T, registry: &PortableRegistry) -> color_eyre::Result<String>
-where
-    T: TypeDescription,
+    where
+        T: TypeDescription,
 {
     let type_description = ty.type_description(registry)?;
     let type_description = format_type_description(&type_description);
@@ -125,7 +125,7 @@ impl TypeDescription for TypeDefPrimitive {
             TypeDefPrimitive::I128 => "i128",
             TypeDefPrimitive::I256 => "i256",
         }
-        .into())
+            .into())
     }
 }
 
@@ -264,4 +264,34 @@ fn format_type_description(input: &str) -> String {
         }
     }
     output
+}
+
+
+#[cfg(test)]
+mod test {
+    use scale_info::scale::{Decode, Encode};
+    use scale_info::TypeInfo;
+    use crate::utils::make_type;
+    use crate::utils::type_description::{print_type_description};
+    use std::fmt::Write;
+    use std::write;
+
+    #[derive(Encode, Decode, Debug, Clone, TypeInfo)]
+    pub struct Foo {
+        hello: String,
+        num: i32,
+    }
+
+    #[test]
+    fn test_type_description() {
+        let (foo_type_id, foo_registry) = make_type::<Foo>();
+        let description =
+            print_type_description(&foo_type_id, &foo_registry).unwrap();
+        let mut output = String::new();
+        writeln!(output, "struct Foo {{").unwrap();
+        writeln!(output, "    hello: String,").unwrap();
+        writeln!(output, "    num: i32").unwrap();
+        write!(output, "}}").unwrap();
+        assert_eq!(description, output);
+    }
 }
