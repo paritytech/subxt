@@ -193,7 +193,8 @@ fn codegen(
         crate_path,
         should_gen_docs,
         runtime_types_only,
-    ).map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
+    )
+    .map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
     writeln!(output, "{runtime_api}")?;
     Ok(())
 }

@@ -63,7 +63,7 @@ impl FileOrUrl {
                 uri,
                 version.unwrap_or_default(),
             )
-                .await?),
+            .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let uri = Uri::from_static("ws://localhost:9944");
@@ -94,7 +94,6 @@ pub fn with_indent(s: String, indent: usize) -> String {
         .collect::<Vec<_>>()
         .join("\n")
 }
-
 
 /// Given a type definition, return type ID and registry representing it.
 #[allow(dead_code)]

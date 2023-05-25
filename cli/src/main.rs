@@ -29,6 +29,6 @@ async fn main() -> color_eyre::Result<()> {
         Command::Codegen(opts) => commands::codegen::run(opts, &mut output).await,
         Command::Compatibility(opts) => commands::compatibility::run(opts, &mut output).await,
         Command::Version(opts) => commands::version::run(opts, &mut output),
-        Command::Explore(opts) => commands::explore::run(opts, &mut output).await
+        Command::Explore(opts) => commands::explore::run(opts, &mut output).await,
     }
 }
