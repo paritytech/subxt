@@ -501,9 +501,8 @@ async fn chainhead_unstable_body() {
     let extrinsics: Vec<Vec<u8>> = body.block.extrinsics.into_iter().map(|ext| ext.0).collect();
     let expected = format!("0x{}", hex::encode(extrinsics.encode()));
 
-    #[cfg(feature = "unstable-light-client")]
     assert_matches!(event,
-        ChainHeadEvent::Done(done) if done.value == expected
+        ChainHeadEvent::Done(done) if done.result == expected
     );
 }
 
@@ -557,8 +556,7 @@ async fn chainhead_unstable_storage() {
         .unwrap();
     let event = sub.next().await.unwrap().unwrap();
 
-    #[cfg(feature = "unstable-light-client")]
-    assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.value.is_some());
+    assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.result.is_some());
 }
 
 #[tokio::test]

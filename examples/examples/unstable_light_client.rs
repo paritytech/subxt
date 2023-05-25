@@ -13,11 +13,9 @@
 //! This feature is experimental and things might break without notice.
 
 use futures::StreamExt;
-use sp_keyring::AccountKeyring;
 use std::sync::Arc;
 use subxt::{
     rpc::{types::FollowEvent, LightClient},
-    utils::AccountId32,
     OnlineClient, PolkadotConfig,
 };
 
@@ -81,21 +79,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("  chainHead_header: {header}");
             } else {
                 println!("  chainHead_header: Header not in memory for {hash}");
-            }
-
-            // Make a storage query.
-            let account_id: AccountId32 = AccountKeyring::Alice.to_account_id().into();
-            let addr = polkadot::storage().system().account(account_id);
-            let addr_bytes = api.storage().address_bytes(&addr).unwrap();
-
-            let mut sub = api
-                .rpc()
-                .chainhead_unstable_storage(sub_id.clone(), hash, &addr_bytes, None)
-                .await?;
-
-            if let Some(event) = sub.next().await {
-                let event = event?;
-                println!("  chainHead_storage event: {event:?}");
             }
         }
     }
