@@ -509,7 +509,7 @@ pub enum FollowEvent<Hash> {
 #[serde(rename_all = "camelCase")]
 pub struct ChainHeadResult<T> {
     /// Result of the method.
-    #[cfg(not(feature = "experimental-light-client"))]
+    #[cfg(not(feature = "unstable-light-client"))]
     pub result: T,
     /// Result of the method.
     ///
@@ -517,7 +517,7 @@ pub struct ChainHeadResult<T> {
     ///
     /// `chainHead_body` returns a vector of values, while
     /// `chainHead_storage` returns just one plain element.
-    #[cfg(feature = "experimental-light-client")]
+    #[cfg(feature = "unstable-light-client")]
     pub value: T,
 }
 

@@ -13,7 +13,7 @@ homepage.workspace = true
 description = "Subxt example usage"
 
 [dev-dependencies]
-subxt = { workspace = true, default-features = false, features = ["default", "experimental-light-client"]}
+subxt = { workspace = true, default-features = false, features = ["default", "unstable-light-client"]}
 tokio = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }

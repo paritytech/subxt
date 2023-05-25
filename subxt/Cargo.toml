@@ -42,7 +42,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-experimental-light-client = [
+unstable-light-client = [
     "smoldot-light/std",
     "tokio-stream",
     "tokio/sync",
