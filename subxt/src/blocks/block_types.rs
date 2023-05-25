@@ -70,7 +70,7 @@ where
 
     /// Fetch and return the block body.
     pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
-        let ids = ExtrinsicPartTypeIds::new(self.client.metadata().runtime_metadata())?;
+        let ids = ExtrinsicPartTypeIds::new(&self.client.metadata())?;
         let block_hash = self.header.hash();
         let Some(block_details) = self.client.rpc().block(Some(block_hash)).await? else {
             return Err(BlockError::not_found(block_hash).into());

@@ -5,10 +5,10 @@
 use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
-use color_eyre::eyre;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use color_eyre::eyre::{self, bail};
+use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::io::{self, Write};
-use subxt_metadata::{metadata_v14_to_latest, retain_metadata};
+use subxt_metadata::Metadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -36,19 +36,19 @@ pub struct Opts {
 
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     let bytes = opts.file_or_url.fetch().await?;
-    let mut metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+    let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
+
+    let version = match &metadata.1 {
+        RuntimeMetadata::V14(_) => Version::V14,
+        RuntimeMetadata::V15(_) => Version::V15,
+        _ => Version::Unknown,
+    };
 
     if opts.pallets.is_some() || opts.runtime_apis.is_some() {
-        let mut metadata_v15 = match metadata.1 {
-            RuntimeMetadata::V14(metadata_v14) => metadata_v14_to_latest(metadata_v14),
-            RuntimeMetadata::V15(metadata_v15) => metadata_v15,
-            _ => {
-                return Err(eyre::eyre!(
-                    "Unsupported metadata version {:?}, expected V14.",
-                    metadata.1
-                ));
-            }
-        };
+        // convert to internal type:
+        let mut md = Metadata::try_from(metadata)?;
+
+        // retain pallets and/or runtime APIs given:
         let retain_pallets_fn: Box<dyn Fn(&str) -> bool> = match opts.pallets.as_ref() {
             Some(pallets) => Box::new(|name| pallets.iter().any(|p| &**p == name)),
             None => Box::new(|_| true),
@@ -57,8 +57,16 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             Some(apis) => Box::new(|name| apis.iter().any(|p| &**p == name)),
             None => Box::new(|_| true),
         };
-        retain_metadata(&mut metadata_v15, retain_pallets_fn, retain_runtime_apis_fn);
-        metadata = metadata_v15.into();
+        md.retain(retain_pallets_fn, retain_runtime_apis_fn);
+
+        // Convert back to wire format, preserving version:
+        metadata = match version {
+            Version::V14 => RuntimeMetadataV15::from(md).into(),
+            Version::V15 => RuntimeMetadataV15::from(md).into(),
+            Version::Unknown => {
+                bail!("Unsupported metadata version; V14 or V15 metadata is expected.")
+            }
+        }
     }
 
     match opts.format.as_str() {
@@ -81,4 +89,10 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
             opts.format
         )),
     }
+}
+
+enum Version {
+    V14,
+    V15,
+    Unknown,
 }

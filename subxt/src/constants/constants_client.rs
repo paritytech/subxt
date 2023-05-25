@@ -5,8 +5,8 @@
 use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
-    error::Error,
-    metadata::{DecodeWithMetadata, MetadataError},
+    error::{Error, MetadataError},
+    metadata::DecodeWithMetadata,
     Config,
 };
 use derivative::Derivative;
@@ -39,13 +39,14 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
             let expected_hash = self
                 .client
                 .metadata()
-                .constant_hash(address.pallet_name(), address.constant_name())?;
+                .pallet_by_name(address.pallet_name())
+                .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?
+                .constant_hash(address.constant_name())
+                .ok_or_else(|| {
+                    MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+                })?;
             if actual_hash != expected_hash {
-                return Err(MetadataError::IncompatibleConstantMetadata(
-                    address.pallet_name().into(),
-                    address.constant_name().into(),
-                )
-                .into());
+                return Err(MetadataError::IncompatibleCodegen.into());
             }
         }
         Ok(())
@@ -64,11 +65,17 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         self.validate(address)?;
 
         // 2. Attempt to decode the constant into the type given:
-        let pallet = metadata.pallet(address.pallet_name())?;
-        let constant = pallet.constant(address.constant_name())?;
+        let pallet = metadata
+            .pallet_by_name(address.pallet_name())
+            .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?;
+        let constant = pallet
+            .constant_by_name(address.constant_name())
+            .ok_or_else(|| {
+                MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+            })?;
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
-            &mut &*constant.value,
-            constant.ty.id,
+            &mut constant.value(),
+            constant.ty(),
             &metadata,
         )?;
         Ok(value)

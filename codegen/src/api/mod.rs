@@ -11,8 +11,7 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use frame_metadata::v15::RuntimeMetadataV15;
-use subxt_metadata::{metadata_v14_to_latest, MetadataHasher};
+use subxt_metadata::Metadata;
 
 use super::DerivesRegistry;
 use crate::error::CodegenError;
@@ -23,7 +22,6 @@ use crate::{
     CratePath,
 };
 use codec::Decode;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -135,7 +133,7 @@ pub fn generate_runtime_api_from_bytes(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
+    let metadata = Metadata::decode(&mut &bytes[..])?;
 
     let generator = RuntimeGenerator::new(metadata);
     if runtime_types_only {
@@ -159,7 +157,7 @@ pub fn generate_runtime_api_from_bytes(
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
-    metadata: RuntimeMetadataV15,
+    metadata: Metadata,
 }
 
 impl RuntimeGenerator {
@@ -174,15 +172,8 @@ impl RuntimeGenerator {
     /// Panics if the runtime metadata version is not supported.
     ///
     /// Supported versions: v14 and v15.
-    pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
-        let mut metadata = match metadata.1 {
-            RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
-            RuntimeMetadata::V15(v15) => v15,
-            _ => panic!("Unsupported metadata version {:?}", metadata.1),
-        };
-
+    pub fn new(mut metadata: Metadata) -> Self {
         Self::ensure_unique_type_paths(&mut metadata);
-
         RuntimeGenerator { metadata }
     }
 
@@ -190,9 +181,9 @@ impl RuntimeGenerator {
     /// unique path, so that types with matching paths don't end up overwriting each other
     /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
     /// de-duplicate those into single types with a generic.
-    fn ensure_unique_type_paths(metadata: &mut RuntimeMetadataV15) {
+    fn ensure_unique_type_paths(metadata: &mut Metadata) {
         let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
-        for ty in &mut metadata.types.types {
+        for ty in metadata.types_mut().types.iter_mut() {
             // Ignore types without a path (ie prelude types).
             if ty.ty.path.namespace().is_empty() {
                 continue;
@@ -249,7 +240,7 @@ impl RuntimeGenerator {
         let rust_items = item_mod_ir.rust_items();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types,
+            self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives,
@@ -300,7 +291,7 @@ impl RuntimeGenerator {
         let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
-            &self.metadata.types,
+            self.metadata.types(),
             "runtime_types",
             type_substitutes,
             derives.clone(),
@@ -311,12 +302,11 @@ impl RuntimeGenerator {
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
             .metadata
-            .pallets
-            .iter()
+            .pallets()
             .map(|pallet| {
                 (
                     pallet,
-                    format_ident!("{}", pallet.name.to_string().to_snake_case()),
+                    format_ident!("{}", pallet.name().to_string().to_snake_case()),
                 )
             })
             .collect::<Vec<_>>();
@@ -326,21 +316,21 @@ impl RuntimeGenerator {
         // validation of just those pallets.
         let pallet_names: Vec<_> = self
             .metadata
-            .pallets
-            .iter()
-            .map(|pallet| &pallet.name)
+            .pallets()
+            .map(|pallet| pallet.name())
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash = MetadataHasher::new()
+        let metadata_hash = self
+            .metadata
+            .hasher()
             .only_these_pallets(&pallet_names)
-            .hash(&self.metadata);
+            .hash();
 
         let modules = pallets_with_mod_names
             .iter()
             .map(|(pallet, mod_name)| {
                 let calls = calls::generate_calls(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -357,7 +347,6 @@ impl RuntimeGenerator {
                 )?;
 
                 let storage_mod = storage::generate_storage(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -366,7 +355,6 @@ impl RuntimeGenerator {
                 )?;
 
                 let constants_mod = constants::generate_constants(
-                    &self.metadata,
                     &type_gen,
                     pallet,
                     types_mod_ident,
@@ -390,12 +378,12 @@ impl RuntimeGenerator {
             })
             .collect::<Result<Vec<_>, CodegenError>>()?;
 
-        let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_event_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.event.as_ref().map(|_| {
+            p.event_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Event),
@@ -410,12 +398,12 @@ impl RuntimeGenerator {
             }
         };
 
-        let outer_extrinsic_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_extrinsic_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.calls.as_ref().map(|_| {
+            p.call_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Call),
@@ -430,11 +418,12 @@ impl RuntimeGenerator {
             }
         };
 
-        let root_event_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_event_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = &p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.event.as_ref().map(|_| {
+
+            p.event_ty_id().map(|_| {
                 // An 'if' arm for the RootEvent impl to match this variant name:
                 quote! {
                     if pallet_name == #variant_name_str {
@@ -448,11 +437,11 @@ impl RuntimeGenerator {
             })
         });
 
-        let root_extrinsic_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_extrinsic_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.calls.as_ref().map(|_| {
+            p.call_ty_id().map(|_| {
                 // An 'if' arm for the RootExtrinsic impl to match this variant name:
                 quote! {
                     if pallet_name == #variant_name_str {
@@ -466,12 +455,12 @@ impl RuntimeGenerator {
             })
         });
 
-        let outer_error_variants = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name);
-            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_error_variants = self.metadata.pallets().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name());
+            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
 
-            p.error.as_ref().map(|_| {
+            p.error_ty_id().map(|_| {
                 quote! {
                     #[codec(index = #index)]
                     #variant_name(#mod_name::Error),
@@ -486,41 +475,41 @@ impl RuntimeGenerator {
             }
         };
 
-        let root_error_if_arms = self.metadata.pallets.iter().filter_map(|p| {
-            let variant_name_str = &p.name;
+        let root_error_if_arms = self.metadata.pallets().filter_map(|p| {
+            let variant_name_str = &p.name();
             let variant_name = format_ident!("{}", variant_name_str);
             let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.error.as_ref().map(|err|
-                {
-                    let type_id = err.ty.id;
-                    quote! {
+
+            p.error_ty_id().map(|type_id| {
+                quote! {
                     if pallet_name == #variant_name_str {
                         let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
                         return Ok(Error::#variant_name(variant_error));
                     }
                 }
-                }
-            )
+            })
         });
 
         let mod_ident = &item_mod_ir.ident;
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
-                (!pallet.constants.is_empty()).then_some(pallet_mod_name)
+                pallet
+                    .constants()
+                    .next()
+                    .is_some()
+                    .then_some(pallet_mod_name)
             })
             .collect();
 
         let pallets_with_storage: Vec<_> = pallets_with_mod_names
             .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                pallet.storage.as_ref().map(|_| pallet_mod_name)
-            })
+            .filter_map(|(pallet, pallet_mod_name)| pallet.storage().map(|_| pallet_mod_name))
             .collect();
 
         let pallets_with_calls: Vec<_> = pallets_with_mod_names
             .iter()
-            .filter_map(|(pallet, pallet_mod_name)| pallet.calls.as_ref().map(|_| pallet_mod_name))
+            .filter_map(|(pallet, pallet_mod_name)| pallet.call_ty_id().map(|_| pallet_mod_name))
             .collect();
 
         let rust_items = item_mod_ir.rust_items();
@@ -632,9 +621,9 @@ impl RuntimeGenerator {
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
                 pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
+                    let runtime_metadata_hash = client.metadata().hasher().only_these_pallets(&PALLETS).hash();
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(#crate_path::error::MetadataError::IncompatibleMetadata)
+                        Err(#crate_path::error::MetadataError::IncompatibleCodegen)
                     } else {
                         Ok(())
                     }

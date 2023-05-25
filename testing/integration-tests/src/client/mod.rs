@@ -8,7 +8,6 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
-use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::storage::well_known_keys;
 use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
@@ -21,6 +20,7 @@ use subxt::{
     tx::Signer,
     utils::AccountId32,
 };
+use subxt_metadata::Metadata;
 
 #[tokio::test]
 async fn insert_key() {
@@ -420,27 +420,23 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 }
 
 #[tokio::test]
-async fn rpc_state_call() {
+async fn rpc_state_call() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    // Call into the runtime of the chain to get the Metadata.
-    let (_, meta) = api
+    // get metadata via state_call.
+    let (_, meta1) = api
         .rpc()
-        .state_call::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None, None)
-        .await
-        .unwrap();
-    let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => {
-            subxt_metadata::metadata_v14_to_latest(metadata)
-        }
-        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
-        _ => panic!("Metadata V14 or V15 unavailable"),
-    };
-    // Compare the runtime API call against the `state_getMetadata`.
-    let metadata = api.rpc().metadata_legacy(None).await.unwrap();
-    let metadata = metadata.runtime_metadata();
-    assert_eq!(&metadata_call, metadata);
+        .state_call::<(Compact<u32>, Metadata)>("Metadata_metadata", None, None)
+        .await?;
+
+    // get metadata via `state_getMetadata`.
+    let meta2 = api.rpc().metadata_legacy(None).await?;
+
+    // They should be the same.
+    assert_eq!(meta1.encode(), meta2.encode());
+
+    Ok(())
 }
 
 #[tokio::test]

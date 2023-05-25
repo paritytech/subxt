@@ -3,10 +3,9 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::v15::PalletMetadata;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use scale_info::form::PortableForm;
+use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
 
@@ -41,19 +40,19 @@ use super::CodegenError;
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_events(
     type_gen: &TypeGenerator,
-    pallet: &PalletMetadata<PortableForm>,
+    pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.
-    let Some(event) = &pallet.event else {
+    let Some(event_ty) = pallet.event_ty_id() else {
         return Ok(quote!())
     };
 
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
-        event.ty.id,
+        event_ty,
         |name| name.into(),
         "Event",
         crate_path,
@@ -61,7 +60,7 @@ pub fn generate_events(
     )?;
 
     let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
-        let pallet_name = &pallet.name;
+        let pallet_name = pallet.name();
         let event_struct = &struct_def.name;
         let event_name = variant_name;
 
@@ -74,8 +73,8 @@ pub fn generate_events(
             }
         }
     });
-    let event_type = type_gen.resolve_type_path(event.ty.id);
-    let event_ty = type_gen.resolve_type(event.ty.id);
+    let event_type = type_gen.resolve_type_path(event_ty);
+    let event_ty = type_gen.resolve_type(event_ty);
     let docs = &event_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })

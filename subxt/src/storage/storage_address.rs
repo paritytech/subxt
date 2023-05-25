@@ -4,13 +4,13 @@
 
 use crate::{
     dynamic::{DecodedValueThunk, Value},
-    error::{Error, StorageAddressError},
+    error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-use frame_metadata::v15::{StorageEntryType, StorageHasher};
 use scale_info::TypeDef;
 use std::borrow::Cow;
+use subxt_metadata::{StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -138,10 +138,17 @@ where
     }
 
     fn append_entry_bytes(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error> {
-        let pallet = metadata.pallet(&self.pallet_name)?;
-        let storage = pallet.storage(&self.entry_name)?;
+        let pallet = metadata
+            .pallet_by_name(self.pallet_name())
+            .ok_or_else(|| MetadataError::PalletNameNotFound(self.pallet_name().to_owned()))?;
+        let storage = pallet
+            .storage()
+            .ok_or_else(|| MetadataError::StorageNotFoundInPallet(self.pallet_name().to_owned()))?;
+        let entry = storage
+            .entry_by_name(self.entry_name())
+            .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
-        match &storage.ty {
+        match entry.entry_type() {
             StorageEntryType::Plain(_) => {
                 if !self.storage_entry_keys.is_empty() {
                     Err(StorageAddressError::WrongNumberOfKeys {
@@ -153,10 +160,13 @@ where
                     Ok(())
                 }
             }
-            StorageEntryType::Map { hashers, key, .. } => {
+            StorageEntryType::Map {
+                hashers, key_ty, ..
+            } => {
                 let ty = metadata
-                    .resolve_type(key.id)
-                    .ok_or(StorageAddressError::TypeNotFound(key.id))?;
+                    .types()
+                    .resolve(*key_ty)
+                    .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
                 // If the key is a tuple, we encode each value to the corresponding tuple type.
                 // If the key is not a tuple, encode a single value to the key type.
@@ -164,7 +174,7 @@ where
                     TypeDef::Tuple(tuple) => {
                         either::Either::Left(tuple.fields.iter().map(|f| f.id))
                     }
-                    _other => either::Either::Right(std::iter::once(key.id)),
+                    _other => either::Either::Right(std::iter::once(*key_ty)),
                 };
 
                 if type_ids.len() != self.storage_entry_keys.len() {

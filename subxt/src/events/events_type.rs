@@ -6,8 +6,11 @@
 
 use super::{Phase, StaticEvent};
 use crate::{
-    client::OnlineClientT, error::Error, events::events_client::get_event_bytes,
-    metadata::EventMetadata, Config, Metadata,
+    client::OnlineClientT,
+    error::{Error, MetadataError},
+    events::events_client::get_event_bytes,
+    metadata::types::PalletMetadata,
+    Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
@@ -224,20 +227,25 @@ impl EventDetails {
         let event_fields_start_idx = all_bytes.len() - input.len();
 
         // Get metadata for the event:
-        let event_metadata = metadata.event(pallet_index, variant_index)?;
+        let event_pallet = metadata
+            .pallet_by_index(pallet_index)
+            .ok_or(MetadataError::PalletIndexNotFound(pallet_index))?;
+        let event_variant = event_pallet
+            .event_variant_by_index(variant_index)
+            .ok_or(MetadataError::VariantIndexNotFound(variant_index))?;
         tracing::debug!(
             "Decoding Event '{}::{}'",
-            event_metadata.pallet(),
-            event_metadata.event()
+            event_pallet.name(),
+            &event_variant.name
         );
 
         // Skip over the bytes belonging to this event.
-        for field_metadata in event_metadata.fields() {
+        for field_metadata in &event_variant.fields {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
                 field_metadata.ty.id,
-                &metadata.runtime_metadata().types,
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -292,19 +300,25 @@ impl EventDetails {
 
     /// The name of the pallet from whence the Event originated.
     pub fn pallet_name(&self) -> &str {
-        self.event_metadata().pallet()
+        self.event_metadata().pallet.name()
     }
 
     /// The name of the event (ie the name of the variant that it corresponds to).
     pub fn variant_name(&self) -> &str {
-        self.event_metadata().event()
+        &self.event_metadata().variant.name
     }
 
-    /// Fetch the metadata for this event.
-    pub fn event_metadata(&self) -> &EventMetadata {
-        self.metadata
-            .event(self.pallet_index(), self.variant_index())
-            .expect("this must exist in order to have produced the EventDetails")
+    /// Fetch details from the metadata for this event.
+    pub fn event_metadata(&self) -> EventMetadataDetails {
+        let pallet = self
+            .metadata
+            .pallet_by_index(self.pallet_index())
+            .expect("event pallet to be found; we did this already during decoding");
+        let variant = pallet
+            .event_variant_by_index(self.variant_index())
+            .expect("event variant to be found; we did this already during decoding");
+
+        EventMetadataDetails { pallet, variant }
     }
 
     /// Return _all_ of the bytes representing this event, which include, in order:
@@ -332,8 +346,8 @@ impl EventDetails {
         use scale_decode::DecodeAsFields;
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            event_metadata.fields(),
-            &self.metadata.runtime_metadata().types,
+            &event_metadata.variant.fields,
+            self.metadata.types(),
         )?;
 
         Ok(decoded)
@@ -343,10 +357,10 @@ impl EventDetails {
     /// Such types are exposed in the codegen as `pallet_name::events::EventName` types.
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
-        if ev_metadata.pallet() == E::PALLET && ev_metadata.event() == E::EVENT {
+        if ev_metadata.pallet.name() == E::PALLET && ev_metadata.variant.name == E::EVENT {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),
-                ev_metadata.fields(),
+                &ev_metadata.variant.fields,
                 self.metadata.types(),
             )?;
             Ok(Some(decoded))
@@ -359,14 +373,12 @@ impl EventDetails {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: RootEvent>(&self) -> Result<E, Error> {
+        let ev_metadata = self.event_metadata();
         let pallet_bytes = &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
-        let pallet = self.metadata.pallet(self.pallet_name())?;
-        let pallet_event_ty = pallet.event_ty_id().ok_or_else(|| {
-            Error::Metadata(crate::metadata::MetadataError::EventNotFound(
-                pallet.index(),
-                self.variant_index(),
-            ))
-        })?;
+        let pallet_event_ty = ev_metadata
+            .pallet
+            .event_ty_id()
+            .ok_or_else(|| MetadataError::EventTypeNotFoundInPallet(ev_metadata.pallet.index()))?;
 
         E::root_event(
             pallet_bytes,
@@ -375,6 +387,12 @@ impl EventDetails {
             &self.metadata,
         )
     }
+}
+
+/// Details for the given event plucked from the metadata.
+pub struct EventMetadataDetails<'a> {
+    pub pallet: PalletMetadata<'a>,
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// This trait is implemented on the statically generated root event type, so that we're able
@@ -406,7 +424,6 @@ pub(crate) mod test_utils {
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
-    use std::convert::TryFrom;
 
     /// An "outer" events enum containing exactly one event.
     #[derive(
@@ -511,7 +528,7 @@ pub(crate) mod test_utils {
         let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
-        Metadata::try_from(runtime_metadata).unwrap()
+        Metadata::new(runtime_metadata.try_into().unwrap())
     }
 
     /// Build an `Events` object for test purposes, based on the details provided,
@@ -584,7 +601,7 @@ mod tests {
         actual: EventDetails,
         expected: TestRawEventDetails,
     ) {
-        let types = &metadata.runtime_metadata().types;
+        let types = &metadata.types();
 
         // Make sure that the bytes handed back line up with the fields handed back;
         // encode the fields back into bytes and they should be equal.

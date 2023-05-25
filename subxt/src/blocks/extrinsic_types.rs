@@ -6,16 +6,15 @@ use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher},
-    error::{BlockError, Error},
+    error::{BlockError, Error, MetadataError},
     events,
-    metadata::ExtrinsicMetadata,
+    metadata::types::PalletMetadata,
     rpc::types::ChainBlockExtrinsic,
     Metadata,
 };
 
 use codec::Decode;
 use derivative::Derivative;
-use frame_metadata::v15::RuntimeMetadataV15;
 use scale_decode::DecodeAsFields;
 use std::{collections::HashMap, sync::Arc};
 
@@ -242,7 +241,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.address,
-                &metadata.runtime_metadata().types,
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -251,7 +250,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.signature,
-                &metadata.runtime_metadata().types,
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -259,7 +258,7 @@ where
             scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ids.extra,
-                &metadata.runtime_metadata().types,
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
@@ -357,19 +356,25 @@ where
 
     /// The name of the pallet from whence the extrinsic originated.
     pub fn pallet_name(&self) -> Result<&str, Error> {
-        Ok(self.extrinsic_metadata()?.pallet())
+        Ok(self.extrinsic_metadata()?.pallet.name())
     }
 
     /// The name of the call (ie the name of the variant that it corresponds to).
     pub fn variant_name(&self) -> Result<&str, Error> {
-        Ok(self.extrinsic_metadata()?.call())
+        Ok(&self.extrinsic_metadata()?.variant.name)
     }
 
     /// Fetch the metadata for this extrinsic.
-    pub fn extrinsic_metadata(&self) -> Result<&ExtrinsicMetadata, Error> {
-        Ok(self
+    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails, Error> {
+        let pallet = self
             .metadata
-            .extrinsic(self.pallet_index(), self.variant_index())?)
+            .pallet_by_index(self.pallet_index())
+            .ok_or_else(|| MetadataError::PalletIndexNotFound(self.pallet_index()))?;
+        let variant = pallet
+            .call_variant_by_index(self.variant_index())
+            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))?;
+
+        Ok(ExtrinsicMetadataDetails { pallet, variant })
     }
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
@@ -382,8 +387,8 @@ where
 
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            extrinsic_metadata.fields(),
-            &self.metadata.runtime_metadata().types,
+            &extrinsic_metadata.variant.fields,
+            self.metadata.types(),
         )?;
 
         Ok(decoded)
@@ -393,10 +398,12 @@ where
     /// Such types are exposed in the codegen as `pallet_name::calls::types::CallName` types.
     pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
         let extrinsic_metadata = self.extrinsic_metadata()?;
-        if extrinsic_metadata.pallet() == E::PALLET && extrinsic_metadata.call() == E::CALL {
+        if extrinsic_metadata.pallet.name() == E::PALLET
+            && extrinsic_metadata.variant.name == E::CALL
+        {
             let decoded = E::decode_as_fields(
                 &mut self.field_bytes(),
-                extrinsic_metadata.fields(),
+                &extrinsic_metadata.variant.fields,
                 self.metadata.types(),
             )?;
             Ok(Some(decoded))
@@ -409,18 +416,15 @@ where
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
     pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
-        let pallet = self.metadata.pallet(self.pallet_name()?)?;
-        let pallet_extrinsic_ty = pallet.call_ty_id().ok_or_else(|| {
-            Error::Metadata(crate::metadata::MetadataError::ExtrinsicNotFound(
-                pallet.index(),
-                self.variant_index(),
-            ))
+        let md = self.extrinsic_metadata()?;
+        let pallet_extrinsic_ty = md.pallet.call_ty_id().ok_or_else(|| {
+            Error::Metadata(MetadataError::CallTypeNotFoundInPallet(md.pallet.index()))
         })?;
 
         // Ignore root enum index.
         E::root_extrinsic(
             &self.call_bytes()[1..],
-            self.pallet_name()?,
+            md.pallet.name(),
             pallet_extrinsic_ty,
             &self.metadata,
         )
@@ -438,6 +442,12 @@ where
         let ext_hash = T::Hasher::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
+}
+
+/// Details for the given extrinsic plucked from the metadata.
+pub struct ExtrinsicMetadataDetails<'a> {
+    pub pallet: PalletMetadata<'a>,
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// The type IDs extracted from the metadata that represent the
@@ -459,15 +469,15 @@ pub(crate) struct ExtrinsicPartTypeIds {
 
 impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
-    pub(crate) fn new(metadata: &RuntimeMetadataV15) -> Result<Self, BlockError> {
+    pub(crate) fn new(metadata: &Metadata) -> Result<Self, BlockError> {
         const ADDRESS: &str = "Address";
         const CALL: &str = "Call";
         const SIGNATURE: &str = "Signature";
         const EXTRA: &str = "Extra";
 
-        let id = metadata.extrinsic.ty.id;
+        let id = metadata.extrinsic().ty();
 
-        let Some(ty) = metadata.types.resolve(id) else {
+        let Some(ty) = metadata.types().resolve(id) else {
             return Err(BlockError::MissingType);
         };
 
@@ -732,7 +742,7 @@ mod tests {
         let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
-        Metadata::try_from(runtime_metadata).unwrap()
+        Metadata::new(runtime_metadata.try_into().unwrap())
     }
 
     /// Build an offline client to work with the test metadata.
@@ -752,18 +762,20 @@ mod tests {
         let metadata = metadata();
 
         // Except our metadata to contain the registered types.
-        let extrinsic = metadata
-            .extrinsic(0, 2)
+        let pallet = metadata.pallet_by_index(0).expect("pallet exists");
+        let extrinsic = pallet
+            .call_variant_by_index(2)
             .expect("metadata contains the RuntimeCall enum with this pallet");
-        assert_eq!(extrinsic.pallet(), "Test");
-        assert_eq!(extrinsic.call(), "TestCall");
+
+        assert_eq!(pallet.name(), "Test");
+        assert_eq!(&extrinsic.name, "TestCall");
     }
 
     #[test]
     fn insufficient_extrinsic_bytes() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with empty bytes.
         let result = ExtrinsicDetails::decode_from(
@@ -781,7 +793,7 @@ mod tests {
     fn unsupported_version_extrinsic() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with invalid version.
         let result = ExtrinsicDetails::decode_from(
@@ -805,7 +817,7 @@ mod tests {
     fn statically_decode_extrinsic() {
         let metadata = metadata();
         let client = client(metadata.clone());
-        let ids = ExtrinsicPartTypeIds::new(metadata.runtime_metadata()).unwrap();
+        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         let tx = crate::tx::dynamic(
             "Test",

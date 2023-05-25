@@ -38,7 +38,8 @@
 //!
 //! let account = AccountKeyring::Alice.to_account_id();
 //! let runtime_call = subxt::dynamic::runtime_api_call(
-//!     "Metadata_metadata_versions",
+//!     "Metadata",
+//!     "metadata_versions",
 //!     Vec::<Value<()>>::new()
 //! );
 //! ```
