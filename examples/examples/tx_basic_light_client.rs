@@ -98,23 +98,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut sub = api
                 .rpc()
                 .chainhead_unstable_body(sub_id.clone(), hash)
-                .await?
-                .take(5);
+                .await?;
 
-            while let Some(event) = sub.next().await {
+            if let Some(event) = sub.next().await {
                 let event = event?;
-
                 println!("  chainHead_body event: {event:?}");
             }
 
             // Fetch the block's header.
-            // let header = api
-            //     .rpc()
-            //     .chainhead_unstable_header(sub_id.clone(), hash)
-            //     .await?;
-            // let header = header.expect("RPC must have this header in memory; qed");
-
-            // println!("  chainHead_header: {header}");
+            let header = api
+                .rpc()
+                .chainhead_unstable_header(sub_id.clone(), hash)
+                .await?;
+            if let Some(header) = header {
+                println!("  chainHead_header: {header}");
+            } else {
+                println!("  chainHead_header: Header not in memory for {hash}");
+            }
 
             // Make a storage query.
             let account_id: AccountId32 = AccountKeyring::Alice.to_account_id().into();
@@ -124,12 +124,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut sub = api
                 .rpc()
                 .chainhead_unstable_storage(sub_id.clone(), hash, &addr_bytes, None)
-                .await?
-                .take(5);
+                .await?;
 
-            while let Some(event) = sub.next().await {
+            if let Some(event) = sub.next().await {
                 let event = event?;
-
                 println!("  chainHead_storage event: {event:?}");
             }
         }
