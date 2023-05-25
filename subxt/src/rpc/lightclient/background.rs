@@ -100,6 +100,18 @@ impl BackgroundTask {
     /// Parse the response received from the light client and sent it to the appropriate user.
     async fn handle_rpc_response(&mut self, response: String) {
         match RpcResponse::from_str(&response) {
+            Ok(RpcResponse::Error { id, error }) => {
+                // Send the error back.
+                if let Some(sender) = self.requests.remove(&id) {
+                    if sender.send(error).is_err() {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            " Cannot send method response to id {:?}",
+                            id
+                        );
+                    }
+                }
+            }
             Ok(RpcResponse::Method { id, result }) => {
                 // Send the response back.
                 if let Some(sender) = self.requests.remove(&id) {
@@ -131,6 +143,9 @@ impl BackgroundTask {
                             "Cannot send notification to subscription {:?}",
                             id
                         );
+
+                        // Remove the sender if the subscription dropped the receiver.
+                        self.subscriptions.remove(&id);
                     }
                     return;
                 }
@@ -247,6 +262,12 @@ enum RpcResponse {
         /// Result.
         result: Box<RawValue>,
     },
+    Error {
+        /// Response ID.
+        id: String,
+        /// Error.
+        error: Box<RawValue>,
+    },
 }
 
 impl std::str::FromStr for RpcResponse {
@@ -281,6 +302,16 @@ impl std::str::FromStr for RpcResponse {
             /// Result.
             params: NotificationParams,
         }
+        #[derive(Deserialize)]
+        struct ErrorResponse {
+            /// JSON-RPC version.
+            #[allow(unused)]
+            jsonrpc: String,
+            /// Request ID.
+            id: String,
+            /// Error.
+            error: Box<RawValue>,
+        }
 
         // Check if the response can be mapped as an RPC method response.
         let result: Result<Response, _> = serde_json::from_str(response);
@@ -291,11 +322,19 @@ impl std::str::FromStr for RpcResponse {
             });
         }
 
-        let notification: ResponseNotification = serde_json::from_str(response)?;
-        Ok(RpcResponse::Subscription {
-            id: notification.params.subscription,
-            method: notification.method,
-            result: notification.params.result,
+        let result: Result<ResponseNotification, _> = serde_json::from_str(response);
+        if let Ok(notification) = result {
+            return Ok(RpcResponse::Subscription {
+                id: notification.params.subscription,
+                method: notification.method,
+                result: notification.params.result,
+            });
+        }
+
+        let error: ErrorResponse = serde_json::from_str(response)?;
+        Ok(RpcResponse::Error {
+            id: error.id,
+            error: error.error,
         })
     }
 }
