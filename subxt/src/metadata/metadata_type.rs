@@ -25,7 +25,8 @@ impl Metadata {
         }
     }
 
-    pub(crate) fn pallet_by_name_err(
+    /// Identical to [`Metadata::pallet_by_name`], but returns an error if the pallet is not found.
+    pub fn pallet_by_name_err(
         &self,
         name: &str,
     ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
@@ -33,7 +34,8 @@ impl Metadata {
             .ok_or_else(|| MetadataError::PalletNameNotFound(name.to_owned()))
     }
 
-    pub(crate) fn pallet_by_index_err(
+    /// Identical to [`Metadata::pallet_by_index`], but returns an error if the pallet is not found.
+    pub fn pallet_by_index_err(
         &self,
         index: u8,
     ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
@@ -41,7 +43,8 @@ impl Metadata {
             .ok_or_else(|| MetadataError::PalletIndexNotFound(index))
     }
 
-    pub(crate) fn runtime_api_trait_by_name_err(
+    /// Identical to [`Metadata::runtime_api_trait_by_name`], but returns an error if the trait is not found.
+    pub fn runtime_api_trait_by_name_err(
         &self,
         name: &str,
     ) -> Result<subxt_metadata::RuntimeApiMetadata, MetadataError> {
