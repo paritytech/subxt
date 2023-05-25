@@ -34,7 +34,6 @@
 use std::sync::Arc;
 
 use codec::{Decode, Encode};
-use frame_metadata::RuntimeMetadataPrefixed;
 use serde::Serialize;
 
 use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
@@ -149,8 +148,7 @@ impl<T: Config> Rpc<T> {
             .client
             .request("state_getMetadata", rpc_params![at])
             .await?;
-        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
-        let metadata: Metadata = meta.try_into()?;
+        let metadata = Metadata::decode(&mut &bytes[..])?;
         Ok(metadata)
     }
 
@@ -387,9 +385,7 @@ impl<T: Config> Rpc<T> {
 
         let bytes = opaque.ok_or(Error::Other("Metadata version not found".into()))?;
 
-        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
-
-        let metadata: Metadata = meta.try_into()?;
+        let metadata: Metadata = Decode::decode(&mut &bytes.0[..])?;
         Ok(metadata)
     }
 
@@ -404,9 +400,7 @@ impl<T: Config> Rpc<T> {
         let bytes: frame_metadata::OpaqueMetadata =
             self.state_call("Metadata_metadata", None, None).await?;
 
-        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes.0[..])?;
-
-        let metadata: Metadata = meta.try_into()?;
+        let metadata: Metadata = Decode::decode(&mut &bytes.0[..])?;
         Ok(metadata)
     }
 

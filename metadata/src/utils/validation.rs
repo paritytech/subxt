@@ -4,9 +4,9 @@
 
 //! Utility functions for metadata validation.
 
-use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
-    RuntimeMetadataV15, StorageEntryMetadata, StorageEntryType,
+use crate::{
+    ExtrinsicMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
+    StorageEntryMetadata, StorageEntryType,
 };
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
 use std::collections::HashSet;
@@ -194,12 +194,12 @@ fn get_type_hash(
 /// Obtain the hash representation of a `frame_metadata::v15::ExtrinsicMetadata`.
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
-    extrinsic: &ExtrinsicMetadata<PortableForm>,
+    extrinsic: &ExtrinsicMetadata,
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
     let mut bytes = concat_and_hash2(
-        &get_type_hash(registry, extrinsic.ty.id, &mut visited_ids),
+        &get_type_hash(registry, extrinsic.ty, &mut visited_ids),
         &[extrinsic.version; 32],
     );
 
@@ -207,12 +207,8 @@ fn get_extrinsic_hash(
         bytes = concat_and_hash4(
             &bytes,
             &hash(signed_extension.identifier.as_bytes()),
-            &get_type_hash(registry, signed_extension.ty.id, &mut visited_ids),
-            &get_type_hash(
-                registry,
-                signed_extension.additional_signed.id,
-                &mut visited_ids,
-            ),
+            &get_type_hash(registry, signed_extension.extra_ty, &mut visited_ids),
+            &get_type_hash(registry, signed_extension.additional_ty, &mut visited_ids),
         )
     }
 
@@ -222,33 +218,33 @@ fn get_extrinsic_hash(
 /// Get the hash corresponding to a single storage entry.
 fn get_storage_entry_hash(
     registry: &PortableRegistry,
-    entry: &StorageEntryMetadata<PortableForm>,
+    entry: &StorageEntryMetadata,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; HASH_LEN] {
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
         // Cloning 'entry.modifier' should essentially be a copy.
-        &[entry.modifier.clone() as u8; HASH_LEN],
+        &[entry.modifier as u8; HASH_LEN],
         &hash(&entry.default),
     );
 
-    match &entry.ty {
+    match &entry.entry_type {
         StorageEntryType::Plain(ty) => {
-            concat_and_hash2(&bytes, &get_type_hash(registry, ty.id, visited_ids))
+            concat_and_hash2(&bytes, &get_type_hash(registry, *ty, visited_ids))
         }
         StorageEntryType::Map {
             hashers,
-            key,
-            value,
+            key_ty,
+            value_ty,
         } => {
             for hasher in hashers {
                 // Cloning the hasher should essentially be a copy.
-                bytes = concat_and_hash2(&bytes, &[hasher.clone() as u8; HASH_LEN]);
+                bytes = concat_and_hash2(&bytes, &[*hasher as u8; HASH_LEN]);
             }
             concat_and_hash3(
                 &bytes,
-                &get_type_hash(registry, key.id, visited_ids),
-                &get_type_hash(registry, value.id, visited_ids),
+                &get_type_hash(registry, *key_ty, visited_ids),
+                &get_type_hash(registry, *value_ty, visited_ids),
             )
         }
     }
@@ -256,9 +252,9 @@ fn get_storage_entry_hash(
 
 /// Get the hash corresponding to a single runtime API method.
 fn get_runtime_method_hash(
-    metadata: &RuntimeMetadataV15,
-    trait_metadata: &RuntimeApiMetadata<PortableForm>,
-    method_metadata: &RuntimeApiMethodMetadata<PortableForm>,
+    registry: &PortableRegistry,
+    trait_name: &str,
+    method_metadata: &RuntimeApiMethodMetadata,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; HASH_LEN] {
     // The trait name is part of the runtime API call that is being
@@ -266,7 +262,7 @@ fn get_runtime_method_hash(
     // connected to the method in the same way as a parameter is
     // to the method.
     let mut bytes = concat_and_hash2(
-        &hash(trait_metadata.name.as_bytes()),
+        &hash(trait_name.as_bytes()),
         &hash(method_metadata.name.as_bytes()),
     );
 
@@ -274,198 +270,123 @@ fn get_runtime_method_hash(
         bytes = concat_and_hash3(
             &bytes,
             &hash(input.name.as_bytes()),
-            &get_type_hash(&metadata.types, input.ty.id, visited_ids),
+            &get_type_hash(registry, input.ty, visited_ids),
         );
     }
 
     bytes = concat_and_hash2(
         &bytes,
-        &get_type_hash(&metadata.types, method_metadata.output.id, visited_ids),
+        &get_type_hash(registry, method_metadata.output_ty, visited_ids),
     );
 
     bytes
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-fn get_runtime_trait_hash(
-    metadata: &RuntimeMetadataV15,
-    trait_metadata: &RuntimeApiMetadata<PortableForm>,
-) -> [u8; HASH_LEN] {
+fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::new();
-    let method_name = hash(trait_metadata.name.as_bytes());
+    let trait_name = &*trait_metadata.inner.name;
+    let method_bytes = trait_metadata
+        .methods()
+        .fold([0u8; HASH_LEN], |bytes, method_metadata| {
+            // We don't care what order the trait methods exist in, and want the hash to
+            // be identical regardless. For this, we can just XOR the hashes for each method
+            // together; we'll get the same output whichever order they are XOR'd together in,
+            // so long as each individual method is the same.
+            xor(
+                bytes,
+                get_runtime_method_hash(
+                    trait_metadata.types,
+                    trait_name,
+                    method_metadata,
+                    &mut visited_ids,
+                ),
+            )
+        });
 
-    let method_bytes =
-        trait_metadata
-            .methods
-            .iter()
-            .fold([0u8; HASH_LEN], |bytes, method_metadata| {
-                // We don't care what order the trait methods exist in, and want the hash to
-                // be identical regardless. For this, we can just XOR the hashes for each method
-                // together; we'll get the same output whichever order they are XOR'd together in,
-                // so long as each individual method is the same.
-                xor(
-                    bytes,
-                    get_runtime_method_hash(
-                        metadata,
-                        trait_metadata,
-                        method_metadata,
-                        &mut visited_ids,
-                    ),
-                )
-            });
-
-    concat_and_hash2(&method_name, &method_bytes)
+    concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
 }
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
-pub fn get_storage_hash(
-    metadata: &RuntimeMetadataV15,
-    pallet_name: &str,
-    storage_name: &str,
-) -> Result<[u8; HASH_LEN], NotFound> {
-    let pallet = metadata
-        .pallets
-        .iter()
-        .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Root)?;
+pub fn get_storage_hash(pallet: &PalletMetadata, entry_name: &str) -> Option<[u8; HASH_LEN]> {
+    let storage = pallet.storage()?;
+    let entry = storage.entry_by_name(entry_name)?;
 
-    let storage = pallet.storage.as_ref().ok_or(NotFound::Item)?;
-
-    let entry = storage
-        .entries
-        .iter()
-        .find(|s| s.name == storage_name)
-        .ok_or(NotFound::Item)?;
-
-    let hash = get_storage_entry_hash(&metadata.types, entry, &mut HashSet::new());
-    Ok(hash)
+    let hash = get_storage_entry_hash(pallet.types, entry, &mut HashSet::new());
+    Some(hash)
 }
 
 /// Obtain the hash for a specific constant, or an error if it's not found.
-pub fn get_constant_hash(
-    metadata: &RuntimeMetadataV15,
-    pallet_name: &str,
-    constant_name: &str,
-) -> Result<[u8; HASH_LEN], NotFound> {
-    let pallet = metadata
-        .pallets
-        .iter()
-        .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Root)?;
-
-    let constant = pallet
-        .constants
-        .iter()
-        .find(|c| c.name == constant_name)
-        .ok_or(NotFound::Item)?;
+pub fn get_constant_hash(pallet: &PalletMetadata, constant_name: &str) -> Option<[u8; HASH_LEN]> {
+    let constant = pallet.constant_by_name(constant_name)?;
 
     // We only need to check that the type of the constant asked for matches.
-    let bytes = get_type_hash(&metadata.types, constant.ty.id, &mut HashSet::new());
-    Ok(bytes)
+    let bytes = get_type_hash(pallet.types, constant.ty, &mut HashSet::new());
+    Some(bytes)
 }
 
 /// Obtain the hash for a specific call, or an error if it's not found.
-pub fn get_call_hash(
-    metadata: &RuntimeMetadataV15,
-    pallet_name: &str,
-    call_name: &str,
-) -> Result<[u8; HASH_LEN], NotFound> {
-    let pallet = metadata
-        .pallets
-        .iter()
-        .find(|p| p.name == pallet_name)
-        .ok_or(NotFound::Root)?;
-
-    let call_id = pallet.calls.as_ref().ok_or(NotFound::Item)?.ty.id;
-
-    let call_ty = metadata.types.resolve(call_id).ok_or(NotFound::Item)?;
-
-    let call_variants = match &call_ty.type_def {
-        TypeDef::Variant(variant) => &variant.variants,
-        _ => return Err(NotFound::Item),
-    };
-
-    let variant = call_variants
-        .iter()
-        .find(|v| v.name == call_name)
-        .ok_or(NotFound::Item)?;
+pub fn get_call_hash(pallet: &PalletMetadata, call_name: &str) -> Option<[u8; HASH_LEN]> {
+    let call_variant = pallet.call_variant_by_name(call_name)?;
 
     // hash the specific variant representing the call we are interested in.
-    let hash = get_variant_hash(&metadata.types, variant, &mut HashSet::new());
-    Ok(hash)
+    let hash = get_variant_hash(pallet.types, call_variant, &mut HashSet::new());
+    Some(hash)
 }
 
 /// Obtain the hash of a specific runtime API function, or an error if it's not found.
 pub fn get_runtime_api_hash(
-    metadata: &RuntimeMetadataV15,
-    trait_name: &str,
+    runtime_apis: &RuntimeApiMetadata,
     method_name: &str,
-) -> Result<[u8; HASH_LEN], NotFound> {
-    let trait_metadata = metadata
-        .apis
-        .iter()
-        .find(|m| m.name == trait_name)
-        .ok_or(NotFound::Root)?;
+) -> Option<[u8; HASH_LEN]> {
+    let trait_name = &*runtime_apis.inner.name;
+    let method_metadata = runtime_apis.method_by_name(method_name)?;
 
-    let method_metadata = trait_metadata
-        .methods
-        .iter()
-        .find(|m| m.name == method_name)
-        .ok_or(NotFound::Item)?;
-
-    Ok(get_runtime_method_hash(
-        metadata,
-        trait_metadata,
+    Some(get_runtime_method_hash(
+        runtime_apis.types,
+        trait_name,
         method_metadata,
         &mut HashSet::new(),
     ))
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
-pub fn get_pallet_hash(
-    registry: &PortableRegistry,
-    pallet: &PalletMetadata<PortableForm>,
-) -> [u8; HASH_LEN] {
+pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
+    let registry = pallet.types;
 
-    let call_bytes = match &pallet.calls {
-        Some(calls) => get_type_hash(registry, calls.ty.id, &mut visited_ids),
+    let call_bytes = match pallet.call_ty_id() {
+        Some(calls) => get_type_hash(registry, calls, &mut visited_ids),
         None => [0u8; HASH_LEN],
     };
-    let event_bytes = match &pallet.event {
-        Some(event) => get_type_hash(registry, event.ty.id, &mut visited_ids),
+    let event_bytes = match pallet.event_ty_id() {
+        Some(event) => get_type_hash(registry, event, &mut visited_ids),
         None => [0u8; HASH_LEN],
     };
-    let error_bytes = match &pallet.error {
-        Some(error) => get_type_hash(registry, error.ty.id, &mut visited_ids),
+    let error_bytes = match pallet.error_ty_id() {
+        Some(error) => get_type_hash(registry, error, &mut visited_ids),
         None => [0u8; HASH_LEN],
     };
-    let constant_bytes = pallet
-        .constants
-        .iter()
-        .fold([0u8; HASH_LEN], |bytes, constant| {
-            // We don't care what order the constants occur in, so XOR together the combinations
-            // of (constantName, constantType) to make the order we see them irrelevant.
-            let constant_hash = concat_and_hash2(
-                &hash(constant.name.as_bytes()),
-                &get_type_hash(registry, constant.ty.id, &mut visited_ids),
-            );
-            xor(bytes, constant_hash)
-        });
-    let storage_bytes = match &pallet.storage {
+    let constant_bytes = pallet.constants().fold([0u8; HASH_LEN], |bytes, constant| {
+        // We don't care what order the constants occur in, so XOR together the combinations
+        // of (constantName, constantType) to make the order we see them irrelevant.
+        let constant_hash = concat_and_hash2(
+            &hash(constant.name.as_bytes()),
+            &get_type_hash(registry, constant.ty(), &mut visited_ids),
+        );
+        xor(bytes, constant_hash)
+    });
+    let storage_bytes = match pallet.storage() {
         Some(storage) => {
-            let prefix_hash = hash(storage.prefix.as_bytes());
-            let entries_hash = storage
-                .entries
-                .iter()
-                .fold([0u8; HASH_LEN], |bytes, entry| {
-                    // We don't care what order the storage entries occur in, so XOR them together
-                    // to make the order irrelevant.
-                    xor(
-                        bytes,
-                        get_storage_entry_hash(registry, entry, &mut visited_ids),
-                    )
-                });
+            let prefix_hash = hash(storage.prefix().as_bytes());
+            let entries_hash = storage.entries().fold([0u8; HASH_LEN], |bytes, entry| {
+                // We don't care what order the storage entries occur in, so XOR them together
+                // to make the order irrelevant.
+                xor(
+                    bytes,
+                    get_storage_entry_hash(registry, entry, &mut visited_ids),
+                )
+            });
             concat_and_hash2(&prefix_hash, &entries_hash)
         }
         None => [0u8; HASH_LEN],
@@ -481,21 +402,18 @@ pub fn get_pallet_hash(
     )
 }
 
-/// Obtain the hash representation of a `frame_metadata::v15::RuntimeMetadataV15`.
+/// Obtain a hash representation of our metadata or some part of it.
+/// This is obtained by calling [`crate::Metadata::hasher()`].
 pub struct MetadataHasher<'a> {
+    metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,
-}
-
-impl<'a> Default for MetadataHasher<'a> {
-    fn default() -> Self {
-        MetadataHasher::new()
-    }
 }
 
 impl<'a> MetadataHasher<'a> {
     /// Create a new [`MetadataHasher`]
-    pub fn new() -> Self {
+    pub(crate) fn new(metadata: &'a Metadata) -> Self {
         Self {
+            metadata,
             specific_pallets: None,
         }
     }
@@ -507,67 +425,43 @@ impl<'a> MetadataHasher<'a> {
     }
 
     /// Hash the given metadata.
-    pub fn hash(&self, metadata: &RuntimeMetadataV15) -> [u8; HASH_LEN] {
+    pub fn hash(&self) -> [u8; HASH_LEN] {
         let mut visited_ids = HashSet::<u32>::new();
 
-        let pallet_hash = metadata
-            .pallets
-            .iter()
-            .fold([0u8; HASH_LEN], |bytes, pallet| {
-                // If specific pallets are given, only include this pallet if it's
-                // in the list.
-                if let Some(specific_pallets) = &self.specific_pallets {
-                    if specific_pallets.iter().all(|&p| p != pallet.name) {
-                        return bytes;
-                    }
-                }
-                // We don't care what order the pallets are seen in, so XOR their
-                // hashes together to be order independent.
-                xor(bytes, get_pallet_hash(&metadata.types, pallet))
-            });
+        let metadata = self.metadata;
 
-        let apis_hash = metadata.apis.iter().fold([0u8; HASH_LEN], |bytes, api| {
-            // We don't care what order the runtime APIs are seen in, so XOR
-            xor(bytes, get_runtime_trait_hash(metadata, api))
+        let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
+            // If specific pallets are given, only include this pallet if it's
+            // in the list.
+            if let Some(specific_pallets) = &self.specific_pallets {
+                if specific_pallets.iter().all(|&p| p != pallet.name()) {
+                    return bytes;
+                }
+            }
+            // We don't care what order the pallets are seen in, so XOR their
+            // hashes together to be order independent.
+            xor(bytes, get_pallet_hash(pallet))
         });
 
+        let apis_hash = metadata
+            .runtime_api_traits()
+            .fold([0u8; HASH_LEN], |bytes, api| {
+                // We don't care what order the runtime APIs are seen in, so XOR
+                xor(bytes, get_runtime_trait_hash(api))
+            });
+
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
-        let runtime_hash = get_type_hash(&metadata.types, metadata.ty.id, &mut visited_ids);
+        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
 
         concat_and_hash4(&pallet_hash, &apis_hash, &extrinsic_hash, &runtime_hash)
     }
-}
-
-/// An error returned if we attempt to get the hash for a specific call, constant,
-/// storage or runtime API function does not exist.
-///
-/// The location of the specific item (call, constant, storage or runtime API function)
-/// is stored with two indirections:
-/// - Root
-/// The root location of the item. For calls, constants, storage this represents the
-/// pallet name. While for runtime API function this represents the trait name.
-/// - Item
-/// The actual item. For calls, constants, storage this represents the actual name.
-/// While for runtime API functions this represents the method name.
-#[derive(Clone, Debug)]
-pub enum NotFound {
-    /// The root location of the item cannot be found.
-    /// - pallet name: for calls, constants, storage
-    /// - trait name: for runtime API functions
-    Root,
-    /// The actual item name cannot be found.
-    Item,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use bitvec::{order::Lsb0, vec::BitVec};
-    use frame_metadata::v15::{
-        ExtrinsicMetadata, PalletCallMetadata, PalletConstantMetadata, PalletErrorMetadata,
-        PalletEventMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15,
-        StorageEntryMetadata, StorageEntryModifier,
-    };
+    use frame_metadata::v15;
     use scale_info::meta_type;
 
     // Define recursive types.
@@ -623,16 +517,16 @@ mod tests {
         Remark { remark: DigestItem },
     }
 
-    fn build_default_extrinsic() -> ExtrinsicMetadata {
-        ExtrinsicMetadata {
+    fn build_default_extrinsic() -> v15::ExtrinsicMetadata {
+        v15::ExtrinsicMetadata {
             ty: meta_type::<()>(),
             version: 0,
             signed_extensions: vec![],
         }
     }
 
-    fn default_pallet() -> PalletMetadata {
-        PalletMetadata {
+    fn default_pallet() -> v15::PalletMetadata {
+        v15::PalletMetadata {
             name: "Test",
             storage: None,
             calls: None,
@@ -644,19 +538,19 @@ mod tests {
         }
     }
 
-    fn build_default_pallets() -> Vec<PalletMetadata> {
+    fn build_default_pallets() -> Vec<v15::PalletMetadata> {
         vec![
-            PalletMetadata {
+            v15::PalletMetadata {
                 name: "First",
-                calls: Some(PalletCallMetadata {
+                calls: Some(v15::PalletCallMetadata {
                     ty: meta_type::<MetadataTestType>(),
                 }),
                 ..default_pallet()
             },
-            PalletMetadata {
+            v15::PalletMetadata {
                 name: "Second",
                 index: 1,
-                calls: Some(PalletCallMetadata {
+                calls: Some(v15::PalletCallMetadata {
                     ty: meta_type::<(DigestItem, AccountId32, A)>(),
                 }),
                 ..default_pallet()
@@ -664,13 +558,15 @@ mod tests {
         ]
     }
 
-    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
-        RuntimeMetadataV15::new(
+    fn pallets_to_metadata(pallets: Vec<v15::PalletMetadata>) -> Metadata {
+        v15::RuntimeMetadataV15::new(
             pallets,
             build_default_extrinsic(),
             meta_type::<()>(),
             vec![],
         )
+        .try_into()
+        .expect("can build valid metadata")
     }
 
     #[test]
@@ -686,8 +582,8 @@ mod tests {
         pallets_swap[1].index = 1;
         let metadata_swap = pallets_to_metadata(pallets_swap);
 
-        let hash = MetadataHasher::new().hash(&metadata);
-        let hash_swap = MetadataHasher::new().hash(&metadata_swap);
+        let hash = MetadataHasher::new(&metadata).hash();
+        let hash_swap = MetadataHasher::new(&metadata_swap).hash();
 
         // Changing pallet order must still result in a deterministic unique hash.
         assert_eq!(hash, hash_swap);
@@ -696,13 +592,13 @@ mod tests {
     #[test]
     fn recursive_type() {
         let mut pallet = default_pallet();
-        pallet.calls = Some(PalletCallMetadata {
+        pallet.calls = Some(v15::PalletCallMetadata {
             ty: meta_type::<A>(),
         });
         let metadata = pallets_to_metadata(vec![pallet]);
 
         // Check hashing algorithm finishes on a recursive type.
-        MetadataHasher::new().hash(&metadata);
+        MetadataHasher::new(&metadata).hash();
     }
 
     #[test]
@@ -713,10 +609,10 @@ mod tests {
     /// must produce the same deterministic hashing value.
     fn recursive_types_different_order() {
         let mut pallets = build_default_pallets();
-        pallets[0].calls = Some(PalletCallMetadata {
+        pallets[0].calls = Some(v15::PalletCallMetadata {
             ty: meta_type::<A>(),
         });
-        pallets[1].calls = Some(PalletCallMetadata {
+        pallets[1].calls = Some(v15::PalletCallMetadata {
             ty: meta_type::<B>(),
         });
         pallets[1].index = 1;
@@ -728,8 +624,8 @@ mod tests {
         pallets_swap[1].index = 1;
         let metadata_swap = pallets_to_metadata(pallets_swap);
 
-        let hash = MetadataHasher::new().hash(&metadata);
-        let hash_swap = MetadataHasher::new().hash(&metadata_swap);
+        let hash = MetadataHasher::new(&metadata).hash();
+        let hash_swap = MetadataHasher::new(&metadata_swap).hash();
 
         // Changing pallet order must still result in a deterministic unique hash.
         assert_eq!(hash, hash_swap);
@@ -737,12 +633,12 @@ mod tests {
 
     #[test]
     fn pallet_hash_correctness() {
-        let compare_pallets_hash = |lhs: &PalletMetadata, rhs: &PalletMetadata| {
+        let compare_pallets_hash = |lhs: &v15::PalletMetadata, rhs: &v15::PalletMetadata| {
             let metadata = pallets_to_metadata(vec![lhs.clone()]);
-            let hash = MetadataHasher::new().hash(&metadata);
+            let hash = MetadataHasher::new(&metadata).hash();
 
             let metadata = pallets_to_metadata(vec![rhs.clone()]);
-            let new_hash = MetadataHasher::new().hash(&metadata);
+            let new_hash = MetadataHasher::new(&metadata).hash();
 
             assert_ne!(hash, new_hash);
         };
@@ -750,12 +646,12 @@ mod tests {
         // Build metadata progressively from an empty pallet to a fully populated pallet.
         let mut pallet = default_pallet();
         let pallet_lhs = pallet.clone();
-        pallet.storage = Some(PalletStorageMetadata {
+        pallet.storage = Some(v15::PalletStorageMetadata {
             prefix: "Storage",
-            entries: vec![StorageEntryMetadata {
+            entries: vec![v15::StorageEntryMetadata {
                 name: "BlockWeight",
-                modifier: StorageEntryModifier::Default,
-                ty: StorageEntryType::Plain(meta_type::<u8>()),
+                modifier: v15::StorageEntryModifier::Default,
+                ty: v15::StorageEntryType::Plain(meta_type::<u8>()),
                 default: vec![],
                 docs: vec![],
             }],
@@ -771,20 +667,20 @@ mod tests {
         //     call_name_02 { arg01: type, arg02: type }
         // }
         // ```
-        pallet.calls = Some(PalletCallMetadata {
+        pallet.calls = Some(v15::PalletCallMetadata {
             ty: meta_type::<Call>(),
         });
         compare_pallets_hash(&pallet_lhs, &pallet);
 
         let pallet_lhs = pallet.clone();
         // Events are similar to Calls.
-        pallet.event = Some(PalletEventMetadata {
+        pallet.event = Some(v15::PalletEventMetadata {
             ty: meta_type::<Call>(),
         });
         compare_pallets_hash(&pallet_lhs, &pallet);
 
         let pallet_lhs = pallet.clone();
-        pallet.constants = vec![PalletConstantMetadata {
+        pallet.constants = vec![v15::PalletConstantMetadata {
             name: "BlockHashCount",
             ty: meta_type::<u64>(),
             value: vec![96u8, 0, 0, 0],
@@ -793,7 +689,7 @@ mod tests {
         compare_pallets_hash(&pallet_lhs, &pallet);
 
         let pallet_lhs = pallet.clone();
-        pallet.error = Some(PalletErrorMetadata {
+        pallet.error = Some(v15::PalletErrorMetadata {
             ty: meta_type::<MetadataTestType>(),
         });
         compare_pallets_hash(&pallet_lhs, &pallet);
@@ -809,27 +705,27 @@ mod tests {
         let metadata_both = pallets_to_metadata(pallets);
 
         // Hashing will ignore any non-existant pallet and return the same result.
-        let hash = MetadataHasher::new()
+        let hash = MetadataHasher::new(&metadata_one)
             .only_these_pallets(&["First", "Second"])
-            .hash(&metadata_one);
-        let hash_rhs = MetadataHasher::new()
+            .hash();
+        let hash_rhs = MetadataHasher::new(&metadata_one)
             .only_these_pallets(&["First"])
-            .hash(&metadata_one);
+            .hash();
         assert_eq!(hash, hash_rhs, "hashing should ignore non-existant pallets");
 
         // Hashing one pallet from metadata with 2 pallets inserted will ignore the second pallet.
-        let hash_second = MetadataHasher::new()
+        let hash_second = MetadataHasher::new(&metadata_both)
             .only_these_pallets(&["First"])
-            .hash(&metadata_both);
+            .hash();
         assert_eq!(
             hash_second, hash,
             "hashing one pallet should ignore the others"
         );
 
         // Check hashing with all pallets.
-        let hash_second = MetadataHasher::new()
+        let hash_second = MetadataHasher::new(&metadata_both)
             .only_these_pallets(&["First", "Second"])
-            .hash(&metadata_both);
+            .hash();
         assert_ne!(
             hash_second, hash,
             "hashing both pallets should produce a different result from hashing just one pallet"
@@ -841,12 +737,12 @@ mod tests {
         // Get a hash representation of the provided meta type,
         // inserted in the context of pallet metadata call.
         let to_hash = |meta_ty| {
-            let pallet = PalletMetadata {
-                calls: Some(PalletCallMetadata { ty: meta_ty }),
+            let pallet = v15::PalletMetadata {
+                calls: Some(v15::PalletCallMetadata { ty: meta_ty }),
                 ..default_pallet()
             };
             let metadata = pallets_to_metadata(vec![pallet]);
-            MetadataHasher::new().hash(&metadata)
+            MetadataHasher::new(&metadata).hash()
         };
 
         #[allow(dead_code)]

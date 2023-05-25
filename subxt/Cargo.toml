@@ -63,7 +63,6 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-parking_lot = { workspace = true }
 frame-metadata = { workspace = true }
 derivative = { workspace = true }
 either = { workspace = true }

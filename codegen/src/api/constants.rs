@@ -3,11 +3,10 @@
 // see LICENSE for license details.
 
 use crate::{types::TypeGenerator, CratePath};
-use frame_metadata::v15::{PalletMetadata, RuntimeMetadataV15};
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use scale_info::form::PortableForm;
+use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
 
@@ -35,29 +34,27 @@ use super::CodegenError;
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_constants(
-    metadata: &RuntimeMetadataV15,
     type_gen: &TypeGenerator,
-    pallet: &PalletMetadata<PortableForm>,
+    pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
-    if pallet.constants.is_empty() {
+    if pallet.constants().len() == 0 {
         return Ok(quote!());
     }
-    let constants = &pallet.constants;
 
-    let constant_fns = constants.iter().map(|constant| {
-        let fn_name = format_ident!("{}", constant.name.to_snake_case());
-        let pallet_name = &pallet.name;
-        let constant_name = &constant.name;
-        let Ok(constant_hash) = subxt_metadata::get_constant_hash(metadata, pallet_name, constant_name) else {
+    let constant_fns = pallet.constants().map(|constant| {
+        let fn_name = format_ident!("{}", constant.name().to_snake_case());
+        let pallet_name = pallet.name();
+        let constant_name = constant.name();
+        let Some(constant_hash) = pallet.constant_hash(constant_name) else {
             return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
         };
 
-        let return_ty = type_gen.resolve_type_path(constant.ty.id);
-        let docs = &constant.docs;
+        let return_ty = type_gen.resolve_type_path(constant.ty());
+        let docs = constant.docs();
         let docs = should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();

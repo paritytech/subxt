@@ -1,5 +1,4 @@
 use subxt::ext::codec::Decode;
-use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::metadata::Metadata;
 use subxt::utils::H256;
 use subxt::{config::PolkadotConfig, OfflineClient};
@@ -26,8 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //    `subxt metadata > file.scale` to download it):
     let metadata = {
         let bytes = std::fs::read("./artifacts/polkadot_metadata_small.scale").unwrap();
-        let metadata = RuntimeMetadataPrefixed::decode(&mut &*bytes).unwrap();
-        Metadata::try_from(metadata).unwrap()
+        Metadata::decode(&mut &*bytes).unwrap()
     };
 
     // Create an offline client using the details obtained above:
