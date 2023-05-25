@@ -39,8 +39,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
             let expected_hash = self
                 .client
                 .metadata()
-                .pallet_by_name(address.pallet_name())
-                .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?
+                .pallet_by_name_err(address.pallet_name())?
                 .constant_hash(address.constant_name())
                 .ok_or_else(|| {
                     MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
@@ -65,10 +64,8 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         self.validate(address)?;
 
         // 2. Attempt to decode the constant into the type given:
-        let pallet = metadata
-            .pallet_by_name(address.pallet_name())
-            .ok_or_else(|| MetadataError::PalletNameNotFound(address.pallet_name().to_owned()))?;
-        let constant = pallet
+        let constant = metadata
+            .pallet_by_name_err(address.pallet_name())?
             .constant_by_name(address.constant_name())
             .ok_or_else(|| {
                 MetadataError::ConstantNameNotFound(address.constant_name().to_owned())

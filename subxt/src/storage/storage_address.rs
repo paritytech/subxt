@@ -138,9 +138,7 @@ where
     }
 
     fn append_entry_bytes(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error> {
-        let pallet = metadata
-            .pallet_by_name(self.pallet_name())
-            .ok_or_else(|| MetadataError::PalletNameNotFound(self.pallet_name().to_owned()))?;
+        let pallet = metadata.pallet_by_name_err(self.pallet_name())?;
         let storage = pallet
             .storage()
             .ok_or_else(|| MetadataError::StorageNotFoundInPallet(self.pallet_name().to_owned()))?;
