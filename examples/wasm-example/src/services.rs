@@ -2,7 +2,7 @@ use futures::StreamExt;
 use std::fmt::Write;
 use subxt::{self, OnlineClient, PolkadotConfig};
 use yew::{AttrValue, Callback};
-use js_sys::{Function, Promise};
+use js_sys::{Promise};
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;

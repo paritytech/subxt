@@ -10,7 +10,7 @@
 //! ```
 //! You need to have a local polkadot/substrate node with it's JSON-RPC HTTP server running at 127.0.0.1:9933 in order for the examples to be working.
 //! Also make sure your browser supports WASM.
-use futures::{self, FutureExt};
+
 
 use routes::signing::SigningExamplesComponent;
 use yew::prelude::*;
@@ -42,11 +42,11 @@ impl Component for SubxtExamplesApp {
 
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         SubxtExamplesApp
     }
 
-    fn view(&self, ctx: &Context<Self>) -> Html {
+    fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <BrowserRouter>
                 <Switch<Route> render={switch} />

@@ -1,7 +1,7 @@
-use anyhow::anyhow;
+
 use futures::FutureExt;
-use js_sys::{Function, Promise};
-use serde::{Deserialize, Serialize};
+
+
 
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -39,7 +39,7 @@ impl Component for SigningExamplesComponent {
 
     type Properties = ();
 
-    fn create(ctx: &Context<Self>) -> Self {
+    fn create(_ctx: &Context<Self>) -> Self {
         SigningExamplesComponent {
             message: "Hello".to_string(),
             stage: SigningStage::EnterMessage,
