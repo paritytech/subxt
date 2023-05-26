@@ -15,7 +15,7 @@ members = [
 # This cannot be a workspace dependency, because it requires
 # mutually exclusive jsonrpsee features to work, and workspaces
 # will aggregate features used across crates:
-exclude = ["testing/wasm-tests"]
+exclude = ["testing/wasm-tests", "examples/wasm-example"]
 resolver = "2"
 
 [workspace.package]
