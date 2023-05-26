@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "wasm-example"
 version = "0.1.0"
@@ -6,6 +8,6 @@ edition = "2021"
 [dependencies]
 futures = "0.3.28"
 subxt = { path = "../../subxt", default-features = false, features = ["jsonrpsee-web"], target_arch = "wasm32" }
-yew = { git = "https://github.com/yewstack/yew/", features = ["csr"] }
+yew = {version = "0.20.0", features = ["csr"] }
 web-sys = "0.3.63"
 hex = "0.4.3"
