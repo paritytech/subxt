@@ -154,11 +154,7 @@ impl std::fmt::Display for ModuleError {
 impl ModuleError {
     /// Return more details about this error.
     pub fn details(&self) -> Result<ModuleErrorDetails, MetadataError> {
-        let pallet = self
-            .metadata
-            .pallet_by_index(self.raw.pallet_index)
-            .ok_or(MetadataError::PalletIndexNotFound(self.raw.pallet_index))?;
-
+        let pallet = self.metadata.pallet_by_index_err(self.raw.pallet_index)?;
         let variant = pallet
             .error_variant_by_index(self.raw.error[0])
             .ok_or_else(|| MetadataError::VariantIndexNotFound(self.raw.error[0]))?;

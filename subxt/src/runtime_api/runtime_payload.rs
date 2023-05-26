@@ -88,10 +88,8 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
     }
 
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        let api_trait = metadata
-            .runtime_api_trait_by_name(&self.trait_name)
-            .ok_or_else(|| MetadataError::RuntimeTraitNotFound((*self.trait_name).to_owned()))?;
-        let api_method = api_trait
+        let api_method = metadata
+            .runtime_api_trait_by_name_err(&self.trait_name)?
             .method_by_name(&self.method_name)
             .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
 
