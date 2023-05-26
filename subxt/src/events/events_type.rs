@@ -227,9 +227,7 @@ impl EventDetails {
         let event_fields_start_idx = all_bytes.len() - input.len();
 
         // Get metadata for the event:
-        let event_pallet = metadata
-            .pallet_by_index(pallet_index)
-            .ok_or(MetadataError::PalletIndexNotFound(pallet_index))?;
+        let event_pallet = metadata.pallet_by_index_err(pallet_index)?;
         let event_variant = event_pallet
             .event_variant_by_index(variant_index)
             .ok_or(MetadataError::VariantIndexNotFound(variant_index))?;
