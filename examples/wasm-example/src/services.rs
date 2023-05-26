@@ -2,6 +2,11 @@ use futures::StreamExt;
 use std::fmt::Write;
 use subxt::{self, OnlineClient, PolkadotConfig};
 use yew::{AttrValue, Callback};
+use js_sys::{Function, Promise};
+use anyhow::anyhow;
+use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 
 #[subxt::subxt(runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale")]
 mod polkadot {}
@@ -70,4 +75,45 @@ pub(crate) async fn subscribe_to_finalized_blocks(
         cb.emit(output.into())
     }
     Ok(())
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_name = getAccounts)]
+    pub fn js_get_accounts() -> Promise;
+    #[wasm_bindgen(js_name = signHexMessage)]
+    pub fn js_sign_hex_message(hex_message: String, account_json_string: String) -> Promise;
+}
+
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Account {
+    pub name: String,
+    pub source: String,
+    pub ty: String,
+    pub address: String,
+}
+
+pub async fn get_accounts() -> Result<Vec<Account>, anyhow::Error> {
+    let result = JsFuture::from(js_get_accounts())
+        .await
+        .map_err(|js_err| anyhow!("{js_err:?}"))?;
+    let accounts_str = result
+        .as_string()
+        .ok_or(anyhow!("Error converting JsValue into String"))?;
+    let accounts: Vec<Account> = serde_json::from_str(&accounts_str)?;
+    Ok(accounts)
+}
+
+pub async fn sign_hex_message(
+    hex_message: String,
+    account_json_string: String,
+) -> Result<String, anyhow::Error> {
+    let result = JsFuture::from(js_sign_hex_message(hex_message, account_json_string))
+        .await
+        .map_err(|js_err| anyhow!("{js_err:?}"))?;
+    let result_string = result
+        .as_string()
+        .ok_or(anyhow!("Error converting JsValue into String"))?;
+    Ok(result_string)
 }

@@ -24,7 +24,7 @@ body{
     width: 800px;
     max-width: 100%;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-    height: 100%;
+    min-height: 100%;
     margin: 0px;
     padding: 16px;
     background-color: $primary;
@@ -52,6 +52,26 @@ button{
     margin-top: 8px;
 }
 
+a{
+    text-decoration: none;
+}
+
 button:hover{
  background-color: $secondary;
+}
+
+input{
+    font-size: large;
+    background-color: white;
+    color: $dark;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.mb{
+    margin-bottom: 12px;
+}
+
+small{
+    color:#24cc85
 }
