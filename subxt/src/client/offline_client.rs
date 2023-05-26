@@ -73,13 +73,13 @@ impl<T: Config> OfflineClient<T> {
     pub fn new(
         genesis_hash: T::Hash,
         runtime_version: RuntimeVersion,
-        metadata: Metadata,
+        metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         OfflineClient {
             inner: Arc::new(Inner {
                 genesis_hash,
                 runtime_version,
-                metadata,
+                metadata: metadata.into(),
             }),
         }
     }

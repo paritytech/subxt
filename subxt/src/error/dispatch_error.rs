@@ -10,7 +10,7 @@ use core::fmt::Debug;
 use scale_decode::visitor::DecodeAsTypeResult;
 use std::borrow::Cow;
 
-use super::Error;
+use super::{Error, MetadataError};
 use crate::error::RootError;
 
 /// An error dispatching a transaction.
@@ -145,20 +145,27 @@ impl std::fmt::Display for ModuleError {
             return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
         };
 
-        let pallet = details.pallet();
-        let error = details.error();
+        let pallet = details.pallet.name();
+        let error = &details.variant.name;
         write!(f, "Pallet error {pallet}::{error}")
     }
 }
 
 impl ModuleError {
     /// Return more details about this error.
-    pub fn details(&self) -> Result<&crate::metadata::ErrorMetadata, super::Error> {
-        let error_details = self
+    pub fn details(&self) -> Result<ModuleErrorDetails, MetadataError> {
+        let pallet = self
             .metadata
-            .error(self.raw.pallet_index, self.raw.error[0])?;
-        Ok(error_details)
+            .pallet_by_index(self.raw.pallet_index)
+            .ok_or(MetadataError::PalletIndexNotFound(self.raw.pallet_index))?;
+
+        let variant = pallet
+            .error_variant_by_index(self.raw.error[0])
+            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.raw.error[0]))?;
+
+        Ok(ModuleErrorDetails { pallet, variant })
     }
+
     /// Return the underlying module error data that was decoded.
     pub fn raw(&self) -> RawModuleError {
         self.raw
@@ -167,8 +174,20 @@ impl ModuleError {
     /// Attempts to decode the ModuleError into a value implementing the trait `RootError`
     /// where the actual type of value is the generated top level enum `Error`.
     pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
-        E::root_error(&self.raw.error, self.details()?.pallet(), &self.metadata)
+        E::root_error(
+            &self.raw.error,
+            self.details()?.pallet.name(),
+            &self.metadata,
+        )
     }
+}
+
+/// Details about the module error.
+pub struct ModuleErrorDetails<'a> {
+    /// The pallet that the error came from
+    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    /// The variant representing the error
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// The error details about a module error that has occurred.
@@ -198,16 +217,9 @@ impl DispatchError {
         metadata: Metadata,
     ) -> Result<Self, super::Error> {
         let bytes = bytes.into();
-
-        let dispatch_error_ty_id = match metadata.dispatch_error_ty() {
-            Some(id) => id,
-            None => {
-                tracing::warn!(
-                    "Can't decode error: sp_runtime::DispatchError was not found in Metadata"
-                );
-                return Err(super::Error::Unknown(bytes.into_owned()));
-            }
-        };
+        let dispatch_error_ty_id = metadata
+            .dispatch_error_ty()
+            .ok_or(MetadataError::DispatchErrorNotFound)?;
 
         // The aim is to decode our bytes into roughly this shape. This is copied from
         // `sp_runtime::DispatchError`; we need the variant names and any inner variant

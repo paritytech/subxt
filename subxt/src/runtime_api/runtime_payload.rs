@@ -8,6 +8,7 @@ use scale_value::Composite;
 use std::borrow::Cow;
 
 use crate::dynamic::DecodedValueThunk;
+use crate::error::MetadataError;
 use crate::{metadata::DecodeWithMetadata, Error, Metadata};
 
 /// This represents a runtime API payload that can call into the runtime of node.
@@ -36,8 +37,11 @@ pub trait RuntimeApiPayload {
     // with the `subxt::Metadata.
     type ReturnType: DecodeWithMetadata;
 
-    /// The runtime API function name.
-    fn fn_name(&self) -> &str;
+    /// The runtime API trait name.
+    fn trait_name(&self) -> &str;
+
+    /// The runtime API method name.
+    fn method_name(&self) -> &str;
 
     /// Scale encode the arguments data.
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
@@ -63,7 +67,8 @@ pub trait RuntimeApiPayload {
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive(Clone, Debug)]
 pub struct Payload<ArgsData, ReturnTy> {
-    fn_name: Cow<'static, str>,
+    trait_name: Cow<'static, str>,
+    method_name: Cow<'static, str>,
     args_data: ArgsData,
     validation_hash: Option<[u8; 32]>,
     _marker: PhantomData<ReturnTy>,
@@ -74,16 +79,42 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
 {
     type ReturnType = ReturnTy;
 
-    fn fn_name(&self) -> &str {
-        &self.fn_name
+    fn trait_name(&self) -> &str {
+        &self.trait_name
+    }
+
+    fn method_name(&self) -> &str {
+        &self.method_name
     }
 
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        let fn_metadata = metadata.runtime_fn(&self.fn_name)?;
+        let api_trait = metadata
+            .runtime_api_trait_by_name(&self.trait_name)
+            .ok_or_else(|| MetadataError::RuntimeTraitNotFound((*self.trait_name).to_owned()))?;
+        let api_method = api_trait
+            .method_by_name(&self.method_name)
+            .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
+
+        // TODO [jsdw]: This isn't good. The options are:
+        // 1. Tweak the Metadata to store things in this way (not great, but
+        //    it's what we did previously).
+        // 2. Tweak scale-encode's methods to accept iterators over
+        //    { name: Option<&str>, type_id: u32 }, because they shouldn't
+        //    need to allocate anyway. I'd like us to do this, and then we can
+        //    remove allocations from this code and probably a couple of other
+        //    places.
+        let fields: Vec<_> = api_method
+            .inputs()
+            .map(|input| scale_info::Field {
+                name: Some(input.name.to_owned()),
+                ty: input.ty.into(),
+                type_name: None,
+                docs: Default::default(),
+            })
+            .collect();
 
         self.args_data
-            .encode_as_fields_to(fn_metadata.fields(), metadata.types(), out)?;
-
+            .encode_as_fields_to(&fields, metadata.types(), out)?;
         Ok(())
     }
 
@@ -97,9 +128,14 @@ pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
 
 impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Create a new [`Payload`].
-    pub fn new(fn_name: impl Into<String>, args_data: ArgsData) -> Self {
+    pub fn new(
+        trait_name: impl Into<String>,
+        method_name: impl Into<String>,
+        args_data: ArgsData,
+    ) -> Self {
         Payload {
-            fn_name: Cow::Owned(fn_name.into()),
+            trait_name: Cow::Owned(trait_name.into()),
+            method_name: Cow::Owned(method_name.into()),
             args_data,
             validation_hash: None,
             _marker: PhantomData,
@@ -112,12 +148,14 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
-        fn_name: &'static str,
+        trait_name: &'static str,
+        method_name: &'static str,
         args_data: ArgsData,
         hash: [u8; 32],
     ) -> Payload<ArgsData, ReturnTy> {
         Payload {
-            fn_name: Cow::Borrowed(fn_name),
+            trait_name: Cow::Borrowed(trait_name),
+            method_name: Cow::Borrowed(method_name),
             args_data,
             validation_hash: Some(hash),
             _marker: std::marker::PhantomData,
@@ -132,9 +170,14 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
         }
     }
 
-    /// Returns the function name.
-    pub fn fn_name(&self) -> &str {
-        &self.fn_name
+    /// Returns the trait name.
+    pub fn trait_name(&self) -> &str {
+        &self.trait_name
+    }
+
+    /// Returns the method name.
+    pub fn method_name(&self) -> &str {
+        &self.method_name
     }
 
     /// Returns the arguments data.
@@ -145,8 +188,9 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
 
 /// Create a new [`DynamicRuntimeApiPayload`].
 pub fn dynamic(
-    fn_name: impl Into<String>,
+    trait_name: impl Into<String>,
+    method_name: impl Into<String>,
     args_data: impl Into<Composite<()>>,
 ) -> DynamicRuntimeApiPayload {
-    Payload::new(fn_name, args_data.into())
+    Payload::new(trait_name, method_name, args_data.into())
 }

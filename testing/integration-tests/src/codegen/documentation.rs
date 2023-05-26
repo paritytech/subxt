@@ -2,49 +2,46 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use codec::Decode;
 use regex::Regex;
 use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
+use subxt_metadata::Metadata;
 
-fn load_test_metadata() -> frame_metadata::RuntimeMetadataPrefixed {
+fn load_test_metadata() -> Metadata {
     let bytes = test_runtime::METADATA;
-    codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata")
+    Metadata::decode(&mut &*bytes).expect("Cannot decode scale metadata")
 }
 
 fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
-    let meta = load_test_metadata();
-    let metadata = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(v14) => subxt_metadata::metadata_v14_to_latest(v14),
-        frame_metadata::RuntimeMetadata::V15(v15) => v15,
-        _ => panic!("Unsupported metadata version {:?}", meta.1),
-    };
+    let metadata = load_test_metadata();
 
     // Inspect the metadata types and collect the documentation.
     let mut docs = Vec::new();
-    for ty in &metadata.types.types {
+    for ty in &metadata.types().types {
         docs.extend_from_slice(&ty.ty.docs);
     }
 
-    for pallet in metadata.pallets {
-        if let Some(storage) = pallet.storage {
-            for entry in storage.entries {
-                docs.extend(entry.docs);
+    for pallet in metadata.pallets() {
+        if let Some(storage) = pallet.storage() {
+            for entry in storage.entries() {
+                docs.extend_from_slice(entry.docs());
             }
         }
         // Note: Calls, Events and Errors are deduced directly to
         // PortableTypes which are handled above.
-        for constant in pallet.constants {
-            docs.extend(constant.docs);
+        for constant in pallet.constants() {
+            docs.extend_from_slice(constant.docs());
         }
     }
     // Note: Extrinsics do not have associated documentation, but is implied by
     // associated Type.
 
     // Inspect the runtime API types and collect the documentation.
-    for api in metadata.apis {
-        docs.extend(api.docs);
-        for method in api.methods {
-            docs.extend(method.docs);
+    for api in metadata.runtime_api_traits() {
+        docs.extend_from_slice(api.docs());
+        for method in api.methods() {
+            docs.extend_from_slice(method.docs());
         }
     }
 

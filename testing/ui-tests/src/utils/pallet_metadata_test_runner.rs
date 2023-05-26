@@ -3,15 +3,14 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
-use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadataPrefixed};
 use std::io::Read;
-use subxt_metadata::{metadata_v14_to_latest, retain_metadata};
+use subxt_metadata::Metadata;
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_pallets_ui_tests_";
 static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";
 
 pub struct PalletMetadataTestRunner {
-    metadata: RuntimeMetadataV15,
+    metadata: Metadata,
     index: usize,
     pallet_names: Option<Vec<String>>,
 }
@@ -26,15 +25,9 @@ impl PalletMetadataTestRunner {
         file.read_to_end(&mut bytes)
             .expect("Failed to read metadata.scale file");
 
-        let meta: RuntimeMetadataPrefixed =
-            Decode::decode(&mut &*bytes).expect("Cannot decode metadata bytes");
-
-        let metadata = match meta.1 {
-            frame_metadata::RuntimeMetadata::V14(v14) => metadata_v14_to_latest(v14),
-            frame_metadata::RuntimeMetadata::V15(v15) => v15,
-            _ => panic!("Unsupported metadata version {:?}", meta.1),
-        };
+        let metadata = Metadata::decode(&mut &*bytes).expect("Cannot decode metadata bytes");
         let pallet_names = pallet_names.map(|v| v.iter().map(|e| e.to_string()).collect());
+
         PalletMetadataTestRunner {
             metadata,
             index: 0,
@@ -43,27 +36,20 @@ impl PalletMetadataTestRunner {
     }
 
     pub fn path_to_next_ui_test(&mut self) -> Option<String> {
-        let Some(pallet) = self.metadata.pallets.get(self.index) else {
-            return None
+        let pallet = match self.pallet_names.as_ref() {
+            Some(names) => self.metadata.pallet_by_name(names.get(self.index)?)?,
+            None => self.metadata.pallets().nth(self.index)?,
         };
-        let test_name = &pallet.name;
-        // Increment test index to avoid overlaps.
+
+        let test_name = pallet.name();
+
+        // Increment test index to point at the next pallet.
         let index = self.index;
         self.index += 1;
-        // if a pallet filter is set (pallet_names is Some), return the next pallet if this pallet is not in the filter.
-        if let Some(name_filter) = self.pallet_names.as_ref() {
-            if !name_filter.contains(test_name) {
-                return self.path_to_next_ui_test();
-            }
-        }
 
         // Build custom metadata containing only this pallet.
         let mut metadata = self.metadata.clone();
-        retain_metadata(
-            &mut metadata,
-            |pallet_filter| pallet_filter == pallet.name,
-            |_| true,
-        );
+        metadata.retain(|pallet_filter| pallet_filter == pallet.name(), |_| true);
 
         let mut tmp_dir = std::env::temp_dir();
         tmp_dir.push(format!("{TEST_DIR_PREFIX}{index}"));
@@ -79,8 +65,7 @@ impl PalletMetadataTestRunner {
             t.to_string_lossy().into_owned()
         };
 
-        let metadata_prefixed: RuntimeMetadataPrefixed = metadata.into();
-        let encoded_metadata = metadata_prefixed.encode();
+        let encoded_metadata = metadata.encode();
         let rust_file = format!(
             r#"
             use subxt;
@@ -106,18 +91,10 @@ impl PalletMetadataTestRunner {
 // are dropped too, to make sure that cleanup happens after tests are ran.
 impl Drop for PalletMetadataTestRunner {
     fn drop(&mut self) {
-        for i in 0..self.index {
-            if let Some(pallet) = self.metadata.pallets.get(self.index) {
-                if let Some(name_filter) = self.pallet_names.as_ref() {
-                    if !name_filter.contains(&pallet.name) {
-                        continue;
-                    }
-                }
-
-                let mut tmp_dir = std::env::temp_dir();
-                tmp_dir.push(format!("{TEST_DIR_PREFIX}{i}"));
-                std::fs::remove_dir_all(tmp_dir).expect("cannot cleanup temp files");
-            };
+        for idx in 0..self.index {
+            let mut tmp_dir = std::env::temp_dir();
+            tmp_dir.push(format!("{TEST_DIR_PREFIX}{idx}"));
+            let _ = std::fs::remove_dir_all(tmp_dir);
         }
     }
 }

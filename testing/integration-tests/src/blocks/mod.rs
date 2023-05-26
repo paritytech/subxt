@@ -3,11 +3,11 @@
 // see LICENSE for license details.
 
 use crate::{pair_signer, test_context, utils::node_runtime};
-use codec::Compact;
-use frame_metadata::RuntimeMetadataPrefixed;
+use codec::{Compact, Encode};
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::blocks::BlocksClient;
+use subxt_metadata::Metadata;
 
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
@@ -103,21 +103,17 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let block = sub.next().await.unwrap()?;
     let rt = block.runtime_api().await?;
 
-    let (_, meta) = rt
-        .call_raw::<(Compact<u32>, RuntimeMetadataPrefixed)>("Metadata_metadata", None)
+    // get metadata via state_call.
+    let (_, meta1) = rt
+        .call_raw::<(Compact<u32>, Metadata)>("Metadata_metadata", None)
         .await?;
-    let metadata_call = match meta.1 {
-        frame_metadata::RuntimeMetadata::V14(metadata) => {
-            subxt_metadata::metadata_v14_to_latest(metadata)
-        }
-        frame_metadata::RuntimeMetadata::V15(metadata) => metadata,
-        _ => panic!("Metadata V14 or V15 unavailable"),
-    };
 
-    // Compare the runtime API call against the `state_getMetadata`.
-    let metadata = api.rpc().metadata_legacy(None).await?;
-    let metadata = metadata.runtime_metadata();
-    assert_eq!(&metadata_call, metadata);
+    // get metadata via `state_getMetadata`.
+    let meta2 = api.rpc().metadata_legacy(None).await?;
+
+    // They should be the same.
+    assert_eq!(meta1.encode(), meta2.encode());
+
     Ok(())
 }
 

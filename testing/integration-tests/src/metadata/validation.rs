@@ -3,12 +3,9 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context, TestContext};
-use frame_metadata::{
-    v15::{
-        ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
-        RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    },
-    RuntimeMetadataPrefixed,
+use frame_metadata::v15::{
+    ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
+    RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
 };
 use scale_info::{
     build::{Fields, Variants},
@@ -16,13 +13,7 @@ use scale_info::{
 };
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
-async fn metadata_to_api(
-    metadata: RuntimeMetadataV15,
-    ctx: &TestContext,
-) -> OfflineClient<SubstrateConfig> {
-    let prefixed = RuntimeMetadataPrefixed::from(metadata);
-    let metadata = Metadata::try_from(prefixed).unwrap();
-
+async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
     OfflineClient::new(
         ctx.client().genesis_hash(),
         ctx.client().runtime_version(),
@@ -30,56 +21,18 @@ async fn metadata_to_api(
     )
 }
 
-#[tokio::test]
-async fn full_metadata_check() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    // Runtime metadata is identical to the metadata used during API generation.
-    assert!(node_runtime::validate_codegen(&api).is_ok());
-
-    // Modify the metadata.
-    let mut metadata = api.metadata().runtime_metadata().clone();
-    metadata.pallets[0].name = "NewPallet".to_string();
-
-    let api = metadata_to_api(metadata, &ctx).await;
-    assert_eq!(
-        node_runtime::validate_codegen(&api)
-            .expect_err("Validation should fail for incompatible metadata"),
-        ::subxt::error::MetadataError::IncompatibleMetadata
-    );
+fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
+    let subxt_md: subxt_metadata::Metadata = v15.try_into().unwrap();
+    subxt_md.into()
 }
 
-#[tokio::test]
-async fn constant_values_are_not_validated() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let deposit_addr = node_runtime::constants().balances().existential_deposit();
-
-    // Retrieve existential deposit to validate it and confirm that it's OK.
-    assert!(api.constants().at(&deposit_addr).is_ok());
-
-    // Modify the metadata.
-    let mut metadata = api.metadata().runtime_metadata().clone();
-
-    let mut existential = metadata
-        .pallets
-        .iter_mut()
-        .find(|pallet| pallet.name == "Balances")
-        .expect("Metadata must contain Balances pallet")
-        .constants
-        .iter_mut()
-        .find(|constant| constant.name == "ExistentialDeposit")
-        .expect("ExistentialDeposit constant must be present");
-
-    // Modifying a constant value should not lead to an error:
-    existential.value = vec![0u8; 32];
-
-    let api = metadata_to_api(metadata, &ctx).await;
-
-    assert!(node_runtime::validate_codegen(&api).is_ok());
-    assert!(api.constants().at(&deposit_addr).is_ok());
+fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
+where
+    F: FnOnce(&mut RuntimeMetadataV15),
+{
+    let mut metadata = RuntimeMetadataV15::from((*metadata).clone());
+    f(&mut metadata);
+    v15_to_metadata(metadata)
 }
 
 fn default_pallet() -> PalletMetadata {
@@ -95,7 +48,7 @@ fn default_pallet() -> PalletMetadata {
     }
 }
 
-fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.
     // The "Call" type from the metadata is used to decode extrinsics.
@@ -120,7 +73,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
         SomeCall,
     }
 
-    RuntimeMetadataV15::new(
+    v15_to_metadata(RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
             ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
@@ -129,7 +82,60 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV15 {
         },
         meta_type::<()>(),
         vec![],
-    )
+    ))
+}
+
+#[tokio::test]
+async fn full_metadata_check() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Runtime metadata is identical to the metadata used during API generation.
+    assert!(node_runtime::validate_codegen(&api).is_ok());
+
+    // Modify the metadata.
+    let metadata = modified_metadata(api.metadata(), |md| {
+        md.pallets[0].name = "NewPallet".to_string();
+    });
+
+    let api = metadata_to_api(metadata, &ctx).await;
+    assert_eq!(
+        node_runtime::validate_codegen(&api)
+            .expect_err("Validation should fail for incompatible metadata"),
+        ::subxt::error::MetadataError::IncompatibleCodegen
+    );
+}
+
+#[tokio::test]
+async fn constant_values_are_not_validated() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let deposit_addr = node_runtime::constants().balances().existential_deposit();
+
+    // Retrieve existential deposit to validate it and confirm that it's OK.
+    assert!(api.constants().at(&deposit_addr).is_ok());
+
+    // Modify the metadata.
+    let metadata = modified_metadata(api.metadata(), |md| {
+        let mut existential = md
+            .pallets
+            .iter_mut()
+            .find(|pallet| pallet.name == "Balances")
+            .expect("Metadata must contain Balances pallet")
+            .constants
+            .iter_mut()
+            .find(|constant| constant.name == "ExistentialDeposit")
+            .expect("ExistentialDeposit constant must be present");
+
+        // Modifying a constant value should not lead to an error:
+        existential.value = vec![0u8; 32];
+    });
+
+    let api = metadata_to_api(metadata, &ctx).await;
+
+    assert!(node_runtime::validate_codegen(&api).is_ok());
+    assert!(api.constants().at(&deposit_addr).is_ok());
 }
 
 #[tokio::test]

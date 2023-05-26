@@ -4,18 +4,22 @@
 
 use clap::Args;
 use color_eyre::eyre;
+
 use std::{fs, io::Read, path::PathBuf};
 use subxt_codegen::utils::{MetadataVersion, Uri};
+
+pub mod type_description;
+pub mod type_example;
 
 /// The source of the metadata.
 #[derive(Debug, Args)]
 pub struct FileOrUrl {
     /// The url of the substrate node to query for metadata for codegen.
     #[clap(long, value_parser)]
-    url: Option<Uri>,
+    pub(crate) url: Option<Uri>,
     /// The path to the encoded metadata file.
     #[clap(long, value_parser)]
-    file: Option<PathBuf>,
+    pub(crate) file: Option<PathBuf>,
     /// Specify the metadata version.
     ///
     ///  - unstable:
@@ -70,4 +74,23 @@ impl FileOrUrl {
             }
         }
     }
+}
+
+pub(crate) fn print_docs_with_indent(docs: &[String], indent: usize) -> String {
+    // take at most the first paragraph of documentation, such that it does not get too long.
+    let docs_str = docs
+        .iter()
+        .map(|e| e.trim())
+        .take_while(|e| !e.is_empty())
+        .collect::<Vec<_>>()
+        .join("\n");
+    with_indent(docs_str, indent)
+}
+
+pub(crate) fn with_indent(s: String, indent: usize) -> String {
+    let indent_str = " ".repeat(indent);
+    s.lines()
+        .map(|line| format!("{indent_str}{line}"))
+        .collect::<Vec<_>>()
+        .join("\n")
 }

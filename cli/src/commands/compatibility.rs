@@ -4,15 +4,12 @@
 
 use clap::Parser as ClapParser;
 use codec::Decode;
-use color_eyre::eyre::{self, WrapErr};
-use frame_metadata::{
-    v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed, META_RESERVED,
-};
+use color_eyre::eyre::WrapErr;
 use jsonrpsee::client_transport::ws::Uri;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_codegen::utils::MetadataVersion;
-use subxt_metadata::{get_pallet_hash, metadata_v14_to_latest, MetadataHasher};
+use subxt_metadata::Metadata;
 
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
@@ -66,9 +63,9 @@ async fn handle_pallet_metadata(
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node, version).await?;
 
-        match metadata.pallets.iter().find(|pallet| pallet.name == name) {
+        match metadata.pallet_by_name(name) {
             Some(pallet_metadata) => {
-                let hash = get_pallet_hash(&metadata.types, pallet_metadata);
+                let hash = pallet_metadata.hash();
                 let hex_hash = hex::encode(hash);
                 println!("Node {node:?} has pallet metadata hash {hex_hash:?}");
 
@@ -97,7 +94,7 @@ async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node, version).await?;
-        let hash = MetadataHasher::new().hash(&metadata);
+        let hash = metadata.hasher().hash();
         let hex_hash = hex::encode(hash);
         println!("Node {node:?} has metadata hash {hex_hash:?}",);
 
@@ -119,26 +116,8 @@ async fn handle_full_metadata(nodes: &[Uri], version: MetadataVersion) -> color_
 async fn fetch_runtime_metadata(
     url: &Uri,
     version: MetadataVersion,
-) -> color_eyre::Result<RuntimeMetadataV15> {
+) -> color_eyre::Result<Metadata> {
     let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version).await?;
-
-    let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
-    if metadata.0 != META_RESERVED {
-        return Err(eyre::eyre!(
-            "Node {:?} has invalid metadata prefix: {:?} expected prefix: {:?}",
-            url,
-            metadata.0,
-            META_RESERVED
-        ));
-    }
-
-    match metadata.1 {
-        RuntimeMetadata::V14(v14) => Ok(metadata_v14_to_latest(v14)),
-        RuntimeMetadata::V15(v15) => Ok(v15),
-        _ => Err(eyre::eyre!(
-            "Node {:?} with unsupported metadata version: {:?}",
-            url,
-            metadata.1
-        )),
-    }
+    let metadata = Metadata::decode(&mut &bytes[..])?;
+    Ok(metadata)
 }

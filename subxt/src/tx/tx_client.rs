@@ -11,7 +11,7 @@ use sp_core_hashing::blake2_256;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
-    error::Error,
+    error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
@@ -47,14 +47,16 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: TxPayload,
     {
         if let Some(details) = call.validation_details() {
-            let metadata = self.client.metadata();
-            let expected_hash = metadata.call_hash(details.pallet_name, details.call_name)?;
+            let expected_hash = self
+                .client
+                .metadata()
+                .pallet_by_name(details.pallet_name)
+                .ok_or_else(|| MetadataError::PalletNameNotFound(details.pallet_name.to_owned()))?
+                .call_hash(details.call_name)
+                .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
+
             if details.hash != expected_hash {
-                return Err(crate::metadata::MetadataError::IncompatibleCallMetadata(
-                    details.pallet_name.into(),
-                    details.call_name.into(),
-                )
-                .into());
+                return Err(MetadataError::IncompatibleCodegen.into());
             }
         }
         Ok(())

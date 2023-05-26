@@ -69,8 +69,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+        assert_eq!(details.pallet.name(), "Staking");
+        assert_eq!(&details.variant.name, "NotController");
     });
     Ok(())
 }
@@ -118,8 +118,8 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
 
     assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+        assert_eq!(details.pallet.name(), "Staking");
+        assert_eq!(&details.variant.name, "NotController");
     });
     Ok(())
 }
@@ -164,8 +164,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
     assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+        assert_eq!(details.pallet.name(), "Staking");
+        assert_eq!(&details.variant.name, "NotController");
     });
 
     let is_chilled = api
@@ -211,8 +211,8 @@ async fn tx_bond() -> Result<(), Error> {
 
     assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "AlreadyBonded");
+        assert_eq!(details.pallet.name(), "Staking");
+        assert_eq!(&details.variant.name, "AlreadyBonded");
     });
     Ok(())
 }

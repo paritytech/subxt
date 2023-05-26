@@ -14,9 +14,10 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
-pub use crate::metadata::{InvalidMetadataError, Metadata, MetadataError};
+pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
+pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -36,12 +37,12 @@ pub enum Error {
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
-    /// Invalid metadata error
-    #[error("Invalid Metadata: {0}")]
-    InvalidMetadata(#[from] InvalidMetadataError),
-    /// Invalid metadata error
+    /// Error working with metadata.
     #[error("Metadata: {0}")]
     Metadata(#[from] MetadataError),
+    /// Error decoding metadata.
+    #[error("Metadata: {0}")]
+    MetadataDecoding(#[from] MetadataTryFromError),
     /// Runtime error.
     #[error("Runtime error: {0:?}")]
     Runtime(#[from] DispatchError),
@@ -160,9 +161,6 @@ pub enum StorageAddressError {
         /// The number of keys provided in the storage address.
         expected: usize,
     },
-    /// Storage lookup requires a type that wasn't found in the metadata.
-    #[error("Storage lookup requires type {0} to exist in the metadata, but it was not found")]
-    TypeNotFound(u32),
     /// This storage entry in the metadata does not have the correct number of hashers to fields.
     #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
     WrongNumberOfHashers {
@@ -171,6 +169,54 @@ pub enum StorageAddressError {
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
     },
+}
+
+/// Something went wrong trying to access details in the metadata.
+#[derive(Clone, Debug, PartialEq, thiserror::Error)]
+#[non_exhaustive]
+pub enum MetadataError {
+    /// The DispatchError type isn't available in the metadata
+    #[error("The DispatchError type isn't available")]
+    DispatchErrorNotFound,
+    /// Type not found in metadata.
+    #[error("Type with ID {0} not found")]
+    TypeNotFound(u32),
+    /// Pallet not found (index).
+    #[error("Pallet with index {0} not found")]
+    PalletIndexNotFound(u8),
+    /// Pallet not found (name).
+    #[error("Pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    /// Variant not found.
+    #[error("Variant with index {0} not found")]
+    VariantIndexNotFound(u8),
+    /// Constant not found.
+    #[error("Constant with name {0} not found")]
+    ConstantNameNotFound(String),
+    /// Call not found.
+    #[error("Call with name {0} not found")]
+    CallNameNotFound(String),
+    /// Runtime trait not found.
+    #[error("Runtime trait with name {0} not found")]
+    RuntimeTraitNotFound(String),
+    /// Runtime method not found.
+    #[error("Runtime method with name {0} not found")]
+    RuntimeMethodNotFound(String),
+    /// Call type not found in metadata.
+    #[error("Call type not found in pallet with index {0}")]
+    CallTypeNotFoundInPallet(u8),
+    /// Event type not found in metadata.
+    #[error("Event type not found in pallet with index {0}")]
+    EventTypeNotFoundInPallet(u8),
+    /// Storage details not found in metadata.
+    #[error("Storage details not found in pallet with name {0}")]
+    StorageNotFoundInPallet(String),
+    /// Storage entry not found.
+    #[error("Storage entry {0} not found")]
+    StorageEntryNotFound(String),
+    /// The generated interface used is not compatible with the node.
+    #[error("The generated code is not compatible with the node")]
+    IncompatibleCodegen,
 }
 
 /// This trait is implemented on the statically generated root ModuleError type
