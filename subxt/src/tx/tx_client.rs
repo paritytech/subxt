@@ -357,10 +357,10 @@ where
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialExtrinsic::sign()`] instead.
-    pub fn sign_with_address_and_signature<S: Encode>(
+    pub fn sign_with_address_and_signature(
         &self,
         address: &T::Address,
-        signature: &S,
+        signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
         // Encode the extrinsic (into the format expected by protocol version 4)
         let extrinsic = {
