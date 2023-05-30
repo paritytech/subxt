@@ -6,21 +6,26 @@
  * The `@polkadot/extension-dapp` package can be dynamically imported.
  * Usually it is wise to use a package manager like npm or yarn to install it as a dependency.
  *
- * The `getDAppMod` closure returns the `@polkadot/extension-dapp` module on demand, loads it if it has not been loaded yet.
+ * The `getDAppMod` closure returns the `@polkadot/extension-dapp` module on demand. 
  */
 let getDAppMod = (() => {
     let mod = null;
+
+    // initialize `@polkadot/extension-dapp` module on page load
+    let initPromise = (async () => {
+        mod = await import(
+            "https://cdn.jsdelivr.net/npm/@polkadot/extension-dapp@0.46.3/+esm"
+            );
+    })();
+
+    // return a function that waits for initialization to be finished, in case mod is not initialized yet.
     return async () => {
         if (mod == null) {
-            mod = await import(
-                "https://cdn.jsdelivr.net/npm/@polkadot/extension-dapp@0.46.3/+esm"
-                );
+            await initPromise;
         }
         return mod;
     };
 })();
-
-getDAppMod(); // initializes `@polkadot/extension-dapp` module on page load
 
 /**
  * Queries wallets from browser extensions like Talisman and the Polkadot.js extension for user accounts.
@@ -35,7 +40,7 @@ async function getAccounts() {
         name: account.meta.name,
         source: account.meta.source,
         ty: account.type,
-        address: account.address,
+        address: account.address
     }));
     return JSON.stringify(accountObjects);
 }
@@ -60,7 +65,7 @@ async function signHexMessage(hex_message, account) {
     const injector = await dApp.web3FromSource(account_obj.source);
     const signRaw = injector?.signer?.signRaw;
     if (!!signRaw) {
-        const { signature } = await signRaw({
+        const {signature} = await signRaw({
             address: account_obj.address,
             data: hex_message,
             type: "bytes",

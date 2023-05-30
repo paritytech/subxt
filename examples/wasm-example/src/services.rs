@@ -1,6 +1,7 @@
 use futures::StreamExt;
 use std::fmt::Write;
 use subxt::{self, OnlineClient, PolkadotConfig};
+use subxt::tx::SubmittableExtrinsic;
 use yew::{AttrValue, Callback};
 use js_sys::{Promise};
 use anyhow::anyhow;
@@ -9,7 +10,7 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
 #[subxt::subxt(runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale")]
-mod polkadot {}
+pub mod polkadot {}
 
 pub(crate) async fn fetch_constant_block_length() -> Result<String, subxt::Error> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
@@ -86,11 +87,15 @@ extern "C" {
 }
 
 
+/// DTO to communicate with JavaScript
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Account {
+    /// account name
     pub name: String,
+    /// name of the browser extension
     pub source: String,
     pub ty: String,
+    /// ss58 formatted address as string. Can be converted into AccountId32 via it's FromStr implementation.
     pub address: String,
 }
 
@@ -117,3 +122,4 @@ pub async fn sign_hex_message(
         .ok_or(anyhow!("Error converting JsValue into String"))?;
     Ok(result_string)
 }
+

@@ -2,25 +2,24 @@ $primary: #24cc85;
 $secondary: #1f624a;
 $dark: #242a35;
 
-*{
+* {
     font-family: monospace;
     color: $dark;
-    
 }
 
-html{
+html {
     background-color: $dark;
     display: flex;
     justify-content: center;
     height: 100%;
 }
 
-h1{
+h1 {
     font-weight: bolder;
     color: $dark;
 }
 
-body{
+body {
     width: 800px;
     max-width: 100%;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
@@ -30,8 +29,7 @@ body{
     background-color: $primary;
 }
 
-
-p{
+p {
     white-space: pre-wrap;
     border-radius: 8px;
     padding: 8px;
@@ -39,7 +37,8 @@ p{
     background-color: $dark;
     color: white;
 }
-button{
+
+button {
     font-size: large;
     padding: 8px 16px;
     font-weight: bold;
@@ -52,15 +51,15 @@ button{
     margin-top: 8px;
 }
 
-a{
+a {
     text-decoration: none;
 }
 
-button:hover{
- background-color: $secondary;
+button:hover {
+    background-color: $secondary;
 }
 
-input{
+input {
     font-size: large;
     background-color: white;
     color: $dark;
@@ -68,10 +67,17 @@ input{
     padding: 8px;
 }
 
-.mb{
+.mb {
     margin-bottom: 12px;
 }
 
-small{
-    color:#24cc85
+small {
+    color: #24cc85;
+}
+
+.error {
+    color: red;
+    background: black;
+    padding: 8px;
+    border-radius: 8px;
 }
