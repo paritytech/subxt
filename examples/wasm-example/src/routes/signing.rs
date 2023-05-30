@@ -123,6 +123,7 @@ impl Component for SigningExamplesComponent {
                                     return Message::Error(anyhow!("could not create partial extrinsic"));
                                 };
                                 let hex_extrinsic_to_sign = format!("0x{}", hex::encode(partial_extrinsic.signer_payload()));
+                                web_sys::console::log_1(&hex_extrinsic_to_sign.clone().into());
                                 let Ok(signature) = sign_hex_message(hex_extrinsic_to_sign, account_json_string).await else {
                                     return Message::Error(anyhow!("Signing failed"));
                                 };

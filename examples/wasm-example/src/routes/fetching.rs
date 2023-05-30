@@ -36,7 +36,7 @@ impl Component for FetchingExamplesComponent {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Message::Error(err) => {
-                self.lines.push(err.to_string().into());
+                self.lines.insert(0, err.to_string().into());
             }
             Message::Reload => {
                 let window = web_sys::window().expect("Failed to access the window object");
@@ -46,10 +46,13 @@ impl Component for FetchingExamplesComponent {
                     .expect("Failed to reload the page");
             }
             Message::Line(line) => {
-                self.lines.push(line);
+                // newer lines go to the top
+                self.lines.insert(0, line);
             }
-            Message::Lines(mut lines) => {
-                self.lines.append(&mut lines);
+            Message::Lines(lines) => {
+                for line in lines {
+                    self.lines.insert(0, line);
+                }
             }
             Message::ButtonClick(button) => match button {
                 Button::SubscribeFinalized => {
