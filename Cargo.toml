@@ -78,11 +78,11 @@ tokio-stream = "0.1.14"
 futures-util = "0.3.28"
 
 # Substrate crates:
-sp-core = { git = "https://github.com/paritytech/substrate.git", default-features = false }
-sp-core-hashing = { git = "https://github.com/paritytech/substrate.git" }
-sp-runtime = { git = "https://github.com/paritytech/substrate.git" }
-sp-keyring = { git = "https://github.com/paritytech/substrate.git" }
-sp-version = { git = "https://github.com/paritytech/substrate.git" }
+sp-core = { version = "21.0.0", default-features = false }
+sp-core-hashing = "9.0.0"
+sp-runtime = "24.0.0"
+sp-keyring = "24.0.0"
+sp-version = "22.0.0"
 
 # Subxt workspace crates:
 subxt = { version = "0.28.0", path = "subxt" }
