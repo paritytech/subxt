@@ -50,8 +50,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             let expected_hash = self
                 .client
                 .metadata()
-                .pallet_by_name(details.pallet_name)
-                .ok_or_else(|| MetadataError::PalletNameNotFound(details.pallet_name.to_owned()))?
+                .pallet_by_name_err(details.pallet_name)?
                 .call_hash(details.call_name)
                 .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
 
@@ -358,10 +357,10 @@ where
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialExtrinsic::sign()`] instead.
-    pub fn sign_with_address_and_signature<S: Encode>(
+    pub fn sign_with_address_and_signature(
         &self,
         address: &T::Address,
-        signature: &S,
+        signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
         // Encode the extrinsic (into the format expected by protocol version 4)
         let extrinsic = {

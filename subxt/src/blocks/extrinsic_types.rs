@@ -366,10 +366,7 @@ where
 
     /// Fetch the metadata for this extrinsic.
     pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails, Error> {
-        let pallet = self
-            .metadata
-            .pallet_by_index(self.pallet_index())
-            .ok_or_else(|| MetadataError::PalletIndexNotFound(self.pallet_index()))?;
+        let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
         let variant = pallet
             .call_variant_by_index(self.variant_index())
             .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))?;
@@ -563,7 +560,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails, Error>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))

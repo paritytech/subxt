@@ -2,3 +2,5 @@
 **/*.rs.bk
 **/.DS_Store
 cargo-timing*
+/examples/wasm-example/dist
+/examples/wasm-example/target

@@ -70,11 +70,7 @@ where
         async move {
             let metadata = client.metadata();
 
-            let api_trait = metadata
-                .runtime_api_trait_by_name(payload.trait_name())
-                .ok_or_else(|| {
-                    MetadataError::RuntimeTraitNotFound(payload.trait_name().to_owned())
-                })?;
+            let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
             let api_method = api_trait
                 .method_by_name(payload.method_name())
                 .ok_or_else(|| {

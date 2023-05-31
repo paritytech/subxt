@@ -33,7 +33,11 @@ fn bench_get_call_hash(c: &mut Criterion) {
 
     for pallet in metadata.pallets() {
         let pallet_name = pallet.name();
-        for variant in pallet.call_variants().unwrap() {
+        let Some(variants) = pallet.call_variants() else {
+            continue;
+        };
+
+        for variant in variants {
             let call_name = &variant.name;
             let bench_name = format!("{pallet_name}/{call_name}");
             group.bench_function(&bench_name, |b| b.iter(|| pallet.call_hash(call_name)));
