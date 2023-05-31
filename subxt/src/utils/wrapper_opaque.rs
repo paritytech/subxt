@@ -5,7 +5,7 @@
 use super::PhantomDataSendSync;
 use codec::{Compact, Decode, DecodeAll, Encode};
 use derivative::Derivative;
-use scale_decode::{IntoVisitor, Visitor};
+use scale_decode::{FieldIter, IntoVisitor, Visitor};
 use scale_encode::EncodeAsType;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
@@ -113,9 +113,9 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
     type Value<'scale, 'info> = WrapperKeepOpaque<T>;
     type Error = scale_decode::Error;
 
-    fn visit_composite<'scale, 'info>(
+    fn visit_composite<'scale, 'info, I: FieldIter<'info>>(
         self,
-        value: &mut scale_decode::visitor::types::Composite<'scale, 'info>,
+        value: &mut scale_decode::visitor::types::Composite<'scale, 'info, I>,
         _type_id: scale_decode::visitor::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};

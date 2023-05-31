@@ -2645,9 +2645,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7e5527e4b3bf079d4c0b2f253418598c380722ba37ef20fac9088081407f2b6"
+checksum = "716db7b24ccd361634c56ec44537789deb2a7b4d81a7bfdf0b59970c5203cb80"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2659,9 +2659,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.5.0"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b38741b2f78e4391b94eac6b102af0f6ea2b0f7fe65adb55d7f4004f507854db"
+checksum = "bd163388b8eddb9b7bfdc7356aa10f362994f3d2723a48b26a723899c9ef4526"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate",
@@ -2672,9 +2672,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15546e5efbb45f0fc2291f7e202dee8623274c5d8bbfdf9c6886cc8b44a7ced3"
+checksum = "9334800277da691d9db60167215370a7f590771a6a5ae2d2c8da5f93a9b869f4"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -2686,9 +2686,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd983cf0a9effd76138554ead18a6de542d1af175ac12fd5e91836c5c0268082"
+checksum = "c44e40904d22e44bb5a32b863f1d9970e4c6f15b920896ad1d6caf32bb23d4c8"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate",
@@ -2725,10 +2725,12 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.7.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11f549769261561e6764218f847e500588f9a79a289de49ce92f9e26642a3574"
+checksum = "bb1ca6961c4fbe4ea7851ed5d68229d911da1428927ff0db2805da102b4f2211"
 dependencies = [
+ "base58",
+ "blake2",
  "either",
  "frame-metadata",
  "parity-scale-codec",
