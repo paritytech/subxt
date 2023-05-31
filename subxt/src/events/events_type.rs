@@ -133,12 +133,7 @@ impl<T: Config> Events<T> {
             if event_bytes.len() <= pos || num_events == index {
                 None
             } else {
-                match EventDetails::decode_from(
-                    metadata.clone(),
-                    event_bytes.clone(),
-                    pos,
-                    index,
-                ) {
+                match EventDetails::decode_from(metadata.clone(), event_bytes.clone(), pos, index) {
                     Ok(event_details) => {
                         // Skip over decoded bytes in next iteration:
                         pos += event_details.bytes().len();
@@ -476,7 +471,11 @@ pub(crate) mod test_utils {
     impl<E: Encode> EventRecord<E> {
         /// Create a new event record with the given phase, event, and topics.
         pub fn new(phase: Phase, event: E, topics: Vec<<SubstrateConfig as Config>::Hash>) -> Self {
-            Self { phase, event: AllEvents::Test(event), topics }
+            Self {
+                phase,
+                event: AllEvents::Test(event),
+                topics,
+            }
         }
     }
 
@@ -975,13 +974,14 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
-        let topics = vec![
-            H256::from_low_u64_le(123),
-            H256::from_low_u64_le(456),
-        ];
+        let topics = vec![H256::from_low_u64_le(123), H256::from_low_u64_le(456)];
         let events = events::<Event>(
             metadata,
-            vec![EventRecord::new(Phase::ApplyExtrinsic(123), event.clone(), topics.clone())],
+            vec![EventRecord::new(
+                Phase::ApplyExtrinsic(123),
+                event.clone(),
+                topics.clone(),
+            )],
         );
 
         let ev = events
