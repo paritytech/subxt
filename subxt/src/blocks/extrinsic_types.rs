@@ -382,9 +382,14 @@ where
         let bytes = &mut self.field_bytes();
         let extrinsic_metadata = self.extrinsic_metadata()?;
 
+        let mut fields = extrinsic_metadata
+            .variant
+            .fields
+            .iter()
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            &extrinsic_metadata.variant.fields,
+            &mut fields,
             self.metadata.types(),
         )?;
 
@@ -398,11 +403,13 @@ where
         if extrinsic_metadata.pallet.name() == E::PALLET
             && extrinsic_metadata.variant.name == E::CALL
         {
-            let decoded = E::decode_as_fields(
-                &mut self.field_bytes(),
-                &extrinsic_metadata.variant.fields,
-                self.metadata.types(),
-            )?;
+            let mut fields = extrinsic_metadata
+                .variant
+                .fields
+                .iter()
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            let decoded =
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
         } else {
             Ok(None)

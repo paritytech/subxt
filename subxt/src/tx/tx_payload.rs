@@ -152,8 +152,13 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
         pallet_index.encode_to(out);
         call_index.encode_to(out);
 
+        let mut fields = call
+            .fields
+            .iter()
+            .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
+
         self.call_data
-            .encode_as_fields_to(&call.fields, metadata.types(), out)?;
+            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
         Ok(())
     }
 
