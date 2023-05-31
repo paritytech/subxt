@@ -253,8 +253,7 @@ impl<T: Config> EventDetails<T> {
         // the end of the field bytes.
         let event_fields_end_idx = all_bytes.len() - input.len();
 
-        // topics come after the event data in EventRecord. They aren't used for
-        // anything at the moment, so just decode and throw them away.
+        // topics come after the event data in EventRecord.
         let topics = Vec::<T::Hash>::decode(input)?;
 
         // what bytes did we skip over in total, including topics.
