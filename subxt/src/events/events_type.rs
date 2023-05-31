@@ -979,7 +979,7 @@ mod tests {
             metadata,
             vec![EventRecord::new(
                 Phase::ApplyExtrinsic(123),
-                event.clone(),
+                event,
                 topics.clone(),
             )],
         );
