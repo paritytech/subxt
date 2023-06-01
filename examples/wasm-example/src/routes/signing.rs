@@ -1,13 +1,15 @@
+use std::fmt::Debug;
 use anyhow::anyhow;
 use futures::FutureExt;
 use serde::Deserialize;
 use subxt::{OnlineClient, PolkadotConfig};
+use subxt::dynamic::Value;
 use subxt::ext::codec::Decode;
 use subxt::tx::SubmittableExtrinsic;
-use subxt::utils::AccountId32;
+use subxt::utils::{AccountId32, MultiSignature};
 
 
-use web_sys::HtmlInputElement;
+use web_sys::{HtmlInputElement};
 use yew::prelude::*;
 use crate::services::{Account, get_accounts, polkadot, sign_hex_message};
 
@@ -39,7 +41,7 @@ pub enum SubmittingStage {
     },
     Submitting,
     Success {
-        remark_event: polkadot::system::events::Remarked
+        remark_event: polkadot::system::events::ExtrinsicSuccess
     },
     Error(anyhow::Error),
 }
@@ -56,7 +58,7 @@ pub enum Message {
     ReceivedSignature(String, SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>),
     SubmitSigned,
     ExtrinsicFinalized {
-        remark_event: polkadot::system::events::Remarked
+        remark_event: polkadot::system::events::ExtrinsicSuccess
     },
     ExtrinsicFailed(anyhow::Error),
 }
@@ -106,9 +108,9 @@ impl Component for SigningExamplesComponent {
             Message::SignWithAccount(i) => {
                 if let SigningStage::SelectAccount(accounts) = &self.stage {
                     let account = accounts.get(i).unwrap();
-                    let account_json_string = serde_json::to_string(account).unwrap();
-
-                    let account_id: AccountId32 = account.address.parse().unwrap();
+                    let account_address = account.address.clone();
+                    let account_source = account.source.clone();
+                    let account_id: AccountId32 = account_address.parse().unwrap();
                     web_sys::console::log_1(&account_id.to_string().into());
 
                     self.stage = SigningStage::Signing(account.clone());
@@ -119,15 +121,42 @@ impl Component for SigningExamplesComponent {
                     ctx.link()
                         .send_future(
                             async move {
-                                let Ok(partial_extrinsic) = api.tx().create_partial_signed(&remark_call, &account_id, Default::default()).await else {
-                                    return Message::Error(anyhow!("could not create partial extrinsic"));
-                                };
+                                // let polkadot_js_signed = {
+                                //     let signed_extrinsic_hex = "0xb9018400d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d014e6dc8f9439b93886e88e83e5d6f7f8b67f8411ca37b79e8c68fe0159520cf1a3d9efce3baf75726a1bfab50c01e5dbccf82dcce6a6646b68e83e6605795028500000000001448656c6c6f";
+                                //     let tx_bytes = hex::decode(&signed_extrinsic_hex[2..]).unwrap();
+                                //     SubmittableExtrinsic::from_bytes(api.clone(), tx_bytes)
+                                // };
+                                // let dry_res = polkadot_js_signed.dry_run(None).await;
+                                // web_sys::console::log_1(&format!("polkadot_js_signed dry res: {:?}", dry_res).into());
+                                // Message::ReceivedSignature("signature".into(), polkadot_js_signed)
+
+                                let partial_extrinsic =
+                                    match api.tx().create_partial_signed(&remark_call, &account_id, Default::default()).await {
+                                        Ok(partial_extrinsic) => partial_extrinsic,
+                                        Err(err) => {
+                                            return Message::Error(anyhow!("could not create partial extrinsic:\n{:?}", err));
+                                        }
+                                    };
+
+                                // check the payload (debug)
+                                web_sys::console::log_1(&format!("signer payload{:?}", partial_extrinsic.signer_payload()).into());
                                 let hex_extrinsic_to_sign = format!("0x{}", hex::encode(partial_extrinsic.signer_payload()));
                                 web_sys::console::log_1(&hex_extrinsic_to_sign.clone().into());
-                                let Ok(signature) = sign_hex_message(hex_extrinsic_to_sign, account_json_string).await else {
+
+                                // get the signature via browser extension
+                                let Ok(signature) = sign_hex_message(hex_extrinsic_to_sign, account_source, account_address).await else {
                                     return Message::Error(anyhow!("Signing failed"));
                                 };
-                                let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &signature);
+                                let signature_bytes = hex::decode(&signature[2..]).unwrap();
+                                web_sys::console::log_1(&format!("{:?}", signature_bytes).into());
+                                let multi_signature: MultiSignature = MultiSignature::Sr25519(signature_bytes.try_into().unwrap());
+                                let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
+
+                                // test via dry run (debug)
+                                let dry_res = signed_extrinsic.dry_run(None).await;
+                                web_sys::console::log_1(&format!("dry res: {:?}", dry_res).into());
+
+                                // return the signature and signed extrinsic
                                 Message::ReceivedSignature(signature, signed_extrinsic)
                             }
                         );
@@ -312,11 +341,19 @@ impl Component for SigningExamplesComponent {
     }
 }
 
-async fn submit_wait_finalized_and_get_remark_event(extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>) -> Result<polkadot::system::events::Remarked, anyhow::Error> {
+async fn submit_wait_finalized_and_get_remark_event(extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
     let events = extrinsic.submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?;
-    let remark_event = events.find_first::<polkadot::system::events::Remarked>()?;
-    remark_event.ok_or(anyhow!("Remarked event not found"))
+
+    let events_str = format!("{:?}", &events);
+    web_sys::console::log_1(&events_str.into());
+    for event in events.find::<polkadot::system::events::ExtrinsicSuccess>() {
+        web_sys::console::log_1(&format!("{:?}", event).into());
+    }
+
+    let success = events.find_first::<polkadot::system::events::ExtrinsicSuccess>()?;
+    success.ok_or(anyhow!("ExtrinsicSuccess not found in events"))
 }
+

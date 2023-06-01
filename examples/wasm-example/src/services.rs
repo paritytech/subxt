@@ -83,7 +83,7 @@ extern "C" {
     #[wasm_bindgen(js_name = getAccounts)]
     pub fn js_get_accounts() -> Promise;
     #[wasm_bindgen(js_name = signHexMessage)]
-    pub fn js_sign_hex_message(hex_message: String, account_json_string: String) -> Promise;
+    pub fn js_sign_hex_message(hex_message: String, source: String, address: String) -> Promise;
 }
 
 
@@ -112,9 +112,10 @@ pub async fn get_accounts() -> Result<Vec<Account>, anyhow::Error> {
 
 pub async fn sign_hex_message(
     hex_message: String,
-    account_json_string: String,
+    source: String,
+    address: String,
 ) -> Result<String, anyhow::Error> {
-    let result = JsFuture::from(js_sign_hex_message(hex_message, account_json_string))
+    let result = JsFuture::from(js_sign_hex_message(hex_message, source, address))
         .await
         .map_err(|js_err| anyhow!("{js_err:?}"))?;
     let result_string = result
