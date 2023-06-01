@@ -44,6 +44,6 @@
 //! Here's an example which puts this all together:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/events.rs")]
+#![doc = include_str!("../../../examples/events.rs")]
 //! ```
 //!
