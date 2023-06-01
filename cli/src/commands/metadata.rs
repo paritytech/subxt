@@ -7,7 +7,7 @@ use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-use std::io::{Write};
+use std::io::Write;
 use subxt_metadata::Metadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.

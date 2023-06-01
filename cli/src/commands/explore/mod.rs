@@ -1,7 +1,6 @@
 use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
 use clap::{Parser as ClapParser, Subcommand};
 
-
 use std::fmt::Write;
 use std::write;
 
