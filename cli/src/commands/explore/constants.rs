@@ -1,7 +1,7 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
 use std::fmt::Write;
-use std::write;
+
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
 use crate::utils::type_description::print_type_description;
