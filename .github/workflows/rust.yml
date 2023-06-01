@@ -53,8 +53,16 @@ jobs:
                   crate: cargo-hack
                   version: 0.5
 
-            - name: Cargo check
-              run: cargo hack --exclude-all-features --each-feature check --all-targets --workspace
+            # A basic check over all targets together. This may lead to features being combined etc,
+            # and doesn't test combinations of different features.
+            - name: Cargo check all targets.
+              run: cargo check --all-targets
+
+            # Next, check each feature on its own and compile each crate separately. This is no good
+            # for subxt/examples, which expect default features to be enabled, hence the above check
+            # and why we don'#t do `--all-targets` for this one.
+            - name: Cargo hack; check each feature/crate on its own
+              run: cargo hack --exclude-all-features --each-feature check --workspace
 
     fmt:
         name: Cargo fmt
