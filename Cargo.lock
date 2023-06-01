@@ -2309,11 +2309,10 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.17"
+version = "0.4.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
+checksum = "518ef76f2f87365916b142844c16d8fefd85039bc5699050210a7778ee1cd1de"
 dependencies = [
- "cfg-if",
  "value-bag",
 ]
 
@@ -3596,8 +3595,6 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 [[package]]
 name = "smoldot"
 version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b781775aae86ced601ad1eebbfea8a46e45116596692f0b28e7957f98c9d0895"
 dependencies = [
  "arrayvec 0.7.2",
  "async-lock",
@@ -3650,8 +3647,6 @@ dependencies = [
 [[package]]
 name = "smoldot-light"
 version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75b550f7c66dfab421e89e75a0d7dd3cb31e633cf655abf151b080f72c191777"
 dependencies = [
  "async-lock",
  "async-std",
@@ -3671,6 +3666,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_json",
+ "siphasher",
  "slab",
  "smoldot",
 ]
@@ -4283,6 +4279,8 @@ dependencies = [
  "sp-keyring",
  "subxt",
  "tokio",
+ "tracing",
+ "tracing-subscriber 0.3.17",
 ]
 
 [[package]]
@@ -4825,13 +4823,9 @@ checksum = "830b7e5d4d90034032940e4ace0d9a9a057e7a45cd94e6c007832e39edb82f6d"
 
 [[package]]
 name = "value-bag"
-version = "1.0.0-alpha.9"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2209b78d1249f7e6f3293657c9779fe31ced465df091bbd433a1cf88e916ec55"
-dependencies = [
- "ctor",
- "version_check",
-]
+checksum = "a4d330786735ea358f3bc09eea4caa098569c1c93f342d9aca0514915022fe7e"
 
 [[package]]
 name = "version_check"
