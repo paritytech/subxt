@@ -1,6 +1,8 @@
 use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
 use clap::{Parser as ClapParser, Subcommand};
+use frame_metadata::RuntimeMetadata;
 
+use std::fmt::Write;
 use std::write;
 
 use codec::Decode;
@@ -88,7 +90,10 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     // if no pallet specified, show user the pallets to choose from:
     let Some(pallet_name) = opts.pallet else {
         let available_pallets = print_available_pallets(&metadata);
-        println!("Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\n{available_pallets}", );
+        writeln!(output, "Usage:", )?;
+        writeln!(output, "    subxt explore <PALLET>", )?;
+        writeln!(output, "        explore a specific pallet", )?;
+        writeln!(output, "\n{available_pallets}", )?;
         return Ok(());
     };
 
@@ -99,8 +104,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
 
     // if correct pallet was specified but no subcommand, instruct the user how to proceed:
     let Some(pallet_subcomand) = opts.pallet_subcommand else {
-        let docs_string = print_docs_with_indent(pallet_metadata.docs(), 4);
-        let mut output = String::new();
+        let docs_string = print_first_paragraph_with_indent(pallet_metadata.docs(), 4);
         if !docs_string.is_empty() {
             writeln!(output, "Description:\n{docs_string}")?;
         }
@@ -110,7 +114,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
         writeln!(output, "    subxt explore {pallet_name} constants")?;
         writeln!(output, "        explore the constants held in this pallet")?;
         writeln!(output, "    subxt explore {pallet_name} storage")?;
-        write!(output, "        explore the storage values held in this pallet")?;
+        writeln!(output, "        explore the storage values held in this pallet")?;
         return Ok(());
     };
 
@@ -139,15 +143,8 @@ fn print_available_pallets(metadata: &Metadata) -> String {
         for pallet in strings {
             write!(output, "\n    {}", pallet).unwrap();
         }
+        output
     }
-}
-
-/// neat wrapper around FileOrUrl::fetch()
-async fn fetch_metadata(file_or_url: &FileOrUrl) -> color_eyre::Result<Metadata> {
-    let bytes = file_or_url.fetch().await?;
-    let metadata_prefixed = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
-    let metadata = Metadata::try_from(metadata_prefixed)?;
-    Ok(metadata)
 }
 
 #[cfg(test)]
@@ -172,19 +169,18 @@ pub mod tests {
     async fn test_commands() {
         // show pallets:
         let output = simulate_run("").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    Staking\n    System");
+        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    Staking\n    System\n");
         // if incorrect pallet, error:
         let output = simulate_run("abc123").await;
         assert!(output.is_err());
         // if correct pallet, show options (calls, constants, storage)
         let output = simulate_run("Balances").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore Balances calls\n        explore the calls that can be made into this pallet\n    subxt explore Balances constants\n        explore the constants held in this pallet\n    subxt explore Balances storage\n        explore the storage values held in this pallet");
+        assert_eq!(output.unwrap(), "Usage:\n    subxt explore Balances calls\n        explore the calls that can be made into this pallet\n    subxt explore Balances constants\n        explore the constants held in this pallet\n    subxt explore Balances storage\n        explore the storage values held in this pallet\n");
         // check that exploring calls, storage entries and constants is possible:
         let output = simulate_run("Balances calls").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls <CALL>\n        explore a specific call within this pallet\n\nAvailable <CALL>'s in the \"Balances\" pallet:\n"));
         let output = simulate_run("Balances storage").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\nAvailable <STORAGE_ENTRY>'s in the \"Balances\" pallet:\n"));
-
         let output = simulate_run("Balances constants").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances constants <CONSTANT>\n        explore a specific call within this pallet\n\nAvailable <CONSTANT>'s in the \"Balances\" pallet:\n"));
         // check that invalid subcommands don't work:
@@ -199,11 +195,11 @@ pub mod tests {
                 .await;
         assert_eq!(
             output.unwrap(),
-            "Encoded call data:\n    0x24040507020cffffff00"
+            "Encoded call data:\n    0x24040507020cffffff00\n"
         );
         // check that we can explore a certain constant:
         let output = simulate_run("Balances constants ExistentialDeposit").await;
-        assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    10000000000");
+        assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    10000000000\n");
         // check that we can explore a certain storage entry:
         let output = simulate_run("System storage Account").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore System storage Account <KEY_VALUE>\n\nDescription:\n    The full account information for a particular account ID."));

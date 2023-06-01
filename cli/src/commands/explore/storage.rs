@@ -14,7 +14,7 @@ use subxt::{
 
 use crate::utils::type_description::print_type_description;
 use crate::utils::type_example::print_type_examples;
-use crate::utils::{print_docs_with_indent, with_indent};
+use crate::utils::{print_first_paragraph_with_indent, with_indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
@@ -28,20 +28,21 @@ pub async fn explore_storage(
     metadata: &Metadata,
     pallet_metadata: PalletMetadata<'_>,
     custom_online_client_url: Option<String>,
+    output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
     let trailing_args = command.trailing_args.join(" ");
     let trailing_args = trailing_args.trim();
 
     let Some(storage_metadata) = pallet_metadata.storage() else {
-        println!("The \"{pallet_name}\" pallet has no storage entries.");
+        writeln!(output, "The \"{pallet_name}\" pallet has no storage entries.")?;
         return Ok(());
     };
 
     // if no storage entry specified, show user the calls to choose from:
     let Some(entry_name) = command.storage_entry else {
         let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
-        write!(output, "Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}")?;
+        writeln!(output, "Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}")?;
         return Ok(());
     };
 
@@ -64,14 +65,13 @@ pub async fn explore_storage(
         writeln!(output, "Usage:")?;
         writeln!(
             output,
-            "    subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>\n\n"
+            "    subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>\n"
         )?;
-        return Ok(output);
     }
 
-    let docs_string = print_docs_with_indent(storage.docs(), 4);
+    let docs_string = print_first_paragraph_with_indent(storage.docs(), 4);
     if !docs_string.is_empty() {
-        write!(output, "Description:\n{docs_string}")?;
+        writeln!(output, "Description:\n{docs_string}")?;
     }
 
     // inform user about shape of key if it can be provided:
@@ -82,14 +82,13 @@ pub async fn explore_storage(
         key_ty_examples = with_indent(key_ty_examples, 4);
         writeln!(
             output,
-            "\nThe <KEY_VALUE> has the following shape:{}",
-            &key_ty_examples[4..]
+            "\nThe <KEY_VALUE> has the following shape:\n    {key_ty_description}\n"
         )?;
-        writeln!(output, "{key_ty_description}\n\n")?;
+        writeln!(output, "{}", &key_ty_examples[4..])?;
     } else {
         writeln!(
             output,
-            "\nThe constant can be accessed without providing a key."
+            "The constant can be accessed without providing a key."
         )?;
     }
 
@@ -99,9 +98,9 @@ pub async fn explore_storage(
     } else {
         return_ty_description
     };
-    write!(
+    writeln!(
         output,
-        "\n\nThe storage entry has the following shape: {}",
+        "\nThe storage entry has the following shape: {}",
         return_ty_description
     )?;
 
@@ -110,7 +109,7 @@ pub async fn explore_storage(
     let key_scale_values = if let Some(key_ty_id) = key_ty_id.filter(|_| !trailing_args.is_empty())
     {
         let key_scale_value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
-        write!(
+        writeln!(
             output,
             "\n\nYou submitted the following value as a key:\n{}",
             with_indent(scale_value::stringify::to_string(&key_scale_value), 4)
@@ -129,7 +128,7 @@ pub async fn explore_storage(
     };
 
     if key_ty_id.is_none() && !trailing_args.is_empty() {
-        write!(output, "\n\nWarning: You submitted the following value as a key, but it will be ignored, because the storage entry does not require a key: \"{}\"", trailing_args)?;
+        writeln!(output, "\n\nWarning: You submitted the following value as a key, but it will be ignored, because the storage entry does not require a key: \"{}\"", trailing_args)?;
     }
 
     // construct and submit the storage entry request if either no key is needed or som key was provided as a scale value
@@ -152,7 +151,7 @@ pub async fn explore_storage(
         let value = decoded_value_thunk.to_value()?;
         let mut value_string = scale_value::stringify::to_string(&value);
         value_string = with_indent(value_string, 4);
-        write!(
+        writeln!(
             output,
             "\nThe value of the storage entry is:\n{value_string}"
         )?;

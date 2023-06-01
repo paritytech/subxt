@@ -5,7 +5,7 @@ use std::write;
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
 use crate::utils::type_description::print_type_description;
-use crate::utils::{print_docs_with_indent, with_indent};
+use crate::utils::{print_first_paragraph_with_indent, with_indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct ConstantsSubcommand {
@@ -16,13 +16,14 @@ pub fn explore_constants(
     command: ConstantsSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
     let Some(constant_name) = command.constant else {
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
         writeln!(output, "Usage:")?;
         writeln!(output, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        write!(output, "        explore a specific call within this pallet\n\n{available_constants}")?;
+        writeln!(output, "        explore a specific call within this pallet\n\n{available_constants}")?;
         return Ok(());
     };
 
@@ -31,16 +32,15 @@ pub fn explore_constants(
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
         let mut description = "Usage:".to_string();
         writeln!(description, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        write!(description, "        explore a specific call within this pallet\n\n{available_constants}")?;
+        writeln!(description, "        explore a specific call within this pallet\n\n{available_constants}")?;
         let err = eyre!("constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}");
         return Err(err);
     };
 
     // docs
-    let mut output = String::new();
-    let doc_string = print_docs_with_indent(constant.docs(), 4);
+    let doc_string = print_first_paragraph_with_indent(constant.docs(), 4);
     if !doc_string.is_empty() {
-        write!(output, "Description:\n{doc_string}")?;
+        writeln!(output, "Description:\n{doc_string}")?;
     }
 
     // shape
@@ -48,13 +48,13 @@ pub fn explore_constants(
     type_description = with_indent(type_description, 4);
     writeln!(
         output,
-        "\n\nThe constant has the following shape:\n{type_description}"
+        "\nThe constant has the following shape:\n{type_description}"
     )?;
 
     // value
     let scale_val =
         scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
-    write!(
+    writeln!(
         output,
         "\nThe value of the constant is:\n    {}",
         scale_value::stringify::to_string(&scale_val)

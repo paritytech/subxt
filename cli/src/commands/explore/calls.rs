@@ -30,6 +30,7 @@ pub fn explore_calls(
     command: CallsSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
 
@@ -40,7 +41,7 @@ pub fn explore_calls(
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
         let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        write!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
+        writeln!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
         return Ok(());
     };
 
@@ -60,16 +61,16 @@ pub fn explore_calls(
         type_description = with_indent(type_description, 4);
         let mut type_examples = print_type_examples(&call.fields, metadata.types(), "SCALE_VALUE")?;
         type_examples = with_indent(type_examples, 4);
-        let mut output = "Usage:".to_string();
+        writeln!(output, "Usage:")?;
         writeln!(
             output,
             "    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>"
         )?;
         writeln!(
             output,
-            "        construct the call by providing a valid argument\n\n"
+            "        construct the call by providing a valid argument\n"
         )?;
-        write!(
+        writeln!(
             output,
             "The call expect expects a <SCALE_VALUE> with this shape:\n{type_description}\n\n{}\n\nYou may need to surround the value in single quotes when providing it as an argument."
             , &type_examples[4..])?;
@@ -83,7 +84,7 @@ pub fn explore_calls(
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
-    write!(output, "Encoded call data:\n    {hex_bytes}")?;
+    writeln!(output, "Encoded call data:\n    {hex_bytes}")?;
     Ok(())
 }
 
@@ -96,8 +97,7 @@ fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_nam
     let mut strings: Vec<_> = pallet_calls.variants.iter().map(|c| &c.name).collect();
     strings.sort();
     for variant in strings {
-        output.push_str("\n    ");
-        output.push_str(variant);
+        write!(output, "\n    {variant}");
     }
     output
 }
