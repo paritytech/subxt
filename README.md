@@ -4,7 +4,7 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ## Usage
 
-Take a look in the [examples](./examples/examples) folder for various `subxt` usage examples.
+Take a look in the [examples](./examples) folder for various `subxt` usage examples.
 
 ### Downloading metadata from a Substrate node
 
