@@ -26,7 +26,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
-4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-metadata`, `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `integration-tests`, `test-runtime`, `ui-tests`.
+4.  Bump the crate versions in the root `Cargo.toml` to whatever was decided in step 2 (basically a find and replace from old version to new version in this file should do the trick).
 
 5.  Ensure the `Cargo.lock` file is up to date.
 

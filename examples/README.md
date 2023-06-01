@@ -1,5 +1,5 @@
 # Subxt Examples
 
-Take a look in the [examples](./examples) subfolder for various `subxt` usage examples.
+Each folder here contains a complete example which makes use of subxt in some way.
 
-All examples form part of the `subxt` documentation; there should be no examples without corresponding links from the docs.
+For smaller single-file examples, see the `./subxt/examples` folder.

@@ -34,6 +34,6 @@
 //! can decode the extrinsics and access various details, including the associated events:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/blocks_subscribing.rs")]
+#![doc = include_str!("../../../examples/blocks_subscribing.rs")]
 //! ```
 //!

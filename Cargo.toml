@@ -2,7 +2,6 @@
 members = [
     "cli",
     "codegen",
-    "examples",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
@@ -21,7 +20,7 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-version = "0.28.0"
+version = "0.29.0"
 rust-version = "1.64.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
@@ -73,16 +72,16 @@ wasm-bindgen-test = "0.3.24"
 which = "4.4.0"
 
 # Substrate crates:
-sp-core = { version = "20.0.0", default-features = false }
-sp-core-hashing = "8.0.0"
-sp-keyring = "23.0.0"
-sp-runtime = "23.0.0"
-sp-version = "21.0.0"
+sp-core = { version = "21.0.0", default-features = false }
+sp-core-hashing = "9.0.0"
+sp-keyring = "24.0.0"
+sp-runtime = "24.0.0"
+sp-version = "22.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.28.0", path = "subxt" }
-subxt-macro = { version = "0.28.0", path = "macro" }
-subxt-metadata = { version = "0.28.0", path = "metadata" }
-subxt-codegen = { version = "0.28.0", path = "codegen" }
+subxt = { version = "0.29.0", path = "subxt" }
+subxt-macro = { version = "0.29.0", path = "macro" }
+subxt-metadata = { version = "0.29.0", path = "metadata" }
+subxt-codegen = { version = "0.29.0", path = "codegen" }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
