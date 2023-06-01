@@ -147,7 +147,7 @@
 //! inspection. This looks like:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/tx_basic.rs")]
+#![doc = include_str!("../../../examples/tx_basic.rs")]
 //! ```
 //!
 //! ### Providing transaction parameters
@@ -156,7 +156,7 @@
 //! [`crate::tx::TxClient::sign_and_submit_then_watch`] instead:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/tx_with_params.rs")]
+#![doc = include_str!("../../../examples/tx_with_params.rs")]
 //! ```
 //!
 //! This example doesn't wait for the transaction to be included in a block; it just submits it and
@@ -168,7 +168,7 @@
 //! the transaction, you can monitor them as they are emitted and react however you choose:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/tx_status_stream.rs")]
+#![doc = include_str!("../../../examples/tx_status_stream.rs")]
 //! ```
 //!
 //! Take a look at the API docs for [`crate::tx::TxProgress`], [`crate::tx::TxStatus`] and

@@ -3463,17 +3463,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-examples"
-version = "0.29.0"
-dependencies = [
- "futures",
- "hex",
- "sp-keyring",
- "subxt",
- "tokio",
-]
-
-[[package]]
 name = "subxt-macro"
 version = "0.29.0"
 dependencies = [
