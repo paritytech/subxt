@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.29.0] - 2023-06-01
 
-This is another big release for Subxt with a bunch of awesome changes. let's talk abotu some of the notable ones:
+This is another big release for Subxt with a bunch of awesome changes. Let's talk about some of the notable ones:
 
 ### A new guide
 
