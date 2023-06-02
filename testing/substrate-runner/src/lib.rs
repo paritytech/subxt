@@ -86,7 +86,7 @@ pub struct SubstrateNode {
     ws_port: u16,
 }
 
-impl SubstrateNodeBuilder {
+impl SubstrateNode {
     /// Configure and spawn a new [`SubstrateNode`].
     pub fn builder() -> SubstrateNodeBuilder {
         SubstrateNodeBuilder::new()
