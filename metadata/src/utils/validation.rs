@@ -632,6 +632,8 @@ mod tests {
     }
 
     #[test]
+    // Redundant clone clippy warning is a lie; https://github.com/rust-lang/rust-clippy/issues/10870
+    #[allow(clippy::redundant_clone)]
     fn pallet_hash_correctness() {
         let compare_pallets_hash = |lhs: &v15::PalletMetadata, rhs: &v15::PalletMetadata| {
             let metadata = pallets_to_metadata(vec![lhs.clone()]);
