@@ -43,11 +43,16 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = [
+    "smoldot",
     "smoldot-light/std",
+    "smoldot-light-wasm",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
     "futures-util",
+    "wasm-bindgen-futures",
+	"futures-timer/wasm-bindgen",
+    "gloo-net",
 ]
 
 [dependencies]
@@ -88,7 +93,14 @@ subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
 
 # Light client support:
+smoldot = { workspace = true, optional = true }
 smoldot-light = { workspace = true, optional = true }
+smoldot-light-wasm = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+futures-timer = { workspace = true, optional = true }
+gloo-net = { workspace = true, optional = true }
+
+
 tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }

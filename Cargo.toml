@@ -73,7 +73,14 @@ wasm-bindgen-test = "0.3.24"
 which = "4.4.0"
 
 # Light client support:
-smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false, opt-level = 2 }
+smoldot = { path = "/home/lexnv/workspace/smoldot/lib", default-features = false }
+smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false }
+smoldot-light-wasm = { path = "/home/lexnv/workspace/smoldot/wasm-node/rust", default-features = false }
+wasm-bindgen-futures = { version = "0.4.19" }
+futures-timer = { version = "3" }
+gloo-net = { version = "0.2.6", default-features = false, features = ["json", "websocket"] }
+
+
 tokio-stream = "0.1.14"
 futures-util = "0.3.28"
 

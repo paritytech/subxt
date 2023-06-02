@@ -3195,12 +3195,12 @@ checksum = "4f3208ce4d8448b3f3e7d168a73f5e0c43a61e32930de3bceeccedb388b6bf06"
 
 [[package]]
 name = "ruzstd"
-version = "0.4.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3ffab8f9715a0d455df4bbb9d21e91135aab3cd3ca187af0cd0c3c3f868fdc"
+checksum = "9a15e661f0f9dac21f3494fe5d23a6338c0ac116a2d22c2b63010acd89467ffe"
 dependencies = [
  "byteorder",
- "thiserror-core",
+ "thiserror",
  "twox-hash",
 ]
 
@@ -3594,7 +3594,7 @@ checksum = "a507befe795404456341dfab10cef66ead4c041f62b8b11bbb92bffe5d0953e0"
 
 [[package]]
 name = "smoldot"
-version = "0.7.0"
+version = "0.6.0"
 dependencies = [
  "arrayvec 0.7.2",
  "async-lock",
@@ -3646,7 +3646,7 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "0.5.0"
+version = "0.4.0"
 dependencies = [
  "async-lock",
  "async-std",
@@ -3666,9 +3666,28 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_json",
- "siphasher",
  "slab",
  "smoldot",
+]
+
+[[package]]
+name = "smoldot-light-wasm"
+version = "1.0.6"
+dependencies = [
+ "async-executor",
+ "async-task",
+ "event-listener",
+ "fnv",
+ "futures-util",
+ "hashbrown 0.13.2",
+ "lazy_static",
+ "log",
+ "nom",
+ "pin-project",
+ "rand 0.8.5",
+ "slab",
+ "smoldot",
+ "smoldot-light",
 ]
 
 [[package]]
@@ -4201,8 +4220,10 @@ dependencies = [
  "either",
  "frame-metadata",
  "futures",
+ "futures-timer",
  "futures-util",
  "getrandom 0.2.9",
+ "gloo-net",
  "hex",
  "impl-serde",
  "jsonrpsee",
@@ -4215,7 +4236,9 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
+ "smoldot",
  "smoldot-light",
+ "smoldot-light-wasm",
  "sp-core",
  "sp-core-hashing",
  "sp-keyring",
@@ -4227,6 +4250,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -4377,26 +4401,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "978c9a314bd8dc99be594bc3c175faaa9794be04a5a5e153caba6915336cebac"
 dependencies = [
  "thiserror-impl",
-]
-
-[[package]]
-name = "thiserror-core"
-version = "1.0.38"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d97345f6437bb2004cd58819d8a9ef8e36cdd7661c2abc4bbde0a7c40d9f497"
-dependencies = [
- "thiserror-core-impl",
-]
-
-[[package]]
-name = "thiserror-core-impl"
-version = "1.0.38"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10ac1c5050e43014d16b2f94d0d2ce79e65ffdd8b38d8048f9c8f6a8a6da62ac"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
 ]
 
 [[package]]
