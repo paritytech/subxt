@@ -451,11 +451,11 @@ impl<'a> MetadataHasher<'a> {
                 .unwrap_or(true);
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
-            return if should_hash {
+            if should_hash {
                 xor(bytes, get_pallet_hash(pallet))
             } else {
                 bytes
-            };
+            }
         });
 
         let apis_hash = metadata
@@ -469,11 +469,11 @@ impl<'a> MetadataHasher<'a> {
                     .unwrap_or(true);
                 // We don't care what order the runtime APIs are seen in, so XOR their
                 // hashes together to be order independent.
-                return if should_hash {
+                if should_hash {
                     xor(bytes, xor(bytes, get_runtime_trait_hash(api)))
                 } else {
                     bytes
-                };
+                }
             });
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
