@@ -50,8 +50,8 @@ pub fn generate_runtime_api_from_path<P>(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError>
-    where
-        P: AsRef<path::Path>,
+where
+    P: AsRef<path::Path>,
 {
     let to_err = |err| CodegenError::Io(path.as_ref().to_string_lossy().into(), err);
 
@@ -328,10 +328,7 @@ impl RuntimeGenerator {
             .collect();
         let runtime_api_names_len = runtime_api_names.len();
 
-        let metadata_hash = self
-            .metadata
-            .hasher()
-            .hash();
+        let metadata_hash = self.metadata.hasher().hash();
 
         let modules = pallets_with_mod_names
             .iter()
@@ -656,8 +653,8 @@ pub fn generate_structs_from_variants<F>(
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<Vec<(String, CompositeDef)>, CodegenError>
-    where
-        F: Fn(&str) -> std::borrow::Cow<str>,
+where
+    F: Fn(&str) -> std::borrow::Cow<str>,
 {
     let ty = type_gen.resolve_type(type_id);
 
