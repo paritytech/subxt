@@ -42,10 +42,14 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
+
+# TODO: WE NEED smoldot-light/std to build in non-wasm environments!!
 unstable-light-client = [
     "smoldot",
-    "smoldot-light/std",
-    "smoldot-light-wasm",
+    # "smoldot-light/std",
+    "smoldot-light",
+    # "futures-executor",
+    # "smoldot-light-wasm",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
@@ -62,7 +66,7 @@ scale-value = { workspace = true }
 scale-bits = { workspace = true }
 scale-decode = { workspace = true }
 scale-encode = { workspace = true }
-futures = { workspace = true }
+futures = { workspace = true, features = ["executor"] }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["raw_value"] }
@@ -99,6 +103,7 @@ smoldot-light-wasm = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 gloo-net = { workspace = true, optional = true }
+futures-executor = { workspace = true, optional = true }
 
 
 tokio = { workspace = true, optional = true }
@@ -112,7 +117,7 @@ getrandom = { workspace = true, features = ["js"] }
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
-tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "time", "rt"] }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }

@@ -11,6 +11,7 @@ use crate::{
 };
 use core::time::Duration;
 use futures::{lock::Mutex as AsyncMutex, stream::StreamExt, Stream};
+
 #[cfg(feature = "jsonrpsee-ws")]
 use jsonrpsee::{
     async_client::ClientBuilder,
@@ -19,7 +20,8 @@ use jsonrpsee::{
     rpc_params,
 };
 use serde_json::value::RawValue;
-use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket, ChainId};
+// use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket, ChainId};
+use smoldot_light::ChainId;
 use std::{
     iter,
     num::NonZeroU32,
@@ -32,7 +34,9 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 
-use smoldot_light_wasm::platform::Platform as WasmPlatform;
+// use smoldot_light_wasm::platform::Platform as WasmPlatform;
+
+use super::platform::Platform as MyPlatform;
 
 const LOG_TARGET: &str = "light-client";
 
@@ -41,7 +45,7 @@ struct LightClientInner {
     /// Smoldot light client implementation that leverages the `AsyncStdTcpWebSocket`.
     ///
     /// Note: `AsyncStdTcpWebSocket` is not wasm compatible.
-    client: smoldot_light::Client<WasmPlatform>,
+    client: smoldot_light::Client<MyPlatform>,
     /// The ID of the chain used to identify the chain protocol (ie. substrate).
     ///
     /// Note: A single chain is supported for a client. This aligns with the subxt's
@@ -443,7 +447,7 @@ impl LightClient {
         //     env!("CARGO_PKG_VERSION").into(),
         // );
 
-        let platform = WasmPlatform::new();
+        let platform = MyPlatform::new();
 
         let mut client = smoldot_light::Client::new(platform);
 
@@ -496,7 +500,8 @@ impl LightClient {
         // `json_rpc_responses` can only be `None` if we had passed `json_rpc: Disabled`.
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
 
-        tokio::spawn(async move {
+        wasm_bindgen_futures::spawn_local(async move {
+            // tokio::spawn(async move {
             let mut task = BackgroundTask::new();
             task.start_task(backend, rpc_responses).await;
         });
