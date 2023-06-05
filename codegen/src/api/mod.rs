@@ -543,6 +543,9 @@ impl RuntimeGenerator {
                 // Identify the pallets composing the static metadata by name.
                 pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
+                // Runtime APIs in the metadata by name.
+                pub static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
+
                 /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
@@ -624,7 +627,6 @@ impl RuntimeGenerator {
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
                 pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
                     let runtime_metadata_hash = client
                                                     .metadata()
                                                     .hasher()
