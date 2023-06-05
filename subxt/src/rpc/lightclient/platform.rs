@@ -46,14 +46,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
         Result<PlatformConnection<Self::Stream, Self::Connection>, ConnectError>,
     >;
 
-    // type ConnectFuture = future::BoxFuture<
-    //     'static,
-    //     Result<
-    //         smoldot_light::platform::PlatformConnection<Self::Stream, Self::Connection>,
-    //         ConnectError,
-    //     >,
-    // >;
-
     type StreamUpdateFuture<'a> = future::BoxFuture<'a, ()>;
 
     type NextSubstreamFuture<'a> =
@@ -135,7 +127,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
                 (ProtocolRef::Ip6(ip), ProtocolRef::Tcp(port), Some(ProtocolRef::Ws)) => {
                     SocketAddr::new(IpAddr::V6((ip).into()), port)
                 }
-                // // TODO: we don't care about the differences between Dns, Dns4, and Dns6
+                // TODO: Minimal protocol, check that basic connection is working.
+                // TODO: we don't care about the differences between Dns, Dns4, and Dns6
                 // (
                 //     ProtocolRef::Dns(addr) | ProtocolRef::Dns4(addr) | ProtocolRef::Dns6(addr),
                 //     ProtocolRef::Tcp(port),
@@ -166,93 +159,26 @@ impl smoldot_light::platform::PlatformRef for Platform {
             // let (to_sender, from_sender) = mpsc::channel(1024);
             // let (to_receiver, from_receiver) = mpsc::channel(1024);
 
-            // TODO: Spawn a task:
-            // enun Protocol
-            /*
-
-            enum Protocol {
-                Send(String),
-                Recv(String),
-            }
-
-            bg_task {
-                while ..
-                Future:
-                    A: if Send() .. self.send();
-                    B: self.next() -> recv_end.send("Msg");
-
-            }
-
-            from fn send(&self, stream: &mut Self::Stream, data: &[u8]) {
-                let str: String = data.into();
-                sender.send(str);
-            }
-
-            from fn read_buffer<'a> {
-
-
-            }
-
-             *
-             */
-
-            // Note: WebSocket is not `Send`, work around that with a spawned task.
-
-            // wasm_bindgen_futures::spawn_local(async move {
-            //     let sender = tokio_stream::wrappers::ReceiverStream::new(from_sender);
-            //     let receiver = tokio_stream::wrappers::ReceiverStream::new(from_receiver);
-
-            //     // let rpc_responses_event =
-            //     //     futures_util::stream::unfold(rpc_responses, |mut rpc_responses| async {
-            //     //         rpc_responses
-            //     //             .next()
-            //     //             .await
-            //     //             .map(|result| (result, rpc_responses))
-            //     //     });
-
-            //     tokio::pin!(backend_event, rpc_responses_event);
-
-            //     let mut backend_event_fut = backend_event.next();
-            //     let mut rpc_responses_fut = rpc_responses_event.next();
-
-            //     loop {
-            //         match future::select(backend_event_fut, rpc_responses_fut).await {
-            //             // Message received from the backend: user registered.
-            //             Either::Left((backend_value, previous_fut)) => {
-            //                 let Some(message) = backend_value else {
-            //                     println!("Frontend channel closed");
-            //                     break;
-            //                 };
-            //                 tracing::trace!(
-            //                     target: LOG_TARGET,
-            //                     "Received register message {:?}",
-            //                     message
-            //                 );
-
-            //                 self.handle_register(message).await;
-
-            //                 backend_event_fut = backend_event.next();
-            //                 rpc_responses_fut = previous_fut;
-            //             }
-            //             // Message received from rpc handler: lightclient response.
-            //             Either::Right((response, previous_fut)) => {
-            //                 // Smoldot returns `None` if the chain has been removed (which subxt does not remove).
-            //                 let Some(response) = response else {
-            //                     println!("Smoldot RPC responses channel closed");
-            //                     break;
-            //                 };
-            //                 println!("Received smoldot RPC result {:?}", response);
-
-            //                 self.handle_rpc_response(response).await;
-
-            //                 // Advance backend, save frontend.
-            //                 backend_event_fut = previous_fut;
-            //                 rpc_responses_fut = rpc_responses_event.next();
-            //             }
-            //         }
-            //     }
-            // });
-
+            //TODO: Spawn a task:
+            //    enum Protocol {
+            //        Send(String),
+            //        Recv(String),
+            //    }
+            //
+            //    bg_task {
+            //        while ..
+            //        Future:
+            //            A: if Send() .. self.send();
+            //            B: self.next() -> recv_end.send("Msg");
+            //
+            //    }
+            //
+            //    from fn send(&self, stream: &mut Self::Stream, data: &[u8]) {
+            //        let str: String = data.into();
+            //        sender.send(str);
+            //    }
+            //
+            //    from fn read_buffer<'a> {
             let (sender, receiver) = websocket.split();
             let conn = ConnectionStream {
                 inner: Arc::new(Mutex::new(ConnectionInner { sender, receiver })),
@@ -289,8 +215,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
             .inner
             .lock()
             .expect("Mutex should not be poised; qed");
-
-        // let fut = locked.receiver.next();
 
         // let msg = futures_executor::block_on(async {
         let msg = futures::executor::block_on(async {
@@ -334,14 +258,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
 
     fn close_send(&self, stream: &mut Self::Stream) {}
 }
-
-/// Error potentially returned by [`PlatformRef::connect`].
-// pub struct ConnectError {
-//     /// Human-readable error message.
-//     pub message: String,
-//     /// `true` if the error is caused by the address to connect to being forbidden or unsupported.
-//     pub is_bad_addr: bool,
-// }
 
 pub struct ConnectionInner {
     sender: SplitSink<WebSocket, Message>,

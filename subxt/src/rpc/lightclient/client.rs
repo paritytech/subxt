@@ -21,6 +21,7 @@ use jsonrpsee::{
 };
 use serde_json::value::RawValue;
 // use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket, ChainId};
+
 use smoldot_light::ChainId;
 use std::{
     iter,
@@ -34,9 +35,9 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 
-// use smoldot_light_wasm::platform::Platform as WasmPlatform;
+use smoldot_light_wasm::platform::Platform as WasmPlatform;
 
-use super::platform::Platform as MyPlatform;
+// use super::platform::Platform as MyPlatform;
 
 const LOG_TARGET: &str = "light-client";
 
@@ -45,7 +46,7 @@ struct LightClientInner {
     /// Smoldot light client implementation that leverages the `AsyncStdTcpWebSocket`.
     ///
     /// Note: `AsyncStdTcpWebSocket` is not wasm compatible.
-    client: smoldot_light::Client<MyPlatform>,
+    client: smoldot_light::Client<WasmPlatform>,
     /// The ID of the chain used to identify the chain protocol (ie. substrate).
     ///
     /// Note: A single chain is supported for a client. This aligns with the subxt's
@@ -447,7 +448,7 @@ impl LightClient {
         //     env!("CARGO_PKG_VERSION").into(),
         // );
 
-        let platform = MyPlatform::new();
+        let platform = WasmPlatform::new();
 
         let mut client = smoldot_light::Client::new(platform);
 

@@ -7,7 +7,7 @@ use subxt::{rpc::LightClient, tx::PairSigner, OnlineClient, PolkadotConfig};
 // #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 // pub mod polkadot {}
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 

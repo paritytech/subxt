@@ -49,7 +49,7 @@ unstable-light-client = [
     # "smoldot-light/std",
     "smoldot-light",
     # "futures-executor",
-    # "smoldot-light-wasm",
+    "smoldot-light-wasm",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
