@@ -50,8 +50,8 @@ pub fn generate_runtime_api_from_path<P>(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError>
-where
-    P: AsRef<path::Path>,
+    where
+        P: AsRef<path::Path>,
 {
     let to_err = |err| CodegenError::Io(path.as_ref().to_string_lossy().into(), err);
 
@@ -321,10 +321,16 @@ impl RuntimeGenerator {
             .collect();
         let pallet_names_len = pallet_names.len();
 
+        let runtime_api_names: Vec<_> = self
+            .metadata
+            .runtime_api_traits()
+            .map(|api| api.name().to_string())
+            .collect();
+        let runtime_api_names_len = runtime_api_names.len();
+
         let metadata_hash = self
             .metadata
             .hasher()
-            .only_these_pallets(&pallet_names)
             .hash();
 
         let modules = pallets_with_mod_names
@@ -621,7 +627,12 @@ impl RuntimeGenerator {
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
                 pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    let runtime_metadata_hash = client.metadata().hasher().only_these_pallets(&PALLETS).hash();
+                    static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
+                    let runtime_metadata_hash = client
+                                                    .metadata()
+                                                    .hasher()
+                                                    .only_these_pallets(&PALLETS)
+                                                    .only_these_runtime_apis(&RUNTIME_APIS).hash();
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
                         Err(#crate_path::error::MetadataError::IncompatibleCodegen)
                     } else {
@@ -645,8 +656,8 @@ pub fn generate_structs_from_variants<F>(
     crate_path: &CratePath,
     should_gen_docs: bool,
 ) -> Result<Vec<(String, CompositeDef)>, CodegenError>
-where
-    F: Fn(&str) -> std::borrow::Cow<str>,
+    where
+        F: Fn(&str) -> std::borrow::Cow<str>,
 {
     let ty = type_gen.resolve_type(type_id);
 

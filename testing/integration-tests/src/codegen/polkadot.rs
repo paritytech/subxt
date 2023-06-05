@@ -4424,16 +4424,36 @@ pub mod api {
     pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(
         client: &C,
     ) -> Result<(), ::subxt::error::MetadataError> {
+        static RUNTIME_APIS: [&str; 17usize] = [
+            "Core",
+            "Metadata",
+            "BlockBuilder",
+            "NominationPoolsApi",
+            "StakingApi",
+            "TaggedTransactionQueue",
+            "OffchainWorkerApi",
+            "ParachainHost",
+            "BeefyApi",
+            "MmrApi",
+            "GrandpaApi",
+            "BabeApi",
+            "AuthorityDiscoveryApi",
+            "SessionKeys",
+            "AccountNonceApi",
+            "TransactionPaymentApi",
+            "TransactionPaymentCallApi",
+        ];
         let runtime_metadata_hash = client
             .metadata()
             .hasher()
             .only_these_pallets(&PALLETS)
+            .only_these_runtime_apis(&RUNTIME_APIS)
             .hash();
         if runtime_metadata_hash
             != [
-                151u8, 83u8, 251u8, 44u8, 149u8, 59u8, 20u8, 183u8, 19u8, 173u8, 234u8, 48u8,
-                114u8, 104u8, 69u8, 102u8, 189u8, 208u8, 10u8, 87u8, 154u8, 252u8, 54u8, 185u8,
-                248u8, 199u8, 45u8, 173u8, 199u8, 95u8, 189u8, 253u8,
+                48u8, 175u8, 255u8, 171u8, 180u8, 123u8, 181u8, 54u8, 125u8, 74u8, 109u8, 140u8,
+                192u8, 208u8, 131u8, 194u8, 195u8, 232u8, 33u8, 229u8, 178u8, 181u8, 236u8, 230u8,
+                37u8, 97u8, 134u8, 144u8, 187u8, 127u8, 47u8, 237u8,
             ]
         {
             Err(::subxt::error::MetadataError::IncompatibleCodegen)
