@@ -12,7 +12,7 @@ use crate::{
 use core::time::Duration;
 use futures::{lock::Mutex as AsyncMutex, stream::StreamExt, Stream};
 
-use subxt_light_client as _;
+// use subxt_light_client as _;
 
 #[cfg(feature = "jsonrpsee-ws")]
 use jsonrpsee::{
@@ -37,9 +37,8 @@ use std::{
 use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 
-use smoldot_light_wasm::platform::Platform as WasmPlatform;
-
-// use super::platform::Platform as MyPlatform;
+// use smoldot_light_wasm::platform::Platform as WasmPlatform;
+use super::platform::Platform as WasmPlatform;
 
 const LOG_TARGET: &str = "light-client";
 

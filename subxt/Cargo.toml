@@ -49,7 +49,7 @@ unstable-light-client = [
     # "smoldot-light/std",
     "smoldot-light",
     # "futures-executor",
-    "smoldot-light-wasm",
+    # "smoldot-light-wasm",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
@@ -57,7 +57,8 @@ unstable-light-client = [
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
     "gloo-net",
-    "subxt-light-client",
+    "instant/wasm-bindgen",
+    # "subxt-light-client",
 ]
 
 [dependencies]
@@ -100,7 +101,7 @@ subxt-metadata = { workspace = true }
 # Light client support:
 smoldot = { workspace = true, optional = true }
 smoldot-light = { workspace = true, optional = true }
-smoldot-light-wasm = { workspace = true, optional = true }
+# smoldot-light-wasm = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 gloo-net = { workspace = true, optional = true }
@@ -110,6 +111,9 @@ subxt-light-client = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }
+
+instant = { workspace = true, optional = true }
+
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { workspace = true, features = ["js"] }

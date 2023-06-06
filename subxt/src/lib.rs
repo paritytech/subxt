@@ -27,7 +27,7 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
-    unused_crate_dependencies,
+    // unused_crate_dependencies,
     unused_extern_crates,
     clippy::all
 )]

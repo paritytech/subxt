@@ -18,6 +18,14 @@ use std::{
     net::{IpAddr, SocketAddr},
 };
 
+use core::{mem, pin, str, task, time::Duration};
+use std::{
+    borrow::Cow,
+    collections::{BTreeMap, VecDeque},
+    sync::atomic::{AtomicU64, Ordering},
+    time::{Instant, SystemTime, UNIX_EPOCH},
+};
+
 use tokio::sync::{mpsc, oneshot};
 
 #[derive(Clone)]
@@ -35,7 +43,7 @@ impl smoldot_light::platform::PlatformRef for Platform {
     // No-op yielding.
     type Yield = future::Ready<()>;
 
-    type Instant = std::time::Instant;
+    type Instant = instant::Instant;
 
     type Connection = std::convert::Infallible;
 
@@ -51,22 +59,43 @@ impl smoldot_light::platform::PlatformRef for Platform {
     type NextSubstreamFuture<'a> =
         future::Pending<Option<(Self::Stream, PlatformSubstreamDirection)>>;
 
-    fn now_from_unix_epoch(&self) -> std::time::Duration {
-        std::time::UNIX_EPOCH
-            .elapsed()
-            .expect("Invalid systime cannot be configured earlier than `UNIX_EPOCH`")
+    fn now_from_unix_epoch(&self) -> instant::Duration {
+        tracing::trace!("[call] now_from_unix_epoch");
+
+        // The documentation of `now_from_unix_epoch()` mentions that it's ok to panic if we're
+        // before the UNIX epoch.
+
+        let res = instant::SystemTime::now()
+            .duration_since(instant::SystemTime::UNIX_EPOCH)
+            .unwrap_or_else(|_| panic!());
+
+        // let res = std::time::UNIX_EPOCH
+        //     .elapsed()
+        //     .expect("Invalid systime cannot be configured earlier than `UNIX_EPOCH`");
+        tracing::trace!("[response] now_from_unix_epoch={:?}", res);
+
+        res
     }
 
     fn now(&self) -> Self::Instant {
-        std::time::Instant::now()
+        // tracing::trace!("[call] now");
+        let now = instant::Instant::now();
+        // tracing::trace!("[res] now ={:?}", now);
+        now
     }
 
-    fn sleep(&self, duration: std::time::Duration) -> Self::Delay {
-        futures_timer::Delay::new(duration).boxed()
+    fn sleep(&self, duration: Duration) -> Self::Delay {
+        tracing::trace!("[call] sleep");
+        let future = futures_timer::Delay::new(duration).boxed();
+        tracing::trace!("[res] sleep");
+        future
     }
 
     fn sleep_until(&self, when: Self::Instant) -> Self::Delay {
-        self.sleep(when.saturating_duration_since(self.now()))
+        tracing::trace!("[call] sleep_until");
+        let res = self.sleep(when.saturating_duration_since(self.now()));
+        tracing::trace!("[res] sleep_until");
+        res
     }
 
     fn spawn_task(
@@ -74,7 +103,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
         task_name: std::borrow::Cow<str>,
         task: futures_util::future::BoxFuture<'static, ()>,
     ) {
-        println!("Spawning {task_name}");
+        tracing::trace!("[call] spawn_task task_name={:?}", task_name);
+
         wasm_bindgen_futures::spawn_local(task)
     }
 
@@ -91,6 +121,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
     }
 
     fn connect(&self, url: &str) -> Self::ConnectFuture {
+        tracing::trace!("[call] connect url={:?}", url);
+
         let url = url.to_string();
 
         Box::pin(async move {
@@ -204,6 +236,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
     }
 
     fn update_stream<'a>(&self, stream: &'a mut Self::Stream) -> Self::StreamUpdateFuture<'a> {
+        tracing::trace!("[call] update_stream");
+
         Box::pin(async move {})
     }
 
@@ -211,6 +245,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
         &self,
         stream: &'a mut Self::Stream,
     ) -> smoldot_light::platform::ReadBuffer<'a> {
+        tracing::trace!("[call] read_buffer");
+
         let mut locked = stream
             .inner
             .lock()
@@ -239,13 +275,18 @@ impl smoldot_light::platform::PlatformRef for Platform {
         }
     }
 
-    fn advance_read_cursor(&self, stream: &mut Self::Stream, bytes: usize) {}
+    fn advance_read_cursor(&self, stream: &mut Self::Stream, bytes: usize) {
+        tracing::trace!("[call] advance_read_cursor");
+    }
 
     fn writable_bytes(&self, stream: &mut Self::Stream) -> usize {
+        tracing::trace!("[call] writable_bytes");
         1024
     }
 
     fn send(&self, stream: &mut Self::Stream, data: &[u8]) {
+        tracing::trace!("[call] send");
+
         let mut locked = stream
             .inner
             .lock()
@@ -256,7 +297,9 @@ impl smoldot_light::platform::PlatformRef for Platform {
         }
     }
 
-    fn close_send(&self, stream: &mut Self::Stream) {}
+    fn close_send(&self, stream: &mut Self::Stream) {
+        tracing::trace!("[call] close_send");
+    }
 }
 
 pub struct ConnectionInner {

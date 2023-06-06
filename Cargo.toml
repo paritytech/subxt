@@ -82,6 +82,9 @@ futures-timer = { version = "3" }
 gloo-net = { version = "0.2.6", default-features = false, features = ["json", "websocket"] }
 futures-executor = { version = "0.3.28", default-features = false }
 
+
+instant = { version = "0.1.12", default-features = false }
+
 tokio-stream = "0.1.14"
 futures-util = "0.3.28"
 
