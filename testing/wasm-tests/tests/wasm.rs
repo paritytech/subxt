@@ -28,8 +28,14 @@ async fn wasm_ws_transport_works() {
 async fn light_client_transport_works() {
 	init_tracing();
 
-    // let light_client = LightClient::new(include_str!("../../../artifacts/dev_spec.json")).unwrap();
-    // let client = subxt::client::OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await.unwrap();
+    tracing::warn!("Starting test");
+    let light_client = LightClient::new(include_str!("../../../artifacts/dev_spec.json")).unwrap();
+    tracing::warn!("RPC layer created..");
+
+    let client = subxt::client::OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await.unwrap();
+
+    tracing::warn!("Client Created");
+
 
     // let chain = client.rpc().system_chain().await.unwrap();
     // assert_eq!(&chain, "Development");

@@ -2231,6 +2231,7 @@ dependencies = [
  "smoldot-light",
  "smoldot-light-wasm",
  "sp-core-hashing",
+ "subxt-light-client",
  "subxt-macro",
  "subxt-metadata",
  "thiserror",
@@ -2256,6 +2257,18 @@ dependencies = [
  "syn 2.0.16",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "subxt-light-client"
+version = "0.28.0"
+dependencies = [
+ "console_error_panic_hook",
+ "gloo-timers",
+ "lazy_static",
+ "tracing",
+ "tracing-wasm",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -2670,6 +2683,7 @@ dependencies = [
  "console_error_panic_hook",
  "serde_json",
  "subxt",
+ "tracing",
  "tracing-wasm",
  "wasm-bindgen-test",
 ]

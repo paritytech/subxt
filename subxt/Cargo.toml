@@ -57,6 +57,7 @@ unstable-light-client = [
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
     "gloo-net",
+    "subxt-light-client",
 ]
 
 [dependencies]
@@ -104,7 +105,7 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 gloo-net = { workspace = true, optional = true }
 futures-executor = { workspace = true, optional = true }
-
+subxt-light-client = { workspace = true, optional = true }
 
 tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }

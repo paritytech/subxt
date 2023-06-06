@@ -1,0 +1,27 @@
+[package]
+name = "subxt-light-client"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "../README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Smoldot integration with Subxt for WASM"
+keywords = ["parity", "substrate", "blockchain"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = "0.2.86"
+tracing-wasm = "0.2.1"
+tracing = "0.1.34"
+lazy_static = "1.4.0"
+gloo-timers = "0.2.6"
+console_error_panic_hook = "0.1.7"
+# wasm-pack = "0.11.1"

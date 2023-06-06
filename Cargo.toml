@@ -9,6 +9,7 @@ members = [
     "testing/ui-tests",
     "macro",
     "metadata",
+    "subxt-light-client",
     "subxt"
 ]
 
@@ -96,6 +97,7 @@ subxt = { version = "0.28.0", path = "subxt" }
 subxt-macro = { version = "0.28.0", path = "macro" }
 subxt-metadata = { version = "0.28.0", path = "metadata" }
 subxt-codegen = { version = "0.28.0", path = "codegen" }
+subxt-light-client= { version = "0.28.0", path = "subxt-light-client" }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 

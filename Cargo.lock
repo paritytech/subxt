@@ -692,6 +692,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "console_error_panic_hook"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
+dependencies = [
+ "cfg-if",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "constant_time_eq"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3985,6 +3995,7 @@ dependencies = [
  "sp-keyring",
  "sp-runtime",
  "sp-version",
+ "subxt-light-client",
  "subxt-macro",
  "subxt-metadata",
  "thiserror",
@@ -4046,6 +4057,18 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.17",
+]
+
+[[package]]
+name = "subxt-light-client"
+version = "0.28.0"
+dependencies = [
+ "console_error_panic_hook",
+ "gloo-timers",
+ "lazy_static",
+ "tracing",
+ "tracing-wasm",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -4403,6 +4426,17 @@ dependencies = [
  "thread_local",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "tracing-wasm"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4575c663a174420fa2d78f4108ff68f65bf2fbb7dd89f33749b6e826b3626e07"
+dependencies = [
+ "tracing",
+ "tracing-subscriber 0.3.17",
+ "wasm-bindgen",
 ]
 
 [[package]]
