@@ -426,7 +426,7 @@ impl<'a> MetadataHasher<'a> {
         self
     }
 
-    /// only hash the provided runtime APIs instead of hashing every runtime API
+    /// Only hash the provided runtime APIs instead of hashing every runtime API
     pub fn only_these_runtime_apis<S: AsRef<str>>(
         &mut self,
         specific_runtime_apis: &'a [S],
