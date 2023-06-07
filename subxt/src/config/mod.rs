@@ -27,7 +27,7 @@ pub use substrate::SubstrateConfig;
 pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
-    type Index: Debug + Copy + DeserializeOwned + Into<u64>;
+    type Index: Debug + Copy + Decode + Into<u64>;
 
     /// The output of the `Hasher` function.
     type Hash: Debug
@@ -42,7 +42,7 @@ pub trait Config: 'static {
         + PartialEq;
 
     /// The account ID type.
-    type AccountId: Debug + Clone + Serialize;
+    type AccountId: Debug + Clone + Encode;
 
     /// The address type.
     type Address: Debug + Encode + From<Self::AccountId>;

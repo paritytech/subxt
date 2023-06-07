@@ -34,7 +34,6 @@
 use std::sync::Arc;
 
 use codec::{Decode, Encode};
-use serde::Serialize;
 
 use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
 
@@ -177,16 +176,6 @@ impl<T: Config> Rpc<T> {
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
         self.client.request("system_version", rpc_params![]).await
-    }
-
-    /// Fetch the current nonce for the given account ID.
-    pub async fn system_account_next_index<AccountId: Serialize>(
-        &self,
-        account: &AccountId,
-    ) -> Result<T::Index, Error> {
-        self.client
-            .request("system_accountNextIndex", rpc_params![account])
-            .await
     }
 
     /// Get a header
