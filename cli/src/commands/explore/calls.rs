@@ -3,9 +3,7 @@ use color_eyre::eyre::eyre;
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
-use std::fmt::Write;
 use std::str::FromStr;
-use std::write;
 
 use subxt::tx;
 use subxt::utils::H256;
@@ -97,7 +95,8 @@ fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_nam
     let mut strings: Vec<_> = pallet_calls.variants.iter().map(|c| &c.name).collect();
     strings.sort();
     for variant in strings {
-        write!(output, "\n    {variant}");
+        output.push_str("\n    ");
+        output.push_str(variant);
     }
     output
 }
