@@ -96,9 +96,10 @@ impl MetadataTestRunnerCaseBuilder {
     ///   provided macro_metadata without running into any issues.
     /// - checks that the `runtime::validate_codegen` function returns
     ///   true or false when compared to the `validation_metadata`, according
-    ///   to whether `should_be_valid` is true or false.
+    ///   to whether `expects_invalid()` is set or not.
     ///
-    /// The generated code will be tidied up when this is dropped.
+    /// The generated code will be tidied up when the `MetadataTestRunner` that
+    /// this was handed out from is dropped.
     pub fn build<M>(self, macro_metadata: M) -> String
     where
         M: TryInto<Metadata>,
