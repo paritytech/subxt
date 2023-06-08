@@ -4441,7 +4441,7 @@ pub mod api {
         }
     }
     #[doc = r" check whether the metadata provided is aligned with this statically generated code."]
-    pub fn validate_codegen(metadata: &::subxt::Metadata) -> bool {
+    pub fn is_codegen_valid_for(metadata: &::subxt::Metadata) -> bool {
         let runtime_metadata_hash = metadata
             .hasher()
             .only_these_pallets(&PALLETS)

@@ -91,7 +91,7 @@ async fn full_metadata_check() {
     let api = ctx.client();
 
     // Runtime metadata is identical to the metadata used during API generation.
-    assert!(node_runtime::validate_codegen(&api.metadata()));
+    assert!(node_runtime::is_codegen_valid_for(&api.metadata()));
 
     // Modify the metadata.
     let metadata = modified_metadata(api.metadata(), |md| {
@@ -99,7 +99,7 @@ async fn full_metadata_check() {
     });
 
     // It should now be invalid:
-    assert!(!node_runtime::validate_codegen(&metadata));
+    assert!(!node_runtime::is_codegen_valid_for(&metadata));
 }
 
 #[tokio::test]
@@ -130,7 +130,7 @@ async fn constant_values_are_not_validated() {
 
     let api = metadata_to_api(metadata, &ctx).await;
 
-    assert!(node_runtime::validate_codegen(&api.metadata()));
+    assert!(node_runtime::is_codegen_valid_for(&api.metadata()));
     assert!(api.constants().at(&deposit_addr).is_ok());
 }
 

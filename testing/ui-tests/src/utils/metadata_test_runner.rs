@@ -94,7 +94,7 @@ impl MetadataTestRunnerCaseBuilder {
     /// The generated code:
     /// - checks that the subxt macro can perform codegen given the
     ///   provided macro_metadata without running into any issues.
-    /// - checks that the `runtime::validate_codegen` function returns
+    /// - checks that the `runtime::is_codegen_valid_for` function returns
     ///   true or false when compared to the `validation_metadata`, according
     ///   to whether `expects_invalid()` is set or not.
     ///
@@ -162,7 +162,7 @@ impl MetadataTestRunnerCaseBuilder {
                     .expect("Cannot decode metadata bytes");
 
                 // validate it:
-                let is_valid = polkadot::validate_codegen(&metadata);
+                let is_valid = polkadot::is_codegen_valid_for(&metadata);
                 assert_eq!(is_valid, {should_be_valid_str}, "expected validity to line up");
             }}
         "#

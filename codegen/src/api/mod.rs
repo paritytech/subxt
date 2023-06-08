@@ -628,7 +628,7 @@ impl RuntimeGenerator {
                 }
 
                 /// check whether the metadata provided is aligned with this statically generated code.
-                pub fn validate_codegen(metadata: &#crate_path::Metadata) -> bool {
+                pub fn is_codegen_valid_for(metadata: &#crate_path::Metadata) -> bool {
                     let runtime_metadata_hash = metadata
                         .hasher()
                         .only_these_pallets(&PALLETS)
