@@ -66,6 +66,7 @@ impl Platform {
         let (send_tx, send_rx) = mpsc::channel(128);
         let (send_ack_tx, send_ack_rx) = mpsc::channel(128);
 
+        // NOTE: This may be avoided when we get a working socket (maybe a variation on web_connection.rs file).
         wasm_bindgen_futures::spawn_local(async move {
             tracing::trace!("[background] Start task");
             let mut new_connection_rx = new_connection_rx;
@@ -74,6 +75,7 @@ impl Platform {
             while let Some(addr) = new_connection_rx.recv().await {
                 tracing::trace!("[background] Received url={:?}", addr);
 
+                // NOTE: `web_sys::Websocket` has the same behavior:
                 // use web_sys::{MessageEvent, WebSocket as WebSysWebsocket};
                 // // new code to use web_connection:
                 // let mut websocket = match WebSysWebsocket::new(&addr) {
@@ -218,7 +220,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
 
     fn now(&self) -> Self::Instant {
         // tracing::trace!("[now]");
-
         instant::Instant::now()
     }
 
@@ -317,6 +318,7 @@ impl smoldot_light::platform::PlatformRef for Platform {
             };
 
             let addr = format!("ws://{}", addr.to_string());
+            // NOTE: When using the normal RPC WS address the connection is successful.
             // let addr = format!("ws://127.0.0.1:9944");
             tracing::trace!("[connect] Connecting to addr={:?}", addr);
 
@@ -332,14 +334,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
                 return Err(err);
             }
 
-            // // TODO: use `addr` instead.
-            // let websocket = WebSocket::open(addr.as_ref()).map_err(|err| {
-            //     tracing::trace!("[connect] Cannot connect to add {:?}", err);
-            //     ConnectError {
-            //         is_bad_addr: false,
-            //         message: "Cannot stablish WebSocket connection".to_string(),
-            //     }
-            // })?;
             tracing::trace!("[connect] Connection established");
 
             // let (sender, receiver) = websocket.split();
@@ -367,7 +361,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
 
     fn open_out_substream(&self, _connection: &mut Self::Connection) {
         tracing::trace!("[call] open_out_substream");
-
         // Called from MultiStream connections that are never opened for this implementation.
     }
 
@@ -391,13 +384,16 @@ impl smoldot_light::platform::PlatformRef for Platform {
         Box::pin(async move {
             tracing::trace!("[update_stream] NEW function");
             if stream.buffers.as_mut().is_none() {
+                // Ignore buffers just to send a raw message
                 tracing::trace!("[update_stream] Buffers are empty");
             }
 
             let mut plat = inner.lock().await;
 
+            // Smoldot submits this as first message:
             // [19, 47, 109, 117, 108, 116, 105, 115, 116, 114, 101, 97, 109, 47, 49, 46, 48, 46, 48, 10, 7, 47, 110, 111, 105, 115, 101, 10] message=Ok("\u{13}/multistream/1.0.0\n\u{7}/noise\n")
 
+            // Send it manually to verify everything is working.
             let bytes = [
                 19, 47, 109, 117, 108, 116, 105, 115, 116, 114, 101, 97, 109, 47, 49, 46, 48, 46,
                 48, 10, 7, 47, 110, 111, 105, 115, 101, 10,
@@ -410,15 +406,15 @@ impl smoldot_light::platform::PlatformRef for Platform {
                 tracing::trace!("[update_stream] Failed to recv ACK for sent bytes");
             }
 
+            // NOTE: uncomment when the socket can connect to substrate.
             // {
             //     let mut locked = inner.lock().unwrap();
             //     let response = locked.sender.send(Message::Bytes(bytes.into())).await;
             //     tracing::trace!("[update_stream] Response is response {:?}", response);
             // }
-
-            // Ignore buffers just to send a message
         })
 
+        // NOTE: implementation with poll_fn, similar to smoldot without `flush` and `close` ops.
         // Box::pin(future::poll_fn(|cx| {
         //     let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else {
         //         tracing::trace!("[update_stream] Buffers are empty");
@@ -607,67 +603,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
                 ReadBuffer::Open(&buffer[cursor.clone()])
             }
         }
-
-        // let mut locked = stream
-        //     .inner
-        //     .lock()
-        //     .expect("Mutex should not be poised; qed");
-
-        // // let recv_future = Box::pin(locked.receiver.next());
-
-        // let mut future = locked.receiver.next();
-
-        // match future.poll_unpin(&mut Context::from_waker(
-        //     futures_util::task::noop_waker_ref(),
-        // )) {
-        //     task::Poll::Ready(result) => {
-        //         tracing::warn!("Got result {:?}", result);
-
-        //         panic!("OPS with result {:?}", result);
-        //     }
-        //     task::Poll::Pending => {
-        //         // panic!("OPS pending");
-
-        //         smoldot_light::platform::ReadBuffer::Closed
-        //         // tracing::warn!("Got pending...");
-        //     }
-        // }
-
-        // match future::Future::poll(
-        //     locked.receiver.next().fuse(),
-        //     &mut Context::from_waker(futures_util::task::noop_waker_ref()),
-        // ) {
-        //     task::Poll::Ready(result) => {
-        //         tracing::warn!("Got result {:?}", result);
-        //     }
-        //     task::Poll::Pending => {
-        //         tracing::warn!("Got pending...");
-        //     }
-        // };
-
-        // panic!("OPS - from reading");
-
-        // // let msg = futures_executor::block_on(async {
-        // let msg = futures::executor::block_on(async {
-        //     match locked.receiver.next().await {
-        //         Some(Ok(msg)) => Some(msg),
-        //         _ => None,
-        //     }
-        // });
-
-        // match msg {
-        //     Some(msg) => {
-        //         let msg = Box::leak(Box::new(msg));
-
-        //         match msg {
-        //             Message::Text(text) => {
-        //                 smoldot_light::platform::ReadBuffer::Open(text.as_bytes())
-        //             }
-        //             Message::Bytes(bytes) => smoldot_light::platform::ReadBuffer::Open(bytes),
-        //         }
-        //     }
-        //     None => smoldot_light::platform::ReadBuffer::Closed,
-        // }
     }
 
     fn advance_read_cursor(&self, stream: &mut Self::Stream, bytes: usize) {
@@ -707,15 +642,6 @@ impl smoldot_light::platform::PlatformRef for Platform {
         stream.buffers.as_mut().map(|(_, w)| w) else { panic!() };
         buffer.reserve(data.len());
         buffer.extend(data.iter().copied());
-
-        // let mut locked = stream
-        //     .inner
-        //     .lock()
-        //     .expect("Mutex should not be poised; qed");
-
-        // if let Ok(message) = String::from_utf8(data.into()) {
-        //     let _ = locked.sender.send(Message::Text(message));
-        // }
     }
 
     fn close_send(&self, stream: &mut Self::Stream) {
@@ -773,7 +699,3 @@ enum StreamWriteBuffer {
     },
     Closed,
 }
-
-// pub struct TcpStream {
-// socket: Rc<RefCell<WebSocket>>,
-// }

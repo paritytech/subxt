@@ -20,6 +20,12 @@
 // SOFTWARE.
 
 //! Libp2p transports built on [Websys](https://rustwasm.github.io/wasm-bindgen/web-sys/index.html).
+//!
+//! TODO: Take from libp2p-websys-transport, but just the socket, without Libp2p transport.
+//!  - For more context: https://github.com/libp2p/rust-libp2p/issues/3611
+//!
+//! Needs some adjusting, gloo-net::Websocket/web-sys may work just as well
+
 #![warn(clippy::all, rust_2018_idioms)]
 
 use futures::{future::Ready, io, prelude::*};

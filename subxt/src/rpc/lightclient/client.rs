@@ -434,6 +434,63 @@ impl LightClient {
         LightClient::new(&result.to_string())
     }
 
+    /// Test websocket substrate connection.
+    pub async fn dial_substrate() {
+        use libp2p::{
+            core::{upgrade::Version, Transport},
+            floodsub::{self, Floodsub, FloodsubEvent},
+            identity, mplex,
+            multiaddr::Multiaddr,
+            noise,
+            swarm::{keep_alive, NetworkBehaviour, Swarm, SwarmEvent},
+            PeerId,
+        };
+        use libp2p_websys_transport::WebsocketTransport;
+
+        // Create the websocket transport.
+        let local_key = identity::Keypair::generate_ed25519();
+        let transport = WebsocketTransport::default()
+            .upgrade(Version::V1)
+            .authenticate(noise::NoiseAuthenticated::xx(&local_key).unwrap())
+            .multiplex(mplex::MplexConfig::default())
+            .boxed();
+
+        // Create a behaviour to receive Floodsub messages and keep alive connection.
+        #[derive(NetworkBehaviour)]
+        struct Behaviour {
+            keep_alive: keep_alive::Behaviour,
+            floodsub: Floodsub,
+        }
+
+        let floodsub_topic = floodsub::Topic::new("chat");
+
+        // Create a Swarm to manage peers and events
+        let mut swarm = {
+            let local_peer_id = PeerId::from(local_key.public());
+            let mut behaviour = Behaviour {
+                floodsub: Floodsub::new(local_peer_id),
+                keep_alive: keep_alive::Behaviour::default(),
+            };
+
+            behaviour.floodsub.subscribe(floodsub_topic.clone());
+
+            Swarm::with_wasm_executor(transport, behaviour, local_peer_id)
+        };
+
+        // hardcode connection check.
+        let addr = "/ip4/127.0.0.1/tcp/30334/ws";
+        let addr = addr.parse::<Multiaddr>().unwrap();
+
+        tracing::trace!("SWARM dial");
+        let res = swarm.dial(addr);
+        tracing::trace!("SWARM dial done");
+
+        loop {
+            let event = swarm.select_next_some().await;
+            tracing::trace!("SWARM event {:?}", event);
+        }
+    }
+
     /// Constructs a new [`LightClient`], providing the chain specification.
     ///
     /// The chain specification can be downloaded from a trusted network via

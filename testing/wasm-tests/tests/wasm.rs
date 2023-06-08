@@ -17,6 +17,13 @@ fn init_tracing() {
     tracing_wasm::set_as_global_default();
 }
 
+// NOTE
+// run as: ` WASM_BINDGEN_TEST_TIMEOUT=40 wasm-pack test --firefox --headless`
+// run as: ` WASM_BINDGEN_TEST_TIMEOUT=40 wasm-pack test --firefox --headless`
+// run as: ` WASM_BINDGEN_TEST_TIMEOUT=40 wasm-pack test --firefox --headless`
+
+
+// NOTE: This is basic subxt:
 // #[wasm_bindgen_test]
 // async fn wasm_ws_transport_works() {
 //     let client = subxt::client::OnlineClient::<PolkadotConfig>::from_url("ws://127.0.0.1:9944")
@@ -25,6 +32,16 @@ fn init_tracing() {
 
 //     let chain = client.rpc().system_chain().await.unwrap();
 //     assert_eq!(&chain, "Development");
+// }
+
+
+// // NOTE: Uncomment this to check that WebSocket
+// // is failing to connect to substrate.
+// #[wasm_bindgen_test]
+// async fn light_client_transport_works() {
+//     init_tracing();
+//     tracing::warn!("Starting test");
+//     let light_client = LightClient::dial_substrate().await;
 // }
 
 #[wasm_bindgen_test]
