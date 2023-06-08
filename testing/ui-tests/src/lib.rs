@@ -86,7 +86,7 @@ fn ui_tests() {
 
         t.pass(
             m.new_test_case()
-                .name(format!("stripped_metadata_validates_against_full"))
+                .name("stripped_metadata_validates_against_full")
                 .validation_metadata(MetadataTestRunner::load_metadata())
                 .build(metadata),
         );
@@ -105,9 +105,7 @@ fn ui_tests() {
 
         t.pass(
             m.new_test_case()
-                .name(format!(
-                    "stripped_metadata_doesnt_validate_against_different"
-                ))
+                .name("stripped_metadata_doesnt_validate_against_different")
                 .validation_metadata(validation_metadata)
                 .expects_invalid()
                 .build(codegen_metadata),

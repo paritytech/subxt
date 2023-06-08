@@ -91,19 +91,15 @@ async fn full_metadata_check() {
     let api = ctx.client();
 
     // Runtime metadata is identical to the metadata used during API generation.
-    assert!(node_runtime::validate_codegen(&api.metadata()).is_ok());
+    assert!(node_runtime::validate_codegen(&api.metadata()));
 
     // Modify the metadata.
     let metadata = modified_metadata(api.metadata(), |md| {
         md.pallets[0].name = "NewPallet".to_string();
     });
 
-    let api = metadata_to_api(metadata, &ctx).await;
-    assert_eq!(
-        node_runtime::validate_codegen(&api.metadata())
-            .expect_err("Validation should fail for incompatible metadata"),
-        ::subxt::error::MetadataError::IncompatibleCodegen
-    );
+    // It should now be invalid:
+    assert!(!node_runtime::validate_codegen(&metadata));
 }
 
 #[tokio::test]
@@ -134,7 +130,7 @@ async fn constant_values_are_not_validated() {
 
     let api = metadata_to_api(metadata, &ctx).await;
 
-    assert!(node_runtime::validate_codegen(&api.metadata()).is_ok());
+    assert!(node_runtime::validate_codegen(&api.metadata()));
     assert!(api.constants().at(&deposit_addr).is_ok());
 }
 
