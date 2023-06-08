@@ -2,7 +2,8 @@ use futures_timer::Delay;
 use futures_util::AsyncWriteExt;
 use futures_util::{future, FutureExt};
 
-use gloo_net::websocket::{futures::WebSocket, Message, WebSocketError};
+use gloo_net::websocket;
+use gloo_net::websocket::{futures::WebSocket, Message, State, WebSocketError};
 use smoldot::libp2p::multiaddr::{Multiaddr, ProtocolRef};
 
 use futures::SinkExt;
@@ -13,8 +14,8 @@ use smoldot_light::platform::PlatformConnection;
 use smoldot_light::platform::PlatformSubstreamDirection;
 
 use std::sync::Arc;
-use std::sync::Mutex;
-// use futures::lock::Mutex;
+// use std::sync::Mutex;
+use futures::lock::Mutex;
 
 use std::task::Context;
 use std::{
@@ -39,14 +40,142 @@ use smoldot_light::platform::ReadBuffer;
 
 use tokio::sync::{mpsc, oneshot};
 
+use super::web_connection::Connection as WebConnection;
+
+struct PlatformInner {
+    new_connection: mpsc::Sender<String>,
+    new_connection_ack: mpsc::Receiver<Result<(), ConnectError>>,
+
+    send: mpsc::Sender<Vec<u8>>,
+    send_ack: mpsc::Receiver<Result<(), WebSocketError>>,
+}
+
 /// Wasm compatible light-client platform for executing low-level operations.
 #[derive(Clone)]
-pub struct Platform {}
+pub struct Platform {
+    inner: Arc<Mutex<PlatformInner>>,
+}
 
 impl Platform {
     /// Constructs a new [`Platform`].
-    pub const fn new() -> Self {
-        Self {}
+    pub fn new() -> Self {
+        // Dedicated task to handle `smoldot_light::platform::PlatformRef::update_stream`.
+
+        let (new_connection_tx, new_connection_rx) = mpsc::channel::<String>(128);
+        let (new_connection_ack_tx, new_connection_ack_rx) = mpsc::channel(128);
+        let (send_tx, send_rx) = mpsc::channel(128);
+        let (send_ack_tx, send_ack_rx) = mpsc::channel(128);
+
+        wasm_bindgen_futures::spawn_local(async move {
+            tracing::trace!("[background] Start task");
+            let mut new_connection_rx = new_connection_rx;
+            let mut send_rx = send_rx;
+
+            while let Some(addr) = new_connection_rx.recv().await {
+                tracing::trace!("[background] Received url={:?}", addr);
+
+                // use web_sys::{MessageEvent, WebSocket as WebSysWebsocket};
+                // // new code to use web_connection:
+                // let mut websocket = match WebSysWebsocket::new(&addr) {
+                //     Ok(websocket) => websocket,
+                //     Err(err) => {
+                //         tracing::trace!("[background] Cannot connect to add {:?}", err);
+
+                //         let err = ConnectError {
+                //             is_bad_addr: false,
+                //             message: "Cannot establish WebSocket connection".to_string(),
+                //         };
+
+                //         if let Err(err) = new_connection_ack_tx.send(Err(err)).await {
+                //             tracing::trace!(
+                //                 "[background] Cannot submit connection ERROR back to user"
+                //             );
+                //         }
+
+                //         continue;
+                //     }
+                // };
+                // let mut websocket = WebConnection::new(websocket);
+                // // Send the ACK only after the socket is fully opened.
+                // let mut connected = false;
+                // for retry in 0..10 {
+                //     let state = websocket.state();
+                //     tracing::trace!("[background] [{}] Websocket state={:?}", retry, state);
+
+                //     if state.0 {
+                //         connected = true;
+                //         break;
+                //     }
+
+                //     futures_timer::Delay::new(Duration::from_secs(2)).await
+                // }
+
+                let mut websocket = match WebSocket::open(addr.as_ref()) {
+                    Ok(websocket) => websocket,
+                    Err(err) => {
+                        tracing::trace!("[background] Cannot connect to add {:?}", err);
+
+                        let err = ConnectError {
+                            is_bad_addr: false,
+                            message: "Cannot establish WebSocket connection".to_string(),
+                        };
+
+                        if let Err(err) = new_connection_ack_tx.send(Err(err)).await {
+                            tracing::trace!(
+                                "[background] Cannot submit connection ERROR back to user"
+                            );
+                        }
+
+                        continue;
+                    }
+                };
+
+                // Send the ACK only after the socket is fully opened.
+                let mut connected = false;
+                for retry in 0..10 {
+                    let state = websocket.state();
+                    tracing::trace!("[background] [{}] Websocket state={:?}", retry, state);
+
+                    match state {
+                        State::Open => {
+                            connected = true;
+                            break;
+                        }
+                        _ => (),
+                    };
+
+                    futures_timer::Delay::new(Duration::from_secs(2)).await
+                }
+                if !connected {
+                    tracing::trace!("[background] Websocket did not connect in time");
+                    continue;
+                }
+
+                tracing::trace!("[background] Websocket fully connected in State::Open");
+
+                if let Err(err) = new_connection_ack_tx.send(Ok(())).await {
+                    tracing::trace!("[background] Cannot submit OK back to user");
+                }
+
+                // while let Some(bytes) = send_rx.recv().await {
+                //     tracing::trace!("[background] Sending bytes={:?}", bytes);
+
+                //     let res = websocket.send(Message::Bytes(bytes)).await;
+                //     if let Err(err) = send_ack_tx.send(res).await {
+                //         tracing::trace!("[background] Cannot send ACK err={:?} back to user", err);
+                //     }
+                // }
+            }
+        });
+
+        Self {
+            inner: Arc::new(Mutex::new(PlatformInner {
+                new_connection: new_connection_tx,
+                new_connection_ack: new_connection_ack_rx,
+                send: send_tx,
+                send_ack: send_ack_rx,
+            })),
+        }
     }
 }
 
@@ -131,6 +260,8 @@ impl smoldot_light::platform::PlatformRef for Platform {
     fn connect(&self, url: &str) -> Self::ConnectFuture {
         tracing::trace!("[connect] url={:?}", url);
 
+        let inner = self.inner.clone();
+
         let url = url.to_string();
         Box::pin(async move {
             let multiaddr = url.parse::<Multiaddr>().map_err(|err| {
@@ -186,22 +317,35 @@ impl smoldot_light::platform::PlatformRef for Platform {
             };
 
             let addr = format!("ws://{}", addr.to_string());
+            // let addr = format!("ws://127.0.0.1:9944");
             tracing::trace!("[connect] Connecting to addr={:?}", addr);
 
-            // TODO: use `addr` instead.
-            let websocket = WebSocket::open(addr.as_ref()).map_err(|err| {
-                tracing::trace!("[connect] Cannot connect to add {:?}", err);
-                ConnectError {
-                    is_bad_addr: false,
-                    message: "Cannot stablish WebSocket connection".to_string(),
-                }
-            })?;
+            let mut plat = inner.lock().await;
+            if let Err(err) = plat.new_connection.send(addr).await {
+                tracing::trace!("[connect] Cannot ask the background to connect to add");
+            }
+
+            let res = plat.new_connection_ack.recv().await;
+            tracing::trace!("[connect] Received connection response from background");
+            if let Some(Err(err)) = res {
+                tracing::trace!("[connect] Received connection response is error");
+                return Err(err);
+            }
+
+            // // TODO: use `addr` instead.
+            // let websocket = WebSocket::open(addr.as_ref()).map_err(|err| {
+            //     tracing::trace!("[connect] Cannot connect to add {:?}", err);
+            //     ConnectError {
+            //         is_bad_addr: false,
+            //         message: "Cannot stablish WebSocket connection".to_string(),
+            //     }
+            // })?;
             tracing::trace!("[connect] Connection established");
 
-            let (sender, receiver) = websocket.split();
+            // let (sender, receiver) = websocket.split();
             let conn = ConnectionStream {
                 // inner: Arc::new(Mutex::new(socket)),
-                inner: Arc::new(Mutex::new(ConnectionInner { sender, receiver })),
+                // inner: Arc::new(Mutex::new(ConnectionInner { sender, receiver })),
                 buffers: Some((
                     StreamReadBuffer::Open {
                         buffer: vec![0; 16384],
@@ -242,13 +386,48 @@ impl smoldot_light::platform::PlatformRef for Platform {
 
         use futures::Future;
 
-        // Box::pin(async move {
+        let inner = self.inner.clone();
+
+        Box::pin(async move {
+            tracing::trace!("[update_stream] NEW function");
+            if stream.buffers.as_mut().is_none() {
+                tracing::trace!("[update_stream] Buffers are empty");
+            }
+
+            let mut plat = inner.lock().await;
+
+            // [19, 47, 109, 117, 108, 116, 105, 115, 116, 114, 101, 97, 109, 47, 49, 46, 48, 46, 48, 10, 7, 47, 110, 111, 105, 115, 101, 10] message=Ok("\u{13}/multistream/1.0.0\n\u{7}/noise\n")
+
+            let bytes = [
+                19, 47, 109, 117, 108, 116, 105, 115, 116, 114, 101, 97, 109, 47, 49, 46, 48, 46,
+                48, 10, 7, 47, 110, 111, 105, 115, 101, 10,
+            ];
+
+            if let Err(_) = plat.send.send(bytes.into()).await {
+                tracing::trace!("[update_stream] Failed to send bytes to background");
+            }
+            if let Some(Err(_)) = plat.send_ack.recv().await {
+                tracing::trace!("[update_stream] Failed to recv ACK for sent bytes");
+            }
+
+            // {
+            //     let mut locked = inner.lock().unwrap();
+            //     let response = locked.sender.send(Message::Bytes(bytes.into())).await;
+            //     tracing::trace!("[update_stream] Response is response {:?}", response);
+            // }
+
+            // Ignore buffers just to send a message
+        })
+
+        // Box::pin(future::poll_fn(|cx| {
         //     let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else {
         //         tracing::trace!("[update_stream] Buffers are empty");
-        //         return
+        //         return Poll::Pending
         //     };
 
-        //     let mut locked = stream.inner.lock().await;
+        //     let mut locked = stream.inner.lock().unwrap();
+        //     // Whether the future returned by `update_stream` should return `Ready` or `Pending`.
+        //     let mut update_stream_future_ready = false;
 
         //     if let StreamReadBuffer::Open {
         //         buffer: ref mut buf,
@@ -262,38 +441,46 @@ impl smoldot_light::platform::PlatformRef for Platform {
         //         // currently in the buffer. For this reason, we only try to read if there is no
         //         // data left in the buffer.
         //         if cursor.start == cursor.end {
-        //             let result = locked.receiver.next().await;
+        //             let mut stream_recv = locked.receiver.next();
+        //             if let Poll::Ready(result) = Pin::new(&mut stream_recv).poll(cx) {
+        //                 tracing::trace!("[update_stream] Received from socket");
+        //                 update_stream_future_ready = true;
+        //                 match result {
+        //                     Some(Ok(message)) => {
+        //                         tracing::trace!(
+        //                             "[update_stream] Received from socket message={:?}",
+        //                             message
+        //                         );
+        //                         // These bytes must end-up in the read buffer.
+        //                         let bytes = match message {
+        //                             Message::Text(text) => text.into_bytes(),
+        //                             Message::Bytes(bytes) => bytes,
+        //                         };
 
-        //             match result {
-        //                 Some(Ok(message)) => {
-        //                     tracing::trace!(
-        //                         "[update_stream] Received from socket message={:?}",
-        //                         message
-        //                     );
-        //                     // These bytes must end-up in the read buffer.
-        //                     let bytes = match message {
-        //                         Message::Text(text) => text.into_bytes(),
-        //                         Message::Bytes(bytes) => bytes,
-        //                     };
+        //                         for (index, byte) in bytes.iter().enumerate() {
+        //                             buf[index] = *byte;
+        //                         }
 
-        //                     for (index, byte) in bytes.iter().enumerate() {
-        //                         buf[index] = *byte;
+        //                         *cursor = 0..bytes.len();
         //                     }
+        //                     Some(Err(err)) => {
+        //                         tracing::warn!(
+        //                             "[update_stream] Reached Websocket error: {:?}",
+        //                             err
+        //                         );
 
-        //                     *cursor = 0..bytes.len();
+        //                         stream.buffers = None;
+        //                         return Poll::Ready(());
+        //                     }
+        //                     None => {
+        //                         tracing::warn!("[update_stream] Reached EOF");
+        //                         // EOF.
+        //                         *read_buffer = StreamReadBuffer::Closed;
+        //                     }
         //                 }
-        //                 Some(Err(err)) => {
-        //                     tracing::warn!("[update_stream] Reached Websocket error: {:?}", err);
-
-        //                     stream.buffers = None;
-        //                     return;
-        //                 }
-        //                 None => {
-        //                     tracing::warn!("[update_stream] Reached EOF");
-        //                     // EOF.
-        //                     *read_buffer = StreamReadBuffer::Closed;
-        //                 }
-        //             };
+        //             }
+        //         } else {
+        //             tracing::trace!("[update_stream] No need to read from socket");
         //         }
         //     }
 
@@ -324,208 +511,87 @@ impl smoldot_light::platform::PlatformRef for Platform {
         //                 write_queue_slices.1
         //             );
 
-        //             let len = write_queue_slices.1.len();
+        //             let len = write_queue_slices.0.len();
         //             let message = Message::Bytes(write_queue_slices.0.to_owned());
 
         //             tracing::trace!("[update_stream] Sending={:?} len={}", message, len);
 
-        //             let result = locked.sender.send(message).await;
-
         //             let mut stream_send = locked.sender.send(message);
-        //             match result {
-        //                 Err(err) => {
-        //                     tracing::trace!("[update_stream] Sending Error {:?}", err);
-
-        //                     // End the stream.
-        //                     stream.buffers = None;
-        //                     return;
+        //             if let Poll::Ready(result) = Pin::new(&mut stream_send).poll(cx) {
+        //                 if !*must_close {
+        //                     // In the situation where the API user wants to close the writing
+        //                     // side, simply sending the buffered data isn't enough to justify
+        //                     // making the future ready.
+        //                     update_stream_future_ready = true;
         //                 }
-        //                 Ok(_) => {
-        //                     tracing::trace!("[update_stream] Sending ok");
 
-        //                     *must_flush = true;
-        //                     for _ in 0..len {
-        //                         buf.pop_front();
+        //                 match result {
+        //                     Err(err) => {
+        //                         tracing::trace!("[update_stream] Sending Error {:?}", err);
+
+        //                         // End the stream.
+        //                         stream.buffers = None;
+        //                         return Poll::Ready(());
+        //                     }
+        //                     Ok(_) => {
+        //                         tracing::trace!("[update_stream] Sending ok");
+
+        //                         *must_flush = true;
+        //                         for _ in 0..len {
+        //                             buf.pop_front();
+        //                         }
         //                     }
         //                 }
+        //             } else {
+        //                 break;
         //             }
         //         }
+
+        //         if buf.is_empty() && *must_close {
+        //             tracing::trace!("[update_stream] MUST poll_close",);
+        //         } else if *must_flush {
+        //             tracing::trace!("[update_stream] MUST poll_flush",);
+        //         }
+        //         //     if let Poll::Ready(result) = Pin::new(&mut stream.socket).poll_close(cx) {
+        //         //         update_stream_future_ready = true;
+        //         //         match result {
+        //         //             Err(_) => {
+        //         //                 // End the stream.
+        //         //                 stream.buffers = None;
+        //         //                 return Poll::Ready(());
+        //         //             }
+        //         //             Ok(()) => {
+        //         //                 *write_buffer = StreamWriteBuffer::Closed;
+        //         //             }
+        //         //         }
+        //         //     }
+        //         // } else if *must_flush {
+        //         //     if let Poll::Ready(result) = Pin::new(&mut stream.socket).poll_flush(cx) {
+        //         //         update_stream_future_ready = true;
+        //         //         match result {
+        //         //             Err(_) => {
+        //         //                 // End the stream.
+        //         //                 stream.buffers = None;
+        //         //                 return Poll::Ready(());
+        //         //             }
+        //         //             Ok(()) => {
+        //         //                 *must_flush = false;
+        //         //             }
+        //         //         }
+        //         //     }
+        //         // }
         //     }
-        // })
 
-        Box::pin(future::poll_fn(|cx| {
-            let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else {
-                tracing::trace!("[update_stream] Buffers are empty");
-                return Poll::Pending
-            };
+        //     if update_stream_future_ready {
+        //         tracing::trace!("[update_stream] Future ready");
 
-            let mut locked = stream.inner.lock().unwrap();
-            // Whether the future returned by `update_stream` should return `Ready` or `Pending`.
-            let mut update_stream_future_ready = false;
+        //         Poll::Ready(())
+        //     } else {
+        //         tracing::trace!("[update_stream] Future pending");
 
-            if let StreamReadBuffer::Open {
-                buffer: ref mut buf,
-                ref mut cursor,
-            } = read_buffer
-            {
-                tracing::trace!("[update_stream] StreamReadBuffer is open");
-
-                // When reading data from the socket, `poll_read` might return "EOF". In that
-                // situation, we transition to the `Closed` state, which would discard the data
-                // currently in the buffer. For this reason, we only try to read if there is no
-                // data left in the buffer.
-                if cursor.start == cursor.end {
-                    let mut stream_recv = locked.receiver.next();
-                    if let Poll::Ready(result) = Pin::new(&mut stream_recv).poll(cx) {
-                        tracing::trace!("[update_stream] Received from socket");
-                        update_stream_future_ready = true;
-                        match result {
-                            Some(Ok(message)) => {
-                                tracing::trace!(
-                                    "[update_stream] Received from socket message={:?}",
-                                    message
-                                );
-                                // These bytes must end-up in the read buffer.
-                                let bytes = match message {
-                                    Message::Text(text) => text.into_bytes(),
-                                    Message::Bytes(bytes) => bytes,
-                                };
-
-                                for (index, byte) in bytes.iter().enumerate() {
-                                    buf[index] = *byte;
-                                }
-
-                                *cursor = 0..bytes.len();
-                            }
-                            Some(Err(err)) => {
-                                tracing::warn!(
-                                    "[update_stream] Reached Websocket error: {:?}",
-                                    err
-                                );
-
-                                stream.buffers = None;
-                                return Poll::Ready(());
-                            }
-                            None => {
-                                tracing::warn!("[update_stream] Reached EOF");
-                                // EOF.
-                                *read_buffer = StreamReadBuffer::Closed;
-                            }
-                        }
-                    }
-                } else {
-                    tracing::trace!("[update_stream] No need to read from socket");
-                }
-            }
-
-            if let StreamWriteBuffer::Open {
-                buffer: ref mut buf,
-                must_flush,
-                must_close,
-            } = write_buffer
-            {
-                while !buf.is_empty() {
-                    let write_queue_slices = buf.as_slices();
-                    let len = write_queue_slices.0.len() + write_queue_slices.1.len();
-
-                    let slices = &[
-                        IoSlice::new(write_queue_slices.0),
-                        IoSlice::new(write_queue_slices.1),
-                    ];
-
-                    let message_str = String::from_utf8(write_queue_slices.0.to_vec());
-                    tracing::trace!(
-                        "[update_stream] Prepare to send first={:?} message={:?}",
-                        write_queue_slices.0,
-                        message_str
-                    );
-
-                    tracing::trace!(
-                        "[update_stream] Prepare to send second={:?}",
-                        write_queue_slices.1
-                    );
-
-                    let len = write_queue_slices.0.len();
-                    let message = Message::Bytes(write_queue_slices.0.to_owned());
-
-                    tracing::trace!("[update_stream] Sending={:?} len={}", message, len);
-
-                    let mut stream_send = locked.sender.send(message);
-                    if let Poll::Ready(result) = Pin::new(&mut stream_send).poll(cx) {
-                        if !*must_close {
-                            // In the situation where the API user wants to close the writing
-                            // side, simply sending the buffered data isn't enough to justify
-                            // making the future ready.
-                            update_stream_future_ready = true;
-                        }
-
-                        match result {
-                            Err(err) => {
-                                tracing::trace!("[update_stream] Sending Error {:?}", err);
-
-                                // End the stream.
-                                stream.buffers = None;
-                                return Poll::Ready(());
-                            }
-                            Ok(_) => {
-                                tracing::trace!("[update_stream] Sending ok");
-
-                                *must_flush = true;
-                                for _ in 0..len {
-                                    buf.pop_front();
-                                }
-                            }
-                        }
-                    } else {
-                        break;
-                    }
-                }
-
-                if buf.is_empty() && *must_close {
-                    tracing::trace!("[update_stream] MUST poll_close",);
-                } else if *must_flush {
-                    tracing::trace!("[update_stream] MUST poll_flush",);
-                }
-                //     if let Poll::Ready(result) = Pin::new(&mut stream.socket).poll_close(cx) {
-                //         update_stream_future_ready = true;
-                //         match result {
-                //             Err(_) => {
-                //                 // End the stream.
-                //                 stream.buffers = None;
-                //                 return Poll::Ready(());
-                //             }
-                //             Ok(()) => {
-                //                 *write_buffer = StreamWriteBuffer::Closed;
-                //             }
-                //         }
-                //     }
-                // } else if *must_flush {
-                //     if let Poll::Ready(result) = Pin::new(&mut stream.socket).poll_flush(cx) {
-                //         update_stream_future_ready = true;
-                //         match result {
-                //             Err(_) => {
-                //                 // End the stream.
-                //                 stream.buffers = None;
-                //                 return Poll::Ready(());
-                //             }
-                //             Ok(()) => {
-                //                 *must_flush = false;
-                //             }
-                //         }
-                //     }
-                // }
-            }
-
-            if update_stream_future_ready {
-                tracing::trace!("[update_stream] Future ready");
-
-                Poll::Ready(())
-            } else {
-                tracing::trace!("[update_stream] Future pending");
-
-                Poll::Pending
-            }
-        }))
+        //         Poll::Pending
+        //     }
+        // }))
     }
 
     fn read_buffer<'a>(
@@ -674,8 +740,7 @@ impl smoldot_light::platform::PlatformRef for Platform {
 
 /// Connection stream of the light-client.
 pub struct ConnectionStream {
-    inner: Arc<Mutex<ConnectionInner>>,
-
+    // inner: Arc<Mutex<ConnectionInner>>,
     /// Read and write buffers of the connection, or `None` if the socket has been reset.
     buffers: Option<(StreamReadBuffer, StreamWriteBuffer)>,
 }

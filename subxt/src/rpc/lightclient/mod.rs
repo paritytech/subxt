@@ -1,6 +1,7 @@
 mod background;
 mod client;
 mod platform;
+mod web_connection;
 
 pub use client::LightClient;
 

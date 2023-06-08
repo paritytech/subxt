@@ -82,8 +82,14 @@ futures-timer = { version = "3" }
 gloo-net = { version = "0.2.6", default-features = false, features = ["json", "websocket"] }
 futures-executor = { version = "0.3.28", default-features = false }
 
-
 instant = { version = "0.1.12", default-features = false }
+
+# Needed for Websocket secure WASM connections.
+web-sys = { version = "0.3.61", features = [ "BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
+wasm-bindgen = "0.2.84"
+# TODO: Could this be replaced?
+send_wrapper = "0.6.0"
+js-sys = "0.3.61"
 
 tokio-stream = "0.1.14"
 futures-util = "0.3.28"

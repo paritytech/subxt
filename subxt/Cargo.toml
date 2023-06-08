@@ -58,6 +58,10 @@ unstable-light-client = [
 	"futures-timer/wasm-bindgen",
     "gloo-net",
     "instant/wasm-bindgen",
+    "web-sys",
+    "wasm-bindgen",
+    "send_wrapper",
+    "js-sys",
     # "subxt-light-client",
 ]
 
@@ -107,13 +111,18 @@ futures-timer = { workspace = true, optional = true }
 gloo-net = { workspace = true, optional = true }
 futures-executor = { workspace = true, optional = true }
 subxt-light-client = { workspace = true, optional = true }
+web-sys = { workspace = true, optional = true }
+wasm-bindgen= { workspace = true, optional = true }
+# TODO: Could this be replaced?
+send_wrapper = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+
 
 tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }
 
 instant = { workspace = true, optional = true }
-
 
 [target.wasm32-unknown-unknown.dependencies]
 getrandom = { workspace = true, features = ["js"] }
