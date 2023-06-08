@@ -4,7 +4,6 @@
 
 pub mod dispatch_error;
 mod metadata_test_runner;
-mod pallet_metadata_test_runner;
 
 use frame_metadata::{
     v15::{
@@ -16,7 +15,6 @@ use frame_metadata::{
 use scale_info::{meta_type, IntoPortable, TypeInfo};
 
 pub use metadata_test_runner::MetadataTestRunner;
-pub use pallet_metadata_test_runner::PalletMetadataTestRunner;
 
 /// Given some pallet metadata, generate a [`RuntimeMetadataPrefixed`] struct.
 /// We default to a useless extrinsic type, and register a fake `DispatchError`

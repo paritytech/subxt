@@ -627,14 +627,14 @@ impl RuntimeGenerator {
                     )*
                 }
 
-                /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    let runtime_metadata_hash = client.metadata().hasher().only_these_pallets(&PALLETS).only_these_runtime_apis(&RUNTIME_APIS).hash();
-                    if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(#crate_path::error::MetadataError::IncompatibleCodegen)
-                    } else {
-                        Ok(())
-                    }
+                /// check whether the metadata provided is aligned with this statically generated code.
+                pub fn validate_codegen(metadata: &#crate_path::Metadata) -> bool {
+                    let runtime_metadata_hash = metadata
+                        .hasher()
+                        .only_these_pallets(&PALLETS)
+                        .only_these_runtime_apis(&RUNTIME_APIS)
+                        .hash();
+                    runtime_metadata_hash == [ #(#metadata_hash,)* ]
                 }
 
                 #( #modules )*
