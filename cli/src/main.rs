@@ -14,6 +14,7 @@ enum Command {
     Metadata(commands::metadata::Opts),
     Codegen(commands::codegen::Opts),
     Compatibility(commands::compatibility::Opts),
+    Diff(commands::diff::Opts),
     Version(commands::version::Opts),
     Explore(commands::explore::Opts),
 }
@@ -27,6 +28,7 @@ async fn main() -> color_eyre::Result<()> {
         Command::Metadata(opts) => commands::metadata::run(opts).await,
         Command::Codegen(opts) => commands::codegen::run(opts).await,
         Command::Compatibility(opts) => commands::compatibility::run(opts).await,
+        Command::Diff(opts) => commands::diff::run(opts).await,
         Command::Version(opts) => commands::version::run(opts),
         Command::Explore(opts) => commands::explore::run(opts).await,
     }

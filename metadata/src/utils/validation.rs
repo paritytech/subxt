@@ -283,7 +283,7 @@ fn get_runtime_method_hash(
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
+pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::new();
     let trait_name = &*trait_metadata.inner.name;
     let method_bytes = trait_metadata
@@ -496,6 +496,7 @@ mod tests {
     struct A {
         pub b: Box<B>,
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     struct B {
@@ -507,6 +508,7 @@ mod tests {
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Composite with TypeDef::Array with Typedef::Primitive.
     struct AccountId32([u8; HASH_LEN]);
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Variant.
@@ -525,6 +527,7 @@ mod tests {
         // TypeDef::BitSequence.
         BitSeq(BitVec<u8, Lsb0>),
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // Ensure recursive types and TypeDef variants are captured.
@@ -533,6 +536,7 @@ mod tests {
         composite: AccountId32,
         type_def: DigestItem,
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // Simulate a PalletCallMetadata.
@@ -591,8 +595,8 @@ mod tests {
             meta_type::<()>(),
             vec![],
         )
-        .try_into()
-        .expect("can build valid metadata")
+            .try_into()
+            .expect("can build valid metadata")
     }
 
     #[test]

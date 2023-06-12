@@ -78,7 +78,7 @@ impl Metadata {
     }
 
     /// An iterator over all of the available pallets.
-    pub fn pallets(&self) -> impl ExactSizeIterator<Item = PalletMetadata<'_>> {
+    pub fn pallets(&self) -> impl ExactSizeIterator<Item=PalletMetadata<'_>> {
         self.pallets.values().iter().map(|inner| PalletMetadata {
             inner,
             types: self.types(),
@@ -109,7 +109,7 @@ impl Metadata {
     }
 
     /// An iterator over all of the runtime APIs.
-    pub fn runtime_api_traits(&self) -> impl ExactSizeIterator<Item = RuntimeApiMetadata<'_>> {
+    pub fn runtime_api_traits(&self) -> impl ExactSizeIterator<Item=RuntimeApiMetadata<'_>> {
         self.apis.values().iter().map(|inner| RuntimeApiMetadata {
             inner,
             types: self.types(),
@@ -132,9 +132,9 @@ impl Metadata {
 
     /// Filter out any pallets that we don't want to keep, retaining only those that we do.
     pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
-    where
-        F: FnMut(&str) -> bool,
-        G: FnMut(&str) -> bool,
+        where
+            F: FnMut(&str) -> bool,
+            G: FnMut(&str) -> bool,
     {
         utils::retain::retain_metadata(self, pallet_filter, api_filter);
     }
@@ -236,7 +236,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// An iterator over the constants in this pallet.
-    pub fn constants(&self) -> impl ExactSizeIterator<Item = &'a ConstantMetadata> {
+    pub fn constants(&self) -> impl ExactSizeIterator<Item=&'a ConstantMetadata> {
         self.inner.constants.values().iter()
     }
 
@@ -303,7 +303,7 @@ impl StorageMetadata {
     }
 
     /// An iterator over the storage entries.
-    pub fn entries(&self) -> impl ExactSizeIterator<Item = &StorageEntryMetadata> {
+    pub fn entries(&self) -> impl ExactSizeIterator<Item=&StorageEntryMetadata> {
         self.entries.values().iter()
     }
 
@@ -490,7 +490,7 @@ pub struct RuntimeApiMetadata<'a> {
 
 impl<'a> RuntimeApiMetadata<'a> {
     /// Trait name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
     /// Trait documentation.
@@ -498,7 +498,7 @@ impl<'a> RuntimeApiMetadata<'a> {
         &self.inner.docs
     }
     /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl ExactSizeIterator<Item = &'a RuntimeApiMethodMetadata> {
+    pub fn methods(&self) -> impl ExactSizeIterator<Item=&'a RuntimeApiMethodMetadata> {
         self.inner.methods.values().iter()
     }
     /// Get a specific trait method given its name.
@@ -508,6 +508,11 @@ impl<'a> RuntimeApiMetadata<'a> {
     /// Return a hash for the constant, or None if it was not found.
     pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
         crate::utils::validation::get_runtime_api_hash(self, method_name)
+    }
+
+    /// Return a hash for the entire pallet.
+    pub fn hash(&self) -> [u8; 32] {
+        crate::utils::validation::get_runtime_trait_hash(*self)
     }
 }
 
@@ -544,7 +549,7 @@ impl RuntimeApiMethodMetadata {
         &self.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &RuntimeApiMethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item=&RuntimeApiMethodParamMetadata> {
         self.inputs.iter()
     }
     /// Method return type.

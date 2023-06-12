@@ -32,7 +32,7 @@ pub struct FileOrUrl {
     ///
     /// Defaults to 14.
     #[clap(long)]
-    version: Option<MetadataVersion>,
+    pub(crate) version: Option<MetadataVersion>,
 }
 
 impl FileOrUrl {

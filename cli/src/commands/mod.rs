@@ -7,3 +7,4 @@ pub mod compatibility;
 pub mod explore;
 pub mod metadata;
 pub mod version;
+pub mod diff;
