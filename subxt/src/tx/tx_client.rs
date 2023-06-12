@@ -174,11 +174,15 @@ where
     T: Config,
     C: OnlineClientT<T>,
 {
-    // Get the next account nonce to use.
-    async fn next_account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
+    /// Get the account nonce for a given account ID.
+    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
         self.client
             .rpc()
-            .system_account_next_index(account_id)
+            .state_call(
+                "AccountNonceApi_account_nonce",
+                Some(&account_id.encode()),
+                None,
+            )
             .await
     }
 
@@ -192,7 +196,7 @@ where
     where
         Call: TxPayload,
     {
-        let account_nonce = self.next_account_nonce(account_id).await?;
+        let account_nonce = self.account_nonce(account_id).await?;
         self.create_partial_signed_with_nonce(call, account_nonce, other_params)
     }
 
@@ -207,7 +211,7 @@ where
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        let account_nonce = self.next_account_nonce(signer.account_id()).await?;
+        let account_nonce = self.account_nonce(signer.account_id()).await?;
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
     }
 

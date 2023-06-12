@@ -407,6 +407,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
 pub struct MetadataHasher<'a> {
     metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,
+    specific_runtime_apis: Option<Vec<&'a str>>,
 }
 
 impl<'a> MetadataHasher<'a> {
@@ -415,12 +416,23 @@ impl<'a> MetadataHasher<'a> {
         Self {
             metadata,
             specific_pallets: None,
+            specific_runtime_apis: None,
         }
     }
 
     /// Only hash the provided pallets instead of hashing every pallet.
     pub fn only_these_pallets<S: AsRef<str>>(&mut self, specific_pallets: &'a [S]) -> &mut Self {
         self.specific_pallets = Some(specific_pallets.iter().map(|n| n.as_ref()).collect());
+        self
+    }
+
+    /// Only hash the provided runtime APIs instead of hashing every runtime API
+    pub fn only_these_runtime_apis<S: AsRef<str>>(
+        &mut self,
+        specific_runtime_apis: &'a [S],
+    ) -> &mut Self {
+        self.specific_runtime_apis =
+            Some(specific_runtime_apis.iter().map(|n| n.as_ref()).collect());
         self
     }
 
@@ -431,23 +443,37 @@ impl<'a> MetadataHasher<'a> {
         let metadata = self.metadata;
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
-            // If specific pallets are given, only include this pallet if it's
-            // in the list.
-            if let Some(specific_pallets) = &self.specific_pallets {
-                if specific_pallets.iter().all(|&p| p != pallet.name()) {
-                    return bytes;
-                }
-            }
+            // If specific pallets are given, only include this pallet if it is in the specific pallets.
+            let should_hash = self
+                .specific_pallets
+                .as_ref()
+                .map(|specific_pallets| specific_pallets.contains(&pallet.name()))
+                .unwrap_or(true);
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
-            xor(bytes, get_pallet_hash(pallet))
+            if should_hash {
+                xor(bytes, get_pallet_hash(pallet))
+            } else {
+                bytes
+            }
         });
 
         let apis_hash = metadata
             .runtime_api_traits()
             .fold([0u8; HASH_LEN], |bytes, api| {
-                // We don't care what order the runtime APIs are seen in, so XOR
-                xor(bytes, get_runtime_trait_hash(api))
+                // If specific runtime APIs are given, only include this pallet if it is in the specific runtime APIs.
+                let should_hash = self
+                    .specific_runtime_apis
+                    .as_ref()
+                    .map(|specific_runtime_apis| specific_runtime_apis.contains(&api.name()))
+                    .unwrap_or(true);
+                // We don't care what order the runtime APIs are seen in, so XOR their
+                // hashes together to be order independent.
+                if should_hash {
+                    xor(bytes, xor(bytes, get_runtime_trait_hash(api)))
+                } else {
+                    bytes
+                }
             });
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
