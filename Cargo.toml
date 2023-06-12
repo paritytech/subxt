@@ -32,7 +32,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.4", default-features = false }
-clap = { version = "4.3.1", features = ["derive", "cargo"] }
+clap = { version = "4.3.3", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -50,15 +50,15 @@ jsonrpsee = { version = "0.16" }
 pretty_assertions = "1.0.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.59"
+proc-macro2 = "1.0.60"
 quote = "1.0.28"
-regex = "1.8.3"
+regex = "1.8.4"
 scale-info = "2.7.0"
 scale-value = "0.10.0"
 scale-bits = "0.3"
 scale-decode = "0.7.0"
 scale-encode = "0.3.0"
-serde = { version = "1.0.163" }
+serde = { version = "1.0.164" }
 serde_json = { version = "1.0.96" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.40"
