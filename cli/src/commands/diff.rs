@@ -43,22 +43,14 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         writeln!(output, "Pallets:")?;
         for diff in node_diff.pallets {
             match diff {
-                Diff::Added(new) => writeln!(
-                    output,
-                    "{}",
-                    format!("    + {} (Added)", new.name()).green()
-                )?,
-                Diff::Removed(old) => writeln!(
-                    output,
-                    "{}",
-                    format!("    - {} (Removed)", old.name()).red()
-                )?,
+                Diff::Added(new) => {
+                    writeln!(output, "{}", format!("    + {}", new.name()).green())?
+                }
+                Diff::Removed(old) => {
+                    writeln!(output, "{}", format!("    - {}", old.name()).red())?
+                }
                 Diff::Changed { from, to } => {
-                    writeln!(
-                        output,
-                        "{}",
-                        format!("    ~ {} (Changed)", from.name()).yellow()
-                    )?;
+                    writeln!(output, "{}", format!("    ~ {}", from.name()).yellow())?;
 
                     let pallet_diff = PalletDiff::construct(&from, &to);
                     if !pallet_diff.calls.is_empty() {
@@ -68,18 +60,20 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
                                 Diff::Added(new) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            + {} (Added)", &new.name).green()
+                                    format!("            + {}", &new.name).green()
                                 )?,
                                 Diff::Removed(old) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            - {} (Removed)", &old.name).red()
+                                    format!("            - {}", &old.name).red()
                                 )?,
-                                Diff::Changed { from, to: _ } => writeln!(
-                                    output,
-                                    "{}",
-                                    format!("            ~ {} (Changed)", &from.name).yellow()
-                                )?,
+                                Diff::Changed { from, to: _ } => {
+                                    writeln!(
+                                        output,
+                                        "{}",
+                                        format!("            ~ {}", &from.name).yellow()
+                                    )?;
+                                }
                             }
                         }
                     }
@@ -91,17 +85,17 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
                                 Diff::Added(new) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            + {} (Added)", new.name()).green()
+                                    format!("            + {}", new.name()).green()
                                 )?,
                                 Diff::Removed(old) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            - {} (Removed)", old.name()).red()
+                                    format!("            - {}", old.name()).red()
                                 )?,
                                 Diff::Changed { from, to: _ } => writeln!(
                                     output,
                                     "{}",
-                                    format!("            ~ {} (Changed)", from.name()).yellow()
+                                    format!("            ~ {}", from.name()).yellow()
                                 )?,
                             }
                         }
@@ -114,17 +108,17 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
                                 Diff::Added(new) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            + {} (Added)", new.name()).green()
+                                    format!("            + {}", new.name()).green()
                                 )?,
                                 Diff::Removed(old) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            - {} (Removed)", old.name()).red()
+                                    format!("            - {}", old.name()).red()
                                 )?,
                                 Diff::Changed { from, to: _ } => writeln!(
                                     output,
                                     "{}",
-                                    format!("            ~ {} (Changed)", from.name()).yellow()
+                                    format!("            ~ {}", from.name()).yellow()
                                 )?,
                             }
                         }
@@ -138,21 +132,15 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         writeln!(output, "Runtime APIs:")?;
         for diff in node_diff.runtime_apis {
             match diff {
-                Diff::Added(new) => writeln!(
-                    output,
-                    "{}",
-                    format!("    + {} (Added)", new.name()).green()
-                )?,
-                Diff::Removed(old) => writeln!(
-                    output,
-                    "{}",
-                    format!("    - {} (Removed)", old.name()).red()
-                )?,
-                Diff::Changed { from, to: _ } => writeln!(
-                    output,
-                    "{}",
-                    format!("    ~ {} (Changed)", from.name()).yellow()
-                )?,
+                Diff::Added(new) => {
+                    writeln!(output, "{}", format!("    + {}", new.name()).green())?
+                }
+                Diff::Removed(old) => {
+                    writeln!(output, "{}", format!("    - {}", old.name()).red())?
+                }
+                Diff::Changed { from, to: _ } => {
+                    writeln!(output, "{}", format!("    ~ {}", from.name()).yellow())?
+                }
             }
         }
     }
@@ -199,10 +187,6 @@ impl<'a> PalletDiff<'a> {
             constants,
             storage_entries,
         }
-    }
-
-    fn is_empty(&self) -> bool {
-        self.calls.is_empty() && self.constants.is_empty() && self.storage_entries.is_empty()
     }
 }
 
