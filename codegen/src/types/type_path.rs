@@ -146,6 +146,18 @@ impl TypePathType {
                     "BTreeSet" => parse_quote!(::std::collections::BTreeSet),
                     "Range" => parse_quote!(::core::ops::Range),
                     "RangeInclusive" => parse_quote!(::core::ops::RangeInclusive),
+                    "NonZeroI8" => parse_quote!(::core::num::NonZeroI8),
+                    "NonZeroU8" => parse_quote!(::core::num::NonZeroU8),
+                    "NonZeroI16" => parse_quote!(::core::num::NonZeroI16),
+                    "NonZeroU16" => parse_quote!(::core::num::NonZeroU16),
+                    "NonZeroI32" => parse_quote!(::core::num::NonZeroI32),
+                    "NonZeroU32" => parse_quote!(::core::num::NonZeroU32),
+                    "NonZeroI64" => parse_quote!(::core::num::NonZeroI64),
+                    "NonZeroU64" => parse_quote!(::core::num::NonZeroU64),
+                    "NonZeroI128" => parse_quote!(::core::num::NonZeroI128),
+                    "NonZeroU128" => parse_quote!(::core::num::NonZeroU128),
+                    "NonZeroIsize" => parse_quote!(::core::num::NonZeroIsize),
+                    "NonZeroUsize" => parse_quote!(::core::num::NonZeroUsize),
                     ident => panic!("Unknown prelude type '{ident}'"),
                 }
             }
