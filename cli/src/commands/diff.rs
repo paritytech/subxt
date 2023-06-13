@@ -1,4 +1,4 @@
-use clap::{FromArgMatches, Parser as ClapParser};
+use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::eyre;
 use frame_metadata::RuntimeMetadataPrefixed;
@@ -271,17 +271,19 @@ fn storage_differences<'a>(
         .collect()
 }
 
+type CallsHashmap<'a> = HashMap<
+    &'a str,
+    (
+        Option<&'a Variant<PortableForm>>,
+        Option<&'a Variant<PortableForm>>,
+    ),
+>;
+
 fn calls_differences<'a>(
     pallet_metadata_1: &'a PalletMetadata<'a>,
     pallet_metadata_2: &'a PalletMetadata<'a>,
 ) -> Vec<Diff<&'a Variant<PortableForm>>> {
-    let mut calls: HashMap<
-        &str,
-        (
-            Option<&'a Variant<PortableForm>>,
-            Option<&'a Variant<PortableForm>>,
-        ),
-    > = HashMap::new();
+    let mut calls: CallsHashmap = HashMap::new();
     if let Some(call_variants) = pallet_metadata_1.call_variants() {
         for call_variant in call_variants {
             let (e1, _) = calls.entry(&call_variant.name).or_default();
@@ -415,22 +417,6 @@ enum Diff<T> {
     Added(T),
     Changed { from: T, to: T },
     Removed(T),
-}
-
-impl<T> Diff<T> {
-    fn map<F, R>(self, mut f: F) -> Diff<R>
-    where
-        F: FnMut(T) -> R,
-    {
-        match self {
-            Diff::Added(new) => Diff::Added(f(new)),
-            Diff::Changed { from, to } => Diff::Changed {
-                from: f(from),
-                to: f(to),
-            },
-            Diff::Removed(old) => Diff::Removed(f(old)),
-        }
-    }
 }
 
 impl<T> TryFrom<(Option<T>, Option<T>)> for Diff<T> {
