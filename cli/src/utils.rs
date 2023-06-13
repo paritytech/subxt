@@ -6,7 +6,11 @@ use clap::Args;
 use color_eyre::eyre;
 
 use std::{fs, io::Read, path::PathBuf};
+use color_eyre::eyre::eyre;
+use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
+use scale_info::form::PortableForm;
 use subxt_codegen::utils::{MetadataVersion, Uri};
+use subxt_metadata::PalletMetadata;
 
 pub mod type_description;
 pub mod type_example;
@@ -63,7 +67,7 @@ impl FileOrUrl {
                 uri,
                 version.unwrap_or_default(),
             )
-            .await?),
+                .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let uri = Uri::from_static("ws://localhost:9944");
