@@ -268,7 +268,6 @@ fn format_type_description(input: &str) -> String {
 
 #[cfg(test)]
 mod test {
-    use crate::utils::make_type;
     use crate::utils::type_description::print_type_description;
     use scale_info::scale::{Decode, Encode};
     use scale_info::TypeInfo;
@@ -279,6 +278,15 @@ mod test {
     pub struct Foo {
         hello: String,
         num: i32,
+    }
+
+    /// Given a type definition, return type ID and registry representing it.
+    fn make_type<T: scale_info::TypeInfo + 'static>() -> (u32, scale_info::PortableRegistry) {
+        let m = scale_info::MetaType::new::<T>();
+        let mut types = scale_info::Registry::new();
+        let id = types.register_type(&m);
+        let portable_registry: scale_info::PortableRegistry = types.into();
+        (id.id, portable_registry)
     }
 
     #[test]
