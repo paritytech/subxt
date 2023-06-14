@@ -15,9 +15,16 @@ use std::io::Write;
 use subxt_codegen::utils::MetadataVersion;
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
+    StorageEntryType,
 };
 
-/// todo: add docs
+/// Explore the differences between two nodes
+///
+/// # Example
+/// ```
+/// subxt diff ./artifacts/polkadot_metadata_small.scale ./artifacts/polkadot_metadata_tiny.scale
+/// subxt diff ./artifacts/polkadot_metadata_small.scale wss://rpc.polkadot.io:443
+/// ```
 #[derive(Debug, ClapParser)]
 pub struct Opts {
     node1: String,
@@ -28,7 +35,6 @@ pub struct Opts {
     pallet: Option<String>,
 }
 
-// cargo run -- diff ../artifacts/polkadot_metadata_small.scale ../artifacts/polkadot_metadata_tiny.scale
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     let (node_1_metadata, node_2_metadata) = get_metadata(&opts).await?;
 
@@ -115,11 +121,25 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
                                     "{}",
                                     format!("            - {}", old.name()).red()
                                 )?,
-                                Diff::Changed { from, to: _ } => writeln!(
-                                    output,
-                                    "{}",
-                                    format!("            ~ {}", from.name()).yellow()
-                                )?,
+                                Diff::Changed { from, to } => {
+                                    let storage_diff = StorageEntryDiff::construct(
+                                        from,
+                                        to,
+                                        &node_1_metadata,
+                                        &node_2_metadata,
+                                    );
+
+                                    writeln!(
+                                        output,
+                                        "{}",
+                                        format!(
+                                            "            ~ {} (Changed: {})",
+                                            from.name(),
+                                            storage_diff.to_strings().join(", ")
+                                        )
+                                        .yellow()
+                                    )?;
+                                }
                             }
                         }
                     }
@@ -187,6 +207,82 @@ impl<'a> PalletDiff<'a> {
             constants,
             storage_entries,
         }
+    }
+}
+
+struct StorageEntryDiff {
+    key_different: bool,
+    value_different: bool,
+    default_different: bool,
+    modifier_different: bool,
+}
+
+impl StorageEntryDiff {
+    fn construct(
+        storage_entry_1: &StorageEntryMetadata,
+        storage_entry_2: &StorageEntryMetadata,
+        metadata_1: &Metadata,
+        metadata_2: &Metadata,
+    ) -> Self {
+        let value_1_ty_id = match storage_entry_1.entry_type() {
+            StorageEntryType::Plain(value_ty) | StorageEntryType::Map { value_ty, .. } => value_ty,
+        };
+        let value_1_hash = metadata_1
+            .type_hash(*value_1_ty_id)
+            .expect("type should be present");
+        let value_2_ty_id = match storage_entry_2.entry_type() {
+            StorageEntryType::Plain(value_ty) | StorageEntryType::Map { value_ty, .. } => value_ty,
+        };
+        let value_2_hash = metadata_1
+            .type_hash(*value_2_ty_id)
+            .expect("type should be present");
+        let value_different = value_1_hash != value_2_hash;
+
+        let key_1_hash = match storage_entry_1.entry_type() {
+            StorageEntryType::Plain(_) => None,
+            StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
+        }
+        .map(|key_ty| {
+            metadata_1
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
+        let key_2_hash = match storage_entry_2.entry_type() {
+            StorageEntryType::Plain(_) => None,
+            StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
+        }
+        .map(|key_ty| {
+            metadata_2
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
+        let key_different = key_1_hash != key_2_hash;
+
+        StorageEntryDiff {
+            key_different,
+            value_different,
+            default_different: storage_entry_1.default_bytes() != storage_entry_2.default_bytes(),
+            modifier_different: storage_entry_1.modifier() != storage_entry_2.modifier(),
+        }
+    }
+
+    fn to_strings(&self) -> Vec<&str> {
+        let mut strings = Vec::<&str>::new();
+        if self.key_different {
+            strings.push("key");
+        }
+        if self.value_different {
+            strings.push("value");
+        }
+        if self.modifier_different {
+            strings.push("modifier");
+        }
+        if self.default_different {
+            strings.push("default value");
+        }
+        strings
     }
 }
 

@@ -175,7 +175,7 @@ fn get_type_def_hash(
 }
 
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
-fn get_type_hash(
+pub fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
     visited_ids: &mut HashSet<u32>,
@@ -595,8 +595,8 @@ mod tests {
             meta_type::<()>(),
             vec![],
         )
-            .try_into()
-            .expect("can build valid metadata")
+        .try_into()
+        .expect("can build valid metadata")
     }
 
     #[test]

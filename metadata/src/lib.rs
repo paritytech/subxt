@@ -20,7 +20,7 @@ mod from_into;
 mod utils;
 
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
@@ -132,11 +132,21 @@ impl Metadata {
 
     /// Filter out any pallets that we don't want to keep, retaining only those that we do.
     pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
-        where
-            F: FnMut(&str) -> bool,
-            G: FnMut(&str) -> bool,
+    where
+        F: FnMut(&str) -> bool,
+        G: FnMut(&str) -> bool,
     {
         utils::retain::retain_metadata(self, pallet_filter, api_filter);
+    }
+
+    /// Get type hash for a type in the registry
+    pub fn type_hash(&self, id: u32) -> Option<[u8; 32]> {
+        self.types.resolve(id)?;
+        Some(crate::utils::validation::get_type_hash(
+            &self.types,
+            id,
+            &mut HashSet::<u32>::new(),
+        ))
     }
 }
 
@@ -387,7 +397,7 @@ pub enum StorageHasher {
 }
 
 /// Is the storage entry optional, or does it have a default value.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum StorageEntryModifier {
     /// The storage entry returns an `Option<T>`, with `None` if the key is not present.
     Optional,

@@ -81,7 +81,6 @@ pub enum PalletSubcommand {
     Storage(StorageSubcommand),
 }
 
-/// cargo run -- explore --file=../artifacts/polkadot_metadata.scale
 pub async fn run(opts: Opts) -> color_eyre::Result<()> {
     // get the metadata
     let bytes = opts.file_or_url.fetch().await?;
