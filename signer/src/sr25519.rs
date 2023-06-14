@@ -93,7 +93,7 @@ impl Keypair {
     pub fn derive<Js: Iterator<Item = DeriveJunction>>(&self, junctions: Js) -> Self {
         let init = self.0.secret.clone();
         let result = junctions.fold(init, |acc, j| match j {
-            DeriveJunction::Soft(cc) => acc.derived_key_simple(ChainCode(cc), &[]).0,
+            DeriveJunction::Soft(cc) => acc.derived_key_simple(ChainCode(cc), []).0,
             DeriveJunction::Hard(cc) => {
                 let seed = acc.hard_derive_mini_secret_key(Some(ChainCode(cc)), b"").0;
                 seed.expand(ExpansionMode::Ed25519)
