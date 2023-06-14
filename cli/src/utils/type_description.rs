@@ -131,9 +131,6 @@ impl TypeDescription for TypeDefPrimitive {
 
 impl TypeDescription for TypeDefVariant<PortableForm> {
     fn type_description(&self, registry: &PortableRegistry) -> color_eyre::Result<String> {
-        const MIN_VARIANT_COUNT_FOR_TRAILING_COMMA: usize = 100;
-        let add_trailing_comma = self.variants.len() >= MIN_VARIANT_COUNT_FOR_TRAILING_COMMA;
-
         let mut variants_string = String::new();
         variants_string.push('{');
         let mut iter = self.variants.iter().peekable();
@@ -141,7 +138,7 @@ impl TypeDescription for TypeDefVariant<PortableForm> {
             let variant_string = variant.type_description(registry)?;
             variants_string.push_str(&variant_string);
 
-            if iter.peek().is_some() || add_trailing_comma {
+            if iter.peek().is_some() {
                 variants_string.push(',');
             }
         }
@@ -170,9 +167,6 @@ impl TypeDescription for Vec<Field<PortableForm>> {
             return Ok("()".to_string());
         }
 
-        const MIN_FIELD_COUNT_FOR_TRAILING_COMMA: usize = 100;
-        let add_trailing_comma = self.len() >= MIN_FIELD_COUNT_FOR_TRAILING_COMMA;
-
         let all_fields_named = self.iter().all(|f| f.name.is_some());
         let all_fields_unnamed = self.iter().all(|f| f.name.is_none());
         let brackets = match (all_fields_named, all_fields_unnamed) {
@@ -192,7 +186,7 @@ impl TypeDescription for Vec<Field<PortableForm>> {
             let field_description = field.type_description(registry)?;
             fields_string.push_str(&field_description);
 
-            if iter.peek().is_some() || add_trailing_comma {
+            if iter.peek().is_some() {
                 fields_string.push(',')
             }
         }
@@ -270,4 +264,40 @@ fn format_type_description(input: &str) -> String {
         }
     }
     output
+}
+
+#[cfg(test)]
+mod test {
+    use crate::utils::type_description::print_type_description;
+    use scale_info::scale::{Decode, Encode};
+    use scale_info::TypeInfo;
+    use std::fmt::Write;
+    use std::write;
+
+    #[derive(Encode, Decode, Debug, Clone, TypeInfo)]
+    pub struct Foo {
+        hello: String,
+        num: i32,
+    }
+
+    /// Given a type definition, return type ID and registry representing it.
+    fn make_type<T: scale_info::TypeInfo + 'static>() -> (u32, scale_info::PortableRegistry) {
+        let m = scale_info::MetaType::new::<T>();
+        let mut types = scale_info::Registry::new();
+        let id = types.register_type(&m);
+        let portable_registry: scale_info::PortableRegistry = types.into();
+        (id.id, portable_registry)
+    }
+
+    #[test]
+    fn test_type_description() {
+        let (foo_type_id, foo_registry) = make_type::<Foo>();
+        let description = print_type_description(&foo_type_id, &foo_registry).unwrap();
+        let mut output = String::new();
+        writeln!(output, "struct Foo {{").unwrap();
+        writeln!(output, "    hello: String,").unwrap();
+        writeln!(output, "    num: i32").unwrap();
+        write!(output, "}}").unwrap();
+        assert_eq!(description, output);
+    }
 }

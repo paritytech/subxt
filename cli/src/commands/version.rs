@@ -4,13 +4,14 @@ use clap::Parser as ClapParser;
 #[derive(Debug, ClapParser)]
 pub struct Opts {}
 
-pub fn run(_opts: Opts) -> color_eyre::Result<()> {
+pub fn run(_opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     let git_hash = env!("GIT_HASH");
-    println!(
+    writeln!(
+        output,
         "{} {}-{}",
         clap::crate_name!(),
         clap::crate_version!(),
         git_hash
-    );
+    )?;
     Ok(())
 }

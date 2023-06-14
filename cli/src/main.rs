@@ -6,6 +6,7 @@
 
 mod commands;
 mod utils;
+
 use clap::Parser as ClapParser;
 
 /// Subxt utilities for interacting with Substrate based nodes.
@@ -23,13 +24,13 @@ enum Command {
 async fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
     let args = Command::parse();
-
+    let mut output = std::io::stdout();
     match args {
-        Command::Metadata(opts) => commands::metadata::run(opts).await,
-        Command::Codegen(opts) => commands::codegen::run(opts).await,
-        Command::Compatibility(opts) => commands::compatibility::run(opts).await,
-        Command::Diff(opts) => commands::diff::run(opts).await,
-        Command::Version(opts) => commands::version::run(opts),
-        Command::Explore(opts) => commands::explore::run(opts).await,
+        Command::Metadata(opts) => commands::metadata::run(opts, &mut output).await,
+        Command::Codegen(opts) => commands::codegen::run(opts, &mut output).await,
+        Command::Compatibility(opts) => commands::compatibility::run(opts, &mut output).await,
+        Command::Diff(opts) => commands::diff::run(opts, &mut output).await,
+        Command::Version(opts) => commands::version::run(opts, &mut output),
+        Command::Explore(opts) => commands::explore::run(opts, &mut output).await,
     }
 }
