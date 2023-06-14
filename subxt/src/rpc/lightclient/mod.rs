@@ -10,7 +10,8 @@ use jsonrpsee::{
     core::client::ClientT,
     rpc_params,
 };
-use std::{iter, num::NonZeroU32};
+use smoldot_light::ChainId;
+use std::num::NonZeroU32;
 
 pub use client::LightClient;
 
@@ -57,6 +58,7 @@ pub struct LightClientBuilder<'a> {
     database_content: Option<&'a str>,
     url: Option<&'a str>,
     bootnodes: Option<Vec<String>>,
+    potential_relay_chains: Option<Vec<ChainId>>,
 }
 
 impl<'a> Default for LightClientBuilder<'a> {
@@ -69,6 +71,7 @@ impl<'a> Default for LightClientBuilder<'a> {
             database_content: None,
             url: None,
             bootnodes: None,
+            potential_relay_chains: None,
         }
     }
 }
@@ -143,6 +146,22 @@ impl<'a> LightClientBuilder<'a> {
         self
     }
 
+    /// If the chain spec defines a parachain, contains the list of relay chains to choose
+    /// from. Ignored if not a parachain.
+    ///
+    /// This field is necessary because multiple different chain can have the same identity.
+    ///
+    /// For example: if user A adds a chain named "Kusama", then user B adds a different chain
+    /// also named "Kusama", then user B adds a parachain whose relay chain is "Kusama", it would
+    /// be wrong to connect to the "Kusama" created by user A.
+    pub fn potential_relay_chains(
+        mut self,
+        potential_relay_chains: impl Iterator<Item = ChainId>,
+    ) -> Self {
+        self.potential_relay_chains = Some(potential_relay_chains.collect());
+        self
+    }
+
     /// The URL of a trusted node from which the chain spec is fetched.
     ///
     /// # Note
@@ -171,7 +190,7 @@ impl<'a> LightClientBuilder<'a> {
         if let Some(bootnodes) = self.bootnodes {
             let bootnodes = bootnodes
                 .into_iter()
-                .map(|node| serde_json::Value::String(node))
+                .map(serde_json::Value::String)
                 .collect();
             if let serde_json::Value::Object(map) = &mut chain_spec {
                 map.insert("bootNodes".to_string(), serde_json::Value::Array(bootnodes));
@@ -184,7 +203,7 @@ impl<'a> LightClientBuilder<'a> {
                 max_pending_requests: self.max_pending_requests,
                 max_subscriptions: self.max_subscriptions,
             },
-            potential_relay_chains: iter::empty(),
+            potential_relay_chains: self.potential_relay_chains.unwrap_or_default().into_iter(),
             database_content: self.database_content.unwrap_or_default(),
             user_data: (),
         };

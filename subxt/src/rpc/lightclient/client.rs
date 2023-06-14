@@ -131,8 +131,8 @@ impl LightClient {
     /// the `sync_state_genSyncSpec` RPC method. This parameter expects the
     /// chain spec in text format (ie not in hex-encoded scale-encoded as RPC methods
     /// will provide).
-    pub fn new<'a>(
-        config: smoldot_light::AddChainConfig<'a, (), impl Iterator<Item = ChainId>>,
+    pub fn new(
+        config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
     ) -> Result<LightClient, Error> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
