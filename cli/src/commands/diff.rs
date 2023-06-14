@@ -305,7 +305,6 @@ impl TryFrom<(&str, Option<MetadataVersion>)> for FileOrUrl {
     type Error = ();
 
     fn try_from(value: (&str, Option<MetadataVersion>)) -> Result<Self, Self::Error> {
-        println!("value {}", &value.0);
         let path = std::path::Path::new(&value.0);
         if path.exists() {
             Ok(FileOrUrl {
