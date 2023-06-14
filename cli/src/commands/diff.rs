@@ -11,7 +11,6 @@ use color_eyre::owo_colors::OwoColorize;
 use jsonrpsee::client_transport::ws::Uri;
 use scale_info::form::PortableForm;
 use scale_info::Variant;
-use std::io::Write;
 use subxt_codegen::utils::MetadataVersion;
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
@@ -35,11 +34,10 @@ pub struct Opts {
     pallet: Option<String>,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     let (node_1_metadata, node_2_metadata) = get_metadata(&opts).await?;
 
     let node_diff = MetadataDiff::construct(&node_1_metadata, &node_2_metadata);
-    let mut output = std::io::stdout();
 
     if node_diff.is_empty() {
         writeln!(output, "No difference in Metadata found.")?;
