@@ -15,7 +15,7 @@
 use futures::StreamExt;
 use std::sync::Arc;
 use subxt::{
-    rpc::{types::FollowEvent, LightClient},
+    rpc::{types::FollowEvent, LightClientBuilder},
     OnlineClient, PolkadotConfig,
 };
 
@@ -27,7 +27,10 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a light client from the provided chain spec.
     // Note: this connects to the live polkadot chain.
-    let light_client = LightClient::new(include_str!("../../artifacts/polkadot_spec.json"))?;
+    let light_client = LightClientBuilder::new()
+        .chain_spec(include_str!("../../artifacts/polkadot_spec.json"))
+        .build()
+        .await?;
     let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;
 
     // Subscribe to the latest 3 finalized blocks.

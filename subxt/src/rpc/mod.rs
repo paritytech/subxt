@@ -67,4 +67,4 @@ pub use rpc_client_t::{
 pub use rpc_client::{rpc_params, RpcClient, RpcParams, Subscription};
 
 #[cfg(feature = "unstable-light-client")]
-pub use lightclient::{LightClient, LightClientError};
+pub use lightclient::{LightClient, LightClientBuilder, LightClientError};

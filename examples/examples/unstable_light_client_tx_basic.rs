@@ -1,6 +1,6 @@
 use sp_keyring::AccountKeyring;
 use std::sync::Arc;
-use subxt::{rpc::LightClient, tx::PairSigner, OnlineClient, PolkadotConfig};
+use subxt::{rpc::LightClientBuilder, tx::PairSigner, OnlineClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -8,40 +8,17 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a light client from the provided chain spec.
-    //
-    // # Note
-    //
-    // This example uses a local running polkadot node and the
-    // provided spec might differ depending on the version used.
-    //
-    // The spec can be generated in the following manner:
-    // - start the polkadot node:
-    //
-    // `./polkadot --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001  --alice --validator`
-    //
-    // - fetch the spec
-    //
-    // ```bash
-    // curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
-    // ```
-    //
-    // - add the boot nodes entry to the spec
-    //
-    // ```json
-    //   "bootNodes": [
-    //       "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-    //    ],
-    //
-    // Where `12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp` should be replaced with the
-    // polkadot nodes identity extracted from the process's logs:
-    //
-    // ```bash
-    // 👴 Loading GRANDPA authority set from genesis on what appears to be first startup.
-    // 👶 Creating empty BABE epoch changes on what appears to be first startup.
-    // 🏷 Local node identity is: 12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
-    // ```
-    let light_client = LightClient::new(include_str!("../../artifacts/dev_spec.json"))?;
+    // Create a light client by fetching the chain spec of a local running node.
+    // In this case, because we start one single node, the bootnodes must be overwritten
+    // for the light client to connect to the local node.
+    let light_client = LightClientBuilder::new()
+        .trusted_url("ws://127.0.0.1:9944")
+        .bootnodes(
+            ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
+                .into_iter(),
+        )
+        .build()
+        .await?;
     let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;
 
     // Build a balance transfer extrinsic.

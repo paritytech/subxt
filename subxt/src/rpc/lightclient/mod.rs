@@ -18,7 +18,7 @@ pub use client::LightClient;
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
     /// Error encountered while adding the chain to the light-client.
-    #[error("Failed to add the chain to the light client: {0}")]
+    #[error("Failed to add the chain to the light client: {0}.")]
     AddChainError(String),
     /// The background task is closed.
     #[error("Failed to communicate with the background task.")]
@@ -27,7 +27,7 @@ pub enum LightClientError {
     #[error("RPC parameters cannot be serialized as JSON string.")]
     InvalidParams,
     /// Error originated while trying to submit a RPC request.
-    #[error("RPC request cannot be sent: {0}")]
+    #[error("RPC request cannot be sent: {0}.")]
     Request(String),
     /// The provided URL scheme is invalid.
     ///
@@ -38,7 +38,7 @@ pub enum LightClientError {
     #[error("The provided URL scheme is invalid.")]
     InvalidUrl,
     /// Handshake error while connecting to a node.
-    #[error("WS handshake failed")]
+    #[error("WS handshake failed.")]
     Handshake,
     /// The configuration provided to the builder is compatible.
     ///
@@ -56,6 +56,7 @@ pub struct LightClientBuilder<'a> {
     max_subscriptions: u32,
     database_content: Option<&'a str>,
     url: Option<&'a str>,
+    bootnodes: Option<Vec<String>>,
 }
 
 impl<'a> Default for LightClientBuilder<'a> {
@@ -67,6 +68,7 @@ impl<'a> Default for LightClientBuilder<'a> {
             max_subscriptions: 1024,
             database_content: None,
             url: None,
+            bootnodes: None,
         }
     }
 }
@@ -99,6 +101,15 @@ impl<'a> LightClientBuilder<'a> {
     /// ```
     pub fn chain_spec(mut self, chain_spec: &'a str) -> Self {
         self.chain_spec = Some(chain_spec);
+        self
+    }
+
+    /// Overwrite the bootnodes of the chain specification.
+    ///
+    /// Can be used to provide trusted entities to the chian spec, or for
+    /// testing environments.
+    pub fn bootnodes(mut self, bootnodes: impl Iterator<Item = &'a str>) -> Self {
+        self.bootnodes = Some(bootnodes.map(Into::into).collect());
         self
     }
 
@@ -150,11 +161,22 @@ impl<'a> LightClientBuilder<'a> {
     ///
     /// Panics if being called outside of `tokio` runtime context.
     pub async fn build(self) -> Result<LightClient, Error> {
-        let chain_spec = match (self.chain_spec, self.url) {
+        let mut chain_spec = match (self.chain_spec, self.url) {
             (Some(chain_spec), None) => serde_json::from_str(chain_spec).unwrap(),
             (None, Some(url)) => fetch_url(url).await?,
             _ => return Err(Error::LightClient(LightClientError::IncompatibleConfig)),
         };
+
+        // Set custom bootnodes if provided.
+        if let Some(bootnodes) = self.bootnodes {
+            let bootnodes = bootnodes
+                .into_iter()
+                .map(|node| serde_json::Value::String(node))
+                .collect();
+            if let serde_json::Value::Object(map) = &mut chain_spec {
+                map.insert("bootNodes".to_string(), serde_json::Value::Array(bootnodes));
+            }
+        }
 
         let config = smoldot_light::AddChainConfig {
             specification: &chain_spec.to_string(),
