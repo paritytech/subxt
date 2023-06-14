@@ -26,8 +26,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
     // ```
     //
-    // - remove the `lightSyncState` entry from the spec
-    //
     // - add the boot nodes entry to the spec
     //
     // ```json

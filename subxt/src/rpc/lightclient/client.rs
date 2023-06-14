@@ -9,18 +9,10 @@ use crate::{
     error::{Error, RpcError},
     rpc::{RpcClientT, RpcFuture, RpcSubscription},
 };
-use core::time::Duration;
 use futures::{lock::Mutex as AsyncMutex, stream::StreamExt, Stream};
-#[cfg(feature = "jsonrpsee-ws")]
-use jsonrpsee::{
-    async_client::ClientBuilder,
-    client_transport::ws::{Uri, WsTransportClientBuilder},
-    core::client::ClientT,
-    rpc_params,
-};
 use serde_json::value::RawValue;
 use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket, ChainId};
-use std::{iter, num::NonZeroU32, pin::Pin, sync::Arc};
+use std::{pin::Pin, sync::Arc};
 use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 
@@ -133,45 +125,15 @@ pub struct LightClient {
 }
 
 impl LightClient {
-    /// Construct a new [`LightClient`], providing a URL to connect to.
-    ///
-    /// The URL is utilized to fetch the chain specification.
-    #[cfg(feature = "jsonrpsee-ws")]
-    pub async fn from_url(url: impl AsRef<str>) -> Result<LightClient, Error> {
-        let url = url
-            .as_ref()
-            .parse::<Uri>()
-            .map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
-
-        if url.scheme_str() != Some("ws") && url.scheme_str() != Some("wss") {
-            return Err(Error::LightClient(LightClientError::InvalidScheme));
-        }
-
-        let (sender, receiver) = WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|_| LightClientError::Handshake)?;
-
-        let client = ClientBuilder::default()
-            .request_timeout(Duration::from_secs(180))
-            .max_notifs_per_subscription(4096)
-            .build_with_tokio(sender, receiver);
-
-        let result: serde_json::Value = client
-            .request("sync_state_genSyncSpec", rpc_params![true])
-            .await
-            .map_err(|err| Error::Rpc(RpcError::ClientError(Box::new(err))))?;
-
-        LightClient::new(&result.to_string())
-    }
-
     /// Constructs a new [`LightClient`], providing the chain specification.
     ///
     /// The chain specification can be downloaded from a trusted network via
     /// the `sync_state_genSyncSpec` RPC method. This parameter expects the
     /// chain spec in text format (ie not in hex-encoded scale-encoded as RPC methods
     /// will provide).
-    pub fn new(chain_spec: &str) -> Result<LightClient, Error> {
+    pub fn new<'a>(
+        config: smoldot_light::AddChainConfig<'a, (), impl Iterator<Item = ChainId>>,
+    ) -> Result<LightClient, Error> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
         let mut client = smoldot_light::Client::new(AsyncStdTcpWebSocket::new(
@@ -183,44 +145,7 @@ impl LightClient {
             chain_id,
             json_rpc_responses,
         } = client
-            .add_chain(smoldot_light::AddChainConfig {
-                // The most important field of the configuration is the chain specification. This is a
-                // JSON document containing all the information necessary for the client to connect to said
-                // chain.
-                specification: chain_spec,
-
-                // Configures some constants about the JSON-RPC endpoints.
-                // It is also possible to pass `Disabled`, in which case the chain will not be able to
-                // handle JSON-RPC requests. This can be used to save up some resources.
-                json_rpc: smoldot_light::AddChainConfigJsonRpc::Enabled {
-                    // Maximum number of JSON-RPC in the queue of requests waiting to be processed.
-                    // This parameter is necessary for situations where the JSON-RPC clients aren't
-                    // trusted. If you control all the requests that are sent out and don't want them
-                    // to fail, feel free to pass `u32::max_value()`.
-                    max_pending_requests: NonZeroU32::new(128)
-                        .expect("Valid number is greater than zero; qed"),
-                    // Maximum number of active subscriptions before new ones are automatically
-                    // rejected. Any JSON-RPC request that causes the server to generate notifications
-                    // counts as a subscription.
-                    // While a typical reasonable value would be for example 64, existing UIs tend to
-                    // start a lot of subscriptions, and a value such as 1024 is recommended.
-                    // Similarly, if you don't want any limit, feel free to pass `u32::max_value()`.
-                    max_subscriptions: 1024,
-                },
-                // This field is necessary only if adding a parachain.
-                potential_relay_chains: iter::empty(),
-                // After a chain has been added, it is possible to extract a "database" (in the form of a
-                // simple string). This database can later be passed back the next time the same chain is
-                // added again.
-                // A database with an invalid format is simply ignored by the client.
-                // In this example, we don't use this feature, and as such we simply pass an empty string,
-                // which is intentionally an invalid database content.
-                database_content: "",
-                // The client gives the possibility to insert an opaque "user data" alongside each chain.
-                // This avoids having to create a separate `HashMap<ChainId, ...>` in parallel of the
-                // client.
-                user_data: (),
-            })
+            .add_chain(config)
             .map_err(|err| LightClientError::AddChainError(err.to_string()))?;
 
         let (to_backend, backend) = mpsc::channel(128);
