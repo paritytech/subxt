@@ -269,10 +269,10 @@ impl StorageEntryDiff {
     fn to_strings(&self) -> Vec<&str> {
         let mut strings = Vec::<&str>::new();
         if self.key_different {
-            strings.push("key");
+            strings.push("key type");
         }
         if self.value_different {
-            strings.push("value");
+            strings.push("value type");
         }
         if self.modifier_different {
             strings.push("modifier");
