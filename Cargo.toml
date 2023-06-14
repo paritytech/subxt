@@ -15,7 +15,7 @@ members = [
 # This cannot be a workspace dependency, because it requires
 # mutually exclusive jsonrpsee features to work, and workspaces
 # will aggregate features used across crates:
-exclude = ["testing/wasm-tests"]
+exclude = ["testing/wasm-tests", "examples/wasm-example"]
 resolver = "2"
 
 [workspace.package]
@@ -51,9 +51,9 @@ jsonrpsee = { version = "0.16" }
 pretty_assertions = "1.0.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.58"
-quote = "1.0.27"
-regex = "1.8.1"
+proc-macro2 = "1.0.59"
+quote = "1.0.28"
+regex = "1.8.3"
 scale-info = "2.7.0"
 scale-value = "0.7.0"
 scale-bits = "0.3"
@@ -78,11 +78,11 @@ tokio-stream = "0.1.14"
 futures-util = "0.3.28"
 
 # Substrate crates:
-sp-core = { git = "https://github.com/paritytech/substrate.git", default-features = false }
-sp-core-hashing = { git = "https://github.com/paritytech/substrate.git" }
-sp-runtime = { git = "https://github.com/paritytech/substrate.git" }
-sp-keyring = { git = "https://github.com/paritytech/substrate.git" }
-sp-version = { git = "https://github.com/paritytech/substrate.git" }
+sp-core = { version = "21.0.0", default-features = false }
+sp-core-hashing = "9.0.0"
+sp-runtime = "24.0.0"
+sp-keyring = "24.0.0"
+sp-version = "22.0.0"
 
 # Subxt workspace crates:
 subxt = { version = "0.28.0", path = "subxt" }

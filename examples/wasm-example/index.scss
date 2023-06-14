@@ -1,0 +1,57 @@
+$primary: #24cc85;
+$secondary: #1f624a;
+$dark: #242a35;
+
+*{
+    font-family: monospace;
+    color: $dark;
+    
+}
+
+html{
+    background-color: $dark;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+}
+
+h1{
+    font-weight: bolder;
+    color: $dark;
+}
+
+body{
+    width: 800px;
+    max-width: 100%;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    height: 100%;
+    margin: 0px;
+    padding: 16px;
+    background-color: $primary;
+}
+
+
+p{
+    white-space: pre-wrap;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    background-color: $dark;
+    color: white;
+}
+button{
+    font-size: large;
+    padding: 8px 16px;
+    font-weight: bold;
+    background-color: $dark;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    display: block;
+    margin-top: 8px;
+}
+
+button:hover{
+ background-color: $secondary;
+}

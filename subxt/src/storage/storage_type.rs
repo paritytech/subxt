@@ -321,9 +321,7 @@ fn lookup_entry_details<'a>(
     entry_name: &str,
     metadata: &'a Metadata,
 ) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
-    let pallet_metadata = metadata
-        .pallet_by_name(pallet_name)
-        .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.to_owned()))?;
+    let pallet_metadata = metadata.pallet_by_name_err(pallet_name)?;
     let storage_metadata = pallet_metadata
         .storage()
         .ok_or_else(|| MetadataError::StorageNotFoundInPallet(pallet_name.to_owned()))?;
