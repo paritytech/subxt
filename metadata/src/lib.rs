@@ -78,7 +78,7 @@ impl Metadata {
     }
 
     /// An iterator over all of the available pallets.
-    pub fn pallets(&self) -> impl ExactSizeIterator<Item=PalletMetadata<'_>> {
+    pub fn pallets(&self) -> impl ExactSizeIterator<Item = PalletMetadata<'_>> {
         self.pallets.values().iter().map(|inner| PalletMetadata {
             inner,
             types: self.types(),
@@ -109,7 +109,7 @@ impl Metadata {
     }
 
     /// An iterator over all of the runtime APIs.
-    pub fn runtime_api_traits(&self) -> impl ExactSizeIterator<Item=RuntimeApiMetadata<'_>> {
+    pub fn runtime_api_traits(&self) -> impl ExactSizeIterator<Item = RuntimeApiMetadata<'_>> {
         self.apis.values().iter().map(|inner| RuntimeApiMetadata {
             inner,
             types: self.types(),
@@ -246,7 +246,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// An iterator over the constants in this pallet.
-    pub fn constants(&self) -> impl ExactSizeIterator<Item=&'a ConstantMetadata> {
+    pub fn constants(&self) -> impl ExactSizeIterator<Item = &'a ConstantMetadata> {
         self.inner.constants.values().iter()
     }
 
@@ -313,7 +313,7 @@ impl StorageMetadata {
     }
 
     /// An iterator over the storage entries.
-    pub fn entries(&self) -> impl ExactSizeIterator<Item=&StorageEntryMetadata> {
+    pub fn entries(&self) -> impl ExactSizeIterator<Item = &StorageEntryMetadata> {
         self.entries.values().iter()
     }
 
@@ -508,7 +508,7 @@ impl<'a> RuntimeApiMetadata<'a> {
         &self.inner.docs
     }
     /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl ExactSizeIterator<Item=&'a RuntimeApiMethodMetadata> {
+    pub fn methods(&self) -> impl ExactSizeIterator<Item = &'a RuntimeApiMethodMetadata> {
         self.inner.methods.values().iter()
     }
     /// Get a specific trait method given its name.
@@ -559,7 +559,7 @@ impl RuntimeApiMethodMetadata {
         &self.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item=&RuntimeApiMethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &RuntimeApiMethodParamMetadata> {
         self.inputs.iter()
     }
     /// Method return type.
