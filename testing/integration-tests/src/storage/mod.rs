@@ -33,12 +33,12 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let signer = dev::alice();
-    let alice: AccountId32 = dev::alice().to_account_id().into();
+    let alice: AccountId32 = dev::alice().public_key().into();
 
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
     api.tx()
-        .sign_and_submit_then_watch_default(&remark_tx, &signer)
+        .sign_and_submit_then_watch_default(&remark_tx, signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -99,8 +99,8 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     // we "approveTransfer" of some of this asset class. This gives us an
     // entry in the `Approvals` StorageNMap that we can try to look up.
     let signer = dev::alice();
-    let alice: AccountId32 = dev::alice().to_account_id().into();
-    let bob: AccountId32 = dev::bob().to_account_id().into();
+    let alice: AccountId32 = dev::alice().public_key().into();
+    let bob: AccountId32 = dev::bob().public_key().into();
 
     let tx1 = node_runtime::tx()
         .assets()
@@ -109,12 +109,12 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
         .assets()
         .approve_transfer(99, bob.clone().into(), 123);
     api.tx()
-        .sign_and_submit_then_watch_default(&tx1, &signer)
+        .sign_and_submit_then_watch_default(&tx1, signer)
         .await?
         .wait_for_finalized_success()
         .await?;
     api.tx()
-        .sign_and_submit_then_watch_default(&tx2, &signer)
+        .sign_and_submit_then_watch_default(&tx2, signer)
         .await?
         .wait_for_finalized_success()
         .await?;

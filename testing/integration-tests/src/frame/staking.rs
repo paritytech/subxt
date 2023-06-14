@@ -14,7 +14,7 @@ use crate::{
     test_context,
 };
 use assert_matches::assert_matches;
-use subxt::error::{DispatchError, Error};
+use subxt::{tx::Signer, error::{DispatchError, Error}};
 use subxt_signer::{
     sr25519::{self, dev},
     SecretUri,
@@ -22,6 +22,7 @@ use subxt_signer::{
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Keypair {
+    use std::str::FromStr;
     let uri = SecretUri::from_str(&format!("//{seed}")).expect("expected to be valid");
     sr25519::Keypair::from_uri(&uri).expect("expected to be valid")
 }
@@ -45,7 +46,7 @@ async fn validate_with_controller_account() {
         .validate(default_validator_prefs());
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -91,7 +92,7 @@ async fn nominate_with_controller_account() {
         .nominate(vec![bob.account_id().clone().into()]);
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -141,7 +142,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob_stash.account_id().clone().into()]);
     api.tx()
-        .sign_and_submit_then_watch_default(&nominate_tx, &alice)
+        .sign_and_submit_then_watch_default(&nominate_tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -173,7 +174,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
     let is_chilled = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, &alice)
+        .sign_and_submit_then_watch_default(&chill_tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -191,14 +192,14 @@ async fn tx_bond() -> Result<(), Error> {
     let alice = dev::alice();
 
     let bond_tx = node_runtime::tx().staking().bond(
-        AccountKeyring::Bob.to_account_id().into(),
+        dev::bob().public_key().into(),
         100_000_000_000_000,
         RewardDestination::Stash,
     );
 
     let bond = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, &alice)
+        .sign_and_submit_then_watch_default(&bond_tx, alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -207,7 +208,7 @@ async fn tx_bond() -> Result<(), Error> {
 
     let bond_again = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, &alice)
+        .sign_and_submit_then_watch_default(&bond_tx, alice)
         .await?
         .wait_for_finalized_success()
         .await;

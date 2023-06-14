@@ -10,12 +10,14 @@ use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
 use sp_core::storage::well_known_keys;
 use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
         ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
+    tx::Signer,
     utils::AccountId32,
 };
 use subxt_metadata::Metadata;
@@ -165,7 +167,7 @@ async fn dry_run_passes() {
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, &alice, Default::default())
+        .create_signed(&tx, alice, Default::default())
         .await
         .unwrap();
 
@@ -191,17 +193,17 @@ async fn dry_run_fails() {
     wait_for_blocks(&api).await;
 
     let alice = dev::alice();
-    let hans = dev::hans();
+    let bob = dev::bob();
 
     let tx = node_runtime::tx().balances().transfer(
-        hans.account_id().into(),
+        bob.public_key().into(),
         // 7 more than the default amount Alice has, so this should fail; insufficient funds:
         1_000_000_000_000_000_000_007,
     );
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, &alice, Default::default())
+        .create_signed(&tx, alice, Default::default())
         .await
         .unwrap();
 
@@ -300,7 +302,7 @@ async fn external_signing() {
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
     let partial_extrinsic = api
         .tx()
-        .create_partial_signed(&tx, alice.account_id(), Default::default())
+        .create_partial_signed(&tx, &alice.account_id(), Default::default())
         .await
         .unwrap();
 
@@ -309,7 +311,7 @@ async fn external_signing() {
     // Sign it (possibly externally).
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
-    let extrinsic = partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature);
+    let extrinsic = partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature.into());
 
     // And now submit it.
     extrinsic
@@ -335,7 +337,7 @@ async fn submit_large_extrinsic() {
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, &alice, Default::default())
+        .create_signed(&tx, alice, Default::default())
         .await
         .unwrap();
 
@@ -356,7 +358,7 @@ async fn decode_a_module_error() {
     let api = ctx.client();
 
     let alice = dev::alice();
-    let alice_addr = alice.account_id().into();
+    let alice_addr = alice.public_key().into();
 
     // Trying to work with an asset ID 1 which doesn't exist should return an
     // "unknown" module error from the assets pallet.
@@ -364,7 +366,7 @@ async fn decode_a_module_error() {
 
     let err = api
         .tx()
-        .sign_and_submit_then_watch_default(&freeze_unknown_asset, &alice)
+        .sign_and_submit_then_watch_default(&freeze_unknown_asset, alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -392,7 +394,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(dev::alice().account_id().clone().into(), 12345000000000000);
+        .transfer(dev::alice().public_key().into(), 12345000000000000);
 
     let actual_tx = api.tx().create_unsigned(&tx).unwrap();
 
@@ -539,7 +541,7 @@ async fn chainhead_unstable_storage() {
     };
     let sub_id = blocks.subscription_id().unwrap().clone();
 
-    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
+    let alice: AccountId32 = dev::alice().public_key().into();
     let addr = node_runtime::storage().system().account(alice);
     let addr_bytes = api.storage().address_bytes(&addr).unwrap();
 
@@ -641,10 +643,10 @@ async fn partial_fee_estimate_correct() {
     let api = ctx.client();
 
     let alice = dev::alice();
-    let hans = dev::hans();
+    let bob = dev::bob();
     let tx = node_runtime::tx()
         .balances()
-        .transfer(hans.account_id().into(), 1_000_000_000_000);
+        .transfer(bob.public_key().into(), 1_000_000_000_000);
 
     let signed_extrinsic = api
         .tx()

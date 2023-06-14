@@ -21,7 +21,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let alice = dev::alice();
-    let bob = dev::bob().to_account_id().into();
+    let bob = dev::bob().public_key().into();
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
@@ -31,7 +31,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
 
     let found_event = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -47,7 +47,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let alice = dev::alice();
-    let bob = dev::bob().to_account_id().into();
+    let bob = dev::bob().public_key().into();
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
@@ -63,7 +63,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
 
     let found_event = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?

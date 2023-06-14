@@ -17,12 +17,12 @@ use subxt_signer::sr25519::dev;
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
-    let bob_address = bob.account_id().into();
+    let bob_address = bob.public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_account_addr = node_runtime::storage().system().account(alice.account_id());
-    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
+    let alice_account_addr = node_runtime::storage().system().account(alice.public_key().into());
+    let bob_account_addr = node_runtime::storage().system().account(bob.public_key().into());
 
     let alice_pre = api
         .storage()
@@ -41,7 +41,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let events = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -123,7 +123,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let events = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .sign_and_submit_then_watch_default(&tx, alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -202,7 +202,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
-    let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().into();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -220,7 +220,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .transfer(bob_address.clone(), 10_000);
     for _ in 0..3 {
         api.tx()
-            .sign_and_submit_then_watch_default(&tx, &alice)
+            .sign_and_submit_then_watch_default(&tx, alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
             .await?
@@ -259,8 +259,8 @@ async fn storage_total_issuance() {
 #[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob_signer = dev::bob();
-    let bob: AccountId32 = dev::bob().to_account_id().into();
-    let charlie: AccountId32 = dev::charlie().to_account_id().into();
+    let bob: AccountId32 = dev::bob().public_key().into();
+    let charlie: AccountId32 = dev::charlie().public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -302,21 +302,21 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 #[tokio::test]
 async fn transfer_error() {
     let alice = dev::alice();
-    let alice_addr = alice.account_id().into();
-    let hans = dev::hans();
-    let hans_address = hans.account_id().into();
+    let alice_addr = alice.public_key().into();
+    let bob = dev::bob();
+    let bob_address = bob.public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_hans_tx = node_runtime::tx()
+    let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer(hans_address, 100_000_000_000_000_000);
+        .transfer(bob_address, 100_000_000_000_000_000);
     let to_alice_tx = node_runtime::tx()
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000);
 
     api.tx()
-        .sign_and_submit_then_watch_default(&to_hans_tx, &alice)
+        .sign_and_submit_then_watch_default(&to_bob_tx, alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -325,7 +325,7 @@ async fn transfer_error() {
 
     let res = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_alice_tx, &hans)
+        .sign_and_submit_then_watch_default(&to_alice_tx, bob)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -345,7 +345,7 @@ async fn transfer_error() {
 #[tokio::test]
 async fn transfer_implicit_subscription() {
     let alice = dev::alice();
-    let bob: AccountId32 = dev::bob().to_account_id().into();
+    let bob: AccountId32 = dev::bob().public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -355,7 +355,7 @@ async fn transfer_implicit_subscription() {
 
     let event = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
+        .sign_and_submit_then_watch_default(&to_bob_tx, alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
