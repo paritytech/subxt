@@ -14,8 +14,11 @@ use crate::{
     test_context,
 };
 use assert_matches::assert_matches;
-use subxt_signer::{ SecretUri, sr25519::{ self, dev } };
 use subxt::error::{DispatchError, Error};
+use subxt_signer::{
+    sr25519::{self, dev},
+    SecretUri,
+};
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Keypair {

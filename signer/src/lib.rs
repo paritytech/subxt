@@ -15,8 +15,8 @@ pub use bip39;
 
 // Used to hold strings in a more secure manner in memory for a little extra
 // protection.
-pub use secrecy::{ ExposeSecret, SecretString };
+pub use secrecy::{ExposeSecret, SecretString};
 
 // SecretUri's can be parsed from strings and used to generate key pairs.
 // DeriveJunctions are the "path" part of these SecretUris.
-pub use crypto::{ SecretUri, SecretUriError, DeriveJunction, DEV_PHRASE };
+pub use crypto::{DeriveJunction, SecretUri, SecretUriError, DEV_PHRASE};

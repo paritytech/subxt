@@ -1,6 +1,6 @@
-use subxt_signer::sr25519::dev;
 use subxt::config::polkadot::{Era, PlainTip, PolkadotExtrinsicParamsBuilder as Params};
 use subxt::{OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}

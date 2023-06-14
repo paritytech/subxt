@@ -2,10 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use secrecy::ExposeSecret;
-use schnorrkel::{ MiniSecretKey, ExpansionMode, derive::{ Derivation, ChainCode }};
+use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use hex::FromHex;
-use crate::crypto::{ SecretUri, DeriveJunction, seed_from_entropy };
+use schnorrkel::{
+    derive::{ChainCode, Derivation},
+    ExpansionMode, MiniSecretKey,
+};
+use secrecy::ExposeSecret;
 
 /// An sr25519 keypair implementation. While the API is slightly different, the logic for
 /// this has been taken from `sp_core::sr25519` and we test against this to ensure conformity.
@@ -39,7 +42,11 @@ impl AsRef<[u8]> for PublicKey {
 impl Keypair {
     /// Turn a [`SecretUri`] into an sr25519 keypair. See the [`SecretUri`] docs for more.
     pub fn from_uri(uri: &SecretUri) -> Result<Self, Error> {
-        let SecretUri { junctions, phrase, password } = uri;
+        let SecretUri {
+            junctions,
+            phrase,
+            password,
+        } = uri;
 
         // If the phrase is hex, convert bytes directly into a seed, ignoring password.
         // Else, parse the phrase string taking the password into account. This is
@@ -59,9 +66,8 @@ impl Keypair {
 
     /// Turn a BIP-39 mnemonic phrase and optional password into an sr25519 keypair.
     pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
-        let big_seed =
-            seed_from_entropy(&mnemonic.to_entropy(), password.unwrap_or(""))
-                .ok_or(Error::InvalidSeed)?;
+        let big_seed = seed_from_entropy(&mnemonic.to_entropy(), password.unwrap_or(""))
+            .ok_or(Error::InvalidSeed)?;
 
         let seed: Seed = big_seed[..SEED_LENGTH]
             .try_into()
@@ -91,7 +97,7 @@ impl Keypair {
             DeriveJunction::Hard(cc) => {
                 let seed = acc.hard_derive_mini_secret_key(Some(ChainCode(cc)), b"").0;
                 seed.expand(ExpansionMode::Ed25519)
-            },
+            }
         });
         Self(result.into())
     }
@@ -118,7 +124,9 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
     let Ok(public) = schnorrkel::PublicKey::from_bytes(&pubkey.0) else {
         return false
     };
-    public.verify_simple(SIGNING_CTX, message.as_ref(), &signature).is_ok()
+    public
+        .verify_simple(SIGNING_CTX, message.as_ref(), &signature)
+        .is_ok()
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -128,7 +136,7 @@ pub enum Error {
     #[error("Cannot parse phrase: {0}")]
     Phrase(#[from] bip39::Error),
     #[error("Cannot parse hex string: {0}")]
-    Hex(#[from] hex::FromHexError)
+    Hex(#[from] hex::FromHexError),
 }
 
 /// Dev accounts, helpful for testing but not to be used in production, since the secret
@@ -171,9 +179,9 @@ pub mod dev {
 mod subxt_compat {
     use super::*;
 
-    use subxt::tx::Signer as SignerT;
     use subxt::config::Config;
-    use subxt::utils::{ AccountId32, MultiAddress, MultiSignature };
+    use subxt::tx::Signer as SignerT;
+    use subxt::utils::{AccountId32, MultiAddress, MultiSignature};
 
     impl From<Signature> for MultiSignature {
         fn from(value: Signature) -> Self {
@@ -185,17 +193,17 @@ mod subxt_compat {
             AccountId32(value.0)
         }
     }
-    impl <T> From<PublicKey> for MultiAddress<AccountId32, T> {
+    impl<T> From<PublicKey> for MultiAddress<AccountId32, T> {
         fn from(value: PublicKey) -> Self {
             MultiAddress::Id(value.into())
         }
     }
 
-    impl <T: Config> SignerT<T> for Keypair
+    impl<T: Config> SignerT<T> for Keypair
     where
         T::AccountId: From<PublicKey>,
         T::Address: From<PublicKey>,
-        T::Signature: From<Signature>
+        T::Signature: From<Signature>,
     {
         fn account_id(&self) -> T::AccountId {
             self.public_key().into()
@@ -217,8 +225,8 @@ mod test {
 
     use super::*;
 
-    use sp_core::sr25519::Pair as SpPair;
     use sp_core::crypto::Pair as _;
+    use sp_core::sr25519::Pair as SpPair;
 
     #[test]
     fn check_from_phrase_matches() {
@@ -287,7 +295,11 @@ mod test {
             let sp_sig = sp_pair.sign(message).0;
             let sig = pair.sign(message).0;
 
-            assert!(SpPair::verify(&SpSignature(sig), message, &sp_pair.public()));
+            assert!(SpPair::verify(
+                &SpSignature(sig),
+                message,
+                &sp_pair.public()
+            ));
             assert!(verify(&Signature(sp_sig), message, &pair.public_key()));
         }
     }
@@ -295,7 +307,8 @@ mod test {
     #[test]
     fn check_hex_uris() {
         // Hex URIs seem to ignore the password on sp_core and here. Check that this is consistent.
-        let uri_str = "0x1122334455667788112233445566778811223344556677881122334455667788///SomePassword";
+        let uri_str =
+            "0x1122334455667788112233445566778811223344556677881122334455667788///SomePassword";
 
         let uri = SecretUri::from_str(uri_str).expect("should be valid");
         let pair = Keypair::from_uri(&uri).expect("should be valid");

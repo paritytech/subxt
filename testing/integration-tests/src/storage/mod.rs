@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context, utils::wait_for_blocks};
-use subxt_signer::sr25519::dev;
 use subxt::utils::AccountId32;
+use subxt_signer::sr25519::dev;
 
 #[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {

@@ -5,9 +5,9 @@
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
-use subxt_signer::sr25519::dev;
 use subxt::blocks::BlocksClient;
 use subxt_metadata::Metadata;
+use subxt_signer::sr25519::dev;
 
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]

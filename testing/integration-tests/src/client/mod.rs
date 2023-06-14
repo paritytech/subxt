@@ -3,7 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{
-    test_context, test_context_with, utils::{node_runtime, wait_for_blocks},
+    test_context, test_context_with,
+    utils::{node_runtime, wait_for_blocks},
 };
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
@@ -389,13 +390,9 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let tx = node_runtime::tx().balances().transfer(
-        dev::alice()
-            .account_id()
-            .clone()
-            .into(),
-        12345000000000000,
-    );
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(dev::alice().account_id().clone().into(), 12345000000000000);
 
     let actual_tx = api.tx().create_unsigned(&tx).unwrap();
 

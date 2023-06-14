@@ -7,11 +7,11 @@ use crate::{
     test_context,
 };
 use codec::Decode;
-use subxt_signer::sr25519::dev;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     utils::{AccountId32, MultiAddress},
 };
+use subxt_signer::sr25519::dev;
 
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {

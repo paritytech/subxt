@@ -1,6 +1,6 @@
-use subxt_signer::sr25519::dev;
 use subxt::dynamic::{At, Value};
 use subxt::{OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

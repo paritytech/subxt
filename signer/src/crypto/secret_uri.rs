@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use secrecy::SecretString;
 use super::DeriveJunction;
 use regex::Regex;
+use secrecy::SecretString;
 
 /// A secret uri (`SURI`) that can be used to generate a key pair.
 ///
@@ -114,7 +114,7 @@ impl std::str::FromStr for SecretUri {
 #[derive(Debug, Copy, Clone, PartialEq, thiserror::Error)]
 pub enum SecretUriError {
     #[error("Invalid secret phrase format")]
-    InvalidFormat
+    InvalidFormat,
 }
 
 once_static! {
@@ -149,4 +149,3 @@ once_static! {
 /// The root phrase for our publicly known keys.
 pub const DEV_PHRASE: &str =
     "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-
