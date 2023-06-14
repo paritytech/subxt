@@ -28,6 +28,7 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 syn = { workspace = true }
 subxt = { workspace = true, features = ["unstable-metadata"] }
+subxt-signer = { workspace = true, features = ["subxt"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
 test-runtime = { workspace = true }

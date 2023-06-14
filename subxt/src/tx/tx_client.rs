@@ -211,7 +211,7 @@ where
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        let account_nonce = self.account_nonce(signer.account_id()).await?;
+        let account_nonce = self.account_nonce(&signer.account_id()).await?;
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
     }
 

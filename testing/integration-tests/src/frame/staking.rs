@@ -11,16 +11,16 @@ use crate::{
         },
         staking,
     },
-    pair_signer, test_context,
+    test_context,
 };
 use assert_matches::assert_matches;
-use sp_core::{sr25519, Pair};
-use sp_keyring::AccountKeyring;
+use subxt_signer::{ SecretUri, sr25519::{ self, dev } };
 use subxt::error::{DispatchError, Error};
 
 /// Helper function to generate a crypto pair from seed
-fn get_from_seed(seed: &str) -> sr25519::Pair {
-    sr25519::Pair::from_string(&format!("//{seed}"), None).expect("static values are valid; qed")
+fn get_from_seed(seed: &str) -> sr25519::Keypair {
+    let uri = SecretUri::from_str(&format!("//{seed}")).expect("expected to be valid");
+    sr25519::Keypair::from_uri(&uri).expect("expected to be valid")
 }
 
 fn default_validator_prefs() -> ValidatorPrefs {
@@ -35,7 +35,7 @@ async fn validate_with_controller_account() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     let tx = node_runtime::tx()
         .staking()
@@ -55,7 +55,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
+    let alice_stash = get_from_seed("Alice//stash");
 
     let tx = node_runtime::tx()
         .staking()
@@ -80,8 +80,8 @@ async fn nominate_with_controller_account() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let alice = dev::alice();
+    let bob = dev::bob();
 
     let tx = node_runtime::tx()
         .staking()
@@ -101,8 +101,8 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
-    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let alice_stash = get_from_seed("Alice//stash");
+    let bob = dev::bob();
 
     let tx = node_runtime::tx()
         .staking()
@@ -129,9 +129,9 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
-    let bob_stash = pair_signer(get_from_seed("Bob//stash"));
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice_stash = get_from_seed("Alice//stash");
+    let bob_stash = get_from_seed("Bob//stash");
+    let alice = dev::alice();
 
     // this will fail the second time, which is why this is one test, not two
     let nominate_tx = node_runtime::tx()
@@ -185,7 +185,7 @@ async fn tx_bond() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     let bond_tx = node_runtime::tx().staking().bond(
         AccountKeyring::Bob.to_account_id().into(),

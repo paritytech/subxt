@@ -15,10 +15,11 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-default = ["jsonrpsee-ws", "substrate-compat"]
+default = ["jsonrpsee-ws"]
 
 # Activate this feature to pull in extra Substrate dependencies which make it
-# possible to provide a proper extrinsic Signer implementation (PairSigner).
+# possible to use the `sp_core::crypto::Pair` Signer implementation, as well as
+# adding some `From` impls for types like `AccountId32`.
 substrate-compat = [
     "sp-core",
     "sp-runtime"
@@ -90,3 +91,5 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
 assert_matches = { workspace = true }
+subxt-signer = { workspace = true, features = ["subxt"] }
+subxt = { workspace = true, features = ["substrate-compat"] }

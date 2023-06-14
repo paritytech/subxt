@@ -1,7 +1,7 @@
 use futures::StreamExt;
-use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 use subxt::{
-    tx::{PairSigner, TxStatus},
+    tx::TxStatus,
     OnlineClient, PolkadotConfig,
 };
 
@@ -15,12 +15,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a balance transfer extrinsic.
-    let dest = AccountKeyring::Bob.to_account_id().into();
+    let dest = dev::bob().public_key().into();
     let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
 
     // Submit the balance transfer extrinsic from Alice, and then monitor the
     // progress of it.
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let from = dev::alice();
     let mut balance_transfer_progress = api
         .tx()
         .sign_and_submit_then_watch_default(&balance_transfer_tx, &signer)

@@ -3,13 +3,11 @@
 // see LICENSE for license details.
 
 use crate::{
-    pair_signer, test_context, test_context_with,
-    utils::{node_runtime, wait_for_blocks},
+    test_context, test_context_with, utils::{node_runtime, wait_for_blocks},
 };
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
 use sp_core::storage::well_known_keys;
-use sp_core::{sr25519::Pair as Sr25519Pair, Pair};
 use sp_keyring::AccountKeyring;
 use subxt::{
     error::{DispatchError, Error, TokenError},
@@ -17,7 +15,6 @@ use subxt::{
         ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
-    tx::Signer,
     utils::AccountId32,
 };
 use subxt_metadata::Metadata;
@@ -156,14 +153,14 @@ async fn dry_run_passes() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let alice = dev::alice();
+    let bob = dev::bob();
 
     wait_for_blocks(&api).await;
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.account_id().clone().into(), 10_000);
+        .transfer(bob.public_key().into(), 10_000);
 
     let signed_extrinsic = api
         .tx()
@@ -192,11 +189,11 @@ async fn dry_run_fails() {
 
     wait_for_blocks(&api).await;
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let hans = pair_signer(Sr25519Pair::generate().0);
+    let alice = dev::alice();
+    let hans = dev::hans();
 
     let tx = node_runtime::tx().balances().transfer(
-        hans.account_id().clone().into(),
+        hans.account_id().into(),
         // 7 more than the default amount Alice has, so this should fail; insufficient funds:
         1_000_000_000_000_000_000_007,
     );
@@ -295,7 +292,7 @@ async fn dry_run_result_is_substrate_compatible() {
 async fn external_signing() {
     let ctx = test_context().await;
     let api = ctx.client();
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     // Create a partial extrinsic. We can get the signer payload at this point, to be
     // signed externally.
@@ -328,7 +325,7 @@ async fn submit_large_extrinsic() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     // 2 MiB blob of data.
     let bytes = vec![0_u8; 2 * 1024 * 1024];
@@ -357,8 +354,8 @@ async fn decode_a_module_error() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let alice_addr = alice.account_id().clone().into();
+    let alice = dev::alice();
+    let alice_addr = alice.account_id().into();
 
     // Trying to work with an asset ID 1 which doesn't exist should return an
     // "unknown" module error from the assets pallet.
@@ -393,7 +390,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let api = ctx.client();
 
     let tx = node_runtime::tx().balances().transfer(
-        pair_signer(AccountKeyring::Alice.pair())
+        dev::alice()
             .account_id()
             .clone()
             .into(),
@@ -646,12 +643,11 @@ async fn partial_fee_estimate_correct() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let hans = pair_signer(Sr25519Pair::generate().0);
-
+    let alice = dev::alice();
+    let hans = dev::hans();
     let tx = node_runtime::tx()
         .balances()
-        .transfer(hans.account_id().clone().into(), 1_000_000_000_000);
+        .transfer(hans.account_id().into(), 1_000_000_000_000);
 
     let signed_extrinsic = api
         .tx()

@@ -4,17 +4,17 @@
 
 use crate::{
     node_runtime::{self, system},
-    pair_signer, test_context,
+    test_context,
 };
 use assert_matches::assert_matches;
-use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 
 #[tokio::test]
 async fn storage_account() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     let account_info_addr = node_runtime::storage().system().account(alice.account_id());
 
@@ -34,7 +34,7 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice = dev::alice();
 
     let tx = node_runtime::tx()
         .system()

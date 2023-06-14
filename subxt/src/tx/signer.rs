@@ -12,7 +12,7 @@ use crate::Config;
 /// as well as actually signing a SCALE encoded payload.
 pub trait Signer<T: Config> {
     /// Return the "from" account ID.
-    fn account_id(&self) -> &T::AccountId;
+    fn account_id(&self) -> T::AccountId;
 
     /// Return the "from" address.
     fn address(&self) -> T::Address;
@@ -83,8 +83,8 @@ mod pair_signer {
         Pair: PairT,
         Pair::Signature: Into<T::Signature>,
     {
-        fn account_id(&self) -> &T::AccountId {
-            &self.account_id
+        fn account_id(&self) -> T::AccountId {
+            self.account_id.clone()
         }
 
         fn address(&self) -> T::Address {

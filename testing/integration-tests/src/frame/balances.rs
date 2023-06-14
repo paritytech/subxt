@@ -4,11 +4,10 @@
 
 use crate::{
     node_runtime::{self, balances, runtime_types, system},
-    pair_signer, test_context,
+    test_context,
 };
 use codec::Decode;
-use sp_core::Pair;
-use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     utils::{AccountId32, MultiAddress},
@@ -16,9 +15,9 @@ use subxt::{
 
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
-    let bob_address = bob.account_id().clone().into();
+    let alice = dev::alice();
+    let bob = dev::bob();
+    let bob_address = bob.account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -56,8 +55,8 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .expect("Failed to find ExtrinisicSuccess");
 
     let expected_event = balances::events::Transfer {
-        from: alice.account_id().clone(),
-        to: bob.account_id().clone(),
+        from: alice.account_id(),
+        to: bob.account_id(),
         amount: 10_000,
     };
     assert_eq!(event, expected_event);
@@ -84,8 +83,8 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     use subxt::ext::scale_value::{At, Composite, Value};
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let alice = dev::alice();
+    let bob = dev::bob();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -201,9 +200,9 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
-    let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();
+    let alice = dev::alice();
+    let bob = dev::bob();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -259,9 +258,9 @@ async fn storage_total_issuance() {
 
 #[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob_signer = pair_signer(AccountKeyring::Bob.pair());
-    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
-    let charlie: AccountId32 = AccountKeyring::Charlie.to_account_id().into();
+    let bob_signer = dev::bob();
+    let bob: AccountId32 = dev::bob().to_account_id().into();
+    let charlie: AccountId32 = dev::charlie().to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -302,10 +301,10 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn transfer_error() {
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let alice_addr = alice.account_id().clone().into();
-    let hans = pair_signer(Pair::generate().0);
-    let hans_address = hans.account_id().clone().into();
+    let alice = dev::alice();
+    let alice_addr = alice.account_id().into();
+    let hans = dev::hans();
+    let hans_address = hans.account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -345,8 +344,8 @@ async fn transfer_error() {
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
+    let alice = dev::alice();
+    let bob: AccountId32 = dev::bob().to_account_id().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -369,7 +368,7 @@ async fn transfer_implicit_subscription() {
     assert_eq!(
         event,
         balances::events::Transfer {
-            from: alice.account_id().clone(),
+            from: alice.account_id(),
             to: bob,
             amount: 10_000
         }

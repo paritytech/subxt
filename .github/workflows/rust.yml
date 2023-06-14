@@ -215,10 +215,16 @@ jobs:
                   mkdir -p ~/.local/bin
                   mv substrate ~/.local/bin
 
-            - name: Run WASM tests
+            - name: Run subxt WASM tests
               run: |
                   substrate --dev --tmp > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
                   pkill substrate
               working-directory: testing/wasm-tests
+
+            - name: Run subxt-signer WASM tests
+              run: |
+                  wasm-pack test --headless --firefox
+                  wasm-pack test --headless --chrome
+              working-directory: signer/wasm-tests

@@ -8,13 +8,18 @@ members = [
     "testing/ui-tests",
     "macro",
     "metadata",
+    "signer",
     "subxt"
 ]
 
-# This cannot be a workspace dependency, because it requires
-# mutually exclusive jsonrpsee features to work, and workspaces
-# will aggregate features used across crates:
-exclude = ["testing/wasm-tests", "examples/wasm-example"]
+# We exclude any crates that would depend on non mutually
+# exclusive feature flags and thus can't compile with the
+# workspace:
+exclude = [
+    "testing/wasm-tests",
+    "signer/wasm-tests",
+    "examples/wasm-example"
+]
 resolver = "2"
 
 [workspace.package]
@@ -42,7 +47,7 @@ derivative = "2.2.0"
 either = "1.8.1"
 frame-metadata = { version = "15.1.0", features = ["v14", "v15-unstable", "std"] }
 futures = { version = "0.3.27", default-features = false, features = ["std"] }
-getrandom = "0.2"
+getrandom = { version = "0.2", default-features = false }
 hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
@@ -79,9 +84,19 @@ sp-runtime = "24.0.0"
 sp-version = "22.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.29.0", path = "subxt" }
+subxt = { version = "0.29.0", path = "subxt", default-features = false }
 subxt-macro = { version = "0.29.0", path = "macro" }
 subxt-metadata = { version = "0.29.0", path = "metadata" }
 subxt-codegen = { version = "0.29.0", path = "codegen" }
+subxt-signer = { version = "0.29.0", path = "signer" }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
+
+# subxt-signer deps that I expect aren't useful anywhere else:
+bip39 = "2.0.0"
+hmac = "0.12.1"
+pbkdf2 = { version = "0.12.1", default-features = false }
+schnorrkel = "0.10.2"
+secrecy = "0.8.0"
+sha2 = "0.10.6"
+zeroize = { version = "1", default-features = false }

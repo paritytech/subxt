@@ -43,6 +43,7 @@ use tokio as _;
 
 // Used to enable the js feature for wasm.
 #[cfg(target_arch = "wasm32")]
+#[allow(unused_imports)]
 pub use getrandom as _;
 
 #[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]

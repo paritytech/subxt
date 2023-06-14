@@ -1,4 +1,4 @@
-use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 use subxt::dynamic::{At, Value};
 use subxt::{OnlineClient, PolkadotConfig};
 
@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a dynamic storage query to access account information.
-    let account = AccountKeyring::Alice.to_account_id();
+    let account = dev::alice().public_key();
     let storage_query =
         subxt::dynamic::storage("System", "Account", vec![Value::from_bytes(account)]);
 
