@@ -20,15 +20,7 @@ use jsonrpsee::{
 };
 use serde_json::value::RawValue;
 use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket, ChainId};
-use std::{
-    iter,
-    num::NonZeroU32,
-    pin::Pin,
-    sync::{
-        atomic::{AtomicU64, Ordering},
-        Arc,
-    },
-};
+use std::{iter, num::NonZeroU32, pin::Pin, sync::Arc};
 use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::ReceiverStream;
 
@@ -48,7 +40,7 @@ struct LightClientInner {
     /// Communicate with the backend task.
     to_backend: mpsc::Sender<BackendMessage>,
     /// Atomic used to generate unique IDs.
-    id_provider: AtomicU64,
+    id_provider: u64,
 }
 
 impl LightClientInner {
@@ -56,7 +48,8 @@ impl LightClientInner {
     ///
     /// This is unique to identify the sender of the request.
     fn next_id(&mut self) -> String {
-        let id = self.id_provider.fetch_add(1, Ordering::AcqRel);
+        let id = self.id_provider;
+        self.id_provider += 1;
         id.to_string()
     }
 
@@ -245,7 +238,7 @@ impl LightClient {
                 client,
                 chain_id,
                 to_backend,
-                id_provider: AtomicU64::new(1),
+                id_provider: 1,
             })),
         })
     }
