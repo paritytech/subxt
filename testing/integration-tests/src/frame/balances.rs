@@ -312,7 +312,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 async fn transfer_error() {
     let alice = dev::alice();
     let alice_addr = alice.public_key().into();
-    let bob = dev::bob();
+    let bob = dev::one(); // some dev account with no funds.
     let bob_address = bob.public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
@@ -332,6 +332,8 @@ async fn transfer_error() {
         .await
         .unwrap();
 
+    // When we try giving all of the funds back, Bob doesn't have
+    // anything left to pay transfer fees, so we hit an error.
     let res = api
         .tx()
         .sign_and_submit_then_watch_default(&to_alice_tx, &bob)
