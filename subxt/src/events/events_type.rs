@@ -32,14 +32,14 @@ pub struct Events<T: Config> {
 }
 
 // Ignore the Metadata when debug-logging events; it's big and distracting.
-impl <T: Config> std::fmt::Debug for Events<T> {
+impl<T: Config> std::fmt::Debug for Events<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Events")
-         .field("block_hash", &self.block_hash)
-         .field("event_bytes", &self.event_bytes)
-         .field("start_idx", &self.start_idx)
-         .field("num_events", &self.num_events)
-         .finish()
+            .field("block_hash", &self.block_hash)
+            .field("event_bytes", &self.event_bytes)
+            .field("start_idx", &self.start_idx)
+            .field("num_events", &self.num_events)
+            .finish()
     }
 }
 
