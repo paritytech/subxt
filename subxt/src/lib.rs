@@ -37,10 +37,10 @@
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
 ))]
-compile_error!("Exactly one of the 'web' and 'native' features should be used.");
+compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
 
 #[cfg(all(feature = "web", feature = "substrate-compat"))]
-compile_error!("The 'substrate-compat' feature is not compatible with the 'web' feature.");
+compile_error!("subxt: the 'substrate-compat' feature is not compatible with the 'web' feature.");
 
 // The guide is here.
 pub mod book;

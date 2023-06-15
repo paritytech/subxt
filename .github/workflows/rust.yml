@@ -58,11 +58,21 @@ jobs:
             - name: Cargo check all targets.
               run: cargo check --all-targets
 
-            # Next, check each feature on its own and compile each crate separately. This is no good
-            # for subxt/examples, which expect default features to be enabled, hence the above check
-            # and why we don'#t do `--all-targets` for this one.
+            # Next, check subxt features.
+            # - `native` feature must always be enabled
+            # - `web` feature is always ignored.
+            # - This means, don't check --no-default-features and don't try enabling --all-features; both will fail
+            - name: Cargo hack; check each subxt feature
+              run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+
+            # Subxt-signer has a "subxt" feature which is enabled by default, but requires the dependee to pick
+            # one of the "web" or "native" features on subxt. So just test it with --no-default-features on its own.
+            - name: Cargo check subxt-signer
+              run: cargo check -p subxt-signer --no-default-features
+
+            # Next, check each other package in isolation.
             - name: Cargo hack; check each feature/crate on its own
-              run: cargo hack --exclude-all-features --each-feature check --workspace
+              run: cargo hack --exclude subxt --exclude subxt-signer --exclude-all-features --each-feature check --workspace
 
     fmt:
         name: Cargo fmt

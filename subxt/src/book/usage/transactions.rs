@@ -145,8 +145,8 @@
 //! let address;
 //! # use subxt::tx::Signer;
 //! # let signer = subxt_signer::sr25519::dev::alice();
-//! # signature = signer.sign(&signer_payload);
-//! # address = signer.address();
+//! # signature = signer.sign(&signer_payload).into();
+//! # address = signer.public_key().to_address();
 //!
 //! // Now we can build an tx, which one can call `submit` or `submit_and_watch`
 //! // on to submit to a node and optionally watch the status.
