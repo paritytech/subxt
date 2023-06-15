@@ -76,7 +76,7 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
             Ok(())
         }
         "hex" => {
-            let hex_data = format!("0x{:?}", hex::encode(metadata.encode()));
+            let hex_data = format!("0x{}", hex::encode(metadata.encode()));
             write!(output, "{hex_data}")?;
             Ok(())
         }
