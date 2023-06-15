@@ -71,7 +71,7 @@
 //!
 //! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
 //! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
-//! need additional signing algorithms that [`subxt_signer`] doesn't support, and don't care about WASM
+//! need additional signing algorithms that `subxt_signer` doesn't support, and don't care about WASM
 //! compatibility.
 //!
 //! Let's see how to use each of these approaches:
