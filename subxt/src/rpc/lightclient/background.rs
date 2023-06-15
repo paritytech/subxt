@@ -107,7 +107,11 @@ impl BackgroundTask {
 
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
-                    tracing::warn!(target: LOG_TARGET, "Cannot send RPC request to lightclient {:?}", err.to_string());
+                    tracing::warn!(
+                        target: LOG_TARGET,
+                        "Cannot send RPC request to lightclient {:?}",
+                        err.to_string()
+                    );
                     let sender = self
                         .requests
                         .remove(&id)
@@ -145,7 +149,11 @@ impl BackgroundTask {
 
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
-                    tracing::warn!(target: LOG_TARGET, "Cannot send RPC request to lightclient {:?}", err.to_string());
+                    tracing::warn!(
+                        target: LOG_TARGET,
+                        "Cannot send RPC request to lightclient {:?}",
+                        err.to_string()
+                    );
                     let (sub_id, _) = self
                         .id_to_subscription
                         .remove(&id)
