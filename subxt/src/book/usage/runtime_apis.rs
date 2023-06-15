@@ -58,7 +58,7 @@
 //! The easiest way to make a runtime API call is to use the statically generated interface.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_static.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_static.rs")]
 //! ```
 //!
 //! ### Making a dynamic Runtime API call
@@ -67,7 +67,7 @@
 //! [`crate::dynamic::runtime_api_call`] method.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_dynamic.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_dynamic.rs")]
 //! ```
 //!
 //! ### Making a raw call
@@ -77,6 +77,6 @@
 //! the argument bytes and manually provide a type for the response bytes to be decoded into.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_raw.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_raw.rs")]
 //! ```
 //!

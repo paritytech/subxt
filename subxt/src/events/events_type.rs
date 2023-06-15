@@ -337,10 +337,16 @@ impl<T: Config> EventDetails<T> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
+        let mut fields = event_metadata
+            .variant
+            .fields
+            .iter()
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+
         use scale_decode::DecodeAsFields;
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            &event_metadata.variant.fields,
+            &mut fields,
             self.metadata.types(),
         )?;
 
@@ -352,11 +358,13 @@ impl<T: Config> EventDetails<T> {
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
         if ev_metadata.pallet.name() == E::PALLET && ev_metadata.variant.name == E::EVENT {
-            let decoded = E::decode_as_fields(
-                &mut self.field_bytes(),
-                &ev_metadata.variant.fields,
-                self.metadata.types(),
-            )?;
+            let mut fields = ev_metadata
+                .variant
+                .fields
+                .iter()
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            let decoded =
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
         } else {
             Ok(None)

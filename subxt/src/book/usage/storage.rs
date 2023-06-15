@@ -75,7 +75,7 @@
 //! latter will only work for storage queries that have a default value when empty):
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_fetch.rs")]
+#![doc = include_str!("../../../examples/storage_fetch.rs")]
 //! ```
 //!
 //! For completeness, below is an example using a dynamic query instead. The return type from a
@@ -83,7 +83,7 @@
 //! [`crate::dynamic::Value`], or else the raw bytes can be accessed instead.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_fetch_dynamic.rs")]
+#![doc = include_str!("../../../examples/storage_fetch_dynamic.rs")]
 //! ```
 //!
 //! ### Iterating storage entries
@@ -92,13 +92,13 @@
 //! iterate over all of the values stored at that location:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_iterating.rs")]
+#![doc = include_str!("../../../examples/storage_iterating.rs")]
 //! ```
 //!
 //! Here's the same logic but using dynamically constructed values instead:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_iterating_dynamic.rs")]
+#![doc = include_str!("../../../examples/storage_iterating_dynamic.rs")]
 //! ```
 //!
 //! ### Advanced

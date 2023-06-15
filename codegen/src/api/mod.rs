@@ -253,6 +253,7 @@ impl RuntimeGenerator {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
+            #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {
                 // Preserve any Rust items that were previously defined in the adorned module
                 #( #rust_items ) *
@@ -321,11 +322,14 @@ impl RuntimeGenerator {
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash = self
+        let runtime_api_names: Vec<_> = self
             .metadata
-            .hasher()
-            .only_these_pallets(&pallet_names)
-            .hash();
+            .runtime_api_traits()
+            .map(|api| api.name().to_string())
+            .collect();
+        let runtime_api_names_len = runtime_api_names.len();
+
+        let metadata_hash = self.metadata.hasher().hash();
 
         let modules = pallets_with_mod_names
             .iter()
@@ -526,6 +530,7 @@ impl RuntimeGenerator {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             #[allow(clippy::all)]
+            #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {
                 // Preserve any Rust items that were previously defined in the adorned module.
                 #( #rust_items ) *
@@ -539,6 +544,9 @@ impl RuntimeGenerator {
 
                 // Identify the pallets composing the static metadata by name.
                 pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
+
+                // Runtime APIs in the metadata by name.
+                pub static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
 
                 /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
@@ -619,14 +627,14 @@ impl RuntimeGenerator {
                     )*
                 }
 
-                /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: #crate_path::Config, C: #crate_path::client::OfflineClientT<T>>(client: &C) -> Result<(), #crate_path::error::MetadataError> {
-                    let runtime_metadata_hash = client.metadata().hasher().only_these_pallets(&PALLETS).hash();
-                    if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(#crate_path::error::MetadataError::IncompatibleCodegen)
-                    } else {
-                        Ok(())
-                    }
+                /// check whether the metadata provided is aligned with this statically generated code.
+                pub fn is_codegen_valid_for(metadata: &#crate_path::Metadata) -> bool {
+                    let runtime_metadata_hash = metadata
+                        .hasher()
+                        .only_these_pallets(&PALLETS)
+                        .only_these_runtime_apis(&RUNTIME_APIS)
+                        .hash();
+                    runtime_metadata_hash == [ #(#metadata_hash,)* ]
                 }
 
                 #( #modules )*

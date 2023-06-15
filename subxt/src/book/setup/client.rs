@@ -36,18 +36,18 @@
 //! Defining some custom config based off the default Substrate config:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/setup_client_custom_config.rs")]
+#![doc = include_str!("../../../examples/setup_client_custom_config.rs")]
 //! ```
 //!
 //! Writing a custom [`crate::rpc::RpcClientT`] implementation:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/setup_client_custom_rpc.rs")]
+#![doc = include_str!("../../../examples/setup_client_custom_rpc.rs")]
 //! ```
 //!
 //! Creating an [`crate::OfflineClient`]:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/setup_client_offline.rs")]
+#![doc = include_str!("../../../examples/setup_client_offline.rs")]
 //! ```
 //!

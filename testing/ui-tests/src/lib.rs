@@ -15,7 +15,7 @@ mod dispatch_errors;
 mod storage;
 mod utils;
 
-use crate::utils::{MetadataTestRunner, PalletMetadataTestRunner};
+use crate::utils::MetadataTestRunner;
 
 // Each of these tests leads to some rust code being compiled and
 // executed to test that compilation is successful (or errors in the
@@ -23,35 +23,93 @@ use crate::utils::{MetadataTestRunner, PalletMetadataTestRunner};
 #[test]
 fn ui_tests() {
     let mut m = MetadataTestRunner::default();
-    // specify pallets we want to test the metadata for (None => all pallets, but specifying only Some(..) speeds up test)
-    let mut p = PalletMetadataTestRunner::new(Some(&["Babe", "Claims", "Grandpa", "Balances"]));
     let t = trybuild::TestCases::new();
 
     t.pass("src/correct/*.rs");
 
     // Check that storage maps with no keys are handled properly.
-    t.pass(m.path_to_ui_test_for_metadata(
-        "storage_map_no_keys",
-        storage::metadata_storage_map_no_keys(),
-    ));
+    t.pass(
+        m.new_test_case()
+            .name("storage_map_no_keys")
+            .build(storage::metadata_storage_map_no_keys()),
+    );
 
     // Test that the codegen can handle the different types of DispatchError.
-    t.pass(m.path_to_ui_test_for_metadata(
-        "named_field_dispatch_error",
-        dispatch_errors::metadata_named_field_dispatch_error(),
-    ));
-    t.pass(m.path_to_ui_test_for_metadata(
-        "legacy_dispatch_error",
-        dispatch_errors::metadata_legacy_dispatch_error(),
-    ));
-    t.pass(m.path_to_ui_test_for_metadata(
-        "array_dispatch_error",
-        dispatch_errors::metadata_array_dispatch_error(),
-    ));
+    t.pass(
+        m.new_test_case()
+            .name("named_field_dispatch_error")
+            .build(dispatch_errors::metadata_named_field_dispatch_error()),
+    );
+    t.pass(
+        m.new_test_case()
+            .name("legacy_dispatch_error")
+            .build(dispatch_errors::metadata_legacy_dispatch_error()),
+    );
+    t.pass(
+        m.new_test_case()
+            .name("array_dispatch_error")
+            .build(dispatch_errors::metadata_array_dispatch_error()),
+    );
 
-    // Ensure the generate per pallet metadata compiles.
-    while let Some(path) = p.path_to_next_ui_test() {
-        t.pass(path);
+    // Test retaining only specific pallets and ensure that works.
+    for pallet in ["Babe", "Claims", "Grandpa", "Balances"] {
+        let mut metadata = MetadataTestRunner::load_metadata();
+        metadata.retain(|p| p == pallet, |_| true);
+
+        t.pass(
+            m.new_test_case()
+                .name(format!("retain_pallet_{pallet}"))
+                .build(metadata),
+        );
+    }
+
+    // Test retaining only specific runtime APIs to ensure that works.
+    for runtime_api in ["Core", "Metadata"] {
+        let mut metadata = MetadataTestRunner::load_metadata();
+        metadata.retain(|_| true, |r| r == runtime_api);
+
+        t.pass(
+            m.new_test_case()
+                .name(format!("retain_runtime_api_{runtime_api}"))
+                .build(metadata),
+        );
+    }
+
+    // Validation should succeed when metadata we codegen from is stripped and
+    // client metadata is full:
+    {
+        let mut metadata = MetadataTestRunner::load_metadata();
+        metadata.retain(
+            |p| ["Babe", "Claims"].contains(&p),
+            |r| ["Core", "Metadata"].contains(&r),
+        );
+
+        t.pass(
+            m.new_test_case()
+                .name("stripped_metadata_validates_against_full")
+                .validation_metadata(MetadataTestRunner::load_metadata())
+                .build(metadata),
+        );
+    }
+
+    // Finally as a sanity check, codegen against stripped metadata should
+    // _not_ compare valid against client with differently stripped metadata.
+    {
+        let mut codegen_metadata = MetadataTestRunner::load_metadata();
+        codegen_metadata.retain(
+            |p| ["Babe", "Claims"].contains(&p),
+            |r| ["Core", "Metadata"].contains(&r),
+        );
+        let mut validation_metadata = MetadataTestRunner::load_metadata();
+        validation_metadata.retain(|p| p != "Claims", |r| r != "Metadata");
+
+        t.pass(
+            m.new_test_case()
+                .name("stripped_metadata_doesnt_validate_against_different")
+                .validation_metadata(validation_metadata)
+                .expects_invalid()
+                .build(codegen_metadata),
+        );
     }
 }
 

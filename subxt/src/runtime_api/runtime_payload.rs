@@ -92,27 +92,12 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
             .runtime_api_trait_by_name_err(&self.trait_name)?
             .method_by_name(&self.method_name)
             .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
-
-        // TODO [jsdw]: This isn't good. The options are:
-        // 1. Tweak the Metadata to store things in this way (not great, but
-        //    it's what we did previously).
-        // 2. Tweak scale-encode's methods to accept iterators over
-        //    { name: Option<&str>, type_id: u32 }, because they shouldn't
-        //    need to allocate anyway. I'd like us to do this, and then we can
-        //    remove allocations from this code and probably a couple of other
-        //    places.
-        let fields: Vec<_> = api_method
+        let mut fields = api_method
             .inputs()
-            .map(|input| scale_info::Field {
-                name: Some(input.name.to_owned()),
-                ty: input.ty.into(),
-                type_name: None,
-                docs: Default::default(),
-            })
-            .collect();
+            .map(|input| scale_encode::Field::named(input.ty, &input.name));
 
         self.args_data
-            .encode_as_fields_to(&fields, metadata.types(), out)?;
+            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
         Ok(())
     }
 
