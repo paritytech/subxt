@@ -26,26 +26,22 @@ use subxt_metadata::{
 /// ```
 #[derive(Debug, ClapParser)]
 pub struct Opts {
-    node1: String,
-    node2: String,
-    #[clap(long, short)]
-    version: Option<MetadataVersion>,
-    #[clap(long, short)]
-    pallet: Option<String>,
+    entry1: FileOrUrl,
+    entry2: FileOrUrl,
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
-    let (node_1_metadata, node_2_metadata) = get_metadata(&opts).await?;
+    let (entry_1_metadata, entry_2_metadata) = get_metadata(&opts).await?;
 
-    let node_diff = MetadataDiff::construct(&node_1_metadata, &node_2_metadata);
+    let metadata_diff = MetadataDiff::construct(&entry_1_metadata, &entry_2_metadata);
 
-    if node_diff.is_empty() {
-        writeln!(output, "No difference in Metadata found.")?;
+    if metadata_diff.is_empty() {
+        writeln!(output, "No difference in metadata found.")?;
         return Ok(());
     }
-    if !node_diff.pallets.is_empty() {
+    if !metadata_diff.pallets.is_empty() {
         writeln!(output, "Pallets:")?;
-        for diff in node_diff.pallets {
+        for diff in metadata_diff.pallets {
             match diff {
                 Diff::Added(new) => {
                     writeln!(output, "{}", format!("    + {}", new.name()).green())?
@@ -123,8 +119,8 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                                     let storage_diff = StorageEntryDiff::construct(
                                         from,
                                         to,
-                                        &node_1_metadata,
-                                        &node_2_metadata,
+                                        &entry_1_metadata,
+                                        &entry_2_metadata,
                                     );
 
                                     writeln!(
@@ -146,9 +142,9 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
         }
     }
 
-    if !node_diff.runtime_apis.is_empty() {
+    if !metadata_diff.runtime_apis.is_empty() {
         writeln!(output, "Runtime APIs:")?;
-        for diff in node_diff.runtime_apis {
+        for diff in metadata_diff.runtime_apis {
             match diff {
                 Diff::Added(new) => {
                     writeln!(output, "{}", format!("    + {}", new.name()).green())?
@@ -285,41 +281,15 @@ impl StorageEntryDiff {
 }
 
 async fn get_metadata(opts: &Opts) -> color_eyre::Result<(Metadata, Metadata)> {
-    let node_1_file_or_url: FileOrUrl = (opts.node1.as_str(), opts.version)
-        .try_into()
-        .map_err(|_| eyre!("{} is not a valid url nor path for node 1.", opts.node1))?;
-    let node_2_file_or_url: FileOrUrl = (opts.node2.as_str(), opts.version)
-        .try_into()
-        .map_err(|_| eyre!("{} is not a valid url nor path for node 2.", opts.node2))?;
+    let bytes = opts.entry1.fetch().await?;
+    let entry_1_metadata: Metadata =
+        RuntimeMetadataPrefixed::decode(&mut &bytes[..])?.try_into()?;
 
-    let bytes = node_1_file_or_url.fetch().await?;
-    let node_1_metadata: Metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?.try_into()?;
+    let bytes = opts.entry2.fetch().await?;
+    let entry_2_metadata: Metadata =
+        RuntimeMetadataPrefixed::decode(&mut &bytes[..])?.try_into()?;
 
-    let bytes = node_2_file_or_url.fetch().await?;
-    let node_2_metadata: Metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?.try_into()?;
-
-    Ok((node_1_metadata, node_2_metadata))
-}
-
-impl TryFrom<(&str, Option<MetadataVersion>)> for FileOrUrl {
-    type Error = ();
-
-    fn try_from(value: (&str, Option<MetadataVersion>)) -> Result<Self, Self::Error> {
-        let path = std::path::Path::new(&value.0);
-        if path.exists() {
-            Ok(FileOrUrl {
-                url: None,
-                file: Some(PathBuf::from(value.0)),
-                version: value.1,
-            })
-        } else {
-            Uri::from_str(value.0).map_err(|_| ()).map(|uri| FileOrUrl {
-                url: Some(uri),
-                file: None,
-                version: value.1,
-            })
-        }
-    }
+    Ok((entry_1_metadata, entry_2_metadata))
 }
 
 fn storage_differences<'a>(
@@ -501,7 +471,9 @@ fn pallet_differences<'a>(
 
     pallets
         .into_values()
-        .map(|tuple| Diff::try_from(tuple).unwrap())
+        .map(|tuple| {
+            Diff::try_from(tuple).expect("unreachable, fails only if two None values are present")
+        })
         .collect()
 }
 

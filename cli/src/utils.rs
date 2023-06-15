@@ -5,6 +5,7 @@
 use clap::Args;
 use color_eyre::eyre;
 
+use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
 
 use subxt_codegen::utils::{MetadataVersion, Uri};
@@ -13,7 +14,7 @@ pub mod type_description;
 pub mod type_example;
 
 /// The source of the metadata.
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Clone)]
 pub struct FileOrUrl {
     /// The url of the substrate node to query for metadata for codegen.
     #[clap(long, value_parser)]
@@ -94,4 +95,27 @@ pub fn with_indent(s: String, indent: usize) -> String {
         .map(|line| format!("{indent_str}{line}"))
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+impl FromStr for FileOrUrl {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let path = std::path::Path::new(s);
+        if path.exists() {
+            Ok(FileOrUrl {
+                url: None,
+                file: Some(PathBuf::from(s)),
+                version: None,
+            })
+        } else {
+            Uri::from_str(s)
+                .map_err(|_| "no path or uri could be crated")
+                .map(|uri| FileOrUrl {
+                    url: Some(uri),
+                    file: None,
+                    version: None,
+                })
+        }
+    }
 }
