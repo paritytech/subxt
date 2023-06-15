@@ -55,10 +55,7 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 }
 
 /// The default RPC client that's used (based on [`jsonrpsee`]).
-#[cfg(any(
-    feature = "jsonrpsee-ws",
-    all(feature = "jsonrpsee-web", target_arch = "wasm32")
-))]
+#[cfg(feature = "jsonrpsee")]
 pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT, Error> {
     let client = jsonrpsee_helpers::client(url.as_ref())
         .await
@@ -67,10 +64,7 @@ pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT
 }
 
 // The default constructors assume Jsonrpsee.
-#[cfg(any(
-    feature = "jsonrpsee-ws",
-    all(feature = "jsonrpsee-web", target_arch = "wasm32")
-))]
+#[cfg(feature = "jsonrpsee")]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
@@ -428,7 +422,7 @@ impl Update {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(feature = "jsonrpsee-ws")]
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
@@ -458,7 +452,7 @@ mod jsonrpsee_helpers {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee-web", target_arch = "wasm32"))]
+#[cfg(all(feature = "jsonrpsee", feature = "web"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,

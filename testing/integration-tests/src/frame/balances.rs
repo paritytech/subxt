@@ -17,12 +17,16 @@ use subxt_signer::sr25519::dev;
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
-    let bob_address = bob.public_key().into();
+    let bob_address = bob.public_key().to_address();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_account_addr = node_runtime::storage().system().account(alice.public_key().into());
-    let bob_account_addr = node_runtime::storage().system().account(bob.public_key().into());
+    let alice_account_addr = node_runtime::storage()
+        .system()
+        .account(alice.public_key().to_account_id());
+    let bob_account_addr = node_runtime::storage()
+        .system()
+        .account(bob.public_key().to_account_id());
 
     let alice_pre = api
         .storage()
@@ -41,7 +45,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 
     let events = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -55,8 +59,8 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .expect("Failed to find ExtrinisicSuccess");
 
     let expected_event = balances::events::Transfer {
-        from: alice.account_id(),
-        to: bob.account_id(),
+        from: alice.public_key().to_account_id(),
+        to: bob.public_key().to_account_id(),
         amount: 10_000,
     };
     assert_eq!(event, expected_event);
@@ -91,12 +95,12 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let alice_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(alice.account_id())],
+        vec![Value::from_bytes(alice.public_key().to_account_id())],
     );
     let bob_account_addr = subxt::dynamic::storage(
         "System",
         "Account",
-        vec![Value::from_bytes(bob.account_id())],
+        vec![Value::from_bytes(bob.public_key().to_account_id())],
     );
 
     let alice_pre = api
@@ -116,14 +120,17 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         "Balances",
         "transfer",
         vec![
-            Value::unnamed_variant("Id", vec![Value::from_bytes(bob.account_id())]),
+            Value::unnamed_variant(
+                "Id",
+                vec![Value::from_bytes(bob.public_key().to_account_id())],
+            ),
             Value::u128(10_000u128),
         ],
     );
 
     let events = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -139,11 +146,11 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let expected_fields = Composite::Named(vec![
         (
             "from".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(alice.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(alice.public_key().to_account_id())]),
         ),
         (
             "to".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(bob.account_id())]),
+            Value::unnamed_composite(vec![Value::from_bytes(bob.public_key().to_account_id())]),
         ),
         ("amount".into(), Value::u128(10_000)),
     ]);
@@ -206,7 +213,9 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
+    let bob_account_addr = node_runtime::storage()
+        .system()
+        .account(bob.public_key().to_account_id());
 
     let bob_pre = api
         .storage()
@@ -220,7 +229,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .transfer(bob_address.clone(), 10_000);
     for _ in 0..3 {
         api.tx()
-            .sign_and_submit_then_watch_default(&tx, alice)
+            .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
             .await?
@@ -316,7 +325,7 @@ async fn transfer_error() {
         .transfer(alice_addr, 100_000_000_000_000_000);
 
     api.tx()
-        .sign_and_submit_then_watch_default(&to_bob_tx, alice)
+        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -325,7 +334,7 @@ async fn transfer_error() {
 
     let res = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_alice_tx, bob)
+        .sign_and_submit_then_watch_default(&to_alice_tx, &bob)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -355,7 +364,7 @@ async fn transfer_implicit_subscription() {
 
     let event = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_bob_tx, alice)
+        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -368,7 +377,7 @@ async fn transfer_implicit_subscription() {
     assert_eq!(
         event,
         balances::events::Transfer {
-            from: alice.account_id(),
+            from: alice.public_key().to_account_id(),
             to: bob,
             amount: 10_000
         }

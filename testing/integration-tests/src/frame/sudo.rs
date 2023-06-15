@@ -31,7 +31,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
 
     let found_event = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -63,7 +63,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
 
     let found_event = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?

@@ -14,7 +14,7 @@ use crate::{
     test_context,
 };
 use assert_matches::assert_matches;
-use subxt::{tx::Signer, error::{DispatchError, Error}};
+use subxt::error::{DispatchError, Error};
 use subxt_signer::{
     sr25519::{self, dev},
     SecretUri,
@@ -46,7 +46,7 @@ async fn validate_with_controller_account() {
         .validate(default_validator_prefs());
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -89,10 +89,10 @@ async fn nominate_with_controller_account() {
 
     let tx = node_runtime::tx()
         .staking()
-        .nominate(vec![bob.account_id().clone().into()]);
+        .nominate(vec![bob.public_key().to_address()]);
 
     api.tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -110,7 +110,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
 
     let tx = node_runtime::tx()
         .staking()
-        .nominate(vec![bob.account_id().clone().into()]);
+        .nominate(vec![bob.public_key().to_address()]);
 
     let nomination = api
         .tx()
@@ -140,14 +140,16 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     // this will fail the second time, which is why this is one test, not two
     let nominate_tx = node_runtime::tx()
         .staking()
-        .nominate(vec![bob_stash.account_id().clone().into()]);
+        .nominate(vec![bob_stash.public_key().to_address()]);
     api.tx()
-        .sign_and_submit_then_watch_default(&nominate_tx, alice)
+        .sign_and_submit_then_watch_default(&nominate_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?;
 
-    let ledger_addr = node_runtime::storage().staking().ledger(alice.account_id());
+    let ledger_addr = node_runtime::storage()
+        .staking()
+        .ledger(alice.public_key().to_account_id());
     let ledger = api
         .storage()
         .at_latest()
@@ -155,7 +157,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .fetch(&ledger_addr)
         .await?
         .unwrap();
-    assert_eq!(alice_stash.account_id(), &ledger.stash);
+    assert_eq!(alice_stash.public_key().to_account_id(), ledger.stash);
 
     let chill_tx = node_runtime::tx().staking().chill();
 
@@ -174,7 +176,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
     let is_chilled = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, alice)
+        .sign_and_submit_then_watch_default(&chill_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -199,7 +201,7 @@ async fn tx_bond() -> Result<(), Error> {
 
     let bond = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, alice)
+        .sign_and_submit_then_watch_default(&bond_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -208,7 +210,7 @@ async fn tx_bond() -> Result<(), Error> {
 
     let bond_again = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, alice)
+        .sign_and_submit_then_watch_default(&bond_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await;

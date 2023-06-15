@@ -12,6 +12,7 @@ use secrecy::ExposeSecret;
 
 /// An sr25519 keypair implementation. While the API is slightly different, the logic for
 /// this has been taken from `sp_core::sr25519` and we test against this to ensure conformity.
+#[derive(Debug, Clone)]
 pub struct Keypair(schnorrkel::Keypair);
 
 const SEED_LENGTH: usize = schnorrkel::keys::MINI_SECRET_KEY_LENGTH;
@@ -145,7 +146,7 @@ pub mod dev {
     use super::*;
     use std::str::FromStr;
 
-    once_static! {
+    once_static_cloned! {
         pub fn alice() -> Keypair {
             Keypair::from_uri(&SecretUri::from_str("//Alice").unwrap()).unwrap()
         }
@@ -190,12 +191,27 @@ mod subxt_compat {
     }
     impl From<PublicKey> for AccountId32 {
         fn from(value: PublicKey) -> Self {
-            AccountId32(value.0)
+            value.to_account_id()
         }
     }
     impl<T> From<PublicKey> for MultiAddress<AccountId32, T> {
         fn from(value: PublicKey) -> Self {
-            MultiAddress::Id(value.into())
+            value.to_address()
+        }
+    }
+
+    impl PublicKey {
+        /// A shortcut to obtain an [`AccountId32`] from a [`PublicKey`].
+        /// We often want this type, and using this methods avoids any
+        /// ambiguous type resolution issues if so.
+        pub fn to_account_id(self) -> AccountId32 {
+            AccountId32(self.0)
+        }
+        /// A shortcut to obtain a [`MultiAddress`] from a [`PublicKey`].
+        /// We often want this type, and using this methods avoids any
+        /// ambiguous type resolution issues if so.
+        pub fn to_address<T>(self) -> MultiAddress<AccountId32, T> {
+            MultiAddress::Id(self.to_account_id())
         }
     }
 

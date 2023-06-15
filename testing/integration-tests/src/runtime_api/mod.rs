@@ -29,7 +29,7 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
     api.tx()
-        .sign_and_submit_then_watch_default(&remark_tx, alice)
+        .sign_and_submit_then_watch_default(&remark_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?;

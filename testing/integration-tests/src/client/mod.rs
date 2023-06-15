@@ -9,25 +9,23 @@ use crate::{
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
 use sp_core::storage::well_known_keys;
-use sp_keyring::AccountKeyring;
-use subxt_signer::sr25519::dev;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
         ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
-    tx::Signer,
     utils::AccountId32,
 };
 use subxt_metadata::Metadata;
+use subxt_signer::sr25519::dev;
 
 #[tokio::test]
 async fn insert_key() {
-    let ctx = test_context_with(AccountKeyring::Bob).await;
+    let ctx = test_context_with("bob".to_string()).await;
     let api = ctx.client();
 
-    let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
+    let public = dev::alice().public_key().as_ref().to_vec();
     api.rpc()
         .insert_key(
             "aura".to_string(),
@@ -167,7 +165,7 @@ async fn dry_run_passes() {
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, alice, Default::default())
+        .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
 
@@ -203,7 +201,7 @@ async fn dry_run_fails() {
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, alice, Default::default())
+        .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
 
@@ -302,7 +300,7 @@ async fn external_signing() {
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
     let partial_extrinsic = api
         .tx()
-        .create_partial_signed(&tx, &alice.account_id(), Default::default())
+        .create_partial_signed(&tx, &alice.public_key().into(), Default::default())
         .await
         .unwrap();
 
@@ -311,7 +309,8 @@ async fn external_signing() {
     // Sign it (possibly externally).
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
-    let extrinsic = partial_extrinsic.sign_with_address_and_signature(&alice.address(), &signature.into());
+    let extrinsic = partial_extrinsic
+        .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
     extrinsic
@@ -337,7 +336,7 @@ async fn submit_large_extrinsic() {
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, alice, Default::default())
+        .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
 
@@ -366,7 +365,7 @@ async fn decode_a_module_error() {
 
     let err = api
         .tx()
-        .sign_and_submit_then_watch_default(&freeze_unknown_asset, alice)
+        .sign_and_submit_then_watch_default(&freeze_unknown_asset, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -568,7 +567,7 @@ async fn chainhead_unstable_call() {
     };
     let sub_id = blocks.subscription_id().unwrap().clone();
 
-    let alice_id = AccountKeyring::Alice.to_account_id();
+    let alice_id = dev::alice().public_key().to_account_id();
     let mut sub = api
         .rpc()
         .chainhead_unstable_call(

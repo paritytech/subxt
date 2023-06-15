@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let from = dev::alice();
     let events = api
         .tx()
-        .sign_and_submit_then_watch_default(&balance_transfer_tx, from)
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
         .await?
         .wait_for_finalized_success()
         .await?;

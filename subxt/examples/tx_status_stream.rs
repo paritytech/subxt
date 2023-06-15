@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let from = dev::alice();
     let mut balance_transfer_progress = api
         .tx()
-        .sign_and_submit_then_watch_default(&balance_transfer_tx, from)
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
         .await?;
 
     while let Some(status) = balance_transfer_progress.next().await {

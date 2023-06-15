@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // submit the transaction:
     let from = dev::alice();
-    let hash = api.tx().sign_and_submit(&tx, from, tx_params).await?;
+    let hash = api.tx().sign_and_submit(&tx, &from, tx_params).await?;
     println!("Balance transfer extrinsic submitted with hash : {hash}");
 
     Ok(())

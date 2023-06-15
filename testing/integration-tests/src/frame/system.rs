@@ -8,7 +8,6 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
-use subxt::tx::Signer;
 
 #[tokio::test]
 async fn storage_account() -> Result<(), subxt::Error> {
@@ -17,7 +16,9 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
     let alice = dev::alice();
 
-    let account_info_addr = node_runtime::storage().system().account(alice.account_id());
+    let account_info_addr = node_runtime::storage()
+        .system()
+        .account(alice.public_key().to_account_id());
 
     let account_info = api
         .storage()
@@ -43,7 +44,7 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error> {
 
     let found_event = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, alice)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await?

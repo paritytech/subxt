@@ -13,12 +13,26 @@
 /// }
 /// ```
 macro_rules! once_static {
-    ($($(#[$doc:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
+    ($($(#[$attr:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
         $(
-            $(#[$doc])*
+            $(#[$attr])*
             $vis fn $name() -> &'static $ty {
                 static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
                 VAR.get_or_init(|| { $expr })
+            }
+        )+
+    };
+}
+
+/// Like `once_static!` but clones the item out of static storage. Useful if it
+/// takes a while to create the item but cloning it is fairly cheap.
+macro_rules! once_static_cloned {
+    ($($(#[$attr:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
+        $(
+            $(#[$attr])*
+            $vis fn $name() -> $ty {
+                static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
+                VAR.get_or_init(|| { $expr }).clone()
             }
         )+
     };
