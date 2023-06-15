@@ -1,17 +1,17 @@
 use clap::Parser as ClapParser;
 use codec::Decode;
-use color_eyre::eyre::eyre;
+
 use frame_metadata::RuntimeMetadataPrefixed;
 use std::collections::HashMap;
-use std::path::PathBuf;
-use std::str::FromStr;
+
+
 
 use crate::utils::FileOrUrl;
 use color_eyre::owo_colors::OwoColorize;
-use jsonrpsee::client_transport::ws::Uri;
+
 use scale_info::form::PortableForm;
 use scale_info::Variant;
-use subxt_codegen::utils::MetadataVersion;
+
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
     StorageEntryType,
