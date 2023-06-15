@@ -103,7 +103,7 @@ impl Keypair {
         Self(result.into())
     }
 
-    /// Obtain the [`PublicKey`] part of this key pair, which can be used in [`Self::verify`]
+    /// Obtain the [`PublicKey`] part of this key pair, which can be used in calls to [`verify()`].
     /// or otherwise converted into an address.
     pub fn public_key(&self) -> PublicKey {
         PublicKey(self.0.public.to_bytes())

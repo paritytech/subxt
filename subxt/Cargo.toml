@@ -31,7 +31,7 @@ native = [
 web = [
     "jsonrpsee?/async-wasm-client",
     "jsonrpsee?/client-web-transport",
-    "getrandom?/js"
+    "getrandom/js"
 ]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
