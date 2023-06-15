@@ -25,6 +25,8 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
+
     // Create a light client from the provided chain spec.
     // Note: this connects to the live polkadot chain.
     let light_client = LightClientBuilder::new()

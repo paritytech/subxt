@@ -2,24 +2,16 @@ use futures::stream::StreamExt;
 use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::{
-    collections::{hash_map::Entry, HashMap},
-    str::FromStr,
-};
+use std::{collections::HashMap, str::FromStr};
 use tokio::sync::{mpsc, oneshot};
 
-///! The background task of the light client.
-
-/// The number of notifications that are buffered, before the user
-/// registers to [`LightClientInner::register_subscription`].
-/// Only the first `BUFFER_NUM_NOTIFICATIONS` are buffered, while the
-/// others are ignored.
-///
-/// In practice, the Light Client produces notifications at a lower rate
-/// than the substrate full node.
-const BUFFER_NUM_NOTIFICATIONS: usize = 16;
+use super::LightClientError;
+use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket as Platform, ChainId};
 
 const LOG_TARGET: &str = "light-client-background";
+
+/// The response of an RPC method.
+pub type MethodResponse = Result<Box<RawValue>, LightClientError>;
 
 /// Message protocol between the front-end client that submits the RPC requests
 /// and the backend handler that produces responses from the chain.
@@ -27,72 +19,150 @@ const LOG_TARGET: &str = "light-client-background";
 /// The light client uses a single object [`smoldot_light::JsonRpcResponses`] to
 /// handle all requests and subscriptions from a chain. A background task is spawned
 /// to multiplex the rpc responses and to provide them back to their rightful submitters.
-///
-/// This presumes that the request ID for both method calls and subscriptions is unique.
 #[derive(Debug)]
 pub enum BackendMessage {
     /// The RPC method request.
     Request {
-        /// ID of the request, needed to match the result.
-        id: String,
+        /// The method of the request.
+        method: String,
+        /// The parameters of the request.
+        params: String,
         /// Channel used to send back the result.
-        sender: oneshot::Sender<Box<RawValue>>,
+        sender: oneshot::Sender<MethodResponse>,
     },
     /// The RPC subscription (pub/sub) request.
     Subscription {
-        /// ID of the subscription, needed to match the result.
-        id: String,
+        /// The method of the request.
+        method: String,
+        /// The parameters of the request.
+        params: String,
+        /// Channel used to send back the subscription ID if successful.
+        sub_id: oneshot::Sender<MethodResponse>,
         /// Channel used to send back the notifcations.
         sender: mpsc::Sender<Box<RawValue>>,
     },
 }
 
 /// Background task data.
-#[derive(Default)]
 pub struct BackgroundTask {
+    /// Smoldot light client implementation that leverages the exposed platform.
+    client: smoldot_light::Client<Platform>,
+    /// The ID of the chain used to identify the chain protocol (ie. substrate).
+    ///
+    /// Note: A single chain is supported for a client. This aligns with the subxt's
+    /// vision of the Client.
+    chain_id: ChainId,
+    /// Unique ID for RPC calls.
+    request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
-    requests: HashMap<String, oneshot::Sender<Box<RawValue>>>,
+    requests: HashMap<String, oneshot::Sender<MethodResponse>>,
+    /// Subscription calls first need to make a plain RPC method
+    /// request to obtain the subscription ID.
+    ///
+    /// The RPC method request is made in the background and the response should
+    /// not be sent back to the user.
+    /// Map the request ID of a RPC method to the frontend `Sender`.
+    id_to_subscription:
+        HashMap<String, (oneshot::Sender<MethodResponse>, mpsc::Sender<Box<RawValue>>)>,
     /// Map the subscription ID to the frontend `Sender`.
     subscriptions: HashMap<String, mpsc::Sender<Box<RawValue>>>,
-    /// Notifications are cached for users that did not subscribe yet.
-    subscriptions_cache: HashMap<String, Vec<Box<RawValue>>>,
 }
 
 impl BackgroundTask {
     /// Constructs a new [`BackgroundTask`].
-    pub fn new() -> BackgroundTask {
-        BackgroundTask::default()
+    pub fn new(client: smoldot_light::Client<Platform>, chain_id: ChainId) -> BackgroundTask {
+        BackgroundTask {
+            client,
+            chain_id,
+            request_id: 1,
+            requests: Default::default(),
+            id_to_subscription: Default::default(),
+            subscriptions: Default::default(),
+        }
+    }
+
+    /// Fetch and increment the request ID.
+    fn next_id(&mut self) -> usize {
+        let next = self.request_id;
+        self.request_id = self.request_id.wrapping_add(1);
+        next
     }
 
     /// Handle the registration messages received from the user.
-    async fn handle_register(&mut self, message: BackendMessage) {
+    async fn handle_requests(&mut self, message: BackendMessage) {
         match message {
-            BackendMessage::Request { id, sender } => {
-                self.requests.insert(id, sender);
-            }
-            BackendMessage::Subscription { id, sender } => {
-                // Drain the subscription cache, that holds messages that
-                // were not propagated to this subscription yet (because the
-                // RPC server produced a notification before the user registered
-                // to receive notifications).
-                if let Some(cached_responses) = self.subscriptions_cache.remove(&id) {
-                    tracing::debug!(
-                        target: LOG_TARGET,
-                        "Some messages were cached before susbcribing"
-                    );
+            BackendMessage::Request {
+                method,
+                params,
+                sender,
+            } => {
+                let id = self.next_id();
+                let request = format!(
+                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
+                    id, method, params
+                );
+                let id = id.to_string();
 
-                    for response in cached_responses {
-                        if sender.send(response).await.is_err() {
-                            tracing::warn!(
-                                target: LOG_TARGET,
-                                "Cannot send notification to subscription {:?}",
-                                id
-                            );
-                        }
+                self.requests.insert(id.clone(), sender);
+
+                let result = self.client.json_rpc_request(request, self.chain_id);
+                if let Err(err) = result {
+                    tracing::warn!(target: LOG_TARGET, "Cannot send RPC request to lightclient {:?}", err.to_string());
+                    let sender = self
+                        .requests
+                        .remove(&id)
+                        .expect("Channel is inserted above; qed");
+
+                    // Send the error back to frontend.
+                    if sender
+                        .send(Err(LightClientError::Request(err.to_string())))
+                        .is_err()
+                    {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            "Cannot send RPC request error to id{:?}",
+                            id
+                        );
                     }
                 }
+            }
+            BackendMessage::Subscription {
+                method,
+                params,
+                sub_id,
+                sender,
+            } => {
+                // For subscriptions we need to make a plain RPC request to the subscription method.
+                // The server will return as a result the subscription ID.
+                let id = self.next_id();
+                let request = format!(
+                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
+                    id, method, params
+                );
+                let id = id.to_string();
 
-                self.subscriptions.insert(id, sender);
+                self.id_to_subscription.insert(id.clone(), (sub_id, sender));
+
+                let result = self.client.json_rpc_request(request, self.chain_id);
+                if let Err(err) = result {
+                    tracing::warn!(target: LOG_TARGET, "Cannot send RPC request to lightclient {:?}", err.to_string());
+                    let (sub_id, _) = self
+                        .id_to_subscription
+                        .remove(&id)
+                        .expect("Channels are inserted above; qed");
+
+                    // Send the error back to frontend.
+                    if sub_id
+                        .send(Err(LightClientError::Request(err.to_string())))
+                        .is_err()
+                    {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            "Cannot send RPC request error to id{:?}",
+                            id
+                        );
+                    }
+                }
             }
         };
     }
@@ -101,9 +171,22 @@ impl BackgroundTask {
     async fn handle_rpc_response(&mut self, response: String) {
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
-                // Send the error back.
                 if let Some(sender) = self.requests.remove(&id) {
-                    if sender.send(error).is_err() {
+                    if sender
+                        .send(Err(LightClientError::Request(error.to_string())))
+                        .is_err()
+                    {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            " Cannot send method response to id {:?}",
+                            id
+                        );
+                    }
+                } else if let Some((sub_id_sender, _)) = self.id_to_subscription.remove(&id) {
+                    if sub_id_sender
+                        .send(Err(LightClientError::Request(error.to_string())))
+                        .is_err()
+                    {
                         tracing::warn!(
                             target: LOG_TARGET,
                             " Cannot send method response to id {:?}",
@@ -115,12 +198,28 @@ impl BackgroundTask {
             Ok(RpcResponse::Method { id, result }) => {
                 // Send the response back.
                 if let Some(sender) = self.requests.remove(&id) {
-                    if sender.send(result).is_err() {
+                    if sender.send(Ok(result)).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
                             " Cannot send method response to id {:?}",
                             id
                         );
+                    }
+                } else if let Some((sub_id_sender, sender)) = self.id_to_subscription.remove(&id) {
+                    tracing::warn!(target: LOG_TARGET, "SUB ID result {:?}", result);
+                    let mut sub_id = result.to_string();
+                    sub_id.retain(|ch| ch.is_ascii_digit());
+                    tracing::warn!(target: LOG_TARGET, "SUB ID parsed: {}", sub_id);
+
+                    if sub_id_sender.send(Ok(result)).is_err() {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            " Cannot send method response to id {:?}",
+                            id
+                        );
+                    } else {
+                        // Track this subscription ID if send is successful.
+                        self.subscriptions.insert(sub_id, sender);
                     }
                 }
             }
@@ -136,6 +235,8 @@ impl BackgroundTask {
                     return;
                 }
 
+                tracing::warn!("Received MSG FROM SUB ID: {}", id);
+
                 if let Some(sender) = self.subscriptions.get_mut(&id) {
                     // Send the current notification response.
                     if sender.send(result).await.is_err() {
@@ -148,29 +249,9 @@ impl BackgroundTask {
                         // Remove the sender if the subscription dropped the receiver.
                         self.subscriptions.remove(&id);
                     }
-                    return;
+                } else {
+                    tracing::warn!("Cannoit find SUB ID: {}", id);
                 }
-
-                // Subscription ID not registered yet, cache the response.
-                // Note: Compiler complains about moving the `result` for `.entry.and_modify(..).or_insert(..)`,
-                // because it sees it as used on both closures and apparently cannot determine that only one
-                // closure can be executed.
-                match self.subscriptions_cache.entry(id) {
-                    Entry::Occupied(mut entry) => {
-                        let cached_responses: &mut Vec<_> = entry.get_mut();
-                        // Do not cache notification if exceeded capacity.
-                        if cached_responses.len() > BUFFER_NUM_NOTIFICATIONS {
-                            return;
-                        }
-
-                        cached_responses.push(result);
-                    }
-                    Entry::Vacant(entry) => {
-                        let mut vec = Vec::with_capacity(BUFFER_NUM_NOTIFICATIONS);
-                        vec.push(result);
-                        entry.insert(vec);
-                    }
-                };
             }
             Err(err) => {
                 tracing::warn!(target: LOG_TARGET, "cannot decode RPC response {:?}", err);
@@ -214,7 +295,7 @@ impl BackgroundTask {
                         message
                     );
 
-                    self.handle_register(message).await;
+                    self.handle_requests(message).await;
 
                     backend_event_fut = backend_event.next();
                     rpc_responses_fut = previous_fut;
