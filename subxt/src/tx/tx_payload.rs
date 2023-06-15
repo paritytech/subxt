@@ -120,6 +120,16 @@ impl<CallData> Payload<CallData> {
     pub fn call_data(&self) -> &CallData {
         &self.call_data
     }
+
+    /// Returns the pallet name.
+    pub fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    /// Returns the call name.
+    pub fn call_name(&self) -> &str {
+        &self.call_name
+    }
 }
 
 impl Payload<Composite<()>> {

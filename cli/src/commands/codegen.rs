@@ -5,6 +5,7 @@
 use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
+use color_eyre::eyre::eyre;
 use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
 
 /// Generate runtime API client code from metadata.
@@ -87,7 +88,7 @@ fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
     Ok((from.to_string(), to.to_string()))
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     let bytes = opts.file_or_url.fetch().await?;
 
     codegen(
@@ -102,6 +103,7 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         opts.runtime_types_only,
         opts.no_default_derives,
         opts.no_default_substitutions,
+        output,
     )?;
     Ok(())
 }
@@ -128,6 +130,7 @@ fn codegen(
     runtime_types_only: bool,
     no_default_derives: bool,
     no_default_substitutions: bool,
+    output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
@@ -190,15 +193,8 @@ fn codegen(
         crate_path,
         should_gen_docs,
         runtime_types_only,
-    );
-    match runtime_api {
-        Ok(runtime_api) => println!("{runtime_api}"),
-        Err(e) => {
-            // Print the error directly to avoid implementing `Send + Sync` on `CodegenError`.
-            use color_eyre::owo_colors::OwoColorize;
-            println!("{}", e.to_string().red())
-        }
-    };
-
+    )
+    .map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
+    writeln!(output, "{runtime_api}")?;
     Ok(())
 }

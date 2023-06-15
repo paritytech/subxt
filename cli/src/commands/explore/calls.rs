@@ -3,9 +3,7 @@ use color_eyre::eyre::eyre;
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
-use std::fmt::Write;
 use std::str::FromStr;
-use std::write;
 
 use subxt::tx;
 use subxt::utils::H256;
@@ -26,10 +24,11 @@ pub struct CallsSubcommand {
     trailing_args: Vec<String>,
 }
 
-pub(crate) fn explore_calls(
+pub fn explore_calls(
     command: CallsSubcommand,
     metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
 
@@ -40,7 +39,7 @@ pub(crate) fn explore_calls(
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
         let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        println!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", );
+        writeln!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
         return Ok(());
     };
 
@@ -60,13 +59,19 @@ pub(crate) fn explore_calls(
         type_description = with_indent(type_description, 4);
         let mut type_examples = print_type_examples(&call.fields, metadata.types(), "SCALE_VALUE")?;
         type_examples = with_indent(type_examples, 4);
-        let mut output = String::new();
-        write!(output, "Usage:\n    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>\n        construct the call by providing a valid argument\n\n")?;
-        write!(
+        writeln!(output, "Usage:")?;
+        writeln!(
+            output,
+            "    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>"
+        )?;
+        writeln!(
+            output,
+            "        construct the call by providing a valid argument\n"
+        )?;
+        writeln!(
             output,
             "The call expect expects a <SCALE_VALUE> with this shape:\n{type_description}\n\n{}\n\nYou may need to surround the value in single quotes when providing it as an argument."
             , &type_examples[4..])?;
-        println!("{output}");
         return Ok(());
     }
 
@@ -77,8 +82,7 @@ pub(crate) fn explore_calls(
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
-    println!("Encoded call data:\n    {hex_bytes}");
-
+    writeln!(output, "Encoded call data:\n    {hex_bytes}")?;
     Ok(())
 }
 
