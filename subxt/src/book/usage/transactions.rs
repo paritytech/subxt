@@ -64,7 +64,7 @@
 //! Subxt who the extrinsic is from, and takes care of signing the relevant details to prove this.
 //!
 //! There are two main ways to create a compatible signer instance:
-//! 1. The [`subxt_signer`] crate provides a WASM compatible implementation of [`crate::tx::Signer`]
+//! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
 //! for chains which require sr25519 signatures (requires the `subxt` feature to be enabled).
 //! 2. Alternately, Subxt can use instances of Substrate's [`sp_core::Pair`] to sign things by wrapping
 //! them in a [`crate::tx::PairSigner`] (requires the `substrate-compat` feature to be enabled).
@@ -106,7 +106,7 @@
 //! let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
 //! ```
 //!
-//! See the [`subxt_signer::sr25519::Keypair`] or the [`sp_core::Pair`] docs for more ways to construct
+//! See the `subxt_signer::sr25519::Keypair` or the [`sp_core::Pair`] docs for more ways to construct
 //! and work with key pairs.
 //!
 //! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
