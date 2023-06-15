@@ -192,7 +192,7 @@ impl RpcClientT for LightClient {
 
             let mut sub_id = result.to_string();
             sub_id.retain(|ch| ch.is_ascii_digit());
-            tracing::warn!(target: LOG_TARGET, "FRONT: SUB ID parsed: {}", sub_id);
+            tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
 
             let stream = ReceiverStream::new(notif);
 

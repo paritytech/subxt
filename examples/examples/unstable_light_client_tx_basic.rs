@@ -8,6 +8,8 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
+
     // Create a light client by fetching the chain spec of a local running node.
     // In this case, because we start one single node, the bootnodes must be overwritten
     // for the light client to connect to the local node.
