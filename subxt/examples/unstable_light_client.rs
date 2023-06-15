@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a light client from the provided chain spec.
     // Note: this connects to the live polkadot chain.
     let light_client = LightClientBuilder::new()
-        .chain_spec(include_str!("../../artifacts/polkadot_spec.json"))
+        .chain_spec(include_str!("../artifacts/polkadot_spec.json"))
         .build()
         .await?;
     let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;

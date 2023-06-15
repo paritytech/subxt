@@ -106,3 +106,15 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
 assert_matches = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+
+[[example]]
+name = "unstable_light_client"
+path = "examples/unstable_light_client.rs"
+required-features = ["unstable-light-client"]
+
+[[example]]
+name = "unstable_light_client_tx_basic"
+path = "examples/unstable_light_client_tx_basic.rs"
+required-features = ["unstable-light-client", "jsonrpsee-ws"]
