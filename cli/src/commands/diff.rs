@@ -4,8 +4,6 @@ use codec::Decode;
 use frame_metadata::RuntimeMetadataPrefixed;
 use std::collections::HashMap;
 
-
-
 use crate::utils::FileOrUrl;
 use color_eyre::owo_colors::OwoColorize;
 
