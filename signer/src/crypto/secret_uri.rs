@@ -11,24 +11,25 @@ use secrecy::SecretString;
 /// The `SURI` can be parsed from a string. The string takes this form:
 ///
 /// ```text
-/// first/path0/path1///password
-/// 11111 22222 22222   33333333
+/// phrase/path0/path1///password
+/// 111111 22222 22222   33333333
 /// ```
 ///
 /// Where:
-/// - 1 denotes a phrase or hex string (and can be optional, being replaced with DEV_PHRASE
-///   if it's omitted) which is used to generate an initial key,
-/// - 2's denote optional "derivation junctions" which are used to derive keys, separated by "/".
-///   A derivation junction beginning with "/" (ie "//" in the original string) is a "hard" path.
-/// - 3 denotes an optional password which is used in conjunction with a phrase provided in 1
-///   to generate an initial key. If hex is provided as "first", it's ignored.
+/// - 1 denotes a phrase or hex string. If this is not provided, the [`DEV_PHRASE`] is used
+///   instead.
+/// - 2's denote optional "derivation junctions" which are used to derive keys. Each of these is
+///   separated by "/". A derivation junction beginning with "/" (ie "//" in the original string)
+///   is a "hard" path.
+/// - 3 denotes an optional password which is used in conjunction with the phrase provided in 1
+///   to generate an initial key. If hex is provided for 1, it's ignored.
 ///
 /// Notes:
-/// - If the "first" part of the string is a `0x` prefixed 64-digit hex string, then we'll interpret
-///   it as hex, and treat the hex bytes as a seed/MiniSecretKey directly.
-/// - Else if the first part is a valid BIP-39 phrase, we'll use the phrase (and password, if provided)
+/// - If 1 is a `0x` prefixed 64-digit hex string, then we'll interpret it as hex, and treat the hex bytes
+///   as a seed/MiniSecretKey directly, ignoring any password.
+/// - Else if the phrase part is a valid BIP-39 phrase, we'll use the phrase (and password, if provided)
 ///   to generate a seed/MiniSecretKey.
-/// - Uris like "//Alice" correspond to keys derived from a DEV_PHRASE, since no "first" part is given.
+/// - Uris like "//Alice" correspond to keys derived from a DEV_PHRASE, since no phrase part is given.
 ///
 /// There is no correspondence mapping between `SURI` strings and the keys they represent.
 /// Two different non-identical strings can actually lead to the same secret being derived.

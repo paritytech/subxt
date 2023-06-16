@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+// The crypto module contains code adapted from sp_core::crypto.
+
 mod derive_junction;
 mod secret_uri;
 mod seed_from_entropy;
