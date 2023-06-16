@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["subxt"]
+default = []
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.

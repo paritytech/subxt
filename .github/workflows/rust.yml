@@ -65,10 +65,10 @@ jobs:
             - name: Cargo hack; check each subxt feature
               run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
 
-            # Subxt-signer has a "subxt" feature which is enabled by default, but requires the dependee to pick
-            # one of the "web" or "native" features on subxt. So just test it with --no-default-features on its own.
+            # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
+            # check it without. We can't enable subxt or web features here, so no cargo hack.
             - name: Cargo check subxt-signer
-              run: cargo check -p subxt-signer --no-default-features
+              run: cargo check -p subxt-signer
 
             # Next, check each other package in isolation.
             - name: Cargo hack; check each feature/crate on its own

@@ -39,7 +39,7 @@ use secrecy::SecretString;
 ///
 /// # Examples
 ///
-/// Parse [`DEV_PHRASE`] secret uri with junction:
+/// Parse [`DEV_PHRASE`] secret URI with junction:
 ///
 /// ```
 /// # use subxt_signer::{SecretUri, DeriveJunction, DEV_PHRASE, ExposeSecret};
@@ -51,7 +51,7 @@ use secrecy::SecretString;
 /// assert!(suri.password.is_none());
 /// ```
 ///
-/// Parse [`DEV_PHRASE`] secret ui with junction and password:
+/// Parse [`DEV_PHRASE`] secret URI with junction and password:
 ///
 /// ```
 /// # use subxt_signer::{SecretUri, DeriveJunction, DEV_PHRASE, ExposeSecret};
@@ -63,7 +63,7 @@ use secrecy::SecretString;
 /// assert_eq!("SECRET_PASSWORD", suri.password.unwrap().expose_secret());
 /// ```
 ///
-/// Parse [`DEV_PHRASE`] secret ui with hex phrase and junction:
+/// Parse [`DEV_PHRASE`] secret URI with hex phrase and junction:
 ///
 /// ```
 /// # use subxt_signer::{SecretUri, DeriveJunction, DEV_PHRASE, ExposeSecret};
@@ -114,6 +114,7 @@ impl std::str::FromStr for SecretUri {
 /// This is returned if `FromStr` cannot parse a string into a `SecretUri`.
 #[derive(Debug, Copy, Clone, PartialEq, thiserror::Error)]
 pub enum SecretUriError {
+    /// Parsing the secret URI from a string failed; wrong format.
     #[error("Invalid secret phrase format")]
     InvalidFormat,
 }

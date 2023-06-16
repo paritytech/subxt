@@ -2,6 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! # Subxt-signer
+//!
+//! The main output from this crate is the [`sr25519::Keypair`], which can
+//! be constructed from a bip39 phrase, secret URI or raw seed, and used to
+//! sign and verify arbitrary messages. This crate is aligned with how Substrate's
+//! `sp_core` crate constructs and signs keypairs, but is lighter on dependencies
+//! and can support compilation to WASM with the `web` feature.
+//!
+//! Enable the `subxt` feature to enable use of this [`sr25519::Keypair`] in signing
+//! subxt transactions for chains supporting sr25519 signatures.
+
+#![deny(missing_docs)]
+
 #[macro_use]
 mod utils;
 mod crypto;

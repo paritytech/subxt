@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! An sr25519 keypair implementation.
+
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use hex::FromHex;
 use schnorrkel::{
@@ -184,12 +186,16 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
         .is_ok()
 }
 
+/// An error handed back if creating a keypair fails.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Invalid seed")]
+    /// Invalid seed.
+    #[error("Invalid seed (was it the wrong length?)")]
     InvalidSeed,
+    /// Invalid phrase.
     #[error("Cannot parse phrase: {0}")]
     Phrase(#[from] bip39::Error),
+    /// Invalid hex.
     #[error("Cannot parse hex string: {0}")]
     Hex(#[from] hex::FromHexError),
 }
