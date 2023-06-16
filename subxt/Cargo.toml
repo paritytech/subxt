@@ -106,6 +106,10 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
 assert_matches = { workspace = true }
+# Tracing subscriber is useful for light-client examples to ensure that
+# the `bootNodes` and chain spec are configured correctly. If all is fine, then
+# the light-client wlll emit INFO logs with
+# `GrandPa warp sync finished` and `Finalized block runtime ready.`
 tracing-subscriber = { workspace = true }
 
 
