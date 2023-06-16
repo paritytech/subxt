@@ -23,7 +23,7 @@ subxt = ["dep:subxt"]
 
 # The getrandom package is used via schnorrkel. We need to enable the JS
 # feature on it if compiling for the web.
-web = ["dep:getrandom"]
+web = ["getrandom/js"]
 
 [dependencies]
 regex = { workspace = true }
@@ -41,7 +41,7 @@ schnorrkel = { workspace = true }
 secrecy = { workspace = true }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
-getrandom = { workspace = true, optional = true, features = ["js"] }
+getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 sp-core = { workspace = true, features = ["std"] }
