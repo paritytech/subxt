@@ -72,10 +72,36 @@ wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "4.4.0"
 
+
+
 # Light client support:
-smoldot = { path = "/home/lexnv/workspace/smoldot/lib", default-features = false }
-smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false }
-smoldot-light-wasm = { path = "/home/lexnv/workspace/smoldot/wasm-node/rust", default-features = false }
+
+# /Users/lexnv/Workspace/parity/smoldot
+# smoldot = { version = "0.6.0", default-features = false }
+# smoldot-light = { version = "0.6.0", default-features = false }
+# smoldot-light-wasm = { version = "0.5.0", default-features = false }
+
+
+smoldot = { git = "https://github.com/smol-dot/smoldot", rev = "cf211107" , default_features = false }
+smoldot-light = { git = "https://github.com/smol-dot/smoldot",  rev = "cf211107", default_features = false }
+# smoldot = { path = "/Users/lexnv/Workspace/parity/smoldot/lib", default-features = false }
+# smoldot-light = { path = "/Users/lexnv/Workspace/parity/smoldot/light-base", default-features = false }
+
+instant = { version = "0.1.12", default-features = false }
+
+tokio-util = "0.7.8"
+
+# Needed for Websocket secure WASM connections.
+web-sys = { version = "0.3.61", features = [ "BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
+wasm-bindgen = "0.2.84"
+send_wrapper = "0.6.0"
+js-sys = "0.3.61"
+
+websocket = "0.26.5"
+
+# smoldot = { path = "/home/lexnv/workspace/smoldot/lib", default-features = false }
+# smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false }
+# smoldot-light-wasm = { path = "/home/lexnv/workspace/smoldot/wasm-node/rust", default-features = false }
 wasm-bindgen-futures = { version = "0.4.19" }
 futures-timer = { version = "3" }
 gloo-net = { version = "0.2.6", default-features = false, features = ["json", "websocket"] }

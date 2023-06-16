@@ -1,6 +1,13 @@
 mod background;
 mod client;
+
+#[cfg(feature = "unstable-light-client-wasm")]
 mod platform;
+#[cfg(feature = "unstable-light-client-wasm")]
+mod web_connection;
+
+mod tokio_platform;
+
 
 pub use client::LightClient;
 

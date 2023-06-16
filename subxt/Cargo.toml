@@ -46,10 +46,28 @@ unstable-metadata = []
 # TODO: WE NEED smoldot-light/std to build in non-wasm environments!!
 unstable-light-client = [
     "smoldot",
+    "smoldot/std",
     # "smoldot-light/std",
     "smoldot-light",
     # "futures-executor",
-    "smoldot-light-wasm",
+    # "smoldot-light-wasm",
+    "tokio-stream",
+    "tokio/sync",
+    "tokio/rt",
+    "futures-util",
+    # "wasm-bindgen-futures",
+	# "futures-timer/wasm-bindgen",
+    "tokio-util",
+    "websocket",
+    # "gloo-net",
+]
+
+unstable-light-client-wasm = [
+    "smoldot",
+    # "smoldot-light/std",
+    "smoldot-light",
+    # "futures-executor",
+    # "smoldot-light-wasm",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
@@ -57,6 +75,13 @@ unstable-light-client = [
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
     "gloo-net",
+    "instant/wasm-bindgen",
+
+    # Based on WebConnection file
+    "js-sys",
+    "send_wrapper",
+    "web-sys",
+    "wasm-bindgen",
 ]
 
 [dependencies]
@@ -99,7 +124,18 @@ subxt-metadata = { workspace = true }
 # Light client support:
 smoldot = { workspace = true, optional = true }
 smoldot-light = { workspace = true, optional = true }
-smoldot-light-wasm = { workspace = true, optional = true }
+
+instant = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
+
+web-sys = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+send_wrapper = { workspace = true, optional = true }
+websocket = { workspace = true, optional = true }
+
+
+# smoldot-light-wasm = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 gloo-net = { workspace = true, optional = true }
