@@ -1,8 +1,7 @@
 mod background;
 mod client;
 
-use crate::error::{Error, RpcError};
-use core::time::Duration;
+use crate::error::Error;
 #[cfg(feature = "jsonrpsee-ws")]
 use jsonrpsee::{
     async_client::ClientBuilder,
@@ -182,6 +181,7 @@ impl<'a> LightClientBuilder<'a> {
     pub async fn build(self) -> Result<LightClient, Error> {
         let mut chain_spec = match (self.chain_spec, self.url) {
             (Some(chain_spec), None) => serde_json::from_str(chain_spec).unwrap(),
+            #[cfg(feature = "jsonrpsee-ws")]
             (None, Some(url)) => fetch_url(url).await?,
             _ => return Err(Error::LightClient(LightClientError::IncompatibleConfig)),
         };
@@ -230,12 +230,12 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
         .map_err(|_| LightClientError::Handshake)?;
 
     let client = ClientBuilder::default()
-        .request_timeout(Duration::from_secs(180))
+        .request_timeout(core::time::Duration::from_secs(180))
         .max_notifs_per_subscription(4096)
         .build_with_tokio(sender, receiver);
 
     client
         .request("sync_state_genSyncSpec", rpc_params![true])
         .await
-        .map_err(|err| Error::Rpc(RpcError::ClientError(Box::new(err))))
+        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
 }
