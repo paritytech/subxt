@@ -13,6 +13,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a light client by fetching the chain spec of a local running node.
     // In this case, because we start one single node, the bootnodes must be overwritten
     // for the light client to connect to the local node.
+    //
+    // The `12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp` is the P2P address
+    // from a local polkadot node starting with
+    // `--node-key 0000000000000000000000000000000000000000000000000000000000000001`
     let light_client = LightClientBuilder::new()
         .trusted_url("ws://127.0.0.1:9944")
         .bootnodes(
