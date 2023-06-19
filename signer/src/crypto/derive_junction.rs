@@ -1,3 +1,7 @@
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
 use codec::{Decode, Encode};
 
 /// The length of the junction identifier. Note that this is also referred to as the
