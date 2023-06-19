@@ -34,7 +34,8 @@ pub fn generate_storage(
     };
 
     let storage_fns = storage
-        .entries().iter()
+        .entries()
+        .iter()
         .map(|entry| {
             generate_storage_entry_fns(type_gen, pallet, entry, crate_path, should_gen_docs)
         })

@@ -1,4 +1,4 @@
-use clap::{Args, Parser as ClapParser};
+use clap::Args;
 use codec::Decode;
 
 use frame_metadata::RuntimeMetadataPrefixed;
@@ -13,7 +13,7 @@ use scale_info::Variant;
 
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
-    StorageEntryType, StorageMetadata,
+    StorageEntryType,
 };
 
 /// Explore the differences between two nodes
@@ -133,7 +133,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                                             from.name(),
                                             storage_diff.to_strings().join(", ")
                                         )
-                                            .yellow()
+                                        .yellow()
                                     )?;
                                 }
                             }
@@ -238,22 +238,22 @@ impl StorageEntryDiff {
             StorageEntryType::Plain(_) => None,
             StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
         }
-            .map(|key_ty| {
-                metadata_1
-                    .type_hash(key_ty)
-                    .expect("type should be present")
-            })
-            .unwrap_or_default();
+        .map(|key_ty| {
+            metadata_1
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
         let key_2_hash = match storage_entry_2.entry_type() {
             StorageEntryType::Plain(_) => None,
             StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
         }
-            .map(|key_ty| {
-                metadata_2
-                    .type_hash(key_ty)
-                    .expect("type should be present")
-            })
-            .unwrap_or_default();
+        .map(|key_ty| {
+            metadata_2
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
         let key_different = key_1_hash != key_2_hash;
 
         StorageEntryDiff {
@@ -320,7 +320,6 @@ fn storage_differences<'a>(
         |e| e.name(),
     )
 }
-
 
 fn calls_differences<'a>(
     pallet_metadata_1: &'a PalletMetadata<'a>,
@@ -398,8 +397,8 @@ enum Diff<T> {
 }
 
 fn diff<T, C: PartialEq, I: Hash + PartialEq + Eq>(
-    items_a: impl IntoIterator<Item=T>,
-    items_b: impl IntoIterator<Item=T>,
+    items_a: impl IntoIterator<Item = T>,
+    items_b: impl IntoIterator<Item = T>,
     hash_fn_a: impl Fn(&T) -> C,
     hash_fn_b: impl Fn(&T) -> C,
     key_fn: impl Fn(&T) -> I,
