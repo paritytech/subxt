@@ -47,7 +47,7 @@ pub async fn explore_storage(
     };
 
     // if specified call storage entry wrong, show user the storage entries to choose from (but this time as an error):
-    let Some(storage) = storage_metadata.entries().find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase()) else {
+    let Some(storage) = storage_metadata.entries().iter().find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase()) else {
         let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
         let description = format!("Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}");
         return Err(eyre!("Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}"));
@@ -171,7 +171,11 @@ fn print_available_storage_entries(
             "Available <STORAGE_ENTRY>'s in the \"{}\" pallet:",
             pallet_name
         );
-        let mut strings: Vec<_> = storage_metadata.entries().map(|s| s.name()).collect();
+        let mut strings: Vec<_> = storage_metadata
+            .entries()
+            .iter()
+            .map(|s| s.name())
+            .collect();
         strings.sort();
         for entry in strings {
             write!(output, "\n    {}", entry).unwrap();

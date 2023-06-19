@@ -379,7 +379,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
     let storage_bytes = match pallet.storage() {
         Some(storage) => {
             let prefix_hash = hash(storage.prefix().as_bytes());
-            let entries_hash = storage.entries().fold([0u8; HASH_LEN], |bytes, entry| {
+            let entries_hash = storage.entries().iter().fold([0u8; HASH_LEN], |bytes, entry| {
                 // We don't care what order the storage entries occur in, so XOR them together
                 // to make the order irrelevant.
                 xor(
@@ -595,8 +595,8 @@ mod tests {
             meta_type::<()>(),
             vec![],
         )
-        .try_into()
-        .expect("can build valid metadata")
+            .try_into()
+            .expect("can build valid metadata")
     }
 
     #[test]
