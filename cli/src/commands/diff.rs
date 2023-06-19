@@ -133,7 +133,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                                             from.name(),
                                             storage_diff.to_strings().join(", ")
                                         )
-                                            .yellow()
+                                        .yellow()
                                     )?;
                                 }
                             }
@@ -238,22 +238,22 @@ impl StorageEntryDiff {
             StorageEntryType::Plain(_) => None,
             StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
         }
-            .map(|key_ty| {
-                metadata_1
-                    .type_hash(key_ty)
-                    .expect("type should be present")
-            })
-            .unwrap_or_default();
+        .map(|key_ty| {
+            metadata_1
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
         let key_2_hash = match storage_entry_2.entry_type() {
             StorageEntryType::Plain(_) => None,
             StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
         }
-            .map(|key_ty| {
-                metadata_2
-                    .type_hash(key_ty)
-                    .expect("type should be present")
-            })
-            .unwrap_or_default();
+        .map(|key_ty| {
+            metadata_2
+                .type_hash(key_ty)
+                .expect("type should be present")
+        })
+        .unwrap_or_default();
         let key_different = key_1_hash != key_2_hash;
 
         StorageEntryDiff {
@@ -397,8 +397,8 @@ enum Diff<T> {
 }
 
 fn diff<T, C: PartialEq, I: Hash + PartialEq + Eq + Ord>(
-    items_a: impl IntoIterator<Item=T>,
-    items_b: impl IntoIterator<Item=T>,
+    items_a: impl IntoIterator<Item = T>,
+    items_b: impl IntoIterator<Item = T>,
     hash_fn_a: impl Fn(&T) -> C,
     hash_fn_b: impl Fn(&T) -> C,
     key_fn: impl Fn(&T) -> I,
@@ -427,15 +427,16 @@ fn diff<T, C: PartialEq, I: Hash + PartialEq + Eq + Ord>(
     }
 
     // sort the values by key before returning
-    let mut diff_vec_with_keys: Vec<_> = entries
-        .into_iter().collect();
+    let mut diff_vec_with_keys: Vec<_> = entries.into_iter().collect();
     diff_vec_with_keys.sort_by(|a, b| a.0.cmp(&b.0));
-    diff_vec_with_keys.into_iter().map(|(_, tuple)| match tuple {
-        (None, None) => panic!("At least one value is inserted when the key exists; qed"),
-        (Some(old), None) => Diff::Removed(old),
-        (None, Some(new)) => Diff::Added(new),
-        (Some(old), Some(new)) => Diff::Changed { from: old, to: new },
-    })
+    diff_vec_with_keys
+        .into_iter()
+        .map(|(_, tuple)| match tuple {
+            (None, None) => panic!("At least one value is inserted when the key exists; qed"),
+            (Some(old), None) => Diff::Removed(old),
+            (None, Some(new)) => Diff::Added(new),
+            (Some(old), Some(new)) => Diff::Changed { from: old, to: new },
+        })
         .collect()
 }
 
@@ -448,7 +449,7 @@ mod test {
         let old_pallets = [("Babe", 7), ("Claims", 9), ("Balances", 23)];
         let new_pallets = [("Claims", 9), ("Balances", 22), ("System", 3), ("NFTs", 5)];
         let hash_fn = |e: &(&str, i32)| e.0.len() as i32 * e.1;
-        let differences = diff(old_pallets, new_pallets, &hash_fn, &hash_fn, |e| e.0);
+        let differences = diff(old_pallets, new_pallets, hash_fn, hash_fn, |e| e.0);
         let expected_differences = vec![
             Diff::Removed(("Babe", 7)),
             Diff::Changed {
