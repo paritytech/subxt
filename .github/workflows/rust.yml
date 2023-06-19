@@ -45,7 +45,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Install cargo-hack
               uses: baptiste0928/cargo-install@v2
@@ -80,7 +80,7 @@ jobs:
                   components: rustfmt
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Cargo fmt
               uses: actions-rs/cargo@v1.0.3
@@ -111,7 +111,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Check internal documentation links
               run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
@@ -145,7 +145,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Install cargo-nextest
               run: cargo install cargo-nextest
@@ -180,7 +180,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Run clippy
               uses: actions-rs/cargo@v1
@@ -205,7 +205,7 @@ jobs:
               uses: browser-actions/setup-chrome@latest
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Download Substrate
               run: |
