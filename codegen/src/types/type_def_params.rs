@@ -27,7 +27,7 @@ impl TypeDefParameters {
 
     /// Update the set of unused type parameters by removing those that are used in the given
     /// fields.
-    pub fn update_unused<'a>(&mut self, fields: impl Iterator<Item = &'a CompositeDefFieldType>) {
+    pub fn update_unused<'a>(&mut self, fields: impl Iterator<Item=&'a CompositeDefFieldType>) {
         let mut used_type_params = BTreeSet::new();
         for field in fields {
             field.type_path.parent_type_params(&mut used_type_params)
