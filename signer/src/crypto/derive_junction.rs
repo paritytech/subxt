@@ -22,12 +22,12 @@ pub enum DeriveJunction {
 impl DeriveJunction {
     /// Consume self to return a soft derive junction with the same chain code.
     pub fn soften(self) -> Self {
-        DeriveJunction::Soft(self.unwrap_inner())
+        DeriveJunction::Soft(self.into_inner())
     }
 
     /// Consume self to return a hard derive junction with the same chain code.
     pub fn harden(self) -> Self {
-        DeriveJunction::Hard(self.unwrap_inner())
+        DeriveJunction::Hard(self.into_inner())
     }
 
     /// Create a new soft (vanilla) DeriveJunction from a given, encodable, value.
@@ -53,7 +53,7 @@ impl DeriveJunction {
     }
 
     /// Consume self to return the chain code.
-    pub fn unwrap_inner(self) -> [u8; JUNCTION_ID_LEN] {
+    pub fn into_inner(self) -> [u8; JUNCTION_ID_LEN] {
         match self {
             DeriveJunction::Hard(c) | DeriveJunction::Soft(c) => c,
         }
