@@ -6,6 +6,9 @@ use super::DeriveJunction;
 use regex::Regex;
 use secrecy::SecretString;
 
+// This code is taken from sp_core::crypto::DeriveJunction. The logic should be identical,
+// though the code is tweaked a touch!
+
 /// A secret uri (`SURI`) that can be used to generate a key pair.
 ///
 /// The `SURI` can be parsed from a string. The string takes this form:

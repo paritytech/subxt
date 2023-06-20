@@ -4,6 +4,9 @@
 
 use codec::{Decode, Encode};
 
+// This code is taken from sp_core::crypto::DeriveJunction. The logic should be identical,
+// though the API is tweaked a touch.
+
 /// The length of the junction identifier. Note that this is also referred to as the
 /// `CHAIN_CODE_LENGTH` in the context of Schnorrkel.
 pub const JUNCTION_ID_LEN: usize = 32;
