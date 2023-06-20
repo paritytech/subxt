@@ -166,7 +166,7 @@ jobs:
                   command: nextest
                   args: run --workspace
 
-    nonwasm_light_client tests:
+    nonwasm_light_client_tests:
         name: "Test non-wasm Light Client"
         runs-on: ubuntu-latest-16-cores
         steps:
