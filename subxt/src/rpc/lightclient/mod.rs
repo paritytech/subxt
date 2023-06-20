@@ -2,7 +2,7 @@ mod background;
 mod client;
 
 use crate::error::Error;
-#[cfg(feature = "jsonrpsee-ws")]
+#[cfg(feature = "jsonrpsee")]
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::{Uri, WsTransportClientBuilder},
@@ -166,7 +166,7 @@ impl<'a> LightClientBuilder<'a> {
     /// # Note
     ///
     /// Incompatible with [`Self::chain_spec`].
-    #[cfg(feature = "jsonrpsee-ws")]
+    #[cfg(feature = "jsonrpsee")]
     pub fn trusted_url(mut self, url: &'a str) -> Self {
         self.url = Some(url);
         self
@@ -181,7 +181,7 @@ impl<'a> LightClientBuilder<'a> {
     pub async fn build(self) -> Result<LightClient, Error> {
         let mut chain_spec = match (self.chain_spec, self.url) {
             (Some(chain_spec), None) => serde_json::from_str(chain_spec).unwrap(),
-            #[cfg(feature = "jsonrpsee-ws")]
+            #[cfg(feature = "jsonrpsee")]
             (None, Some(url)) => fetch_url(url).await?,
             _ => return Err(Error::LightClient(LightClientError::IncompatibleConfig)),
         };
@@ -213,7 +213,7 @@ impl<'a> LightClientBuilder<'a> {
 }
 
 /// Fetch the chain spec from the URL.
-#[cfg(feature = "jsonrpsee-ws")]
+#[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     let url = url
         .as_ref()

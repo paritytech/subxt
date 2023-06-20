@@ -2047,7 +2047,6 @@ dependencies = [
  "regex",
  "scale-info",
  "sp-core",
- "sp-runtime",
  "substrate-runner",
  "subxt",
  "subxt-codegen",
