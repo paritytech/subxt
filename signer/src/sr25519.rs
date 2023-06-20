@@ -336,19 +336,33 @@ mod test {
 
     #[test]
     fn check_from_secret_uri_matches() {
-        for i in 0..20 {
-            // Build an sp_core::Pair that includes a phrase, path and password:
-            let password = format!("Testing{i}");
-            let (_sp_pair, phrase, _seed) = SpPair::generate_with_phrase(Some(&password));
-            let uri = format!("{phrase}//foo/001///{password}");
-            let sp_pair = SpPair::from_string(&uri, None).expect("should be valid");
+        // Some derive junctions to check that the logic there aligns:
+        let uri_paths = [
+            "/foo",
+            "//bar",
+            "/1",
+            "/0001",
+            "//1",
+            "//0001",
+            "//foo//bar/wibble",
+            "//foo//001/wibble",
+        ];
 
-            // Now build a local Keypair using the equivalent API:
-            let uri = SecretUri::from_str(&uri).expect("should be valid secret URI");
-            let pair = Keypair::from_uri(&uri).expect("should be valid");
+        for i in 0..2 {
+            for path in &uri_paths {
+                // Build an sp_core::Pair that includes a phrase, path and password:
+                let password = format!("Testing{i}");
+                let (_sp_pair, phrase, _seed) = SpPair::generate_with_phrase(Some(&password));
+                let uri = format!("{phrase}{path}///{password}");
+                let sp_pair = SpPair::from_string(&uri, None).expect("should be valid");
 
-            // They should match:
-            assert_eq!(sp_pair.public().0, pair.public_key().0);
+                // Now build a local Keypair using the equivalent API:
+                let uri = SecretUri::from_str(&uri).expect("should be valid secret URI");
+                let pair = Keypair::from_uri(&uri).expect("should be valid");
+
+                // They should match:
+                assert_eq!(sp_pair.public().0, pair.public_key().0);
+            }
         }
     }
 
