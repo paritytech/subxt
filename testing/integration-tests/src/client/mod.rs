@@ -22,6 +22,7 @@ use subxt::{
 };
 use subxt_metadata::Metadata;
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn insert_key() {
     let ctx = test_context_with(AccountKeyring::Bob).await;
@@ -58,6 +59,7 @@ async fn fetch_block() {
     api.rpc().block(block_hash).await.unwrap();
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn fetch_read_proof() {
     let ctx = test_context().await;
@@ -120,6 +122,7 @@ async fn fetch_keys() {
     assert_eq!(keys.len(), 4)
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn test_iter() {
     let ctx = test_context().await;
@@ -141,6 +144,7 @@ async fn test_iter() {
     assert_eq!(i, 13);
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn fetch_system_info() {
     let ctx = test_context().await;
@@ -151,6 +155,7 @@ async fn fetch_system_info() {
     assert!(!api.rpc().system_version().await.unwrap().is_empty());
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_passes() {
     let ctx = test_context().await;
@@ -185,6 +190,7 @@ async fn dry_run_passes() {
         .unwrap();
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_fails() {
     let ctx = test_context().await;
@@ -235,6 +241,7 @@ async fn dry_run_fails() {
     );
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_result_is_substrate_compatible() {
     use sp_runtime::{
@@ -439,6 +446,7 @@ async fn rpc_state_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_follow() {
     let ctx = test_context().await;
@@ -475,6 +483,7 @@ async fn chainhead_unstable_follow() {
     );
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_body() {
     let ctx = test_context().await;
@@ -532,6 +541,7 @@ async fn chainhead_unstable_header() {
     assert_eq!(header, expected);
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_storage() {
     let ctx = test_context().await;
@@ -559,6 +569,7 @@ async fn chainhead_unstable_storage() {
     assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.result.is_some());
 }
 
+#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_call() {
     let ctx = test_context().await;
