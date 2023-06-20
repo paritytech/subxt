@@ -7,7 +7,7 @@ use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-use std::io::Write;
+use std::{io::Write, path::PathBuf};
 use subxt_metadata::Metadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
@@ -32,6 +32,9 @@ pub struct Opts {
     /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     runtime_apis: Option<Vec<String>>,
+    /// Write the output of the metadata command to the provided file path.
+    #[clap(long, short, value_parser)]
+    pub output_file: Option<PathBuf>,
 }
 
 pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
@@ -68,6 +71,11 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
             }
         }
     }
+
+    let mut output: Box<dyn Write> = match opts.output_file {
+        Some(path) => Box::new(std::fs::File::create(path)?),
+        None => Box::new(output),
+    };
 
     match opts.format.as_str() {
         "json" => {

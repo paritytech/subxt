@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, pair_signer, test_context, utils::wait_for_blocks};
-use sp_keyring::AccountKeyring;
+use crate::{node_runtime, test_context, utils::wait_for_blocks};
 use subxt::utils::AccountId32;
+use subxt_signer::sr25519::dev;
 
 #[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
@@ -32,8 +32,8 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let signer = pair_signer(AccountKeyring::Alice.pair());
-    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
+    let signer = dev::alice();
+    let alice: AccountId32 = dev::alice().public_key().into();
 
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
@@ -98,9 +98,9 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     // Boilerplate; we create a new asset class with ID 99, and then
     // we "approveTransfer" of some of this asset class. This gives us an
     // entry in the `Approvals` StorageNMap that we can try to look up.
-    let signer = pair_signer(AccountKeyring::Alice.pair());
-    let alice: AccountId32 = AccountKeyring::Alice.to_account_id().into();
-    let bob: AccountId32 = AccountKeyring::Bob.to_account_id().into();
+    let signer = dev::alice();
+    let alice: AccountId32 = dev::alice().public_key().into();
+    let bob: AccountId32 = dev::bob().public_key().into();
 
     let tx1 = node_runtime::tx()
         .assets()

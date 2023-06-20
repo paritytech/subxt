@@ -1,5 +1,5 @@
-use sp_keyring::AccountKeyring;
 use subxt::{OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a storage query to access account information.
-    let account = AccountKeyring::Alice.to_account_id().into();
+    let account = dev::alice().public_key().into();
     let storage_query = polkadot::storage().system().account(&account);
 
     // Use that query to `fetch` a result. This returns an `Option<_>`, which will be

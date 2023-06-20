@@ -45,7 +45,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Install cargo-hack
               uses: baptiste0928/cargo-install@v2
@@ -58,11 +58,21 @@ jobs:
             - name: Cargo check all targets.
               run: cargo check --all-targets
 
-            # Next, check each feature on its own and compile each crate separately. This is no good
-            # for subxt/examples, which expect default features to be enabled, hence the above check
-            # and why we don'#t do `--all-targets` for this one.
+            # Next, check subxt features.
+            # - `native` feature must always be enabled
+            # - `web` feature is always ignored.
+            # - This means, don't check --no-default-features and don't try enabling --all-features; both will fail
+            - name: Cargo hack; check each subxt feature
+              run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+
+            # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
+            # check it without. We can't enable subxt or web features here, so no cargo hack.
+            - name: Cargo check subxt-signer
+              run: cargo check -p subxt-signer
+
+            # Next, check each other package in isolation.
             - name: Cargo hack; check each feature/crate on its own
-              run: cargo hack --exclude-all-features --each-feature check --workspace
+              run: cargo hack --exclude subxt --exclude subxt-signer --exclude-all-features --each-feature check --workspace
 
     fmt:
         name: Cargo fmt
@@ -80,7 +90,7 @@ jobs:
                   components: rustfmt
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Cargo fmt
               uses: actions-rs/cargo@v1.0.3
@@ -111,7 +121,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Check internal documentation links
               run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
@@ -145,7 +155,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Install cargo-nextest
               run: cargo install cargo-nextest
@@ -211,7 +221,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Run clippy
               uses: actions-rs/cargo@v1
@@ -236,7 +246,7 @@ jobs:
               uses: browser-actions/setup-chrome@latest
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
 
             - name: Download Substrate
               run: |
@@ -246,10 +256,16 @@ jobs:
                   mkdir -p ~/.local/bin
                   mv substrate ~/.local/bin
 
-            - name: Run WASM tests
+            - name: Run subxt WASM tests
               run: |
                   substrate --dev --tmp > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
                   pkill substrate
               working-directory: testing/wasm-tests
+
+            - name: Run subxt-signer WASM tests
+              run: |
+                  wasm-pack test --headless --firefox
+                  wasm-pack test --headless --chrome
+              working-directory: signer/wasm-tests

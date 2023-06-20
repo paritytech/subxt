@@ -8,9 +8,9 @@ use crate::{
         runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    pair_signer, test_context,
+    test_context,
 };
-use sp_keyring::AccountKeyring;
+use subxt_signer::sr25519::dev;
 
 type Call = runtime_types::kitchensink_runtime::RuntimeCall;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
@@ -20,8 +20,8 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().into();
+    let alice = dev::alice();
+    let bob = dev::bob().public_key().into();
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
@@ -46,8 +46,8 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().into();
+    let alice = dev::alice();
+    let bob = dev::bob().public_key().into();
 
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,

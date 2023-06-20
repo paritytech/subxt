@@ -1,6 +1,6 @@
-use sp_keyring::AccountKeyring;
 use subxt::dynamic::Value;
 use subxt::{config::PolkadotConfig, OnlineClient};
+use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a dynamically runtime API payload that calls the
     // `AccountNonceApi_account_nonce` function.
-    let account = AccountKeyring::Alice.to_account_id();
+    let account = dev::alice().public_key();
     let runtime_api_call = subxt::dynamic::runtime_api_call(
         "AccountNonceApi",
         "account_nonce",

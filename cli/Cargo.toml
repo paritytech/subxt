@@ -19,7 +19,7 @@ path = "src/main.rs"
 [dependencies]
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
-subxt = { workspace = true }
+subxt = { workspace = true, features = ["native", "jsonrpsee"] }
 clap = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }

@@ -65,7 +65,6 @@ We also assume that ongoing work done is being merged directly to the `master` b
     2.  Perform a final sanity check that everything looks ok.
 
         ```
-        cargo hack --exclude-all-features --each-feature check --all-targets --workspace
         cargo test --all-targets
         ```
 
@@ -77,11 +76,9 @@ We also assume that ongoing work done is being merged directly to the `master` b
             (cd codegen && cargo publish) && \
             (cd macro && cargo publish) && \
             (cd subxt && cargo publish) && \
+            (cd signer && cargo publish) && \
             (cd cli && cargo publish);
         ```
-
-        If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
-        you may just need to wait a little longer and then run the remaining portion of that command.
 
 10. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:

@@ -22,8 +22,6 @@
 //! We can use the statically generated interface to build runtime calls:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
-//!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
@@ -33,10 +31,8 @@
 //! Alternately, we can dynamically construct a runtime call:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
 //! use subxt::dynamic::Value;
 //!
-//! let account = AccountKeyring::Alice.to_account_id();
 //! let runtime_call = subxt::dynamic::runtime_api_call(
 //!     "Metadata",
 //!     "metadata_versions",

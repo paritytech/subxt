@@ -16,8 +16,5 @@ pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
 };
 
-#[cfg(any(
-    feature = "jsonrpsee-ws",
-    all(feature = "jsonrpsee-web", target_arch = "wasm32")
-))]
+#[cfg(feature = "jsonrpsee")]
 pub use online_client::default_rpc_client;

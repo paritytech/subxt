@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use sp_keyring::AccountKeyring;
-
 use crate::{
     node_runtime::{
         self,
@@ -13,16 +11,12 @@ use crate::{
     },
     test_context, TestContext,
 };
-use sp_core::sr25519::Pair;
-use subxt::{
-    tx::{PairSigner, TxProgress},
-    utils::MultiAddress,
-    Config, Error, OnlineClient, SubstrateConfig,
-};
+use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error, OnlineClient, SubstrateConfig};
+use subxt_signer::sr25519::{self, dev};
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<SubstrateConfig, Pair>,
+    signer: sr25519::Keypair,
 }
 
 type Hash = <SubstrateConfig as Config>::Hash;
@@ -40,7 +34,7 @@ const PROOF_SIZE: u64 = u64::MAX / 2;
 impl ContractsTestContext {
     async fn init() -> Self {
         let cxt = test_context().await;
-        let signer = PairSigner::new(AccountKeyring::Alice.pair());
+        let signer = dev::alice();
 
         Self { cxt, signer }
     }
