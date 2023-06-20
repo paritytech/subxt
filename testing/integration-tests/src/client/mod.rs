@@ -2,21 +2,28 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    test_context, test_context_with,
-    utils::{node_runtime, wait_for_blocks},
-};
+use crate::{test_context, utils::node_runtime};
+#[cfg(not(feature = "unstable-light-client"))]
+use crate::{test_context_with, utils::wait_for_blocks};
+#[cfg(not(feature = "unstable-light-client"))]
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
+#[cfg(not(feature = "unstable-light-client"))]
 use sp_core::storage::well_known_keys;
+#[cfg(not(feature = "unstable-light-client"))]
 use subxt::{
-    error::{DispatchError, Error, TokenError},
+    error::TokenError,
     rpc::types::{
-        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
     utils::AccountId32,
 };
+use subxt::{
+    error::{DispatchError, Error},
+    rpc::types::FollowEvent,
+};
+
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
