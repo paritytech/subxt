@@ -1,15 +1,16 @@
 [package]
-name = "wasm-test"
+name = "wasm-tests"
 version = "0.1.0"
 edition = "2021"
 publish = false
 
 [dev-dependencies]
-# This crate is not a part of the workspace, sadly, because it
-# requires a mutually exclusive jsonrpsee feature to be enabled on
-# subxt to work. So, we can't inherit versions.
 wasm-bindgen-test = "0.3.24"
 tracing-wasm = "0.2.1"
 console_error_panic_hook = "0.1.7"
 serde_json = "1"
-subxt = { path = "../../subxt", default-features = false, features = ["jsonrpsee-web"] }
+
+# This crate is not a part of the workspace, because it
+# requires the "jsonrpsee-web" feature to be enabled, which we don't
+# want enabled for workspace builds in general.
+subxt = { path = "../../subxt", default-features = false, features = ["web", "jsonrpsee"] }

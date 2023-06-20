@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use sp_keyring::AccountKeyring;
 use std::ffi::{OsStr, OsString};
 use substrate_runner::SubstrateNode;
 use subxt::{Config, OnlineClient};
@@ -35,7 +34,7 @@ where
 /// Construct a test node process.
 pub struct TestNodeProcessBuilder {
     node_path: OsString,
-    authority: Option<AccountKeyring>,
+    authority: Option<String>,
 }
 
 impl TestNodeProcessBuilder {
@@ -50,7 +49,7 @@ impl TestNodeProcessBuilder {
     }
 
     /// Set the authority dev account for a node in validator mode e.g. --alice.
-    pub fn with_authority(&mut self, account: AccountKeyring) -> &mut Self {
+    pub fn with_authority(&mut self, account: String) -> &mut Self {
         self.authority = Some(account);
         self
     }
@@ -64,9 +63,8 @@ impl TestNodeProcessBuilder {
 
         node_builder.binary_path(self.node_path);
 
-        if let Some(authority) = self.authority {
-            let authority = format!("{authority:?}");
-            node_builder.arg(authority.as_str().to_lowercase());
+        if let Some(authority) = &self.authority {
+            node_builder.arg(authority.to_lowercase());
         }
 
         // Spawn the node and retrieve a URL to it:

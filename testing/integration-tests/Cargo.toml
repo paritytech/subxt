@@ -25,9 +25,9 @@ regex = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
-sp-keyring = { workspace = true }
 syn = { workspace = true }
-subxt = { workspace = true, features = ["unstable-metadata"] }
+subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat"] }
+subxt-signer = { workspace = true, features = ["subxt"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
 test-runtime = { workspace = true }

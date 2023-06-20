@@ -19,7 +19,7 @@ use std::sync::Arc;
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derivative(Clone(bound = ""))]
 pub struct Events<T: Config> {
     metadata: Metadata,
     block_hash: T::Hash,
@@ -29,6 +29,18 @@ pub struct Events<T: Config> {
     event_bytes: Arc<[u8]>,
     start_idx: usize,
     num_events: u32,
+}
+
+// Ignore the Metadata when debug-logging events; it's big and distracting.
+impl<T: Config> std::fmt::Debug for Events<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Events")
+            .field("block_hash", &self.block_hash)
+            .field("event_bytes", &self.event_bytes)
+            .field("start_idx", &self.start_idx)
+            .field("num_events", &self.num_events)
+            .finish()
+    }
 }
 
 impl<T: Config> Events<T> {

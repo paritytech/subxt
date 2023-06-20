@@ -60,28 +60,54 @@
 //! ## Signing it
 //!
 //! You'll normally need to sign an extrinsic to prove that it originated from an account that you
-//! control. To do this, you will typically first create an [`crate::tx::Signer`], which tells Subxt
-//! who the extrinsic is from, and takes care of signing the relevant details to prove this.
+//! control. To do this, you will typically first create a [`crate::tx::Signer`] instance, which tells
+//! Subxt who the extrinsic is from, and takes care of signing the relevant details to prove this.
 //!
-//! Subxt provides a [`crate::tx::PairSigner`] which implements this trait (if the
-//! `substrate-compat` feature is enabled) which accepts any valid [`sp_core::Pair`] and uses that
-//! to sign transactions:
+//! There are two main ways to create a compatible signer instance:
+//! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
+//! for chains which require sr25519 signatures (requires the `subxt` feature to be enabled).
+//! 2. Alternately, Subxt can use instances of Substrate's [`sp_core::Pair`] to sign things by wrapping
+//! them in a [`crate::tx::PairSigner`] (requires the `substrate-compat` feature to be enabled).
+//!
+//! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
+//! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
+//! need additional signing algorithms that `subxt_signer` doesn't support, and don't care about WASM
+//! compatibility.
+//!
+//! Let's see how to use each of these approaches:
 //!
 //! ```rust
+//! use subxt::config::PolkadotConfig;
+//! use std::str::FromStr;
+//!
+//! //// 1. Use a `subxt_signer` impl:
+//! use subxt_signer::{ SecretUri, sr25519 };
+//!
+//! // Get hold of a `Signer` for a test account:
+//! let alice = sr25519::dev::alice();
+//!
+//! // Or generate a keypair, here from an SURI:
+//! let uri = SecretUri::from_str("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password")
+//!     .expect("valid URI");
+//! let keypair = sr25519::Keypair::from_uri(&uri)
+//!     .expect("valid keypair");
+//!
+//! //// 2. Use the corresponding `sp_core::Pair` impl:
 //! use subxt::tx::PairSigner;
 //! use sp_core::Pair;
-//! use subxt::config::PolkadotConfig;
 //!
-//! // Get hold of a `Signer` given a test account:
-//! let pair = sp_keyring::AccountKeyring::Alice.pair();
-//! let signer = PairSigner::<PolkadotConfig,_>::new(pair);
+//! // Get hold of a `Signer` for a test account:
+//! let alice = sp_keyring::AccountKeyring::Alice.pair();
+//! let alice = PairSigner::<PolkadotConfig,_>::new(alice);
 //!
-//! // Or generate an `sr25519` keypair to use:
-//! let (pair, _, _) = sp_core::sr25519::Pair::generate_with_phrase(Some("password"));
-//! let signer = PairSigner::<PolkadotConfig,_>::new(pair);
+//! // Or generate a keypair, here from an SURI:
+//! let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
+//!     .expect("valid URI");
+//! let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
 //! ```
 //!
-//! See the [`sp_core::Pair`] docs for more ways to generate them.
+//! See the `subxt_signer::sr25519::Keypair` or the [`sp_core::Pair`] docs for more ways to construct
+//! and work with key pairs.
 //!
 //! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
 //! custom signing logic, or you can use some external signing logic, like so:
@@ -118,10 +144,9 @@
 //! let signature;
 //! let address;
 //! # use subxt::tx::Signer;
-//! # let pair = sp_keyring::AccountKeyring::Alice.pair();
-//! # let signer = subxt::tx::PairSigner::<PolkadotConfig,_>::new(pair);
-//! # signature = signer.sign(&signer_payload);
-//! # address = signer.address();
+//! # let signer = subxt_signer::sr25519::dev::alice();
+//! # signature = signer.sign(&signer_payload).into();
+//! # address = signer.public_key().to_address();
 //!
 //! // Now we can build an tx, which one can call `submit` or `submit_and_watch`
 //! // on to submit to a node and optionally watch the status.

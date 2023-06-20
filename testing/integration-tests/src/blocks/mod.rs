@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{pair_signer, test_context, utils::node_runtime};
+use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
-use sp_keyring::AccountKeyring;
 use subxt::blocks::BlocksClient;
 use subxt_metadata::Metadata;
+use subxt_signer::sr25519::dev;
 
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
@@ -122,13 +122,13 @@ async fn decode_extrinsics() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let alice = dev::alice();
+    let bob = dev::bob();
 
     // Generate a block that has unsigned and signed transactions.
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.account_id().clone().into(), 10_000);
+        .transfer(bob.public_key().into(), 10_000);
 
     let signed_extrinsic = api
         .tx()

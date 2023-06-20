@@ -1,0 +1,48 @@
+[package]
+name = "subxt-signer"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Sign extrinsics to be submitted by Subxt"
+keywords = ["parity", "subxt", "extrinsic", "signer"]
+
+[features]
+default = []
+
+# Make the keypair algorithms here compatible with Subxt's Signer trait,
+# so that they can be used to sign transactions for compatible chains.
+subxt = ["dep:subxt"]
+
+# The getrandom package is used via schnorrkel. We need to enable the JS
+# feature on it if compiling for the web.
+web = ["getrandom/js"]
+
+[dependencies]
+regex = { workspace = true }
+subxt = { workspace = true, optional = true }
+hex = { workspace = true }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+sp-core-hashing = { workspace = true }
+thiserror = { workspace = true }
+pbkdf2 = { workspace = true }
+sha2 = { workspace = true }
+hmac = { workspace = true }
+zeroize = { workspace = true }
+bip39 = { workspace = true }
+schnorrkel = { workspace = true }
+secrecy = { workspace = true }
+
+# We only pull this in to enable the JS flag for schnorrkel to use.
+getrandom = { workspace = true, optional = true }
+
+[dev-dependencies]
+sp-core = { workspace = true, features = ["std"] }
+sp-keyring = { workspace = true }

@@ -16,8 +16,6 @@
 //! We can use the statically generated interface to build constant queries:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
-//!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
@@ -27,10 +25,8 @@
 //! Alternately, we can dynamically construct a constant query:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
 //! use subxt::dynamic::Value;
 //!
-//! let account = AccountKeyring::Alice.to_account_id();
 //! let storage_query = subxt::dynamic::constant("System", "BlockLength");
 //! ```
 //!

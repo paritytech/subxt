@@ -15,30 +15,48 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-default = ["jsonrpsee-ws", "substrate-compat"]
+# For dev and documentation reasons we enable more features than are often desired.
+# it's recommended to use `--no-default-features` and then select what you need.
+default = ["jsonrpsee", "native", "substrate-compat"]
 
-# Activate this feature to pull in extra Substrate dependencies which make it
-# possible to provide a proper extrinsic Signer implementation (PairSigner).
+# Enable this for native (ie non web/wasm builds).
+# Exactly 1 of "web" and "native" is expected.
+native = [
+    "jsonrpsee?/async-client",
+    "jsonrpsee?/client-ws-transport"
+]
+
+# Enable this for web/wasm builds.
+# Exactly 1 of "web" and "native" is expected.
+web = [
+    "jsonrpsee?/async-wasm-client",
+    "jsonrpsee?/client-web-transport",
+    "getrandom/js"
+]
+
+# Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
+jsonrpsee = [
+    "dep:jsonrpsee"
+]
+
+# Enable this to pull in extra Substrate dependencies which make it possible to
+# use the `sp_core::crypto::Pair` Signer implementation, as well as adding some
+# `From` impls for types like `AccountId32`. Cannot be used with "web".
 substrate-compat = [
     "sp-core",
     "sp-runtime"
 ]
 
-# Activate this to expose functionality only used for integration testing.
-# The exposed functionality is subject to breaking changes at any point,
-# and should not be relied upon.
-integration-tests = []
-
-# Jsonrpsee if the default RPC provider used in Subxt. However, it can be
-# swapped out for an alternative implementation, and so is optional.
-jsonrpsee-ws = ["jsonrpsee/async-client", "jsonrpsee/client-ws-transport"]
-jsonrpsee-web = ["jsonrpsee/async-wasm-client", "jsonrpsee/client-web-transport"]
-
-# Activate this to fetch and utilize the latest unstabl metadata from a node.
+# Enable this to fetch and utilize the latest unstable metadata from a node.
 # The unstable metadata is subject to breaking changes and the subxt might
 # fail to decode the metadata properly. Use this to experiment with the
 # latest features exposed by the metadata.
 unstable-metadata = []
+
+# Enable this to expose functionality only used for integration testing.
+# The exposed functionality is subject to breaking changes at any point,
+# and should not be relied upon.
+integration-tests = []
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
@@ -66,10 +84,10 @@ sp-core-hashing = { workspace = true }
 base58 = { workspace = true }
 blake2 = { workspace = true }
 
-# Included if one of the jsonrpsee features is enabled.
+# Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
 
-# These are only included is "substrate-compat" is enabled.
+# Included if the "substrate-compat" feature is enabled.
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
 
@@ -77,8 +95,8 @@ sp-runtime = { workspace = true, optional = true }
 subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
 
-[target.wasm32-unknown-unknown.dependencies]
-getrandom = { workspace = true, features = ["js"] }
+# Included if "web" feature is enabled, to enable its js feature.
+getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 bitvec = { workspace = true }
@@ -90,3 +108,4 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
 assert_matches = { workspace = true }
+subxt-signer = { workspace = true, features = ["subxt"] }
