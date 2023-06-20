@@ -7,6 +7,11 @@ use std::ffi::{OsStr, OsString};
 use substrate_runner::SubstrateNode;
 use subxt::{Config, OnlineClient};
 
+#[cfg(feature = "unstable-light-client")]
+use std::sync::Arc;
+#[cfg(feature = "unstable-light-client")]
+use subxt::rpc::LightClientBuilder;
+
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
@@ -73,8 +78,27 @@ impl TestNodeProcessBuilder {
         let proc = node_builder.spawn().map_err(|e| e.to_string())?;
         let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
+        #[cfg(feature = "unstable-light-client")]
+        let bootnode = format!(
+            "/ip4/127.0.0.1/tcp/{}/p2p/{}",
+            proc.p2p_port(),
+            proc.p2p_address()
+        );
+
+        #[cfg(feature = "unstable-light-client")]
+        let light_client = LightClientBuilder::new()
+            .trusted_url("ws://127.0.0.1:9944")
+            .bootnodes([bootnode.as_str()].into_iter())
+            .build()
+            .await
+            .map_err(|e| e.to_string())?;
+        #[cfg(feature = "unstable-light-client")]
+        let client = OnlineClient::from_rpc_client(Arc::new(light_client)).await;
+
         // Connect to the node with a subxt client:
+        #[cfg(not(feature = "unstable-light-client"))]
         let client = OnlineClient::from_url(ws_url.clone()).await;
+
         match client {
             Ok(client) => Ok(TestNodeProcess {
                 _proc: proc,
