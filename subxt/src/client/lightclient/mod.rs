@@ -37,81 +37,47 @@ pub enum LightClientError {
     /// The provided URL is invalid.
     #[error("The provided URL scheme is invalid.")]
     InvalidUrl,
+    /// The provided chain spec is invalid.
+    #[error("The provided chain spec is not a valid JSON object.")]
+    InvalidChainSpec,
     /// Handshake error while connecting to a node.
     #[error("WS handshake failed.")]
     Handshake,
-    /// The configuration provided to the builder is compatible.
-    ///
-    /// The light client can be constructed with either a chain config
-    /// or an URL to a trusted node.
-    #[error("The configuration provided to the builder is compatible. Please provide a chain spec or URL.")]
-    IncompatibleConfig,
 }
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
-pub struct LightClientBuilder<'a> {
-    chain_spec: Option<&'a str>,
+pub struct LightClientBuilder {
     max_pending_requests: NonZeroU32,
     max_subscriptions: u32,
-    database_content: Option<&'a str>,
-    url: Option<&'a str>,
     bootnodes: Option<Vec<String>>,
     potential_relay_chains: Option<Vec<ChainId>>,
 }
 
-impl<'a> Default for LightClientBuilder<'a> {
+impl Default for LightClientBuilder {
     fn default() -> Self {
         Self {
-            chain_spec: None,
             max_pending_requests: NonZeroU32::new(128)
                 .expect("Valid number is greater than zero; qed"),
             max_subscriptions: 1024,
-            database_content: None,
-            url: None,
             bootnodes: None,
             potential_relay_chains: None,
         }
     }
 }
 
-impl<'a> LightClientBuilder<'a> {
+impl LightClientBuilder {
     /// Create a new [`LightClientBuilder`].
-    pub fn new() -> LightClientBuilder<'a> {
+    pub fn new() -> LightClientBuilder {
         LightClientBuilder::default()
-    }
-
-    /// The most important field of the configuration is the chain specification.
-    /// This is a JSON document containing all the information necessary for the client to
-    /// connect to said chain.
-    ///
-    /// The chain spec must be obtained from a trusted entity.
-    ///
-    /// It can be fetched from a trused node with the following command:
-    /// ```bash
-    /// curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
-    /// ```
-    ///
-    /// # Note
-    ///
-    /// For testing environments, please populate the "bootNodes" if the not already provided.
-    ///
-    /// ```json
-    ///   "bootNodes": [
-    ///       "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-    ///    ],
-    /// ```
-    pub fn chain_spec(mut self, chain_spec: &'a str) -> Self {
-        self.chain_spec = Some(chain_spec);
-        self
     }
 
     /// Overwrite the bootnodes of the chain specification.
     ///
     /// Can be used to provide trusted entities to the chian spec, or for
     /// testing environments.
-    pub fn bootnodes(mut self, bootnodes: impl Iterator<Item = &'a str>) -> Self {
-        self.bootnodes = Some(bootnodes.map(Into::into).collect());
+    pub fn bootnodes<'a>(mut self, bootnodes: impl IntoIterator<Item = &'a str>) -> Self {
+        self.bootnodes = Some(bootnodes.into_iter().map(Into::into).collect());
         self
     }
 
@@ -136,15 +102,6 @@ impl<'a> LightClientBuilder<'a> {
         self
     }
 
-    /// After a chain has been added, it is possible to extract a "database" (in the form of a
-    /// simple string). This database can later be passed back the next time the same chain is
-    /// added again.
-    /// A database with an invalid format is simply ignored by the client.
-    pub fn database_content(mut self, database_content: &'a str) -> Self {
-        self.database_content = Some(database_content);
-        self
-    }
-
     /// If the chain spec defines a parachain, contains the list of relay chains to choose
     /// from. Ignored if not a parachain.
     ///
@@ -155,20 +112,9 @@ impl<'a> LightClientBuilder<'a> {
     /// be wrong to connect to the "Kusama" created by user A.
     pub fn potential_relay_chains(
         mut self,
-        potential_relay_chains: impl Iterator<Item = ChainId>,
+        potential_relay_chains: impl IntoIterator<Item = ChainId>,
     ) -> Self {
-        self.potential_relay_chains = Some(potential_relay_chains.collect());
-        self
-    }
-
-    /// The URL of a trusted node from which the chain spec is fetched.
-    ///
-    /// # Note
-    ///
-    /// Incompatible with [`Self::chain_spec`].
-    #[cfg(feature = "jsonrpsee")]
-    pub fn trusted_url(mut self, url: &'a str) -> Self {
-        self.url = Some(url);
+        self.potential_relay_chains = Some(potential_relay_chains.into_iter().collect());
         self
     }
 
@@ -178,14 +124,49 @@ impl<'a> LightClientBuilder<'a> {
     /// ## Panics
     ///
     /// Panics if being called outside of `tokio` runtime context.
-    pub async fn build(self) -> Result<LightClient, Error> {
-        let mut chain_spec = match (self.chain_spec, self.url) {
-            (Some(chain_spec), None) => serde_json::from_str(chain_spec).unwrap(),
-            #[cfg(feature = "jsonrpsee")]
-            (None, Some(url)) => fetch_url(url).await?,
-            _ => return Err(Error::LightClient(LightClientError::IncompatibleConfig)),
-        };
+    #[cfg(feature = "jsonrpsee")]
+    pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient, Error> {
+        let chain_spec = fetch_url(url.as_ref()).await?;
 
+        self.build_client(chain_spec).await
+    }
+
+    /// Build the light client from chain spec.
+    ///
+    /// The most important field of the configuration is the chain specification.
+    /// This is a JSON document containing all the information necessary for the client to
+    /// connect to said chain.
+    ///
+    /// The chain spec must be obtained from a trusted entity.
+    ///
+    /// It can be fetched from a trused node with the following command:
+    /// ```bash
+    /// curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
+    /// ```
+    ///
+    /// # Note
+    ///
+    /// For testing environments, please populate the "bootNodes" if the not already provided.
+    /// See [`Self::bootnodes`] for more details.
+    ///
+    /// ```json
+    ///   "bootNodes": [
+    ///       "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
+    ///    ],
+    /// ```
+    ///
+    /// ## Panics
+    ///
+    /// Panics if being called outside of `tokio` runtime context.
+    pub async fn build(self, chain_spec: &str) -> Result<LightClient, Error> {
+        let chain_spec = serde_json::from_str(chain_spec)
+            .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
+
+        self.build_client(chain_spec).await
+    }
+
+    /// Build the light client.
+    async fn build_client(self, mut chain_spec: serde_json::Value) -> Result<LightClient, Error> {
         // Set custom bootnodes if provided.
         if let Some(bootnodes) = self.bootnodes {
             let bootnodes = bootnodes
@@ -204,7 +185,7 @@ impl<'a> LightClientBuilder<'a> {
                 max_subscriptions: self.max_subscriptions,
             },
             potential_relay_chains: self.potential_relay_chains.unwrap_or_default().into_iter(),
-            database_content: self.database_content.unwrap_or_default(),
+            database_content: "",
             user_data: (),
         };
 
