@@ -60,7 +60,7 @@
 //! ## Example Development Chain
 //!
 //! Similar to the previous example, the Light Client can fetch the chain spec from a running node and
-//! overwrite the bootNodes section. The `jsonrpsee-ws` feature flag exposes the `trusted_url` method:
+//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the `trusted_url` method:
 //!
 //! ```rust,ignore
 //! let light_client = LightClientBuilder::new()
@@ -78,7 +78,7 @@
 //! You can run the example using the following command:
 //!
 //! ```bash
-//! cargo run --example unstable_light_client_tx_basic --features="unstable-light-client jsonrpsee-ws"
+//! cargo run --example unstable_light_client_tx_basic --features="unstable-light-client jsonrpsee"
 //! ```
 //!
 //! ```rust,ignore

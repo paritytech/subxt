@@ -138,7 +138,7 @@ required-features = ["unstable-light-client"]
 [[example]]
 name = "unstable_light_client_tx_basic"
 path = "examples/unstable_light_client_tx_basic.rs"
-required-features = ["unstable-light-client", "jsonrpsee-ws"]
+required-features = ["unstable-light-client", "jsonrpsee"]
 
 [profile.dev.package.smoldot-light]
 opt-level = 2
