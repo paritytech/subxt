@@ -163,10 +163,10 @@ impl<'a> TypeGenerator<'a> {
         parent_type_params: &[TypeParameter],
         original_name: Option<&str>,
     ) -> TypePath {
-        if let Some(parent_type_param) = parent_type_params
-            .iter()
-            .find(|tp| tp.concrete_type_id == id && original_name.map_or(true, |original_name| tp.original_name == original_name))
-        {
+        if let Some(parent_type_param) = parent_type_params.iter().find(|tp| {
+            tp.concrete_type_id == id
+                && original_name.map_or(true, |original_name| tp.original_name == original_name)
+        }) {
             return TypePath::from_parameter(parent_type_param.clone());
         }
 
@@ -315,12 +315,12 @@ impl Module {
     }
 
     /// Returns this `Module`s child `mod`s.
-    pub fn children(&self) -> impl Iterator<Item=(&Ident, &Module)> {
+    pub fn children(&self) -> impl Iterator<Item = (&Ident, &Module)> {
         self.children.iter()
     }
 
     /// Returns the generated types.
-    pub fn types(&self) -> impl Iterator<Item=(&scale_info::Path<PortableForm>, &TypeDefGen)> {
+    pub fn types(&self) -> impl Iterator<Item = (&scale_info::Path<PortableForm>, &TypeDefGen)> {
         self.types.iter()
     }
 

@@ -6,8 +6,9 @@ use frame_metadata::{
     v15::{ExtrinsicMetadata, RuntimeMetadataV15},
     RuntimeMetadataPrefixed,
 };
-use scale_info::{meta_type, IntoPortable, TypeInfo};
+use scale_info::{meta_type, IntoPortable, PortableRegistry, Registry, TypeInfo};
 use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
+use syn::__private::quote;
 
 fn generate_runtime_interface_from_metadata(metadata: RuntimeMetadataPrefixed) -> String {
     // Generate a runtime interface from the provided metadata.
@@ -143,4 +144,76 @@ fn generic_types_overwrite_each_other() {
     assert!(interface.contains("DuplicateType"));
     // We do _not_ expect this to exist, since a generic is present on the type:
     assert!(!interface.contains("DuplicateType2"));
+}
+
+#[test]
+fn more_than_1_generic_parameters_work() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct Foo<T, U, V, W> {
+        a: T,
+        b: U,
+        c: V,
+        d: W,
+    }
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct Bar {
+        p: Foo<u32, u32, u64, u128>,
+        q: Foo<u8, u8, u8, u8>,
+    }
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<Bar>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = subxt_codegen::TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+        CratePath::default(),
+        false,
+    );
+
+    let types = type_gen.generate_types_mod().unwrap();
+    let generated_mod = quote::quote!( #types);
+
+    let expected_mod = quote::quote! {
+    pub mod root {
+        use super::root;
+        pub mod integration_tests {
+            use super::root;
+            pub mod codegen {
+            use super::root;
+                pub mod codegen_tests {
+                        use super::root;
+                        pub struct Bar {
+                            pub p: root::integration_tests::codegen::codegen_tests::Foo<
+                                ::core::primitive::u32,
+                                ::core::primitive::u32,
+                                ::core::primitive::u64,
+                                ::core::primitive::u128
+                            >,
+                            pub q: root::integration_tests::codegen::codegen_tests::Foo<
+                                ::core::primitive::u8,
+                                ::core::primitive::u8,
+                                ::core::primitive::u8,
+                                ::core::primitive::u8
+                            >,
+                        }
+                        pub struct Foo<_0, _1, _2, _3> {
+                            pub a: _0,
+                            pub b: _1,
+                            pub c: _2,
+                            pub d: _3,
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    assert_eq!(generated_mod.to_string(), expected_mod.to_string());
 }

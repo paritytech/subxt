@@ -113,7 +113,7 @@ impl quote::ToTokens for CompositeDef {
                     self.fields,
                     CompositeDefFields::NoFields | CompositeDefFields::Unnamed(_)
                 )
-                    .then(|| quote!(;));
+                .then(|| quote!(;));
 
                 quote! {
                     #derives
@@ -173,7 +173,11 @@ impl CompositeDefFields {
         let mut unnamed_fields = Vec::new();
 
         for field in fields {
-            let type_path = type_gen.resolve_field_type_path(field.ty.id, parent_type_params, field.type_name.as_deref());
+            let type_path = type_gen.resolve_field_type_path(
+                field.ty.id,
+                parent_type_params,
+                field.type_name.as_deref(),
+            );
             let field_type =
                 CompositeDefFieldType::new(field.ty.id, type_path, field.type_name.clone());
 
@@ -198,7 +202,7 @@ impl CompositeDefFields {
     }
 
     /// Returns the set of composite fields.
-    pub fn field_types(&self) -> Box<dyn Iterator<Item=&CompositeDefFieldType> + '_> {
+    pub fn field_types(&self) -> Box<dyn Iterator<Item = &CompositeDefFieldType> + '_> {
         match self {
             Self::NoFields => Box::new([].iter()),
             Self::Named(named_fields) => Box::new(named_fields.iter().map(|(_, f)| f)),
