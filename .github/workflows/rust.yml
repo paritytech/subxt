@@ -195,7 +195,7 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: test
-                  args: --package integration-tests --features unstable-light-client
+                  args: --release --package integration-tests --features unstable-light-client
 
     clippy:
         name: Cargo clippy
