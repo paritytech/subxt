@@ -263,33 +263,29 @@ impl BackgroundTask {
     }
 
     /// Perform the main background task:
-    /// - receiving user registration for RPC method / subscriptions
-    /// - providing the results from the light client back to users.
+    /// - receiving requests from subxt RPC method / subscriptions
+    /// - provides the results from the light client back to users.
     pub async fn start_task(
         &mut self,
-        backend: mpsc::Receiver<BackendMessage>,
-        rpc_responses: smoldot_light::JsonRpcResponses,
+        from_subxt: mpsc::Receiver<BackendMessage>,
+        from_node: smoldot_light::JsonRpcResponses,
     ) {
-        let backend_event = tokio_stream::wrappers::ReceiverStream::new(backend);
-        let rpc_responses_event =
-            futures_util::stream::unfold(rpc_responses, |mut rpc_responses| async {
-                rpc_responses
-                    .next()
-                    .await
-                    .map(|result| (result, rpc_responses))
-            });
+        let from_subxt_event = tokio_stream::wrappers::ReceiverStream::new(from_subxt);
+        let from_node_event = futures_util::stream::unfold(from_node, |mut from_node| async {
+            from_node.next().await.map(|result| (result, from_node))
+        });
 
-        tokio::pin!(backend_event, rpc_responses_event);
+        tokio::pin!(from_subxt_event, from_node_event);
 
-        let mut backend_event_fut = backend_event.next();
-        let mut rpc_responses_fut = rpc_responses_event.next();
+        let mut from_subxt_event_fut = from_subxt_event.next();
+        let mut from_node_event_fut = from_node_event.next();
 
         loop {
-            match future::select(backend_event_fut, rpc_responses_fut).await {
-                // Message received from the backend: user registered.
-                Either::Left((backend_value, previous_fut)) => {
-                    let Some(message) = backend_value else {
-                        tracing::trace!(target: LOG_TARGET, "Frontend channel closed");
+            match future::select(from_subxt_event_fut, from_node_event_fut).await {
+                // Message received from subxt.
+                Either::Left((subxt_message, previous_fut)) => {
+                    let Some(message) = subxt_message else {
+                        tracing::trace!(target: LOG_TARGET, "Subxt channel closed");
                         break;
                     };
                     tracing::trace!(
@@ -300,13 +296,13 @@ impl BackgroundTask {
 
                     self.handle_requests(message).await;
 
-                    backend_event_fut = backend_event.next();
-                    rpc_responses_fut = previous_fut;
+                    from_subxt_event_fut = from_subxt_event.next();
+                    from_node_event_fut = previous_fut;
                 }
                 // Message received from rpc handler: lightclient response.
-                Either::Right((response, previous_fut)) => {
+                Either::Right((node_message, previous_fut)) => {
                     // Smoldot returns `None` if the chain has been removed (which subxt does not remove).
-                    let Some(response) = response else {
+                    let Some(response) = node_message else {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
                         break;
                     };
@@ -319,8 +315,8 @@ impl BackgroundTask {
                     self.handle_rpc_response(response).await;
 
                     // Advance backend, save frontend.
-                    backend_event_fut = previous_fut;
-                    rpc_responses_fut = rpc_responses_event.next();
+                    from_subxt_event_fut = previous_fut;
+                    from_node_event_fut = from_node_event.next();
                 }
             }
         }
