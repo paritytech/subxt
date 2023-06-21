@@ -20,7 +20,7 @@ pub type MethodResponse = Result<Box<RawValue>, LightClientError>;
 /// handle all requests and subscriptions from a chain. A background task is spawned
 /// to multiplex the rpc responses and to provide them back to their rightful submitters.
 #[derive(Debug)]
-pub enum BackendMessage {
+pub enum FromSubxt {
     /// The RPC method request.
     Request {
         /// The method of the request.
@@ -89,9 +89,9 @@ impl BackgroundTask {
     }
 
     /// Handle the registration messages received from the user.
-    async fn handle_requests(&mut self, message: BackendMessage) {
+    async fn handle_requests(&mut self, message: FromSubxt) {
         match message {
-            BackendMessage::Request {
+            FromSubxt::Request {
                 method,
                 params,
                 sender,
@@ -130,7 +130,7 @@ impl BackgroundTask {
                     }
                 }
             }
-            BackendMessage::Subscription {
+            FromSubxt::Subscription {
                 method,
                 params,
                 sub_id,
@@ -267,7 +267,7 @@ impl BackgroundTask {
     /// - provides the results from the light client back to users.
     pub async fn start_task(
         &mut self,
-        from_subxt: mpsc::Receiver<BackendMessage>,
+        from_subxt: mpsc::Receiver<FromSubxt>,
         from_node: smoldot_light::JsonRpcResponses,
     ) {
         let from_subxt_event = tokio_stream::wrappers::ReceiverStream::new(from_subxt);

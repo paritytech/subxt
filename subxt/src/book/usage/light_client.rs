@@ -20,28 +20,13 @@
 //! curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9933/ | jq .result > chain_spec.json
 //! ```
 //!
-//! For development purposes, if the local running node is not part of a development/test network
-//! (i.e., it is the only process started), you need to manually add the following to the spec:
-//!
-//! ```bash
-//! {
-//!    "bootNodes": [
-//!      "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-//!    ],
-//!    "genesis": { ... },
-//! }
-//! ```
-//!
-//! The bootNodes section of the spec identifies the network to which the Light Client is connecting.
-//!
 //! ## Example Live Chain
 //!
 //! You can construct a Light Client from a trusted chain spec stored on disk:
 //!
 //! ```rust,ignore
 //! let light_client = LightClientBuilder::new()
-//!     .chain_spec(include_str!("../artifacts/polkadot_spec.json"))
-//!     .build()
+//!     .build(include_str!("../artifacts/polkadot_spec.json"))
 //!     .await?;
 //! ```
 //!
@@ -60,16 +45,18 @@
 //! ## Example Development Chain
 //!
 //! Similar to the previous example, the Light Client can fetch the chain spec from a running node and
-//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the `trusted_url` method:
+//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the `build_from_url` method.
+//!
+//! For development purposes, if the local running node is not part of a development/test network
+//! (i.e., it is the only process started), you will need to specify the bootnodes.
 //!
 //! ```rust,ignore
 //! let light_client = LightClientBuilder::new()
-//!     .trusted_url("ws://127.0.0.1:9944")
 //!     .bootnodes(
 //!         ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
 //!             .into_iter(),
 //!     )
-//!     .build()
+//!     .build_from_url("ws://127.0.0.1:9944")
 //!     .await?;
 //! ```
 //!

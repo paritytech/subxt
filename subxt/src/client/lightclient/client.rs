@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 use super::{
-    background::{BackendMessage, BackgroundTask, MethodResponse},
+    background::{BackgroundTask, FromSubxt, MethodResponse},
     LightClientError,
 };
 use crate::{
@@ -23,7 +23,7 @@ pub const LOG_TARGET: &str = "light-client";
 pub struct LightClient {
     /// Communicate with the backend task that multiplexes the responses
     /// back to the frontend.
-    to_backend: mpsc::Sender<BackendMessage>,
+    to_backend: mpsc::Sender<FromSubxt>,
 }
 
 impl LightClient {
@@ -75,11 +75,11 @@ impl LightClient {
         &self,
         method: String,
         params: String,
-    ) -> Result<oneshot::Receiver<MethodResponse>, SendError<BackendMessage>> {
+    ) -> Result<oneshot::Receiver<MethodResponse>, SendError<FromSubxt>> {
         let (sender, receiver) = oneshot::channel();
 
         self.to_backend
-            .send(BackendMessage::Request {
+            .send(FromSubxt::Request {
                 method,
                 params,
                 sender,
@@ -102,13 +102,13 @@ impl LightClient {
             oneshot::Receiver<MethodResponse>,
             mpsc::Receiver<Box<RawValue>>,
         ),
-        SendError<BackendMessage>,
+        SendError<FromSubxt>,
     > {
         let (sub_id, sub_id_rx) = oneshot::channel();
         let (sender, receiver) = mpsc::channel(128);
 
         self.to_backend
-            .send(BackendMessage::Subscription {
+            .send(FromSubxt::Subscription {
                 method,
                 params,
                 sub_id,
