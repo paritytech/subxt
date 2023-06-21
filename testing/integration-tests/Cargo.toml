@@ -39,3 +39,4 @@ tracing-subscriber = { workspace = true }
 wabt = { workspace = true }
 which = { workspace = true }
 substrate-runner = { workspace = true }
+sp-runtime = { workspace = true }

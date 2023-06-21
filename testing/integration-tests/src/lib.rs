@@ -27,6 +27,10 @@ use test_runtime::node_runtime;
 #[cfg(test)]
 use utils::*;
 
+// The sp_runtime dependency is used for non light-client tests.
+#[cfg(test)]
+use sp_runtime as _;
+
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test
 // to enable tracing for it:
