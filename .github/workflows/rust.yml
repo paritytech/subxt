@@ -167,7 +167,7 @@ jobs:
                   args: run --workspace
 
     nonwasm_light_client_tests:
-        name: "Test non-wasm Light Client"
+        name: "Test Light Client"
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
@@ -195,7 +195,7 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: test
-                  args: --package integration-tests --features unstable-light-client
+                  args: --package integration-tests --features unstable-light-client -- --test-threads=2
 
     clippy:
         name: Cargo clippy
