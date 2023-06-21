@@ -20,7 +20,7 @@ mod from_into;
 mod utils;
 
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
@@ -137,6 +137,16 @@ impl Metadata {
         G: FnMut(&str) -> bool,
     {
         utils::retain::retain_metadata(self, pallet_filter, api_filter);
+    }
+
+    /// Get type hash for a type in the registry
+    pub fn type_hash(&self, id: u32) -> Option<[u8; 32]> {
+        self.types.resolve(id)?;
+        Some(crate::utils::validation::get_type_hash(
+            &self.types,
+            id,
+            &mut HashSet::<u32>::new(),
+        ))
     }
 }
 
@@ -303,8 +313,8 @@ impl StorageMetadata {
     }
 
     /// An iterator over the storage entries.
-    pub fn entries(&self) -> impl ExactSizeIterator<Item = &StorageEntryMetadata> {
-        self.entries.values().iter()
+    pub fn entries(&self) -> &[StorageEntryMetadata] {
+        self.entries.values()
     }
 
     /// Return a specific storage entry given its name.
@@ -387,7 +397,7 @@ pub enum StorageHasher {
 }
 
 /// Is the storage entry optional, or does it have a default value.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum StorageEntryModifier {
     /// The storage entry returns an `Option<T>`, with `None` if the key is not present.
     Optional,
@@ -490,7 +500,7 @@ pub struct RuntimeApiMetadata<'a> {
 
 impl<'a> RuntimeApiMetadata<'a> {
     /// Trait name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
     /// Trait documentation.
@@ -508,6 +518,11 @@ impl<'a> RuntimeApiMetadata<'a> {
     /// Return a hash for the constant, or None if it was not found.
     pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
         crate::utils::validation::get_runtime_api_hash(self, method_name)
+    }
+
+    /// Return a hash for the runtime API trait.
+    pub fn hash(&self) -> [u8; 32] {
+        crate::utils::validation::get_runtime_trait_hash(*self)
     }
 }
 
