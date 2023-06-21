@@ -19,6 +19,9 @@ use subxt::{
     },
     utils::AccountId32,
 };
+
+#[cfg(feature = "unstable-light-client")]
+use subxt::client::{OfflineClientT, OnlineClientT};
 use subxt::{
     error::{DispatchError, Error},
     rpc::types::FollowEvent,

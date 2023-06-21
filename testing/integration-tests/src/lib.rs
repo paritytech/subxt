@@ -38,3 +38,9 @@ use sp_runtime as _;
 // tracing_subscriber::fmt::init();
 #[cfg(test)]
 use tracing_subscriber as _;
+
+// The following are used by `contracts` tests disabled for lightclient.
+#[cfg(test)]
+use tracing as _;
+#[cfg(test)]
+use wabt as _;

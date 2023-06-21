@@ -13,8 +13,11 @@
 //! This feature is experimental and things might break without notice.
 
 use futures::StreamExt;
-use std::sync::Arc;
-use subxt::{client::LightClientBuilder, rpc::types::FollowEvent, OnlineClient, PolkadotConfig};
+use subxt::{
+    client::{LightClient, LightClientBuilder, OfflineClientT, OnlineClientT},
+    rpc::types::FollowEvent,
+    PolkadotConfig,
+};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -25,14 +28,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     // Create a light client from the provided chain spec.
-    let light_client = LightClientBuilder::new()
+    let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .bootnodes(
             ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
                 .into_iter(),
         )
         .build_from_url("ws://127.0.0.1:9944")
         .await?;
-    let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;
 
     // Subscribe to the latest 3 finalized blocks.
     {

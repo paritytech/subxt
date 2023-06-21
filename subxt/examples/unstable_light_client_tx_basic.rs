@@ -1,7 +1,9 @@
 use sp_keyring::AccountKeyring;
-use std::sync::Arc;
-use subxt::client::LightClientBuilder;
-use subxt::{tx::PairSigner, OnlineClient, PolkadotConfig};
+use subxt::{
+    client::{LightClient, LightClientBuilder, OfflineClientT},
+    tx::PairSigner,
+    PolkadotConfig,
+};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -18,14 +20,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The `12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp` is the P2P address
     // from a local polkadot node starting with
     // `--node-key 0000000000000000000000000000000000000000000000000000000000000001`
-    let light_client = LightClientBuilder::new()
+    let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .bootnodes(
             ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
                 .into_iter(),
         )
         .build_from_url("ws://127.0.0.1:9944")
         .await?;
-    let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;
 
     // Build a balance transfer extrinsic.
     let dest = AccountKeyring::Bob.to_account_id().into();

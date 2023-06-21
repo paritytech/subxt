@@ -3,6 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context};
+#[cfg(feature = "unstable-light-client")]
+use subxt::client::OfflineClientT;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 

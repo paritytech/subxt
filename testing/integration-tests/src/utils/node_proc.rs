@@ -7,15 +7,18 @@ use substrate_runner::SubstrateNode;
 use subxt::{Config, OnlineClient};
 
 #[cfg(feature = "unstable-light-client")]
-use std::sync::Arc;
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::LightClientBuilder;
+use subxt::client::{LightClient, LightClientBuilder};
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
     _proc: SubstrateNode,
+
+    #[cfg(not(feature = "unstable-light-client"))]
     client: OnlineClient<R>,
+
+    #[cfg(feature = "unstable-light-client")]
+    client: LightClient<R>,
 }
 
 impl<R> TestNodeProcess<R>
@@ -31,7 +34,14 @@ where
     }
 
     /// Returns the subxt client connected to the running node.
+    #[cfg(not(feature = "unstable-light-client"))]
     pub fn client(&self) -> OnlineClient<R> {
+        self.client.clone()
+    }
+
+    /// Returns the subxt client connected to the running node.
+    #[cfg(feature = "unstable-light-client")]
+    pub fn client(&self) -> LightClient<R> {
         self.client.clone()
     }
 }
@@ -94,7 +104,7 @@ impl TestNodeProcessBuilder {
 }
 
 #[cfg(feature = "unstable-light-client")]
-async fn build_light_client<R: Config>(proc: &SubstrateNode) -> Result<OnlineClient<R>, String> {
+async fn build_light_client<R: Config>(proc: &SubstrateNode) -> Result<LightClient<R>, String> {
     // RPC endpoint.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
@@ -113,13 +123,9 @@ async fn build_light_client<R: Config>(proc: &SubstrateNode) -> Result<OnlineCli
         proc.p2p_address()
     );
 
-    let light_client = LightClientBuilder::new()
+    LightClientBuilder::new()
         .bootnodes([bootnode.as_str()].into_iter())
         .build_from_url(ws_url.as_str())
-        .await
-        .map_err(|e| format!("Failed to construct light client {}", e.to_string()))?;
-
-    OnlineClient::<R>::from_rpc_client(Arc::new(light_client))
         .await
         .map_err(|e| format!("Failed to construct light client {}", e.to_string()))
 }

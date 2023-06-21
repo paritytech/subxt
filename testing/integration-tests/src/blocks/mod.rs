@@ -9,6 +9,9 @@ use subxt::blocks::BlocksClient;
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
+#[cfg(feature = "unstable-light-client")]
+use subxt::client::{OfflineClientT, OnlineClientT};
+
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
 async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {

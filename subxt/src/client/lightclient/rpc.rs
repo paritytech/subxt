@@ -1,6 +1,7 @@
 // Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
+
 use super::{
     background::{BackgroundTask, FromSubxt, MethodResponse},
     LightClientError,
@@ -18,16 +19,16 @@ use tokio_stream::wrappers::ReceiverStream;
 
 pub const LOG_TARGET: &str = "light-client";
 
-/// The light-client implementation that is used to connect with the chain.
+/// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
-pub struct LightClient {
+pub struct LightClientRpc {
     /// Communicate with the backend task that multiplexes the responses
     /// back to the frontend.
     to_backend: mpsc::Sender<FromSubxt>,
 }
 
-impl LightClient {
-    /// Constructs a new [`LightClient`], providing the chain specification.
+impl LightClientRpc {
+    /// Constructs a new [`LightClientRpc`], providing the chain specification.
     ///
     /// The chain specification can be downloaded from a trusted network via
     /// the `sync_state_genSyncSpec` RPC method. This parameter expects the
@@ -39,7 +40,7 @@ impl LightClient {
     /// Panics if being called outside of `tokio` runtime context.
     pub fn new(
         config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
-    ) -> Result<LightClient, Error> {
+    ) -> Result<LightClientRpc, Error> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
         let mut client = smoldot_light::Client::new(Platform::new(
@@ -64,7 +65,7 @@ impl LightClient {
             task.start_task(backend, rpc_responses).await;
         });
 
-        Ok(LightClient { to_backend })
+        Ok(LightClientRpc { to_backend })
     }
 
     /// Submits an RPC method request to the light-client.
@@ -120,7 +121,7 @@ impl LightClient {
     }
 }
 
-impl RpcClientT for LightClient {
+impl RpcClientT for LightClientRpc {
     fn request_raw<'a>(
         &'a self,
         method: &'a str,

@@ -4,6 +4,9 @@
 
 use crate::{node_runtime, test_context};
 
+#[cfg(feature = "unstable-light-client")]
+use subxt::client::OfflineClientT;
+
 #[tokio::test]
 async fn storage_get_current_timestamp() {
     let ctx = test_context().await;
