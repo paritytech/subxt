@@ -77,21 +77,7 @@ impl TestNodeProcessBuilder {
         let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
         #[cfg(feature = "unstable-light-client")]
-        let bootnode = format!(
-            "/ip4/127.0.0.1/tcp/{}/p2p/{}",
-            proc.p2p_port(),
-            proc.p2p_address()
-        );
-
-        #[cfg(feature = "unstable-light-client")]
-        let light_client = LightClientBuilder::new()
-            .trusted_url("ws://127.0.0.1:9944")
-            .bootnodes([bootnode.as_str()].into_iter())
-            .build()
-            .await
-            .map_err(|e| e.to_string())?;
-        #[cfg(feature = "unstable-light-client")]
-        let client = OnlineClient::from_rpc_client(Arc::new(light_client)).await;
+        let client = build_light_client(proc).await;
 
         // Connect to the node with a subxt client:
         #[cfg(not(feature = "unstable-light-client"))]
@@ -105,4 +91,25 @@ impl TestNodeProcessBuilder {
             Err(err) => Err(format!("Failed to connect to node rpc at {ws_url}: {err}")),
         }
     }
+}
+
+#[cfg(feature = "unstable-light-client")]
+async fn build_light_client<R: Config>(proc: SubstrateNode) -> Result<OnlineClient<R>, Error> {
+    // RPC endpoint.
+    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+
+    // P2p bootnode.
+    let bootnode = format!(
+        "/ip4/127.0.0.1/tcp/{}/p2p/{}",
+        proc.p2p_port(),
+        proc.p2p_address()
+    );
+
+    let light_client = LightClientBuilder::new()
+        .bootnodes([bootnode.as_str()].into_iter())
+        .build_from_url(ws_url.as_str())
+        .await
+        .map_err(|e| e.to_string())?;
+
+    OnlineClient::from_rpc_client(Arc::new(light_client)).await
 }
