@@ -25,9 +25,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     // Create a light client from the provided chain spec.
-    // Note: this connects to the live polkadot chain.
     let light_client = LightClientBuilder::new()
-        .build(include_str!("../artifacts/polkadot_spec.json"))
+        .bootnodes(
+            ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
+                .into_iter(),
+        )
+        .build_from_url("ws://127.0.0.1:9944")
         .await?;
     let api = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(light_client)).await?;
 

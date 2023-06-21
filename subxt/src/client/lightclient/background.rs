@@ -214,8 +214,11 @@ impl BackgroundTask {
                         );
                     }
                 } else if let Some((sub_id_sender, sender)) = self.id_to_subscription.remove(&id) {
-                    let mut sub_id = result.to_string();
-                    sub_id.retain(|ch| ch.is_ascii_digit());
+                    let sub_id = result
+                        .get()
+                        .trim_start_matches('"')
+                        .trim_end_matches('"')
+                        .to_string();
                     tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
 
                     if sub_id_sender.send(Ok(result)).is_err() {

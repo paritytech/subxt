@@ -190,8 +190,11 @@ impl RpcClientT for LightClient {
                     RpcError::ClientError(Box::new(LightClientError::Request(err.to_string())))
                 })?;
 
-            let mut sub_id = result.to_string();
-            sub_id.retain(|ch| ch.is_ascii_digit());
+            let sub_id = result
+                .get()
+                .trim_start_matches('"')
+                .trim_end_matches('"')
+                .to_string();
             tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
 
             let stream = ReceiverStream::new(notif);
@@ -202,7 +205,7 @@ impl RpcClientT for LightClient {
 
             let rpc_subscription: RpcSubscription = RpcSubscription {
                 stream: rpc_substription_stream,
-                id: Some(sub_id.to_string()),
+                id: Some(sub_id),
             };
 
             Ok(rpc_subscription)
