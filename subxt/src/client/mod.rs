@@ -11,6 +11,9 @@
 mod offline_client;
 mod online_client;
 
+#[cfg(feature = "unstable-light-client")]
+mod lightclient;
+
 pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
@@ -18,3 +21,6 @@ pub use online_client::{
 
 #[cfg(feature = "jsonrpsee")]
 pub use online_client::default_rpc_client;
+
+#[cfg(feature = "unstable-light-client")]
+pub use lightclient::{LightClient, LightClientBuilder, LightClientError};

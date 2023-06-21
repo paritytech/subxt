@@ -14,10 +14,7 @@
 
 use futures::StreamExt;
 use std::sync::Arc;
-use subxt::{
-    rpc::{types::FollowEvent, LightClientBuilder},
-    OnlineClient, PolkadotConfig,
-};
+use subxt::{client::LightClientBuilder, rpc::types::FollowEvent, OnlineClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]

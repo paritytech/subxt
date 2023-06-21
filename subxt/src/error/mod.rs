@@ -9,7 +9,7 @@ mod dispatch_error;
 use core::fmt::Debug;
 
 #[cfg(feature = "unstable-light-client")]
-pub use crate::rpc::LightClientError;
+pub use crate::client::LightClientError;
 
 // Re-export dispatch error types:
 pub use dispatch_error::{

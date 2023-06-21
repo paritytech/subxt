@@ -9,7 +9,7 @@ use subxt::{Config, OnlineClient};
 #[cfg(feature = "unstable-light-client")]
 use std::sync::Arc;
 #[cfg(feature = "unstable-light-client")]
-use subxt::rpc::LightClientBuilder;
+use subxt::client::LightClientBuilder;
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
