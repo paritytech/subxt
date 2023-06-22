@@ -27,15 +27,15 @@
 //! For more context see: https://github.com/tokio-rs/tokio/issues/2374.
 //!
 
-use crate::{test_context, utils::node_runtime};
+use crate::utils::node_runtime;
 use codec::{Compact, Encode};
 use futures::StreamExt;
-use subxt::client::{LightClient, OfflineClientT, OnlineClientT};
-use subxt::config::SubstrateConfig;
-use subxt::rpc::types::FollowEvent;
-use subxt::utils::AccountId32;
+use subxt::{
+    client::{LightClient, LightClientBuilder, OfflineClientT, OnlineClientT},
+    config::PolkadotConfig,
+    rpc::types::FollowEvent,
+};
 use subxt_metadata::Metadata;
-use subxt_signer::sr25519::dev;
 
 // We don't use these dependencies.
 use assert_matches as _;
@@ -44,13 +44,17 @@ use hex as _;
 use regex as _;
 use scale_info as _;
 use sp_core as _;
+use sp_runtime as _;
 use subxt_codegen as _;
+use subxt_signer as _;
 use syn as _;
+use tracing as _;
+use wabt as _;
+
+type Client = LightClient<PolkadotConfig>;
 
 // Check that we can subscribe to non-finalized blocks.
-async fn non_finalized_headers_subscription(
-    api: &LightClient<SubstrateConfig>,
-) -> Result<(), subxt::Error> {
+async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_best().await?;
     let header = sub.next().await.unwrap()?;
     let block_hash = header.hash();
@@ -66,9 +70,7 @@ async fn non_finalized_headers_subscription(
 }
 
 // Check that we can subscribe to finalized blocks.
-async fn finalized_headers_subscription(
-    api: &LightClient<SubstrateConfig>,
-) -> Result<(), subxt::Error> {
+async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_finalized().await?;
     let header = sub.next().await.unwrap()?;
     let finalized_hash = api.rpc().finalized_head().await?;
@@ -83,7 +85,7 @@ async fn finalized_headers_subscription(
 }
 
 // Check that we can subscribe to non-finalized blocks.
-async fn runtime_api_call(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_best().await?;
 
     let block = sub.next().await.unwrap()?;
@@ -103,48 +105,8 @@ async fn runtime_api_call(api: &LightClient<SubstrateConfig>) -> Result<(), subx
     Ok(())
 }
 
-// Fetch the account nonce of Alice using the runtime API before
-// and after submitting an extrinsic.
-async fn runtime_api_account_nonce(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
-    let alice = dev::alice();
-    let alice_account_id: AccountId32 = alice.public_key().into();
-
-    // Check Alice nonce is starting from 0.
-    let runtime_api_call = node_runtime::apis()
-        .account_nonce_api()
-        .account_nonce(alice_account_id.clone());
-    let nonce = api
-        .runtime_api()
-        .at_latest()
-        .await?
-        .call(runtime_api_call)
-        .await?;
-    assert_eq!(nonce, 0);
-
-    // Do some transaction to bump the Alice nonce to 1:
-    let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
-    api.tx()
-        .sign_and_submit_then_watch_default(&remark_tx, &alice)
-        .await?
-        .wait_for_finalized_success()
-        .await?;
-
-    let runtime_api_call = node_runtime::apis()
-        .account_nonce_api()
-        .account_nonce(alice_account_id);
-    let nonce = api
-        .runtime_api()
-        .at_latest()
-        .await?
-        .call(runtime_api_call)
-        .await?;
-    assert_eq!(nonce, 1);
-
-    Ok(())
-}
-
 // Lookup for the `Timestamp::now` plain storage entry.
-async fn storage_plain_lookup(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
     let addr = node_runtime::storage().timestamp().now();
     let entry = api
         .storage()
@@ -159,7 +121,7 @@ async fn storage_plain_lookup(api: &LightClient<SubstrateConfig>) -> Result<(), 
 
 // Subscribe to produced blocks using the `ChainHead` spec V2 and fetch the header of
 // just a few reported blocks.
-async fn follow_chain_head(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn follow_chain_head(api: &Client) -> Result<(), subxt::Error> {
     let mut blocks = api.rpc().chainhead_unstable_follow(false).await?;
     let sub_id = blocks
         .subscription_id()
@@ -189,7 +151,7 @@ async fn follow_chain_head(api: &LightClient<SubstrateConfig>) -> Result<(), sub
 }
 
 // Make a dynamic constant query for `System::BlockLenght`.
-async fn dynamic_constant_query(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     let constant_query = subxt::dynamic::constant("System", "BlockLength");
     let _value = api.constants().at(&constant_query)?;
 
@@ -197,7 +159,7 @@ async fn dynamic_constant_query(api: &LightClient<SubstrateConfig>) -> Result<()
 }
 
 // Fetch a few all events from the latest block and decode them dynamically.
-async fn dynamic_events(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     let events = api.events().at_latest().await?;
 
     for event in events.iter() {
@@ -208,7 +170,7 @@ async fn dynamic_events(api: &LightClient<SubstrateConfig>) -> Result<(), subxt:
 }
 
 // Make a few raw RPC calls to the chain.
-async fn various_rpc_calls(api: &LightClient<SubstrateConfig>) -> Result<(), subxt::Error> {
+async fn various_rpc_calls(api: &Client) -> Result<(), subxt::Error> {
     let _system_chain = api.rpc().system_chain().await?;
     let _system_name = api.rpc().system_name().await?;
     let _finalized_hash = api.rpc().finalized_head().await?;
@@ -218,15 +180,13 @@ async fn various_rpc_calls(api: &LightClient<SubstrateConfig>) -> Result<(), sub
 
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
-    tracing_subscriber::fmt::init();
-
-    let ctx = test_context().await;
-    let api = ctx.client();
+    let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
+        .build_from_url("wss://rpc.polkadot.io:443")
+        .await?;
 
     non_finalized_headers_subscription(&api).await?;
     finalized_headers_subscription(&api).await?;
     runtime_api_call(&api).await?;
-    runtime_api_account_nonce(&api).await?;
     storage_plain_lookup(&api).await?;
     follow_chain_head(&api).await?;
     dynamic_constant_query(&api).await?;

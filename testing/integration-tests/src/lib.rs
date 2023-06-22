@@ -27,12 +27,8 @@ mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
-#[cfg(test)]
+#[cfg(all(test, feature = "unstable-light-client"))]
 use utils::*;
-
-// The sp_runtime dependency is used for non light-client tests.
-#[cfg(test)]
-use sp_runtime as _;
 
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test
@@ -41,9 +37,3 @@ use sp_runtime as _;
 // tracing_subscriber::fmt::init();
 #[cfg(test)]
 use tracing_subscriber as _;
-
-// The following are used by `contracts` tests disabled for lightclient.
-#[cfg(test)]
-use tracing as _;
-#[cfg(test)]
-use wabt as _;
