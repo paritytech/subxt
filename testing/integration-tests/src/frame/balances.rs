@@ -7,8 +7,6 @@ use crate::{
     test_context,
 };
 use codec::Decode;
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::OfflineClientT;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     utils::{AccountId32, MultiAddress},

@@ -10,8 +10,6 @@ use crate::{
     },
     test_context,
 };
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::OfflineClientT;
 use subxt_signer::sr25519::dev;
 
 type Call = runtime_types::kitchensink_runtime::RuntimeCall;

@@ -6,9 +6,6 @@ use crate::{node_runtime, test_context, utils::wait_for_blocks};
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::OfflineClientT;
-
 #[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;

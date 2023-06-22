@@ -11,11 +11,4 @@ pub async fn wait_for_blocks<C: Config>(api: &impl OnlineClientT<C>) {
     let mut sub = api.rpc().subscribe_all_block_headers().await.unwrap();
     sub.next().await;
     sub.next().await;
-
-    #[cfg(feature = "unstable-light-client")]
-    {
-        sub.next().await;
-        sub.next().await;
-        sub.next().await;
-    }
 }

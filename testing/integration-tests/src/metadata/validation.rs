@@ -3,9 +3,6 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context, TestContext};
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::OfflineClientT;
-
 use frame_metadata::v15::{
     ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
     RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,

@@ -2,35 +2,24 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{test_context, utils::node_runtime};
-#[cfg(not(feature = "unstable-light-client"))]
-use crate::{test_context_with, utils::wait_for_blocks};
-#[cfg(not(feature = "unstable-light-client"))]
+use crate::{
+    test_context, test_context_with,
+    utils::{node_runtime, wait_for_blocks},
+};
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
-#[cfg(not(feature = "unstable-light-client"))]
 use sp_core::storage::well_known_keys;
-#[cfg(not(feature = "unstable-light-client"))]
 use subxt::{
-    error::TokenError,
+    error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent, DryRunResult, DryRunResultBytes, Initialized, RuntimeEvent,
+        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
         RuntimeVersionEvent,
     },
     utils::AccountId32,
 };
-
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::{OfflineClientT, OnlineClientT};
-use subxt::{
-    error::{DispatchError, Error},
-    rpc::types::FollowEvent,
-};
-
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn insert_key() {
     let ctx = test_context_with("bob".to_string()).await;
@@ -67,7 +56,6 @@ async fn fetch_block() {
     api.rpc().block(block_hash).await.unwrap();
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn fetch_read_proof() {
     let ctx = test_context().await;
@@ -130,7 +118,6 @@ async fn fetch_keys() {
     assert_eq!(keys.len(), 4)
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn test_iter() {
     let ctx = test_context().await;
@@ -152,7 +139,6 @@ async fn test_iter() {
     assert_eq!(i, 13);
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn fetch_system_info() {
     let ctx = test_context().await;
@@ -163,7 +149,6 @@ async fn fetch_system_info() {
     assert!(!api.rpc().system_version().await.unwrap().is_empty());
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_passes() {
     let ctx = test_context().await;
@@ -198,7 +183,6 @@ async fn dry_run_passes() {
         .unwrap();
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_fails() {
     let ctx = test_context().await;
@@ -249,7 +233,6 @@ async fn dry_run_fails() {
     );
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn dry_run_result_is_substrate_compatible() {
     use sp_runtime::{
@@ -451,7 +434,6 @@ async fn rpc_state_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_follow() {
     let ctx = test_context().await;
@@ -488,7 +470,6 @@ async fn chainhead_unstable_follow() {
     );
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_body() {
     let ctx = test_context().await;
@@ -546,7 +527,6 @@ async fn chainhead_unstable_header() {
     assert_eq!(header, expected);
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_storage() {
     let ctx = test_context().await;
@@ -574,7 +554,6 @@ async fn chainhead_unstable_storage() {
     assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.result.is_some());
 }
 
-#[cfg(not(feature = "unstable-light-client"))]
 #[tokio::test]
 async fn chainhead_unstable_call() {
     let ctx = test_context().await;

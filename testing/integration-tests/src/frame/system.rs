@@ -7,8 +7,6 @@ use crate::{
     test_context,
 };
 use assert_matches::assert_matches;
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::OfflineClientT;
 use subxt_signer::sr25519::dev;
 
 #[tokio::test]

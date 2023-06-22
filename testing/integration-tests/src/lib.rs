@@ -4,23 +4,26 @@
 
 #![deny(unused_crate_dependencies)]
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod codegen;
 #[cfg(test)]
 mod utils;
 
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod blocks;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod client;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod frame;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod metadata;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod runtime_api;
-#[cfg(test)]
+#[cfg(all(test, not(feature = "unstable-light-client")))]
 mod storage;
+
+#[cfg(all(test, feature = "unstable-light-client"))]
+mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
