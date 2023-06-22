@@ -20,35 +20,12 @@
 //! curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9933/ | jq .result > chain_spec.json
 //! ```
 //!
-//! ## Example Live Chain
+//! ## Example
 //!
-//! You can construct a Light Client from a trusted chain spec stored on disk:
-//!
-//! ```rust,ignore
-//! let light_client = LightClientBuilder::new()
-//!     .build(include_str!("../artifacts/polkadot_spec.json"))
-//!     .await?;
-//! ```
-//!
-//! The following example connects to the live Polkadot chain and performs several queries using the Light Client.
-//!
-//! You can run the example using the following command:
-//!
-//! ```bash
-//! cargo run --example unstable_light_client_tx_basic --features="unstable-light-client"
-//! ```
-//!
-//! ```rust,ignore
-#![doc = include_str!("../../../examples/unstable_light_client.rs")]
-//! ```
-//!
-//! ## Example Development Chain
-//!
-//! Similar to the previous example, the Light Client can fetch the chain spec from a running node and
-//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the `build_from_url` method.
-//!
-//! For development purposes, if the local running node is not part of a development/test network
-//! (i.e., it is the only process started), you will need to specify the bootnodes.
+//! You can construct a Light Client from a trusted chain spec stored on disk.
+//! Similary, the Light Client can fetch the chain spec from a running node and
+//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the
+//! `build_from_url` method.
 //!
 //! ```rust,ignore
 //! let light_client = LightClientBuilder::new()
