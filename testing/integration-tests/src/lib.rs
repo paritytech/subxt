@@ -27,7 +27,7 @@ mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
-#[cfg(all(test, feature = "unstable-light-client"))]
+#[cfg(test)]
 use utils::*;
 
 // We don't use this dependency, but it's here so that we
