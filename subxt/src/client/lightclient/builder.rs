@@ -21,7 +21,7 @@ use std::sync::Arc;
 pub struct LightClientBuilder {
     max_pending_requests: NonZeroU32,
     max_subscriptions: u32,
-    bootnodes: Option<Vec<String>>,
+    bootnodes: Option<Vec<serde_json::Value>>,
     potential_relay_chains: Option<Vec<ChainId>>,
 }
 
@@ -146,10 +146,6 @@ impl LightClientBuilder {
     ) -> Result<LightClient<T>, Error> {
         // Set custom bootnodes if provided.
         if let Some(bootnodes) = self.bootnodes {
-            let bootnodes = bootnodes
-                .into_iter()
-                .map(serde_json::Value::String)
-                .collect();
             if let serde_json::Value::Object(map) = &mut chain_spec {
                 map.insert("bootNodes".to_string(), serde_json::Value::Array(bootnodes));
             }
