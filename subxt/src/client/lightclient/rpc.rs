@@ -15,7 +15,7 @@ use serde_json::value::RawValue;
 use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket as Platform, ChainId};
 use std::pin::Pin;
 use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
-use tokio_stream::wrappers::ReceiverStream;
+use tokio_stream::wrappers::UnboundedReceiverStream;
 
 pub const LOG_TARGET: &str = "light-client";
 
@@ -24,7 +24,7 @@ pub const LOG_TARGET: &str = "light-client";
 pub struct LightClientRpc {
     /// Communicate with the backend task that multiplexes the responses
     /// back to the frontend.
-    to_backend: mpsc::Sender<FromSubxt>,
+    to_backend: mpsc::UnboundedSender<FromSubxt>,
 }
 
 impl LightClientRpc {
@@ -55,7 +55,7 @@ impl LightClientRpc {
             .add_chain(config)
             .map_err(|err| LightClientError::AddChainError(err.to_string()))?;
 
-        let (to_backend, backend) = mpsc::channel(128);
+        let (to_backend, backend) = mpsc::unbounded_channel();
 
         // `json_rpc_responses` can only be `None` if we had passed `json_rpc: Disabled`.
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
@@ -72,20 +72,18 @@ impl LightClientRpc {
     ///
     /// This method sends a request to the light-client to execute an RPC method with the provided parameters.
     /// The parameters are parsed into a valid JSON object in the background.
-    async fn method_request(
+    fn method_request(
         &self,
         method: String,
         params: String,
     ) -> Result<oneshot::Receiver<MethodResponse>, SendError<FromSubxt>> {
         let (sender, receiver) = oneshot::channel();
 
-        self.to_backend
-            .send(FromSubxt::Request {
-                method,
-                params,
-                sender,
-            })
-            .await?;
+        self.to_backend.send(FromSubxt::Request {
+            method,
+            params,
+            sender,
+        })?;
 
         Ok(receiver)
     }
@@ -94,28 +92,26 @@ impl LightClientRpc {
     ///
     /// This method sends a request to the light-client to establish an RPC subscription with the provided parameters.
     /// The parameters are parsed into a valid JSON object in the background.
-    async fn subscription_request(
+    fn subscription_request(
         &self,
         method: String,
         params: String,
     ) -> Result<
         (
             oneshot::Receiver<MethodResponse>,
-            mpsc::Receiver<Box<RawValue>>,
+            mpsc::UnboundedReceiver<Box<RawValue>>,
         ),
         SendError<FromSubxt>,
     > {
         let (sub_id, sub_id_rx) = oneshot::channel();
-        let (sender, receiver) = mpsc::channel(128);
+        let (sender, receiver) = mpsc::unbounded_channel();
 
-        self.to_backend
-            .send(FromSubxt::Subscription {
-                method,
-                params,
-                sub_id,
-                sender,
-            })
-            .await?;
+        self.to_backend.send(FromSubxt::Subscription {
+            method,
+            params,
+            sub_id,
+            sender,
+        })?;
 
         Ok((sub_id_rx, receiver))
     }
@@ -140,7 +136,6 @@ impl RpcClientT for LightClientRpc {
             // Fails if the background is closed.
             let rx = client
                 .method_request(method.to_string(), params)
-                .await
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
             // Fails if the background is closed.
@@ -180,7 +175,6 @@ impl RpcClientT for LightClientRpc {
             // Fails if the background is closed.
             let (sub_id, notif) = client
                 .subscription_request(sub.to_string(), params)
-                .await
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
             // Fails if the background is closed.
@@ -198,7 +192,7 @@ impl RpcClientT for LightClientRpc {
                 .to_string();
             tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
 
-            let stream = ReceiverStream::new(notif);
+            let stream = UnboundedReceiverStream::new(notif);
 
             let rpc_substription_stream: Pin<
                 Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,

@@ -46,7 +46,7 @@ pub enum FromSubxt {
         /// Channel used to send back the subscription ID if successful.
         sub_id: oneshot::Sender<MethodResponse>,
         /// Channel used to send back the notifcations.
-        sender: mpsc::Sender<Box<RawValue>>,
+        sender: mpsc::UnboundedSender<Box<RawValue>>,
     },
 }
 
@@ -69,10 +69,15 @@ pub struct BackgroundTask {
     /// The RPC method request is made in the background and the response should
     /// not be sent back to the user.
     /// Map the request ID of a RPC method to the frontend `Sender`.
-    id_to_subscription:
-        HashMap<SubscriptionId, (oneshot::Sender<MethodResponse>, mpsc::Sender<Box<RawValue>>)>,
+    id_to_subscription: HashMap<
+        SubscriptionId,
+        (
+            oneshot::Sender<MethodResponse>,
+            mpsc::UnboundedSender<Box<RawValue>>,
+        ),
+    >,
     /// Map the subscription ID to the frontend `Sender`.
-    subscriptions: HashMap<SubscriptionId, mpsc::Sender<Box<RawValue>>>,
+    subscriptions: HashMap<SubscriptionId, mpsc::UnboundedSender<Box<RawValue>>>,
 }
 
 impl BackgroundTask {
@@ -179,7 +184,7 @@ impl BackgroundTask {
     }
 
     /// Parse the response received from the light client and sent it to the appropriate user.
-    async fn handle_rpc_response(&mut self, response: String) {
+    fn handle_rpc_response(&mut self, response: String) {
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
                 let Ok(id) = id.parse::<SubscriptionId>() else {
@@ -269,7 +274,7 @@ impl BackgroundTask {
 
                 if let Some(sender) = self.subscriptions.get_mut(&id) {
                     // Send the current notification response.
-                    if sender.send(result).await.is_err() {
+                    if sender.send(result).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
                             "Cannot send notification to subscription {:?}",
@@ -292,10 +297,10 @@ impl BackgroundTask {
     /// - provides the results from the light client back to users.
     pub async fn start_task(
         &mut self,
-        from_subxt: mpsc::Receiver<FromSubxt>,
+        from_subxt: mpsc::UnboundedReceiver<FromSubxt>,
         from_node: smoldot_light::JsonRpcResponses,
     ) {
-        let from_subxt_event = tokio_stream::wrappers::ReceiverStream::new(from_subxt);
+        let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
         let from_node_event = futures_util::stream::unfold(from_node, |mut from_node| async {
             from_node.next().await.map(|result| (result, from_node))
         });
@@ -337,7 +342,7 @@ impl BackgroundTask {
                         response
                     );
 
-                    self.handle_rpc_response(response).await;
+                    self.handle_rpc_response(response);
 
                     // Advance backend, save frontend.
                     from_subxt_event_fut = previous_fut;
