@@ -6,11 +6,11 @@ use futures::stream::StreamExt;
 use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, str::FromStr, sync::Arc};
 use tokio::sync::{mpsc, oneshot};
 
 use super::LightClientError;
-use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket as Platform, ChainId};
+use smoldot_light::{platform::default::DefaultPlatform as Platform, ChainId};
 
 const LOG_TARGET: &str = "light-client-background";
 
@@ -53,7 +53,7 @@ pub enum FromSubxt {
 /// Background task data.
 pub struct BackgroundTask {
     /// Smoldot light client implementation that leverages the exposed platform.
-    client: smoldot_light::Client<Platform>,
+    client: smoldot_light::Client<Arc<Platform>>,
     /// The ID of the chain used to identify the chain protocol (ie. substrate).
     ///
     /// Note: A single chain is supported for a client. This aligns with the subxt's
@@ -82,7 +82,7 @@ pub struct BackgroundTask {
 
 impl BackgroundTask {
     /// Constructs a new [`BackgroundTask`].
-    pub fn new(client: smoldot_light::Client<Platform>, chain_id: ChainId) -> BackgroundTask {
+    pub fn new(client: smoldot_light::Client<Arc<Platform>>, chain_id: ChainId) -> BackgroundTask {
         BackgroundTask {
             client,
             chain_id,
@@ -261,24 +261,12 @@ impl BackgroundTask {
                     return
                 };
 
-                // Subxt calls into `author_submitAndWatchExtrinsic`, however the smoldot produces
-                // `{"event":"broadcasted","numPeers":1}` and `{"event":"validated"}` which are part
-                // of the RPC V2 API. Ignore those events.
-                if method == "transaction_unstable_watchEvent"
-                    && (result.to_string().contains("broadcasted")
-                        || result.to_string().contains("validated"))
-                {
-                    tracing::debug!(target: LOG_TARGET, "Ignoring notification {:?}", result);
-                    return;
-                }
-
                 if let Some(sender) = self.subscriptions.get_mut(&id) {
                     // Send the current notification response.
                     if sender.send(result).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            "Cannot send notification to subscription {:?}",
-                            id
+                            "Cannot send notification to subscription id={id} method={method}",
                         );
 
                         // Remove the sender if the subscription dropped the receiver.

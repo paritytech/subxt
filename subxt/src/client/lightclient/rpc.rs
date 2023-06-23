@@ -12,7 +12,7 @@ use crate::{
 };
 use futures::{stream::StreamExt, Stream};
 use serde_json::value::RawValue;
-use smoldot_light::{platform::async_std::AsyncStdTcpWebSocket as Platform, ChainId};
+use smoldot_light::{platform::default::DefaultPlatform as Platform, ChainId};
 use std::pin::Pin;
 use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 use tokio_stream::wrappers::UnboundedReceiverStream;

@@ -242,38 +242,29 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 ///
 /// Substrate produces `camelCase` events, while smoldot produces `CamelCase` events.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum SubstrateTxStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
-    #[serde(alias = "future")]
     Future,
     /// Transaction is part of the ready queue.
-    #[serde(alias = "ready")]
     Ready,
     /// The transaction has been broadcast to the given peers.
-    #[serde(alias = "broadcast")]
     Broadcast(Vec<String>),
     /// Transaction has been included in block with given hash.
-    #[serde(alias = "inBlock")]
     InBlock(BlockHash),
     /// The block this transaction was included in has been retracted.
-    #[serde(alias = "retracted")]
     Retracted(BlockHash),
     /// Maximum number of finality watchers has been reached,
     /// old watchers are being removed.
-    #[serde(alias = "finalityTimeout")]
     FinalityTimeout(BlockHash),
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
-    #[serde(alias = "finalized")]
     Finalized(BlockHash),
     /// Transaction has been replaced in the pool, by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
-    #[serde(alias = "usurped")]
     Usurped(Hash),
     /// Transaction has been dropped from the pool because of the limit.
-    #[serde(alias = "dropped")]
     Dropped,
     /// Transaction is no longer valid in the current state.
-    #[serde(alias = "invalid")]
     Invalid,
 }
 
