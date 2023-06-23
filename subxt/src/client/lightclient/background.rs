@@ -17,6 +17,9 @@ const LOG_TARGET: &str = "light-client-background";
 /// The response of an RPC method.
 pub type MethodResponse = Result<Box<RawValue>, LightClientError>;
 
+/// The type of a subscription ID.
+type SubscriptionId = usize;
+
 /// Message protocol between the front-end client that submits the RPC requests
 /// and the backend handler that produces responses from the chain.
 ///
@@ -59,7 +62,7 @@ pub struct BackgroundTask {
     /// Unique ID for RPC calls.
     request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
-    requests: HashMap<String, oneshot::Sender<MethodResponse>>,
+    requests: HashMap<SubscriptionId, oneshot::Sender<MethodResponse>>,
     /// Subscription calls first need to make a plain RPC method
     /// request to obtain the subscription ID.
     ///
@@ -67,9 +70,9 @@ pub struct BackgroundTask {
     /// not be sent back to the user.
     /// Map the request ID of a RPC method to the frontend `Sender`.
     id_to_subscription:
-        HashMap<String, (oneshot::Sender<MethodResponse>, mpsc::Sender<Box<RawValue>>)>,
+        HashMap<SubscriptionId, (oneshot::Sender<MethodResponse>, mpsc::Sender<Box<RawValue>>)>,
     /// Map the subscription ID to the frontend `Sender`.
-    subscriptions: HashMap<String, mpsc::Sender<Box<RawValue>>>,
+    subscriptions: HashMap<SubscriptionId, mpsc::Sender<Box<RawValue>>>,
 }
 
 impl BackgroundTask {
@@ -105,9 +108,8 @@ impl BackgroundTask {
                     r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
                     id, method, params
                 );
-                let id = id.to_string();
 
-                self.requests.insert(id.clone(), sender);
+                self.requests.insert(id, sender);
 
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
@@ -128,8 +130,7 @@ impl BackgroundTask {
                     {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            "Cannot send RPC request error to id{:?}",
-                            id
+                            "Cannot send RPC request error to id={id}",
                         );
                     }
                 }
@@ -147,9 +148,8 @@ impl BackgroundTask {
                     r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
                     id, method, params
                 );
-                let id = id.to_string();
 
-                self.id_to_subscription.insert(id.clone(), (sub_id, sender));
+                self.id_to_subscription.insert(id, (sub_id, sender));
 
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
@@ -170,8 +170,7 @@ impl BackgroundTask {
                     {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            "Cannot send RPC request error to id{:?}",
-                            id
+                            "Cannot send RPC request error to id={id}",
                         );
                     }
                 }
@@ -183,6 +182,11 @@ impl BackgroundTask {
     async fn handle_rpc_response(&mut self, response: String) {
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
+                let Ok(id) = id.parse::<SubscriptionId>() else {
+                    tracing::warn!(target: LOG_TARGET, "Cannot send error. Id={id} is not a valid number");
+                    return
+                };
+
                 if let Some(sender) = self.requests.remove(&id) {
                     if sender
                         .send(Err(LightClientError::Request(error.to_string())))
@@ -190,8 +194,7 @@ impl BackgroundTask {
                     {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            " Cannot send method response to id {:?}",
-                            id
+                            "Cannot send method response to id={id}",
                         );
                     }
                 } else if let Some((sub_id_sender, _)) = self.id_to_subscription.remove(&id) {
@@ -201,35 +204,45 @@ impl BackgroundTask {
                     {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            " Cannot send method response to id {:?}",
+                            "Cannot send method response to id {:?}",
                             id
                         );
                     }
                 }
             }
             Ok(RpcResponse::Method { id, result }) => {
+                let Ok(id) = id.parse::<SubscriptionId>() else {
+                    tracing::warn!(target: LOG_TARGET, "Cannot send response. Id={id} is not a valid number");
+                    return
+                };
+
                 // Send the response back.
                 if let Some(sender) = self.requests.remove(&id) {
                     if sender.send(Ok(result)).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            " Cannot send method response to id {:?}",
-                            id
+                            "Cannot send method response to id={id}",
                         );
                     }
                 } else if let Some((sub_id_sender, sender)) = self.id_to_subscription.remove(&id) {
-                    let sub_id = result
+                    let Ok(sub_id) = result
                         .get()
                         .trim_start_matches('"')
                         .trim_end_matches('"')
-                        .to_string();
-                    tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
+                        .parse::<SubscriptionId>() else {
+                            tracing::warn!(
+                                target: LOG_TARGET,
+                                "Subscription id={result} is not a valid number",
+                            );
+                            return;
+                    };
+
+                    tracing::trace!(target: LOG_TARGET, "Received subscription id={sub_id}");
 
                     if sub_id_sender.send(Ok(result)).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
-                            " Cannot send method response to id {:?}",
-                            id
+                            "Cannot send method response to id={id}",
                         );
                     } else {
                         // Track this subscription ID if send is successful.
@@ -238,6 +251,11 @@ impl BackgroundTask {
                 }
             }
             Ok(RpcResponse::Subscription { method, id, result }) => {
+                let Ok(id) = id.parse::<SubscriptionId>() else {
+                    tracing::warn!(target: LOG_TARGET, "Cannot send subscription. Id={id} is not a valid number");
+                    return
+                };
+
                 // Subxt calls into `author_submitAndWatchExtrinsic`, however the smoldot produces
                 // `{"event":"broadcasted","numPeers":1}` and `{"event":"validated"}` which are part
                 // of the RPC V2 API. Ignore those events.
