@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub(crate) use crate::{node_runtime, TestNodeProcess};
+pub(crate) use crate::{node_runtime, utils::TestNodeProcess};
 
 use subxt::SubstrateConfig;
 

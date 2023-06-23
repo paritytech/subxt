@@ -4,31 +4,33 @@
 
 #![deny(unused_crate_dependencies)]
 
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod codegen;
 #[cfg(test)]
-mod utils;
+pub mod utils;
+
+// We expose the utils crate's contents as public to avoid
+// a few unused warnings when running the tests under the
+// "unstable-light-client" flag.
+#[cfg(all(test, feature = "unstable-light-client"))]
+pub use utils::*;
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use utils::*;
 
 #[cfg(all(test, not(feature = "unstable-light-client")))]
-mod blocks;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod client;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod frame;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod metadata;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod runtime_api;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
-mod storage;
+mod full_client;
 
 #[cfg(all(test, feature = "unstable-light-client"))]
 mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
-#[cfg(test)]
-use utils::*;
+
+// These dependencies are used for the full client.
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use regex as _;
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use subxt_codegen as _;
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use syn as _;
 
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test
