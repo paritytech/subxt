@@ -45,7 +45,7 @@ impl LightClientBuilder {
 
     /// Overwrite the bootnodes of the chain specification.
     ///
-    /// Can be used to provide trusted entities to the chian spec, or for
+    /// Can be used to provide trusted entities to the chain spec, or for
     /// testing environments.
     pub fn bootnodes<'a>(mut self, bootnodes: impl IntoIterator<Item = &'a str>) -> Self {
         self.bootnodes = Some(bootnodes.into_iter().map(Into::into).collect());
