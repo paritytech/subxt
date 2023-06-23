@@ -12,10 +12,13 @@ use crate::{
 };
 use futures::{stream::StreamExt, Stream};
 use serde_json::value::RawValue;
-use smoldot_light::{platform::default::DefaultPlatform as Platform, ChainId};
+// use smoldot_light::{platform::default::DefaultPlatform as Platform, ChainId};
+use smoldot_light::ChainId;
 use std::pin::Pin;
 use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 use tokio_stream::wrappers::UnboundedReceiverStream;
+
+use super::platform::default::SubxtPlatform as Platform;
 
 pub const LOG_TARGET: &str = "light-client";
 
@@ -43,10 +46,7 @@ impl LightClientRpc {
     ) -> Result<LightClientRpc, Error> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
-        let mut client = smoldot_light::Client::new(Platform::new(
-            env!("CARGO_PKG_NAME").into(),
-            env!("CARGO_PKG_VERSION").into(),
-        ));
+        let mut client = smoldot_light::Client::new(Platform::new());
 
         let smoldot_light::AddChainSuccess {
             chain_id,
@@ -60,10 +60,15 @@ impl LightClientRpc {
         // `json_rpc_responses` can only be `None` if we had passed `json_rpc: Disabled`.
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
 
-        tokio::spawn(async move {
+        let future = async move {
             let mut task = BackgroundTask::new(client, chain_id);
             task.start_task(backend, rpc_responses).await;
-        });
+        };
+
+        #[cfg(not(feature = "unstable-light-client-wasm"))]
+        tokio::spawn(future);
+        #[cfg(feature = "unstable-light-client-wasm")]
+        wasm_bindgen_futures::spawn_local(future);
 
         Ok(LightClientRpc { to_backend })
     }

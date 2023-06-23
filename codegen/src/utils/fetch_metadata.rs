@@ -62,7 +62,7 @@ pub fn fetch_metadata_hex_blocking(
 
 // Block on some tokio runtime for sync contexts
 fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
-    tokio::runtime::Builder::new_multi_thread()
+    tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
         .unwrap()

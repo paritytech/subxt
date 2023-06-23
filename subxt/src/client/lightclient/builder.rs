@@ -5,13 +5,6 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::{config::Config, error::Error, OnlineClient};
 
-#[cfg(feature = "jsonrpsee")]
-use jsonrpsee::{
-    async_client::ClientBuilder,
-    client_transport::ws::{Uri, WsTransportClientBuilder},
-    core::client::ClientT,
-    rpc_params,
-};
 use smoldot_light::ChainId;
 use std::num::NonZeroU32;
 use std::sync::Arc;
@@ -165,27 +158,65 @@ impl LightClientBuilder {
 /// Fetch the chain spec from the URL.
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
-    let url = url
-        .as_ref()
-        .parse::<Uri>()
-        .map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+    use jsonrpsee::core::client::ClientT;
 
-    if url.scheme_str() != Some("ws") && url.scheme_str() != Some("wss") {
-        return Err(Error::LightClient(LightClientError::InvalidScheme));
-    }
-
-    let (sender, receiver) = WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .map_err(|_| LightClientError::Handshake)?;
-
-    let client = ClientBuilder::default()
-        .request_timeout(core::time::Duration::from_secs(180))
-        .max_notifs_per_subscription(4096)
-        .build_with_tokio(sender, receiver);
+    let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
     client
-        .request("sync_state_genSyncSpec", rpc_params![true])
+        .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
         .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
+}
+
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
+mod jsonrpsee_helpers {
+    use crate::error::{Error, LightClientError};
+    pub use jsonrpsee::{
+        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
+        core::client::{Client, ClientBuilder},
+    };
+
+    /// Build WS RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let url = url
+            .parse::<Uri>()
+            .map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+
+        if url.scheme_str() != Some("ws") && url.scheme_str() != Some("wss") {
+            return Err(Error::LightClient(LightClientError::InvalidScheme));
+        }
+
+        let (sender, receiver) = ws_transport(url).await?;
+
+        Ok(ClientBuilder::default()
+            .max_notifs_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: Uri) -> Result<(Sender, Receiver), Error> {
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|_| Error::LightClient(LightClientError::Handshake))
+    }
+}
+
+#[cfg(all(feature = "jsonrpsee", feature = "web"))]
+mod jsonrpsee_helpers {
+    use crate::error::{Error, LightClientError};
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::client::{Client, ClientBuilder},
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url)
+            .await
+            .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
+
+        Ok(ClientBuilder::default()
+            .max_notifs_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
+    }
 }

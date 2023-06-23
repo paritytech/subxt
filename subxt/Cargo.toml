@@ -17,7 +17,7 @@ keywords = ["parity", "substrate", "blockchain"]
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native", "substrate-compat"]
+default = ["jsonrpsee", "web", "substrate-compat", "unstable-light-client-wasm"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -56,11 +56,33 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = [
+    "smoldot",
     "smoldot-light/std",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
     "futures-util",
+    "tokio-util",
+]
+
+unstable-light-client-wasm = [
+    "smoldot",
+    "smoldot-light",
+
+    "tokio-stream",
+    "tokio/sync",
+    "futures-util",
+
+    # For the light-client platform.
+    "wasm-bindgen-futures",
+	"futures-timer/wasm-bindgen",
+    "instant/wasm-bindgen",
+
+    # For websocket.
+    "js-sys",
+    "send_wrapper",
+    "web-sys",
+    "wasm-bindgen",
 ]
 
 [dependencies]
@@ -101,10 +123,19 @@ subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
 
 # Light client support:
+smoldot = { workspace = true, optional = true }
 smoldot-light = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
 futures-util = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+send_wrapper = { workspace = true, optional = true }
+web-sys = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+futures-timer = { workspace = true, optional = true }
+instant = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }

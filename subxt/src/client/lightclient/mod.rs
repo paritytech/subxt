@@ -6,6 +6,7 @@
 
 mod background;
 mod builder;
+mod platform;
 mod rpc;
 
 use derivative::Derivative;

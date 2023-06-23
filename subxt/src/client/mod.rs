@@ -11,7 +11,10 @@
 mod offline_client;
 mod online_client;
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(any(
+    feature = "unstable-light-client",
+    feature = "unstable-light-client-wasm"
+))]
 mod lightclient;
 
 pub use offline_client::{OfflineClient, OfflineClientT};
@@ -22,5 +25,8 @@ pub use online_client::{
 #[cfg(feature = "jsonrpsee")]
 pub use online_client::default_rpc_client;
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(any(
+    feature = "unstable-light-client",
+    feature = "unstable-light-client-wasm"
+))]
 pub use lightclient::{LightClient, LightClientBuilder, LightClientError};
