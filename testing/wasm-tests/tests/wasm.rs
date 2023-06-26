@@ -23,6 +23,11 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 // ./polkadot --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws
 // ```
 //
+// Use the following to enable logs:
+// ```
+//  console_error_panic_hook::set_once();
+//  tracing_wasm::set_as_global_default();
+// ```
 
 #[wasm_bindgen_test]
 async fn wasm_ws_transport_works() {
@@ -36,9 +41,6 @@ async fn wasm_ws_transport_works() {
 
 #[wasm_bindgen_test]
 async fn light_client_works() {
-	console_error_panic_hook::set_once();
-	tracing_wasm::set_as_global_default();
-
     // Use a polkadot trusted DNS.
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .bootnodes(
