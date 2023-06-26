@@ -137,8 +137,9 @@ impl<'a> TypeGenerator<'a> {
         &self,
         id: u32,
         parent_type_params: &[TypeParameter],
+        original_name: Option<&str>,
     ) -> TypePath {
-        self.resolve_type_path_recurse(id, true, parent_type_params)
+        self.resolve_type_path_recurse(id, true, parent_type_params, original_name)
     }
 
     /// Get the type path for the given type identifier.
@@ -147,22 +148,25 @@ impl<'a> TypeGenerator<'a> {
     ///
     /// If no type with the given id found in the type registry.
     pub fn resolve_type_path(&self, id: u32) -> TypePath {
-        self.resolve_type_path_recurse(id, false, &[])
+        self.resolve_type_path_recurse(id, false, &[], None)
     }
 
     /// Visit each node in a possibly nested type definition to produce a type path.
     ///
     /// e.g `Result<GenericStruct<NestedGenericStruct<T>>, String>`
+    ///
+    /// if `original_name` is `Some(original_name)`, the resolved type needs to have the same `original_name`.
     fn resolve_type_path_recurse(
         &self,
         id: u32,
         is_field: bool,
         parent_type_params: &[TypeParameter],
+        original_name: Option<&str>,
     ) -> TypePath {
-        if let Some(parent_type_param) = parent_type_params
-            .iter()
-            .find(|tp| tp.concrete_type_id == id)
-        {
+        if let Some(parent_type_param) = parent_type_params.iter().find(|tp| {
+            tp.concrete_type_id == id
+                && original_name.map_or(true, |original_name| tp.original_name == original_name)
+        }) {
             return TypePath::from_parameter(parent_type_param.clone());
         }
 
@@ -181,7 +185,7 @@ impl<'a> TypeGenerator<'a> {
             .type_params
             .iter()
             .filter_map(|f| {
-                f.ty.map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params))
+                f.ty.map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params, None))
             })
             .collect();
 
@@ -205,6 +209,7 @@ impl<'a> TypeGenerator<'a> {
                     arr.type_param.id,
                     false,
                     parent_type_params,
+                    None,
                 )),
             },
             TypeDef::Sequence(seq) => TypePathType::Vec {
@@ -212,13 +217,14 @@ impl<'a> TypeGenerator<'a> {
                     seq.type_param.id,
                     false,
                     parent_type_params,
+                    None,
                 )),
             },
             TypeDef::Tuple(tuple) => TypePathType::Tuple {
                 elements: tuple
                     .fields
                     .iter()
-                    .map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params))
+                    .map(|f| self.resolve_type_path_recurse(f.id, false, parent_type_params, None))
                     .collect(),
             },
             TypeDef::Compact(compact) => TypePathType::Compact {
@@ -226,6 +232,7 @@ impl<'a> TypeGenerator<'a> {
                     compact.type_param.id,
                     false,
                     parent_type_params,
+                    None,
                 )),
                 is_field,
                 crate_path: self.crate_path.clone(),
@@ -235,11 +242,13 @@ impl<'a> TypeGenerator<'a> {
                     bitseq.bit_order_type.id,
                     false,
                     parent_type_params,
+                    None,
                 )),
                 bit_store_type: Box::new(self.resolve_type_path_recurse(
                     bitseq.bit_store_type.id,
                     false,
                     parent_type_params,
+                    None,
                 )),
                 crate_path: self.crate_path.clone(),
             },

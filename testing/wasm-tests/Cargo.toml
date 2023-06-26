@@ -11,6 +11,6 @@ console_error_panic_hook = "0.1.7"
 serde_json = "1"
 
 # This crate is not a part of the workspace, because it
-# requires the "jsonrpsee-web" feature to be enabled, which we don't
+# requires the "jsonrpsee web" features to be enabled, which we don't
 # want enabled for workspace builds in general.
 subxt = { path = "../../subxt", default-features = false, features = ["web", "jsonrpsee"] }
