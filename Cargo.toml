@@ -98,5 +98,5 @@ hmac = "0.12.1"
 pbkdf2 = { version = "0.12.1", default-features = false }
 schnorrkel = "0.10.2"
 secrecy = "0.8.0"
-sha2 = "0.10.6"
+sha2 = "0.10.7"
 zeroize = { version = "1", default-features = false }
