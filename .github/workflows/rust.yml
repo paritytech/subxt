@@ -21,7 +21,7 @@ env:
     # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
     SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
-    WASM_BINDGEN_TEST_TIMEOUT=60
+    WASM_BINDGEN_TEST_TIMEOUT: 60
 
 jobs:
     build:
