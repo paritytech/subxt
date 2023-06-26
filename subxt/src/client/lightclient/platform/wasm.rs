@@ -71,10 +71,26 @@ pub async fn connect<'a>(
     // Ensure ahead of time that the multiaddress is supported.
     let addr = match (&proto1, &proto2, &proto3) {
         (ProtocolRef::Ip4(ip), ProtocolRef::Tcp(port), Some(ProtocolRef::Ws)) => {
-            SocketAddr::new(IpAddr::V4((*ip).into()), *port)
+            let addr = SocketAddr::new(IpAddr::V4((*ip).into()), *port);
+            format!("ws://{}", addr.to_string())
         }
         (ProtocolRef::Ip6(ip), ProtocolRef::Tcp(port), Some(ProtocolRef::Ws)) => {
-            SocketAddr::new(IpAddr::V6((*ip).into()), *port)
+            let addr = SocketAddr::new(IpAddr::V6((*ip).into()), *port);
+            format!("ws://{}", addr.to_string())
+        }
+        (
+            ProtocolRef::Dns(addr) | ProtocolRef::Dns4(addr) | ProtocolRef::Dns6(addr),
+            ProtocolRef::Tcp(port),
+            Some(ProtocolRef::Ws),
+        ) => {
+            format!("ws://{}:{}", addr.to_string(), port)
+        }
+        (
+            ProtocolRef::Dns(addr) | ProtocolRef::Dns4(addr) | ProtocolRef::Dns6(addr),
+            ProtocolRef::Tcp(port),
+            Some(ProtocolRef::Wss),
+        ) => {
+            format!("wss://{}:{}", addr.to_string(), port)
         }
         _ => {
             return Err(ConnectError {
@@ -84,7 +100,6 @@ pub async fn connect<'a>(
         }
     };
 
-    let addr = format!("ws://{}", addr.to_string());
     tracing::debug!("Connecting to addr={addr}");
 
     let socket = WasmSocket::new(addr.as_str()).map_err(|err| ConnectError {
