@@ -7,12 +7,8 @@
 #[cfg(test)]
 pub mod utils;
 
-// We expose the utils crate's contents as public to avoid
-// a few unused warnings when running the tests under the
-// "unstable-light-client" flag.
-#[cfg(all(test, feature = "unstable-light-client"))]
-pub use utils::*;
-#[cfg(all(test, not(feature = "unstable-light-client")))]
+#[cfg(test)]
+#[cfg_attr(test, allow(unused_imports))]
 use utils::*;
 
 #[cfg(all(test, not(feature = "unstable-light-client")))]
