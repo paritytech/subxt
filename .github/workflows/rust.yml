@@ -265,7 +265,7 @@ jobs:
                   # `node-key` provides a deterministic p2p address.
                   substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
-                  # wasm-pack test --headless --chrome
+                  wasm-pack test --headless --chrome
                   pkill substrate
               working-directory: testing/wasm-tests
 
