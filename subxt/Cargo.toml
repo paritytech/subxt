@@ -62,10 +62,6 @@ unstable-light-client = [
     "tokio/rt",
     "futures-util",
 ]
-# Enable this to expose functionality only used for integration testing.
-# The exposed functionality is subject to breaking changes at any point,
-# and should not be relied upon.
-integration-tests = []
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
