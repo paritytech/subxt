@@ -39,12 +39,12 @@ async fn light_client_works() {
 	console_error_panic_hook::set_once();
 	tracing_wasm::set_as_global_default();
 
+    // Use a polkadot trusted DNS.
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .bootnodes(
-            ["/ip4/127.0.0.1/tcp/30333/ws/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
-                .into_iter(),
+            ["/dns/polkadot-connect-0.parity.io/tcp/443/wss/p2p/12D3KooWEPmjoRpDSUuiTjvyNDd8fejZ9eNWH5bE965nyBMDrB4o"]
         )
-        .build_from_url("ws://127.0.0.1:9944")
+        .build_from_url("wss://rpc.polkadot.io:443")
         .await
         .expect("Cannot construct light client");
 
