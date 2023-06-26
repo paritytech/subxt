@@ -123,12 +123,6 @@ impl LightClientBuilder {
     /// For testing environments, please populate the "bootNodes" if the not already provided.
     /// See [`Self::bootnodes`] for more details.
     ///
-    /// ```json
-    ///   "bootNodes": [
-    ///       "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"
-    ///    ],
-    /// ```
-    ///
     /// ## Panics
     ///
     /// Panics if being called outside of `tokio` runtime context.
