@@ -166,6 +166,38 @@ jobs:
                   command: nextest
                   args: run --workspace
 
+    nonwasm_light_client_tests:
+        name: "Test Light Client"
+        runs-on: ubuntu-latest-16-cores
+        timeout-minutes: 15
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v3
+
+            - name: Download Substrate
+              run: |
+                  curl $SUBSTRATE_URL --output substrate --location
+                  chmod +x substrate
+                  ./substrate --version
+                  mkdir -p ~/.local/bin
+                  mv substrate ~/.local/bin
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+
+            - name: Run tests
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: test
+                  args: --release --package integration-tests --features unstable-light-client
+
     clippy:
         name: Cargo clippy
         runs-on: ubuntu-latest

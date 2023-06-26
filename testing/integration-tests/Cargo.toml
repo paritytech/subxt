@@ -13,7 +13,10 @@ homepage.workspace = true
 description = "Subxt integration tests that rely on the Substrate binary"
 
 [features]
-default = ["subxt/integration-tests"]
+default = []
+
+# Enable to run the tests with Light Client support.
+unstable-light-client = ["subxt/unstable-light-client"]
 
 [dev-dependencies]
 assert_matches = { workspace = true }
@@ -24,7 +27,6 @@ hex = { workspace = true }
 regex = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
-sp-runtime = { workspace = true }
 syn = { workspace = true }
 subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat"] }
 subxt-signer = { workspace = true, features = ["subxt"] }
@@ -37,3 +39,4 @@ tracing-subscriber = { workspace = true }
 wabt = { workspace = true }
 which = { workspace = true }
 substrate-runner = { workspace = true }
+sp-runtime = { workspace = true }

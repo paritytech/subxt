@@ -5,27 +5,28 @@
 #![deny(unused_crate_dependencies)]
 
 #[cfg(test)]
-mod codegen;
-#[cfg(test)]
-mod utils;
+pub mod utils;
 
 #[cfg(test)]
-mod blocks;
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod frame;
-#[cfg(test)]
-mod metadata;
-#[cfg(test)]
-mod runtime_api;
-#[cfg(test)]
-mod storage;
+#[cfg_attr(test, allow(unused_imports))]
+use utils::*;
+
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+mod full_client;
+
+#[cfg(all(test, feature = "unstable-light-client"))]
+mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
-#[cfg(test)]
-use utils::*;
+
+// These dependencies are used for the full client.
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use regex as _;
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use subxt_codegen as _;
+#[cfg(all(test, not(feature = "unstable-light-client")))]
+use syn as _;
 
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test

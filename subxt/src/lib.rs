@@ -53,6 +53,11 @@ mod only_used_in_docs_or_tests {
     use tokio as _;
 }
 
+// Suppress an unused dependency warning because tracing_subscriber is
+// only used in example code snippets at the time of writing.
+#[cfg(test)]
+use tracing_subscriber as _;
+
 // Used to enable the js feature for wasm.
 #[cfg(feature = "web")]
 #[allow(unused_imports)]
