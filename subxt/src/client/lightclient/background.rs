@@ -17,9 +17,6 @@ const LOG_TARGET: &str = "light-client-background";
 /// The response of an RPC method.
 pub type MethodResponse = Result<Box<RawValue>, LightClientError>;
 
-/// The type of a subscription ID.
-type SubscriptionId = usize;
-
 /// Message protocol between the front-end client that submits the RPC requests
 /// and the backend handler that produces responses from the chain.
 ///
@@ -62,7 +59,7 @@ pub struct BackgroundTask {
     /// Unique ID for RPC calls.
     request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
-    requests: HashMap<SubscriptionId, oneshot::Sender<MethodResponse>>,
+    requests: HashMap<usize, oneshot::Sender<MethodResponse>>,
     /// Subscription calls first need to make a plain RPC method
     /// request to obtain the subscription ID.
     ///
@@ -70,14 +67,14 @@ pub struct BackgroundTask {
     /// not be sent back to the user.
     /// Map the request ID of a RPC method to the frontend `Sender`.
     id_to_subscription: HashMap<
-        SubscriptionId,
+        usize,
         (
             oneshot::Sender<MethodResponse>,
             mpsc::UnboundedSender<Box<RawValue>>,
         ),
     >,
     /// Map the subscription ID to the frontend `Sender`.
-    subscriptions: HashMap<SubscriptionId, mpsc::UnboundedSender<Box<RawValue>>>,
+    subscriptions: HashMap<usize, mpsc::UnboundedSender<Box<RawValue>>>,
 }
 
 impl BackgroundTask {
@@ -187,7 +184,7 @@ impl BackgroundTask {
     fn handle_rpc_response(&mut self, response: String) {
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
-                let Ok(id) = id.parse::<SubscriptionId>() else {
+                let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send error. Id={id} is not a valid number");
                     return
                 };
@@ -216,7 +213,7 @@ impl BackgroundTask {
                 }
             }
             Ok(RpcResponse::Method { id, result }) => {
-                let Ok(id) = id.parse::<SubscriptionId>() else {
+                let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send response. Id={id} is not a valid number");
                     return
                 };
@@ -234,7 +231,7 @@ impl BackgroundTask {
                         .get()
                         .trim_start_matches('"')
                         .trim_end_matches('"')
-                        .parse::<SubscriptionId>() else {
+                        .parse::<usize>() else {
                             tracing::warn!(
                                 target: LOG_TARGET,
                                 "Subscription id={result} is not a valid number",
@@ -256,7 +253,7 @@ impl BackgroundTask {
                 }
             }
             Ok(RpcResponse::Subscription { method, id, result }) => {
-                let Ok(id) = id.parse::<SubscriptionId>() else {
+                let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send subscription. Id={id} is not a valid number");
                     return
                 };

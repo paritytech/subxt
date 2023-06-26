@@ -7,8 +7,6 @@
 //! The Light Client aims to contribute to the decentralization of blockchains by providing connectivity
 //! to the P2P network and behaving similarly to a full node.
 //!
-//! The `unstable-light-client` feature flag enables this functionality.
-//!
 //! To enable this functionality, the unstable-light-client feature flag needs to be enabled.
 //!
 //! To connect to a blockchain network, the Light Client requires a trusted sync state of the network, named "chain spec".
