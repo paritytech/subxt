@@ -2,6 +2,7 @@
 members = [
     "cli",
     "codegen",
+    "lightclient",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
