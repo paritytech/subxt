@@ -23,7 +23,8 @@ default = ["jsonrpsee", "native", "substrate-compat"]
 # Exactly 1 of "web" and "native" is expected.
 native = [
     "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport"
+    "jsonrpsee?/client-ws-transport",
+    "subxt-lightclient?/native"
 ]
 
 # Enable this for web/wasm builds.
@@ -31,7 +32,8 @@ native = [
 web = [
     "jsonrpsee?/async-wasm-client",
     "jsonrpsee?/client-web-transport",
-    "getrandom/js"
+    "getrandom/js",
+    "subxt-lightclient?/web"
 ]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
@@ -56,34 +58,8 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = [
-    "smoldot",
-    "smoldot-light/std",
-    "tokio-stream",
-    "tokio/sync",
-    "tokio/rt",
-    "tokio/net",
-    "tokio-util/compat",
-    "futures-util",
-]
-
-unstable-light-client-wasm = [
-    "smoldot",
-    "smoldot-light",
-
-    "tokio-stream",
-    "tokio/sync",
-    "futures-util",
-
-    # For the light-client platform.
-    "wasm-bindgen-futures",
-	"futures-timer/wasm-bindgen",
-    "instant/wasm-bindgen",
-
-    # For websocket.
-    "js-sys",
-    "send_wrapper",
-    "web-sys",
-    "wasm-bindgen",
+    "subxt-lightclient",
+    "tokio-stream"
 ]
 
 [dependencies]
@@ -122,21 +98,10 @@ sp-runtime = { workspace = true, optional = true }
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
+subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Light client support:
-smoldot = { workspace = true, optional = true }
-smoldot-light = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
-futures-util = { workspace = true, optional = true }
-js-sys = { workspace = true, optional = true }
-send_wrapper = { workspace = true, optional = true }
-web-sys = { workspace = true, optional = true }
-wasm-bindgen = { workspace = true, optional = true }
-wasm-bindgen-futures = { workspace = true, optional = true }
-futures-timer = { workspace = true, optional = true }
-instant = { workspace = true, optional = true }
-tokio-util = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
@@ -162,8 +127,3 @@ tracing-subscriber = { workspace = true }
 name = "unstable_light_client_tx_basic"
 path = "examples/unstable_light_client_tx_basic.rs"
 required-features = ["unstable-light-client", "jsonrpsee"]
-
-[profile.dev.package.smoldot-light]
-opt-level = 2
-[profile.test.package.smoldot-light]
-opt-level = 2

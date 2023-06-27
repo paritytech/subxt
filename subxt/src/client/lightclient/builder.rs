@@ -5,7 +5,8 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::{config::Config, error::Error, OnlineClient};
 
-use smoldot_light::ChainId;
+use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
+
 use std::num::NonZeroU32;
 use std::sync::Arc;
 
@@ -138,9 +139,9 @@ impl LightClientBuilder {
             }
         }
 
-        let config = smoldot_light::AddChainConfig {
+        let config = AddChainConfig {
             specification: &chain_spec.to_string(),
-            json_rpc: smoldot_light::AddChainConfigJsonRpc::Enabled {
+            json_rpc: AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: self.max_pending_requests,
                 max_subscriptions: self.max_subscriptions,
             },

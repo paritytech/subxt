@@ -4,36 +4,30 @@
 
 //! This module provides support for light clients.
 
-mod background;
 mod builder;
-mod platform;
 mod rpc;
 
 use derivative::Derivative;
-
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::Config,
     OnlineClient,
 };
-
 pub use builder::LightClientBuilder;
+use subxt_lightclient::LightClientRpcError;
 
 /// Light client error.
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
-    /// Error encountered while adding the chain to the light-client.
-    #[error("Failed to add the chain to the light client: {0}.")]
-    AddChainError(String),
+    /// Error originated from the low-level RPC layer.
+    #[error("Rpc error: {0}")]
+    Rpc(LightClientRpcError),
     /// The background task is closed.
     #[error("Failed to communicate with the background task.")]
     BackgroundClosed,
     /// Invalid RPC parameters cannot be serialized as JSON string.
     #[error("RPC parameters cannot be serialized as JSON string.")]
     InvalidParams,
-    /// Error originated while trying to submit a RPC request.
-    #[error("RPC request cannot be sent: {0}.")]
-    Request(String),
     /// The provided URL scheme is invalid.
     ///
     /// Supported versions: WS, WSS.

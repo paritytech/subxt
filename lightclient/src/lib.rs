@@ -16,6 +16,7 @@
     unused_extern_crates,
     clippy::all
 )]
+#![allow(clippy::type_complexity)]
 
 #[cfg(any(
     all(feature = "web", feature = "native"),
@@ -24,8 +25,8 @@
 compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
 
 mod background;
-mod platform;
 mod client;
+mod platform;
 
 // Used to enable the js feature for wasm.
 #[cfg(feature = "web")]
@@ -33,6 +34,7 @@ mod client;
 pub use getrandom as _;
 
 pub use client::LightClientRpc;
+pub use smoldot_light::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
 
 /// Light client error.
 #[derive(Debug, thiserror::Error)]

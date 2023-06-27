@@ -15,9 +15,7 @@ description = "Light Client for chain interaction"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-# For dev and documentation reasons we enable more features than are often desired.
-# it's recommended to use `--no-default-features` and then select what you need.
-default = ["native"]
+default = []
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -43,10 +41,12 @@ web = [
     "tokio-stream",
     "tokio/sync",
     "futures-util",
+
     # For the light-client platform.
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
     "instant/wasm-bindgen",
+
     # For websocket.
     "js-sys",
     "send_wrapper",

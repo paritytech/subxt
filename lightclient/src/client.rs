@@ -7,7 +7,6 @@ use super::{
     LightClientRpcError,
 };
 use serde_json::value::RawValue;
-use smoldot_light::ChainId;
 use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 
 use super::platform::default::SubxtPlatform as Platform;
@@ -34,7 +33,7 @@ impl LightClientRpc {
     ///
     /// Panics if being called outside of `tokio` runtime context.
     pub fn new(
-        config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
+        config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = smoldot_light::ChainId>>,
     ) -> Result<LightClientRpc, LightClientRpcError> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 

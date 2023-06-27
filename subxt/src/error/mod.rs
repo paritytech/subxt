@@ -8,10 +8,7 @@ mod dispatch_error;
 
 use core::fmt::Debug;
 
-#[cfg(any(
-    feature = "unstable-light-client",
-    feature = "unstable-light-client-wasm"
-))]
+#[cfg(feature = "unstable-light-client")]
 pub use crate::client::LightClientError;
 
 // Re-export dispatch error types:
@@ -71,10 +68,7 @@ pub enum Error {
     #[error("An error occurred but it could not be decoded: {0:?}")]
     Unknown(Vec<u8>),
     /// Light client error.
-    #[cfg(any(
-        feature = "unstable-light-client",
-        feature = "unstable-light-client-wasm"
-    ))]
+    #[cfg(feature = "unstable-light-client")]
     #[error("An error occurred but it could not be decoded: {0:?}")]
     LightClient(#[from] LightClientError),
     /// Other error.
