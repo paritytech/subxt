@@ -72,9 +72,13 @@ jobs:
             - name: Cargo check subxt-signer
               run: cargo check -p subxt-signer
 
+            # We can't enable web features here, so no cargo hack.
+            - name: Cargo check subxt-lightclient
+              run: cargo check -p subxt-lightclient
+
             # Next, check each other package in isolation.
             - name: Cargo hack; check each feature/crate on its own
-              run: cargo hack --exclude subxt --exclude subxt-signer --exclude-all-features --each-feature check --workspace
+              run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
 
     fmt:
         name: Cargo fmt
