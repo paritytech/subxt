@@ -7,13 +7,13 @@
 mod builder;
 mod rpc;
 
-use derivative::Derivative;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::Config,
     OnlineClient,
 };
 pub use builder::LightClientBuilder;
+use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;
 
 /// Light client error.
