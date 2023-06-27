@@ -15,7 +15,7 @@ description = "Light Client for chain interaction"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-default = []
+default = ["native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
