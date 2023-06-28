@@ -20,15 +20,11 @@ default = ["native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "smoldot",
     "smoldot-light/std",
     "tokio-stream",
     "tokio/sync",
     "tokio/rt",
-    "tokio/net",
-    "tokio-util/compat",
     "futures-util",
-    "either",
 ]
 
 # Enable this for web/wasm builds.

@@ -9,7 +9,7 @@ use super::{
 use serde_json::value::RawValue;
 use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 
-use super::platform::default::SubxtPlatform as Platform;
+use super::platform::build_platform;
 
 pub const LOG_TARGET: &str = "light-client";
 
@@ -37,7 +37,7 @@ impl LightClientRpc {
     ) -> Result<LightClientRpc, LightClientRpcError> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
-        let mut client = smoldot_light::Client::new(Platform::new());
+        let mut client = smoldot_light::Client::new(build_platform());
 
         let smoldot_light::AddChainSuccess {
             chain_id,

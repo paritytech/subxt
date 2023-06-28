@@ -2,12 +2,39 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub mod default;
+//! Default platform for WASM environments.
 
-#[cfg(feature = "native")]
-mod native;
-
+#[cfg(feature = "web")]
+mod default;
 #[cfg(feature = "web")]
 mod wasm;
 #[cfg(feature = "web")]
 mod wasm_socket;
+
+pub use helpers::{build_platform, PlatformType};
+
+#[cfg(feature = "native")]
+mod helpers {
+    use smoldot_light::platform::default::DefaultPlatform as Platform;
+    use std::sync::Arc;
+
+    pub type PlatformType = Arc<Platform>;
+
+    pub fn build_platform() -> PlatformType {
+        Platform::new(
+            "subxt-light-client".into(),
+            env!("CARGO_PKG_VERSION").into(),
+        )
+    }
+}
+
+#[cfg(feature = "web")]
+mod helpers {
+    use super::default::SubxtPlatform as Platform;
+
+    pub type PlatformType = Platform;
+
+    pub fn build_platform() -> PlatformType {
+        Platform::new()
+    }
+}

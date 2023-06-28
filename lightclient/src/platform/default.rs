@@ -11,9 +11,6 @@ use smoldot_light::platform::{
 };
 use std::{io::IoSlice, pin::Pin};
 
-#[cfg(feature = "native")]
-use super::native as platform_impl;
-#[cfg(feature = "web")]
 use super::wasm as platform_impl;
 
 use platform_impl::{StreamReadBuffer, StreamWriteBuffer};
@@ -22,6 +19,8 @@ use platform_impl::{StreamReadBuffer, StreamWriteBuffer};
 ///
 /// This implementation is a conversion of the implementation from the smoldot:
 /// https://github.com/smol-dot/smoldot/blob/f49ce4ea6a325c444ab6ad37d3ab5558edf0d541/light-base/src/platform/default.rs#L52.
+///
+/// This platform will evolve over time and we'll need to keep this code in sync.
 #[derive(Clone)]
 pub struct SubxtPlatform {}
 
