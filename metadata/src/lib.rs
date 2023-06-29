@@ -45,6 +45,8 @@ pub struct Metadata {
     extrinsic: ExtrinsicMetadata,
     /// The type ID of the `Runtime` type.
     runtime_ty: u32,
+    /// The types of the outer enums.
+    outer_enums: OuterEnumsMetadata,
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
     dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
@@ -75,6 +77,11 @@ impl Metadata {
     /// Return details about the extrinsic format.
     pub fn extrinsic(&self) -> &ExtrinsicMetadata {
         &self.extrinsic
+    }
+
+    /// Return details about the outer enums.
+    pub fn outer_enums(&self) -> OuterEnumsMetadata {
+        self.outer_enums
     }
 
     /// An iterator over all of the available pallets.
@@ -488,6 +495,34 @@ impl SignedExtensionMetadata {
     /// The type of the additional signed data, with the data to be included in the signed payload
     pub fn additional_ty(&self) -> u32 {
         self.additional_ty
+    }
+}
+
+/// Metadata for the outer enums.
+#[derive(Debug, Clone, Copy)]
+pub struct OuterEnumsMetadata {
+    /// The type of the outer call enum.
+    call_enum_ty: u32,
+    /// The type of the outer event enum.
+    event_enum_ty: u32,
+    /// The type of the outer error enum.
+    error_enum_ty: u32,
+}
+
+impl OuterEnumsMetadata {
+    /// The type of the outer call enum.
+    pub fn call_enum_ty(&self) -> u32 {
+        self.call_enum_ty
+    }
+
+    /// The type of the outer event enum.
+    pub fn event_enum_ty(&self) -> u32 {
+        self.event_enum_ty
+    }
+
+    /// The type of the outer error enum.
+    pub fn error_enum_ty(&self) -> u32 {
+        self.error_enum_ty
     }
 }
 
