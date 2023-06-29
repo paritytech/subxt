@@ -1378,6 +1378,16 @@ dependencies = [
  "cfg-if",
  "parity-scale-codec",
  "scale-info",
+]
+
+[[package]]
+name = "frame-metadata"
+version = "15.2.0"
+source = "git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/stable_v15#e19a5873674457677cb978599f02783112231821"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info",
  "serde",
 ]
 
@@ -1954,7 +1964,7 @@ name = "integration-tests"
 version = "0.29.0"
 dependencies = [
  "assert_matches",
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -3222,7 +3232,7 @@ dependencies = [
  "base58",
  "blake2",
  "either",
- "frame-metadata",
+ "frame-metadata 15.1.0",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
@@ -4146,7 +4156,7 @@ dependencies = [
  "blake2",
  "derivative",
  "either",
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "futures",
  "futures-util",
  "getrandom 0.2.10",
@@ -4184,7 +4194,7 @@ version = "0.29.0"
 dependencies = [
  "clap 4.3.4",
  "color-eyre",
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -4204,7 +4214,7 @@ name = "subxt-codegen"
 version = "0.29.0"
 dependencies = [
  "bitvec",
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "heck",
  "hex",
  "jsonrpsee",
@@ -4235,7 +4245,7 @@ version = "0.29.0"
 dependencies = [
  "bitvec",
  "criterion",
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "parity-scale-codec",
  "scale-info",
  "sp-core-hashing",
@@ -4684,7 +4694,7 @@ checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 name = "ui-tests"
 version = "0.29.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 15.2.0",
  "parity-scale-codec",
  "scale-info",
  "subxt",
