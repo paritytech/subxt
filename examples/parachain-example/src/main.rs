@@ -49,6 +49,10 @@
 //! Statemint (Polkadot Asset Hub) is part of the [Cumulus Github repository](https://github.com/paritytech/cumulus).
 //! The crate defining the parachains runtime can be found [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot).
 //!
+//! ## 2.1 Create the config from scratch
+//!
+//! First we want to create the config from scratch to understand all the details.
+//!
 //! ### AccountId, Index, Hash, Hasher and Header
 //! We need to check, where the parachains runtime implements the frame_system::Config trait.
 //! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
@@ -132,9 +136,9 @@
 //! Then we combine them into a `StatemintExtrinsicParams` struct for which we implement the [subxt::config::ExtrinsicParams] trait, see below.
 //! Now we have all the parts we need to create our config `StatemintConfig` and implment the [subxt::Config] trait on it.
 //! Note that StatemintConfig is an empty enum, an _uninhabited type_ that is never means to be instantiated
-//! but just gives type information to various interfaces of subxt.
+//! but just gives type information to various interfaces of _subxt_.
 //!
-//! # 3. Simplifying the config
+//! ## 2.2 Simplifying the config
 //!
 //! Now you should be able to create a config for a parachain from scratch and understand the details of its construction.
 //! However this is quite a tedious process, so subxt provides some sane defaults that can make your life easier.
@@ -149,28 +153,45 @@
 //! - [subxt::hash] instead of [sp_runtime::MultiAddress]
 //! - [subxt::config::substrate::Era] instead of [sp_runtime::generic::Era]
 //! - [subxt::config::substrate::SubstrateHeader] instead of [sp_runtime::generic::Header]
-//! - [subxt::config::substrate::AssetTip] instead of [pallet_transaction_payment::ChargeTransactionPayment]
-//! - [subxt::config::substrate::BlakeTwo256] instead of [sp_runtime::generic::Era]
-//! - [subxt::config::substrate] instead of [sp_runtime::generic::Era]
-//! - [subxt::config::substrate::Era] instead of [sp_runtime::generic::Era]
-//! todo
-use sp_core::H256;
+//! - [subxt::config::substrate::AssetTip] and [subxt::config::polkadot::PlainTip] instead of [pallet_transaction_payment::ChargeTransactionPayment]
+//! - [subxt::config::substrate::BlakeTwo256] instead of [sp_core::Blake2Hasher] or [sp_runtime::traits::BlakeTwo256]
+//! - [subxt::config::substrate::DigestItem] and [subxt::config::substrate::Digest] instead of types from [sp_runtime::generic::digest]
+//! - [subxt::config::substrate::ConsensusEngineId] instead of [sp_runtime::ConsensusEngineId]
+//!
+//! With these optimizations, our config can look like the `StatemintConfig2` below.
+//!
+//! ## 2.3. Use the Substrate default config as much as possible
+//!
+//! Because most substrate based chains share a great deal of types, _subxt_ already provides two configs:
+//! - [subxt::SubstrateConfig] configured for the default [substrate node template](https://github.com/substrate-developer-hub/substrate-node-template)
+//! - [subxt::PolkadotConfig] configured for the [polkadot node implementation](https://github.com/paritytech/polkadot)
+//!
+//! Even those two just differ in the type of the `Tip` and `MultiAddress`.
+//! Statemint (Polkadot Asset Hub) seems to match the Polkadot config in almost all points, except for the `ExtrinsicParams`.
+//! Here the tips follow the same structure as for the default substrate node.
+//! We can now simply build the config for Statemint from the building blocks provided
+//! by [subxt::SubstrateConfig] and [subxt::PolkadotConfig] as shown below in `StatemintConfig3`.
+//!
+//! All configs we constructed, `StatemintConfig`, `StatemintConfig2` and `StatemintConfig3` should behave in the same way.
+//! All three ways are valid for constructing a config. Choose one depending on your use case.
+//!
 use subxt::config::ExtrinsicParams;
 use subxt::{
-    config::substrate::{BlakeTwo256, SubstrateHeader},
     Config, OnlineClient, PolkadotConfig, SubstrateConfig,
 };
 
-use codec::{Decode, Encode};
+use codec::{Encode};
 
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+#[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct ChargeAssetTxPayment {
     #[codec(compact)]
     tip: u128,
     asset_id: Option<u32>,
 }
+////////////////////////////////////////////////////////////
+// First Config (verbose and detailed)
+////////////////////////////////////////////////////////////
 
-/// Default set of commonly used types by Polkadot nodes.
 pub enum StatemintConfig {}
 
 impl Config for StatemintConfig {
@@ -184,20 +205,20 @@ impl Config for StatemintConfig {
     type ExtrinsicParams = StatemintExtrinsicParams;
 }
 
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+#[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct StatemintExtrinsicParams {
     extra_params: StatemintExtraParams,
     additional_params: StatemintAdditionalParams,
 }
 
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+#[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct StatemintExtraParams {
     era: sp_runtime::generic::Era,
     nonce: u32,
     charge: ChargeAssetTxPayment,
 }
 
-#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+#[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct StatemintAdditionalParams {
     spec_version: u32,
     tx_version: u32,
@@ -247,10 +268,110 @@ impl ExtrinsicParams<<StatemintConfig as Config>::Index, <StatemintConfig as Con
     }
 }
 
+////////////////////////////////////////////////////////////
+// Second Config (just using subxt types)
+////////////////////////////////////////////////////////////
+
+pub enum StatemintConfig2 {}
+
+impl Config for StatemintConfig2 {
+    type Index = u32;
+    type Hash = subxt::utils::H256;
+    type AccountId = subxt::utils::AccountId32;
+    type Address = subxt::utils::MultiAddress<Self::AccountId, ()>;
+    type Signature = subxt::utils::MultiSignature;
+    type Hasher = subxt::config::substrate::BlakeTwo256;
+    type Header = subxt::config::substrate::SubstrateHeader<u32, Self::Hasher>;
+    type ExtrinsicParams = StatemintExtrinsicParams;
+}
+
+#[derive(Encode, Debug, Clone)]
+pub struct StatemintExtrinsicParams2 {
+    extra_params: StatemintExtraParams2,
+    additional_params: StatemintAdditionalParams2,
+}
+
+#[derive(Encode, Debug, Clone)]
+pub struct StatemintExtraParams2 {
+    era: subxt::config::extrinsic_params::Era,
+    nonce: u32,
+    charge: subxt::config::substrate::AssetTip,
+}
+
+#[derive(Encode, Debug, Clone)]
+pub struct StatemintAdditionalParams2 {
+    spec_version: u32,
+    tx_version: u32,
+    genesis_hash: subxt::utils::H256,
+    mortality_hash: subxt::utils::H256,
+}
+
+impl ExtrinsicParams<<StatemintConfig2 as Config>::Index, <StatemintConfig2 as Config>::Hash>
+for StatemintExtrinsicParams2
+{
+    /// mortality hash, era, charge
+    type OtherParams = (
+        subxt::utils::H256,
+        subxt::config::extrinsic_params::Era,
+        subxt::config::substrate::AssetTip,
+    );
+
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: <StatemintConfig2 as Config>::Index,
+        genesis_hash: <StatemintConfig2 as Config>::Hash,
+        other_params: Self::OtherParams,
+    ) -> Self {
+        let (mortality_hash, era, charge) = other_params;
+
+        let extra_params = StatemintExtraParams2 { era, nonce, charge };
+
+        let additional_params = StatemintAdditionalParams2 {
+            spec_version,
+            tx_version,
+            genesis_hash,
+            mortality_hash,
+        };
+        Self {
+            extra_params,
+            additional_params,
+        }
+    }
+
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        self.extra_params.encode_to(v);
+    }
+
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        self.additional_params.encode_to(v);
+    }
+}
+
+////////////////////////////////////////////////////////////
+// Third Config (using the Substrate and Polkadot Config)
+////////////////////////////////////////////////////////////
+
+pub enum StatemintConfig3 {}
+
+impl Config for StatemintConfig3 {
+    type Index = <PolkadotConfig as Config>::Index;
+    type Hash = <PolkadotConfig as Config>::Hash;
+    type AccountId = <PolkadotConfig as Config>::AccountId;
+    type Address = <PolkadotConfig as Config>::Address;
+    type Signature = <PolkadotConfig as Config>::Signature;
+    type Hasher = <PolkadotConfig as Config>::Hasher;
+    type Header = <PolkadotConfig as Config>::Header;
+    // this is the only difference:
+    type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
+}
+
+
+/// In this example you can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // // Create a new API client, configured to talk to Polkadot nodes.
-    // let api = OnlineClient::<AjunaConfig>::new().await?;
+    let rpc_endpoint = todo!();
+    let api = OnlineClient::<StatemintConfig>::from_url().await?;
 
     println!("Hello");
     Ok(())
