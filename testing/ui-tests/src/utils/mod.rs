@@ -7,7 +7,7 @@ mod metadata_test_runner;
 
 use frame_metadata::{
     v15::{
-        ExtrinsicMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15,
+        self, ExtrinsicMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15,
         StorageEntryMetadata,
     },
     RuntimeMetadataPrefixed,
@@ -24,9 +24,12 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
 ) -> RuntimeMetadataPrefixed {
     // We don't care about the extrinsic type.
     let extrinsic = ExtrinsicMetadata {
-        ty: meta_type::<()>(),
         version: 0,
         signed_extensions: vec![],
+        address_ty: meta_type::<()>(),
+        call_ty: meta_type::<()>(),
+        signature_ty: meta_type::<()>(),
+        extra_ty: meta_type::<()>(),
     };
 
     // Construct metadata manually from our types (See `RuntimeMetadataV15::new()`).
@@ -46,6 +49,8 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
     registry.register_type(&meta_type::<RuntimeCall>());
     registry.register_type(&meta_type::<RuntimeEvent>());
 
+    let outer_enums_ty = registry.register_type(&meta_type::<()>());
+
     // Metadata needs to contain this DispatchError, since codegen looks for it.
     registry.register_type(&meta_type::<DispatchError>());
 
@@ -55,6 +60,14 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
         extrinsic,
         ty,
         apis: vec![],
+        outer_enums: v15::OuterEnums {
+            call_enum_ty: outer_enums_ty.clone(),
+            event_enum_ty: outer_enums_ty.clone(),
+            error_enum_ty: outer_enums_ty,
+        },
+        custom: v15::CustomMetadata {
+            map: Default::default(),
+        },
     };
 
     RuntimeMetadataPrefixed::from(metadata)

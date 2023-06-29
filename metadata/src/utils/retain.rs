@@ -82,7 +82,10 @@ fn update_pallet_types(pallet: &mut PalletMetadataInner, map_ids: &BTreeMap<u32,
 
 /// Collect all type IDs needed to represent the extrinsic metadata.
 fn collect_extrinsic_types(extrinsic: &ExtrinsicMetadata, type_ids: &mut HashSet<u32>) {
-    type_ids.insert(extrinsic.ty);
+    type_ids.insert(extrinsic.address_ty);
+    type_ids.insert(extrinsic.call_ty);
+    type_ids.insert(extrinsic.signature_ty);
+    type_ids.insert(extrinsic.extra_ty);
 
     for signed in &extrinsic.signed_extensions {
         type_ids.insert(signed.extra_ty);
@@ -92,7 +95,10 @@ fn collect_extrinsic_types(extrinsic: &ExtrinsicMetadata, type_ids: &mut HashSet
 
 /// Update all type IDs of the provided extrinsic metadata using the new type IDs from the portable registry.
 fn update_extrinsic_types(extrinsic: &mut ExtrinsicMetadata, map_ids: &BTreeMap<u32, u32>) {
-    update_type(&mut extrinsic.ty, map_ids);
+    update_type(&mut extrinsic.address_ty, map_ids);
+    update_type(&mut extrinsic.call_ty, map_ids);
+    update_type(&mut extrinsic.signature_ty, map_ids);
+    update_type(&mut extrinsic.extra_ty, map_ids);
 
     for signed in &mut extrinsic.signed_extensions {
         update_type(&mut signed.extra_ty, map_ids);
@@ -143,21 +149,10 @@ fn retain_pallets_in_runtime_call_type<F>(metadata: &mut Metadata, mut filter: F
 where
     F: FnMut(&str) -> bool,
 {
-    let extrinsic_ty = metadata
-        .types
-        .types
-        .get_mut(metadata.extrinsic.ty as usize)
-        .expect("Metadata should contain extrinsic type in registry");
-
-    let Some(call_ty) = extrinsic_ty.ty.type_params
-        .iter_mut()
-        .find(|ty| ty.name == "Call")
-        .and_then(|ty| ty.ty) else { return; };
-
     let call_ty = metadata
         .types
         .types
-        .get_mut(call_ty.id as usize)
+        .get_mut(metadata.extrinsic.call_ty as usize)
         .expect("Metadata should contain Call type information");
 
     let TypeDef::Variant(variant) = &mut call_ty.ty.type_def else {
@@ -268,7 +263,6 @@ mod tests {
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
         match meta.1 {
-            RuntimeMetadata::V14(v14) => v14.try_into().unwrap(),
             RuntimeMetadata::V15(v15) => v15.try_into().unwrap(),
             _ => panic!("Unsupported metadata version {:?}", meta.1),
         }

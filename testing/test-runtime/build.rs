@@ -37,7 +37,7 @@ async fn run() {
 
     // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
     // This may at least prevent this script from running so often (ie whenever we change Subxt).
-    const V15_METADATA_VERSION: u32 = u32::MAX;
+    const V15_METADATA_VERSION: u32 = 15;
     let bytes = V15_METADATA_VERSION.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
     let raw: String = {
@@ -56,7 +56,9 @@ async fn run() {
         .unwrap_or_else(|e| panic!("Failed to hex-decode metadata: {e}"));
     let bytes: Option<Vec<u8>> = Decode::decode(&mut &raw_bytes[..])
         .unwrap_or_else(|e| panic!("Failed to decode metadata bytes: {e}"));
-    let metadata_bytes = bytes.expect("Metadata version not found");
+    let metadata_bytes = bytes.expect(&format!(
+        "Metadata version not found for verison {V15_METADATA_VERSION}"
+    ));
 
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();

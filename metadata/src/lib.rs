@@ -637,7 +637,6 @@ impl codec::Decode for Metadata {
     fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
         let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(input)?;
         let metadata = match metadata.1 {
-            frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
             _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
         };

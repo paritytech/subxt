@@ -16,6 +16,8 @@ use std::collections::HashMap;
 
 // Converting from V15 metadata into our Subxt repr.
 mod from_v15 {
+    use crate::OuterEnumsMetadata;
+
     use super::*;
 
     impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
@@ -86,6 +88,11 @@ mod from_v15 {
                 pallets_by_index,
                 extrinsic: from_extrinsic_metadata(m.extrinsic),
                 runtime_ty: m.ty.id,
+                outer_enums: OuterEnumsMetadata {
+                    call_enum_ty: m.outer_enums.call_enum_ty.id,
+                    event_enum_ty: m.outer_enums.event_enum_ty.id,
+                    error_enum_ty: m.outer_enums.error_enum_ty.id,
+                },
                 dispatch_error_ty,
                 apis: apis.collect(),
             })
@@ -104,13 +111,16 @@ mod from_v15 {
 
     fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
-            ty: value.ty.id,
             version: value.version,
             signed_extensions: value
                 .signed_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
                 .collect(),
+            address_ty: value.address_ty.id,
+            call_ty: value.call_ty.id,
+            signature_ty: value.signature_ty.id,
+            extra_ty: value.extra_ty.id,
         }
     }
 
@@ -268,6 +278,14 @@ mod into_v15 {
                     .into_iter()
                     .map(from_runtime_api_metadata)
                     .collect(),
+                outer_enums: v15::OuterEnums {
+                    call_enum_ty: m.outer_enums.call_enum_ty.into(),
+                    event_enum_ty: m.outer_enums.event_enum_ty.into(),
+                    error_enum_ty: m.outer_enums.error_enum_ty.into(),
+                },
+                custom: v15::CustomMetadata {
+                    map: Default::default(),
+                },
             }
         }
     }
@@ -313,13 +331,16 @@ mod into_v15 {
 
     fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v15::ExtrinsicMetadata<PortableForm> {
         v15::ExtrinsicMetadata {
-            ty: e.ty.into(),
             version: e.version,
             signed_extensions: e
                 .signed_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
                 .collect(),
+            address_ty: e.address_ty.into(),
+            call_ty: e.call_ty.into(),
+            signature_ty: e.signature_ty.into(),
+            extra_ty: e.extra_ty.into(),
         }
     }
 
