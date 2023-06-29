@@ -447,8 +447,14 @@ impl ConstantMetadata {
 /// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-    /// The type of the extrinsic.
-    ty: u32,
+    /// The type of the address that signes the extrinsic
+    address_ty: u32,
+    /// The type of the outermost Call enum.
+    call_ty: u32,
+    /// The type of the extrinsic's signature.
+    signature_ty: u32,
+    /// The type of the outermost Extra enum.
+    extra_ty: u32,
     /// Extrinsic version.
     version: u8,
     /// The signed extensions in the order they appear in the extrinsic.
@@ -456,9 +462,22 @@ pub struct ExtrinsicMetadata {
 }
 
 impl ExtrinsicMetadata {
-    /// Type of the extrinsic.
-    pub fn ty(&self) -> u32 {
-        self.ty
+    /// The type of the address that signes the extrinsic
+    pub fn address_ty(&self) -> u32 {
+        self.address_ty
+    }
+
+    /// The type of the outermost Call enum.
+    pub fn call_ty(&self) -> u32 {
+        self.call_ty
+    }
+    /// The type of the extrinsic's signature.
+    pub fn signature_ty(&self) -> u32 {
+        self.signature_ty
+    }
+    /// The type of the outermost Extra enum.
+    pub fn extra_ty(&self) -> u32 {
+        self.extra_ty
     }
 
     /// Extrinsic version.
