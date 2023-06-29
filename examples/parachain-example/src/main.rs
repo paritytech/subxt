@@ -1,0 +1,257 @@
+//! # Connecting to a parachain with Subxt
+//!
+//! In this example we connect to a parachain and subscribe to its blocks.
+//! There are many parachains on Polkadot and Kusama. Connecting to a parachain (or any other substrate based blockchain) with subxt requires 2 steps:
+//!
+//! 1. Fetching the chains metadata to generate a static interface via the subxt codegen.
+//! 2. Creating a config struct that implements `subxt::Config` to give some type information
+//! that is currently not covered by the metadata.
+//!
+//! We now show these steps in detail. As an example we use the
+//! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub" that is currently (2023-06-26)
+//! deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
+//!
+//!
+//! ## 1. Fetch the Metadata
+//!
+//! To fetch the metadata for the Statemint parachain, we need to have the URL of an RPC node.
+//! We can find the "Asset Hub" entry, by looking through the sidebar on [Polkadot.js](https://polkadot.js.org/apps/).
+//! We connect to the node ("via Parity"), which leads us to [this page](https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Fpolkadot-asset-hub-rpc.polkadot.io#/explorer).
+//! In the URL of the page we can already see the URL of the RPC endpoint of the node as a query parameter. It is also printed
+//! to the Javascript console of the browser: `WS endpoint= wss://polkadot-asset-hub-rpc.polkadot.io`.
+//!
+//! Let's create a separate crate for the statically generated interface.
+//! Keeping the metadata and the resulting generated code in a separate crate
+//! avoids unnecessary recompiles, whenever you change something in the rest of your project.
+//!
+//! ```txt
+//! cargo new metadata --lib
+//! ```
+//!
+//! In the new crate we can now get the metadata via the [subxt cli](https://crates.io/crates/subxt-cli) tool.
+//! It is important to specify the port as `:443` like so:
+//! ```txt
+//! subxt metadata  --url wss://polkadot-asset-hub-rpc.polkadot.io:443 > statemint_metadata.scale
+//! ```
+//! The metadata is saved as `statemint_metadata.scale`. We need to add subxt as a dependency with `cargo add subxt`
+//! and then we can replace the code in lib.rs with the following:
+//! ```
+//! #[subxt::subxt(runtime_metadata_path = "statemint_metadata.scale")]
+//! pub mod statemint {}
+//! ```
+//! We use the `metadata` crate as a dependency in our main project and have access to
+//! all the pallets and calls of Ajuna via the exported module `metadata::statemint`.
+//!
+//! # 2. Create the Config
+//!
+//! To construct a config, we need to investigate which types Statemint uses as `AccountId`, `Hasher`, etc.
+//! We need to take a look at the source code of Statemint and find out how it implements some substrate functionalities.
+//! Statemint (Polkadot Asset Hub) is part of the [Cumulus Github repository](https://github.com/paritytech/cumulus).
+//! The crate defining the parachains runtime can be found [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot).
+//!
+//! ### AccountId, Index, Hash, Hasher and Header
+//! We need to check, where the parachains runtime implements the frame_system::Config trait.
+//! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
+//! For Statemint we find it [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179).
+//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::Config] should also be the ones
+//! we want to use for implementing [subxt::Config].
+//! In the Case of Statemint (Asset Hub) they are:
+//!
+//! - AccountId: [sp_core::crypto::AccountId32]
+//! - Index: [u32]
+//! - Hash: [sp_core::H256]
+//! - Hasher (type `Hashing` in [frame_system::Config]): [sp_runtime::traits::BlakeTwo256]
+//! - Header: [sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>](sp_runtime::generic::Header)
+//!
+//! ### Address, Signature, ExtrinsicParams
+//! A Substrate runtime is typically constructed by using the [frame_support::construct_runtime] macro.
+//! In this macro, we need to specify the type of an `UncheckedExtrinsic`. Most of the time, the `UncheckedExtrinsic` will be of the type
+//! [sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>](sp_runtime::generic::UncheckedExtrinsic).
+//! The generic parameters `Address` and `Signature` specified when declaring the `UncheckedExtrinsic` type
+//! are the types for `Address` and `Signature` we should use when implementing the [subxt::Config] trait.
+//! In case of Statemint (Polkadot Asset Hub) we see the following types being used in `UncheckedExtrinsic`:
+//!
+//! - Address: [sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress)
+//! - Signature: [sp_runtime::MultiSignature]
+//!
+//! #### ExtrinsicParams
+//! The `ExtrinsicParams` type is the most complicated to set up, but it can be derived from
+//! the `SignedExtra` parameter of the `UncheckedExtrinsic` of your parachain. The `SignedExtra` parameter is a tuple in most cases,
+//! where each field of the tuple corresponds to 0-1 fields in the `ExtrinsicParams` struct we want to create.
+//! It looks like [this](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L779) for the Statemint parachain:
+//!
+//! ```rs
+//! pub type SignedExtra = (
+//!	    frame_system::CheckNonZeroSender<Runtime>,
+//!	    frame_system::CheckSpecVersion<Runtime>,
+//!	    frame_system::CheckTxVersion<Runtime>,
+//!	    frame_system::CheckGenesis<Runtime>,
+//!	    frame_system::CheckEra<Runtime>,
+//!	    frame_system::CheckNonce<Runtime>,
+//!	    frame_system::CheckWeight<Runtime>,
+//!	    pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>,
+//! );
+//! ```
+//!
+//! The `ExtrinsicParams` struct is basically a collection of fields that can be grouped into two categories:
+//! _extra parameters_ and _additional parameters_. _Extra parameters_ are taken into account when
+//! signing a transaction and sent along with it, while _additional parameters_ are only used during
+//! the signing step but _not_ sent along with the transaction.
+//!
+//! Each element of the `SignedExtra` tuple implements [parity_scale_codec::codec::Encode] and [sp_runtime::traits::SignedExtension]
+//! which has an associated type `AdditionalSigned` that also implements [parity_scale_codec::codec::Encode]. Let's look at the underlying types for each tuple element.
+//! All zero-sized types have been replaced by `()` for simplicity.
+//!
+//! | tuple element                        | struct type                                     | `AdditionalSigned` type          |
+//! | ------------------------------------ | ----------------------------------------------- | ---------------------------------|
+//! | [frame_system::CheckNonZeroSender]   | ()                                              | ()                               |
+//! | [frame_system::CheckSpecVersion]     | ()                                              | [u32]                            |
+//! | [frame_system::CheckTxVersion]       | ()                                              | [u32]                            |
+//! | [frame_system::CheckGenesis]         | ()                                              | `Config::Hash` = [sp_core::H256] |
+//! | [frame_system::CheckMortality]       | [sp_runtime::generic::Era]                      | `Config::Hash` = [sp_core::H256] |
+//! | [frame_system::CheckNonce]           | [Config::Index] = [u32]                         | ()                               |
+//! | [frame_system::CheckWeight]          | ()                                              | ()                               |
+//! | [frame_system::ChargeAssetTxPayment] | [pallet_asset_tx_payment::ChargeAssetTxPayment] | ()                               |
+//!
+//! All types in the `struct type` column make up our _extra parameters_.
+//! We can put them together into a struct, ignoring all zero-sized types.
+//! The types of the last column make up our _additional parameters_. Here
+//! we can also ignore the zero-sized types. We can name the fields however we like,
+//! however their order in the struct should match the order in the `SignedExtra` tuple (see table).
+//! Beware that some numbers might be compact encoded, when encoding the struct, some might not be.
+//! Please check the exact struct type definition here. For example the definition for CheckNonce is
+//! `CheckNonce<T: Config>(#[codec(compact)] pub T::Index)`. We can see that the `#[codec(compact)`
+//! attribute tells us that the `u32` value needs to be compact encoded.
+//!
+//! Because the `pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>` struct requires us to pass the
+//! struct of our `Runtime` as a generic argument, we decide to just recreate the struct here. This prohibits us
+//! from pulling in tons of unneeded dependencies. This is a pattern that you might see often,
+//! especially because substrate crates and their types are quite big, clunky and entangled sometimes.
+//!
+//! With all these types collected, we can create two structs: `StatemintExtraParams` and `StatemintAdditionalParams`.
+//! Then we combine them into a `StatemintExtrinsicParams` struct for which we implement the [subxt::config::ExtrinsicParams] trait, see below.
+//! Now we have all the parts we need to create our config `StatemintConfig` and implment the [subxt::Config] trait on it.
+//! Note that StatemintConfig is an empty enum, an _uninhabited type_ that is never means to be instantiated
+//! but just gives type information to various interfaces of subxt.
+//!
+//! # 3. Simplifying the config
+//!
+//! Now you should be able to create a config for a parachain from scratch and understand the details of its construction.
+//! However this is quite a tedious process, so subxt provides some sane defaults that can make your life easier.
+//! First, let's ditch the dependencies to [sp_core] and [sp_runtime].
+//! We should not be forced to utilize these traits whenever we create a config for a chain.
+//! That is why subxt provides some types that can function as drop in replacements for some types in [sp_core] and [sp_runtime].
+//! You can use:
+//! - [subxt::config::extrinsic_params::Era] instead of [sp_runtime::generic::Era]
+//! - [subxt::utils::AccountId32] instead of [sp_core::crypto::AccountId32]
+//! - [subxt::utils::MultiAddress] instead of [sp_runtime::MultiAddress]
+//! - [subxt::utils::H160], [subxt::utils::H256] and [subxt::utils::H512] instead of [sp_core::H256], [sp_core::H160] and [sp_core::H512]
+//! - [subxt::hash] instead of [sp_runtime::MultiAddress]
+//! - [subxt::config::substrate::Era] instead of [sp_runtime::generic::Era]
+//! - [subxt::config::substrate::SubstrateHeader] instead of [sp_runtime::generic::Header]
+//! - [subxt::config::substrate::AssetTip] instead of [pallet_transaction_payment::ChargeTransactionPayment]
+//! - [subxt::config::substrate::BlakeTwo256] instead of [sp_runtime::generic::Era]
+//! - [subxt::config::substrate] instead of [sp_runtime::generic::Era]
+//! - [subxt::config::substrate::Era] instead of [sp_runtime::generic::Era]
+//! todo
+use sp_core::H256;
+use subxt::config::ExtrinsicParams;
+use subxt::{
+    config::substrate::{BlakeTwo256, SubstrateHeader},
+    Config, OnlineClient, PolkadotConfig, SubstrateConfig,
+};
+
+use codec::{Decode, Encode};
+
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct ChargeAssetTxPayment {
+    #[codec(compact)]
+    tip: u128,
+    asset_id: Option<u32>,
+}
+
+/// Default set of commonly used types by Polkadot nodes.
+pub enum StatemintConfig {}
+
+impl Config for StatemintConfig {
+    type Index = u32;
+    type Hash = sp_core::H256;
+    type AccountId = sp_core::crypto::AccountId32;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, ()>;
+    type Signature = sp_runtime::MultiSignature;
+    type Hasher = sp_runtime::traits::BlakeTwo256;
+    type Header = sp_runtime::generic::Header<u32, Self::Hasher>;
+    type ExtrinsicParams = StatemintExtrinsicParams;
+}
+
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct StatemintExtrinsicParams {
+    extra_params: StatemintExtraParams,
+    additional_params: StatemintAdditionalParams,
+}
+
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct StatemintExtraParams {
+    era: sp_runtime::generic::Era,
+    nonce: u32,
+    charge: ChargeAssetTxPayment,
+}
+
+#[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
+pub struct StatemintAdditionalParams {
+    spec_version: u32,
+    tx_version: u32,
+    genesis_hash: sp_core::H256,
+    mortality_hash: sp_core::H256,
+}
+
+impl ExtrinsicParams<<StatemintConfig as Config>::Index, <StatemintConfig as Config>::Hash>
+    for StatemintExtrinsicParams
+{
+    /// mortality hash, era, charge
+    type OtherParams = (
+        sp_core::H256,
+        sp_runtime::generic::Era,
+        ChargeAssetTxPayment,
+    );
+
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: <StatemintConfig as Config>::Index,
+        genesis_hash: <StatemintConfig as Config>::Hash,
+        other_params: Self::OtherParams,
+    ) -> Self {
+        let (mortality_hash, era, charge) = other_params;
+
+        let extra_params = StatemintExtraParams { era, nonce, charge };
+
+        let additional_params = StatemintAdditionalParams {
+            spec_version,
+            tx_version,
+            genesis_hash,
+            mortality_hash,
+        };
+        Self {
+            extra_params,
+            additional_params,
+        }
+    }
+
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        self.extra_params.encode_to(v);
+    }
+
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        self.additional_params.encode_to(v);
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // // Create a new API client, configured to talk to Polkadot nodes.
+    // let api = OnlineClient::<AjunaConfig>::new().await?;
+
+    println!("Hello");
+    Ok(())
+}

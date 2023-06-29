@@ -4,3 +4,5 @@
 cargo-timing*
 /examples/wasm-example/dist
 /examples/wasm-example/target
+/examples/parachain-example/target
+/examples/parachain-example/metadata/target

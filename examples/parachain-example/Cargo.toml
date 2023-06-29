@@ -1,0 +1,21 @@
+[package]
+name = "parachain-example"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["./metadata"]
+
+[dependencies]
+subxt = { path = "../../subxt" }
+futures = { version = "0.3.27", default-features = false, features = ["std"] }
+tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
+metadata = { path = "./metadata" }
+sp-core = "21.0.0"
+sp-runtime = "24.0.0"
+codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
+scale-decode = "0.7.0"
+scale-encode = "0.3.0"
+#pallet-asset-tx-payment = "21.0.0"
+
+#asset-hub-polkadot-runtime  = { git = "https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot" }
