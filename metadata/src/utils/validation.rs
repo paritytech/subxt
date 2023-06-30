@@ -198,11 +198,8 @@ fn get_extrinsic_hash(
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    let mut bytes = concat_and_hash5(
-        &get_type_hash(registry, extrinsic.call_ty, &mut visited_ids),
-        &get_type_hash(registry, extrinsic.address_ty, &mut visited_ids),
-        &get_type_hash(registry, extrinsic.signature_ty, &mut visited_ids),
-        &get_type_hash(registry, extrinsic.extra_ty, &mut visited_ids),
+    let mut bytes = concat_and_hash2(
+        &get_type_hash(registry, extrinsic.ty, &mut visited_ids),
         &[extrinsic.version; 32],
     );
 
@@ -555,12 +552,9 @@ mod tests {
 
     fn build_default_extrinsic() -> v15::ExtrinsicMetadata {
         v15::ExtrinsicMetadata {
+            ty: meta_type::<()>(),
             version: 0,
             signed_extensions: vec![],
-            address_ty: meta_type::<()>(),
-            call_ty: meta_type::<()>(),
-            signature_ty: meta_type::<()>(),
-            extra_ty: meta_type::<()>(),
         }
     }
 
@@ -603,14 +597,6 @@ mod tests {
             build_default_extrinsic(),
             meta_type::<()>(),
             vec![],
-            v15::OuterEnums {
-                call_enum_ty: meta_type::<()>(),
-                event_enum_ty: meta_type::<()>(),
-                error_enum_ty: meta_type::<()>(),
-            },
-            v15::CustomMetadata {
-                map: Default::default(),
-            },
         )
         .try_into()
         .expect("can build valid metadata")

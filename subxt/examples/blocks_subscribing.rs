@@ -1,14 +1,13 @@
 use futures::StreamExt;
-use subxt::{OnlineClient, SubstrateConfig};
+use subxt::{OnlineClient, PolkadotConfig};
 
-// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
-    let api = OnlineClient::<SubstrateConfig>::new().await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Subscribe to all finalized blocks:
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;

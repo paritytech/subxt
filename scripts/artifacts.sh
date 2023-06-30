@@ -12,9 +12,9 @@
 # ```
 
 # get the full metadata
-cargo run --bin subxt metadata --version 15 > artifacts/polkadot_metadata_full.scale
+cargo run --bin subxt metadata --version unstable > artifacts/polkadot_metadata_full.scale
 # use it to generate polkadot.rs
-cargo run --bin subxt codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
+cargo run --bin subxt codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/codegen/polkadot.rs
 # generate a metadata file that only contains the pallets Balances, Staking, System and Multisig
 cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "Balances,Staking,System,Multisig" > artifacts/polkadot_metadata_small.scale
 # generate a metadata file that only contains no pallets

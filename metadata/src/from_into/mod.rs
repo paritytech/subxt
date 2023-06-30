@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+mod v14;
 mod v15;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
@@ -74,9 +75,7 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
             frame_metadata::RuntimeMetadata::V13(_) => {
                 Err(TryFromError::UnsupportedMetadataVersion(13))
             }
-            frame_metadata::RuntimeMetadata::V14(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(14))
-            }
+            frame_metadata::RuntimeMetadata::V14(m) => m.try_into(),
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),
         }
     }

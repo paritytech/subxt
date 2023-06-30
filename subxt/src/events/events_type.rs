@@ -546,28 +546,12 @@ pub(crate) mod test_utils {
         }];
 
         let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
-            address_ty: meta_type::<()>(),
-            call_ty: meta_type::<RuntimeCall>(),
-            signature_ty: meta_type::<()>(),
-            extra_ty: meta_type::<()>(),
         };
 
-        let meta = RuntimeMetadataV15::new(
-            pallets,
-            extrinsic,
-            meta_type::<()>(),
-            vec![],
-            frame_metadata::v15::OuterEnums {
-                call_enum_ty: meta_type::<()>().into(),
-                event_enum_ty: meta_type::<()>().into(),
-                error_enum_ty: meta_type::<()>().into(),
-            },
-            frame_metadata::v15::CustomMetadata {
-                map: Default::default(),
-            },
-        );
+        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::new(runtime_metadata.try_into().unwrap())

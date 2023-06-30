@@ -131,7 +131,7 @@ impl<T: Config> OnlineClient<T> {
         {
             // Try to fetch the latest unstable metadata, if that fails fall back to
             // fetching the latest stable metadata.
-            const V15_METADATA_VERSION: u32 = 15;
+            const V15_METADATA_VERSION: u32 = u32::MAX;
             match rpc.metadata_at_version(V15_METADATA_VERSION).await {
                 Ok(bytes) => Ok(bytes),
                 Err(_) => rpc.metadata().await,

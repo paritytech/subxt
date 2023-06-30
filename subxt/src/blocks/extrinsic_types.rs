@@ -16,7 +16,7 @@ use crate::{
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::DecodeAsFields;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -474,11 +474,47 @@ pub(crate) struct ExtrinsicPartTypeIds {
 impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
     pub(crate) fn new(metadata: &Metadata) -> Result<Self, BlockError> {
+        const ADDRESS: &str = "Address";
+        const CALL: &str = "Call";
+        const SIGNATURE: &str = "Signature";
+        const EXTRA: &str = "Extra";
+
+        let id = metadata.extrinsic().ty();
+
+        let Some(ty) = metadata.types().resolve(id) else {
+            return Err(BlockError::MissingType);
+        };
+
+        let params: HashMap<_, _> = ty
+            .type_params
+            .iter()
+            .map(|ty_param| {
+                let Some(ty) = ty_param.ty else {
+                    return Err(BlockError::MissingType);
+                };
+
+                Ok((ty_param.name.as_str(), ty.id))
+            })
+            .collect::<Result<_, _>>()?;
+
+        let Some(address) = params.get(ADDRESS) else {
+            return Err(BlockError::MissingType);
+        };
+        let Some(call) = params.get(CALL) else {
+            return Err(BlockError::MissingType);
+        };
+        let Some(signature) = params.get(SIGNATURE) else {
+            return Err(BlockError::MissingType);
+        };
+        let Some(extra) = params.get(EXTRA) else {
+            return Err(BlockError::MissingType);
+        };
+
         Ok(ExtrinsicPartTypeIds {
-            address: metadata.extrinsic().address_ty(),
-            _call: metadata.extrinsic().call_ty(),
-            signature: metadata.extrinsic().signature_ty(),
-            extra: metadata.extrinsic().extra_ty(),
+            address: *address,
+            _call: *call,
+            signature: *signature,
+            extra: *extra,
         })
     }
 }
@@ -584,7 +620,6 @@ mod tests {
     use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
-    use frame_metadata::v15::{CustomMetadata, OuterEnums};
     use frame_metadata::{
         v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
@@ -703,28 +738,12 @@ mod tests {
         }];
 
         let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<ExtrinsicType<(), RuntimeCall, (), ()>>(),
             version: 4,
             signed_extensions: vec![],
-            address_ty: meta_type::<()>(),
-            call_ty: meta_type::<RuntimeCall>(),
-            signature_ty: meta_type::<()>(),
-            extra_ty: meta_type::<()>(),
         };
 
-        let meta = RuntimeMetadataV15::new(
-            pallets,
-            extrinsic,
-            meta_type::<()>(),
-            vec![],
-            OuterEnums {
-                call_enum_ty: meta_type::<()>(),
-                event_enum_ty: meta_type::<()>(),
-                error_enum_ty: meta_type::<()>(),
-            },
-            CustomMetadata {
-                map: Default::default(),
-            },
-        );
+        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::new(runtime_metadata.try_into().unwrap())

@@ -95,12 +95,10 @@ pub fn generate_runtime_api_from_url(
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Fetch latest unstable version, if that fails fall back to the latest stable.
-    // let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
-    //     Ok(bytes) => bytes,
-    //     Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
-    // };
-
-    let bytes = fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?;
+    let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
+        Ok(bytes) => bytes,
+        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
+    };
 
     generate_runtime_api_from_bytes(
         item_mod,
@@ -550,20 +548,10 @@ impl RuntimeGenerator {
                 // Runtime APIs in the metadata by name.
                 pub static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
 
-                /// Outer most event.
-                pub type Event = #types_mod_ident::kitchensink_runtime::RuntimeEvent;
-
-                /// Outer most event.
-                pub type Error = #types_mod_ident::kitchensink_runtime::RuntimeError;
-
-                /// Outer most event.
-                // #outer_extrinsic
-                pub type Call = #types_mod_ident::kitchensink_runtime::RuntimeCall;
-
                 /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
-                // #outer_event
+                #outer_event
 
                 impl #crate_path::events::RootEvent for Event {
                     fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -573,7 +561,7 @@ impl RuntimeGenerator {
                     }
                 }
 
-                // #outer_extrinsic
+                #outer_extrinsic
 
                 impl #crate_path::blocks::RootExtrinsic for Call {
                     fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -583,7 +571,7 @@ impl RuntimeGenerator {
                     }
                 }
 
-                // #outer_error
+                #outer_error
 
                 impl #crate_path::error::RootError for Error {
                     fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
