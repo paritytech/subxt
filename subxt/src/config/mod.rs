@@ -31,15 +31,15 @@ pub trait Config: 'static {
 
     /// The output of the `Hasher` function.
     type Hash: Debug
-    + Copy
-    + Send
-    + Sync
-    + Decode
-    + AsRef<[u8]>
-    + Serialize
-    + DeserializeOwned
-    + Encode
-    + PartialEq;
+        + Copy
+        + Send
+        + Sync
+        + Decode
+        + AsRef<[u8]>
+        + Serialize
+        + DeserializeOwned
+        + Encode
+        + PartialEq;
 
     /// The account ID type.
     type AccountId: Debug + Clone + Encode;
@@ -51,10 +51,10 @@ pub trait Config: 'static {
     type Signature: Debug + Encode;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hasher: Debug + Hasher<Output=Self::Hash>;
+    type Hasher: Debug + Hasher<Output = Self::Hash>;
 
     /// The block header.
-    type Header: Debug + Header<Hasher=Self::Hasher> + Sync + Send + DeserializeOwned;
+    type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
@@ -100,7 +100,7 @@ pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T
 }
 
 impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
-for WithExtrinsicParams<T, E>
+    for WithExtrinsicParams<T, E>
 {
     type Index = T::Index;
     type Hash = T::Hash;
@@ -119,10 +119,10 @@ mod substrate_impls {
     use primitive_types::{H256, U256};
 
     impl<N, H> Header for sp_runtime::generic::Header<N, H>
-        where
-            Self: Encode,
-            N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
-            H: sp_runtime::traits::Hash + Hasher,
+    where
+        Self: Encode,
+        N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
+        H: sp_runtime::traits::Hash + Hasher,
     {
         type Number = N;
         type Hasher = H;

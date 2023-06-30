@@ -52,7 +52,6 @@
 
 use subxt::{Config, OnlineClient, PolkadotConfig, SubstrateConfig};
 
-
 /// Default set of commonly used types by Polkadot nodes.
 pub enum AjunaConfig {}
 

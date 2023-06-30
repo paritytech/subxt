@@ -174,12 +174,10 @@
 //! All configs we constructed, `StatemintConfig`, `StatemintConfig2` and `StatemintConfig3` should behave in the same way.
 //! All three ways are valid for constructing a config. Choose one depending on your use case.
 //!
-use subxt::config::ExtrinsicParams;
-use subxt::{
-    Config, OnlineClient, PolkadotConfig, SubstrateConfig,
-};
+use codec::Encode;
 use futures::StreamExt;
-use codec::{Encode};
+use subxt::config::ExtrinsicParams;
+use subxt::{Config, OnlineClient, PolkadotConfig, SubstrateConfig};
 
 #[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct ChargeAssetTxPayment {
@@ -307,7 +305,7 @@ pub struct StatemintAdditionalParams2 {
 }
 
 impl ExtrinsicParams<<StatemintConfig2 as Config>::Index, <StatemintConfig2 as Config>::Hash>
-for StatemintExtrinsicParams2
+    for StatemintExtrinsicParams2
 {
     /// mortality hash, era, charge
     type OtherParams = (
@@ -365,7 +363,6 @@ impl Config for StatemintConfig3 {
     // this is the only difference:
     type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
 }
-
 
 /// In this example you can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
 #[tokio::main]
