@@ -85,14 +85,14 @@
 //!
 //! ```rs
 //! pub type SignedExtra = (
-//!	    frame_system::CheckNonZeroSender<Runtime>,
-//!	    frame_system::CheckSpecVersion<Runtime>,
-//!	    frame_system::CheckTxVersion<Runtime>,
-//!	    frame_system::CheckGenesis<Runtime>,
-//!	    frame_system::CheckEra<Runtime>,
-//!	    frame_system::CheckNonce<Runtime>,
-//!	    frame_system::CheckWeight<Runtime>,
-//!	    pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>,
+//!     frame_system::CheckNonZeroSender<Runtime>,
+//!     frame_system::CheckSpecVersion<Runtime>,
+//!     frame_system::CheckTxVersion<Runtime>,
+//!     frame_system::CheckGenesis<Runtime>,
+//!     frame_system::CheckEra<Runtime>,
+//!     frame_system::CheckNonce<Runtime>,
+//!     frame_system::CheckWeight<Runtime>,
+//!     pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>,
 //! );
 //! ```
 //!
