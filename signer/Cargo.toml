@@ -38,6 +38,7 @@ hmac = { workspace = true }
 zeroize = { workspace = true }
 bip39 = { workspace = true }
 schnorrkel = { workspace = true }
+secp256k1 = { workspace = true }
 secrecy = { workspace = true }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
