@@ -11,7 +11,6 @@
 //! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub" that is currently (2023-06-26)
 //! deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
 //!
-//!
 //! ## 1. Fetch the Metadata
 //!
 //! To fetch the metadata for the Statemint parachain, we need to have the URL of an RPC node.
@@ -179,7 +178,7 @@ use subxt::config::ExtrinsicParams;
 use subxt::{
     Config, OnlineClient, PolkadotConfig, SubstrateConfig,
 };
-
+use futures::StreamExt;
 use codec::{Encode};
 
 #[derive(Encode, Debug, Clone, Eq, PartialEq)]
@@ -188,6 +187,7 @@ pub struct ChargeAssetTxPayment {
     tip: u128,
     asset_id: Option<u32>,
 }
+
 ////////////////////////////////////////////////////////////
 // First Config (verbose and detailed)
 ////////////////////////////////////////////////////////////
@@ -370,9 +370,50 @@ impl Config for StatemintConfig3 {
 /// In this example you can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let rpc_endpoint = todo!();
-    let api = OnlineClient::<StatemintConfig>::from_url().await?;
+    let rpc_endpoint = "wss://polkadot-asset-hub-rpc.polkadot.io:443";
 
-    println!("Hello");
+    // here we use the config:
+    let api = OnlineClient::<StatemintConfig>::from_url(rpc_endpoint).await?;
+
+    // Subscribe to all finalized blocks:
+    let mut blocks_sub = api.blocks().subscribe_finalized().await?;
+
+    // For each block, print a bunch of information about it:
+    while let Some(block) = blocks_sub.next().await {
+        let block = block?;
+
+        let block_number = block.header().number;
+        let block_hash = block.hash();
+
+        println!("Block #{block_number}:");
+        println!("  Hash: {block_hash}");
+        println!("  Extrinsics:");
+
+        let body = block.body().await?;
+        for ext in body.extrinsics().iter() {
+            let ext = ext?;
+            let idx = ext.index();
+            let events = ext.events().await?;
+            // here we make use of the generated metadata code:
+            let decoded_ext = ext.as_root_extrinsic::<metadata::statemint::Call>();
+
+            println!("    Extrinsic #{idx}:");
+            println!("      Bytes: {}", ext.bytes().len());
+            println!("      Decoded: {decoded_ext:?}");
+            println!("      Events:");
+
+            for evt in events.iter() {
+                let evt = evt?;
+
+                let pallet_name = evt.pallet_name();
+                let event_name = evt.variant_name();
+                let event_values = evt.field_values()?;
+
+                println!("        {pallet_name}_{event_name}");
+                println!("          {}", event_values);
+            }
+        }
+    }
+
     Ok(())
 }
