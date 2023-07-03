@@ -56,7 +56,7 @@ pretty_assertions = "1.0.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.60"
-quote = "1.0.28"
+quote = "1.0.29"
 regex = "1.8.4"
 scale-info = "2.7.0"
 scale-value = "0.10.0"
