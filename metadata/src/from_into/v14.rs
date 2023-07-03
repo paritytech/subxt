@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashMap;
+
 use super::TryFromError;
 use crate::Metadata;
 use frame_metadata::{v14, v15};
@@ -21,7 +23,47 @@ impl From<Metadata> for v14::RuntimeMetadataV14 {
     }
 }
 
-fn v15_to_v14(metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 {
+fn v15_to_v14(mut metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 {
+    let types = &mut metadata.types;
+
+    // In subxt we care about the `Address`, `Call`, `Signature` and `Extra` types.
+    let extrinsic_type = scale_info::Type {
+        path: scale_info::Path {
+            segments: vec![
+                "primitives".to_string(),
+                "runtime".to_string(),
+                "generic".to_string(),
+                "UncheckedExtrinsic".to_string(),
+            ],
+        },
+        type_params: vec![
+            scale_info::TypeParameter::<scale_info::form::PortableForm> {
+                name: "Address".to_string(),
+                ty: Some(metadata.extrinsic.address_ty),
+            },
+            scale_info::TypeParameter::<scale_info::form::PortableForm> {
+                name: "Call".to_string(),
+                ty: Some(metadata.extrinsic.call_ty),
+            },
+            scale_info::TypeParameter::<scale_info::form::PortableForm> {
+                name: "Signature".to_string(),
+                ty: Some(metadata.extrinsic.signature_ty),
+            },
+            scale_info::TypeParameter::<scale_info::form::PortableForm> {
+                name: "Extra".to_string(),
+                ty: Some(metadata.extrinsic.extra_ty),
+            },
+        ],
+        type_def: scale_info::TypeDef::Composite(scale_info::TypeDefComposite { fields: vec![] }),
+        docs: vec![],
+    };
+    let extrinsic_type_id = types.types.len() as u32;
+
+    types.types.push(scale_info::PortableType {
+        id: extrinsic_type_id,
+        ty: extrinsic_type,
+    });
+
     v14::RuntimeMetadataV14 {
         types: metadata.types,
         pallets: metadata
@@ -92,7 +134,7 @@ fn v15_to_v14(metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 {
             })
             .collect(),
         extrinsic: frame_metadata::v14::ExtrinsicMetadata {
-            ty: metadata.extrinsic.ty,
+            ty: extrinsic_type_id.into(),
             version: metadata.extrinsic.version,
             signed_extensions: metadata.extrinsic.signed_extensions.into_iter().map(|ext| {
                 frame_metadata::v14::SignedExtensionMetadata {
@@ -106,7 +148,13 @@ fn v15_to_v14(metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 {
     }
 }
 
-fn v14_to_v15(metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
+fn v14_to_v15(mut metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
+    // Find the extrinsic types.
+    let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)
+        .expect("Extrinsic types are always present on V14; qed");
+
+    let outer_enums = generate_outer_enums(&mut metadata);
+
     v15::RuntimeMetadataV15 {
         types: metadata.types,
         pallets: metadata
@@ -178,7 +226,6 @@ fn v14_to_v15(metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
             })
             .collect(),
         extrinsic: frame_metadata::v15::ExtrinsicMetadata {
-            ty: metadata.extrinsic.ty,
             version: metadata.extrinsic.version,
             signed_extensions: metadata.extrinsic.signed_extensions.into_iter().map(|ext| {
                 frame_metadata::v15::SignedExtensionMetadata {
@@ -186,9 +233,104 @@ fn v14_to_v15(metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
                     ty: ext.ty,
                     additional_signed: ext.additional_signed,
                 }
-            }).collect()
+            }).collect(),
+            address_ty: extrinsic_parts.address.into(),
+            call_ty: extrinsic_parts.call.into(),
+            signature_ty: extrinsic_parts.signature.into(),
+            extra_ty: extrinsic_parts.extra.into(),
         },
         ty: metadata.ty,
         apis: Default::default(),
+        outer_enums,
+        custom: v15::CustomMetadata {
+            map: Default::default(),
+        },
+    }
+}
+
+/// The type IDs extracted from the metadata that represent the
+/// generic type parameters passed to the `UncheckedExtrinsic` from
+/// the substrate-based chain.
+struct ExtrinsicPartTypeIds {
+    address: u32,
+    call: u32,
+    signature: u32,
+    extra: u32,
+}
+
+impl ExtrinsicPartTypeIds {
+    /// Extract the generic type parameters IDs from the extrinsic type.
+    fn new(metadata: &v14::RuntimeMetadataV14) -> Result<Self, String> {
+        const ADDRESS: &str = "Address";
+        const CALL: &str = "Call";
+        const SIGNATURE: &str = "Signature";
+        const EXTRA: &str = "Extra";
+
+        let extrinsic_id = metadata.extrinsic.ty.id;
+        let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
+            return Err("Missing extrinsic type".into())
+        };
+
+        let params: HashMap<_, _> = extrinsic_ty
+            .type_params
+            .iter()
+            .map(|ty_param| {
+                let Some(ty) = ty_param.ty else {
+                    return Err("Missing type param type from extrinsic".to_string());
+                };
+
+                Ok((ty_param.name.as_str(), ty.id))
+            })
+            .collect::<Result<_, _>>()?;
+
+        let Some(address) = params.get(ADDRESS) else {
+            return Err("Missing address type from extrinsic".into());
+        };
+        let Some(call) = params.get(CALL) else {
+            return Err("Missing call type from extrinsic".into());
+        };
+        let Some(signature) = params.get(SIGNATURE) else {
+            return Err("Missing signature type from extrinsic".into());
+        };
+        let Some(extra) = params.get(EXTRA) else {
+            return Err("Missing extra type from extrinsic".into());
+        };
+
+        Ok(ExtrinsicPartTypeIds {
+            address: *address,
+            call: *call,
+            signature: *signature,
+            extra: *extra,
+        })
+    }
+}
+
+fn generate_outer_enums(
+    metadata: &mut v14::RuntimeMetadataV14,
+) -> v15::OuterEnums<scale_info::form::PortableForm> {
+    let call_enum = metadata
+        .types
+        .types
+        .iter()
+        .find(|ty| {
+            let Some(ident) = ty.ty.path.ident() else { return false };
+            ident == "RuntimeCall"
+        })
+        .expect("RuntimeCall exists in V14; qed");
+
+    let event_enun = metadata
+        .types
+        .types
+        .iter()
+        .find(|ty| {
+            let Some(ident) = ty.ty.path.ident() else { return false };
+            ident == "RuntimeEvent"
+        })
+        .expect("RuntimeEvent exists in V14; qed");
+
+    v15::OuterEnums {
+        call_enum_ty: call_enum.id.into(),
+        event_enum_ty: event_enun.id.into(),
+        error_enum_ty: event_enun.id.into(),
     }
 }
