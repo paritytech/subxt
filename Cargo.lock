@@ -701,9 +701,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.3.4"
+version = "4.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "80672091db20273a15cf9fdd4e47ed43b5091ec9841bf4c6145c9dfbbcae09ed"
+checksum = "384e169cc618c613d5e3ca6404dda77a8685a63e08660dcc64abaf7da7cb0c7a"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -712,13 +712,12 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.3.4"
+version = "4.3.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c1458a1df40e1e2afebb7ab60ce55c1fa8f431146205aa5f4887e0b111c27636"
+checksum = "ef137bbe35aab78bdb468ccfba75a5f4d8321ae011d34063770780545176af2d"
 dependencies = [
  "anstream",
  "anstyle",
- "bitflags",
  "clap_lex 0.5.0",
  "once_cell",
  "strsim",
@@ -1378,17 +1377,6 @@ dependencies = [
  "cfg-if",
  "parity-scale-codec",
  "scale-info",
-]
-
-[[package]]
-name = "frame-metadata"
-version = "16.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87cf1549fba25a6fcac22785b61698317d958e96cac72a59102ea45b9ae64692"
-dependencies = [
- "cfg-if",
- "parity-scale-codec",
- "scale-info",
  "serde",
 ]
 
@@ -1965,7 +1953,7 @@ name = "integration-tests"
 version = "0.29.0"
 dependencies = [
  "assert_matches",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -2811,9 +2799,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.60"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dec2b086b7a862cf4de201096214fa870344cf922b2b30c167badb3af3195406"
+checksum = "7b368fba921b0dce7e60f5e04ec15e565b3303972b42bcfde1d0713b881959eb"
 dependencies = [
  "unicode-ident",
 ]
@@ -2829,9 +2817,9 @@ dependencies = [
 
 [[package]]
 name = "quote"
-version = "1.0.28"
+version = "1.0.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b9ab9c7eadfd8df19006f1cf1a4aed13540ed5cbc047010ece5826e10825488"
+checksum = "573015e8ab27661678357f27dc26460738fd2b6c86e46f386fde94cb5d913105"
 dependencies = [
  "proc-macro2",
 ]
@@ -3200,9 +3188,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info"
-version = "2.9.0"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35c0a159d0c45c12b20c5a844feb1fe4bea86e28f17b92a5f0c42193634d3782"
+checksum = "ad560913365790f17cbf12479491169f01b9d46d29cfc7422bf8c64bdc61b731"
 dependencies = [
  "bitvec",
  "cfg-if",
@@ -3214,9 +3202,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-derive"
-version = "2.9.0"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "912e55f6d20e0e80d63733872b40e1227c0bce1e1ab81ba67d696339bfd7fd29"
+checksum = "19df9bd9ace6cc2fe19387c96ce677e823e07d017ceed253e7bb3d1d1bd9c73b"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -3233,7 +3221,7 @@ dependencies = [
  "base58",
  "blake2",
  "either",
- "frame-metadata 15.1.0",
+ "frame-metadata",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
@@ -4157,7 +4145,7 @@ dependencies = [
  "blake2",
  "derivative",
  "either",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "futures",
  "futures-util",
  "getrandom 0.2.10",
@@ -4193,9 +4181,9 @@ dependencies = [
 name = "subxt-cli"
 version = "0.29.0"
 dependencies = [
- "clap 4.3.4",
+ "clap 4.3.10",
  "color-eyre",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -4215,7 +4203,7 @@ name = "subxt-codegen"
 version = "0.29.0"
 dependencies = [
  "bitvec",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "heck",
  "hex",
  "jsonrpsee",
@@ -4246,7 +4234,7 @@ version = "0.29.0"
 dependencies = [
  "bitvec",
  "criterion",
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "parity-scale-codec",
  "scale-info",
  "sp-core-hashing",
@@ -4444,11 +4432,12 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.28.2"
+version = "1.29.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94d7b1cfd2aa4011f2de74c2c4c63665e27a71006b0a192dcd2710272e73dfa2"
+checksum = "532826ff75199d5833b9d2c5fe410f29235e25704ee5f0ef599fb51c21f4a4da"
 dependencies = [
  "autocfg",
+ "backtrace",
  "bytes",
  "libc",
  "mio",
@@ -4695,7 +4684,7 @@ checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
 name = "ui-tests"
 version = "0.29.0"
 dependencies = [
- "frame-metadata 16.0.0",
+ "frame-metadata",
  "parity-scale-codec",
  "scale-info",
  "subxt",
