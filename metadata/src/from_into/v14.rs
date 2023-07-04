@@ -318,7 +318,7 @@ fn generate_outer_enums(
         })
         .expect("RuntimeCall exists in V14; qed");
 
-    let event_enun = metadata
+    let event_enum = metadata
         .types
         .types
         .iter()
@@ -328,9 +328,88 @@ fn generate_outer_enums(
         })
         .expect("RuntimeEvent exists in V14; qed");
 
+    let call_ty = call_enum.id.into();
+    let event_ty = event_enum.id.into();
+    let error_ty_id = generate_runtime_error_type(metadata);
+
     v15::OuterEnums {
-        call_enum_ty: call_enum.id.into(),
-        event_enum_ty: event_enun.id.into(),
-        error_enum_ty: event_enun.id.into(),
+        call_enum_ty: call_ty,
+        event_enum_ty: event_ty,
+        error_enum_ty: error_ty_id.into(),
     }
+}
+
+/// Generate the `RuntimeError` type and add it to the metadata.
+///
+/// Returns the `RuntimeError` Id from the registry.
+fn generate_runtime_error_type(metadata: &mut v14::RuntimeMetadataV14) -> u32 {
+    let error_types: HashMap<_, _> = metadata
+        .types
+        .types
+        .iter()
+        .filter_map(|ty| {
+            let segments = &ty.ty.path.segments;
+            // Interested in segments that end with `pallet::Error`.
+            let len = segments.len();
+            if len < 2 {
+                return None;
+            }
+
+            if segments[len - 2] != "pallet" || segments[len - 1] != "Error" {
+                return None;
+            }
+
+            let pallet_name = segments[0].as_str();
+            let pallet_name = if let Some(name) = pallet_name.strip_prefix("pallet_") {
+                name.to_lowercase()
+            } else if let Some(name) = pallet_name.strip_prefix("frame_") {
+                name.to_lowercase()
+            } else {
+                pallet_name.to_lowercase()
+            };
+
+            Some((pallet_name, ty))
+        })
+        .collect();
+
+    let variants: Vec<_> = metadata
+        .pallets
+        .iter()
+        .filter_map(|pallet| {
+            let Some(entry) = error_types.get(&pallet.name.to_lowercase()) else { return None };
+
+            Some(scale_info::Variant {
+                name: pallet.name.clone(),
+                fields: vec![scale_info::Field {
+                    name: None,
+                    ty: entry.id.into(),
+                    type_name: Some(format!("pallet_{}::Error<Runtime>", pallet.name)),
+                    docs: vec![],
+                }],
+                index: pallet.index,
+                docs: vec![],
+            })
+        })
+        .collect();
+
+    let error_type = scale_info::Type {
+        path: scale_info::Path {
+            segments: vec![
+                "kitchensink_runtime".to_string(),
+                "RuntimeError".to_string(),
+            ],
+        },
+        type_params: vec![],
+        type_def: scale_info::TypeDef::Variant(scale_info::TypeDefVariant { variants }),
+        docs: vec![],
+    };
+
+    let error_type_id = metadata.types.types.len() as u32;
+
+    metadata.types.types.push(scale_info::PortableType {
+        id: error_type_id,
+        ty: error_type,
+    });
+
+    error_type_id
 }
