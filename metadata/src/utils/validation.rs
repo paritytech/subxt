@@ -604,9 +604,9 @@ mod tests {
             meta_type::<()>(),
             vec![],
             v15::OuterEnums {
-                call_enum_ty: meta_type::<()>().into(),
-                event_enum_ty: meta_type::<()>().into(),
-                error_enum_ty: meta_type::<()>().into(),
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
             },
             v15::CustomMetadata {
                 map: Default::default(),
