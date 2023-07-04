@@ -37,8 +37,8 @@ async fn run() {
 
     // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
     // This may at least prevent this script from running so often (ie whenever we change Subxt).
-    const V15_METADATA_VERSION: u32 = 15;
-    let bytes = V15_METADATA_VERSION.encode();
+    const LATEST_STABLE_METADATA_VERSION: u32 = 15;
+    let bytes = LATEST_STABLE_METADATA_VERSION.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
     let raw: String = {
         use client::ClientT;

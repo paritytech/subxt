@@ -439,7 +439,10 @@ pub(crate) mod test_utils {
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
-        v15::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV15},
+        v15::{
+            CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletEventMetadata, PalletMetadata,
+            RuntimeMetadataV15,
+        },
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
@@ -546,12 +549,28 @@ pub(crate) mod test_utils {
         }];
 
         let extrinsic = ExtrinsicMetadata {
-            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<RuntimeCall>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
         };
 
-        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let meta = RuntimeMetadataV15::new(
+            pallets,
+            extrinsic,
+            meta_type::<()>(),
+            vec![],
+            OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            CustomMetadata {
+                map: Default::default(),
+            },
+        );
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::new(runtime_metadata.try_into().unwrap())

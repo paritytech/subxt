@@ -193,11 +193,9 @@ async fn tx_bond() -> Result<(), Error> {
 
     let alice = dev::alice();
 
-    let bond_tx = node_runtime::tx().staking().bond(
-        dev::bob().public_key().into(),
-        100_000_000_000_000,
-        RewardDestination::Stash,
-    );
+    let bond_tx = node_runtime::tx()
+        .staking()
+        .bond(100_000_000_000_000, RewardDestination::Stash);
 
     let bond = api
         .tx()
