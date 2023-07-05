@@ -106,11 +106,10 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  chmod +x ./artifacts/substrate
+                  ./artifacts/substrate --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  cp ./artifacts/substrate ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -140,11 +139,10 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  chmod +x ./artifacts/substrate
+                  ./artifacts/substrate --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  cp ./artifacts/substrate ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -175,11 +173,10 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  chmod +x ./artifacts/substrate
+                  ./artifacts/substrate --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  cp ./artifacts/substrate ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -206,11 +203,10 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  chmod +x ./artifacts/substrate
+                  ./artifacts/substrate --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  cp ./artifacts/substrate ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -250,11 +246,10 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  chmod +x ./artifacts/substrate
+                  ./artifacts/substrate --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  cp ./artifacts/substrate ~/.local/bin
 
             - name: Run subxt WASM tests
               run: |
