@@ -142,25 +142,34 @@ fn update_type(ty: &mut u32, map_ids: &BTreeMap<u32, u32>) {
     *ty = new_id;
 }
 
-/// Strip any pallets out of the RuntimeCall type that aren't the ones we want to keep.
-/// The RuntimeCall type is referenced in a bunch of places, so doing this prevents us from
-/// holding on to stuff in pallets we've asked not to keep.
-fn retain_pallets_in_runtime_call_type<F>(metadata: &mut Metadata, mut filter: F)
+/// Retain the enum type identified by ID and keep only the variants that
+/// match the provided filter.
+fn retain_enum_type<F>(metadata: &mut Metadata, id: u32, mut filter: F)
 where
     F: FnMut(&str) -> bool,
 {
-    let call_ty = metadata
+    let ty = metadata
         .types
         .types
-        .get_mut(metadata.extrinsic.call_ty as usize)
-        .expect("Metadata should contain extrinsic call type in registry");
+        .get_mut(id as usize)
+        .expect("Metadata should contain enum type in registry");
 
-    let TypeDef::Variant(variant) = &mut call_ty.ty.type_def else {
-        panic!("Metadata Call type is expected to be a variant type");
+    let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
+        panic!("Metadata type is expected to be a variant type");
     };
 
-    // Remove all variants from the call type that aren't the pallet(s) we want to keep.
+    // Remove all variants from the type that aren't the pallet(s) we want to keep.
     variant.variants.retain(|v| filter(&v.name));
+}
+
+/// Strip any pallets out of the outer enum types that aren't the ones we want to keep.
+fn retain_pallets_in_runtime_outer_types<F>(metadata: &mut Metadata, mut filter: F)
+where
+    F: FnMut(&str) -> bool,
+{
+    retain_enum_type(metadata, metadata.outer_enums.call_enum_ty, &mut filter);
+    retain_enum_type(metadata, metadata.outer_enums.event_enum_ty, &mut filter);
+    retain_enum_type(metadata, metadata.outer_enums.error_enum_ty, &mut filter);
 }
 
 /// Generate a subset of the metadata that contains only the
@@ -185,10 +194,10 @@ pub fn retain_metadata<F, G>(
 {
     let mut type_ids = HashSet::new();
 
-    // There is a special RuntimeCall type which points to all pallets and call types by default.
+    // There are special outer enum types that point to all pallets types (call, error, event) by default.
     // This brings in a significant chunk of types. We trim this down to only include variants
     // for the pallets we're retaining, to avoid this.
-    retain_pallets_in_runtime_call_type(metadata, &mut pallets_filter);
+    retain_pallets_in_runtime_outer_types(metadata, &mut pallets_filter);
 
     // Filter our pallet list to only those pallets we want to keep. Keep hold of all
     // type IDs in the pallets we're keeping. Retain all, if no filter specified.
