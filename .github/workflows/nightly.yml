@@ -9,7 +9,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   # Use latest substrate for nightly runs:
-  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
 
 jobs:
   tests:

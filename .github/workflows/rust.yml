@@ -19,7 +19,7 @@ concurrency:
 env:
     CARGO_TERM_COLOR: always
     # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
 
 jobs:
     build:
