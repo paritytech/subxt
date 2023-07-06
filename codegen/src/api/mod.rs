@@ -465,6 +465,12 @@ impl RuntimeGenerator {
             should_gen_docs,
         )?;
 
+        // Fetch the paths of the outer enums.
+        // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
+        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty());
+        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty());
+        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty());
+
         Ok(quote! {
             #( #item_mod_attrs )*
             #[allow(dead_code, unused_imports, non_camel_case_types)]
@@ -491,7 +497,7 @@ impl RuntimeGenerator {
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
                 /// The outer event enum.
-                pub type Event = #types_mod_ident::polkadot_runtime::RuntimeEvent;
+                pub type Event = #event_path;
 
                 impl #crate_path::events::RootEvent for Event {
                     fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -502,7 +508,7 @@ impl RuntimeGenerator {
                 }
 
                 /// The outer extrinsic enum.
-                pub type Call = #types_mod_ident::polkadot_runtime::RuntimeCall;
+                pub type Call = #call_path;
 
                 impl #crate_path::blocks::RootExtrinsic for Call {
                     fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -513,7 +519,7 @@ impl RuntimeGenerator {
                 }
 
                 /// The outer error enum representing the DispatchError's Module variant.
-                pub type Error = #types_mod_ident::polkadot_runtime::RuntimeError;
+                pub type Error = #error_path;
 
                 impl #crate_path::error::RootError for Error {
                     fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
