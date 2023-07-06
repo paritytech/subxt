@@ -107,7 +107,7 @@ fn get_variant_hash(
 fn get_type_def_variant_hash(
     registry: &PortableRegistry,
     variant: &TypeDefVariant<PortableForm>,
-    specific_pallets: &Option<Vec<String>>,
+    specific_pallets: &Option<Vec<&str>>,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; HASH_LEN] {
     let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
@@ -116,7 +116,7 @@ fn get_type_def_variant_hash(
         // as long as all of the names+types are there. XOR to not care about ordering.
         let should_hash = specific_pallets
             .as_ref()
-            .map(|specific_pallets| specific_pallets.contains(&var.name))
+            .map(|specific_pallets| specific_pallets.contains(&var.name.as_str()))
             .unwrap_or(true);
 
         if should_hash {
@@ -212,7 +212,7 @@ pub fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
-    specific_pallets: &Option<Vec<String>>,
+    specific_pallets: &Option<Vec<&str>>,
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
@@ -523,15 +523,8 @@ impl<'a> MetadataHasher<'a> {
                 }
             });
 
-        // Note: This allocation avoids polluting the entire validation process with lifetimes from the `get_type_hash`.
-        let specific_pallets = self.specific_pallets.as_ref().map(|pallets| {
-            pallets
-                .iter()
-                .map(|pallet| pallet.to_string())
-                .collect::<Vec<String>>()
-        });
         let extrinsic_hash =
-            get_extrinsic_hash(&metadata.types, &metadata.extrinsic, &specific_pallets);
+            get_extrinsic_hash(&metadata.types, &metadata.extrinsic, &self.specific_pallets);
         let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
 
         // Note: The outer enums hashes are intrinsically present in the validation process by hashing the pallet's components.
