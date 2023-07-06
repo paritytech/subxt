@@ -3,7 +3,7 @@ default_image = "docker.io/parity/polkadot:latest"
 default_command = "polkadot"
 default_args = [ "-lparachain=debug" ]
 
-chain = "kusama-local"
+chain = "rococo-local"
 
   [[relaychain.nodes]]
   name = "alice"
@@ -15,7 +15,7 @@ chain = "kusama-local"
 
 [[parachains]]
 id = 100
-chain = "asset-hub-kusama-local"
+chain = "asset-hub-polkadot-local"
 
   [parachains.collator]
   name = "collator01"

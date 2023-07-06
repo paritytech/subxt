@@ -173,15 +173,14 @@
 //!
 //! All configs we constructed, `StatemintConfig`, `StatemintConfig2` and `StatemintConfig3` should behave in the same way.
 //! All three ways are valid for constructing a config. Choose one depending on your use case.
-//! 
+//!
 //! # 3 Try the examples
 //! We have two examples of interacting with the parachain, that you can try. You find them in the bin directory of this crate. Please check them out.
-//! 
+//!
 //!
 use codec::Encode;
-use futures::StreamExt;
 use subxt::config::ExtrinsicParams;
-use subxt::{Config, OnlineClient, PolkadotConfig, SubstrateConfig};
+use subxt::{Config, PolkadotConfig, SubstrateConfig};
 
 #[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct ChargeAssetTxPayment {

@@ -1,14 +1,16 @@
-use futures::StreamExt;
-use subxt::OnlineClient;
-use parachain_example::StatemintConfig;
+//! In this example we connect to the official polkadot asset hub parachain and subscribe to blocks that get produced.
+//! You can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
+//!
+//! To run this example:
+//! ```txt
+//! cargo run --bin fetch_blocks
+//! ```
 
-/// In this example we connect to the official polkadot asset hub parachain and subscribe to blocks that get produced.
-/// You can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
-///
-/// To run this example:
-/// ```txt
+use futures::StreamExt;
+use parachain_example::StatemintConfig;
+use subxt::OnlineClient;
+
 /// cargo run --bin fetch_blocks
-/// ```
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc_endpoint = "wss://polkadot-asset-hub-rpc.polkadot.io:443";
@@ -35,6 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;
+
             // here we make use of the generated metadata code:
             let decoded_ext = ext.as_root_extrinsic::<metadata::statemint::Call>();
 
