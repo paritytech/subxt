@@ -86,104 +86,8 @@ pub mod api {
     ];
     #[doc = r" The error type returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-    #[derive(
-        :: subxt :: ext :: codec :: Decode,
-        :: subxt :: ext :: codec :: Encode,
-        :: subxt :: ext :: scale_decode :: DecodeAsType,
-        :: subxt :: ext :: scale_encode :: EncodeAsType,
-        Debug,
-    )]
-    # [codec (crate = :: subxt :: ext :: codec)]
-    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-    pub enum Event {
-        #[codec(index = 0)]
-        System(system::Event),
-        #[codec(index = 1)]
-        Scheduler(scheduler::Event),
-        #[codec(index = 10)]
-        Preimage(preimage::Event),
-        #[codec(index = 4)]
-        Indices(indices::Event),
-        #[codec(index = 5)]
-        Balances(balances::Event),
-        #[codec(index = 32)]
-        TransactionPayment(transaction_payment::Event),
-        #[codec(index = 7)]
-        Staking(staking::Event),
-        #[codec(index = 8)]
-        Offences(offences::Event),
-        #[codec(index = 9)]
-        Session(session::Event),
-        #[codec(index = 11)]
-        Grandpa(grandpa::Event),
-        #[codec(index = 12)]
-        ImOnline(im_online::Event),
-        #[codec(index = 14)]
-        Democracy(democracy::Event),
-        #[codec(index = 15)]
-        Council(council::Event),
-        #[codec(index = 16)]
-        TechnicalCommittee(technical_committee::Event),
-        #[codec(index = 17)]
-        PhragmenElection(phragmen_election::Event),
-        #[codec(index = 18)]
-        TechnicalMembership(technical_membership::Event),
-        #[codec(index = 19)]
-        Treasury(treasury::Event),
-        #[codec(index = 20)]
-        ConvictionVoting(conviction_voting::Event),
-        #[codec(index = 21)]
-        Referenda(referenda::Event),
-        #[codec(index = 23)]
-        Whitelist(whitelist::Event),
-        #[codec(index = 24)]
-        Claims(claims::Event),
-        #[codec(index = 25)]
-        Vesting(vesting::Event),
-        #[codec(index = 26)]
-        Utility(utility::Event),
-        #[codec(index = 28)]
-        Identity(identity::Event),
-        #[codec(index = 29)]
-        Proxy(proxy::Event),
-        #[codec(index = 30)]
-        Multisig(multisig::Event),
-        #[codec(index = 34)]
-        Bounties(bounties::Event),
-        #[codec(index = 38)]
-        ChildBounties(child_bounties::Event),
-        #[codec(index = 35)]
-        Tips(tips::Event),
-        #[codec(index = 36)]
-        ElectionProviderMultiPhase(election_provider_multi_phase::Event),
-        #[codec(index = 37)]
-        VoterList(voter_list::Event),
-        #[codec(index = 39)]
-        NominationPools(nomination_pools::Event),
-        #[codec(index = 40)]
-        FastUnstake(fast_unstake::Event),
-        #[codec(index = 53)]
-        ParaInclusion(para_inclusion::Event),
-        #[codec(index = 56)]
-        Paras(paras::Event),
-        #[codec(index = 60)]
-        Hrmp(hrmp::Event),
-        #[codec(index = 62)]
-        ParasDisputes(paras_disputes::Event),
-        #[codec(index = 70)]
-        Registrar(registrar::Event),
-        #[codec(index = 71)]
-        Slots(slots::Event),
-        #[codec(index = 72)]
-        Auctions(auctions::Event),
-        #[codec(index = 73)]
-        Crowdloan(crowdloan::Event),
-        #[codec(index = 99)]
-        XcmPallet(xcm_pallet::Event),
-        #[codec(index = 100)]
-        MessageQueue(message_queue::Event),
-    }
+    #[doc = r" The outer event enum."]
+    pub type Event = runtime_types::polkadot_runtime::RuntimeEvent;
     impl ::subxt::events::RootEvent for Event {
         fn root_event(
             pallet_bytes: &[u8],
@@ -524,114 +428,8 @@ pub mod api {
             .into())
         }
     }
-    #[derive(
-        :: subxt :: ext :: codec :: Decode,
-        :: subxt :: ext :: codec :: Encode,
-        :: subxt :: ext :: scale_decode :: DecodeAsType,
-        :: subxt :: ext :: scale_encode :: EncodeAsType,
-        Debug,
-    )]
-    # [codec (crate = :: subxt :: ext :: codec)]
-    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-    pub enum Call {
-        #[codec(index = 0)]
-        System(system::Call),
-        #[codec(index = 1)]
-        Scheduler(scheduler::Call),
-        #[codec(index = 10)]
-        Preimage(preimage::Call),
-        #[codec(index = 2)]
-        Babe(babe::Call),
-        #[codec(index = 3)]
-        Timestamp(timestamp::Call),
-        #[codec(index = 4)]
-        Indices(indices::Call),
-        #[codec(index = 5)]
-        Balances(balances::Call),
-        #[codec(index = 7)]
-        Staking(staking::Call),
-        #[codec(index = 9)]
-        Session(session::Call),
-        #[codec(index = 11)]
-        Grandpa(grandpa::Call),
-        #[codec(index = 12)]
-        ImOnline(im_online::Call),
-        #[codec(index = 14)]
-        Democracy(democracy::Call),
-        #[codec(index = 15)]
-        Council(council::Call),
-        #[codec(index = 16)]
-        TechnicalCommittee(technical_committee::Call),
-        #[codec(index = 17)]
-        PhragmenElection(phragmen_election::Call),
-        #[codec(index = 18)]
-        TechnicalMembership(technical_membership::Call),
-        #[codec(index = 19)]
-        Treasury(treasury::Call),
-        #[codec(index = 20)]
-        ConvictionVoting(conviction_voting::Call),
-        #[codec(index = 21)]
-        Referenda(referenda::Call),
-        #[codec(index = 23)]
-        Whitelist(whitelist::Call),
-        #[codec(index = 24)]
-        Claims(claims::Call),
-        #[codec(index = 25)]
-        Vesting(vesting::Call),
-        #[codec(index = 26)]
-        Utility(utility::Call),
-        #[codec(index = 28)]
-        Identity(identity::Call),
-        #[codec(index = 29)]
-        Proxy(proxy::Call),
-        #[codec(index = 30)]
-        Multisig(multisig::Call),
-        #[codec(index = 34)]
-        Bounties(bounties::Call),
-        #[codec(index = 38)]
-        ChildBounties(child_bounties::Call),
-        #[codec(index = 35)]
-        Tips(tips::Call),
-        #[codec(index = 36)]
-        ElectionProviderMultiPhase(election_provider_multi_phase::Call),
-        #[codec(index = 37)]
-        VoterList(voter_list::Call),
-        #[codec(index = 39)]
-        NominationPools(nomination_pools::Call),
-        #[codec(index = 40)]
-        FastUnstake(fast_unstake::Call),
-        #[codec(index = 51)]
-        Configuration(configuration::Call),
-        #[codec(index = 52)]
-        ParasShared(paras_shared::Call),
-        #[codec(index = 53)]
-        ParaInclusion(para_inclusion::Call),
-        #[codec(index = 54)]
-        ParaInherent(para_inherent::Call),
-        #[codec(index = 56)]
-        Paras(paras::Call),
-        #[codec(index = 57)]
-        Initializer(initializer::Call),
-        #[codec(index = 60)]
-        Hrmp(hrmp::Call),
-        #[codec(index = 62)]
-        ParasDisputes(paras_disputes::Call),
-        #[codec(index = 63)]
-        ParasSlashing(paras_slashing::Call),
-        #[codec(index = 70)]
-        Registrar(registrar::Call),
-        #[codec(index = 71)]
-        Slots(slots::Call),
-        #[codec(index = 72)]
-        Auctions(auctions::Call),
-        #[codec(index = 73)]
-        Crowdloan(crowdloan::Call),
-        #[codec(index = 99)]
-        XcmPallet(xcm_pallet::Call),
-        #[codec(index = 100)]
-        MessageQueue(message_queue::Call),
-    }
+    #[doc = r" The outer extrinsic enum."]
+    pub type Call = runtime_types::polkadot_runtime::RuntimeCall;
     impl ::subxt::blocks::RootExtrinsic for Call {
         fn root_extrinsic(
             pallet_bytes: &[u8],
@@ -1009,108 +807,8 @@ pub mod api {
             .into())
         }
     }
-    #[derive(
-        :: subxt :: ext :: codec :: Decode,
-        :: subxt :: ext :: codec :: Encode,
-        :: subxt :: ext :: scale_decode :: DecodeAsType,
-        :: subxt :: ext :: scale_encode :: EncodeAsType,
-        Debug,
-    )]
-    # [codec (crate = :: subxt :: ext :: codec)]
-    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-    pub enum Error {
-        #[codec(index = 0)]
-        System(system::Error),
-        #[codec(index = 1)]
-        Scheduler(scheduler::Error),
-        #[codec(index = 10)]
-        Preimage(preimage::Error),
-        #[codec(index = 2)]
-        Babe(babe::Error),
-        #[codec(index = 4)]
-        Indices(indices::Error),
-        #[codec(index = 5)]
-        Balances(balances::Error),
-        #[codec(index = 7)]
-        Staking(staking::Error),
-        #[codec(index = 9)]
-        Session(session::Error),
-        #[codec(index = 11)]
-        Grandpa(grandpa::Error),
-        #[codec(index = 12)]
-        ImOnline(im_online::Error),
-        #[codec(index = 14)]
-        Democracy(democracy::Error),
-        #[codec(index = 15)]
-        Council(council::Error),
-        #[codec(index = 16)]
-        TechnicalCommittee(technical_committee::Error),
-        #[codec(index = 17)]
-        PhragmenElection(phragmen_election::Error),
-        #[codec(index = 18)]
-        TechnicalMembership(technical_membership::Error),
-        #[codec(index = 19)]
-        Treasury(treasury::Error),
-        #[codec(index = 20)]
-        ConvictionVoting(conviction_voting::Error),
-        #[codec(index = 21)]
-        Referenda(referenda::Error),
-        #[codec(index = 23)]
-        Whitelist(whitelist::Error),
-        #[codec(index = 24)]
-        Claims(claims::Error),
-        #[codec(index = 25)]
-        Vesting(vesting::Error),
-        #[codec(index = 26)]
-        Utility(utility::Error),
-        #[codec(index = 28)]
-        Identity(identity::Error),
-        #[codec(index = 29)]
-        Proxy(proxy::Error),
-        #[codec(index = 30)]
-        Multisig(multisig::Error),
-        #[codec(index = 34)]
-        Bounties(bounties::Error),
-        #[codec(index = 38)]
-        ChildBounties(child_bounties::Error),
-        #[codec(index = 35)]
-        Tips(tips::Error),
-        #[codec(index = 36)]
-        ElectionProviderMultiPhase(election_provider_multi_phase::Error),
-        #[codec(index = 37)]
-        VoterList(voter_list::Error),
-        #[codec(index = 39)]
-        NominationPools(nomination_pools::Error),
-        #[codec(index = 40)]
-        FastUnstake(fast_unstake::Error),
-        #[codec(index = 51)]
-        Configuration(configuration::Error),
-        #[codec(index = 53)]
-        ParaInclusion(para_inclusion::Error),
-        #[codec(index = 54)]
-        ParaInherent(para_inherent::Error),
-        #[codec(index = 56)]
-        Paras(paras::Error),
-        #[codec(index = 60)]
-        Hrmp(hrmp::Error),
-        #[codec(index = 62)]
-        ParasDisputes(paras_disputes::Error),
-        #[codec(index = 63)]
-        ParasSlashing(paras_slashing::Error),
-        #[codec(index = 70)]
-        Registrar(registrar::Error),
-        #[codec(index = 71)]
-        Slots(slots::Error),
-        #[codec(index = 72)]
-        Auctions(auctions::Error),
-        #[codec(index = 73)]
-        Crowdloan(crowdloan::Error),
-        #[codec(index = 99)]
-        XcmPallet(xcm_pallet::Error),
-        #[codec(index = 100)]
-        MessageQueue(message_queue::Error),
-    }
+    #[doc = r" The outer error enum representing the DispatchError's Module variant."]
+    pub type Error = runtime_types::polkadot_runtime::RuntimeError;
     impl ::subxt::error::RootError for Error {
         fn root_error(
             pallet_bytes: &[u8],
@@ -4569,9 +4267,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                180u8, 15u8, 230u8, 160u8, 122u8, 108u8, 141u8, 21u8, 70u8, 26u8, 217u8, 119u8,
-                241u8, 166u8, 149u8, 219u8, 59u8, 4u8, 241u8, 107u8, 199u8, 109u8, 98u8, 132u8,
-                169u8, 136u8, 68u8, 24u8, 32u8, 172u8, 239u8, 171u8,
+                10u8, 62u8, 145u8, 35u8, 67u8, 146u8, 108u8, 53u8, 65u8, 30u8, 179u8, 46u8, 49u8,
+                203u8, 203u8, 14u8, 236u8, 221u8, 33u8, 211u8, 37u8, 197u8, 1u8, 231u8, 4u8, 24u8,
+                165u8, 87u8, 13u8, 162u8, 240u8, 46u8,
             ]
     }
     pub mod system {
