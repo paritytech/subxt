@@ -294,7 +294,7 @@ impl RuntimeGenerator {
             self.metadata.types(),
             "runtime_types",
             type_substitutes,
-            derives.clone(),
+            derives,
             crate_path.clone(),
             should_gen_docs,
         );
