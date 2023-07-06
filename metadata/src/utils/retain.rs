@@ -5,7 +5,8 @@
 //! Utility functions to generate a subset of the metadata.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, PalletMetadataInner, RuntimeApiMetadataInner, StorageEntryType,
+    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
+    StorageEntryType,
 };
 use scale_info::TypeDef;
 use std::collections::{BTreeMap, HashSet};
@@ -128,6 +129,20 @@ fn update_runtime_api_types(apis: &mut [RuntimeApiMetadataInner], map_ids: &BTre
     }
 }
 
+/// Collect the outer enums type IDs.
+fn collect_outer_enums(enums: &OuterEnumsMetadata, type_ids: &mut HashSet<u32>) {
+    type_ids.insert(enums.call_enum_ty);
+    type_ids.insert(enums.event_enum_ty);
+    type_ids.insert(enums.error_enum_ty);
+}
+
+/// Update all the type IDs for outer enums.
+fn update_outer_enums(enums: &mut OuterEnumsMetadata, map_ids: &BTreeMap<u32, u32>) {
+    update_type(&mut enums.call_enum_ty, map_ids);
+    update_type(&mut enums.event_enum_ty, map_ids);
+    update_type(&mut enums.error_enum_ty, map_ids);
+}
+
 /// Update the given type using the new type ID from the portable registry.
 ///
 /// # Panics
@@ -199,6 +214,9 @@ pub fn retain_metadata<F, G>(
     // for the pallets we're retaining, to avoid this.
     retain_pallets_in_runtime_outer_types(metadata, &mut pallets_filter);
 
+    // Collect the stripped outer enums.
+    collect_outer_enums(&metadata.outer_enums, &mut type_ids);
+
     // Filter our pallet list to only those pallets we want to keep. Keep hold of all
     // type IDs in the pallets we're keeping. Retain all, if no filter specified.
     metadata.pallets.retain(|pallet| {
@@ -249,6 +267,7 @@ pub fn retain_metadata<F, G>(
     let map_ids = metadata.types.retain(|id| type_ids.contains(&id));
 
     // And finally, we can go and update all of our type IDs in the metadata as a result of this:
+    update_outer_enums(&mut metadata.outer_enums, &map_ids);
     for pallets in metadata.pallets.values_mut() {
         update_pallet_types(pallets, &map_ids);
     }
