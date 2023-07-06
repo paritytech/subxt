@@ -289,7 +289,6 @@ impl RuntimeGenerator {
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
-        let default_derives = derives.default_derives();
 
         let type_gen = TypeGenerator::new(
             self.metadata.types(),
@@ -382,46 +381,6 @@ impl RuntimeGenerator {
             })
             .collect::<Result<Vec<_>, CodegenError>>()?;
 
-        let outer_event_variants = self.metadata.pallets().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name());
-            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
-
-            p.event_ty_id().map(|_| {
-                quote! {
-                    #[codec(index = #index)]
-                    #variant_name(#mod_name::Event),
-                }
-            })
-        });
-
-        let outer_event = quote! {
-            #default_derives
-            pub enum Event {
-                #( #outer_event_variants )*
-            }
-        };
-
-        let outer_extrinsic_variants = self.metadata.pallets().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name());
-            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
-
-            p.call_ty_id().map(|_| {
-                quote! {
-                    #[codec(index = #index)]
-                    #variant_name(#mod_name::Call),
-                }
-            })
-        });
-
-        let outer_extrinsic = quote! {
-            #default_derives
-            pub enum Call {
-                #( #outer_extrinsic_variants )*
-            }
-        };
-
         let root_event_if_arms = self.metadata.pallets().filter_map(|p| {
             let variant_name_str = &p.name();
             let variant_name = format_ident!("{}", variant_name_str);
@@ -458,26 +417,6 @@ impl RuntimeGenerator {
                 }
             })
         });
-
-        let outer_error_variants = self.metadata.pallets().filter_map(|p| {
-            let variant_name = format_ident!("{}", p.name());
-            let mod_name = format_ident!("{}", p.name().to_string().to_snake_case());
-            let index = proc_macro2::Literal::u8_unsuffixed(p.index());
-
-            p.error_ty_id().map(|_| {
-                quote! {
-                    #[codec(index = #index)]
-                    #variant_name(#mod_name::Error),
-                }
-            })
-        });
-
-        let outer_error = quote! {
-            #default_derives
-            pub enum Error {
-                #( #outer_error_variants )*
-            }
-        };
 
         let root_error_if_arms = self.metadata.pallets().filter_map(|p| {
             let variant_name_str = &p.name();
@@ -551,7 +490,8 @@ impl RuntimeGenerator {
                 /// The error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
-                #outer_event
+                /// The outer event enum.
+                pub type Event = #types_mod_ident::polkadot_runtime::RuntimeEvent;
 
                 impl #crate_path::events::RootEvent for Event {
                     fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -561,7 +501,8 @@ impl RuntimeGenerator {
                     }
                 }
 
-                #outer_extrinsic
+                /// The outer extrinsic enum.
+                pub type Call = #types_mod_ident::polkadot_runtime::RuntimeCall;
 
                 impl #crate_path::blocks::RootExtrinsic for Call {
                     fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
@@ -571,7 +512,8 @@ impl RuntimeGenerator {
                     }
                 }
 
-                #outer_error
+                /// The outer error enum representing the DispatchError's Module variant.
+                pub type Error = #types_mod_ident::polkadot_runtime::RuntimeError;
 
                 impl #crate_path::error::RootError for Error {
                     fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
