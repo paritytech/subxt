@@ -44,11 +44,13 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
     enum RuntimeCall {}
     #[derive(TypeInfo)]
     enum RuntimeEvent {}
+    #[derive(TypeInfo)]
+    enum RuntimeError {}
 
     let ty = registry.register_type(&meta_type::<Runtime>());
     let runtime_call = registry.register_type(&meta_type::<RuntimeCall>());
     let runtime_event = registry.register_type(&meta_type::<RuntimeEvent>());
-    let runtime_error = registry.register_type(&meta_type::<()>());
+    let runtime_error = registry.register_type(&meta_type::<RuntimeError>());
 
     // Metadata needs to contain this DispatchError, since codegen looks for it.
     registry.register_type(&meta_type::<DispatchError>());
