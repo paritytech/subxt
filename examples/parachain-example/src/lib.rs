@@ -157,7 +157,7 @@
 //! - [subxt::config::substrate::DigestItem] and [subxt::config::substrate::Digest] instead of types from [sp_runtime::generic::digest]
 //! - [subxt::config::substrate::ConsensusEngineId] instead of [sp_runtime::ConsensusEngineId]
 //!
-//! With these optimizations, our config can look like the `StatemintConfig2` below.
+//! With these optimizations, our config can look like the `StatemintConfigWithSubxtTypes` below.
 //!
 //! ## 2.3. Use the Substrate default config as much as possible
 //!
@@ -169,9 +169,9 @@
 //! Statemint (Polkadot Asset Hub) seems to match the Polkadot config in almost all points, except for the `ExtrinsicParams`.
 //! Here the tips follow the same structure as for the default substrate node.
 //! We can now simply build the config for Statemint from the building blocks provided
-//! by [subxt::SubstrateConfig] and [subxt::PolkadotConfig] as shown below in `StatemintConfig3`.
+//! by [subxt::SubstrateConfig] and [subxt::PolkadotConfig] as shown below in `StatemintConfigComposed`.
 //!
-//! All configs we constructed, `StatemintConfig`, `StatemintConfig2` and `StatemintConfig3` should behave in the same way.
+//! All configs we constructed, `StatemintConfig`, `StatemintConfigWithSubxtTypes` and `StatemintConfigComposed` should behave in the same way.
 //! All three ways are valid for constructing a config. Choose one depending on your use case.
 //!
 //! # 3 Try the examples
@@ -273,9 +273,9 @@ impl ExtrinsicParams<<StatemintConfig as Config>::Index, <StatemintConfig as Con
 // Second Config (just using subxt types)
 ////////////////////////////////////////////////////////////
 
-pub enum StatemintConfig2 {}
+pub enum StatemintConfigWithSubxtTypes {}
 
-impl Config for StatemintConfig2 {
+impl Config for StatemintConfigWithSubxtTypes {
     type Index = u32;
     type Hash = subxt::utils::H256;
     type AccountId = subxt::utils::AccountId32;
@@ -283,32 +283,32 @@ impl Config for StatemintConfig2 {
     type Signature = subxt::utils::MultiSignature;
     type Hasher = subxt::config::substrate::BlakeTwo256;
     type Header = subxt::config::substrate::SubstrateHeader<u32, Self::Hasher>;
-    type ExtrinsicParams = StatemintExtrinsicParams;
+    type ExtrinsicParams = StatemintExtrinsicParamsWithSubxtTypes;
 }
 
 #[derive(Encode, Debug, Clone)]
-pub struct StatemintExtrinsicParams2 {
-    extra_params: StatemintExtraParams2,
-    additional_params: StatemintAdditionalParams2,
+pub struct StatemintExtrinsicParamsWithSubxtTypes {
+    extra_params: StatemintExtraParamsWithSubxtTypes,
+    additional_params: StatemintAdditionalParamsWithSubxtTypes,
 }
 
 #[derive(Encode, Debug, Clone)]
-pub struct StatemintExtraParams2 {
+pub struct StatemintExtraParamsWithSubxtTypes {
     era: subxt::config::extrinsic_params::Era,
     nonce: u32,
     charge: subxt::config::substrate::AssetTip,
 }
 
 #[derive(Encode, Debug, Clone)]
-pub struct StatemintAdditionalParams2 {
+pub struct StatemintAdditionalParamsWithSubxtTypes {
     spec_version: u32,
     tx_version: u32,
     genesis_hash: subxt::utils::H256,
     mortality_hash: subxt::utils::H256,
 }
 
-impl ExtrinsicParams<<StatemintConfig2 as Config>::Index, <StatemintConfig2 as Config>::Hash>
-    for StatemintExtrinsicParams2
+impl ExtrinsicParams<<StatemintConfigWithSubxtTypes as Config>::Index, <StatemintConfigWithSubxtTypes as Config>::Hash>
+    for StatemintExtrinsicParamsWithSubxtTypes
 {
     /// mortality hash, era, charge
     type OtherParams = (
@@ -320,15 +320,15 @@ impl ExtrinsicParams<<StatemintConfig2 as Config>::Index, <StatemintConfig2 as C
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: <StatemintConfig2 as Config>::Index,
-        genesis_hash: <StatemintConfig2 as Config>::Hash,
+        nonce: <StatemintConfigWithSubxtTypes as Config>::Index,
+        genesis_hash: <StatemintConfigWithSubxtTypes as Config>::Hash,
         other_params: Self::OtherParams,
     ) -> Self {
         let (mortality_hash, era, charge) = other_params;
 
-        let extra_params = StatemintExtraParams2 { era, nonce, charge };
+        let extra_params = StatemintExtraParamsWithSubxtTypes { era, nonce, charge };
 
-        let additional_params = StatemintAdditionalParams2 {
+        let additional_params = StatemintAdditionalParamsWithSubxtTypes {
             spec_version,
             tx_version,
             genesis_hash,
@@ -353,9 +353,9 @@ impl ExtrinsicParams<<StatemintConfig2 as Config>::Index, <StatemintConfig2 as C
 // Third Config (using the Substrate and Polkadot Config)
 ////////////////////////////////////////////////////////////
 
-pub enum StatemintConfig3 {}
+pub enum StatemintConfigComposed {}
 
-impl Config for StatemintConfig3 {
+impl Config for StatemintConfigComposed {
     type Index = <PolkadotConfig as Config>::Index;
     type Hash = <PolkadotConfig as Config>::Hash;
     type AccountId = <PolkadotConfig as Config>::AccountId;

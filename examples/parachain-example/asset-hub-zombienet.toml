@@ -1,7 +1,7 @@
 [relaychain]
 default_image = "docker.io/parity/polkadot:latest"
 default_command = "polkadot"
-default_args = [ "-lparachain=debug" ]
+default_args = ["-lparachain=debug"]
 
 chain = "rococo-local"
 
@@ -20,6 +20,7 @@ chain = "asset-hub-polkadot-local"
   [parachains.collator]
   name = "collator01"
   image = "docker.io/parity/polkadot-parachain:latest"
+  ws_port = 42069
   command = "polkadot-parachain"
   args = ["-lparachain=debug"]
   

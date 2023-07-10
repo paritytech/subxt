@@ -51,23 +51,21 @@
 //! Polkadot / Kusama / Rococo have different epoch times of `24h` / `2h` / `2min` respectively.
 //! The parachain is only registered after the first epoch. So we need to wait 2 minutes, until the parachain becomes interactive and produces blocks.
 //!
-//!
 //! # Running the example
 //!
-//! After you have the network running, you should see something like [https://polkadot.js.org/apps/?rpc=ws://127.0.0.1:41955#/explorer]
-//! as the polkadot.js link to the parachain (e.g. "collator01") in the zombienet output. Here `41955` refers to the port,
-//! which we will need shortly.
+//! After you have the network running, you should see something like [https://polkadot.js.org/apps/?rpc=ws://127.0.0.1:42069#/explorer]
+//! as the polkadot.js link to the parachain (e.g. "collator01") in the zombienet output.
 //!
-//! In this example we use the _uniques_ pallet of the polakdot asset hub parachain.
+//! In this example we use the _uniques_ pallet of the polkadot asset hub parachain.
 //! The dev account _alice_ creates an NFT collection, then mints an NFT that is part of the collection.
 //! Beware that this example can take up to a minute to run. Specify the port like so:
 //! ```txt
-//! cargo run --bin submit_transaction <PORT>
+//! cargo run --bin submit_transaction
 //! ```
 //!
 
 use metadata::statemint;
-use parachain_example::StatemintConfig3;
+use parachain_example::StatemintConfigComposed;
 use subxt::{
     utils::{AccountId32, MultiAddress},
     OnlineClient,
@@ -75,7 +73,7 @@ use subxt::{
 
 use subxt_signer::sr25519::dev::{self};
 
-/// cargo run --bin submit_transaction <PORT>
+/// cargo run --bin submit_transaction
 #[tokio::main]
 pub async fn main() {
     if let Err(err) = run().await {
@@ -84,11 +82,8 @@ pub async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let port = std::env::args().nth(1).expect("port must be specified");
-    // Connecting to the local parachain. You might need to replace the port in `"ws://127.0.0.1:36317"`
-    // with a different value, depending on what your zombienet cli outputs to you.
     let api =
-        OnlineClient::<StatemintConfig3>::from_url(format!("ws://127.0.0.1:{}", port)).await?;
+        OnlineClient::<StatemintConfigComposed>::from_url("ws://127.0.0.1:42069").await?;
     println!("Connection with parachain established.");
     let alice: MultiAddress<AccountId32, ()> = dev::alice().public_key().into();
     let alice_pair_signer = dev::alice();

@@ -1,5 +1,5 @@
 //! In this example we connect to the official polkadot asset hub parachain and subscribe to blocks that get produced.
-//! You can just switch out `StatemintConfig` for `StatemintConfig2` or `StatemintConfig3` and the behavior should be the same.
+//! You can just switch out `StatemintConfig` for `StatemintConfigWithSubxtTypes` or `StatemintConfigComposed` and the behavior should be the same.
 //!
 //! To run this example:
 //! ```txt
