@@ -100,7 +100,7 @@ substrate-runner = { path = "testing/substrate-runner" }
 # subxt-signer deps that I expect aren't useful anywhere else:
 bip39 = "2.0.0"
 hmac = "0.12.1"
-pbkdf2 = { version = "0.12.1", default-features = false }
+pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = "0.10.2"
 secrecy = "0.8.0"
 sha2 = "0.10.6"
