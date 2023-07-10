@@ -1,17 +1,17 @@
-//! # Connecting to a parachain with Subxt
+//! # Tutorial: Subxt setup to interact with custom chains
 //!
-//! In this example we connect to a parachain and subscribe to its blocks.
-//! There are many parachains on Polkadot and Kusama. Connecting to a parachain (or any other substrate based blockchain) with subxt requires 2 steps:
+//! There are many parachains on Polkadot and Kusama. Using Subxt to connect to a parachain 
+//! (or any other custom, substrate based chain) requires 2 steps:
 //!
 //! 1. Fetching the chains metadata to generate a static interface via the subxt codegen.
 //! 2. Creating a config struct that implements `subxt::Config` to give some type information
 //! that is currently not covered by the metadata.
 //!
-//! We now show these steps in detail. As an example we use the
-//! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub" that is currently (2023-06-26)
+//! We now show these steps in detail for the ["Statemint"](https://parachains.info/details/statemint) parachain, 
+//! also known as "Asset Hub" that is currently (as of 2023-06-26)
 //! deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
 //!
-//! ## 1. Fetch the Metadata
+//! # 1. Fetch the Metadata
 //!
 //! To fetch the metadata for the Statemint parachain, we need to have the URL of an RPC node.
 //! We can find the "Asset Hub" entry, by looking through the sidebar on [Polkadot.js](https://polkadot.js.org/apps/).
@@ -174,9 +174,10 @@
 //! All configs we constructed, `StatemintConfig`, `StatemintConfigWithSubxtTypes` and `StatemintConfigComposed` should behave in the same way.
 //! All three ways are valid for constructing a config. Choose one depending on your use case.
 //!
-//! # 3 Try the examples
-//! We have two examples of interacting with the parachain, that you can try. You find them in the bin directory of this crate. Please check them out.
-//!
+//! # 3. Try the examples
+//! 
+//! We have two examples of interacting with the parachain, that you can try. 
+//! You find them in the bin directory of this crate. Please check them out.
 //!
 use codec::Encode;
 use subxt::config::ExtrinsicParams;
@@ -363,6 +364,6 @@ impl Config for StatemintConfigComposed {
     type Signature = <PolkadotConfig as Config>::Signature;
     type Hasher = <PolkadotConfig as Config>::Hasher;
     type Header = <PolkadotConfig as Config>::Header;
-    // this is the only difference:
+    // this is the only difference to the PolkadotConfig:
     type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
 }
