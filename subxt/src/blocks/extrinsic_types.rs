@@ -119,7 +119,7 @@ where
             } else {
                 match ExtrinsicDetails::decode_from(
                     index as u32,
-                    extrinsics[index].0.clone().into(),
+                    &extrinsics[index].0,
                     client.clone(),
                     hash,
                     cached_events.clone(),
@@ -203,7 +203,7 @@ where
     // Attempt to dynamically decode a single extrinsic from the given input.
     pub(crate) fn decode_from(
         index: u32,
-        extrinsic_bytes: Arc<[u8]>,
+        extrinsic_bytes: &[u8],
         client: C,
         block_hash: T::Hash,
         cached_events: CachedEvents<T>,
@@ -214,6 +214,9 @@ where
         const LATEST_EXTRINSIC_VERSION: u8 = 4;
 
         let metadata = client.metadata();
+
+        // removing the compact encoded prefix:
+        let extrinsic_bytes: Vec<u8> = Decode::decode(&mut &extrinsic_bytes[..])?;
 
         // Extrinsic are encoded in memory in the following way:
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
@@ -274,7 +277,7 @@ where
 
         Ok(ExtrinsicDetails {
             index,
-            bytes: extrinsic_bytes,
+            bytes: extrinsic_bytes.into(),
             is_signed,
             address_start_idx,
             address_end_idx,
@@ -717,6 +720,7 @@ mod tests {
         signed: bool,
         name: String,
     }
+
     impl StaticExtrinsic for TestCallExtrinsic {
         const PALLET: &'static str = "Test";
         const CALL: &'static str = "TestCall";
@@ -784,7 +788,7 @@ mod tests {
         // Decode with empty bytes.
         let result = ExtrinsicDetails::decode_from(
             1,
-            vec![].into(),
+            &vec![],
             client,
             H256::random(),
             Default::default(),
@@ -802,7 +806,7 @@ mod tests {
         // Decode with invalid version.
         let result = ExtrinsicDetails::decode_from(
             1,
-            3u8.encode().into(),
+            &3u8.encode(),
             client,
             H256::random(),
             Default::default(),

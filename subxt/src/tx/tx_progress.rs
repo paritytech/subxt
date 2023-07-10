@@ -4,6 +4,7 @@
 
 //! Types representing extrinsics/transactions that have been submitted to a node.
 
+use codec::Decode;
 use std::task::Poll;
 
 use crate::{
@@ -80,7 +81,7 @@ where
                 TxStatus::InBlock(s) | TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalityTimeout.into())
+                    return Err(TransactionError::FinalityTimeout.into());
                 }
                 TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
                 TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
@@ -109,7 +110,7 @@ where
                 TxStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalityTimeout.into())
+                    return Err(TransactionError::FinalityTimeout.into());
                 }
                 TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
                 TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
@@ -260,7 +261,6 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 /// In any of these cases the client side TxProgress stream is also closed.
 /// In those cases the stream is closed however, so you currently have no way to find
 /// out if they finally made it into a block or not.
-
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub enum TxStatus<T: Config, C> {
@@ -389,7 +389,10 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let hash = T::Hasher::hash_of(&ext.0);
+                let Ok(ext_without_prefix) = <Vec<u8>>::decode(&mut &ext.0[..]) else {
+                    return false;
+                };
+                let hash = T::Hasher::hash_of(&ext_without_prefix);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our
