@@ -6,6 +6,7 @@
 
 use std::task::Poll;
 
+use crate::utils::strip_compact_prefix;
 use crate::{
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
@@ -15,7 +16,6 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
-use crate::utils::strip_compact_prefix;
 
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]

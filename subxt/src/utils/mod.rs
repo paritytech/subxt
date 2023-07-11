@@ -35,7 +35,7 @@ impl codec::Encode for Encoded {
     }
 }
 
-pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error>{
+pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> {
     let cursor = &mut &*bytes;
     let val = <Compact<u64>>::decode(cursor)?;
     Ok((val.0, *cursor))

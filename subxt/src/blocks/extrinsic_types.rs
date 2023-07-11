@@ -13,11 +13,11 @@ use crate::{
     Metadata,
 };
 
+use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::DecodeAsFields;
 use std::{collections::HashMap, sync::Arc};
-use crate::utils::strip_compact_prefix;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -217,7 +217,7 @@ where
         let metadata = client.metadata();
 
         // removing the compact encoded prefix:
-        let bytes: Arc<[u8]> =  strip_compact_prefix(extrinsic_bytes)?.1.into();
+        let bytes: Arc<[u8]> = strip_compact_prefix(extrinsic_bytes)?.1.into();
 
         // Extrinsic are encoded in memory in the following way:
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
