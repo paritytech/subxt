@@ -46,14 +46,14 @@
 //! ```
 //! Zombienet uses Kubernetes by default, but we can use it without Kubernetes, by providing the `-p native` flag.
 //!
-//! You might have notices, that we use `chain = "rococo-local"` in the `asset-hub-zombienet.toml` file for the relay chain.
+//! You might have noticed, that we use `chain = "rococo-local"` in the `asset-hub-zombienet.toml` file for the relay chain.
 //! This is just to make the epoch time shorter and should have no effect on your interactions with the parachain.
 //! Polkadot / Kusama / Rococo have different epoch times of `24h` / `2h` / `2min` respectively.
 //! The parachain is only registered after the first epoch. So we need to wait 2 minutes, until the parachain becomes interactive and produces blocks.
 //!
 //! # Running the example
 //!
-//! After you have the network running, you should see something like [https://polkadot.js.org/apps/?rpc=ws://127.0.0.1:42069#/explorer]
+//! After you have the network up and running, you should see something like [https://polkadot.js.org/apps/?rpc=ws://127.0.0.1:42069#/explorer]
 //! as the polkadot.js link to the parachain (e.g. "collator01") in the zombienet output.
 //!
 //! In this example we use the _uniques_ pallet of the polkadot asset hub parachain.
@@ -82,7 +82,8 @@ pub async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let api = OnlineClient::<StatemintConfigComposed>::from_url("ws://127.0.0.1:42069").await?;
+    // (the port 42069 is specified in the asset-hub-zombienet.toml)
+    let api = OnlineClient::<StatemintConfig>::from_url("ws://127.0.0.1:42069").await?;
     println!("Connection with parachain established.");
     let alice: MultiAddress<AccountId32, ()> = dev::alice().public_key().into();
     let alice_pair_signer = dev::alice();

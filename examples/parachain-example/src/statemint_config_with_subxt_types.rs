@@ -1,6 +1,6 @@
 use codec::Encode;
 use subxt::config::ExtrinsicParams;
-use subxt::{Config, PolkadotConfig, SubstrateConfig};
+use subxt::{Config};
 
 pub enum StatemintConfig {}
 
