@@ -27,22 +27,22 @@
 //! We need to check, where the parachains runtime implements the frame_system::Config trait.
 //! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
 //! For Statemint we find it [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179).
-//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::Config] should also be the ones
-//! we want to use for implementing [subxt::Config].
+//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html) should also be the ones
+//! we want to use for implementing [crate::Config].
 //! In the Case of Statemint (Asset Hub) they are:
 //!
 //! - AccountId: [sp_core::crypto::AccountId32]
 //! - Index: [u32]
 //! - Hash: [sp_core::H256]
-//! - Hasher (type `Hashing` in [frame_system::Config]): [sp_runtime::traits::BlakeTwo256]
+//! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): [sp_runtime::traits::BlakeTwo256]
 //! - Header: [sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>](sp_runtime::generic::Header)
 //!
 //! ### Address, Signature, ExtrinsicParams
-//! A Substrate runtime is typically constructed by using the [frame_support::construct_runtime] macro.
+//! A Substrate runtime is typically constructed by using the [frame_support::construct_runtime](https://docs.rs/frame-support/latest/frame_support/macro.construct_runtime.html) macro.
 //! In this macro, we need to specify the type of an `UncheckedExtrinsic`. Most of the time, the `UncheckedExtrinsic` will be of the type
 //! [sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>](sp_runtime::generic::UncheckedExtrinsic).
 //! The generic parameters `Address` and `Signature` specified when declaring the `UncheckedExtrinsic` type
-//! are the types for `Address` and `Signature` we should use when implementing the [subxt::Config] trait.
+//! are the types for `Address` and `Signature` we should use when implementing the [crate::Config] trait.
 //! In case of Statemint (Polkadot Asset Hub) we see the following types being used in `UncheckedExtrinsic`:
 //!
 //! - Address: [sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress)
@@ -72,20 +72,20 @@
 //! signing a transaction and sent along with it, while _additional parameters_ are only used during
 //! the signing step but _not_ sent along with the transaction.
 //!
-//! Each element of the `SignedExtra` tuple implements [parity_scale_codec::codec::Encode] and [sp_runtime::traits::SignedExtension]
-//! which has an associated type `AdditionalSigned` that also implements [parity_scale_codec::codec::Encode]. Let's look at the underlying types for each tuple element.
+//! Each element of the `SignedExtra` tuple implements [codec::Encode] and [sp_runtime::traits::SignedExtension]
+//! which has an associated type `AdditionalSigned` that also implements [codec::Encode]. Let's look at the underlying types for each tuple element.
 //! All zero-sized types have been replaced by `()` for simplicity.
 //!
 //! | tuple element                        | struct type                                     | `AdditionalSigned` type          |
 //! | ------------------------------------ | ----------------------------------------------- | ---------------------------------|
-//! | [frame_system::CheckNonZeroSender]   | ()                                              | ()                               |
-//! | [frame_system::CheckSpecVersion]     | ()                                              | [u32]                            |
-//! | [frame_system::CheckTxVersion]       | ()                                              | [u32]                            |
-//! | [frame_system::CheckGenesis]         | ()                                              | `Config::Hash` = [sp_core::H256] |
-//! | [frame_system::CheckMortality]       | [sp_runtime::generic::Era]                      | `Config::Hash` = [sp_core::H256] |
-//! | [frame_system::CheckNonce]           | [Config::Index] = [u32]                         | ()                               |
-//! | [frame_system::CheckWeight]          | ()                                              | ()                               |
-//! | [frame_system::ChargeAssetTxPayment] | [pallet_asset_tx_payment::ChargeAssetTxPayment] | ()                               |
+//! | [`frame_system::CheckNonZeroSender`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonZeroSender.html)     | ()                                              | ()                               |
+//! | [frame_system::CheckSpecVersion](https://docs.rs/frame-system/latest/frame_system/struct.CheckSpecVersion.html)     | ()                                              | [u32]                            |
+//! | [frame_system::CheckTxVersion](https://docs.rs/frame-system/latest/frame_system/struct.CheckTxVersion.html)       | ()                                              | [u32]                            |
+//! | [frame_system::CheckGenesis](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)         | ()                                              | `Config::Hash` = [sp_core::H256] |
+//! | [frame_system::CheckMortality](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)       | [sp_runtime::generic::Era]                      | `Config::Hash` = [sp_core::H256] |
+//! | [frame_system::CheckNonce](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)           | `Config::Index` = [u32]                         | ()                               |
+//! | [frame_system::CheckWeight](https://docs.rs/frame-system/latest/frame_system/struct.CheckWeight.html)          | ()                                              | ()                               |
+//! | [frame_system::ChargeAssetTxPayment](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
 //!
 //! All types in the `struct type` column make up our _extra parameters_.
 //! We can put them together into a struct, ignoring all zero-sized types.
@@ -103,8 +103,8 @@
 //! especially because substrate crates and their types are quite big, clunky and entangled sometimes.
 //!
 //! With all these types collected, we can create two structs: `StatemintExtraParams` and `StatemintAdditionalParams`.
-//! Then we combine them into a `StatemintExtrinsicParams` struct for which we implement the [subxt::config::ExtrinsicParams] trait, see below.
-//! Now we have all the parts we need to create our config `StatemintConfig` and implment the [subxt::Config] trait on it.
+//! Then we combine them into a `StatemintExtrinsicParams` struct for which we implement the [crate::config::ExtrinsicParams] trait, see below.
+//! Now we have all the parts we need to create our config `StatemintConfig` and implment the [crate::Config] trait on it.
 //! Note that StatemintConfig is an empty enum, an _uninhabited type_ that is never means to be instantiated
 //! but just gives type information to various interfaces of _subxt_.
 //!
@@ -129,7 +129,7 @@
 //! - [crate::config::substrate::SubstrateHeader] instead of [sp_runtime::generic::Header]
 //! - [crate::config::substrate::AssetTip] and [crate::config::polkadot::PlainTip] instead of [pallet_transaction_payment::ChargeTransactionPayment](https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.ChargeTransactionPayment.html)
 //! - [crate::config::substrate::BlakeTwo256] instead of [sp_core::Blake2Hasher] or [sp_runtime::traits::BlakeTwo256]
-//! - [crate::config::substrate::DigestItem] and [crate::config::substrate::Digest] instead of types from [sp_runtime::generic::digest]
+//! - [crate::config::substrate::DigestItem] and [crate::config::substrate::Digest] instead of [sp_runtime::generic::Digest] and [sp_runtime::generic::DigestItem]
 //! - [crate::config::substrate::ConsensusEngineId] instead of [sp_runtime::ConsensusEngineId]
 //!
 //! With these optimizations, our config can look like this:
