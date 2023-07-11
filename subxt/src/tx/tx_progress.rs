@@ -4,7 +4,7 @@
 
 //! Types representing extrinsics/transactions that have been submitted to a node.
 
-use codec::Decode;
+use codec::{Compact, Decode, Encode};
 use std::task::Poll;
 
 use crate::{
@@ -389,10 +389,11 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let Ok(ext_without_prefix) = <Vec<u8>>::decode(&mut &ext.0[..]) else {
+                let Ok(compact) = <Compact<u32>>::decode(&mut &ext.0[..]) else {
                     return false;
                 };
-                let hash = T::Hasher::hash_of(&ext_without_prefix);
+                let extrinsic_start_index = compact.size_hint();
+                let hash = T::Hasher::hash_of(&&ext.0[extrinsic_start_index..]);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our
