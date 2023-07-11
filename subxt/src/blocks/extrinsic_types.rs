@@ -786,14 +786,8 @@ mod tests {
         let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with empty bytes.
-        let result = ExtrinsicDetails::decode_from(
-            1,
-            &vec![],
-            client,
-            H256::random(),
-            Default::default(),
-            ids,
-        );
+        let result =
+            ExtrinsicDetails::decode_from(1, &[], client, H256::random(), Default::default(), ids);
         assert_matches!(result.err(), Some(crate::Error::Codec(_)));
     }
 
@@ -806,7 +800,7 @@ mod tests {
         // Decode with invalid version.
         let result = ExtrinsicDetails::decode_from(
             1,
-            &3u8.encode(),
+            &vec![3u8].encode(),
             client,
             H256::random(),
             Default::default(),
@@ -845,7 +839,7 @@ mod tests {
         // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
         let extrinsic = ExtrinsicDetails::decode_from(
             1,
-            tx_encoded.encoded()[1..].into(),
+            tx_encoded.encoded(),
             client,
             H256::random(),
             Default::default(),
