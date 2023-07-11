@@ -11,3 +11,4 @@
 
 pub mod client;
 pub mod codegen;
+pub mod config;

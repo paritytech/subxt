@@ -64,8 +64,8 @@
 //! ```
 //!
 
-use metadata::statemint;
-use parachain_example::StatemintConfigComposed;
+use parachain_example::statemint;
+use parachain_example::statemint_config_composed::StatemintConfig;
 use subxt::{
     utils::{AccountId32, MultiAddress},
     OnlineClient,
@@ -82,8 +82,7 @@ pub async fn main() {
 }
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
-    let api =
-        OnlineClient::<StatemintConfigComposed>::from_url("ws://127.0.0.1:42069").await?;
+    let api = OnlineClient::<StatemintConfigComposed>::from_url("ws://127.0.0.1:42069").await?;
     println!("Connection with parachain established.");
     let alice: MultiAddress<AccountId32, ()> = dev::alice().public_key().into();
     let alice_pair_signer = dev::alice();

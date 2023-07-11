@@ -72,7 +72,8 @@
 //! parachain node), you'll want to:
 //!
 //! 1. [Generate an interface](setup::codegen).
-//! 2. [Configure and instantiate the client](setup::client).
+//! 2. [Create a Config](setup::config).
+//! 2. [Use the config to instantiate the client](setup::client).
 //!
 //! Follow the above links to learn more about each step.
 //!

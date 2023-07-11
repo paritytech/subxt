@@ -6,8 +6,9 @@
 //! cargo run --bin fetch_blocks
 //! ```
 
+use parachain_example::statemint;
 use futures::StreamExt;
-use parachain_example::StatemintConfig;
+use parachain_example::statemint_config_composed::StatemintConfig;
 use subxt::OnlineClient;
 
 /// cargo run --bin fetch_blocks
@@ -39,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let events = ext.events().await?;
 
             // here we make use of the generated metadata code:
-            let decoded_ext = ext.as_root_extrinsic::<metadata::statemint::Call>();
+            let decoded_ext = ext.as_root_extrinsic::<statemint::Call>();
 
             println!("    Extrinsic #{idx}:");
             println!("      Bytes: {}", ext.bytes().len());

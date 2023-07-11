@@ -4,14 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["./metadata"]
 
 [dependencies]
 subxt = { path = "../../subxt" }
-subxt-signer = { path = "../../signer", features=["subxt"] }
+subxt-signer = { path = "../../signer", features = ["subxt"] }
 futures = { version = "0.3.27", default-features = false, features = ["std"] }
 tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
-metadata = { path = "./metadata" }
 sp-core = "21.0.0"
 sp-runtime = "24.0.0"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
