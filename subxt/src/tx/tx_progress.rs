@@ -4,7 +4,6 @@
 
 //! Types representing extrinsics/transactions that have been submitted to a node.
 
-use codec::{Compact, Decode, Encode};
 use std::task::Poll;
 
 use crate::{
@@ -16,6 +15,7 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
+use crate::utils::strip_compact_prefix;
 
 /// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
@@ -389,11 +389,10 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let Ok(compact) = <Compact<u32>>::decode(&mut &ext.0[..]) else {
+                let Ok((_,stripped)) = strip_compact_prefix(&ext.0)else {
                     return false;
                 };
-                let extrinsic_start_index = compact.size_hint();
-                let hash = T::Hasher::hash_of(&&ext.0[extrinsic_start_index..]);
+                let hash = T::Hasher::hash_of(&stripped);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our

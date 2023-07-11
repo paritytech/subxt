@@ -17,6 +17,7 @@ use codec::Decode;
 use derivative::Derivative;
 use scale_decode::DecodeAsFields;
 use std::{collections::HashMap, sync::Arc};
+use crate::utils::strip_compact_prefix;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -216,13 +217,13 @@ where
         let metadata = client.metadata();
 
         // removing the compact encoded prefix:
-        let extrinsic_bytes: Vec<u8> = Decode::decode(&mut &extrinsic_bytes[..])?;
+        let bytes: Arc<[u8]> =  strip_compact_prefix(extrinsic_bytes)?.1.into();
 
         // Extrinsic are encoded in memory in the following way:
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
-        let first_byte: u8 = Decode::decode(&mut &extrinsic_bytes[..])?;
+        let first_byte: u8 = Decode::decode(&mut &bytes[..])?;
 
         let version = first_byte & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
@@ -232,13 +233,13 @@ where
         let is_signed = first_byte & SIGNATURE_MASK != 0;
 
         // Skip over the first byte which denotes the version and signing.
-        let cursor = &mut &extrinsic_bytes[1..];
+        let cursor = &mut &bytes[1..];
 
         let mut address_start_idx = 0;
         let mut address_end_idx = 0;
 
         if is_signed {
-            address_start_idx = extrinsic_bytes.len() - cursor.len();
+            address_start_idx = bytes.len() - cursor.len();
 
             // Skip over the address, signature and extra fields.
             scale_decode::visitor::decode_with_visitor(
@@ -248,7 +249,7 @@ where
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
-            address_end_idx = extrinsic_bytes.len() - cursor.len();
+            address_end_idx = bytes.len() - cursor.len();
 
             scale_decode::visitor::decode_with_visitor(
                 cursor,
@@ -267,17 +268,17 @@ where
             .map_err(scale_decode::Error::from)?;
         }
 
-        let call_start_idx = extrinsic_bytes.len() - cursor.len();
+        let call_start_idx = bytes.len() - cursor.len();
 
         // Decode the pallet index, then the call variant.
-        let cursor = &mut &extrinsic_bytes[call_start_idx..];
+        let cursor = &mut &bytes[call_start_idx..];
 
         let pallet_index: u8 = Decode::decode(cursor)?;
         let variant_index: u8 = Decode::decode(cursor)?;
 
         Ok(ExtrinsicDetails {
             index,
-            bytes: extrinsic_bytes.into(),
+            bytes,
             is_signed,
             address_start_idx,
             address_end_idx,
