@@ -148,8 +148,7 @@
 //! Statemint (Polkadot Asset Hub) seems to match the Polkadot config in almost all points, except for the `ExtrinsicParams`.
 //! Here the tips follow the same structure as for the default substrate node.
 //! We can now simply build the config for Statemint from the building blocks provided
-//! by [subxt::SubstrateConfig] and [subxt::PolkadotConfig] as shown below.
-//!
+//! by [`PolkadotConfig`](crate::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig) as shown below.
 //!
 //! ```rust,ignore
 #![doc = include_str ! ("../../../../examples/parachain-example/src/statemint_config_composed.rs")]
