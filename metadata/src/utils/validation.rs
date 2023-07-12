@@ -5,8 +5,8 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
-    StorageEntryMetadata, StorageEntryType,
+    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadata, RuntimeApiMetadata,
+    RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
 use std::collections::HashSet;
@@ -212,36 +212,17 @@ pub fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
-    only_these_variants: Option<&[&str]>,
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
     // Get the hashes of the extrinsic type.
     let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut visited_ids);
-
-    // Get the hash of the `RuntimeCall` for the specified pallets.
-    // This mirrors the metadata stripped by `retain_metadata()`.
-    let call_hash = {
-        let ty = registry
-            .types
-            .get(extrinsic.call_ty as usize)
-            .expect("Metadata should contain call enum type in registry");
-
-        // If the `RuntimeCall` is a variant, then filter out the pallets of interest.
-        // Note: this can be a different type def for our testing.
-        if let TypeDef::Variant(variant) = &ty.ty.type_def {
-            get_type_def_variant_hash(registry, variant, only_these_variants, &mut visited_ids)
-        } else {
-            get_type_hash(registry, extrinsic.call_ty, &mut visited_ids)
-        }
-    };
-
+    // The `RuntimeCall` type is intentionally emitted and hashed by the outer enums instead.
     let signature_hash = get_type_hash(registry, extrinsic.signature_ty, &mut visited_ids);
     let extra_hash = get_type_hash(registry, extrinsic.extra_ty, &mut visited_ids);
 
-    let mut bytes = concat_and_hash5(
+    let mut bytes = concat_and_hash4(
         &address_hash,
-        &call_hash,
         &signature_hash,
         &extra_hash,
         &[extrinsic.version; 32],
@@ -257,6 +238,57 @@ fn get_extrinsic_hash(
     }
 
     bytes
+}
+
+/// Obtain the hash representation of the `frame_metadata::v15::OuterEnums`.
+fn get_outer_enums_hash(
+    registry: &PortableRegistry,
+    enums: &OuterEnumsMetadata,
+    only_these_variants: Option<&[&str]>,
+) -> [u8; HASH_LEN] {
+    let mut visited_ids = HashSet::<u32>::new();
+
+    /// Hash the provided enum type.
+    fn get_enum_hash(
+        registry: &PortableRegistry,
+        id: u32,
+        only_these_variants: Option<&[&str]>,
+        visited_ids: &mut HashSet<u32>,
+    ) -> [u8; HASH_LEN] {
+        let ty = registry
+            .types
+            .get(id as usize)
+            .expect("Metadata should contain enum type in registry");
+
+        if let TypeDef::Variant(variant) = &ty.ty.type_def {
+            get_type_def_variant_hash(registry, variant, only_these_variants, visited_ids)
+        } else {
+            get_type_hash(registry, id, visited_ids)
+        }
+    }
+
+    let call_hash = get_enum_hash(
+        registry,
+        enums.call_enum_ty,
+        only_these_variants,
+        &mut visited_ids,
+    );
+
+    let event_hash = get_enum_hash(
+        registry,
+        enums.event_enum_ty,
+        only_these_variants,
+        &mut visited_ids,
+    );
+
+    let error_hash = get_enum_hash(
+        registry,
+        enums.error_enum_ty,
+        only_these_variants,
+        &mut visited_ids,
+    );
+
+    concat_and_hash3(&call_hash, &event_hash, &error_hash)
 }
 
 /// Get the hash corresponding to a single storage entry.
@@ -523,16 +555,21 @@ impl<'a> MetadataHasher<'a> {
                 }
             });
 
-        let extrinsic_hash = get_extrinsic_hash(
+        let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
+        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
+        let outer_enums_hash = get_outer_enums_hash(
             &metadata.types,
-            &metadata.extrinsic,
+            &metadata.outer_enums(),
             self.specific_pallets.as_deref(),
         );
-        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
 
-        // Note: The outer enums hashes are intrinsically present in the validation process by hashing the pallet's components.
-
-        concat_and_hash4(&pallet_hash, &apis_hash, &extrinsic_hash, &runtime_hash)
+        concat_and_hash5(
+            &pallet_hash,
+            &apis_hash,
+            &extrinsic_hash,
+            &runtime_hash,
+            &outer_enums_hash,
+        )
     }
 }
 
