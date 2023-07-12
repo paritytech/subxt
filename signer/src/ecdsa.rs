@@ -7,11 +7,7 @@ use codec::Encode;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use hex::FromHex;
-use secp256k1::{
-    Secp256k1,
-    ecdsa::RecoverableSignature,
-    Message, SecretKey,
-};
+use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
 
 const SEED_LENGTH: usize = 32;
@@ -113,9 +109,7 @@ impl Keypair {
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
         let context = Secp256k1::signing_only();
-        Ok(Self(secp256k1::KeyPair::from_secret_key(
-            &context, &secret,
-        )))
+        Ok(Self(secp256k1::KeyPair::from_secret_key(&context, &secret)))
     }
 
     /// Derive a child key from this one given a series of junctions.
@@ -144,7 +138,8 @@ impl Keypair {
             match junction {
                 DeriveJunction::Soft(_) => return Err(Error::SoftJunction),
                 DeriveJunction::Hard(junction_bytes) => {
-                    acc = ("Secp256k1HDKD", acc, junction_bytes).using_encoded(sp_core_hashing::blake2_256)
+                    acc = ("Secp256k1HDKD", acc, junction_bytes)
+                        .using_encoded(sp_core_hashing::blake2_256)
                 }
             }
         }
