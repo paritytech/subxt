@@ -14,8 +14,6 @@ pub use events_client::EventsClient;
 pub use events_type::{
     EventDetails,
     Events,
-    // Used in codegen but hidden from docs:
-    RootEvent,
 };
 use scale_decode::DecodeAsFields;
 

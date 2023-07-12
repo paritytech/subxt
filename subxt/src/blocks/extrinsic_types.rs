@@ -15,7 +15,7 @@ use crate::{
 
 use codec::Decode;
 use derivative::Derivative;
-use scale_decode::DecodeAsFields;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -34,23 +34,6 @@ pub trait StaticExtrinsic: DecodeAsFields {
     fn is_extrinsic(pallet: &str, call: &str) -> bool {
         Self::PALLET == pallet && Self::CALL == call
     }
-}
-
-/// This trait is implemented on the statically generated root extrinsic type, so that we're able
-/// to decode it properly via a pallet that impls `DecodeAsMetadata`. This is necessary
-/// because the "root extrinsic" type is generated using pallet info but doesn't actually exist in the
-/// metadata types, so we have no easy way to decode things into it via type information and need a
-/// little help via codegen.
-#[doc(hidden)]
-pub trait RootExtrinsic: Sized {
-    /// Given details of the pallet extrinsic we want to decode, and the name of the pallet, try to hand
-    /// back a "root extrinsic".
-    fn root_extrinsic(
-        pallet_bytes: &[u8],
-        pallet_name: &str,
-        pallet_extrinsic_ty: u32,
-        metadata: &Metadata,
-    ) -> Result<Self, Error>;
 }
 
 /// The body of a block.
@@ -416,22 +399,17 @@ where
         }
     }
 
-    /// Attempt to decode these [`ExtrinsicDetails`] into a root extrinsic type (which includes
+    /// Attempt to decode these [`ExtrinsicDetails`] into a outer call enum type (which includes
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
-    pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
-        let md = self.extrinsic_metadata()?;
-        let pallet_extrinsic_ty = md.pallet.call_ty_id().ok_or_else(|| {
-            Error::Metadata(MetadataError::CallTypeNotFoundInPallet(md.pallet.index()))
-        })?;
+    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let decoded = E::decode_as_type(
+            &mut &self.call_bytes()[..],
+            self.metadata.outer_enums().call_enum_ty(),
+            self.metadata.types(),
+        )?;
 
-        // Ignore root enum index.
-        E::root_extrinsic(
-            &self.call_bytes()[1..],
-            md.pallet.name(),
-            pallet_extrinsic_ty,
-            &self.metadata,
-        )
+        Ok(decoded)
     }
 }
 
@@ -619,27 +597,6 @@ mod tests {
     )]
     enum RuntimeCall {
         Test(Pallet),
-    }
-
-    // We need this in order to be able to decode into a root extrinsic type:
-    impl RootExtrinsic for RuntimeCall {
-        fn root_extrinsic(
-            mut pallet_bytes: &[u8],
-            pallet_name: &str,
-            pallet_extrinsic_ty: u32,
-            metadata: &Metadata,
-        ) -> Result<Self, Error> {
-            if pallet_name == "Test" {
-                return Ok(RuntimeCall::Test(Pallet::decode_with_metadata(
-                    &mut pallet_bytes,
-                    pallet_extrinsic_ty,
-                    metadata,
-                )?));
-            }
-            panic!(
-                "Asked for pallet name '{pallet_name}', which isn't in our test RuntimeCall type"
-            )
-        }
     }
 
     // The calls of the pallet.

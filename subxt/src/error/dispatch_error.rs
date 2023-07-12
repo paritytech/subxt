@@ -7,11 +7,10 @@
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::visitor::DecodeAsTypeResult;
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
 use std::borrow::Cow;
 
 use super::{Error, MetadataError};
-use crate::error::RootError;
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -167,14 +166,15 @@ impl ModuleError {
         self.raw
     }
 
-    /// Attempts to decode the ModuleError into a value implementing the trait `RootError`
-    /// where the actual type of value is the generated top level enum `Error`.
-    pub fn as_root_error<E: RootError>(&self) -> Result<E, Error> {
-        E::root_error(
-            &self.raw.error,
-            self.details()?.pallet.name(),
-            &self.metadata,
-        )
+    /// Attempts to decode the ModuleError into the top outer Error enum.
+    pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let decoded = E::decode_as_type(
+            &mut &self.raw.error[..],
+            self.metadata.outer_enums().error_enum_ty(),
+            self.metadata.types(),
+        )?;
+
+        Ok(decoded)
     }
 }
 

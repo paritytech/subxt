@@ -381,58 +381,6 @@ impl RuntimeGenerator {
             })
             .collect::<Result<Vec<_>, CodegenError>>()?;
 
-        let root_event_if_arms = self.metadata.pallets().filter_map(|p| {
-            let variant_name_str = &p.name();
-            let variant_name = format_ident!("{}", variant_name_str);
-            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-
-            p.event_ty_id().map(|_| {
-                // An 'if' arm for the RootEvent impl to match this variant name:
-                quote! {
-                    if pallet_name == #variant_name_str {
-                        return Ok(Event::#variant_name(#mod_name::Event::decode_with_metadata(
-                            &mut &*pallet_bytes,
-                            pallet_ty,
-                            metadata
-                        )?));
-                    }
-                }
-            })
-        });
-
-        let root_extrinsic_if_arms = self.metadata.pallets().filter_map(|p| {
-            let variant_name_str = p.name();
-            let variant_name = format_ident!("{}", variant_name_str);
-            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-            p.call_ty_id().map(|_| {
-                // An 'if' arm for the RootExtrinsic impl to match this variant name:
-                quote! {
-                    if pallet_name == #variant_name_str {
-                        return Ok(Call::#variant_name(#mod_name::Call::decode_with_metadata(
-                            &mut &*pallet_bytes,
-                            pallet_ty,
-                            metadata
-                        )?));
-                    }
-                }
-            })
-        });
-
-        let root_error_if_arms = self.metadata.pallets().filter_map(|p| {
-            let variant_name_str = &p.name();
-            let variant_name = format_ident!("{}", variant_name_str);
-            let mod_name = format_ident!("{}", variant_name_str.to_string().to_snake_case());
-
-            p.error_ty_id().map(|type_id| {
-                quote! {
-                    if pallet_name == #variant_name_str {
-                        let variant_error = #mod_name::Error::decode_with_metadata(cursor, #type_id, metadata)?;
-                        return Ok(Error::#variant_name(variant_error));
-                    }
-                }
-            })
-        });
-
         let mod_ident = &item_mod_ir.ident;
         let pallets_with_constants: Vec<_> = pallets_with_mod_names
             .iter()
@@ -499,36 +447,11 @@ impl RuntimeGenerator {
                 /// The outer event enum.
                 pub type Event = #event_path;
 
-                impl #crate_path::events::RootEvent for Event {
-                    fn root_event(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
-                        use #crate_path::metadata::DecodeWithMetadata;
-                        #( #root_event_if_arms )*
-                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Event enum", pallet_name)).into())
-                    }
-                }
-
                 /// The outer extrinsic enum.
                 pub type Call = #call_path;
 
-                impl #crate_path::blocks::RootExtrinsic for Call {
-                    fn root_extrinsic(pallet_bytes: &[u8], pallet_name: &str, pallet_ty: u32, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
-                        use #crate_path::metadata::DecodeWithMetadata;
-                        #( #root_extrinsic_if_arms )*
-                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Call enum", pallet_name)).into())
-                    }
-                }
-
                 /// The outer error enum representing the DispatchError's Module variant.
                 pub type Error = #error_path;
-
-                impl #crate_path::error::RootError for Error {
-                    fn root_error(pallet_bytes: &[u8], pallet_name: &str, metadata: &#crate_path::Metadata) -> Result<Self, #crate_path::Error> {
-                        use #crate_path::metadata::DecodeWithMetadata;
-                        let cursor = &mut &pallet_bytes[..];
-                        #( #root_error_if_arms )*
-                        Err(#crate_path::ext::scale_decode::Error::custom(format!("Pallet name '{}' not found in root Error enum", pallet_name)).into())
-                    }
-                }
 
                 pub fn constants() -> ConstantsApi {
                     ConstantsApi

@@ -225,15 +225,3 @@ pub enum MetadataError {
     #[error("The generated code is not compatible with the node")]
     IncompatibleCodegen,
 }
-
-/// This trait is implemented on the statically generated root ModuleError type
-#[doc(hidden)]
-pub trait RootError: Sized {
-    /// Given details of the pallet error we want to decode
-    fn root_error(
-        // typically a [u8; 4] encodes the error of a pallet
-        pallet_bytes: &[u8],
-        pallet_name: &str,
-        metadata: &Metadata,
-    ) -> Result<Self, Error>;
-}
