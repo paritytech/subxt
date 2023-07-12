@@ -21,9 +21,6 @@ use derivative::Derivative;
 use futures::future;
 use std::sync::{Arc, RwLock};
 
-/// The unstable metadata version number.
-const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
-
 /// A trait representing a client that can perform
 /// online actions.
 pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
@@ -132,6 +129,9 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
         #[cfg(feature = "unstable-metadata")]
         {
+            /// The unstable metadata version number.
+            const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
+
             // Try to fetch the latest unstable metadata, if that fails fall back to
             // fetching the latest stable metadata.
             match rpc.metadata_at_version(UNSTABLE_METADATA_VERSION).await {
@@ -146,22 +146,15 @@ impl<T: Config> OnlineClient<T> {
 
     /// Fetch the latest stable metadata from the node.
     async fn fetch_latest_stable_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
-        // Step 1. Get all available metadata versions.
-        let supported_versions = rpc.metadata_versions().await?;
+        // This is the latest stable metadata that subxt can utilize.
+        const V15_METADATA_VERSION: u32 = 15;
 
-        // Step 2. Find the latest metadata that is not unstable.
-        let version = *supported_versions
-            .iter()
-            .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
-            .max()
-            .ok_or_else(|| Error::Other("No valid metadata versions returned".to_string()))?;
-
-        // Step 3. Try to fetch the metadata version.
-        if let Ok(bytes) = rpc.metadata_at_version(version).await {
+        // Try to fetch the metadata version.
+        if let Ok(bytes) = rpc.metadata_at_version(V15_METADATA_VERSION).await {
             return Ok(bytes);
         }
 
-        // Step 4. If step 3 failed, fetch the metadata V14 using the old API.
+        // If that fails, fetch the metadata V14 using the old API.
         rpc.metadata().await
     }
 
