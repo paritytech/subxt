@@ -107,16 +107,16 @@ fn get_variant_hash(
 fn get_type_def_variant_hash(
     registry: &PortableRegistry,
     variant: &TypeDefVariant<PortableForm>,
-    specific_pallets: &Option<Vec<&str>>,
+    only_these_variants: Option<&[&str]>,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; HASH_LEN] {
     let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
         // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
         // as long as all of the names+types are there. XOR to not care about ordering.
-        let should_hash = specific_pallets
+        let should_hash = only_these_variants
             .as_ref()
-            .map(|specific_pallets| specific_pallets.contains(&var.name.as_str()))
+            .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
             .unwrap_or(true);
 
         if should_hash {
@@ -149,7 +149,7 @@ fn get_type_def_hash(
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
         TypeDef::Variant(variant) => {
-            get_type_def_variant_hash(registry, variant, &None, visited_ids)
+            get_type_def_variant_hash(registry, variant, None, visited_ids)
         }
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
@@ -212,7 +212,7 @@ pub fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
-    specific_pallets: &Option<Vec<&str>>,
+    only_these_variants: Option<&[&str]>,
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
@@ -230,7 +230,7 @@ fn get_extrinsic_hash(
         // If the `RuntimeCall` is a variant, then filter out the pallets of interest.
         // Note: this can be a different type def for our testing.
         if let TypeDef::Variant(variant) = &ty.ty.type_def {
-            get_type_def_variant_hash(registry, variant, specific_pallets, &mut visited_ids)
+            get_type_def_variant_hash(registry, variant, only_these_variants, &mut visited_ids)
         } else {
             get_type_hash(registry, extrinsic.call_ty, &mut visited_ids)
         }
@@ -523,8 +523,11 @@ impl<'a> MetadataHasher<'a> {
                 }
             });
 
-        let extrinsic_hash =
-            get_extrinsic_hash(&metadata.types, &metadata.extrinsic, &self.specific_pallets);
+        let extrinsic_hash = get_extrinsic_hash(
+            &metadata.types,
+            &metadata.extrinsic,
+            self.specific_pallets.as_deref(),
+        );
         let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
 
         // Note: The outer enums hashes are intrinsically present in the validation process by hashing the pallet's components.
