@@ -194,9 +194,9 @@ pub struct RawModuleError {
     /// The raw bytes of the module error.
     ///
     /// Bytes representation:
-    /// bytes[0]:   pallet index
-    /// bytes[1]:   error index
-    /// bytes[2..]: 3 bytes specific for the module error
+    ///  - `bytes[0]`:   pallet index
+    ///  - `bytes[1]`:   error index
+    ///  - `bytes[2..]`: 3 bytes specific for the module error
     pub bytes: [u8; 5],
 }
 
