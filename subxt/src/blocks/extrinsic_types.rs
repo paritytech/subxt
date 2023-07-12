@@ -558,7 +558,6 @@ impl<T: Config> ExtrinsicEvents<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metadata::DecodeWithMetadata;
     use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};

@@ -410,7 +410,6 @@ pub struct EventMetadataDetails<'a> {
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
-    use crate::metadata::DecodeWithMetadata;
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
