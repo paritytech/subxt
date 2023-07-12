@@ -153,10 +153,10 @@ impl std::fmt::Display for ModuleError {
 impl ModuleError {
     /// Return more details about this error.
     pub fn details(&self) -> Result<ModuleErrorDetails, MetadataError> {
-        let pallet = self.metadata.pallet_by_index_err(self.raw.pallet_index)?;
+        let pallet = self.metadata.pallet_by_index_err(self.raw.pallet_index())?;
         let variant = pallet
-            .error_variant_by_index(self.raw.error[0])
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.raw.error[0]))?;
+            .error_variant_by_index(self.raw.error_index())
+            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.raw.error_index()))?;
 
         Ok(ModuleErrorDetails { pallet, variant })
     }
@@ -169,7 +169,7 @@ impl ModuleError {
     /// Attempts to decode the ModuleError into the top outer Error enum.
     pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
-            &mut &self.raw.error[..],
+            &mut &self.raw.bytes[..],
             self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
         )?;
@@ -191,17 +191,24 @@ pub struct ModuleErrorDetails<'a> {
 /// **Note**: Structure used to obtain the underlying bytes of a ModuleError.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct RawModuleError {
-    /// Index of the pallet that the error came from.
-    pub pallet_index: u8,
-    /// Raw error bytes.
-    pub error: [u8; 4],
+    /// The raw bytes of the module error.
+    ///
+    /// Bytes representation:
+    /// bytes[0]:   pallet index
+    /// bytes[1]:   error index
+    /// bytes[2..]: 3 bytes specific for the module error
+    pub bytes: [u8; 5],
 }
 
 impl RawModuleError {
+    /// Obtain the pallet index from the underlying byte data.
+    pub fn pallet_index(&self) -> u8 {
+        self.bytes[0]
+    }
+
     /// Obtain the error index from the underlying byte data.
     pub fn error_index(&self) -> u8 {
-        // Error index is utilized as the first byte from the error array.
-        self.error[0]
+        self.bytes[1]
     }
 }
 
@@ -292,13 +299,12 @@ impl DispatchError {
                 // The new version is 5 bytes; a pallet and error index and then 3 extra bytes.
                 let raw = if module_bytes.len() == 2 {
                     RawModuleError {
-                        pallet_index: module_bytes[0],
-                        error: [module_bytes[1], 0, 0, 0],
+                        bytes: [module_bytes[0], module_bytes[1], 0, 0, 0],
                     }
                 } else if module_bytes.len() == 5 {
                     RawModuleError {
-                        pallet_index: module_bytes[0],
-                        error: [
+                        bytes: [
+                            module_bytes[0],
                             module_bytes[1],
                             module_bytes[2],
                             module_bytes[3],
