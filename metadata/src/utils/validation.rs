@@ -232,7 +232,7 @@ fn get_extrinsic_hash(
         if let TypeDef::Variant(variant) = &ty.ty.type_def {
             get_type_def_variant_hash(registry, variant, specific_pallets, &mut visited_ids)
         } else {
-            get_type_hash(registry, extrinsic.signature_ty, &mut visited_ids)
+            get_type_hash(registry, extrinsic.call_ty, &mut visited_ids)
         }
     };
 
