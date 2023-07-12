@@ -280,6 +280,7 @@ pub fn retain_metadata<F, G>(
 mod tests {
     use super::*;
     use crate::Metadata;
+    use assert_matches::assert_matches;
     use codec::Decode;
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
@@ -304,6 +305,7 @@ mod tests {
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in metadata_cache.pallets() {
             let mut metadata = metadata_cache.clone();
+
             retain_metadata(
                 &mut metadata,
                 |pallet_name| pallet_name == pallet.name(),
@@ -315,6 +317,21 @@ mod tests {
                 &*metadata.pallets.get_by_index(0).unwrap().name,
                 pallet.name()
             );
+
+            let id = metadata.outer_enums().call_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.call_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
+
+            let id = metadata.outer_enums().error_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.error_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
+
+            let id = metadata.outer_enums().event_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.event_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
         }
     }
 
