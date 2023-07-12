@@ -447,7 +447,7 @@ impl ConstantMetadata {
 /// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-    /// The type of the address that signes the extrinsic
+    /// The type of the address that signs the extrinsic
     address_ty: u32,
     /// The type of the outermost Call enum.
     call_ty: u32,
@@ -462,7 +462,7 @@ pub struct ExtrinsicMetadata {
 }
 
 impl ExtrinsicMetadata {
-    /// The type of the address that signes the extrinsic
+    /// The type of the address that signs the extrinsic
     pub fn address_ty(&self) -> u32 {
         self.address_ty
     }
