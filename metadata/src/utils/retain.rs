@@ -159,7 +159,7 @@ fn update_type(ty: &mut u32, map_ids: &BTreeMap<u32, u32>) {
 
 /// Retain the enum type identified by ID and keep only the variants that
 /// match the provided filter.
-fn retain_enum_type<F>(metadata: &mut Metadata, id: u32, mut filter: F)
+fn retain_variants_in_enum_type<F>(metadata: &mut Metadata, id: u32, mut filter: F)
 where
     F: FnMut(&str) -> bool,
 {
@@ -182,9 +182,9 @@ fn retain_pallets_in_runtime_outer_types<F>(metadata: &mut Metadata, mut filter:
 where
     F: FnMut(&str) -> bool,
 {
-    retain_enum_type(metadata, metadata.outer_enums.call_enum_ty, &mut filter);
-    retain_enum_type(metadata, metadata.outer_enums.event_enum_ty, &mut filter);
-    retain_enum_type(metadata, metadata.outer_enums.error_enum_ty, &mut filter);
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.call_enum_ty, &mut filter);
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.event_enum_ty, &mut filter);
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.error_enum_ty, &mut filter);
 }
 
 /// Generate a subset of the metadata that contains only the
