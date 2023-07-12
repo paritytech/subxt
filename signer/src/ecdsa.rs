@@ -7,12 +7,9 @@ use codec::Encode;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use hex::FromHex;
-
-use crate::ecdsa::Error::SoftJunction;
-use secp256k1::Secp256k1;
-use secp256k1::SECP256K1;
 use secp256k1::{
-    ecdsa::{RecoverableSignature, RecoveryId},
+    Secp256k1,
+    ecdsa::RecoverableSignature,
     Message, SecretKey,
 };
 use secrecy::ExposeSecret;
@@ -142,15 +139,16 @@ impl Keypair {
         &self,
         junctions: Js,
     ) -> Result<Self, Error> {
-        let init = Ok(self.0.secret_key().clone().secret_bytes());
-        let result = junctions.into_iter().fold(init, |acc, j| match j {
-            DeriveJunction::Soft(_) => Err(SoftJunction),
-            DeriveJunction::Hard(junction_bytes) => acc.map(|acc_bytes| {
-                ("Secp256k1HDKD", acc_bytes, junction_bytes)
-                    .using_encoded(sp_core_hashing::blake2_256)
-            }),
-        })?;
-        Self::from_seed(result)
+        let mut acc = self.0.secret_key().clone().secret_bytes();
+        for junction in junctions {
+            match junction {
+                DeriveJunction::Soft(_) => return Err(Error::SoftJunction),
+                DeriveJunction::Hard(junction_bytes) => {
+                    acc = ("Secp256k1HDKD", acc, junction_bytes).using_encoded(sp_core_hashing::blake2_256)
+                }
+            }
+        }
+        Self::from_seed(acc)
     }
 
     /// Obtain the [`PublicKey`] part of this key pair, which can be used in calls to [`verify()`].
@@ -162,17 +160,18 @@ impl Keypair {
 
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
+        // From sp_core::ecdsa::sign:
         let message_hash = sp_core_hashing::blake2_256(message);
+        // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_slice(&message_hash).expect("Message is 32 bytes; qed");
-        let context = SECP256K1;
-        let recoverable_signature: RecoverableSignature =
+        let context = Secp256k1::signing_only();
+        let recsig: RecoverableSignature =
             context.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
-        let (recovery_id, raw_sig): (RecoveryId, [u8; 64]) =
-            recoverable_signature.serialize_compact();
+        // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
+        let (recid, sig) = recsig.serialize_compact();
         let mut signature_bytes: [u8; 65] = [0; 65];
-        // Copy the signature and recovery ID bytes into the array
-        signature_bytes[..64].copy_from_slice(&raw_sig[..]);
-        signature_bytes[64] = (recovery_id.to_i32() & 0xFF) as u8;
+        signature_bytes[..64].copy_from_slice(&sig);
+        signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
         Signature(signature_bytes)
     }
 }
@@ -385,7 +384,7 @@ mod test {
             let uri = format!("{phrase}{path}");
             let uri = SecretUri::from_str(&uri).expect("should be valid secret URI");
             let result = Keypair::from_uri(&uri);
-            assert_eq!(result.err(), Some(SoftJunction));
+            assert_eq!(result.err(), Some(Error::SoftJunction));
         }
     }
 

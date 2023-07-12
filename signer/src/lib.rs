@@ -24,6 +24,7 @@ pub mod sr25519;
 
 // An ecdsa key pair implementation.
 pub mod ecdsa;
+
 // Re-export useful bits and pieces for generating a Pair from a phrase,
 // namely the Mnemonic struct.
 pub use bip39;
