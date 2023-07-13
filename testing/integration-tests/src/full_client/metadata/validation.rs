@@ -114,7 +114,7 @@ async fn constant_values_are_not_validated() {
 
     // Modify the metadata.
     let metadata = modified_metadata(api.metadata(), |md| {
-        let mut existential = md
+        let existential = md
             .pallets
             .iter_mut()
             .find(|pallet| pallet.name == "Balances")
