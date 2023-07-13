@@ -330,7 +330,14 @@ fn generate_outer_enums(
 
     let call_ty = call_enum.id.into();
     let event_ty = event_enum.id.into();
-    let error_ty_id = generate_runtime_error_type(metadata);
+
+    let mut path_segments = call_enum.ty.path.segments.clone();
+    let last = path_segments
+        .last_mut()
+        .expect("Should have at least one segment checked above; qed");
+    *last = "RuntimeError".to_string();
+
+    let error_ty_id = generate_runtime_error_type(metadata, path_segments);
 
     v15::OuterEnums {
         call_enum_ty: call_ty,
@@ -342,48 +349,33 @@ fn generate_outer_enums(
 /// Generate the `RuntimeError` type and add it to the metadata.
 ///
 /// Returns the `RuntimeError` Id from the registry.
-fn generate_runtime_error_type(metadata: &mut v14::RuntimeMetadataV14) -> u32 {
-    let error_types: HashMap<_, _> = metadata
-        .types
-        .types
-        .iter()
-        .filter_map(|ty| {
-            let segments = &ty.ty.path.segments;
-            // Interested in segments that end with `pallet::Error`.
-            let len = segments.len();
-            if len < 2 {
-                return None;
-            }
-
-            if segments[len - 2] != "pallet" || segments[len - 1] != "Error" {
-                return None;
-            }
-
-            let pallet_name = segments[0].as_str();
-            let pallet_name = if let Some(name) = pallet_name.strip_prefix("pallet_") {
-                name.to_lowercase()
-            } else if let Some(name) = pallet_name.strip_prefix("frame_") {
-                name.to_lowercase()
-            } else {
-                pallet_name.to_lowercase()
-            };
-
-            Some((pallet_name, ty))
-        })
-        .collect();
-
+fn generate_runtime_error_type(
+    metadata: &mut v14::RuntimeMetadataV14,
+    path_segments: Vec<String>,
+) -> u32 {
     let variants: Vec<_> = metadata
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let Some(entry) = error_types.get(&pallet.name.to_lowercase()) else { return None };
+            let Some(pallet_error) = &pallet.error else { return None };
+
+            let error_ty = metadata
+                .types
+                .resolve(pallet_error.ty.id)
+                .expect("Error type is present in the metadata; qed");
+
+            // Note: the type name is the name of the type as it appears in substrate, we cannot
+            // accurately reproduce it when it contains more than 1 generic.
+            // The first generic is always the `Runtime`, the others represent instances.
+            let instances = ",Instance".repeat(error_ty.type_params.len() - 1);
+            let path = format!("{}<Runtime{}>", error_ty.path, instances);
 
             Some(scale_info::Variant {
                 name: pallet.name.clone(),
                 fields: vec![scale_info::Field {
                     name: None,
-                    ty: entry.id.into(),
-                    type_name: Some(format!("pallet_{}::Error<Runtime>", pallet.name)),
+                    ty: pallet_error.ty.id.into(),
+                    type_name: Some(path),
                     docs: vec![],
                 }],
                 index: pallet.index,
@@ -394,10 +386,7 @@ fn generate_runtime_error_type(metadata: &mut v14::RuntimeMetadataV14) -> u32 {
 
     let error_type = scale_info::Type {
         path: scale_info::Path {
-            segments: vec![
-                "kitchensink_runtime".to_string(),
-                "RuntimeError".to_string(),
-            ],
+            segments: path_segments,
         },
         type_params: vec![],
         type_def: scale_info::TypeDef::Variant(scale_info::TypeDefVariant { variants }),
@@ -412,4 +401,200 @@ fn generate_runtime_error_type(metadata: &mut v14::RuntimeMetadataV14) -> u32 {
     });
 
     error_type_id
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use codec::Decode;
+    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
+    use scale_info::TypeDef;
+    use std::{fs, path::Path};
+
+    fn load_v15_metadata() -> RuntimeMetadataV15 {
+        let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
+            .expect("Cannot read metadata blob");
+        let meta: RuntimeMetadataPrefixed =
+            Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+
+        match meta.1 {
+            RuntimeMetadata::V15(v15) => v15,
+            _ => panic!("Unsupported metadata version {:?}", meta.1),
+        }
+    }
+
+    #[test]
+    fn test_extrinsic_id_generation() {
+        let v15 = load_v15_metadata();
+        let v14 = v15_to_v14(v15.clone());
+
+        let ext_ty = v14.types.resolve(v14.extrinsic.ty.id).unwrap();
+        let addr_id = ext_ty
+            .type_params
+            .iter()
+            .find_map(|ty| {
+                if ty.name == "Address" {
+                    Some(ty.ty.unwrap().id)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        let call_id = ext_ty
+            .type_params
+            .iter()
+            .find_map(|ty| {
+                if ty.name == "Call" {
+                    Some(ty.ty.unwrap().id)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        let extra_id = ext_ty
+            .type_params
+            .iter()
+            .find_map(|ty| {
+                if ty.name == "Extra" {
+                    Some(ty.ty.unwrap().id)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        let signature_id = ext_ty
+            .type_params
+            .iter()
+            .find_map(|ty| {
+                if ty.name == "Signature" {
+                    Some(ty.ty.unwrap().id)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+
+        // Position in type registry shouldn't change.
+        assert_eq!(v15.extrinsic.address_ty.id, addr_id);
+        assert_eq!(v15.extrinsic.call_ty.id, call_id);
+        assert_eq!(v15.extrinsic.extra_ty.id, extra_id);
+        assert_eq!(v15.extrinsic.signature_ty.id, signature_id);
+
+        let v15_addr = v15.types.resolve(v15.extrinsic.address_ty.id).unwrap();
+        let v14_addr = v14.types.resolve(addr_id).unwrap();
+        assert_eq!(v15_addr, v14_addr);
+
+        let v15_call = v15.types.resolve(v15.extrinsic.call_ty.id).unwrap();
+        let v14_call = v14.types.resolve(call_id).unwrap();
+        assert_eq!(v15_call, v14_call);
+
+        let v15_extra = v15.types.resolve(v15.extrinsic.extra_ty.id).unwrap();
+        let v14_extra = v14.types.resolve(extra_id).unwrap();
+        assert_eq!(v15_extra, v14_extra);
+
+        let v15_sign = v15.types.resolve(v15.extrinsic.signature_ty.id).unwrap();
+        let v14_sign = v14.types.resolve(signature_id).unwrap();
+        assert_eq!(v15_sign, v14_sign);
+
+        // Ensure we don't lose the information when converting back to v15.
+        let converted_v15 = v14_to_v15(v14);
+
+        let v15_addr = v15.types.resolve(v15.extrinsic.address_ty.id).unwrap();
+        let converted_v15_addr = converted_v15
+            .types
+            .resolve(converted_v15.extrinsic.address_ty.id)
+            .unwrap();
+        assert_eq!(v15_addr, converted_v15_addr);
+
+        let v15_call = v15.types.resolve(v15.extrinsic.call_ty.id).unwrap();
+        let converted_v15_call = converted_v15
+            .types
+            .resolve(converted_v15.extrinsic.call_ty.id)
+            .unwrap();
+        assert_eq!(v15_call, converted_v15_call);
+
+        let v15_extra = v15.types.resolve(v15.extrinsic.extra_ty.id).unwrap();
+        let converted_v15_extra = converted_v15
+            .types
+            .resolve(converted_v15.extrinsic.extra_ty.id)
+            .unwrap();
+        assert_eq!(v15_extra, converted_v15_extra);
+
+        let v15_sign = v15.types.resolve(v15.extrinsic.signature_ty.id).unwrap();
+        let converted_v15_sign = converted_v15
+            .types
+            .resolve(converted_v15.extrinsic.signature_ty.id)
+            .unwrap();
+        assert_eq!(v15_sign, converted_v15_sign);
+    }
+
+    #[test]
+    fn test_outer_enums_generation() {
+        let v15 = load_v15_metadata();
+        let v14 = v15_to_v14(v15.clone());
+
+        // Convert back to v15 and expect to have the enum types properly generated.
+        let converted_v15 = v14_to_v15(v14);
+
+        // RuntimeCall and RuntimeEvent were already present in the metadata v14.
+        let v15_call = v15.types.resolve(v15.outer_enums.call_enum_ty.id).unwrap();
+        let converted_v15_call = converted_v15
+            .types
+            .resolve(converted_v15.outer_enums.call_enum_ty.id)
+            .unwrap();
+        assert_eq!(v15_call, converted_v15_call);
+
+        let v15_event = v15.types.resolve(v15.outer_enums.event_enum_ty.id).unwrap();
+        let converted_v15_event = converted_v15
+            .types
+            .resolve(converted_v15.outer_enums.event_enum_ty.id)
+            .unwrap();
+        assert_eq!(v15_event, converted_v15_event);
+
+        let v15_error = v15.types.resolve(v15.outer_enums.error_enum_ty.id).unwrap();
+        let converted_v15_error = converted_v15
+            .types
+            .resolve(converted_v15.outer_enums.error_enum_ty.id)
+            .unwrap();
+
+        // Ensure they match in terms of variants and fields ids.
+        assert_eq!(v15_error.path, converted_v15_error.path);
+
+        let TypeDef::Variant(v15_variant) = &v15_error.type_def else {
+            panic!("V15 error must be a variant");
+        };
+
+        let TypeDef::Variant(converted_v15_variant) = &converted_v15_error.type_def else {
+            panic!("Converted V15 error must be a variant");
+        };
+
+        assert_eq!(
+            v15_variant.variants.len(),
+            converted_v15_variant.variants.len()
+        );
+
+        for (v15_var, converted_v15_var) in v15_variant
+            .variants
+            .iter()
+            .zip(converted_v15_variant.variants.iter())
+        {
+            // Variant name must match.
+            assert_eq!(v15_var.name, converted_v15_var.name);
+            assert_eq!(v15_var.fields.len(), converted_v15_var.fields.len());
+
+            // Fields must have the same type.
+            for (v15_field, converted_v15_field) in
+                v15_var.fields.iter().zip(converted_v15_var.fields.iter())
+            {
+                assert_eq!(v15_field.ty.id, converted_v15_field.ty.id);
+
+                let ty = v15.types.resolve(v15_field.ty.id).unwrap();
+                let converted_ty = converted_v15
+                    .types
+                    .resolve(converted_v15_field.ty.id)
+                    .unwrap();
+                assert_eq!(ty, converted_ty);
+            }
+        }
+    }
 }
