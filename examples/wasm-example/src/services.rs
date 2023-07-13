@@ -84,6 +84,8 @@ extern "C" {
     pub fn js_get_accounts() -> Promise;
     #[wasm_bindgen(js_name = signHexMessage)]
     pub fn js_sign_hex_message(hex_message: String, source: String, address: String) -> Promise;
+    #[wasm_bindgen(js_name = signPayload)]
+    pub fn js_sign_payload(payload: String, source: String, address: String) -> Promise;
 }
 
 
@@ -123,4 +125,38 @@ pub async fn sign_hex_message(
         .ok_or(anyhow!("Error converting JsValue into String"))?;
     Ok(result_string)
 }
+
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignerPayloadForJS {
+    pub spec_version: String,
+    pub transaction_version: String,
+    pub address: String,
+    pub block_hash: String,
+    pub block_number: String,
+    pub era: String,
+    pub genesis_hash: String,
+    pub method: String,
+    pub nonce: String,
+    pub signed_extensions: Vec<String>,
+    pub tip: String,
+    pub version: usize,
+}
+
+pub async fn sign_payload(
+    payload: SignerPayloadForJS,
+    source: String,
+    address: String,
+) -> Result<String, anyhow::Error> {
+    let payload_as_str = serde_json::to_string(&payload).unwrap();
+    let result = JsFuture::from(js_sign_payload(payload_as_str, source, address))
+        .await
+        .map_err(|js_err| anyhow!("{js_err:?}"))?;
+    let result_string = result
+        .as_string()
+        .ok_or(anyhow!("Error converting JsValue into String"))?;
+    Ok(result_string)
+}
+
 

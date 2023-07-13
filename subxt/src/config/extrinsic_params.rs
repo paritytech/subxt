@@ -57,14 +57,22 @@ pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = "Tip: Debug"))]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
-    era: Era,
-    nonce: T::Index,
-    tip: Tip,
-    spec_version: u32,
-    transaction_version: u32,
-    genesis_hash: T::Hash,
-    mortality_checkpoint: T::Hash,
-    marker: std::marker::PhantomData<T>,
+    /// todo!()
+    pub era: Era,
+    /// todo!()
+    pub nonce: T::Index,
+    /// todo!()
+    pub tip: Tip,
+    /// todo!()
+    pub spec_version: u32,
+    /// todo!()
+    pub transaction_version: u32,
+    /// todo!()
+    pub genesis_hash: T::Hash,
+    /// todo!()
+    pub mortality_checkpoint: T::Hash,
+    /// todo!()
+    pub marker: std::marker::PhantomData<T>,
 }
 
 /// This builder allows you to provide the parameters that can be configured in order to

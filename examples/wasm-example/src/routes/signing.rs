@@ -4,14 +4,14 @@ use futures::FutureExt;
 use serde::Deserialize;
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt::dynamic::Value;
-use subxt::ext::codec::Decode;
+use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::SubmittableExtrinsic;
 use subxt::utils::{AccountId32, MultiSignature};
 
 
 use web_sys::{HtmlInputElement};
 use yew::prelude::*;
-use crate::services::{Account, get_accounts, polkadot, sign_hex_message};
+use crate::services::{Account, get_accounts, polkadot, sign_hex_message, sign_payload, SignerPayloadForJS};
 
 pub struct SigningExamplesComponent {
     message: String,
@@ -138,26 +138,97 @@ impl Component for SigningExamplesComponent {
                                         }
                                     };
 
+
+
+                                fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+                                    format!("0x{}", hex::encode(bytes.as_ref()))
+                                }
+
+                                fn encode_to_hex<E: Encode>(input: &E) -> String {
+                                    format!("0x{}", hex::encode(input.encode()))
+                                }
+
+                                fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
+                                    let mut bytes = input.encode();
+                                    bytes.reverse();
+                                    format!("0x{}", hex::encode(bytes))
+                                }
+
+
                                 // check the payload (debug)
-                                web_sys::console::log_1(&format!("signer payload{:?}", partial_extrinsic.signer_payload()).into());
-                                let hex_extrinsic_to_sign = format!("0x{}", hex::encode(partial_extrinsic.signer_payload()));
-                                web_sys::console::log_1(&hex_extrinsic_to_sign.clone().into());
+                                let params = &partial_extrinsic.additional_and_extra_params;
+                                // web_sys::console::log_1(&format!("params.genesis_hash: {:?}", params.genesis_hash).into());
+                                // web_sys::console::log_1(&format!("params.era: {:?}", params.era).into());
+                                //
+                                // web_sys::console::log_1(&format!("spec_version: {:?} {:?}", &partial_extrinsic.additional_and_extra_params.spec_version, encode_to_hex_reverse(&partial_extrinsic.additional_and_extra_params.spec_version)).into());
 
-                                // get the signature via browser extension
-                                let Ok(signature) = sign_hex_message(hex_extrinsic_to_sign, account_source, account_address).await else {
-                                    return Message::Error(anyhow!("Signing failed"));
+                                let js_payload = SignerPayloadForJS {
+                                    spec_version: encode_to_hex_reverse(&params.spec_version),
+                                    transaction_version: encode_to_hex_reverse(&partial_extrinsic.additional_and_extra_params.transaction_version),
+                                    address: account_address.clone(),
+                                    block_hash: encode_to_hex(&params.genesis_hash),
+                                    block_number: "0x00000000".into(), // immortal
+                                    era: "0x0000".into(), // immortal
+                                    genesis_hash: encode_to_hex(&params.genesis_hash),
+                                    method: to_hex(partial_extrinsic.call_data()),
+                                    nonce: encode_to_hex_reverse(&params.nonce),
+                                    signed_extensions: vec![
+                                        "CheckNonZeroSender",
+                                        "CheckSpecVersion",
+                                        "CheckTxVersion",
+                                        "CheckGenesis",
+                                        "CheckMortality",
+                                        "CheckNonce",
+                                        "CheckWeight",
+                                        "ChargeTransactionPayment",
+                                        "PrevalidateAttests",
+                                    ].into_iter().map(|s| s.to_string()).collect::<Vec<_>>(),
+                                    tip: "0x00000000000000000000000000000000".into(),
+                                    version: 4,
                                 };
-                                let signature_bytes = hex::decode(&signature[2..]).unwrap();
-                                web_sys::console::log_1(&format!("{:?}", signature_bytes).into());
-                                let multi_signature: MultiSignature = MultiSignature::Sr25519(signature_bytes.try_into().unwrap());
-                                let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
 
-                                // test via dry run (debug)
+                                let Ok(signature) = sign_payload(js_payload, account_source, account_address).await else {
+                                    return Message::Error(anyhow!("Signing via extension failed"));
+                                };
+                                web_sys::console::log_1(&format!("signature: {}", &signature).into());
+
+                                // these are 65 bytes: 01 for the Sr25519 variant and 64 bytes after that.
+                                let signature_bytes = hex::decode(&signature[2..]).unwrap();
+                                // the deafult for the polkadot
+                                let Ok(multi_signature) = MultiSignature::decode(&mut &signature_bytes[..]) else {
+                                    return Message::Error(anyhow!("MultiSignature Decoding"));
+                                };
+                                web_sys::console::log_1(&format!("multi_signature: {:?}", &multi_signature).into());
+
+
+                                let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
+                                web_sys::console::log_1(&format!("signed_extrinsic hex: {:?}", hex::encode(signed_extrinsic.encoded())).into());
                                 let dry_res = signed_extrinsic.dry_run(None).await;
                                 web_sys::console::log_1(&format!("dry res: {:?}", dry_res).into());
+                                return Message::Error(anyhow!("after signing"));
 
-                                // return the signature and signed extrinsic
-                                Message::ReceivedSignature(signature, signed_extrinsic)
+                                let multi_signature: MultiSignature = MultiSignature::Sr25519(signature_bytes.try_into().unwrap());
+
+                                //
+                                // web_sys::console::log_1(&format!("signer payload{:?}", partial_extrinsic.signer_payload()).into());
+                                // let hex_extrinsic_to_sign = format!("0x{}", hex::encode(partial_extrinsic.signer_payload()));
+                                // web_sys::console::log_1(&hex_extrinsic_to_sign.clone().into());
+                                //
+                                // // get the signature via browser extension
+                                // let Ok(signature) = sign_hex_message(hex_extrinsic_to_sign, account_source, account_address).await else {
+                                //     return Message::Error(anyhow!("Signing failed"));
+                                // };
+                                // let signature_bytes = hex::decode(&signature[2..]).unwrap();
+                                // web_sys::console::log_1(&format!("{:?}", signature_bytes).into());
+                                // let multi_signature: MultiSignature = MultiSignature::Sr25519(signature_bytes.try_into().unwrap());
+                                // let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
+                                //
+                                // // test via dry run (debug)
+                                // let dry_res = signed_extrinsic.dry_run(None).await;
+                                // web_sys::console::log_1(&format!("dry res: {:?}", dry_res).into());
+                                //
+                                // // return the signature and signed extrinsic
+                                // Message::ReceivedSignature(signature, signed_extrinsic)
                             }
                         );
                 }
