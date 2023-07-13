@@ -110,20 +110,8 @@ pub type ConsensusEngineId = [u8; 4];
 pub type EncodedJustification = Vec<u8>;
 
 /// Bytes representing an extrinsic in a [`ChainBlock`].
-#[derive(Clone, Debug)]
-pub struct ChainBlockExtrinsic(pub Vec<u8>);
-
-impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
-    fn deserialize<D>(de: D) -> Result<Self, D::Error>
-    where
-        D: ::serde::Deserializer<'a>,
-    {
-        let r = impl_serde::serialize::deserialize(de)?;
-        let bytes = Decode::decode(&mut &r[..])
-            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {e}")))?;
-        Ok(ChainBlockExtrinsic(bytes))
-    }
-}
+#[derive(Clone, Debug, Deserialize)]
+pub struct ChainBlockExtrinsic(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
