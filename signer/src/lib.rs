@@ -20,9 +20,11 @@ mod utils;
 mod crypto;
 
 // An sr25519 key pair implementation.
+#[cfg(feature = "sr25519")]
 pub mod sr25519;
 
 // An ecdsa key pair implementation.
+#[cfg(feature = "ecdsa")]
 pub mod ecdsa;
 
 // Re-export useful bits and pieces for generating a Pair from a phrase,

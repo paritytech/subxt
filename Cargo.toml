@@ -63,7 +63,6 @@ scale-value = "0.10.0"
 scale-bits = "0.3"
 scale-decode = "0.7.0"
 scale-encode = "0.3.0"
-secp256k1 = { version = "0.27.0", features = ["global-context", "recovery"] }
 serde = { version = "1.0.164" }
 serde_json = { version = "1.0.100" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
@@ -103,6 +102,7 @@ bip39 = "2.0.0"
 hmac = "0.12.1"
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = "0.10.2"
+secp256k1 = "0.27.0"
 secrecy = "0.8.0"
 sha2 = "0.10.6"
 zeroize = { version = "1", default-features = false }

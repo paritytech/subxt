@@ -7,7 +7,7 @@ use codec::Encode;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use hex::FromHex;
-use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
+use secp256k1::{ecdsa::RecoverableSignature, Message, SecretKey, SECP256K1};
 use secrecy::ExposeSecret;
 
 const SEED_LENGTH: usize = 32;
@@ -108,8 +108,9 @@ impl Keypair {
     /// This will only be secure if the seed is secure!
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
-        let context = Secp256k1::signing_only();
-        Ok(Self(secp256k1::KeyPair::from_secret_key(&context, &secret)))
+        Ok(Self(secp256k1::KeyPair::from_secret_key(
+            &SECP256K1, &secret,
+        )))
     }
 
     /// Derive a child key from this one given a series of junctions.
@@ -159,9 +160,8 @@ impl Keypair {
         let message_hash = sp_core_hashing::blake2_256(message);
         // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_slice(&message_hash).expect("Message is 32 bytes; qed");
-        let context = Secp256k1::signing_only();
         let recsig: RecoverableSignature =
-            context.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
+            SECP256K1.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
         // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
         let (recid, sig) = recsig.serialize_compact();
         let mut signature_bytes: [u8; 65] = [0; 65];
