@@ -1,11 +1,14 @@
 use futures::StreamExt;
 use std::fmt::Write;
-use subxt::{self, OnlineClient, PolkadotConfig};
-use subxt::tx::SubmittableExtrinsic;
+use subxt::{self, Config, OnlineClient, PolkadotConfig};
+use subxt::tx::{SubmittableExtrinsic, PartialExtrinsic};
 use yew::{AttrValue, Callback};
 use js_sys::{Promise};
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
+use subxt::client::OfflineClientT;
+use subxt::ext::codec::Encode;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 
@@ -126,37 +129,77 @@ pub async fn sign_hex_message(
     Ok(result_string)
 }
 
+//
+// #[derive(Clone, Debug, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct SignerPayloadForJS {
+//     pub spec_version: String,
+//     pub transaction_version: String,
+//     pub address: String,
+//     pub block_hash: String,
+//     pub block_number: String,
+//     pub era: String,
+//     pub genesis_hash: String,
+//     pub method: String,
+//     pub nonce: String,
+//     pub signed_extensions: Vec<String>,
+//     pub tip: String,
+//     pub version: usize,
+// }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SignerPayloadForJS {
-    pub spec_version: String,
-    pub transaction_version: String,
-    pub address: String,
-    pub block_hash: String,
-    pub block_number: String,
-    pub era: String,
-    pub genesis_hash: String,
-    pub method: String,
-    pub nonce: String,
-    pub signed_extensions: Vec<String>,
-    pub tip: String,
-    pub version: usize,
+
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
-pub async fn sign_payload(
-    payload: SignerPayloadForJS,
-    source: String,
-    address: String,
-) -> Result<String, anyhow::Error> {
-    let payload_as_str = serde_json::to_string(&payload).unwrap();
-    let result = JsFuture::from(js_sign_payload(payload_as_str, source, address))
+fn encode_to_hex<E: Encode>(input: &E) -> String {
+    format!("0x{}", hex::encode(input.encode()))
+}
+
+fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
+    let mut bytes = input.encode();
+    bytes.reverse();
+    format!("0x{}", hex::encode(bytes))
+}
+
+pub async fn extension_signature_for_partial_extrinsic(
+    partial_extrinsic: &PartialExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+    api: &OnlineClient<PolkadotConfig>,
+    account_source: String,
+    account_address: String,
+) -> Result<Vec<u8>, anyhow::Error> {
+    let params = &partial_extrinsic.additional_and_extra_params;
+
+    let spec_version = encode_to_hex_reverse(&params.spec_version);
+    let transaction_version = encode_to_hex_reverse(&params.transaction_version);
+    let genesis_hash = encode_to_hex(&params.genesis_hash);
+    let method = to_hex(partial_extrinsic.call_data());
+    let nonce = encode_to_hex_reverse(&params.nonce);
+    let signed_extensions: Vec<String> = api.metadata().extrinsic().signed_extensions().iter().map(|e| e.identifier().to_string()).collect();
+
+    let payload = json!({
+        "specVersion": spec_version,
+        "transactionVersion": transaction_version,
+        "address": account_address,
+        "blockHash": genesis_hash,
+        "blockNumber": "0x00000000", // immortal
+        "era": "0x0000", // immortal
+        "genesisHash": genesis_hash,
+        "method": method,
+        "nonce": nonce,
+        "signedExtensions": signed_extensions,
+        "tip": "0x00000000000000000000000000000000", // no tip
+        "version": 4,
+    });
+    let payload = payload.to_string();
+    let result = JsFuture::from(js_sign_payload(payload, account_source, account_address))
         .await
         .map_err(|js_err| anyhow!("{js_err:?}"))?;
-    let result_string = result
+    let signature = result
         .as_string()
         .ok_or(anyhow!("Error converting JsValue into String"))?;
-    Ok(result_string)
+    let signature = hex::decode(&signature[2..])?;
+    Ok(signature)
 }
 
 
