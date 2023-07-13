@@ -6,6 +6,8 @@
 pub enum Error {
     Io(std::io::Error),
     CouldNotExtractPort,
+    CouldNotExtractP2pAddress,
+    CouldNotExtractP2pPort,
 }
 
 impl std::fmt::Display for Error {
@@ -15,6 +17,14 @@ impl std::fmt::Display for Error {
             Error::CouldNotExtractPort => write!(
                 f,
                 "could not extract port from running substrate node's stdout"
+            ),
+            Error::CouldNotExtractP2pAddress => write!(
+                f,
+                "could not extract p2p address from running substrate node's stdout"
+            ),
+            Error::CouldNotExtractP2pPort => write!(
+                f,
+                "could not extract p2p port from running substrate node's stdout"
             ),
         }
     }

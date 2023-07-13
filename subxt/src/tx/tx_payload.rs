@@ -120,6 +120,16 @@ impl<CallData> Payload<CallData> {
     pub fn call_data(&self) -> &CallData {
         &self.call_data
     }
+
+    /// Returns the pallet name.
+    pub fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    /// Returns the call name.
+    pub fn call_name(&self) -> &str {
+        &self.call_name
+    }
 }
 
 impl Payload<Composite<()>> {
@@ -152,8 +162,13 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
         pallet_index.encode_to(out);
         call_index.encode_to(out);
 
+        let mut fields = call
+            .fields
+            .iter()
+            .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
+
         self.call_data
-            .encode_as_fields_to(&call.fields, metadata.types(), out)?;
+            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
         Ok(())
     }
 

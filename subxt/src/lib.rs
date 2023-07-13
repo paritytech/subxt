@@ -5,7 +5,7 @@
 //! Subxt is a library for interacting with Substrate based nodes. Using it looks something like this:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../examples/examples/tx_basic.rs")]
+#![doc = include_str!("../examples/tx_basic.rs")]
 //! ```
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
@@ -33,22 +33,35 @@
 )]
 #![allow(clippy::type_complexity)]
 
+#[cfg(any(
+    all(feature = "web", feature = "native"),
+    not(any(feature = "web", feature = "native"))
+))]
+compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
+
+#[cfg(all(feature = "web", feature = "substrate-compat"))]
+compile_error!("subxt: the 'substrate-compat' feature is not compatible with the 'web' feature.");
+
 // The guide is here.
 pub mod book;
 
 // Suppress an unused dependency warning because tokio is
 // only used in example code snippets at the time of writing.
 #[cfg(test)]
-use tokio as _;
+mod only_used_in_docs_or_tests {
+    use subxt_signer as _;
+    use tokio as _;
+}
+
+// Suppress an unused dependency warning because tracing_subscriber is
+// only used in example code snippets at the time of writing.
+#[cfg(test)]
+use tracing_subscriber as _;
 
 // Used to enable the js feature for wasm.
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "web")]
+#[allow(unused_imports)]
 pub use getrandom as _;
-
-#[cfg(all(feature = "jsonrpsee-ws", feature = "jsonrpsee-web"))]
-std::compile_error!(
-    "Both the features `jsonrpsee-ws` and `jsonrpsee-web` are enabled which are mutually exclusive"
-);
 
 pub mod blocks;
 pub mod client;

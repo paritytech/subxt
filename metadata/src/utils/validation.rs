@@ -175,7 +175,7 @@ fn get_type_def_hash(
 }
 
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
-fn get_type_hash(
+pub fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
     visited_ids: &mut HashSet<u32>,
@@ -283,7 +283,7 @@ fn get_runtime_method_hash(
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
+pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::new();
     let trait_name = &*trait_metadata.inner.name;
     let method_bytes = trait_metadata
@@ -379,14 +379,17 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
     let storage_bytes = match pallet.storage() {
         Some(storage) => {
             let prefix_hash = hash(storage.prefix().as_bytes());
-            let entries_hash = storage.entries().fold([0u8; HASH_LEN], |bytes, entry| {
-                // We don't care what order the storage entries occur in, so XOR them together
-                // to make the order irrelevant.
-                xor(
-                    bytes,
-                    get_storage_entry_hash(registry, entry, &mut visited_ids),
-                )
-            });
+            let entries_hash = storage
+                .entries()
+                .iter()
+                .fold([0u8; HASH_LEN], |bytes, entry| {
+                    // We don't care what order the storage entries occur in, so XOR them together
+                    // to make the order irrelevant.
+                    xor(
+                        bytes,
+                        get_storage_entry_hash(registry, entry, &mut visited_ids),
+                    )
+                });
             concat_and_hash2(&prefix_hash, &entries_hash)
         }
         None => [0u8; HASH_LEN],
@@ -407,6 +410,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
 pub struct MetadataHasher<'a> {
     metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,
+    specific_runtime_apis: Option<Vec<&'a str>>,
 }
 
 impl<'a> MetadataHasher<'a> {
@@ -415,12 +419,23 @@ impl<'a> MetadataHasher<'a> {
         Self {
             metadata,
             specific_pallets: None,
+            specific_runtime_apis: None,
         }
     }
 
     /// Only hash the provided pallets instead of hashing every pallet.
     pub fn only_these_pallets<S: AsRef<str>>(&mut self, specific_pallets: &'a [S]) -> &mut Self {
         self.specific_pallets = Some(specific_pallets.iter().map(|n| n.as_ref()).collect());
+        self
+    }
+
+    /// Only hash the provided runtime APIs instead of hashing every runtime API
+    pub fn only_these_runtime_apis<S: AsRef<str>>(
+        &mut self,
+        specific_runtime_apis: &'a [S],
+    ) -> &mut Self {
+        self.specific_runtime_apis =
+            Some(specific_runtime_apis.iter().map(|n| n.as_ref()).collect());
         self
     }
 
@@ -431,23 +446,37 @@ impl<'a> MetadataHasher<'a> {
         let metadata = self.metadata;
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
-            // If specific pallets are given, only include this pallet if it's
-            // in the list.
-            if let Some(specific_pallets) = &self.specific_pallets {
-                if specific_pallets.iter().all(|&p| p != pallet.name()) {
-                    return bytes;
-                }
-            }
+            // If specific pallets are given, only include this pallet if it is in the specific pallets.
+            let should_hash = self
+                .specific_pallets
+                .as_ref()
+                .map(|specific_pallets| specific_pallets.contains(&pallet.name()))
+                .unwrap_or(true);
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
-            xor(bytes, get_pallet_hash(pallet))
+            if should_hash {
+                xor(bytes, get_pallet_hash(pallet))
+            } else {
+                bytes
+            }
         });
 
         let apis_hash = metadata
             .runtime_api_traits()
             .fold([0u8; HASH_LEN], |bytes, api| {
-                // We don't care what order the runtime APIs are seen in, so XOR
-                xor(bytes, get_runtime_trait_hash(api))
+                // If specific runtime APIs are given, only include this pallet if it is in the specific runtime APIs.
+                let should_hash = self
+                    .specific_runtime_apis
+                    .as_ref()
+                    .map(|specific_runtime_apis| specific_runtime_apis.contains(&api.name()))
+                    .unwrap_or(true);
+                // We don't care what order the runtime APIs are seen in, so XOR their
+                // hashes together to be order independent.
+                if should_hash {
+                    xor(bytes, xor(bytes, get_runtime_trait_hash(api)))
+                } else {
+                    bytes
+                }
             });
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
@@ -470,6 +499,7 @@ mod tests {
     struct A {
         pub b: Box<B>,
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     struct B {
@@ -481,6 +511,7 @@ mod tests {
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Composite with TypeDef::Array with Typedef::Primitive.
     struct AccountId32([u8; HASH_LEN]);
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // TypeDef::Variant.
@@ -499,6 +530,7 @@ mod tests {
         // TypeDef::BitSequence.
         BitSeq(BitVec<u8, Lsb0>),
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // Ensure recursive types and TypeDef variants are captured.
@@ -507,6 +539,7 @@ mod tests {
         composite: AccountId32,
         type_def: DigestItem,
     }
+
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // Simulate a PalletCallMetadata.
@@ -632,6 +665,8 @@ mod tests {
     }
 
     #[test]
+    // Redundant clone clippy warning is a lie; https://github.com/rust-lang/rust-clippy/issues/10870
+    #[allow(clippy::redundant_clone)]
     fn pallet_hash_correctness() {
         let compare_pallets_hash = |lhs: &v15::PalletMetadata, rhs: &v15::PalletMetadata| {
             let metadata = pallets_to_metadata(vec![lhs.clone()]);

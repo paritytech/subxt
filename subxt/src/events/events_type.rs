@@ -19,7 +19,7 @@ use std::sync::Arc;
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derivative(Clone(bound = ""))]
 pub struct Events<T: Config> {
     metadata: Metadata,
     block_hash: T::Hash,
@@ -29,6 +29,18 @@ pub struct Events<T: Config> {
     event_bytes: Arc<[u8]>,
     start_idx: usize,
     num_events: u32,
+}
+
+// Ignore the Metadata when debug-logging events; it's big and distracting.
+impl<T: Config> std::fmt::Debug for Events<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Events")
+            .field("block_hash", &self.block_hash)
+            .field("event_bytes", &self.event_bytes)
+            .field("start_idx", &self.start_idx)
+            .field("num_events", &self.num_events)
+            .finish()
+    }
 }
 
 impl<T: Config> Events<T> {
@@ -121,7 +133,7 @@ impl<T: Config> Events<T> {
     // use of it with our `FilterEvents` stuff.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Result<EventDetails, Error>> + Send + Sync + 'static {
+    ) -> impl Iterator<Item = Result<EventDetails<T>, Error>> + Send + Sync + 'static {
         // The event bytes ignoring the compact encoded length on the front:
         let event_bytes = self.event_bytes.clone();
         let metadata = self.metadata.clone();
@@ -133,12 +145,7 @@ impl<T: Config> Events<T> {
             if event_bytes.len() <= pos || num_events == index {
                 None
             } else {
-                match EventDetails::decode_from::<T>(
-                    metadata.clone(),
-                    event_bytes.clone(),
-                    pos,
-                    index,
-                ) {
+                match EventDetails::decode_from(metadata.clone(), event_bytes.clone(), pos, index) {
                     Ok(event_details) => {
                         // Skip over decoded bytes in next iteration:
                         pos += event_details.bytes().len();
@@ -189,7 +196,7 @@ impl<T: Config> Events<T> {
 
 /// The event details.
 #[derive(Debug, Clone)]
-pub struct EventDetails {
+pub struct EventDetails<T: Config> {
     phase: Phase,
     /// The index of the event in the list of events in a given block.
     index: u32,
@@ -205,16 +212,17 @@ pub struct EventDetails {
     // end of everything (fields + topics)
     end_idx: usize,
     metadata: Metadata,
+    topics: Vec<T::Hash>,
 }
 
-impl EventDetails {
+impl<T: Config> EventDetails<T> {
     // Attempt to dynamically decode a single event from our events input.
-    fn decode_from<T: Config>(
+    fn decode_from(
         metadata: Metadata,
         all_bytes: Arc<[u8]>,
         start_idx: usize,
         index: u32,
-    ) -> Result<EventDetails, Error> {
+    ) -> Result<EventDetails<T>, Error> {
         let input = &mut &all_bytes[start_idx..];
 
         let phase = Phase::decode(input)?;
@@ -252,9 +260,8 @@ impl EventDetails {
         // the end of the field bytes.
         let event_fields_end_idx = all_bytes.len() - input.len();
 
-        // topics come after the event data in EventRecord. They aren't used for
-        // anything at the moment, so just decode and throw them away.
-        let _topics = Vec::<T::Hash>::decode(input)?;
+        // topics come after the event data in EventRecord.
+        let topics = Vec::<T::Hash>::decode(input)?;
 
         // what bytes did we skip over in total, including topics.
         let end_idx = all_bytes.len() - input.len();
@@ -269,6 +276,7 @@ impl EventDetails {
             end_idx,
             all_bytes,
             metadata,
+            topics,
         })
     }
 
@@ -341,10 +349,16 @@ impl EventDetails {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
+        let mut fields = event_metadata
+            .variant
+            .fields
+            .iter()
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+
         use scale_decode::DecodeAsFields;
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            &event_metadata.variant.fields,
+            &mut fields,
             self.metadata.types(),
         )?;
 
@@ -356,11 +370,13 @@ impl EventDetails {
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
         let ev_metadata = self.event_metadata();
         if ev_metadata.pallet.name() == E::PALLET && ev_metadata.variant.name == E::EVENT {
-            let decoded = E::decode_as_fields(
-                &mut self.field_bytes(),
-                &ev_metadata.variant.fields,
-                self.metadata.types(),
-            )?;
+            let mut fields = ev_metadata
+                .variant
+                .fields
+                .iter()
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            let decoded =
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
         } else {
             Ok(None)
@@ -384,6 +400,11 @@ impl EventDetails {
             pallet_event_ty,
             &self.metadata,
         )
+    }
+
+    /// Return the topics associated with this event.
+    pub fn topics(&self) -> &[T::Hash] {
+        &self.topics
     }
 }
 
@@ -467,14 +488,21 @@ pub(crate) mod test_utils {
         topics: Vec<<SubstrateConfig as Config>::Hash>,
     }
 
+    impl<E: Encode> EventRecord<E> {
+        /// Create a new event record with the given phase, event, and topics.
+        pub fn new(phase: Phase, event: E, topics: Vec<<SubstrateConfig as Config>::Hash>) -> Self {
+            Self {
+                phase,
+                event: AllEvents::Test(event),
+                topics,
+            }
+        }
+    }
+
     /// Build an EventRecord, which encoded events in the format expected
     /// to be handed back from storage queries to System.Events.
     pub fn event_record<E: Encode>(phase: Phase, event: E) -> EventRecord<E> {
-        EventRecord {
-            phase,
-            event: AllEvents::Test(event),
-            topics: vec![],
-        }
+        EventRecord::new(phase, event, vec![])
     }
 
     /// Build fake metadata consisting of a single pallet that knows
@@ -564,10 +592,12 @@ pub(crate) mod test_utils {
 #[cfg(test)]
 mod tests {
     use super::{
-        test_utils::{event_record, events, events_raw, AllEvents},
+        test_utils::{event_record, events, events_raw, AllEvents, EventRecord},
         *,
     };
+    use crate::SubstrateConfig;
     use codec::Encode;
+    use primitive_types::H256;
     use scale_info::TypeInfo;
     use scale_value::Value;
 
@@ -596,7 +626,7 @@ mod tests {
         // Just for convenience, pass in the metadata type constructed
         // by the `metadata` function above to simplify caller code.
         metadata: &Metadata,
-        actual: EventDetails,
+        actual: EventDetails<SubstrateConfig>,
         expected: TestRawEventDetails,
     ) {
         let types = &metadata.types();
@@ -949,5 +979,37 @@ mod tests {
             },
         );
         assert!(event_details.next().is_none());
+    }
+
+    #[test]
+    fn topics() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo, scale_decode::DecodeAsType)]
+        enum Event {
+            A(u8, bool, Vec<String>),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode our events in the format we expect back from a node, and
+        // construct an Events object to iterate them:
+        let event = Event::A(1, true, vec!["Hi".into()]);
+        let topics = vec![H256::from_low_u64_le(123), H256::from_low_u64_le(456)];
+        let events = events::<Event>(
+            metadata,
+            vec![EventRecord::new(
+                Phase::ApplyExtrinsic(123),
+                event,
+                topics.clone(),
+            )],
+        );
+
+        let ev = events
+            .iter()
+            .next()
+            .expect("one event expected")
+            .expect("event should be extracted OK");
+
+        assert_eq!(topics, ev.topics());
     }
 }

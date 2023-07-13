@@ -13,6 +13,7 @@ use crate::{
     Metadata,
 };
 
+use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::DecodeAsFields;
@@ -119,7 +120,7 @@ where
             } else {
                 match ExtrinsicDetails::decode_from(
                     index as u32,
-                    extrinsics[index].0.clone().into(),
+                    &extrinsics[index].0,
                     client.clone(),
                     hash,
                     cached_events.clone(),
@@ -203,7 +204,7 @@ where
     // Attempt to dynamically decode a single extrinsic from the given input.
     pub(crate) fn decode_from(
         index: u32,
-        extrinsic_bytes: Arc<[u8]>,
+        extrinsic_bytes: &[u8],
         client: C,
         block_hash: T::Hash,
         cached_events: CachedEvents<T>,
@@ -215,11 +216,14 @@ where
 
         let metadata = client.metadata();
 
+        // removing the compact encoded prefix:
+        let bytes: Arc<[u8]> = strip_compact_prefix(extrinsic_bytes)?.1.into();
+
         // Extrinsic are encoded in memory in the following way:
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
-        let first_byte: u8 = Decode::decode(&mut &extrinsic_bytes[..])?;
+        let first_byte: u8 = Decode::decode(&mut &bytes[..])?;
 
         let version = first_byte & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
@@ -229,13 +233,13 @@ where
         let is_signed = first_byte & SIGNATURE_MASK != 0;
 
         // Skip over the first byte which denotes the version and signing.
-        let cursor = &mut &extrinsic_bytes[1..];
+        let cursor = &mut &bytes[1..];
 
         let mut address_start_idx = 0;
         let mut address_end_idx = 0;
 
         if is_signed {
-            address_start_idx = extrinsic_bytes.len() - cursor.len();
+            address_start_idx = bytes.len() - cursor.len();
 
             // Skip over the address, signature and extra fields.
             scale_decode::visitor::decode_with_visitor(
@@ -245,7 +249,7 @@ where
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(scale_decode::Error::from)?;
-            address_end_idx = extrinsic_bytes.len() - cursor.len();
+            address_end_idx = bytes.len() - cursor.len();
 
             scale_decode::visitor::decode_with_visitor(
                 cursor,
@@ -264,17 +268,17 @@ where
             .map_err(scale_decode::Error::from)?;
         }
 
-        let call_start_idx = extrinsic_bytes.len() - cursor.len();
+        let call_start_idx = bytes.len() - cursor.len();
 
         // Decode the pallet index, then the call variant.
-        let cursor = &mut &extrinsic_bytes[call_start_idx..];
+        let cursor = &mut &bytes[call_start_idx..];
 
         let pallet_index: u8 = Decode::decode(cursor)?;
         let variant_index: u8 = Decode::decode(cursor)?;
 
         Ok(ExtrinsicDetails {
             index,
-            bytes: extrinsic_bytes,
+            bytes,
             is_signed,
             address_start_idx,
             address_end_idx,
@@ -382,9 +386,14 @@ where
         let bytes = &mut self.field_bytes();
         let extrinsic_metadata = self.extrinsic_metadata()?;
 
+        let mut fields = extrinsic_metadata
+            .variant
+            .fields
+            .iter()
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
         let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
             bytes,
-            &extrinsic_metadata.variant.fields,
+            &mut fields,
             self.metadata.types(),
         )?;
 
@@ -398,11 +407,13 @@ where
         if extrinsic_metadata.pallet.name() == E::PALLET
             && extrinsic_metadata.variant.name == E::CALL
         {
-            let decoded = E::decode_as_fields(
-                &mut self.field_bytes(),
-                &extrinsic_metadata.variant.fields,
-                self.metadata.types(),
-            )?;
+            let mut fields = extrinsic_metadata
+                .variant
+                .fields
+                .iter()
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            let decoded =
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
         } else {
             Ok(None)
@@ -560,7 +571,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails, Error>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
@@ -710,6 +721,7 @@ mod tests {
         signed: bool,
         name: String,
     }
+
     impl StaticExtrinsic for TestCallExtrinsic {
         const PALLET: &'static str = "Test";
         const CALL: &'static str = "TestCall";
@@ -775,14 +787,8 @@ mod tests {
         let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with empty bytes.
-        let result = ExtrinsicDetails::decode_from(
-            1,
-            vec![].into(),
-            client,
-            H256::random(),
-            Default::default(),
-            ids,
-        );
+        let result =
+            ExtrinsicDetails::decode_from(1, &[], client, H256::random(), Default::default(), ids);
         assert_matches!(result.err(), Some(crate::Error::Codec(_)));
     }
 
@@ -795,7 +801,7 @@ mod tests {
         // Decode with invalid version.
         let result = ExtrinsicDetails::decode_from(
             1,
-            3u8.encode().into(),
+            &vec![3u8].encode(),
             client,
             H256::random(),
             Default::default(),
@@ -834,7 +840,7 @@ mod tests {
         // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
         let extrinsic = ExtrinsicDetails::decode_from(
             1,
-            tx_encoded.encoded()[1..].into(),
+            tx_encoded.encoded(),
             client,
             H256::random(),
             Default::default(),

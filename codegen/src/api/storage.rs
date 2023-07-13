@@ -30,11 +30,12 @@ pub fn generate_storage(
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let Some(storage) = pallet.storage() else {
-        return Ok(quote!())
+        return Ok(quote!());
     };
 
     let storage_fns = storage
         .entries()
+        .iter()
         .map(|entry| {
             generate_storage_entry_fns(type_gen, pallet, entry, crate_path, should_gen_docs)
         })
@@ -104,7 +105,7 @@ fn generate_storage_entry_fns(
     let pallet_name = pallet.name();
     let storage_name = storage_entry.name();
     let Some(storage_hash) = pallet.storage_hash(storage_name) else {
-        return Err(CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into()))
+        return Err(CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into()));
     };
 
     let fn_name = format_ident!("{}", storage_entry.name().to_snake_case());
@@ -157,7 +158,7 @@ fn generate_storage_entry_fns(
     // so expose a function to create this entry, too:
     let root_entry_fn = if is_map_type {
         let fn_name_root = format_ident!("{}_root", fn_name);
-        quote! (
+        quote!(
             #docs
             pub fn #fn_name_root(
                 &self,

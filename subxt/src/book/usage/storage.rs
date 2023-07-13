@@ -16,12 +16,12 @@
 //! We can use the statically generated interface to build storage queries:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
+//! use subxt_signer::sr25519::dev;
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
-//! let account = AccountKeyring::Alice.to_account_id().into();
+//! let account = dev::alice().public_key().into();
 //! let storage_query = polkadot::storage().system().account(&account);
 //! ```
 //!
@@ -29,10 +29,10 @@
 //! validated until it's submitted:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
+//! use subxt_signer::sr25519::dev;
 //! use subxt::dynamic::Value;
 //!
-//! let account = AccountKeyring::Alice.to_account_id();
+//! let account = dev::alice().public_key();
 //! let storage_query = subxt::dynamic::storage("System", "Account", vec![
 //!     Value::from_bytes(account)
 //! ]);
@@ -43,8 +43,6 @@
 //! will only be available on static constructors when iteration is actually possible):
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
-//!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
@@ -75,7 +73,7 @@
 //! latter will only work for storage queries that have a default value when empty):
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_fetch.rs")]
+#![doc = include_str!("../../../examples/storage_fetch.rs")]
 //! ```
 //!
 //! For completeness, below is an example using a dynamic query instead. The return type from a
@@ -83,7 +81,7 @@
 //! [`crate::dynamic::Value`], or else the raw bytes can be accessed instead.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_fetch_dynamic.rs")]
+#![doc = include_str!("../../../examples/storage_fetch_dynamic.rs")]
 //! ```
 //!
 //! ### Iterating storage entries
@@ -92,13 +90,13 @@
 //! iterate over all of the values stored at that location:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_iterating.rs")]
+#![doc = include_str!("../../../examples/storage_iterating.rs")]
 //! ```
 //!
 //! Here's the same logic but using dynamically constructed values instead:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/storage_iterating_dynamic.rs")]
+#![doc = include_str!("../../../examples/storage_iterating_dynamic.rs")]
 //! ```
 //!
 //! ### Advanced

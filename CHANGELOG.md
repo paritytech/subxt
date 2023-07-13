@@ -4,7 +4,126 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.28.0] - 2022-04-11
+## [0.29.0] - 2023-06-01
+
+This is another big release for Subxt with a bunch of awesome changes. Let's talk about some of the notable ones:
+
+### A new guide
+
+This release will come with overhauled documentation and examples which is much more comprehensive than before, and goes into much more detail on each of the main areas that Subxt can work in.
+
+Check out [the documentation](https://docs.rs/subxt/latest/subxt/) for more. We'll continue to build on this with some larger examples, too, going forwards. ([#968](https://github.com/paritytech/subxt/pull/968)) is particularly cool as it's our first example showcasing Subxt working with Yew and WASM; it'll be extended with more documentation and things in the next release.
+
+### A more powerful CLI tool: an `explore` command.
+
+The CLI tool has grown a new command, `explore`. Point it at a node and use `explore` to get information about the calls, constants and storage of a node, with a helpful interface that allows you to progressively dig into each of these areas!
+
+### Support for (unstable) V15 metadata and generating a Runtime API interface
+
+One of the biggest changes in this version is that, given (unstable) V15 metadata, Subxt can now generate a nice interface to make working with Runtime APIs as easy as building extrinsics or storage queries. This is currently unstable until the V15 metadata format is stabilised, and so will break as we introduce more tweaks to the metadata format. We hope to stabilise V15 metadata soon; [see this](https://forum.polkadot.network/t/stablising-v15-metadata/2819) for more information. At this point, we'll stabilize support in Subxt.
+
+### Support for decoding extrinsics
+
+Up until now, you were able to retrieve the bytes for extrinsics, but weren't able to use Subxt to do much with those bytes.
+
+Now, we expose several methods to decode extrinsics that work much like decoding events:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "polkadot_metadata.scale")]
+pub mod polkadot {}
+
+// Get some block:
+let block = api.blocks().at_latest().await?;
+
+// Find and decode a specific extrinsic in the block:
+let remark = block.find::<polkadot::system::calls::Remark>()?;
+
+// Iterate the extrinsics in the block:
+for ext in block.iter() {
+    // Decode a specific extrinsic into the call data:
+    let remark = ext.as_extrinsic::<polkadot::system::calls::Remark>()?;
+    // Decode any extrinsic into an enum containing the call data:
+    let extrinsic = ext.as_root_extrinsic::<polkadot::Call>()?;
+}
+```
+
+### New Metadata Type ([#974](https://github.com/paritytech/subxt/pull/974))
+
+Previously, the `subxt_metadata` crate was simply a collection of functions that worked directly on `frame_metadata` types. Then, in `subxt`, we had a custom metadata type which wrapped this to provide the interface needed by various Subxt internals and traits.
+
+Now, the `subxt_metadata` crate exposes our own `Metadata` type which can be decoded from the same wire format as the `frame_metadata` types we used to use. This type is now used throughout Subxt, as well as in the `codegen` stuff, and provides a single unified interface for working with metadata that is independent of the actual underlying metadata version we're using.
+
+This shouldn't lead to breakages in most code, but if you need to load metadata for an `OfflineClient` you might previously have done this:
+
+```rust
+use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
+use subxt::metadata::Metadata;
+
+let metadata = RuntimeMetadataPrefixed::decode(&mut &*bytes).unwrap();
+let metadata = Metadata::try_from(metadata).unwrap();
+```
+
+But now you'd do this:
+
+```rust
+use subxt::metadata::Metadata;
+
+let metadata = Metadata::decode(&mut &*bytes).unwrap();
+```
+
+Otherwise, if you implement traits like `TxPayload` directly, you'll need to tweak the implementations to use the new `Metadata` type, which exposes everything you used to be able to get hold of but behind a slightly different interface.
+
+### Removing `as_pallet_event` method ([#953](https://github.com/paritytech/subxt/pull/953))
+
+In an effort to simplify the number of ways we have to decode events, `as_pallet_event` was removed. You can achieve a similar thing by calling `as_root_event`, which will decode _any_ event that the static interface knows about into an outer enum of pallet names to event names. if you only care about a specific event, you can match on this enum to look for events from a specific pallet.
+
+Another reason that `as_pallet_event` was removed was that it could potentially decode events from the wrong pallets into what you're looking for, if the event shapes happened to line up, which was a potential foot gun.
+
+### Added `as_root_error` for decoding errors.
+
+Much like we can call `as_root_extrinsic` or `as_root_event` to decode extrinsics and events into a top level enum, we've also added `as_root_error` to do the same for errors and help to make this interface consistent across the board.
+
+Beyond these, there's a bunch more that's been added, fixed and changes. A full list of the notable changes in this release are as follows:
+
+### Added
+
+- Add topics to `EventDetails` ([#989](https://github.com/paritytech/subxt/pull/989))
+- Yew Subxt WASM examples ([#968](https://github.com/paritytech/subxt/pull/968))
+- CLI subxt explore commands ([#950](https://github.com/paritytech/subxt/pull/950))
+- Retain specific runtime APIs ([#961](https://github.com/paritytech/subxt/pull/961))
+- Subxt Guide ([#890](https://github.com/paritytech/subxt/pull/890))
+- Partial fee estimates for SubmittableExtrinsic ([#910](https://github.com/paritytech/subxt/pull/910))
+- Add ability to opt out from default derives and attributes ([#925](https://github.com/paritytech/subxt/pull/925))
+- add no_default_substitutions to the macro and cli ([#936](https://github.com/paritytech/subxt/pull/936))
+- extrinsics: Decode extrinsics from blocks ([#929](https://github.com/paritytech/subxt/pull/929))
+- Metadata V15: Generate Runtime APIs ([#918](https://github.com/paritytech/subxt/pull/918)) and ([#947](https://github.com/paritytech/subxt/pull/947))
+- impl Header and Hasher for some substrate types behind the "substrate-compat" feature flag ([#934](https://github.com/paritytech/subxt/pull/934))
+- add `as_root_error` for helping to decode ModuleErrors ([#930](https://github.com/paritytech/subxt/pull/930))
+
+### Changed
+
+- Update scale-encode, scale-decode and scale-value to latest ([#991](https://github.com/paritytech/subxt/pull/991))
+- restrict sign_with_address_and_signature interface ([#988](https://github.com/paritytech/subxt/pull/988))
+- Introduce Metadata type ([#974](https://github.com/paritytech/subxt/pull/974)) and ([#978](https://github.com/paritytech/subxt/pull/978))
+- Have a pass over metadata validation ([#959](https://github.com/paritytech/subxt/pull/959))
+- remove as_pallet_extrinsic and as_pallet_event ([#953](https://github.com/paritytech/subxt/pull/953))
+- speed up ui tests. ([#944](https://github.com/paritytech/subxt/pull/944))
+- cli: Use WS by default instead of HTTP ([#954](https://github.com/paritytech/subxt/pull/954))
+- Upgrade to `syn 2.0` ([#875](https://github.com/paritytech/subxt/pull/875))
+- Move all deps to workspace toml ([#932](https://github.com/paritytech/subxt/pull/932))
+- Speed up CI ([#928](https://github.com/paritytech/subxt/pull/928)) and ([#926](https://github.com/paritytech/subxt/pull/926))
+- metadata: Use v15 internally ([#912](https://github.com/paritytech/subxt/pull/912))
+- Factor substrate node runner into separate crate ([#913](https://github.com/paritytech/subxt/pull/913))
+- Remove need to import parity-scale-codec to use subxt macro ([#907](https://github.com/paritytech/subxt/pull/907))
+
+### Fixed
+
+- use blake2 for extrinsic hashing ([#921](https://github.com/paritytech/subxt/pull/921))
+- Ensure unique types in codegen ([#967](https://github.com/paritytech/subxt/pull/967))
+- use unit type in polkadot config ([#943](https://github.com/paritytech/subxt/pull/943))
+
+
+## [0.28.0] - 2023-04-11
 
 This is a fairly significant change; what follows is a description of the main changes to be aware of:
 
@@ -111,13 +230,13 @@ That covers the larger changes in this release. For more details, have a look at
 - wait_for_finalized behavior if the tx dropped, usurped or invalid ([#897](https://github.com/paritytech/subxt/pull/897))
 
 
-## [0.27.1] - 2022-02-15
+## [0.27.1] - 2023-02-15
 
 ### Added
 
 - Add `find_last` for block types ([#825](https://github.com/paritytech/subxt/pull/825))
 
-## [0.27.0] - 2022-02-13
+## [0.27.0] - 2023-02-13
 
 This is a fairly small release, primarily to bump substrate dependencies to their latest versions.
 
@@ -135,7 +254,7 @@ Note worthy PRs merged since the last release:
 - Remove unneeded Config bounds and BlockNumber associated type ([#804](https://github.com/paritytech/subxt/pull/804))
 
 
-## [0.26.0] - 2022-01-24
+## [0.26.0] - 2023-01-24
 
 This release adds a number of improvements, most notably:
 

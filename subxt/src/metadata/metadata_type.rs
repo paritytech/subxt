@@ -59,6 +59,13 @@ impl From<subxt_metadata::Metadata> for Metadata {
     }
 }
 
+impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for Metadata {
+    type Error = subxt_metadata::TryFromError;
+    fn try_from(value: frame_metadata::RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
+        subxt_metadata::Metadata::try_from(value).map(Metadata::from)
+    }
+}
+
 impl codec::Decode for Metadata {
     fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
         subxt_metadata::Metadata::decode(input).map(Metadata::new)

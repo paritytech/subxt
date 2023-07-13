@@ -22,8 +22,6 @@
 //! We can use the statically generated interface to build runtime calls:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
-//!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
@@ -33,10 +31,8 @@
 //! Alternately, we can dynamically construct a runtime call:
 //!
 //! ```rust,no_run
-//! use sp_keyring::AccountKeyring;
 //! use subxt::dynamic::Value;
 //!
-//! let account = AccountKeyring::Alice.to_account_id();
 //! let runtime_call = subxt::dynamic::runtime_api_call(
 //!     "Metadata",
 //!     "metadata_versions",
@@ -58,7 +54,7 @@
 //! The easiest way to make a runtime API call is to use the statically generated interface.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_static.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_static.rs")]
 //! ```
 //!
 //! ### Making a dynamic Runtime API call
@@ -67,7 +63,7 @@
 //! [`crate::dynamic::runtime_api_call`] method.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_dynamic.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_dynamic.rs")]
 //! ```
 //!
 //! ### Making a raw call
@@ -77,6 +73,6 @@
 //! the argument bytes and manually provide a type for the response bytes to be decoded into.
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../../examples/examples/runtime_apis_raw.rs")]
+#![doc = include_str!("../../../examples/runtime_apis_raw.rs")]
 //! ```
 //!

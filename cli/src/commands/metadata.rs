@@ -7,7 +7,7 @@ use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-use std::io::{self, Write};
+use std::{io::Write, path::PathBuf};
 use subxt_metadata::Metadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
@@ -32,9 +32,12 @@ pub struct Opts {
     /// when using the option.
     #[clap(long, use_value_delimiter = true, value_parser)]
     runtime_apis: Option<Vec<String>>,
+    /// Write the output of the metadata command to the provided file path.
+    #[clap(long, short, value_parser)]
+    pub output_file: Option<PathBuf>,
 }
 
-pub async fn run(opts: Opts) -> color_eyre::Result<()> {
+pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
     let bytes = opts.file_or_url.fetch().await?;
     let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
@@ -69,20 +72,26 @@ pub async fn run(opts: Opts) -> color_eyre::Result<()> {
         }
     }
 
+    let mut output: Box<dyn Write> = match opts.output_file {
+        Some(path) => Box::new(std::fs::File::create(path)?),
+        None => Box::new(output),
+    };
+
     match opts.format.as_str() {
         "json" => {
             let json = serde_json::to_string_pretty(&metadata)?;
-            println!("{json}");
+            write!(output, "{json}")?;
             Ok(())
         }
         "hex" => {
-            let hex_data = format!("0x{:?}", hex::encode(metadata.encode()));
-            println!("{hex_data}");
+            let hex_data = format!("0x{}", hex::encode(metadata.encode()));
+            write!(output, "{hex_data}")?;
             Ok(())
         }
         "bytes" => {
             let bytes = metadata.encode();
-            Ok(io::stdout().write_all(&bytes)?)
+            output.write_all(&bytes)?;
+            Ok(())
         }
         _ => Err(eyre::eyre!(
             "Unsupported format `{}`, expected `json`, `hex` or `bytes`",

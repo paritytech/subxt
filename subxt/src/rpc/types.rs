@@ -110,20 +110,8 @@ pub type ConsensusEngineId = [u8; 4];
 pub type EncodedJustification = Vec<u8>;
 
 /// Bytes representing an extrinsic in a [`ChainBlock`].
-#[derive(Clone, Debug)]
-pub struct ChainBlockExtrinsic(pub Vec<u8>);
-
-impl<'a> ::serde::Deserialize<'a> for ChainBlockExtrinsic {
-    fn deserialize<D>(de: D) -> Result<Self, D::Error>
-    where
-        D: ::serde::Deserializer<'a>,
-    {
-        let r = impl_serde::serialize::deserialize(de)?;
-        let bytes = Decode::decode(&mut &r[..])
-            .map_err(|e| ::serde::de::Error::custom(format!("Decode error: {e}")))?;
-        Ok(ChainBlockExtrinsic(bytes))
-    }
-}
+#[derive(Clone, Debug, Deserialize)]
+pub struct ChainBlockExtrinsic(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -239,6 +227,8 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 ///
 /// This is copied from `sp-transaction-pool` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
+///
+/// Substrate produces `camelCase` events, while smoldot produces `CamelCase` events.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SubstrateTxStatus<Hash, BlockHash> {

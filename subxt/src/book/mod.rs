@@ -64,7 +64,7 @@
 //! accounts, Alice to Bob:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../examples/examples/tx_basic.rs")]
+#![doc = include_str!("../../examples/tx_basic.rs")]
 //! ```
 //!
 //! This example assumes that a Polkadot node is running locally (Subxt endeavors to support all

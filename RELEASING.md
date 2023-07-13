@@ -26,7 +26,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
-4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-metadata`, `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `integration-tests`, `test-runtime`, `ui-tests`.
+4.  Bump the crate versions in the root `Cargo.toml` to whatever was decided in step 2 (basically a find and replace from old version to new version in this file should do the trick).
 
 5.  Ensure the `Cargo.lock` file is up to date.
 
@@ -65,7 +65,6 @@ We also assume that ongoing work done is being merged directly to the `master` b
     2.  Perform a final sanity check that everything looks ok.
 
         ```
-        cargo hack --exclude-all-features --each-feature check --all-targets --workspace
         cargo test --all-targets
         ```
 
@@ -77,11 +76,9 @@ We also assume that ongoing work done is being merged directly to the `master` b
             (cd codegen && cargo publish) && \
             (cd macro && cargo publish) && \
             (cd subxt && cargo publish) && \
+            (cd signer && cargo publish) && \
             (cd cli && cargo publish);
         ```
-
-        If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
-        you may just need to wait a little longer and then run the remaining portion of that command.
 
 10. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
