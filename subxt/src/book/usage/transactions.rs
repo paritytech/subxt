@@ -107,10 +107,10 @@
 //! #
 //! # // Test that these all impl Signer trait while we're here:
 //! #
-//! # fn as_signer(_signer: impl subxt::tx::Signer) {}
-//! # as_signer(subxt_signer::sr25519::dev::alice());
-//! # as_signer(subxt_signer::ecdsa::dev::alice());
-//! # as_signer(PairSigner::<PolkadotConfig,_>::new(alice));
+//! # fn is_subxt_signer(_signer: impl subxt::tx::Signer<PolkadotConfig>) {}
+//! # is_subxt_signer(subxt_signer::sr25519::dev::alice());
+//! # is_subxt_signer(subxt_signer::ecdsa::dev::alice());
+//! # is_subxt_signer(PairSigner::<PolkadotConfig,_>::new(sp_keyring::AccountKeyring::Alice.pair()));
 //! ```
 //!
 //! See the `subxt_signer` crate or the [`sp_core::Pair`] docs for more ways to construct
