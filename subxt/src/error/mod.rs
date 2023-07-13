@@ -13,7 +13,7 @@ pub use crate::client::LightClientError;
 
 // Re-export dispatch error types:
 pub use dispatch_error::{
-    ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
+    ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
 
 // Re-expose the errors we use from other crates here:
