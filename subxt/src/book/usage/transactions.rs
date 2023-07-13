@@ -65,7 +65,7 @@
 //!
 //! There are two main ways to create a compatible signer instance:
 //! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
-//! for chains which require sr25519 signatures (requires the `subxt` feature to be enabled).
+//! for chains which require sr25519 or ecdsa signatures (requires the `subxt` feature to be enabled).
 //! 2. Alternately, Subxt can use instances of Substrate's [`sp_core::Pair`] to sign things by wrapping
 //! them in a [`crate::tx::PairSigner`] (requires the `substrate-compat` feature to be enabled).
 //!
@@ -104,9 +104,16 @@
 //! let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
 //!     .expect("valid URI");
 //! let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
+//! #
+//! # // Test that these all impl Signer trait while we're here:
+//! #
+//! # fn as_signer(_signer: impl subxt::tx::Signer) {}
+//! # as_signer(subxt_signer::sr25519::dev::alice());
+//! # as_signer(subxt_signer::ecdsa::dev::alice());
+//! # as_signer(PairSigner::<PolkadotConfig,_>::new(alice));
 //! ```
 //!
-//! See the `subxt_signer::sr25519::Keypair` or the [`sp_core::Pair`] docs for more ways to construct
+//! See the `subxt_signer` crate or the [`sp_core::Pair`] docs for more ways to construct
 //! and work with key pairs.
 //!
 //! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
