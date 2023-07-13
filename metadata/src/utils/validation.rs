@@ -246,14 +246,11 @@ fn get_outer_enums_hash(
     enums: &OuterEnumsMetadata,
     only_these_variants: Option<&[&str]>,
 ) -> [u8; HASH_LEN] {
-    let mut visited_ids = HashSet::<u32>::new();
-
     /// Hash the provided enum type.
     fn get_enum_hash(
         registry: &PortableRegistry,
         id: u32,
         only_these_variants: Option<&[&str]>,
-        visited_ids: &mut HashSet<u32>,
     ) -> [u8; HASH_LEN] {
         let ty = registry
             .types
@@ -261,32 +258,17 @@ fn get_outer_enums_hash(
             .expect("Metadata should contain enum type in registry");
 
         if let TypeDef::Variant(variant) = &ty.ty.type_def {
-            get_type_def_variant_hash(registry, variant, only_these_variants, visited_ids)
+            get_type_def_variant_hash(registry, variant, only_these_variants, &mut HashSet::new())
         } else {
-            get_type_hash(registry, id, visited_ids)
+            get_type_hash(registry, id, &mut HashSet::new())
         }
     }
 
-    let call_hash = get_enum_hash(
-        registry,
-        enums.call_enum_ty,
-        only_these_variants,
-        &mut visited_ids,
-    );
+    let call_hash = get_enum_hash(registry, enums.call_enum_ty, only_these_variants);
 
-    let event_hash = get_enum_hash(
-        registry,
-        enums.event_enum_ty,
-        only_these_variants,
-        &mut visited_ids,
-    );
+    let event_hash = get_enum_hash(registry, enums.event_enum_ty, only_these_variants);
 
-    let error_hash = get_enum_hash(
-        registry,
-        enums.error_enum_ty,
-        only_these_variants,
-        &mut visited_ids,
-    );
+    let error_hash = get_enum_hash(registry, enums.error_enum_ty, only_these_variants);
 
     concat_and_hash3(&call_hash, &event_hash, &error_hash)
 }
@@ -517,8 +499,6 @@ impl<'a> MetadataHasher<'a> {
 
     /// Hash the given metadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        let mut visited_ids = HashSet::<u32>::new();
-
         let metadata = self.metadata;
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
@@ -556,7 +536,8 @@ impl<'a> MetadataHasher<'a> {
             });
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
-        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
+        let runtime_hash =
+            get_type_hash(&metadata.types, metadata.runtime_ty(), &mut HashSet::new());
         let outer_enums_hash = get_outer_enums_hash(
             &metadata.types,
             &metadata.outer_enums(),
