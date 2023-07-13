@@ -109,7 +109,7 @@ impl Keypair {
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
         Ok(Self(secp256k1::KeyPair::from_secret_key(
-            &SECP256K1, &secret,
+            SECP256K1, &secret,
         )))
     }
 
