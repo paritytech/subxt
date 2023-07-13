@@ -399,7 +399,7 @@ where
         }
     }
 
-    /// Attempt to decode these [`ExtrinsicDetails`] into a outer call enum type (which includes
+    /// Attempt to decode these [`ExtrinsicDetails`] into an outer call enum type (which includes
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
     pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
