@@ -358,17 +358,7 @@ fn generate_runtime_error_type(
         .iter()
         .filter_map(|pallet| {
             let Some(pallet_error) = &pallet.error else { return None };
-
-            let error_ty = metadata
-                .types
-                .resolve(pallet_error.ty.id)
-                .expect("Error type is present in the metadata; qed");
-
-            // Note: the type name is the name of the type as it appears in substrate, we cannot
-            // accurately reproduce it when it contains more than 1 generic.
-            // The first generic is always the `Runtime`, the others represent instances.
-            let instances = ",Instance".repeat(error_ty.type_params.len() - 1);
-            let path = format!("{}<Runtime{}>", error_ty.path, instances);
+            let path = format!("{}Error", pallet.name);
 
             Some(scale_info::Variant {
                 name: pallet.name.clone(),
