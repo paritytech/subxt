@@ -673,7 +673,7 @@ mod tests {
             meta_type::<()>(),
             vec![],
             OuterEnums {
-                call_enum_ty: meta_type::<()>(),
+                call_enum_ty: meta_type::<RuntimeCall>(),
                 event_enum_ty: meta_type::<()>(),
                 error_enum_ty: meta_type::<()>(),
             },
