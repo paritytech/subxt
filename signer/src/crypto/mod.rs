@@ -10,5 +10,4 @@ mod seed_from_entropy;
 
 pub use derive_junction::DeriveJunction;
 pub use secret_uri::{SecretUri, SecretUriError, DEV_PHRASE};
-#[allow(dead_code)]
 pub use seed_from_entropy::seed_from_entropy;
