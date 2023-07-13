@@ -217,7 +217,7 @@ fn get_extrinsic_hash(
 
     // Get the hashes of the extrinsic type.
     let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut visited_ids);
-    // The `RuntimeCall` type is intentionally emitted and hashed by the outer enums instead.
+    // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
     let signature_hash = get_type_hash(registry, extrinsic.signature_ty, &mut visited_ids);
     let extra_hash = get_type_hash(registry, extrinsic.extra_ty, &mut visited_ids);
 
