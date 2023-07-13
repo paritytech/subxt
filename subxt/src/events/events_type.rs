@@ -204,6 +204,8 @@ pub struct EventDetails<T: Config> {
     all_bytes: Arc<[u8]>,
     // start of the bytes (phase, pallet/variant index and then fields and then topic to follow).
     start_idx: usize,
+    // start of the event (ie pallet/variant index and then the fields and topic after).
+    event_start_idx: usize,
     // start of the fields (ie after phase and pallet/variant index).
     event_fields_start_idx: usize,
     // end of the fields.
@@ -225,6 +227,8 @@ impl<T: Config> EventDetails<T> {
         let input = &mut &all_bytes[start_idx..];
 
         let phase = Phase::decode(input)?;
+
+        let event_start_idx = all_bytes.len() - input.len();
 
         let pallet_index = u8::decode(input)?;
         let variant_index = u8::decode(input)?;
@@ -267,6 +271,7 @@ impl<T: Config> EventDetails<T> {
             phase,
             index,
             start_idx,
+            event_start_idx,
             event_fields_start_idx,
             event_fields_end_idx,
             end_idx,
@@ -383,7 +388,7 @@ impl<T: Config> EventDetails<T> {
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
     pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, Error> {
-        let bytes = &self.all_bytes[self.start_idx + 1..self.event_fields_end_idx];
+        let bytes = &self.all_bytes[self.event_start_idx..self.event_fields_end_idx];
 
         let decoded = E::decode_as_type(
             &mut &bytes[..],
@@ -519,7 +524,7 @@ pub(crate) mod test_utils {
             vec![],
             OuterEnums {
                 call_enum_ty: meta_type::<()>(),
-                event_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<AllEvents<E>>(),
                 error_enum_ty: meta_type::<()>(),
             },
             CustomMetadata {
