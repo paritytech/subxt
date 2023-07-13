@@ -11,7 +11,7 @@ mod multi_signature;
 mod static_type;
 mod wrapper_opaque;
 
-use codec::{Decode, Encode};
+use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 
 pub use account_id::AccountId32;
@@ -33,6 +33,14 @@ impl codec::Encode for Encoded {
     fn encode(&self) -> Vec<u8> {
         self.0.to_owned()
     }
+}
+
+/// Decodes a compact encoded value from the beginning of the provided bytes,
+/// returning the value and any remaining bytes.
+pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> {
+    let cursor = &mut &*bytes;
+    let val = <Compact<u64>>::decode(cursor)?;
+    Ok((val.0, *cursor))
 }
 
 /// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
