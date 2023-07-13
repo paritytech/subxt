@@ -1,13 +1,12 @@
 use futures::StreamExt;
 use std::fmt::Write;
-use subxt::{self, Config, OnlineClient, PolkadotConfig};
-use subxt::tx::{SubmittableExtrinsic, PartialExtrinsic};
+use subxt::{self, OnlineClient, PolkadotConfig};
+use subxt::tx::{PartialExtrinsic};
 use yew::{AttrValue, Callback};
 use js_sys::{Promise};
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use subxt::client::OfflineClientT;
 use subxt::ext::codec::Encode;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -85,8 +84,6 @@ pub(crate) async fn subscribe_to_finalized_blocks(
 extern "C" {
     #[wasm_bindgen(js_name = getAccounts)]
     pub fn js_get_accounts() -> Promise;
-    #[wasm_bindgen(js_name = signHexMessage)]
-    pub fn js_sign_hex_message(hex_message: String, source: String, address: String) -> Promise;
     #[wasm_bindgen(js_name = signPayload)]
     pub fn js_sign_payload(payload: String, source: String, address: String) -> Promise;
 }
@@ -115,39 +112,6 @@ pub async fn get_accounts() -> Result<Vec<Account>, anyhow::Error> {
     Ok(accounts)
 }
 
-pub async fn sign_hex_message(
-    hex_message: String,
-    source: String,
-    address: String,
-) -> Result<String, anyhow::Error> {
-    let result = JsFuture::from(js_sign_hex_message(hex_message, source, address))
-        .await
-        .map_err(|js_err| anyhow!("{js_err:?}"))?;
-    let result_string = result
-        .as_string()
-        .ok_or(anyhow!("Error converting JsValue into String"))?;
-    Ok(result_string)
-}
-
-//
-// #[derive(Clone, Debug, Serialize, Deserialize)]
-// #[serde(rename_all = "camelCase")]
-// pub struct SignerPayloadForJS {
-//     pub spec_version: String,
-//     pub transaction_version: String,
-//     pub address: String,
-//     pub block_hash: String,
-//     pub block_number: String,
-//     pub era: String,
-//     pub genesis_hash: String,
-//     pub method: String,
-//     pub nonce: String,
-//     pub signed_extensions: Vec<String>,
-//     pub tip: String,
-//     pub version: usize,
-// }
-
-
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
 }
@@ -156,6 +120,8 @@ fn encode_to_hex<E: Encode>(input: &E) -> String {
     format!("0x{}", hex::encode(input.encode()))
 }
 
+/// this is used because numeric types (e.g. u32) are encoded as little-endian via scale (e.g. 9430 -> d6240000)
+/// while we need a big-endian representation for the json (e.g. 9430 -> 000024d6).
 fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
     let mut bytes = input.encode();
     bytes.reverse();
@@ -181,7 +147,7 @@ pub async fn extension_signature_for_partial_extrinsic(
         "specVersion": spec_version,
         "transactionVersion": transaction_version,
         "address": account_address,
-        "blockHash": genesis_hash,
+        "blockHash": genesis_hash, // immortal
         "blockNumber": "0x00000000", // immortal
         "era": "0x0000", // immortal
         "genesisHash": genesis_hash,

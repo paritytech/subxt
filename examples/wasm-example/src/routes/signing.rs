@@ -1,9 +1,9 @@
-use std::fmt::Debug;
+
 use anyhow::anyhow;
 use futures::FutureExt;
-use serde::Deserialize;
+
 use subxt::{OnlineClient, PolkadotConfig};
-use subxt::dynamic::Value;
+
 use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::SubmittableExtrinsic;
 use subxt::utils::{AccountId32, MultiSignature};
@@ -11,7 +11,7 @@ use subxt::tx::TxPayload;
 
 use web_sys::{HtmlInputElement};
 use yew::prelude::*;
-use crate::services::{Account, extension_signature_for_partial_extrinsic, get_accounts, polkadot, sign_hex_message};
+use crate::services::{Account, extension_signature_for_partial_extrinsic, get_accounts, polkadot};
 
 pub struct SigningExamplesComponent {
     message: String,
@@ -137,15 +137,6 @@ impl Component for SigningExamplesComponent {
                     ctx.link()
                         .send_future(
                             async move {
-                                // let polkadot_js_signed = {
-                                //     let signed_extrinsic_hex = "0xb9018400d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d014e6dc8f9439b93886e88e83e5d6f7f8b67f8411ca37b79e8c68fe0159520cf1a3d9efce3baf75726a1bfab50c01e5dbccf82dcce6a6646b68e83e6605795028500000000001448656c6c6f";
-                                //     let tx_bytes = hex::decode(&signed_extrinsic_hex[2..]).unwrap();
-                                //     SubmittableExtrinsic::from_bytes(api.clone(), tx_bytes)
-                                // };
-                                // let dry_res = polkadot_js_signed.dry_run(None).await;
-                                // web_sys::console::log_1(&format!("polkadot_js_signed dry res: {:?}", dry_res).into());
-                                // Message::ReceivedSignature("signature".into(), polkadot_js_signed)
-
                                 let partial_extrinsic =
                                     match api.tx().create_partial_signed(&remark_call, &account_id, Default::default()).await {
                                         Ok(partial_extrinsic) => partial_extrinsic,
@@ -154,81 +145,20 @@ impl Component for SigningExamplesComponent {
                                         }
                                     };
 
-
-
-                                fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-                                    format!("0x{}", hex::encode(bytes.as_ref()))
-                                }
-
-                                fn encode_to_hex<E: Encode>(input: &E) -> String {
-                                    format!("0x{}", hex::encode(input.encode()))
-                                }
-
-                                fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
-                                    let mut bytes = input.encode();
-                                    bytes.reverse();
-                                    format!("0x{}", hex::encode(bytes))
-                                }
-
-
-                                // check the payload (debug)
-                                let params = &partial_extrinsic.additional_and_extra_params;
-                                // web_sys::console::log_1(&format!("params.genesis_hash: {:?}", params.genesis_hash).into());
-                                // web_sys::console::log_1(&format!("params.era: {:?}", params.era).into());
-                                //
-                                // web_sys::console::log_1(&format!("spec_version: {:?} {:?}", &partial_extrinsic.additional_and_extra_params.spec_version, encode_to_hex_reverse(&partial_extrinsic.additional_and_extra_params.spec_version)).into());
-
-                                // api.metadata().extrinsic().signed_extensions().iter().map(|e| e.identifier())
-
-                                // let js_payload = SignerPayloadForJS {
-                                //     spec_version: encode_to_hex_reverse(&params.spec_version),
-                                //     transaction_version: encode_to_hex_reverse(&partial_extrinsic.additional_and_extra_params.transaction_version),
-                                //     address: account_address.clone(),
-                                //     block_hash: encode_to_hex(&params.genesis_hash),
-                                //     block_number: "0x00000000".into(), // immortal
-                                //     era: "0x0000".into(), // immortal
-                                //     genesis_hash: encode_to_hex(&params.genesis_hash),
-                                //     method: to_hex(partial_extrinsic.call_data()),
-                                //     nonce: encode_to_hex_reverse(&params.nonce),
-                                //     signed_extensions: vec![
-                                //         "CheckNonZeroSender",
-                                //         "CheckSpecVersion",
-                                //         "CheckTxVersion",
-                                //         "CheckGenesis",
-                                //         "CheckMortality",
-                                //         "CheckNonce",
-                                //         "CheckWeight",
-                                //         "ChargeTransactionPayment",
-                                //         "PrevalidateAttests",
-                                //     ].into_iter().map(|s| s.to_string()).collect::<Vec<_>>(),
-                                //     tip: "0x00000000000000000000000000000000".into(),
-                                //     version: 4,
-                                // };
-                                //
-                                // let Ok(signature) = sign_payload(js_payload, account_source, account_address).await else {
-                                //     return Message::Error(anyhow!("Signing via extension failed"));
-                                // };
-
-
                                 let Ok(signature) = extension_signature_for_partial_extrinsic(&partial_extrinsic, &api, account_source, account_address).await else {
                                     return Message::Error(anyhow!("Signing via extension failed"));
                                 };
 
-                                // web_sys::console::log_1(&format!("signature: {}", &signature).into());
-                                //
-                                // // these are 65 bytes: 01 for the Sr25519 variant and 64 bytes after that.
-                                // let signature_bytes = hex::decode(&signature[2..]).unwrap();
-                                // the deafult for the polkadot
                                 let Ok(multi_signature) = MultiSignature::decode(&mut &signature[..]) else {
                                     return Message::Error(anyhow!("MultiSignature Decoding"));
                                 };
-                                web_sys::console::log_1(&format!("multi_signature: {:?}", &multi_signature).into());
-
 
                                 let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
-                                web_sys::console::log_1(&format!("signed_extrinsic hex: {:?}", hex::encode(signed_extrinsic.encoded())).into());
+
+                                // do a dry run (to debug in the js console if the extrinsic would work)
                                 let dry_res = signed_extrinsic.dry_run(None).await;
-                                web_sys::console::log_1(&format!("dry res: {:?}", dry_res).into());
+                                web_sys::console::log_1(&format!("Dry Run Result: {:?}", dry_res).into());
+
                                 // return the signature and signed extrinsic
                                 Message::ReceivedSignature(multi_signature, signed_extrinsic)
                             }
@@ -253,7 +183,7 @@ impl Component for SigningExamplesComponent {
                     };
 
                     ctx.link().send_future(async move {
-                        match submit_wait_finalized_and_get_remark_event(signed_extrinsic).await {
+                        match submit_wait_finalized_and_get_extrinsic_success_event(signed_extrinsic).await {
                             Ok(remark_event) => Message::ExtrinsicFinalized { remark_event },
                             Err(err) => Message::ExtrinsicFailed(err)
                         }
@@ -288,7 +218,7 @@ impl Component for SigningExamplesComponent {
         let message_html: Html = match &self.stage {
             SigningStage::Error(_) | SigningStage::EnterMessage | SigningStage::CreatingOnlineClient => html!(<></>),
             _ => {
-                let remark_call = polkadot::tx().system().remark(self.message.as_bytes().to_vec());
+                let _remark_call = polkadot::tx().system().remark(self.message.as_bytes().to_vec());
                 html!(
                     <div>
                         <div class="mb">
@@ -331,7 +261,6 @@ impl Component for SigningExamplesComponent {
             }
             SigningStage::EnterMessage => {
                 let get_accounts_click = ctx.link().callback(|_| Message::RequestAccounts);
-                let hex_message = format!("0x{}", hex::encode(&self.message));
                 let on_input = ctx.link().callback(move |event: InputEvent| {
                     let input_element = event.target_dyn_into::<HtmlInputElement>().unwrap();
                     let value = input_element.value();
@@ -421,7 +350,7 @@ impl Component for SigningExamplesComponent {
     }
 }
 
-async fn submit_wait_finalized_and_get_remark_event(extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
+async fn submit_wait_finalized_and_get_extrinsic_success_event(extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
     let events = extrinsic.submit_and_watch()
         .await?
         .wait_for_finalized_success()
