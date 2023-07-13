@@ -306,7 +306,7 @@ where
 pub struct PartialExtrinsic<T: Config, C> {
     client: C,
     call_data: Vec<u8>,
-    /// todo!()
+    /// Extrinsic params (Additional and Extra)
     pub additional_and_extra_params: T::ExtrinsicParams,
 }
 
