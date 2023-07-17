@@ -167,7 +167,7 @@ pub mod tests {
     async fn test_commands() {
         // show pallets:
         let output = simulate_run("").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    Staking\n    System\n");
+        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    ParaInherent\n    Staking\n    System\n    Timestamp\n");
         // if incorrect pallet, error:
         let output = simulate_run("abc123").await;
         assert!(output.is_err());

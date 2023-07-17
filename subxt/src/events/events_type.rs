@@ -14,6 +14,7 @@ use crate::{
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
+use scale_decode::DecodeAsType;
 use std::sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
@@ -386,20 +387,16 @@ impl<T: Config> EventDetails<T> {
     /// Attempt to decode these [`EventDetails`] into a root event type (which includes
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
-    pub fn as_root_event<E: RootEvent>(&self) -> Result<E, Error> {
-        let ev_metadata = self.event_metadata();
-        let pallet_bytes = &self.all_bytes[self.event_start_idx + 1..self.event_fields_end_idx];
-        let pallet_event_ty = ev_metadata
-            .pallet
-            .event_ty_id()
-            .ok_or_else(|| MetadataError::EventTypeNotFoundInPallet(ev_metadata.pallet.index()))?;
+    pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let bytes = &self.all_bytes[self.event_start_idx..self.event_fields_end_idx];
 
-        E::root_event(
-            pallet_bytes,
-            self.pallet_name(),
-            pallet_event_ty,
-            &self.metadata,
-        )
+        let decoded = E::decode_as_type(
+            &mut &bytes[..],
+            self.metadata.outer_enums().event_enum_ty(),
+            self.metadata.types(),
+        )?;
+
+        Ok(decoded)
     }
 
     /// Return the topics associated with this event.
@@ -414,32 +411,17 @@ pub struct EventMetadataDetails<'a> {
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
-/// This trait is implemented on the statically generated root event type, so that we're able
-/// to decode it properly via a pallet event that impls `DecodeAsMetadata`. This is necessary
-/// becasue the "root event" type is generated using pallet info but doesn't actually exist in the
-/// metadata types, so we have no easy way to decode things into it via type information and need a
-/// little help via codegen.
-#[doc(hidden)]
-pub trait RootEvent: Sized {
-    /// Given details of the pallet event we want to decode, and the name of the pallet, try to hand
-    /// back a "root event".
-    fn root_event(
-        pallet_bytes: &[u8],
-        pallet_name: &str,
-        pallet_event_ty: u32,
-        metadata: &Metadata,
-    ) -> Result<Self, Error>;
-}
-
 /// Event related test utilities used outside this module.
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
-    use crate::metadata::DecodeWithMetadata;
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
-        v15::{ExtrinsicMetadata, PalletEventMetadata, PalletMetadata, RuntimeMetadataV15},
+        v15::{
+            CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletEventMetadata, PalletMetadata,
+            RuntimeMetadataV15,
+        },
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
@@ -458,25 +440,6 @@ pub(crate) mod test_utils {
     )]
     pub enum AllEvents<Ev> {
         Test(Ev),
-    }
-
-    // We need this in order to be able to decode into a root event type:
-    impl<Ev: DecodeWithMetadata> RootEvent for AllEvents<Ev> {
-        fn root_event(
-            mut bytes: &[u8],
-            pallet_name: &str,
-            pallet_event_ty: u32,
-            metadata: &Metadata,
-        ) -> Result<Self, Error> {
-            if pallet_name == "Test" {
-                return Ok(AllEvents::Test(Ev::decode_with_metadata(
-                    &mut bytes,
-                    pallet_event_ty,
-                    metadata,
-                )?));
-            }
-            panic!("Asked for pallet name '{pallet_name}', which isn't in our test AllEvents type")
-        }
     }
 
     /// This encodes to the same format an event is expected to encode to
@@ -546,12 +509,28 @@ pub(crate) mod test_utils {
         }];
 
         let extrinsic = ExtrinsicMetadata {
-            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<RuntimeCall>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
         };
 
-        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let meta = RuntimeMetadataV15::new(
+            pallets,
+            extrinsic,
+            meta_type::<()>(),
+            vec![],
+            OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<AllEvents<E>>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            CustomMetadata {
+                map: Default::default(),
+            },
+        );
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::new(runtime_metadata.try_into().unwrap())
