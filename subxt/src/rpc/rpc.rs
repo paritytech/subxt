@@ -365,6 +365,15 @@ impl<T: Config> Rpc<T> {
         Ok(res)
     }
 
+    /// Provide a list of the supported metadata versions of the node.
+    pub async fn metadata_versions(&self) -> Result<Vec<u32>, Error> {
+        let versions = self
+            .state_call("Metadata_metadata_versions", None, None)
+            .await?;
+
+        Ok(versions)
+    }
+
     /// Execute runtime API call and return the specified runtime metadata version.
     pub async fn metadata_at_version(&self, version: u32) -> Result<Metadata, Error> {
         let param = version.encode();

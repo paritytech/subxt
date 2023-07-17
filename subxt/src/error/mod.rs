@@ -13,7 +13,7 @@ pub use crate::client::LightClientError;
 
 // Re-export dispatch error types:
 pub use dispatch_error::{
-    ArithmeticError, DispatchError, ModuleError, RawModuleError, TokenError, TransactionalError,
+    ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
 
 // Re-expose the errors we use from other crates here:
@@ -224,16 +224,4 @@ pub enum MetadataError {
     /// The generated interface used is not compatible with the node.
     #[error("The generated code is not compatible with the node")]
     IncompatibleCodegen,
-}
-
-/// This trait is implemented on the statically generated root ModuleError type
-#[doc(hidden)]
-pub trait RootError: Sized {
-    /// Given details of the pallet error we want to decode
-    fn root_error(
-        // typically a [u8; 4] encodes the error of a pallet
-        pallet_bytes: &[u8],
-        pallet_name: &str,
-        metadata: &Metadata,
-    ) -> Result<Self, Error>;
 }

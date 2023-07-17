@@ -5,7 +5,8 @@
 //! Utility functions to generate a subset of the metadata.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, PalletMetadataInner, RuntimeApiMetadataInner, StorageEntryType,
+    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
+    StorageEntryType,
 };
 use scale_info::TypeDef;
 use std::collections::{BTreeMap, HashSet};
@@ -82,7 +83,10 @@ fn update_pallet_types(pallet: &mut PalletMetadataInner, map_ids: &BTreeMap<u32,
 
 /// Collect all type IDs needed to represent the extrinsic metadata.
 fn collect_extrinsic_types(extrinsic: &ExtrinsicMetadata, type_ids: &mut HashSet<u32>) {
-    type_ids.insert(extrinsic.ty);
+    type_ids.insert(extrinsic.address_ty);
+    type_ids.insert(extrinsic.call_ty);
+    type_ids.insert(extrinsic.signature_ty);
+    type_ids.insert(extrinsic.extra_ty);
 
     for signed in &extrinsic.signed_extensions {
         type_ids.insert(signed.extra_ty);
@@ -92,7 +96,10 @@ fn collect_extrinsic_types(extrinsic: &ExtrinsicMetadata, type_ids: &mut HashSet
 
 /// Update all type IDs of the provided extrinsic metadata using the new type IDs from the portable registry.
 fn update_extrinsic_types(extrinsic: &mut ExtrinsicMetadata, map_ids: &BTreeMap<u32, u32>) {
-    update_type(&mut extrinsic.ty, map_ids);
+    update_type(&mut extrinsic.address_ty, map_ids);
+    update_type(&mut extrinsic.call_ty, map_ids);
+    update_type(&mut extrinsic.signature_ty, map_ids);
+    update_type(&mut extrinsic.extra_ty, map_ids);
 
     for signed in &mut extrinsic.signed_extensions {
         update_type(&mut signed.extra_ty, map_ids);
@@ -122,6 +129,20 @@ fn update_runtime_api_types(apis: &mut [RuntimeApiMetadataInner], map_ids: &BTre
     }
 }
 
+/// Collect the outer enums type IDs.
+fn collect_outer_enums(enums: &OuterEnumsMetadata, type_ids: &mut HashSet<u32>) {
+    type_ids.insert(enums.call_enum_ty);
+    type_ids.insert(enums.event_enum_ty);
+    type_ids.insert(enums.error_enum_ty);
+}
+
+/// Update all the type IDs for outer enums.
+fn update_outer_enums(enums: &mut OuterEnumsMetadata, map_ids: &BTreeMap<u32, u32>) {
+    update_type(&mut enums.call_enum_ty, map_ids);
+    update_type(&mut enums.event_enum_ty, map_ids);
+    update_type(&mut enums.error_enum_ty, map_ids);
+}
+
 /// Update the given type using the new type ID from the portable registry.
 ///
 /// # Panics
@@ -136,36 +157,34 @@ fn update_type(ty: &mut u32, map_ids: &BTreeMap<u32, u32>) {
     *ty = new_id;
 }
 
-/// Strip any pallets out of the RuntimeCall type that aren't the ones we want to keep.
-/// The RuntimeCall type is referenced in a bunch of places, so doing this prevents us from
-/// holding on to stuff in pallets we've asked not to keep.
-fn retain_pallets_in_runtime_call_type<F>(metadata: &mut Metadata, mut filter: F)
+/// Retain the enum type identified by ID and keep only the variants that
+/// match the provided filter.
+fn retain_variants_in_enum_type<F>(metadata: &mut Metadata, id: u32, mut filter: F)
 where
     F: FnMut(&str) -> bool,
 {
-    let extrinsic_ty = metadata
+    let ty = metadata
         .types
         .types
-        .get_mut(metadata.extrinsic.ty as usize)
-        .expect("Metadata should contain extrinsic type in registry");
+        .get_mut(id as usize)
+        .expect("Metadata should contain enum type in registry");
 
-    let Some(call_ty) = extrinsic_ty.ty.type_params
-        .iter_mut()
-        .find(|ty| ty.name == "Call")
-        .and_then(|ty| ty.ty) else { return; };
-
-    let call_ty = metadata
-        .types
-        .types
-        .get_mut(call_ty.id as usize)
-        .expect("Metadata should contain Call type information");
-
-    let TypeDef::Variant(variant) = &mut call_ty.ty.type_def else {
-        panic!("Metadata Call type is expected to be a variant type");
+    let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
+        panic!("Metadata type is expected to be a variant type");
     };
 
-    // Remove all variants from the call type that aren't the pallet(s) we want to keep.
+    // Remove all variants from the type that aren't the pallet(s) we want to keep.
     variant.variants.retain(|v| filter(&v.name));
+}
+
+/// Strip any pallets out of the outer enum types that aren't the ones we want to keep.
+fn retain_pallets_in_runtime_outer_types<F>(metadata: &mut Metadata, mut filter: F)
+where
+    F: FnMut(&str) -> bool,
+{
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.call_enum_ty, &mut filter);
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.event_enum_ty, &mut filter);
+    retain_variants_in_enum_type(metadata, metadata.outer_enums.error_enum_ty, &mut filter);
 }
 
 /// Generate a subset of the metadata that contains only the
@@ -190,10 +209,13 @@ pub fn retain_metadata<F, G>(
 {
     let mut type_ids = HashSet::new();
 
-    // There is a special RuntimeCall type which points to all pallets and call types by default.
+    // There are special outer enum types that point to all pallets types (call, error, event) by default.
     // This brings in a significant chunk of types. We trim this down to only include variants
     // for the pallets we're retaining, to avoid this.
-    retain_pallets_in_runtime_call_type(metadata, &mut pallets_filter);
+    retain_pallets_in_runtime_outer_types(metadata, &mut pallets_filter);
+
+    // Collect the stripped outer enums.
+    collect_outer_enums(&metadata.outer_enums, &mut type_ids);
 
     // Filter our pallet list to only those pallets we want to keep. Keep hold of all
     // type IDs in the pallets we're keeping. Retain all, if no filter specified.
@@ -245,6 +267,7 @@ pub fn retain_metadata<F, G>(
     let map_ids = metadata.types.retain(|id| type_ids.contains(&id));
 
     // And finally, we can go and update all of our type IDs in the metadata as a result of this:
+    update_outer_enums(&mut metadata.outer_enums, &map_ids);
     for pallets in metadata.pallets.values_mut() {
         update_pallet_types(pallets, &map_ids);
     }
@@ -257,6 +280,7 @@ pub fn retain_metadata<F, G>(
 mod tests {
     use super::*;
     use crate::Metadata;
+    use assert_matches::assert_matches;
     use codec::Decode;
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
@@ -281,6 +305,7 @@ mod tests {
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in metadata_cache.pallets() {
             let mut metadata = metadata_cache.clone();
+
             retain_metadata(
                 &mut metadata,
                 |pallet_name| pallet_name == pallet.name(),
@@ -292,6 +317,21 @@ mod tests {
                 &*metadata.pallets.get_by_index(0).unwrap().name,
                 pallet.name()
             );
+
+            let id = metadata.outer_enums().call_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.call_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
+
+            let id = metadata.outer_enums().error_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.error_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
+
+            let id = metadata.outer_enums().event_enum_ty;
+            let ty = metadata.types.resolve(id).unwrap();
+            let num_variants = if pallet.event_ty_id().is_some() { 1 } else { 0 };
+            assert_matches!(&ty.type_def, TypeDef::Variant(variant) if variant.variants.len() == num_variants);
         }
     }
 
