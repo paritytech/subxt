@@ -269,12 +269,10 @@ async fn storage_total_issuance() {
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob_signer = dev::bob();
     let bob: AccountId32 = dev::bob().public_key().into();
-    let charlie: AccountId32 = dev::charlie().public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
     let tx = node_runtime::tx().staking().bond(
-        charlie.into(),
         100_000_000_000_000,
         runtime_types::pallet_staking::RewardDestination::Stash,
     );

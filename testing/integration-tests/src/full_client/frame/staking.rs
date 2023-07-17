@@ -35,27 +35,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
 }
 
 #[tokio::test]
-async fn validate_with_controller_account() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let alice = dev::alice();
-
-    let tx = node_runtime::tx()
-        .staking()
-        .validate(default_validator_prefs());
-
-    api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await
-        .expect("should be successful");
-}
-
-#[tokio::test]
-async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
+async fn validate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -65,9 +45,29 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
         .staking()
         .validate(default_validator_prefs());
 
+    api.tx()
+        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .expect("should be successful");
+}
+
+#[tokio::test]
+async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = dev::alice();
+
+    let tx = node_runtime::tx()
+        .staking()
+        .validate(default_validator_prefs());
+
     let announce_validator = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -80,28 +80,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
 }
 
 #[tokio::test]
-async fn nominate_with_controller_account() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let alice = dev::alice();
-    let bob = dev::bob();
-
-    let tx = node_runtime::tx()
-        .staking()
-        .nominate(vec![bob.public_key().to_address()]);
-
-    api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await
-        .expect("should be successful");
-}
-
-#[tokio::test]
-async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
+async fn nominate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -112,9 +91,30 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob.public_key().to_address()]);
 
+    api.tx()
+        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .expect("should be successful");
+}
+
+#[tokio::test]
+async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let alice = dev::alice();
+    let bob = dev::bob();
+
+    let tx = node_runtime::tx()
+        .staking()
+        .nominate(vec![bob.public_key().to_address()]);
+
     let nomination = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+        .sign_and_submit_then_watch_default(&tx, &alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -129,7 +129,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
 }
 
 #[tokio::test]
-async fn chill_works_for_controller_only() -> Result<(), Error> {
+async fn chill_works_for_stash_only() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -142,14 +142,14 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob_stash.public_key().to_address()]);
     api.tx()
-        .sign_and_submit_then_watch_default(&nominate_tx, &alice)
+        .sign_and_submit_then_watch_default(&nominate_tx, &alice_stash)
         .await?
         .wait_for_finalized_success()
         .await?;
 
     let ledger_addr = node_runtime::storage()
         .staking()
-        .ledger(alice.public_key().to_account_id());
+        .ledger(alice_stash.public_key().to_account_id());
     let ledger = api
         .storage()
         .at_latest()
@@ -163,7 +163,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
     let chill = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, &alice_stash)
+        .sign_and_submit_then_watch_default(&chill_tx, &alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -176,7 +176,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
     let is_chilled = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, &alice)
+        .sign_and_submit_then_watch_default(&chill_tx, &alice_stash)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -193,11 +193,9 @@ async fn tx_bond() -> Result<(), Error> {
 
     let alice = dev::alice();
 
-    let bond_tx = node_runtime::tx().staking().bond(
-        dev::bob().public_key().into(),
-        100_000_000_000_000,
-        RewardDestination::Stash,
-    );
+    let bond_tx = node_runtime::tx()
+        .staking()
+        .bond(100_000_000_000_000, RewardDestination::Stash);
 
     let bond = api
         .tx()
