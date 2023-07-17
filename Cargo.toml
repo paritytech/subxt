@@ -17,7 +17,8 @@ members = [
 # exclusive feature flags and thus can't compile with the
 # workspace:
 exclude = [
-    "testing/wasm-tests",
+    "testing/wasm-rpc-tests",
+    "testing/wasm-lightclient-tests",
     "signer/wasm-tests",
     "examples/wasm-example"
 ]
