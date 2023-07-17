@@ -265,7 +265,9 @@ jobs:
 
             - name: Run subxt WASM tests
               run: |
-                  substrate --dev /dev/null 2>&1 &
+                  # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
+                  # `node-key` provides a deterministic p2p address.
+                  substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
                   pkill substrate
