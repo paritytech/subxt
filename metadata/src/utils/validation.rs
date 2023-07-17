@@ -744,6 +744,36 @@ mod tests {
     }
 
     #[test]
+    /// Ensure ABB and ABA have a different structure:
+    fn do_not_reuse_visited_type_ids() {
+        #[derive(scale_info::TypeInfo)]
+        struct ABA{
+            ab: (A,B),
+            other: A,
+        }
+
+        #[derive(scale_info::TypeInfo)]
+        struct ABB{
+            ab: (A,B),
+            other: B,
+        }
+
+        let metadata_hash_with_type = |ty|{
+            let mut pallets = build_default_pallets();
+            pallets[0].calls = Some(v15::PalletCallMetadata {
+                ty
+            });
+            let metadata = pallets_to_metadata(pallets);
+            MetadataHasher::new(&metadata).hash()
+        };
+
+        let aba_hash = metadata_hash_with_type(meta_type::<ABA>());
+        let abb_hash = metadata_hash_with_type(meta_type::<ABB>());
+
+        assert_neq!(aba_hash, abb_hash);
+    }
+
+    #[test]
     // Redundant clone clippy warning is a lie; https://github.com/rust-lang/rust-clippy/issues/10870
     #[allow(clippy::redundant_clone)]
     fn pallet_hash_correctness() {
