@@ -5,9 +5,9 @@
 //! Default platform for WASM environments.
 
 #[cfg(feature = "web")]
-mod default;
+mod wasm_helpers;
 #[cfg(feature = "web")]
-mod wasm;
+mod wasm_platform;
 #[cfg(feature = "web")]
 mod wasm_socket;
 
@@ -30,7 +30,7 @@ mod helpers {
 
 #[cfg(feature = "web")]
 mod helpers {
-    use super::default::SubxtPlatform as Platform;
+    use super::wasm_platform::SubxtPlatform as Platform;
 
     pub type PlatformType = Platform;
 

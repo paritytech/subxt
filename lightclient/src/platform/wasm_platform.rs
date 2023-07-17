@@ -11,11 +11,9 @@ use smoldot_light::platform::{
 };
 use std::{io::IoSlice, pin::Pin};
 
-use super::wasm as platform_impl;
+use super::wasm_helpers::{StreamReadBuffer, StreamWriteBuffer};
 
-use platform_impl::{StreamReadBuffer, StreamWriteBuffer};
-
-/// Subxt plaform implementation for native and wasm.
+/// Subxt plaform implementation for wasm.
 ///
 /// This implementation is a conversion of the implementation from the smoldot:
 /// https://github.com/smol-dot/smoldot/blob/f49ce4ea6a325c444ab6ad37d3ab5558edf0d541/light-base/src/platform/default.rs#L52.
@@ -31,11 +29,11 @@ impl SubxtPlatform {
 }
 
 impl PlatformRef for SubxtPlatform {
-    type Delay = platform_impl::Delay;
+    type Delay = super::wasm_helpers::Delay;
     type Yield = future::Ready<()>;
-    type Instant = platform_impl::Instant;
+    type Instant = super::wasm_helpers::Instant;
     type Connection = std::convert::Infallible;
-    type Stream = platform_impl::Stream;
+    type Stream = super::wasm_helpers::Stream;
     type ConnectFuture = future::BoxFuture<
         'static,
         Result<PlatformConnection<Self::Stream, Self::Connection>, ConnectError>,
@@ -45,15 +43,15 @@ impl PlatformRef for SubxtPlatform {
         future::Pending<Option<(Self::Stream, PlatformSubstreamDirection)>>;
 
     fn now_from_unix_epoch(&self) -> Duration {
-        platform_impl::now_from_unix_epoch()
+        super::wasm_helpers::now_from_unix_epoch()
     }
 
     fn now(&self) -> Self::Instant {
-        platform_impl::now()
+        super::wasm_helpers::now()
     }
 
     fn sleep(&self, duration: Duration) -> Self::Delay {
-        platform_impl::sleep(duration)
+        super::wasm_helpers::sleep(duration)
     }
 
     fn sleep_until(&self, when: Self::Instant) -> Self::Delay {
@@ -96,7 +94,7 @@ impl PlatformRef for SubxtPlatform {
                 });
             }
 
-            platform_impl::connect(proto1, proto2, proto3).await
+            super::wasm_helpers::connect(proto1, proto2, proto3).await
         })
     }
 
@@ -286,7 +284,7 @@ impl PlatformRef for SubxtPlatform {
     }
 
     fn spawn_task(&self, _: std::borrow::Cow<str>, task: future::BoxFuture<'static, ()>) {
-        platform_impl::spawn(task);
+        super::wasm_helpers::spawn(task);
     }
 
     fn client_name(&self) -> std::borrow::Cow<str> {
