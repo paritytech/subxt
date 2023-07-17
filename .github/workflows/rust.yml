@@ -19,7 +19,7 @@ concurrency:
 env:
     CARGO_TERM_COLOR: always
     # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
     WASM_BINDGEN_TEST_TIMEOUT: 60
 
@@ -47,7 +47,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Install cargo-hack
               uses: baptiste0928/cargo-install@v2
@@ -96,7 +96,7 @@ jobs:
                   components: rustfmt
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Cargo fmt
               uses: actions-rs/cargo@v1.0.3
@@ -127,7 +127,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Check internal documentation links
               run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
@@ -161,7 +161,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Install cargo-nextest
               run: cargo install cargo-nextest
@@ -175,7 +175,7 @@ jobs:
     nonwasm_light_client_tests:
         name: "Test Light Client"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 15
+        timeout-minutes: 25
         steps:
             - name: Checkout sources
               uses: actions/checkout@v3
@@ -196,7 +196,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@988c164c3d0e93c4dbab36aaf5bbeb77425b2894 # v2.4.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Run tests
               uses: actions-rs/cargo@v1.0.3
@@ -228,7 +228,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Run clippy
               uses: actions-rs/cargo@v1
@@ -253,7 +253,7 @@ jobs:
               uses: browser-actions/setup-chrome@latest
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@2656b87321093db1cb55fbd73183d195214fdfd1 # v2.5.0
+              uses: Swatinem/rust-cache@dd05243424bd5c0e585e4b55eb2d7615cdd32f1f # v2.5.1
 
             - name: Download Substrate
               run: |
