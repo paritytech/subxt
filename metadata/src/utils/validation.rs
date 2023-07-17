@@ -5,10 +5,10 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata,
-    StorageEntryMetadata, StorageEntryType,
+    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadata, RuntimeApiMetadata,
+    RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
-use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, Variant};
+use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
 use std::collections::HashSet;
 
 /// Predefined value to be returned when we already visited a type.
@@ -104,6 +104,30 @@ fn get_variant_hash(
     concat_and_hash2(&variant_name_bytes, &variant_field_bytes)
 }
 
+fn get_type_def_variant_hash(
+    registry: &PortableRegistry,
+    variant: &TypeDefVariant<PortableForm>,
+    only_these_variants: Option<&[&str]>,
+    visited_ids: &mut HashSet<u32>,
+) -> [u8; HASH_LEN] {
+    let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
+    let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
+        // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
+        // as long as all of the names+types are there. XOR to not care about ordering.
+        let should_hash = only_these_variants
+            .as_ref()
+            .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
+            .unwrap_or(true);
+
+        if should_hash {
+            xor(bytes, get_variant_hash(registry, var, visited_ids))
+        } else {
+            bytes
+        }
+    });
+    concat_and_hash2(&variant_id_bytes, &variant_field_bytes)
+}
+
 /// Obtain the hash representation of a `scale_info::TypeDef`.
 fn get_type_def_hash(
     registry: &PortableRegistry,
@@ -125,14 +149,7 @@ fn get_type_def_hash(
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
         TypeDef::Variant(variant) => {
-            let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
-            let variant_field_bytes =
-                variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
-                    // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
-                    // as long as all of the names+types are there. XOR to not care about ordering.
-                    xor(bytes, get_variant_hash(registry, var, visited_ids))
-                });
-            concat_and_hash2(&variant_id_bytes, &variant_field_bytes)
+            get_type_def_variant_hash(registry, variant, None, visited_ids)
         }
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
@@ -198,8 +215,16 @@ fn get_extrinsic_hash(
 ) -> [u8; HASH_LEN] {
     let mut visited_ids = HashSet::<u32>::new();
 
-    let mut bytes = concat_and_hash2(
-        &get_type_hash(registry, extrinsic.ty, &mut visited_ids),
+    // Get the hashes of the extrinsic type.
+    let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut visited_ids);
+    // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
+    let signature_hash = get_type_hash(registry, extrinsic.signature_ty, &mut visited_ids);
+    let extra_hash = get_type_hash(registry, extrinsic.extra_ty, &mut visited_ids);
+
+    let mut bytes = concat_and_hash4(
+        &address_hash,
+        &signature_hash,
+        &extra_hash,
         &[extrinsic.version; 32],
     );
 
@@ -213,6 +238,39 @@ fn get_extrinsic_hash(
     }
 
     bytes
+}
+
+/// Obtain the hash representation of the `frame_metadata::v15::OuterEnums`.
+fn get_outer_enums_hash(
+    registry: &PortableRegistry,
+    enums: &OuterEnumsMetadata,
+    only_these_variants: Option<&[&str]>,
+) -> [u8; HASH_LEN] {
+    /// Hash the provided enum type.
+    fn get_enum_hash(
+        registry: &PortableRegistry,
+        id: u32,
+        only_these_variants: Option<&[&str]>,
+    ) -> [u8; HASH_LEN] {
+        let ty = registry
+            .types
+            .get(id as usize)
+            .expect("Metadata should contain enum type in registry");
+
+        if let TypeDef::Variant(variant) = &ty.ty.type_def {
+            get_type_def_variant_hash(registry, variant, only_these_variants, &mut HashSet::new())
+        } else {
+            get_type_hash(registry, id, &mut HashSet::new())
+        }
+    }
+
+    let call_hash = get_enum_hash(registry, enums.call_enum_ty, only_these_variants);
+
+    let event_hash = get_enum_hash(registry, enums.event_enum_ty, only_these_variants);
+
+    let error_hash = get_enum_hash(registry, enums.error_enum_ty, only_these_variants);
+
+    concat_and_hash3(&call_hash, &event_hash, &error_hash)
 }
 
 /// Get the hash corresponding to a single storage entry.
@@ -441,8 +499,6 @@ impl<'a> MetadataHasher<'a> {
 
     /// Hash the given metadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        let mut visited_ids = HashSet::<u32>::new();
-
         let metadata = self.metadata;
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
@@ -480,9 +536,21 @@ impl<'a> MetadataHasher<'a> {
             });
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
-        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut visited_ids);
+        let runtime_hash =
+            get_type_hash(&metadata.types, metadata.runtime_ty(), &mut HashSet::new());
+        let outer_enums_hash = get_outer_enums_hash(
+            &metadata.types,
+            &metadata.outer_enums(),
+            self.specific_pallets.as_deref(),
+        );
 
-        concat_and_hash4(&pallet_hash, &apis_hash, &extrinsic_hash, &runtime_hash)
+        concat_and_hash5(
+            &pallet_hash,
+            &apis_hash,
+            &extrinsic_hash,
+            &runtime_hash,
+            &outer_enums_hash,
+        )
     }
 }
 
@@ -552,9 +620,12 @@ mod tests {
 
     fn build_default_extrinsic() -> v15::ExtrinsicMetadata {
         v15::ExtrinsicMetadata {
-            ty: meta_type::<()>(),
             version: 0,
             signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<()>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
         }
     }
 
@@ -597,6 +668,14 @@ mod tests {
             build_default_extrinsic(),
             meta_type::<()>(),
             vec![],
+            v15::OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            v15::CustomMetadata {
+                map: Default::default(),
+            },
         )
         .try_into()
         .expect("can build valid metadata")

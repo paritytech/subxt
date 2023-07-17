@@ -19,7 +19,7 @@ concurrency:
 env:
     CARGO_TERM_COLOR: always
     # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
 
 jobs:
     build:
@@ -169,7 +169,7 @@ jobs:
     nonwasm_light_client_tests:
         name: "Test Light Client"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 15
+        timeout-minutes: 25
         steps:
             - name: Checkout sources
               uses: actions/checkout@v3
