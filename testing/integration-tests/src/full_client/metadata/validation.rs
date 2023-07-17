@@ -4,8 +4,9 @@
 
 use crate::{node_runtime, test_context, TestContext};
 use frame_metadata::v15::{
-    ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, PalletStorageMetadata,
-    RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletCallMetadata, PalletMetadata,
+    PalletStorageMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
+    StorageEntryType,
 };
 use scale_info::{
     build::{Fields, Variants},
@@ -76,12 +77,23 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
     v15_to_metadata(RuntimeMetadataV15::new(
         pallets,
         ExtrinsicMetadata {
-            ty: meta_type::<ExtrinsicType<RuntimeCall>>(),
             version: 0,
             signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<RuntimeCall>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
         },
         meta_type::<()>(),
         vec![],
+        OuterEnums {
+            call_enum_ty: meta_type::<()>(),
+            event_enum_ty: meta_type::<()>(),
+            error_enum_ty: meta_type::<()>(),
+        },
+        CustomMetadata {
+            map: Default::default(),
+        },
     ))
 }
 

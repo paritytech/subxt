@@ -24,6 +24,7 @@ thiserror = { workspace = true }
 bitvec = { workspace = true, features = ["alloc"] }
 criterion = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
+assert_matches = { workspace = true }
 
 [lib]
 # Without this, libtest cli opts interfere with criteron benches:

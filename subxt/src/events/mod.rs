@@ -11,12 +11,7 @@ mod events_type;
 
 use codec::{Decode, Encode};
 pub use events_client::EventsClient;
-pub use events_type::{
-    EventDetails,
-    Events,
-    // Used in codegen but hidden from docs:
-    RootEvent,
-};
+pub use events_type::{EventDetails, Events};
 use scale_decode::DecodeAsFields;
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.

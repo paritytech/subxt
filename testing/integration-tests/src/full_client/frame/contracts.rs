@@ -22,10 +22,12 @@ struct ContractsTestContext {
 type Hash = <SubstrateConfig as Config>::Hash;
 type AccountId = <SubstrateConfig as Config>::AccountId;
 
+/// A dummy contract which does nothing at all.
 const CONTRACT: &str = r#"
     (module
-        (func (export "call"))
+        (import "env" "memory" (memory 1 1))
         (func (export "deploy"))
+        (func (export "call"))
     )
 "#;
 
