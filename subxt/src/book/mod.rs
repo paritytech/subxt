@@ -73,7 +73,7 @@
 //!
 //! 1. [Generate an interface](setup::codegen)
 //! 2. [Create a config](setup::config)
-//! 2. [Use the config to instantiate the client](setup::client)
+//! 3. [Use the config to instantiate the client](setup::client)
 //!
 //! Follow the above links to learn more about each step.
 //!

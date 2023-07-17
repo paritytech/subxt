@@ -58,7 +58,7 @@
 //!
 //! In this example we use the _uniques_ pallet of the polkadot asset hub parachain.
 //! The dev account _alice_ creates an NFT collection, then mints an NFT that is part of the collection.
-//! Beware that this example can take up to a minute to run. Specify the port like so:
+//! Beware that this example can take up to a minute to run.
 //! ```txt
 //! cargo run --bin submit_transaction
 //! ```
