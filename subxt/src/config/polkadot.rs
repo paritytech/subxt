@@ -18,7 +18,6 @@ pub use primitive_types::{H256, U256};
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {
-    type Index = <SubstrateConfig as Config>::Index;
     type Hash = <SubstrateConfig as Config>::Hash;
     type AccountId = <SubstrateConfig as Config>::AccountId;
     type Address = MultiAddress<Self::AccountId, ()>;
