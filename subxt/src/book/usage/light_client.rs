@@ -8,6 +8,7 @@
 //! to the P2P network and behaving similarly to a full node.
 //!
 //! To enable this functionality, the unstable-light-client feature flag needs to be enabled.
+//! To enable light client for WASM environments, also enable the web feature flag.
 //!
 //! To connect to a blockchain network, the Light Client requires a trusted sync state of the network, named "chain spec".
 //! This can be obtained by making a `sync_state_genSyncSpec` RPC call to a trusted node.
