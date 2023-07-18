@@ -187,7 +187,7 @@ fn get_type_def_hash(
 }
 
 /// indicates whether a hash has been fully computed for a type or not
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum CachedHash {
     /// hash not known yet, but computation has already started
     Recursive,
@@ -584,7 +584,7 @@ mod tests {
     use super::*;
     use bitvec::{order::Lsb0, vec::BitVec};
     use frame_metadata::v15;
-    use scale_info::meta_type;
+    use scale_info::{meta_type, Registry};
 
     // Define recursive types.
     #[allow(dead_code)]
@@ -768,23 +768,23 @@ mod tests {
         assert_eq!(hash, hash_swap);
     }
 
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    struct Aba {
+        ab: (A, B),
+        other: A,
+    }
+
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    struct Abb {
+        ab: (A, B),
+        other: B,
+    }
+
     #[test]
     /// Ensure ABB and ABA have a different structure:
     fn do_not_reuse_visited_type_ids() {
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct Aba {
-            ab: (A, B),
-            other: A,
-        }
-
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct Abb {
-            ab: (A, B),
-            other: B,
-        }
-
         let metadata_hash_with_type = |ty| {
             let mut pallets = build_default_pallets();
             pallets[0].calls = Some(v15::PalletCallMetadata { ty });
@@ -796,6 +796,25 @@ mod tests {
         let abb_hash = metadata_hash_with_type(meta_type::<Abb>());
 
         assert_ne!(aba_hash, abb_hash);
+    }
+
+    #[test]
+    fn hash_cache_gets_filled_with_correct_hashes() {
+        let mut registry = Registry::new();
+        let a_type_id = registry.register_type(&meta_type::<A>()).id;
+        let b_type_id = registry.register_type(&meta_type::<B>()).id;
+        let registry: PortableRegistry = registry.into();
+
+        let mut cache = HashMap::new();
+
+        let a_hash = get_type_hash(&registry, a_type_id, &mut cache);
+        let b_hash = get_type_hash(&registry, b_type_id, &mut cache);
+
+        let CachedHash::Hash(a_cache_hash) = cache[&a_type_id] else { panic!() };
+        let CachedHash::Hash(b_cache_hash) = cache[&b_type_id] else { panic!() };
+
+        assert_eq!(a_hash, a_cache_hash);
+        assert_eq!(b_hash, b_cache_hash);
     }
 
     #[test]
