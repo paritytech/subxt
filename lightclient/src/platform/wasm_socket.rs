@@ -7,10 +7,9 @@ use send_wrapper::SendWrapper;
 use wasm_bindgen::{prelude::*, JsCast};
 
 use std::{
-    cell::RefCell,
     collections::VecDeque,
     pin::Pin,
-    rc::Rc,
+    sync::{Arc, Mutex},
     task::Poll,
     task::{Context, Waker},
 };
@@ -24,11 +23,11 @@ pub enum Error {
 /// Websocket for WASM environments.
 ///
 /// This is a rust-based wrapper around browser's WebSocket API.
+///
+// Warning: It is not safe to have `Clone` on this structure.
 pub struct WasmSocket {
     /// Inner data shared between `poll` and web_sys callbacks.
-    ///
-    /// This is safe in wasm environments.
-    inner: SendWrapper<Rc<RefCell<InnerWasmSocket>>>,
+    inner: Arc<Mutex<InnerWasmSocket>>,
     /// This implements `Send` and panics if the value is accessed
     /// or dropped from another thread.
     ///
@@ -84,16 +83,16 @@ impl WasmSocket {
 
         socket.set_binary_type(web_sys::BinaryType::Arraybuffer);
 
-        let inner = Rc::new(RefCell::new(InnerWasmSocket {
+        let inner = Arc::new(Mutex::new(InnerWasmSocket {
             state: ConnectionState::Connecting,
             data: VecDeque::with_capacity(16384),
             waker: None,
         }));
 
         let open_callback = Closure::<dyn FnMut()>::new({
-            let inner = Rc::clone(&inner);
+            let inner = inner.clone();
             move || {
-                let mut inner = inner.borrow_mut();
+                let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Opened;
 
                 if let Some(waker) = inner.waker.take() {
@@ -104,13 +103,13 @@ impl WasmSocket {
         socket.set_onopen(Some(open_callback.as_ref().unchecked_ref()));
 
         let message_callback = Closure::<dyn FnMut(_)>::new({
-            let inner = Rc::clone(&inner);
+            let inner = inner.clone();
             move |event: web_sys::MessageEvent| {
                 let Ok(buffer) = event.data().dyn_into::<js_sys::ArrayBuffer>() else {
                     panic!("Unexpected data format {:?}", event.data());
                 };
 
-                let mut inner = inner.borrow_mut();
+                let mut inner = inner.lock().expect("Mutex is poised; qed");
                 let bytes = js_sys::Uint8Array::new(&buffer).to_vec();
                 inner.data.extend(bytes.into_iter());
 
@@ -122,10 +121,10 @@ impl WasmSocket {
         socket.set_onmessage(Some(message_callback.as_ref().unchecked_ref()));
 
         let error_callback = Closure::<dyn FnMut(_)>::new({
-            let inner = Rc::clone(&inner);
+            let inner = inner.clone();
             move |_| {
                 // Callback does not provide useful information, signal it back to the stream.
-                let mut inner = inner.borrow_mut();
+                let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Error;
 
                 if let Some(waker) = inner.waker.take() {
@@ -136,9 +135,9 @@ impl WasmSocket {
         socket.set_onerror(Some(error_callback.as_ref().unchecked_ref()));
 
         let close_callback = Closure::<dyn FnMut(_)>::new({
-            let inner = Rc::clone(&inner);
+            let inner = inner.clone();
             move |_| {
-                let mut inner = inner.borrow_mut();
+                let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Closed;
 
                 if let Some(waker) = inner.waker.take() {
@@ -156,7 +155,7 @@ impl WasmSocket {
         );
 
         Ok(Self {
-            inner: SendWrapper::new(inner),
+            inner,
             socket: SendWrapper::new(socket),
             _callbacks: SendWrapper::new(callbacks),
         })
@@ -169,7 +168,7 @@ impl AsyncRead for WasmSocket {
         cx: &mut Context<'_>,
         buf: &mut [u8],
     ) -> Poll<Result<usize, io::Error>> {
-        let mut inner = self.inner.borrow_mut();
+        let mut inner = self.inner.lock().expect("Mutex is poised; qed");
         inner.waker = Some(cx.waker().clone());
 
         match inner.state {
@@ -199,7 +198,7 @@ impl AsyncWrite for WasmSocket {
         cx: &mut Context<'_>,
         buf: &[u8],
     ) -> Poll<Result<usize, io::Error>> {
-        let mut inner = self.inner.borrow_mut();
+        let mut inner = self.inner.lock().expect("Mutex is poised; qed");
         inner.waker = Some(cx.waker().clone());
 
         match inner.state {
@@ -229,7 +228,7 @@ impl AsyncWrite for WasmSocket {
 
 impl Drop for WasmSocket {
     fn drop(&mut self) {
-        let inner = self.inner.borrow_mut();
+        let inner = self.inner.lock().expect("Mutex is poised; qed");
 
         if inner.state == ConnectionState::Opened {
             let _ = self.socket.close();
