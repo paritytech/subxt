@@ -227,8 +227,6 @@ pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 ///
 /// This is copied from `sp-transaction-pool` to avoid a dependency on that crate. Therefore it
 /// must be kept compatible with that type from the target substrate version.
-///
-/// Substrate produces `camelCase` events, while smoldot produces `CamelCase` events.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum SubstrateTxStatus<Hash, BlockHash> {

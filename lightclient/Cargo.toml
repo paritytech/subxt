@@ -1,0 +1,86 @@
+[package]
+name = "subxt-lightclient"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "../README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Light Client for chain interaction"
+keywords = ["parity", "substrate", "blockchain"]
+
+[features]
+default = ["native"]
+
+# Enable this for native (ie non web/wasm builds).
+# Exactly 1 of "web" and "native" is expected.
+native = [
+    "smoldot-light/std",
+    "tokio-stream",
+    "tokio/sync",
+    "tokio/rt",
+    "futures-util",
+]
+
+# Enable this for web/wasm builds.
+# Exactly 1 of "web" and "native" is expected.
+web = [
+    "getrandom/js",
+
+    "smoldot",
+    "smoldot-light",
+    "tokio-stream",
+    "tokio/sync",
+    "futures-util",
+
+    # For the light-client platform.
+    "wasm-bindgen-futures",
+	"futures-timer/wasm-bindgen",
+    "instant/wasm-bindgen",
+
+    # For websocket.
+    "js-sys",
+    "send_wrapper",
+    "web-sys",
+    "wasm-bindgen",
+]
+
+[dependencies]
+futures = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+# Light client support:
+smoldot = { workspace = true, optional = true }
+smoldot-light = { workspace = true, optional = true }
+either = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+tokio-stream = { workspace = true, optional = true }
+futures-util = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
+send_wrapper = { workspace = true, optional = true }
+web-sys = { workspace = true, optional = true }
+wasm-bindgen = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+futures-timer = { workspace = true, optional = true }
+instant = { workspace = true, optional = true }
+tokio-util = { workspace = true, optional = true }
+
+# Included if "web" feature is enabled, to enable its js feature.
+getrandom = { workspace = true, optional = true }
+
+[profile.dev.package.smoldot-light]
+opt-level = 2
+[profile.test.package.smoldot-light]
+opt-level = 2
+[profile.dev.package.smoldot]
+opt-level = 2
+[profile.test.package.smoldot]
+opt-level = 2
