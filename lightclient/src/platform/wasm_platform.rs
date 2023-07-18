@@ -112,6 +112,8 @@ impl PlatformRef for SubxtPlatform {
 
     fn update_stream<'a>(&self, stream: &'a mut Self::Stream) -> Self::StreamUpdateFuture<'a> {
         Box::pin(future::poll_fn(|cx| {
+            // The `connect` is expected to be called before this method and would populate
+            // the buffers properly. When the buffers are empty, this future is shortly dropped.
             let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else { return Poll::Pending };
 
             // Whether the future returned by `update_stream` should return `Ready` or `Pending`.
@@ -221,6 +223,9 @@ impl PlatformRef for SubxtPlatform {
             if update_stream_future_ready {
                 Poll::Ready(())
             } else {
+                // Progress cannot be made since poll_read, poll_write, poll_close, poll_flush
+                // are not ready yet. Smoldot drops this future and calls it again with the
+                // next processing iteration.
                 Poll::Pending
             }
         }))
