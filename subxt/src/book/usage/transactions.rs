@@ -131,7 +131,7 @@
 //! // here, or can use `create_partial_signed` to fetch the correct nonce.
 //! let partial_tx = client.tx().create_partial_signed_with_nonce(
 //!     &payload,
-//!     0,
+//!     0u64,
 //!     Default::default()
 //! )?;
 //!
