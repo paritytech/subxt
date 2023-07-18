@@ -9,35 +9,49 @@
 //!
 //! # How to create a Config for a custom chain?
 //!
-//! We now show in depth how a subxt Config can be created for a parachain, using the ["Statemint"](https://parachains.info/details/statemint) parachain,
-//! also known as "Asset Hub" as an example. It is currently (as of 2023-06-26)
-//! deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
-//! We also provide a separate example on [how to interact with the parachain](https://github.com/paritytech/subxt/tree/master/examples/parachain-example).
+//! Some chains may use config that is not compatible with our [`PolkadotConfig`](crate::config::PolkadotConfig) or
+//! [`SubstrateConfig`](crate::config::SubstrateConfig).
+//!
+//! We now walk through how a subxt [`crate::config::Config`] can be created for a parachain, using the
+//! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub" as an example. It
+//! is currently (as of 2023-06-26) deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
 //!
 //! To construct a config, we need to investigate which types Statemint uses as `AccountId`, `Hasher`, etc.
 //! We need to take a look at the source code of Statemint and find out how it implements some substrate functionalities.
 //! Statemint (Polkadot Asset Hub) is part of the [Cumulus Github repository](https://github.com/paritytech/cumulus).
 //! The crate defining the parachains runtime can be found [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot).
 //!
-//! ## 1. Create the config from scratch
+//! ## Creating the `Config` from scratch
 //!
-//! First we want to create the config from scratch to understand all the details.
+//! Creating the config from scratch is the most arduous approach but also the most flexible, so first we'll walk through
+//! how to do this, and then we'll show how to simplify the process, which can be achieved in most cases.
 //!
 //! ### AccountId, Index, Hash, Hasher and Header
-//! We need to check, where the parachains runtime implements the frame_system::Config trait.
+//!
+//! For these config types, we need to find out where the parachain runtime implements the `frame_system::Config` trait.
 //! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
 //! For Statemint we find it [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179).
-//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html) should also be the ones
-//! we want to use for implementing [crate::Config].
-//! In the Case of Statemint (Asset Hub) they are:
+//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
+//! should also be the ones we want to use for implementing [crate::Config]. In the Case of Statemint (Asset Hub) they are:
 //!
-//! - AccountId: [sp_core::crypto::AccountId32]
-//! - Index: [u32]
-//! - Hash: [sp_core::H256]
-//! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): [sp_runtime::traits::BlakeTwo256]
-//! - Header: [sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>](sp_runtime::generic::Header)
+//! - AccountId: [`sp_core::crypto::AccountId32`]
+//! - Index: [`u32`]
+//! - Hash: [`sp_core::H256`]
+//! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): [`sp_runtime::traits::BlakeTwo256`]
+//! - Header: [`sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>`](sp_runtime::generic::Header)
 //!
-//! ### Address, Signature, ExtrinsicParams
+//! Subxt has its own versions of some of these types in order to avoid needing to pull in Substrate dependencies:
+//!
+//! - [`sp_core::crypto::AccountId32`] can be swapped with [`crate::utils::AccountId32`].
+//! - [`sp_core::H256`] is a re-export which subxt also provides as [`crate::config::substrate::H256`].
+//! - [`sp_runtime::traits::BlakeTwo256`] can be swapped with [`crate::config::substrate::BlakeTwo256`].
+//! - [`sp_runtime::generic::Header`] can be swapped with [`crate::config::substrate::SubstrateHeader`].
+//!
+//! Having a look at how those types are implemented can give some clues as to how to implement other custom types that
+//! you may need to use as part of your config.
+//!
+//! ### Address, Signature
+//!
 //! A Substrate runtime is typically constructed by using the [frame_support::construct_runtime](https://docs.rs/frame-support/latest/frame_support/macro.construct_runtime.html) macro.
 //! In this macro, we need to specify the type of an `UncheckedExtrinsic`. Most of the time, the `UncheckedExtrinsic` will be of the type
 //! [sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>](sp_runtime::generic::UncheckedExtrinsic).
@@ -48,11 +62,29 @@
 //! - Address: [sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress)
 //! - Signature: [sp_runtime::MultiSignature]
 //!
-//! #### ExtrinsicParams
-//! The `ExtrinsicParams` type is the most complicated to set up, but it can be derived from
-//! the `SignedExtra` parameter of the `UncheckedExtrinsic` of your parachain. The `SignedExtra` parameter is a tuple in most cases,
-//! where each field of the tuple corresponds to 0-1 fields in the `ExtrinsicParams` struct we want to create.
-//! It looks like [this](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L779) for the Statemint parachain:
+//! As above, Subxt has its own versions of these types that can be used instead to avoid pulling in Substrate dependencies.
+//! Using the Subxt versions also makes interacting with generated code (which uses them in some places) a little nicer:
+//!
+//! - [`sp_runtime::MultiAddress`] can be swapped with [`crate::utils::MultiAddress`].
+//! - [`sp_runtime::MultiSignature`] can be swapped with [`crate::utils::MultiSignature`].
+//!
+//! ### ExtrinsicParams
+//!
+//! Parachains each have a set of "signed extensions" configured. Signed extensions provide a means to extend how transactions
+//! work. Each signed extension can potentially encode some "extra" data which is sent along with a transaction, as well as some
+//! "additional" data which is included in the transaction signer payload, but not transmitted along with the transaction.
+//!
+//! The `ExtrinsicParams` config type expects to be given an implementation of the [`crate::config::ExtrinsicParams`] trait.
+//! Implementations of the [`crate::config::ExtrinsicParams`] trait are handed some parameters from Subxt itself, and can
+//! accept arbitrary `OtherParams` from users, and are then expected to provide this "extra" and "additional" data when asked.
+//!
+//! In order to construct a valid implementation of the `ExtrinsicParams` trait, you must first find out which signed extensions
+//! are in use by a chain. This information can be obtained from the `SignedExtra` parameter of the `UncheckedExtrinsic` of your
+//! parachain, which will be a tuple of signed extensions. It can also be obtained from the metadata (see
+//! [`frame_metadata::v15::SignedExtensionMetadata`]).
+//!
+//! For statemint, the signed extensions look like
+//! [this](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L779):
 //!
 //! ```rs
 //! pub type SignedExtra = (
@@ -67,89 +99,65 @@
 //! );
 //! ```
 //!
-//! The `ExtrinsicParams` struct is basically a collection of fields that can be grouped into two categories:
-//! _extra parameters_ and _additional parameters_. _Extra parameters_ are taken into account when
-//! signing a transaction and sent along with it, while _additional parameters_ are only used during
-//! the signing step but _not_ sent along with the transaction.
-//!
 //! Each element of the `SignedExtra` tuple implements [codec::Encode] and [sp_runtime::traits::SignedExtension]
-//! which has an associated type `AdditionalSigned` that also implements [codec::Encode]. Let's look at the underlying types for each tuple element.
-//! All zero-sized types have been replaced by `()` for simplicity.
+//! which has an associated type `AdditionalSigned` that also implements [codec::Encode]. Let's look at the underlying types
+//! for each tuple element. All zero-sized types have been replaced by `()` for simplicity.
 //!
-//! | tuple element                                                                                                           | struct type                                                                                                                                              | `AdditionalSigned` type          |
-//! | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-//! | [`frame_system::CheckNonZeroSender`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonZeroSender.html)   | ()                                                                                                                                                       | ()                               |
-//! | [frame_system::CheckSpecVersion](https://docs.rs/frame-system/latest/frame_system/struct.CheckSpecVersion.html)         | ()                                                                                                                                                       | [u32]                            |
-//! | [frame_system::CheckTxVersion](https://docs.rs/frame-system/latest/frame_system/struct.CheckTxVersion.html)             | ()                                                                                                                                                       | [u32]                            |
-//! | [frame_system::CheckGenesis](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)                 | ()                                                                                                                                                       | `Config::Hash` = [sp_core::H256] |
-//! | [frame_system::CheckMortality](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)             | [sp_runtime::generic::Era]                                                                                                                               | `Config::Hash` = [sp_core::H256] |
-//! | [frame_system::CheckNonce](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)                     | `Config::Index` = [u32]                                                                                                                                  | ()                               |
-//! | [frame_system::CheckWeight](https://docs.rs/frame-system/latest/frame_system/struct.CheckWeight.html)                   | ()                                                                                                                                                       | ()                               |
-//! | [frame_system::ChargeAssetTxPayment](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
+//! | tuple element                                                                                                             | struct type                                                                                                                                              | `AdditionalSigned` type          |
+//! | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+//! | [`frame_system::CheckNonZeroSender`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonZeroSender.html)     | ()                                                                                                                                                       | ()                               |
+//! | [`frame_system::CheckSpecVersion`](https://docs.rs/frame-system/latest/frame_system/struct.CheckSpecVersion.html)         | ()                                                                                                                                                       | [u32]                            |
+//! | [`frame_system::CheckTxVersion`](https://docs.rs/frame-system/latest/frame_system/struct.CheckTxVersion.html)             | ()                                                                                                                                                       | [u32]                            |
+//! | [`frame_system::CheckGenesis`](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)                 | ()                                                                                                                                                       | `Config::Hash` = [sp_core::H256] |
+//! | [`frame_system::CheckMortality`](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)             | [sp_runtime::generic::Era]                                                                                                                               | `Config::Hash` = [sp_core::H256] |
+//! | [`frame_system::CheckNonce`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)                     | `Config::Index` = [u32]                                                                                                                                  | ()                               |
+//! | [`frame_system::CheckWeight`](https://docs.rs/frame-system/latest/frame_system/struct.CheckWeight.html)                   | ()                                                                                                                                                       | ()                               |
+//! | [`frame_system::ChargeAssetTxPayment`](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
 //!
-//! All types in the `struct type` column make up our _extra parameters_.
-//! We can put them together into a struct, ignoring all zero-sized types.
-//! The types of the last column make up our _additional parameters_. Here
-//! we can also ignore the zero-sized types. We can name the fields however we like,
-//! however their order in the struct should match the order in the `SignedExtra` tuple (see table).
-//! Beware that some numbers might be compact encoded, when encoding the struct, some might not be.
-//! Please check the exact struct type definition here. For example the definition for CheckNonce is
-//! `CheckNonce<T: Config>(#[codec(compact)] pub T::Index)`. We can see that the `#[codec(compact)`
-//! attribute tells us that the `u32` value needs to be compact encoded.
+//! All types in the `struct type` column make up the "extra" data that we're expected to provide. All types in the
+//! `AdditionalSigned` column make up the "additional" data that we're expected to provide. The goal of an
+//! [`crate::config::ExtrinsicParams`] then is to provide the appropriate data for these via [`crate::config::ExtrinsicParams::encode_extra_to()`]
+//! and [`crate::config::ExtrinsicParams::encode_additional_to()`] respectively. If it needs additional parameters from
+//! the user to provide this data, it can obtain it via [`crate::config::ExtrinsicParams::OtherParams`].
 //!
-//! Because the `pallet_asset_tx_payment::ChargeAssetTxPayment<Runtime>` struct requires us to pass the
-//! struct of our `Runtime` as a generic argument, we decide to just recreate the struct here. This prohibits us
-//! from pulling in tons of unneeded dependencies. This is a pattern that you might see often,
-//! especially because substrate crates and their types are quite big, clunky and entangled sometimes.
-//!
-//! With all these types collected, we can create two structs: `StatemintExtraParams` and `StatemintAdditionalParams`.
-//! Then we combine them into a `StatemintExtrinsicParams` struct for which we implement the [crate::config::ExtrinsicParams] trait, see below.
-//! Now we have all the parts we need to create our config `StatemintConfig` and implment the [crate::Config] trait on it.
-//! Note that StatemintConfig is an empty enum, an _uninhabited type_ that is never means to be instantiated
-//! but just gives type information to various interfaces of _subxt_.
+//! Given the above information, here is a fairly naive approach to implementing config for Statemint, including the
+//! [`crate::config::ExtrinsicParams`] trait, in a compatible way:
 //!
 //! ```rust,ignore
-#![doc = include_str ! ("../../../../examples/parachain-example/src/statemint_config_verbose.rs")]
+#![doc = include_str ! ("../../../examples/setup_config_custom.rs")]
 //! ```
 //!
-//! ## 2. Simplifying the config
-//!
-//! Now you should be able to create a config for a parachain from scratch and understand the details of its construction.
-//! However this is quite a tedious process, so subxt provides some sane defaults that can make your life easier.
-//! First, let's ditch the dependencies to [sp_core] and [sp_runtime].
-//! We should not be forced to utilize these traits whenever we create a config for a chain.
-//! That is why subxt provides some types that can function as drop in replacements for some types in [sp_core] and [sp_runtime].
-//! You can use:
-//! - [crate::config::extrinsic_params::Era] instead of [sp_runtime::generic::Era]
-//! - [crate::utils::AccountId32] instead of [sp_core::crypto::AccountId32]
-//! - [crate::utils::MultiAddress] instead of [sp_runtime::MultiAddress]
-//! - [crate::utils::H160], [crate::utils::H256] and [crate::utils::H512] instead of [sp_core::H256], [sp_core::H160] and [sp_core::H512]
-//! - [crate::utils::MultiAddress] instead of [sp_runtime::MultiAddress]
-//! - [crate::config::substrate::Era] instead of [sp_runtime::generic::Era]
-//! - [crate::config::substrate::SubstrateHeader] instead of [sp_runtime::generic::Header]
-//! - [crate::config::substrate::AssetTip] and [crate::config::polkadot::PlainTip] instead of [pallet_transaction_payment::ChargeTransactionPayment](https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.ChargeTransactionPayment.html)
-//! - [crate::config::substrate::BlakeTwo256] instead of [sp_core::Blake2Hasher] or [sp_runtime::traits::BlakeTwo256]
-//! - [crate::config::substrate::DigestItem] and [crate::config::substrate::Digest] instead of [sp_runtime::generic::Digest] and [sp_runtime::generic::DigestItem]
-//! - [crate::config::substrate::ConsensusEngineId] instead of [sp_runtime::ConsensusEngineId]
-//!
-//! With these optimizations, our config can look like this:
-//!
-//! ```rust,ignore
-#![doc = include_str ! ("../../../../examples/parachain-example/src/statemint_config_with_subxt_types.rs")]
-//! ```
-//!
-//! ## 3. Use the [`PolkadotConfig`](crate::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig) to compose a Config
+//! ## Using [`PolkadotConfig`](crate::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig) values to compose a Config
 //!
 //! Because most substrate based chains share a great deal of types, _subxt_ already provides two configs:
-//! - [`SubstrateConfig`](crate::SubstrateConfig) configured for the default [substrate node template](https://github.com/substrate-developer-hub/substrate-node-template)
-//! - [`PolkadotConfig`](crate::PolkadotConfig) configured for the [polkadot node implementation](https://github.com/paritytech/polkadot)
+//! - [`SubstrateConfig`](crate::SubstrateConfig) configured for the default
+//!   [substrate node template](https://github.com/substrate-developer-hub/substrate-node-template)
+//! - [`PolkadotConfig`](crate::PolkadotConfig) configured for the
+//!   [polkadot node implementation](https://github.com/paritytech/polkadot)
 //!
-//! Even those two just differ in the type of the `Tip` and `MultiAddress`.
-//! Statemint (Polkadot Asset Hub) seems to match the Polkadot config in almost all points, except for the `ExtrinsicParams`.
-//! Here the tips follow the same structure as for the default substrate node.
-//! We can now simply build the config for Statemint from the building blocks provided
-//! by [`PolkadotConfig`](crate::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig) as shown below.
+//! These two configs are quite similar, and only differ slightly in the `MultiAddress` type, and in terms of the type of `Tip` provided
+//! as part of the `ExtrinsicParams`.
+//!
+//! Looking at the Statemint config, we can see that it is very similar to these. It ultimately uses the same signed extensions that
+//! Substrate uses, and otherwise uses the same types as Polkadot. So, we can create a config which just reuses these existing types:
 //!
 //! ```rust,ignore
-#![doc = include_str ! ("../../../../examples/parachain-example/src/statemint_config_composed.rs")]
+//! use subxt::{Config, PolkadotConfig, SubstrateConfig};
+//!
+//! pub enum StatemintConfig {}
+//!
+//! impl Config for StatemintConfig {
+//!     type Index = <PolkadotConfig as Config>::Index;
+//!     type Hash = <PolkadotConfig as Config>::Hash;
+//!     type AccountId = <PolkadotConfig as Config>::AccountId;
+//!     type Address = <PolkadotConfig as Config>::Address;
+//!     type Signature = <PolkadotConfig as Config>::Signature;
+//!     type Hasher = <PolkadotConfig as Config>::Hasher;
+//!     type Header = <PolkadotConfig as Config>::Header;
+//!     // this is the only difference to the PolkadotConfig:
+//!     type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
+//! }
 //! ```
+//!
+//! This saves us a bunch of effort over creating our own `ExtrinsicParams` and so on, but is only applicable when such types are the
+//! same between the chain you're interested in interacting with, and either Substrate or Polkadot.
