@@ -72,7 +72,7 @@ concat_and_hash_n!(concat_and_hash5(a b c d e));
 fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     let field_name_bytes = match &field.name {
         Some(name) => hash(name.as_bytes()),
@@ -89,7 +89,7 @@ fn get_field_hash(
 fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     let variant_name_bytes = hash(var.name.as_bytes());
     let variant_field_bytes = var.fields.iter().fold([0u8; HASH_LEN], |bytes, field| {
@@ -105,7 +105,7 @@ fn get_type_def_variant_hash(
     registry: &PortableRegistry,
     variant: &TypeDefVariant<PortableForm>,
     only_these_variants: Option<&[&str]>,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
@@ -129,7 +129,7 @@ fn get_type_def_variant_hash(
 fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     match ty_def {
         TypeDef::Composite(composite) => {
@@ -186,42 +186,53 @@ fn get_type_def_hash(
     }
 }
 
+/// indicates whether a hash has been fully computed for a type or not
+#[derive(Clone)]
+pub enum CachedHash {
+    /// hash not known yet, but computation has already started
+    Recursive,
+    /// hash of the type, computation was finished
+    Hash([u8; HASH_LEN]),
+}
+
+impl CachedHash {
+    fn hash(&self) -> [u8; HASH_LEN] {
+        match &self {
+            CachedHash::Hash(hash) => *hash,
+            CachedHash::Recursive => [123; HASH_LEN], // some magical value
+        }
+    }
+}
+
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
 pub fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     // Guard against recursive types, with a 2 step caching approach:
     //    if the cache has an entry for the id, just return a hash derived from it.
-    //    if the type has not been seen yet, mark it with a 0 in the cache and proceed to `get_type_def_hash()`.
+    //    if the type has not been seen yet, mark it with `CachedHash::Recursive` in the cache and proceed to `get_type_def_hash()`.
     //        -> During the execution of get_type_def_hash() we might get into get_type_hash(id) again for the original id
-    //            -> in this case the 0 provokes an early return.
-    //        -> Once we return from `get_type_def_hash()` we need to update the entry in the cache.
-    //            -> We just derive some u32 from the hash that was returned and save it.
-    //            -> This makes sure, that different types end up with different cache values.
+    //            -> in this case the `CachedHash::Recursive` provokes an early return.
+    //        -> Once we return from `get_type_def_hash()` we need to update the cache entry:
+    //            -> We set the cache value to `CachedHash::Hash(type_hash)`, where `type_hash` was returned from `get_type_def_hash()`
+    //            -> It makes sure, that different types end up with different cache values.
     //
     // Values in the cache can be thought of as a mapping like this:
-    // type id -> not contained           if not seen yet
-    //         -> 0                       if within get_type_hash() calculation for the type
-    //         -> (pseudo-)random u32     if get_type_hash() calculation has completed for the type
+    // type_id ->  not contained           = We haven't seen the type yet.
+    //         -> `CachedHash::Recursive`  = We have seen the type but hash calculation for it hasn't finished yet.
+    //         -> `CachedHash::Hash(hash)` = Hash calculation for the type was completed.
 
-    if let Some(short_hash) = cache.get(&id) {
-        return hash(&short_hash.to_be_bytes());
+    if let Some(cached_hash) = cache.get(&id) {
+        return cached_hash.hash();
     }
-    cache.insert(id, 0);
+    cache.insert(id, CachedHash::Recursive);
     let ty = registry
         .resolve(id)
         .expect("Type ID provided by the metadata is registered; qed");
     let type_hash = get_type_def_hash(registry, &ty.type_def, cache);
-
-    let short_hash = {
-        let mut short_hash: [u8; 4] = [0; 4];
-        short_hash.clone_from_slice(&type_hash[..4]);
-        u32::from_le_bytes(short_hash)
-    };
-
-    cache.insert(id, short_hash);
+    cache.insert(id, CachedHash::Hash(type_hash));
     type_hash
 }
 
@@ -230,7 +241,7 @@ fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
 ) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, u32>::new();
+    let mut cache = HashMap::<u32, CachedHash>::new();
 
     // Get the hashes of the extrinsic type.
     let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut cache);
@@ -294,7 +305,7 @@ fn get_outer_enums_hash(
 fn get_storage_entry_hash(
     registry: &PortableRegistry,
     entry: &StorageEntryMetadata,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
@@ -330,7 +341,7 @@ fn get_runtime_method_hash(
     registry: &PortableRegistry,
     trait_name: &str,
     method_metadata: &RuntimeApiMethodMetadata,
-    cache: &mut HashMap<u32, u32>,
+    cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     // The trait name is part of the runtime API call that is being
     // generated for this method. Therefore the trait name is strongly
@@ -427,7 +438,7 @@ pub fn get_runtime_api_hash(
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
 pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, u32>::new();
+    let mut cache = HashMap::<u32, CachedHash>::new();
     let registry = pallet.types;
 
     let call_bytes = match pallet.call_ty_id() {

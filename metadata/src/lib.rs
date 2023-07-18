@@ -152,7 +152,7 @@ impl Metadata {
         Some(crate::utils::validation::get_type_hash(
             &self.types,
             id,
-            &mut HashMap::<u32, u32>::new(),
+            &mut HashMap::new(),
         ))
     }
 }
