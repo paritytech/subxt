@@ -19,7 +19,7 @@ pub enum CodegenError {
     #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]
     Io(String, std::io::Error),
     /// Cannot decode the metadata bytes.
-    #[error("Could not decode metadata, only V14 metadata is supported: {0}")]
+    #[error("Could not decode metadata, only V14 and V15 metadata are supported: {0}")]
     Decode(#[from] codec::Error),
     /// Out of line modules are not supported.
     #[error("Out-of-line subxt modules are not supported, make sure you are providing a body to your module: pub mod polkadot {{ ... }}")]

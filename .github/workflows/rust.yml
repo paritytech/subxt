@@ -19,7 +19,9 @@ concurrency:
 env:
     CARGO_TERM_COLOR: always
     # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
+    # Increase wasm test timeout from 20 seconds (default) to 1 minute.
+    WASM_BINDGEN_TEST_TIMEOUT: 60
 
 jobs:
     build:
@@ -70,9 +72,13 @@ jobs:
             - name: Cargo check subxt-signer
               run: cargo check -p subxt-signer
 
+            # We can't enable web features here, so no cargo hack.
+            - name: Cargo check subxt-lightclient
+              run: cargo check -p subxt-lightclient
+
             # Next, check each other package in isolation.
             - name: Cargo hack; check each feature/crate on its own
-              run: cargo hack --exclude subxt --exclude subxt-signer --exclude-all-features --each-feature check --workspace
+              run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
 
     fmt:
         name: Cargo fmt
@@ -259,11 +265,23 @@ jobs:
 
             - name: Run subxt WASM tests
               run: |
-                  substrate --dev --tmp > /dev/null 2>&1 &
+                  # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
+                  # `node-key` provides a deterministic p2p address.
+                  substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
                   pkill substrate
-              working-directory: testing/wasm-tests
+              working-directory: testing/wasm-rpc-tests
+
+            - name: Run subxt-lightclient WASM tests
+              run: |
+                  # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
+                  # `node-key` provides a deterministic p2p address.
+                  substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
+                  wasm-pack test --headless --firefox
+                  wasm-pack test --headless --chrome
+                  pkill substrate
+              working-directory: testing/wasm-lightclient-tests
 
             - name: Run subxt-signer WASM tests
               run: |

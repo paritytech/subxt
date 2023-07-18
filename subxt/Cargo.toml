@@ -23,7 +23,8 @@ default = ["jsonrpsee", "native", "substrate-compat"]
 # Exactly 1 of "web" and "native" is expected.
 native = [
     "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport"
+    "jsonrpsee?/client-ws-transport",
+    "subxt-lightclient?/native"
 ]
 
 # Enable this for web/wasm builds.
@@ -31,7 +32,8 @@ native = [
 web = [
     "jsonrpsee?/async-wasm-client",
     "jsonrpsee?/client-web-transport",
-    "getrandom/js"
+    "getrandom/js",
+    "subxt-lightclient?/web"
 ]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
@@ -56,11 +58,8 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = [
-    "smoldot-light/std",
-    "tokio-stream",
-    "tokio/sync",
-    "tokio/rt",
-    "futures-util",
+    "subxt-lightclient",
+    "tokio-stream"
 ]
 
 [dependencies]
@@ -99,12 +98,10 @@ sp-runtime = { workspace = true, optional = true }
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
+subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Light client support:
-smoldot-light = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true }
 tokio-stream = { workspace = true, optional = true }
-futures-util = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
@@ -130,8 +127,3 @@ tracing-subscriber = { workspace = true }
 name = "unstable_light_client_tx_basic"
 path = "examples/unstable_light_client_tx_basic.rs"
 required-features = ["unstable-light-client", "jsonrpsee"]
-
-[profile.dev.package.smoldot-light]
-opt-level = 2
-[profile.test.package.smoldot-light]
-opt-level = 2
