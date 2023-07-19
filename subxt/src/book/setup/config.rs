@@ -12,8 +12,8 @@
 //! Some chains may use config that is not compatible with our [`PolkadotConfig`](crate::config::PolkadotConfig) or
 //! [`SubstrateConfig`](crate::config::SubstrateConfig).
 //!
-//! We now walk through how a subxt [`crate::config::Config`] can be created for a parachain, using the
-//! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub" as an example. It
+//! We now walk through creating a [`crate::config::Config`] for a parachain, using the
+//! ["Statemint"](https://parachains.info/details/statemint) parachain, also known as "Asset Hub", as an example. It
 //! is currently (as of 2023-06-26) deployed on Polkadot and [Kusama (as "Statemine")](https://parachains.info/details/statemine).
 //!
 //! To construct a config, we need to investigate which types Statemint uses as `AccountId`, `Hasher`, etc.
@@ -24,15 +24,15 @@
 //! ## Creating the `Config` from scratch
 //!
 //! Creating the config from scratch is the most arduous approach but also the most flexible, so first we'll walk through
-//! how to do this, and then we'll show how to simplify the process, which can be achieved in most cases.
+//! how to do this, and then we'll show how to simplify the process where possible.
 //!
 //! ### AccountId, Index, Hash, Hasher and Header
 //!
 //! For these config types, we need to find out where the parachain runtime implements the `frame_system::Config` trait.
 //! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
-//! For Statemint we find it [here](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179).
-//! The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
-//! should also be the ones we want to use for implementing [crate::Config]. In the Case of Statemint (Asset Hub) they are:
+//! For Statemint it looks like [this](https://github.com/paritytech/cumulus/blob/e2b7ad2061824f490c08df27a922c64f50accd6b/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179)
+//! at the time of writing. The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
+//! correspond to the ones we want to use for implementing [crate::Config]. In the Case of Statemint (Asset Hub) they are:
 //!
 //! - AccountId: [`sp_core::crypto::AccountId32`]
 //! - Index: [`u32`]
@@ -56,8 +56,9 @@
 //! In this macro, we need to specify the type of an `UncheckedExtrinsic`. Most of the time, the `UncheckedExtrinsic` will be of the type
 //! [sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>](sp_runtime::generic::UncheckedExtrinsic).
 //! The generic parameters `Address` and `Signature` specified when declaring the `UncheckedExtrinsic` type
-//! are the types for `Address` and `Signature` we should use when implementing the [crate::Config] trait.
-//! In case of Statemint (Polkadot Asset Hub) we see the following types being used in `UncheckedExtrinsic`:
+//! are the types for `Address` and `Signature` we should use when implementing the [crate::Config] trait. This information can
+//! also be obtained from the metadata (see [`frame_metadata::v15::ExtrinsicMetadata`]). In case of Statemint (Polkadot Asset Hub)
+//! we see the following types being used in `UncheckedExtrinsic`:
 //!
 //! - Address: [sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress)
 //! - Signature: [sp_runtime::MultiSignature]
@@ -70,9 +71,10 @@
 //!
 //! ### ExtrinsicParams
 //!
-//! Parachains each have a set of "signed extensions" configured. Signed extensions provide a means to extend how transactions
+//! Chains each have a set of "signed extensions" configured. Signed extensions provide a means to extend how transactions
 //! work. Each signed extension can potentially encode some "extra" data which is sent along with a transaction, as well as some
-//! "additional" data which is included in the transaction signer payload, but not transmitted along with the transaction.
+//! "additional" data which is included in the transaction signer payload, but not transmitted along with the transaction. On
+//! a node, signed extensions can then perform additional checks on the submitted transactions to ensure their validity.
 //!
 //! The `ExtrinsicParams` config type expects to be given an implementation of the [`crate::config::ExtrinsicParams`] trait.
 //! Implementations of the [`crate::config::ExtrinsicParams`] trait are handed some parameters from Subxt itself, and can
@@ -116,9 +118,10 @@
 //!
 //! All types in the `struct type` column make up the "extra" data that we're expected to provide. All types in the
 //! `AdditionalSigned` column make up the "additional" data that we're expected to provide. The goal of an
-//! [`crate::config::ExtrinsicParams`] then is to provide the appropriate data for these via [`crate::config::ExtrinsicParams::encode_extra_to()`]
-//! and [`crate::config::ExtrinsicParams::encode_additional_to()`] respectively. If it needs additional parameters from
-//! the user to provide this data, it can obtain it via [`crate::config::ExtrinsicParams::OtherParams`].
+//! [`crate::config::ExtrinsicParams`] impl then is to provide the appropriate (SCALE encoded) data for these via
+//! [`crate::config::ExtrinsicParams::encode_extra_to()`] and [`crate::config::ExtrinsicParams::encode_additional_to()`]
+//! respectively. If the [`crate::config::ExtrinsicParams`] impl needs additional data to be able to do this, it can use
+//! the [`crate::config::ExtrinsicParams::OtherParams`] associated type to obtain it from the user.
 //!
 //! Given the above information, here is a fairly naive approach to implementing config for Statemint, including the
 //! [`crate::config::ExtrinsicParams`] trait, in a compatible way:
@@ -129,17 +132,14 @@
 //!
 //! ## Using [`PolkadotConfig`](crate::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig) values to compose a Config
 //!
-//! Because most substrate based chains share a great deal of types, _subxt_ already provides two configs:
-//! - [`SubstrateConfig`](crate::SubstrateConfig) configured for the default
-//!   [substrate node template](https://github.com/substrate-developer-hub/substrate-node-template)
-//! - [`PolkadotConfig`](crate::PolkadotConfig) configured for the
-//!   [polkadot node implementation](https://github.com/paritytech/polkadot)
+//! Subxt already provides [`PolkadotConfig`](crate::config::PolkadotConfig) and [`SubstrateConfig`](crate::SubstrateConfig). These
+//! two configs are actually very similar, and only differ slightly in the `MultiAddress` type, and in terms of the type of `Tip` provided
+//! as part of the `ExtrinsicParams`. Many chains share a lot of the same types as these, and so often times you can just reuse parts
+//! of these implementations.
 //!
-//! These two configs are quite similar, and only differ slightly in the `MultiAddress` type, and in terms of the type of `Tip` provided
-//! as part of the `ExtrinsicParams`.
-//!
-//! Looking at the Statemint config, we can see that it is very similar to these. It ultimately uses the same signed extensions that
-//! Substrate uses, and otherwise uses the same types as Polkadot. So, we can create a config which just reuses these existing types:
+//! From looking at the types needed for the Statemint config above, we can see that it is indeed very similar to these. It ultimately
+//! uses the same signed extensions that Substrate uses, and otherwise uses the same types as Polkadot. So, we can create a config which
+//! just reuses these existing types:
 //!
 //! ```rust,ignore
 //! use subxt::{Config, PolkadotConfig, SubstrateConfig};
@@ -159,5 +159,4 @@
 //! }
 //! ```
 //!
-//! This saves us a bunch of effort over creating our own `ExtrinsicParams` and so on, but is only applicable when such types are the
-//! same between the chain you're interested in interacting with, and either Substrate or Polkadot.
+//! When the types are very similar, building a custom config like this is much simpler than implementing one from scratch.
