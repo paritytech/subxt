@@ -44,7 +44,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     const COLLECTION_ID: u32 = 12;
     const NTF_ID: u32 = 234;
 
-    // create a collection with id `42`
+    // create a collection with id `12`
     let collection_creation_tx = statemint::tx()
         .uniques()
         .create(COLLECTION_ID, alice.clone());
@@ -60,7 +60,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("Collection created.");
 
-    // create an nft in that collection with id `420`
+    // create an nft in that collection with id `234`
     let nft_creation_tx = statemint::tx()
         .uniques()
         .mint(COLLECTION_ID, NTF_ID, alice.clone());
