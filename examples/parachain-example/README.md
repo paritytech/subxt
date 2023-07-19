@@ -21,7 +21,6 @@ and install it in your path:
 ```txt
 git clone https://github.com/paritytech/polkadot.git
 cd polkadot
-cargo build --release
 cargo install --path .
 ```
 
@@ -34,8 +33,7 @@ Asset Hub nodes.
 ```txt
 git clone https://github.com/paritytech/cumulus.git
 cd cumulus
-cargo build --release
-cargo install --path .
+cargo install --path polkadot-parachain
 ```
 
 ### 4. Run the parachain locally
