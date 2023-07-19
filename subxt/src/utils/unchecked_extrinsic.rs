@@ -43,20 +43,6 @@ impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
     }
 }
 
-impl<Address, Call, Signature, Extra> scale_encode::EncodeAsFields
-    for UncheckedExtrinsic<Address, Call, Signature, Extra>
-{
-    fn encode_as_fields_to(
-        &self,
-        _fields: &mut dyn scale_encode::FieldIter<'_>,
-        _types: &scale_info::PortableRegistry,
-        out: &mut Vec<u8>,
-    ) -> Result<(), scale_encode::Error> {
-        out.extend_from_slice(&self.0);
-        Ok(())
-    }
-}
-
 pub struct UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra>(
     PhantomData<(Address, Call, Signature, Extra)>,
 );
