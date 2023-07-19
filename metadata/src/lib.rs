@@ -20,7 +20,7 @@ mod from_into;
 mod utils;
 
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
@@ -152,7 +152,7 @@ impl Metadata {
         Some(crate::utils::validation::get_type_hash(
             &self.types,
             id,
-            &mut HashSet::<u32>::new(),
+            &mut HashMap::new(),
         ))
     }
 }
