@@ -17,7 +17,7 @@ use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 use super::{Encoded, Static};
 
 /// The unchecked extrinsic from substrate.
-#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, scale_encode::EncodeAsType)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub struct UncheckedExtrinsic<Address, Call, Signature, Extra>(
     Static<Encoded>,
     #[codec(skip)] PhantomData<(Address, Call, Signature, Extra)>,
@@ -32,6 +32,20 @@ impl<Address, Call, Signature, Extra> UncheckedExtrinsic<Address, Call, Signatur
     /// Get the bytes of the encoded extrinsic.
     pub fn bytes(&self) -> &[u8] {
         self.0 .0 .0.as_slice()
+    }
+}
+
+impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
+    for UncheckedExtrinsic<Address, Call, Signature, Extra>
+{
+    fn encode_as_type_to(
+        &self,
+        _type_id: u32,
+        _types: &scale_info::PortableRegistry,
+        out: &mut Vec<u8>,
+    ) -> Result<(), scale_encode::Error> {
+        self.0.encode_to(out);
+        Ok(())
     }
 }
 
