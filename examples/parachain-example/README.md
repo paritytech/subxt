@@ -59,7 +59,7 @@ The parachain is only registered after the first epoch. So after the previous st
 interactive and produces blocks. At this point, we can run:
 
 ```
-cargo run --bin
+cargo run --bin parachain-example
 ```
 
 To run our example code.
