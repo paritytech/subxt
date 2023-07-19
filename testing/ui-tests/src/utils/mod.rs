@@ -7,8 +7,8 @@ mod metadata_test_runner;
 
 use frame_metadata::{
     v15::{
-        ExtrinsicMetadata, PalletMetadata, PalletStorageMetadata, RuntimeMetadataV15,
-        StorageEntryMetadata,
+        CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletMetadata, PalletStorageMetadata,
+        RuntimeMetadataV15, StorageEntryMetadata,
     },
     RuntimeMetadataPrefixed,
 };
@@ -24,9 +24,12 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
 ) -> RuntimeMetadataPrefixed {
     // We don't care about the extrinsic type.
     let extrinsic = ExtrinsicMetadata {
-        ty: meta_type::<()>(),
         version: 0,
         signed_extensions: vec![],
+        address_ty: meta_type::<()>(),
+        call_ty: meta_type::<()>(),
+        signature_ty: meta_type::<()>(),
+        extra_ty: meta_type::<()>(),
     };
 
     // Construct metadata manually from our types (See `RuntimeMetadataV15::new()`).
@@ -41,10 +44,13 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
     enum RuntimeCall {}
     #[derive(TypeInfo)]
     enum RuntimeEvent {}
+    #[derive(TypeInfo)]
+    enum RuntimeError {}
 
     let ty = registry.register_type(&meta_type::<Runtime>());
-    registry.register_type(&meta_type::<RuntimeCall>());
-    registry.register_type(&meta_type::<RuntimeEvent>());
+    let runtime_call = registry.register_type(&meta_type::<RuntimeCall>());
+    let runtime_event = registry.register_type(&meta_type::<RuntimeEvent>());
+    let runtime_error = registry.register_type(&meta_type::<RuntimeError>());
 
     // Metadata needs to contain this DispatchError, since codegen looks for it.
     registry.register_type(&meta_type::<DispatchError>());
@@ -55,6 +61,14 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
         extrinsic,
         ty,
         apis: vec![],
+        outer_enums: OuterEnums {
+            call_enum_ty: runtime_call,
+            event_enum_ty: runtime_event,
+            error_enum_ty: runtime_error,
+        },
+        custom: CustomMetadata {
+            map: Default::default(),
+        },
     };
 
     RuntimeMetadataPrefixed::from(metadata)

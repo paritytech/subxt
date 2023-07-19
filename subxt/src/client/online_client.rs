@@ -129,16 +129,32 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
         #[cfg(feature = "unstable-metadata")]
         {
+            /// The unstable metadata version number.
+            const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
+
             // Try to fetch the latest unstable metadata, if that fails fall back to
             // fetching the latest stable metadata.
-            const V15_METADATA_VERSION: u32 = u32::MAX;
-            match rpc.metadata_at_version(V15_METADATA_VERSION).await {
+            match rpc.metadata_at_version(UNSTABLE_METADATA_VERSION).await {
                 Ok(bytes) => Ok(bytes),
-                Err(_) => rpc.metadata().await,
+                Err(_) => OnlineClient::fetch_latest_stable_metadata(rpc).await,
             }
         }
 
         #[cfg(not(feature = "unstable-metadata"))]
+        OnlineClient::fetch_latest_stable_metadata(rpc).await
+    }
+
+    /// Fetch the latest stable metadata from the node.
+    async fn fetch_latest_stable_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
+        // This is the latest stable metadata that subxt can utilize.
+        const V15_METADATA_VERSION: u32 = 15;
+
+        // Try to fetch the metadata version.
+        if let Ok(bytes) = rpc.metadata_at_version(V15_METADATA_VERSION).await {
+            return Ok(bytes);
+        }
+
+        // If that fails, fetch the metadata V14 using the old API.
         rpc.metadata().await
     }
 

@@ -11,7 +11,7 @@ subxt = { workspace = true, features = ["native"] }
 substrate-runner = { workspace = true }
 impl-serde = { workspace = true }
 serde = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
 which = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport"] }
 hex = { workspace = true }

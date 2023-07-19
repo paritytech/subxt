@@ -6,16 +6,17 @@ use futures::stream::StreamExt;
 use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
-use std::{collections::HashMap, str::FromStr, sync::Arc};
+use std::{collections::HashMap, str::FromStr};
 use tokio::sync::{mpsc, oneshot};
 
-use super::LightClientError;
-use smoldot_light::{platform::default::DefaultPlatform as Platform, ChainId};
+use super::platform::PlatformType;
+use super::LightClientRpcError;
+use smoldot_light::ChainId;
 
 const LOG_TARGET: &str = "light-client-background";
 
 /// The response of an RPC method.
-pub type MethodResponse = Result<Box<RawValue>, LightClientError>;
+pub type MethodResponse = Result<Box<RawValue>, LightClientRpcError>;
 
 /// Message protocol between the front-end client that submits the RPC requests
 /// and the backend handler that produces responses from the chain.
@@ -50,7 +51,7 @@ pub enum FromSubxt {
 /// Background task data.
 pub struct BackgroundTask {
     /// Smoldot light client implementation that leverages the exposed platform.
-    client: smoldot_light::Client<Arc<Platform>>,
+    client: smoldot_light::Client<PlatformType>,
     /// The ID of the chain used to identify the chain protocol (ie. substrate).
     ///
     /// Note: A single chain is supported for a client. This aligns with the subxt's
@@ -79,7 +80,7 @@ pub struct BackgroundTask {
 
 impl BackgroundTask {
     /// Constructs a new [`BackgroundTask`].
-    pub fn new(client: smoldot_light::Client<Arc<Platform>>, chain_id: ChainId) -> BackgroundTask {
+    pub fn new(client: smoldot_light::Client<PlatformType>, chain_id: ChainId) -> BackgroundTask {
         BackgroundTask {
             client,
             chain_id,
@@ -127,7 +128,7 @@ impl BackgroundTask {
 
                     // Send the error back to frontend.
                     if sender
-                        .send(Err(LightClientError::Request(err.to_string())))
+                        .send(Err(LightClientRpcError::Request(err.to_string())))
                         .is_err()
                     {
                         tracing::warn!(
@@ -167,7 +168,7 @@ impl BackgroundTask {
 
                     // Send the error back to frontend.
                     if sub_id
-                        .send(Err(LightClientError::Request(err.to_string())))
+                        .send(Err(LightClientRpcError::Request(err.to_string())))
                         .is_err()
                     {
                         tracing::warn!(
@@ -191,7 +192,7 @@ impl BackgroundTask {
 
                 if let Some(sender) = self.requests.remove(&id) {
                     if sender
-                        .send(Err(LightClientError::Request(error.to_string())))
+                        .send(Err(LightClientRpcError::Request(error.to_string())))
                         .is_err()
                     {
                         tracing::warn!(
@@ -201,7 +202,7 @@ impl BackgroundTask {
                     }
                 } else if let Some((sub_id_sender, _)) = self.id_to_subscription.remove(&id) {
                     if sub_id_sender
-                        .send(Err(LightClientError::Request(error.to_string())))
+                        .send(Err(LightClientRpcError::Request(error.to_string())))
                         .is_err()
                     {
                         tracing::warn!(

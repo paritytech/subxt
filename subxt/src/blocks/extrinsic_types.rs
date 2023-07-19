@@ -16,8 +16,8 @@ use crate::{
 use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
-use scale_decode::DecodeAsFields;
-use std::{collections::HashMap, sync::Arc};
+use scale_decode::{DecodeAsFields, DecodeAsType};
+use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -35,23 +35,6 @@ pub trait StaticExtrinsic: DecodeAsFields {
     fn is_extrinsic(pallet: &str, call: &str) -> bool {
         Self::PALLET == pallet && Self::CALL == call
     }
-}
-
-/// This trait is implemented on the statically generated root extrinsic type, so that we're able
-/// to decode it properly via a pallet that impls `DecodeAsMetadata`. This is necessary
-/// because the "root extrinsic" type is generated using pallet info but doesn't actually exist in the
-/// metadata types, so we have no easy way to decode things into it via type information and need a
-/// little help via codegen.
-#[doc(hidden)]
-pub trait RootExtrinsic: Sized {
-    /// Given details of the pallet extrinsic we want to decode, and the name of the pallet, try to hand
-    /// back a "root extrinsic".
-    fn root_extrinsic(
-        pallet_bytes: &[u8],
-        pallet_name: &str,
-        pallet_extrinsic_ty: u32,
-        metadata: &Metadata,
-    ) -> Result<Self, Error>;
 }
 
 /// The body of a block.
@@ -420,22 +403,17 @@ where
         }
     }
 
-    /// Attempt to decode these [`ExtrinsicDetails`] into a root extrinsic type (which includes
+    /// Attempt to decode these [`ExtrinsicDetails`] into an outer call enum type (which includes
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
-    pub fn as_root_extrinsic<E: RootExtrinsic>(&self) -> Result<E, Error> {
-        let md = self.extrinsic_metadata()?;
-        let pallet_extrinsic_ty = md.pallet.call_ty_id().ok_or_else(|| {
-            Error::Metadata(MetadataError::CallTypeNotFoundInPallet(md.pallet.index()))
-        })?;
+    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let decoded = E::decode_as_type(
+            &mut &self.call_bytes()[..],
+            self.metadata.outer_enums().call_enum_ty(),
+            self.metadata.types(),
+        )?;
 
-        // Ignore root enum index.
-        E::root_extrinsic(
-            &self.call_bytes()[1..],
-            md.pallet.name(),
-            pallet_extrinsic_ty,
-            &self.metadata,
-        )
+        Ok(decoded)
     }
 }
 
@@ -478,47 +456,11 @@ pub(crate) struct ExtrinsicPartTypeIds {
 impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
     pub(crate) fn new(metadata: &Metadata) -> Result<Self, BlockError> {
-        const ADDRESS: &str = "Address";
-        const CALL: &str = "Call";
-        const SIGNATURE: &str = "Signature";
-        const EXTRA: &str = "Extra";
-
-        let id = metadata.extrinsic().ty();
-
-        let Some(ty) = metadata.types().resolve(id) else {
-            return Err(BlockError::MissingType);
-        };
-
-        let params: HashMap<_, _> = ty
-            .type_params
-            .iter()
-            .map(|ty_param| {
-                let Some(ty) = ty_param.ty else {
-                    return Err(BlockError::MissingType);
-                };
-
-                Ok((ty_param.name.as_str(), ty.id))
-            })
-            .collect::<Result<_, _>>()?;
-
-        let Some(address) = params.get(ADDRESS) else {
-            return Err(BlockError::MissingType);
-        };
-        let Some(call) = params.get(CALL) else {
-            return Err(BlockError::MissingType);
-        };
-        let Some(signature) = params.get(SIGNATURE) else {
-            return Err(BlockError::MissingType);
-        };
-        let Some(extra) = params.get(EXTRA) else {
-            return Err(BlockError::MissingType);
-        };
-
         Ok(ExtrinsicPartTypeIds {
-            address: *address,
-            _call: *call,
-            signature: *signature,
-            extra: *extra,
+            address: metadata.extrinsic().address_ty(),
+            _call: metadata.extrinsic().call_ty(),
+            signature: metadata.extrinsic().signature_ty(),
+            extra: metadata.extrinsic().extra_ty(),
         })
     }
 }
@@ -620,10 +562,10 @@ impl<T: Config> ExtrinsicEvents<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metadata::DecodeWithMetadata;
     use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
+    use frame_metadata::v15::{CustomMetadata, OuterEnums};
     use frame_metadata::{
         v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
@@ -658,27 +600,6 @@ mod tests {
     )]
     enum RuntimeCall {
         Test(Pallet),
-    }
-
-    // We need this in order to be able to decode into a root extrinsic type:
-    impl RootExtrinsic for RuntimeCall {
-        fn root_extrinsic(
-            mut pallet_bytes: &[u8],
-            pallet_name: &str,
-            pallet_extrinsic_ty: u32,
-            metadata: &Metadata,
-        ) -> Result<Self, Error> {
-            if pallet_name == "Test" {
-                return Ok(RuntimeCall::Test(Pallet::decode_with_metadata(
-                    &mut pallet_bytes,
-                    pallet_extrinsic_ty,
-                    metadata,
-                )?));
-            }
-            panic!(
-                "Asked for pallet name '{pallet_name}', which isn't in our test RuntimeCall type"
-            )
-        }
     }
 
     // The calls of the pallet.
@@ -743,12 +664,28 @@ mod tests {
         }];
 
         let extrinsic = ExtrinsicMetadata {
-            ty: meta_type::<ExtrinsicType<(), RuntimeCall, (), ()>>(),
             version: 4,
             signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<RuntimeCall>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
         };
 
-        let meta = RuntimeMetadataV15::new(pallets, extrinsic, meta_type::<()>(), vec![]);
+        let meta = RuntimeMetadataV15::new(
+            pallets,
+            extrinsic,
+            meta_type::<()>(),
+            vec![],
+            OuterEnums {
+                call_enum_ty: meta_type::<RuntimeCall>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            CustomMetadata {
+                map: Default::default(),
+            },
+        );
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
 
         Metadata::new(runtime_metadata.try_into().unwrap())

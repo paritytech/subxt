@@ -45,6 +45,8 @@ pub struct Metadata {
     extrinsic: ExtrinsicMetadata,
     /// The type ID of the `Runtime` type.
     runtime_ty: u32,
+    /// The types of the outer enums.
+    outer_enums: OuterEnumsMetadata,
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
     dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
@@ -75,6 +77,11 @@ impl Metadata {
     /// Return details about the extrinsic format.
     pub fn extrinsic(&self) -> &ExtrinsicMetadata {
         &self.extrinsic
+    }
+
+    /// Return details about the outer enums.
+    pub fn outer_enums(&self) -> OuterEnumsMetadata {
+        self.outer_enums
     }
 
     /// An iterator over all of the available pallets.
@@ -440,8 +447,14 @@ impl ConstantMetadata {
 /// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-    /// The type of the extrinsic.
-    ty: u32,
+    /// The type of the address that signs the extrinsic
+    address_ty: u32,
+    /// The type of the outermost Call enum.
+    call_ty: u32,
+    /// The type of the extrinsic's signature.
+    signature_ty: u32,
+    /// The type of the outermost Extra enum.
+    extra_ty: u32,
     /// Extrinsic version.
     version: u8,
     /// The signed extensions in the order they appear in the extrinsic.
@@ -449,9 +462,22 @@ pub struct ExtrinsicMetadata {
 }
 
 impl ExtrinsicMetadata {
-    /// Type of the extrinsic.
-    pub fn ty(&self) -> u32 {
-        self.ty
+    /// The type of the address that signs the extrinsic
+    pub fn address_ty(&self) -> u32 {
+        self.address_ty
+    }
+
+    /// The type of the outermost Call enum.
+    pub fn call_ty(&self) -> u32 {
+        self.call_ty
+    }
+    /// The type of the extrinsic's signature.
+    pub fn signature_ty(&self) -> u32 {
+        self.signature_ty
+    }
+    /// The type of the outermost Extra enum.
+    pub fn extra_ty(&self) -> u32 {
+        self.extra_ty
     }
 
     /// Extrinsic version.
@@ -488,6 +514,34 @@ impl SignedExtensionMetadata {
     /// The type of the additional signed data, with the data to be included in the signed payload
     pub fn additional_ty(&self) -> u32 {
         self.additional_ty
+    }
+}
+
+/// Metadata for the outer enums.
+#[derive(Debug, Clone, Copy)]
+pub struct OuterEnumsMetadata {
+    /// The type of the outer call enum.
+    call_enum_ty: u32,
+    /// The type of the outer event enum.
+    event_enum_ty: u32,
+    /// The type of the outer error enum.
+    error_enum_ty: u32,
+}
+
+impl OuterEnumsMetadata {
+    /// The type of the outer call enum.
+    pub fn call_enum_ty(&self) -> u32 {
+        self.call_enum_ty
+    }
+
+    /// The type of the outer event enum.
+    pub fn event_enum_ty(&self) -> u32 {
+        self.event_enum_ty
+    }
+
+    /// The type of the outer error enum.
+    pub fn error_enum_ty(&self) -> u32 {
+        self.error_enum_ty
     }
 }
 
