@@ -90,7 +90,7 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     // Use the generated API to confirm the result with the raw call.
     let runtime_api_call = node_runtime::apis()
         .transaction_payment_api()
-        .query_fee_details(subxt::utils::UncheckedExtrinsic(tx_bytes, PhantomData), len);
+        .query_fee_details(tx_bytes.into(), len);
 
     let result = api
         .runtime_api()

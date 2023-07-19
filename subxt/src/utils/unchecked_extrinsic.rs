@@ -17,9 +17,37 @@ use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 /// The unchecked extrinsic from substrate.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub struct UncheckedExtrinsic<Address, Call, Signature, Extra>(
-    pub Vec<u8>,
-    #[codec(skip)] pub PhantomData<(Address, Call, Signature, Extra)>,
+    Vec<u8>,
+    #[codec(skip)] PhantomData<(Address, Call, Signature, Extra)>,
 );
+
+impl<Address, Call, Signature, Extra> UncheckedExtrinsic<Address, Call, Signature, Extra> {
+    /// Construct a new [`UncheckedExtrinsic`].
+    pub fn new(bytes: Vec<u8>) -> Self {
+        Self(bytes, PhantomData)
+    }
+
+    /// Get the bytes of the encoded extrinsic.
+    pub fn bytes(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+}
+
+impl<Address, Call, Signature, Extra> From<Vec<u8>>
+    for UncheckedExtrinsic<Address, Call, Signature, Extra>
+{
+    fn from(bytes: Vec<u8>) -> Self {
+        UncheckedExtrinsic(bytes, PhantomData)
+    }
+}
+
+impl<Address, Call, Signature, Extra> From<UncheckedExtrinsic<Address, Call, Signature, Extra>>
+    for Vec<u8>
+{
+    fn from(bytes: UncheckedExtrinsic<Address, Call, Signature, Extra>) -> Self {
+        bytes.0
+    }
+}
 
 impl<Address, Call, Signature, Extra> codec::Encode
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
