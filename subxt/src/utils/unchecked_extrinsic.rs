@@ -14,22 +14,24 @@ use std::marker::PhantomData;
 use codec::Decode;
 use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 
+use super::{Encoded, Static};
+
 /// The unchecked extrinsic from substrate.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub struct UncheckedExtrinsic<Address, Call, Signature, Extra>(
-    Vec<u8>,
+    Static<Encoded>,
     #[codec(skip)] PhantomData<(Address, Call, Signature, Extra)>,
 );
 
 impl<Address, Call, Signature, Extra> UncheckedExtrinsic<Address, Call, Signature, Extra> {
     /// Construct a new [`UncheckedExtrinsic`].
     pub fn new(bytes: Vec<u8>) -> Self {
-        Self(bytes, PhantomData)
+        Self(Static(Encoded(bytes)), PhantomData)
     }
 
     /// Get the bytes of the encoded extrinsic.
     pub fn bytes(&self) -> &[u8] {
-        self.0.as_slice()
+        self.0 .0 .0.as_slice()
     }
 }
 
@@ -37,7 +39,7 @@ impl<Address, Call, Signature, Extra> From<Vec<u8>>
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
     fn from(bytes: Vec<u8>) -> Self {
-        UncheckedExtrinsic(bytes, PhantomData)
+        UncheckedExtrinsic::new(bytes)
     }
 }
 
@@ -45,7 +47,7 @@ impl<Address, Call, Signature, Extra> From<UncheckedExtrinsic<Address, Call, Sig
     for Vec<u8>
 {
     fn from(bytes: UncheckedExtrinsic<Address, Call, Signature, Extra>) -> Self {
-        bytes.0
+        bytes.0 .0 .0
     }
 }
 
@@ -53,7 +55,7 @@ impl<Address, Call, Signature, Extra> codec::Encode
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
     fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
-        dest.write(&self.0)
+        dest.write(self.bytes())
     }
 }
 
@@ -66,7 +68,7 @@ impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
         _types: &scale_info::PortableRegistry,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
-        out.extend_from_slice(&self.0);
+        out.extend_from_slice(self.bytes());
         Ok(())
     }
 }

@@ -4,7 +4,6 @@
 
 use crate::{node_runtime, test_context};
 use codec::Encode;
-use core::marker::PhantomData;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 
