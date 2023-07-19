@@ -10,6 +10,7 @@ use zeroize::Zeroize;
 /// This is taken from `substrate-bip39` so that we can keep dependencies in line, and
 /// is the same logic that sp-core uses to go from mnemonic entropy to seed. Returns
 /// `None` if invalid length.
+#[allow(dead_code)]
 pub fn seed_from_entropy(entropy: &[u8], password: &str) -> Option<[u8; 64]> {
     if entropy.len() < 16 || entropy.len() > 32 || entropy.len() % 4 != 0 {
         return None;
