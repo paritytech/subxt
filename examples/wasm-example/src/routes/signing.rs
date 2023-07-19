@@ -1,4 +1,3 @@
-
 use anyhow::anyhow;
 use futures::FutureExt;
 
@@ -6,12 +5,12 @@ use subxt::{OnlineClient, PolkadotConfig};
 
 use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::SubmittableExtrinsic;
-use subxt::utils::{AccountId32, MultiSignature};
 use subxt::tx::TxPayload;
+use subxt::utils::{AccountId32, MultiSignature};
 
-use web_sys::{HtmlInputElement};
+use crate::services::{extension_signature_for_partial_extrinsic, get_accounts, polkadot, Account};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
-use crate::services::{Account, extension_signature_for_partial_extrinsic, get_accounts, polkadot};
 
 pub struct SigningExamplesComponent {
     message: String,
@@ -26,7 +25,9 @@ impl SigningExamplesComponent {
     fn set_message(&mut self, message: String) {
         let remark_call = polkadot::tx().system().remark(message.as_bytes().to_vec());
         let online_client = self.online_client.as_ref().unwrap();
-        let remark_call_bytes = remark_call.encode_call_data(&online_client.metadata()).unwrap();
+        let remark_call_bytes = remark_call
+            .encode_call_data(&online_client.metadata())
+            .unwrap();
         self.remark_call_bytes = remark_call_bytes;
         self.message = message;
     }
@@ -50,15 +51,13 @@ pub enum SigningStage {
 pub enum SubmittingStage {
     Initial {
         signed_extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
-
     },
     Submitting,
     Success {
-        remark_event: polkadot::system::events::ExtrinsicSuccess
+        remark_event: polkadot::system::events::ExtrinsicSuccess,
     },
     Error(anyhow::Error),
 }
-
 
 pub enum Message {
     Error(anyhow::Error),
@@ -68,10 +67,13 @@ pub enum Message {
     ReceivedAccounts(Vec<Account>),
     /// usize represents account index in Vec<Account>
     SignWithAccount(usize),
-    ReceivedSignature(MultiSignature, SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>),
+    ReceivedSignature(
+        MultiSignature,
+        SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+    ),
     SubmitSigned,
     ExtrinsicFinalized {
-        remark_event: polkadot::system::events::ExtrinsicSuccess
+        remark_event: polkadot::system::events::ExtrinsicSuccess,
     },
     ExtrinsicFailed(anyhow::Error),
 }
@@ -95,7 +97,6 @@ impl Component for SigningExamplesComponent {
             remark_call_bytes: vec![],
         }
     }
-
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
@@ -130,7 +131,9 @@ impl Component for SigningExamplesComponent {
 
                     self.stage = SigningStage::Signing(account.clone());
 
-                    let remark_call = polkadot::tx().system().remark(self.message.as_bytes().to_vec());
+                    let remark_call = polkadot::tx()
+                        .system()
+                        .remark(self.message.as_bytes().to_vec());
 
                     let api = self.online_client.as_ref().unwrap().clone();
 
@@ -167,7 +170,8 @@ impl Component for SigningExamplesComponent {
             }
             Message::ReceivedSignature(signature, signed_extrinsic) => {
                 if let SigningStage::Signing(account) = &self.stage {
-                    let signed_extrinsic_hex = format!("0x{}", hex::encode(signed_extrinsic.encoded()));
+                    let signed_extrinsic_hex =
+                        format!("0x{}", hex::encode(signed_extrinsic.encoded()));
                     self.stage = SigningStage::SigningSuccess {
                         signer_account: account.clone(),
                         signature,
@@ -177,33 +181,46 @@ impl Component for SigningExamplesComponent {
                 }
             }
             Message::SubmitSigned => {
-                if let SigningStage::SigningSuccess { submitting_stage: submitting_stage @ SubmittingStage::Initial { .. }, .. } = &mut self.stage {
+                if let SigningStage::SigningSuccess {
+                    submitting_stage: submitting_stage @ SubmittingStage::Initial { .. },
+                    ..
+                } = &mut self.stage
+                {
                     let SubmittingStage::Initial { signed_extrinsic } = std::mem::replace(submitting_stage, SubmittingStage::Submitting) else {
                         panic!("unreachable")
                     };
 
                     ctx.link().send_future(async move {
-                        match submit_wait_finalized_and_get_extrinsic_success_event(signed_extrinsic).await {
+                        match submit_wait_finalized_and_get_extrinsic_success_event(
+                            signed_extrinsic,
+                        )
+                        .await
+                        {
                             Ok(remark_event) => Message::ExtrinsicFinalized { remark_event },
-                            Err(err) => Message::ExtrinsicFailed(err)
+                            Err(err) => Message::ExtrinsicFailed(err),
                         }
                     });
                 }
             }
             Message::ExtrinsicFinalized { remark_event } => {
-                if let SigningStage::SigningSuccess { submitting_stage, .. } = &mut self.stage {
+                if let SigningStage::SigningSuccess {
+                    submitting_stage, ..
+                } = &mut self.stage
+                {
                     *submitting_stage = SubmittingStage::Success { remark_event }
                 }
             }
             Message::ExtrinsicFailed(err) => {
-                if let SigningStage::SigningSuccess { submitting_stage, .. } = &mut self.stage {
+                if let SigningStage::SigningSuccess {
+                    submitting_stage, ..
+                } = &mut self.stage
+                {
                     *submitting_stage = SubmittingStage::Error(err)
                 }
             }
         };
         true
     }
-
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let message_as_hex_html = || {
@@ -216,9 +233,13 @@ impl Component for SigningExamplesComponent {
         };
 
         let message_html: Html = match &self.stage {
-            SigningStage::Error(_) | SigningStage::EnterMessage | SigningStage::CreatingOnlineClient => html!(<></>),
+            SigningStage::Error(_)
+            | SigningStage::EnterMessage
+            | SigningStage::CreatingOnlineClient => html!(<></>),
             _ => {
-                let _remark_call = polkadot::tx().system().remark(self.message.as_bytes().to_vec());
+                let _remark_call = polkadot::tx()
+                    .system()
+                    .remark(self.message.as_bytes().to_vec());
                 html!(
                     <div>
                         <div class="mb">
@@ -233,9 +254,7 @@ impl Component for SigningExamplesComponent {
 
         let signer_account_html: Html = match &self.stage {
             SigningStage::Signing(signer_account)
-            | SigningStage::SigningSuccess {
-                signer_account, ..
-            } => {
+            | SigningStage::SigningSuccess { signer_account, .. } => {
                 html!(
                     <div class="mb">
                             <b>{"Account used for signing: "}</b> <br/>
@@ -310,10 +329,13 @@ impl Component for SigningExamplesComponent {
             } => {
                 let submitting_stage_html = match submitting_stage {
                     SubmittingStage::Initial { .. } => {
-                        let submit_extrinsic_click = ctx.link().callback(move |_| Message::SubmitSigned);
+                        let submit_extrinsic_click =
+                            ctx.link().callback(move |_| Message::SubmitSigned);
                         html!(<button onclick={submit_extrinsic_click}> {"=> Submit the signed extrinsic"} </button>)
                     }
-                    SubmittingStage::Submitting => html!(<div class="loading"><b>{"Submitting Extrinsic (please wait)..."}</b></div>),
+                    SubmittingStage::Submitting => {
+                        html!(<div class="loading"><b>{"Submitting Extrinsic... (please wait a few seconds)"}</b></div>)
+                    }
                     SubmittingStage::Success { remark_event } => {
                         html!(<div style="overflow-wrap: break-word;"> <b>{"Successfully submitted Extrinsic. Event:"}</b> <br/> {format!("{:?}", remark_event)} </div>)
                     }
@@ -350,8 +372,11 @@ impl Component for SigningExamplesComponent {
     }
 }
 
-async fn submit_wait_finalized_and_get_extrinsic_success_event(extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
-    let events = extrinsic.submit_and_watch()
+async fn submit_wait_finalized_and_get_extrinsic_success_event(
+    extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
+    let events = extrinsic
+        .submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -365,4 +390,3 @@ async fn submit_wait_finalized_and_get_extrinsic_success_event(extrinsic: Submit
     let success = events.find_first::<polkadot::system::events::ExtrinsicSuccess>()?;
     success.ok_or(anyhow!("ExtrinsicSuccess not found in events"))
 }
-

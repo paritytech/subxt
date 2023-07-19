@@ -1,15 +1,15 @@
-use futures::StreamExt;
-use std::fmt::Write;
-use subxt::{self, OnlineClient, PolkadotConfig};
-use subxt::tx::{PartialExtrinsic};
-use yew::{AttrValue, Callback};
-use js_sys::{Promise};
 use anyhow::anyhow;
+use futures::StreamExt;
+use js_sys::Promise;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use std::fmt::Write;
 use subxt::ext::codec::Encode;
+use subxt::tx::PartialExtrinsic;
+use subxt::{self, OnlineClient, PolkadotConfig};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
+use yew::{AttrValue, Callback};
 
 #[subxt::subxt(runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
@@ -88,7 +88,6 @@ extern "C" {
     pub fn js_sign_payload(payload: String, source: String, address: String) -> Promise;
 }
 
-
 /// DTO to communicate with JavaScript
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Account {
@@ -138,25 +137,34 @@ pub async fn extension_signature_for_partial_extrinsic(
 
     let spec_version = encode_to_hex_reverse(&params.spec_version);
     let transaction_version = encode_to_hex_reverse(&params.transaction_version);
+    let mortality_checkpoint = encode_to_hex(&params.mortality_checkpoint);
+    let era = encode_to_hex(&params.era);
     let genesis_hash = encode_to_hex(&params.genesis_hash);
     let method = to_hex(partial_extrinsic.call_data());
     let nonce = encode_to_hex_reverse(&params.nonce);
-    let signed_extensions: Vec<String> = api.metadata().extrinsic().signed_extensions().iter().map(|e| e.identifier().to_string()).collect();
+    let signed_extensions: Vec<String> = api
+        .metadata()
+        .extrinsic()
+        .signed_extensions()
+        .iter()
+        .map(|e| e.identifier().to_string())
+        .collect();
+    let tip = encode_to_hex(&params.tip);
 
     let payload = json!({
         "specVersion": spec_version,
         "transactionVersion": transaction_version,
         "address": account_address,
-        "blockHash": genesis_hash, // immortal
-        "blockNumber": "0x00000000", // immortal
-        "era": "0x0000", // immortal
+        "blockHash": mortality_checkpoint,
+        "era": era,
         "genesisHash": genesis_hash,
         "method": method,
         "nonce": nonce,
         "signedExtensions": signed_extensions,
-        "tip": "0x00000000000000000000000000000000", // no tip
+        "tip": tip,
         "version": 4,
     });
+
     let payload = payload.to_string();
     let result = JsFuture::from(js_sign_payload(payload, account_source, account_address))
         .await
@@ -167,5 +175,3 @@ pub async fn extension_signature_for_partial_extrinsic(
     let signature = hex::decode(&signature[2..])?;
     Ok(signature)
 }
-
-

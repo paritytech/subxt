@@ -57,17 +57,20 @@ pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = "Tip: Debug"))]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
-    era: Era,
+    /// era
+    pub era: Era,
     /// nonce (account nonce sent along an extrinsic, such that no extrinsic is submitted twice)
     pub nonce: T::Index,
-    tip: Tip,
+    /// tip
+    pub tip: Tip,
     /// spec version
     pub spec_version: u32,
     /// transaction version
     pub transaction_version: u32,
     /// genesis hash of the chain
     pub genesis_hash: T::Hash,
-    mortality_checkpoint: T::Hash,
+    /// mortality checkpoint
+    pub mortality_checkpoint: T::Hash,
     marker: std::marker::PhantomData<T>,
 }
 

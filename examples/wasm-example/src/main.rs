@@ -11,14 +11,13 @@
 //! You need to have a local polkadot/substrate node with it's JSON-RPC HTTP server running at 127.0.0.1:9933 in order for the examples to be working.
 //! Also make sure your browser supports WASM.
 
-
 use routes::signing::SigningExamplesComponent;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
 use crate::routes::fetching::FetchingExamplesComponent;
-mod services;
 mod routes;
+mod services;
 
 #[derive(Routable, PartialEq, Eq, Clone, Debug)]
 pub enum Route {

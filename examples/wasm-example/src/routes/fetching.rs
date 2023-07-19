@@ -69,16 +69,16 @@ impl Component for FetchingExamplesComponent {
                         Some("Fetch the constant \"block_length\" of \"System\" pallet:".into());
                     ctx.link()
                         .send_future(services::fetch_constant_block_length().map(|result| {
-                            match result {
-                                Ok(value) => Message::Line(
-                                    format!(
-                                        "constant \"block_length\" of \"System\" pallet:\n    {value}"
-                                    )
-                                        .into(),
-                                ),
-                                Err(err) => Message::Error(err),
-                            }
-                        }))
+                        match result {
+                            Ok(value) => Message::Line(
+                                format!(
+                                    "constant \"block_length\" of \"System\" pallet:\n    {value}"
+                                )
+                                .into(),
+                            ),
+                            Err(err) => Message::Error(err),
+                        }
+                    }))
                 }
                 Button::FetchEvents => {
                     self.operation_title = Some("Fetch events:".into());
