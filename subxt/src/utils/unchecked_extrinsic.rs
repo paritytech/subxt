@@ -40,12 +40,11 @@ impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
 {
     fn encode_as_type_to(
         &self,
-        _type_id: u32,
-        _types: &scale_info::PortableRegistry,
+        type_id: u32,
+        types: &scale_info::PortableRegistry,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
-        self.0.encode_to(out);
-        Ok(())
+        self.0.encode_as_type_to(type_id, types, out)
     }
 }
 
