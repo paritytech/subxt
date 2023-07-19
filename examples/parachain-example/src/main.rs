@@ -1,15 +1,12 @@
-#[subxt::subxt(runtime_metadata_path = "statemint_metadata.scale")]
-pub mod statemint {}
-
-use parachain_example::statemint;
-use parachain_example::statemint_config_composed::StatemintConfig;
 use subxt::{
     Config, PolkadotConfig, SubstrateConfig,
     utils::{AccountId32, MultiAddress},
     OnlineClient,
 };
-
 use subxt_signer::sr25519::dev::{self};
+
+#[subxt::subxt(runtime_metadata_path = "statemint_metadata.scale")]
+pub mod statemint {}
 
 /// Custom config that works with Statemint:
 pub enum StatemintConfig {}
