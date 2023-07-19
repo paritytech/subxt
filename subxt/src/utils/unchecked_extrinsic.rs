@@ -24,8 +24,8 @@ pub struct UncheckedExtrinsic<Address, Call, Signature, Extra>(
 impl<Address, Call, Signature, Extra> codec::Encode
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
+    fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
+        dest.write(&self.0)
     }
 }
 
