@@ -70,7 +70,10 @@ jobs:
             # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
             # check it without. We can't enable subxt or web features here, so no cargo hack.
             - name: Cargo check subxt-signer
-              run: cargo check -p subxt-signer
+              run: |
+                cargo check -p subxt-signer
+                cargo check -p subxt-signer --no-default-features --features sr25519
+                cargo check -p subxt-signer --no-default-features --features ecdsa
 
             # We can't enable web features here, so no cargo hack.
             - name: Cargo check subxt-lightclient
