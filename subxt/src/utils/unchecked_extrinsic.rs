@@ -12,7 +12,7 @@
 use std::marker::PhantomData;
 
 use codec::{Decode, Encode};
-use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, Visitor};
 
 use super::{Encoded, Static};
 
@@ -78,13 +78,10 @@ impl<Address, Call, Signature, Extra> Visitor
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        _type_id: scale_decode::visitor::TypeId,
-        _types: &'info scale_info::PortableRegistry,
+        type_id: scale_decode::visitor::TypeId,
+        types: &'info scale_info::PortableRegistry,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
-        use scale_decode::{visitor::DecodeError, Error};
-        let decoded = UncheckedExtrinsic::decode(input)
-            .map_err(|e| Error::new(DecodeError::CodecError(e).into()));
-        DecodeAsTypeResult::Decoded(decoded)
+        DecodeAsTypeResult::Decoded(Self::Value::decode_as_type(input, type_id.0, types))
     }
 }
 
