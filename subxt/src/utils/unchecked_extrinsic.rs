@@ -11,13 +11,13 @@
 
 use std::marker::PhantomData;
 
-use codec::Decode;
+use codec::{Decode, Encode};
 use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 
 use super::{Encoded, Static};
 
 /// The unchecked extrinsic from substrate.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Encode, Decode, scale_encode::EncodeAsType)]
 pub struct UncheckedExtrinsic<Address, Call, Signature, Extra>(
     Static<Encoded>,
     #[codec(skip)] PhantomData<(Address, Call, Signature, Extra)>,
@@ -48,28 +48,6 @@ impl<Address, Call, Signature, Extra> From<UncheckedExtrinsic<Address, Call, Sig
 {
     fn from(bytes: UncheckedExtrinsic<Address, Call, Signature, Extra>) -> Self {
         bytes.0 .0 .0
-    }
-}
-
-impl<Address, Call, Signature, Extra> codec::Encode
-    for UncheckedExtrinsic<Address, Call, Signature, Extra>
-{
-    fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
-        dest.write(self.bytes())
-    }
-}
-
-impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
-    for UncheckedExtrinsic<Address, Call, Signature, Extra>
-{
-    fn encode_as_type_to(
-        &self,
-        _type_id: u32,
-        _types: &scale_info::PortableRegistry,
-        out: &mut Vec<u8>,
-    ) -> Result<(), scale_encode::Error> {
-        out.extend_from_slice(self.bytes());
-        Ok(())
     }
 }
 
