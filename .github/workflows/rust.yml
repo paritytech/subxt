@@ -60,6 +60,10 @@ jobs:
             - name: Cargo check all targets.
               run: cargo check --all-targets
 
+            # A basic check for WASM target specifically
+            - name: Cargo check WASM target
+              run: cargo check --no-default-features --features jsonrpsee,web --target wasm32-unknown-unknown
+
             # Next, check subxt features.
             # - `native` feature must always be enabled
             # - `web` feature is always ignored.
@@ -71,9 +75,9 @@ jobs:
             # check it without. We can't enable subxt or web features here, so no cargo hack.
             - name: Cargo check subxt-signer
               run: |
-                cargo check -p subxt-signer
-                cargo check -p subxt-signer --no-default-features --features sr25519
-                cargo check -p subxt-signer --no-default-features --features ecdsa
+                  cargo check -p subxt-signer
+                  cargo check -p subxt-signer --no-default-features --features sr25519
+                  cargo check -p subxt-signer --no-default-features --features ecdsa
 
             # We can't enable web features here, so no cargo hack.
             - name: Cargo check subxt-lightclient
@@ -271,8 +275,8 @@ jobs:
                   # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
                   # `node-key` provides a deterministic p2p address.
                   substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
-                  wasm-pack test --headless --firefox
-                  wasm-pack test --headless --chrome
+                  wasm-pack test --no-default-features --features jsonrpsee,web --headless  --firefox 
+                  wasm-pack test --no-default-features --features jsonrpsee,web --headless --chrome 
                   pkill substrate
               working-directory: testing/wasm-rpc-tests
 
