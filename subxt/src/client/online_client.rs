@@ -468,7 +468,7 @@ mod jsonrpsee_helpers {
 }
 
 // helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee", feature = "web"))]
+#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,
@@ -480,7 +480,7 @@ mod jsonrpsee_helpers {
 
     /// Build web RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url).await.unwrap();
+        let (sender, receiver) = web::connect(url).await.map_err(|e| Error::Transport(e.into()))?;
         Ok(ClientBuilder::default()
             .max_notifs_per_subscription(4096)
             .build_with_wasm(sender, receiver))

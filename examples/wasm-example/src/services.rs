@@ -138,7 +138,7 @@ pub async fn extension_signature_for_partial_extrinsic(
     let spec_version = encode_to_hex_reverse(&params.spec_version);
     let transaction_version = encode_to_hex_reverse(&params.transaction_version);
     let mortality_checkpoint = encode_to_hex(&params.mortality_checkpoint);
-    let era = encode_to_hex(&params.era);
+    let era = encode_to_hex(&params.era); // polkadot-js does not seem to accept mortal eras encoded like this
     let genesis_hash = encode_to_hex(&params.genesis_hash);
     let method = to_hex(partial_extrinsic.call_data());
     let nonce = encode_to_hex_reverse(&params.nonce);
@@ -156,6 +156,7 @@ pub async fn extension_signature_for_partial_extrinsic(
         "transactionVersion": transaction_version,
         "address": account_address,
         "blockHash": mortality_checkpoint,
+        "blockNumber": "0x00000000",
         "era": era,
         "genesisHash": genesis_hash,
         "method": method,
