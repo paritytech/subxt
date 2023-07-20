@@ -25,10 +25,6 @@ pub use substrate::SubstrateConfig;
 // automatically applies a 'static bound to all generic types (including this one),
 // and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
 pub trait Config: 'static {
-    /// Account index (aka nonce) type. This stores the number of previous
-    /// transactions associated with a sender account.
-    type Index: Debug + Copy + Decode + Into<u64>;
-
     /// The output of the `Hasher` function.
     type Hash: Debug
         + Copy
@@ -57,7 +53,7 @@ pub trait Config: 'static {
     type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Index, Self::Hash>;
+    type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Hash>;
 }
 
 /// This represents the hasher used by a node to hash things like block headers
@@ -95,14 +91,13 @@ pub trait Header: Sized + Encode {
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
 /// additional and extra parameters to pass to an extrinsic (see [`ExtrinsicParams`]),
 /// and returns a type implementing [`Config`] with those new [`ExtrinsicParams`].
-pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> {
+pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Hash>> {
     _marker: std::marker::PhantomData<(T, E)>,
 }
 
-impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Index, T::Hash>> Config
+impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Hash>> Config
     for WithExtrinsicParams<T, E>
 {
-    type Index = T::Index;
     type Hash = T::Hash;
     type AccountId = T::AccountId;
     type Address = T::Address;

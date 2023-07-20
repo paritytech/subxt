@@ -7,8 +7,6 @@ use subxt::{
 /// more information about each type):
 enum MyConfig {}
 impl Config for MyConfig {
-    // This is different from the default `u32`:
-    type Index = u64;
     // We can point to the default types if we don't need to change things:
     type Hash = <SubstrateConfig as Config>::Hash;
     type Hasher = <SubstrateConfig as Config>::Hasher;
