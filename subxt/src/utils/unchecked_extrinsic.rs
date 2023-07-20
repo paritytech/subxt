@@ -107,3 +107,29 @@ impl<Address, Call, Signature, Extra> IntoVisitor
         UncheckedExtrinsicDecodeAsTypeVisitor(PhantomData)
     }
 }
+
+#[cfg(test)]
+pub mod tests {
+    use super::*;
+
+    #[test]
+    fn unchecked_extrinsic_encoding() {
+        let tx_bytes = vec![1, 2, 3];
+
+        let unchecked_extrinsic = UncheckedExtrinsic::<(), (), (), ()>::new(tx_bytes.clone());
+        let encoded_tx_bytes = unchecked_extrinsic.encode();
+
+        // The encoded representation must not alter the provided bytes.
+        assert_eq!(tx_bytes, encoded_tx_bytes);
+
+        // However, for decoding we expect to be able to read the extrinsic from the wire
+        // which would be length prefixed.
+        let wire_bytes = tx_bytes.encode();
+        let decoded_tx =
+            UncheckedExtrinsic::<(), (), (), ()>::decode(&mut &wire_bytes[..]).unwrap();
+        let encoded_tx_bytes = decoded_tx.encode();
+
+        assert_eq!(decoded_tx.bytes(), encoded_tx_bytes);
+        assert_eq!(tx_bytes, encoded_tx_bytes);
+    }
+}
