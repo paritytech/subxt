@@ -20,7 +20,6 @@ pub use primitive_types::{H256, U256};
 pub enum SubstrateConfig {}
 
 impl Config for SubstrateConfig {
-    type Index = u32;
     type Hash = H256;
     type AccountId = AccountId32;
     type Address = MultiAddress<Self::AccountId, u32>;
