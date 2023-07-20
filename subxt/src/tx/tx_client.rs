@@ -110,7 +110,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     pub fn create_partial_signed_with_nonce<Call>(
         &self,
         call: &Call,
-        account_nonce: impl Into<u64>,
+        account_nonce: u64,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
@@ -149,7 +149,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         signer: &Signer,
-        account_nonce: impl Into<u64>,
+        account_nonce: u64,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where

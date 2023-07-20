@@ -27,7 +27,7 @@ pub trait ExtrinsicParams<Hash>: Debug + 'static {
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: impl Into<u64>,
+        nonce: u64,
         genesis_hash: Hash,
         other_params: Self::OtherParams,
     ) -> Self;
@@ -131,7 +131,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Hash>
         // Provided from subxt client:
         spec_version: u32,
         transaction_version: u32,
-        nonce: impl Into<u64>,
+        nonce: u64,
         genesis_hash: T::Hash,
         // Provided externally:
         other_params: Self::OtherParams,
@@ -140,7 +140,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Hash>
             era: other_params.era,
             mortality_checkpoint: other_params.mortality_checkpoint.unwrap_or(genesis_hash),
             tip: other_params.tip,
-            nonce: nonce.into(),
+            nonce,
             spec_version,
             transaction_version,
             genesis_hash,
