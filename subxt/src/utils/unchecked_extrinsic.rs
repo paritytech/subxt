@@ -39,6 +39,11 @@ impl<Address, Call, Signature, Extra> Decode
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
     fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        // The bytes for an UncheckedExtrinsic are first a compact
+        // encoded length, and then the bytes following. This is the
+        // same encoding as a Vec, so easiest ATM is just to decode 
+        // into that, and then encode the vec bytes to get our extrinsic 
+        // bytes, which we save into an `Encoded` to preserve as-is.
         let xt_vec: Vec<u8> = Decode::decode(input)?;
         Ok(UncheckedExtrinsic::new(xt_vec))
     }
