@@ -71,8 +71,9 @@
 //! recent releases). Typically, to use Subxt to talk to some custom Substrate node (for example a
 //! parachain node), you'll want to:
 //!
-//! 1. [Generate an interface](setup::codegen).
-//! 2. [Configure and instantiate the client](setup::client).
+//! 1. [Generate an interface](setup::codegen)
+//! 2. [Create a config](setup::config)
+//! 3. [Use the config to instantiate the client](setup::client)
 //!
 //! Follow the above links to learn more about each step.
 //!
@@ -92,5 +93,14 @@
 //! - [Runtime APIs](usage::runtime_apis): Subxt can make calls into pallet runtime APIs to retrieve
 //!   data.
 //!
+//! ## Examples
+//!
+//! Some complete, self contained examples which are not a part of this guide:
+//!
+//! - [`parachain-example`](https://github.com/paritytech/subxt/tree/master/examples/parachain-example) is an example
+//!   which uses Zombienet to spawn a parachain locally, and then connects to it using Subxt.
+//! - [`wasm-example`](https://github.com/paritytech/subxt/tree/master/examples/wasm-example) is an example of writing
+//!   a Rust app that contains a Yew based UI, uses Subxt to interact with a chain, and compiles to WASM in order to
+//!   run entirely in the browser.
 pub mod setup;
 pub mod usage;

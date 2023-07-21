@@ -9,6 +9,7 @@ pub mod bits;
 mod multi_address;
 mod multi_signature;
 mod static_type;
+mod unchecked_extrinsic;
 mod wrapper_opaque;
 
 use codec::{Compact, Decode, Encode};
@@ -18,6 +19,7 @@ pub use account_id::AccountId32;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
+pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
@@ -26,7 +28,7 @@ pub use primitive_types::{H160, H256, H512};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {
