@@ -7,7 +7,6 @@ use subxt::config::{Config, ExtrinsicParams};
 pub enum StatemintConfig {}
 
 impl Config for StatemintConfig {
-    type Index = u32;
     type Hash = subxt::utils::H256;
     type AccountId = subxt::utils::AccountId32;
     type Address = subxt::utils::MultiAddress<Self::AccountId, ()>;
@@ -23,7 +22,7 @@ pub struct StatemintExtrinsicParams {
     additional_params: StatemintAdditionalParams,
 }
 
-impl ExtrinsicParams<u32, H256> for StatemintExtrinsicParams {
+impl ExtrinsicParams<H256> for StatemintExtrinsicParams {
     // We need these additional values that aren't otherwise
     // provided. Calls like api.tx().sign_and_submit_then_watch()
     // allow the user to provide an instance of these, so it's wise
@@ -38,7 +37,7 @@ impl ExtrinsicParams<u32, H256> for StatemintExtrinsicParams {
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: u32,
+        nonce: u64,
         genesis_hash: H256,
         other_params: Self::OtherParams,
     ) -> Self {
@@ -70,7 +69,7 @@ impl ExtrinsicParams<u32, H256> for StatemintExtrinsicParams {
 #[derive(Encode, Debug, Clone, Eq, PartialEq)]
 pub struct StatemintExtraParams {
     era: sp_runtime::generic::Era,
-    nonce: u32,
+    nonce: u64,
     charge: ChargeAssetTxPayment,
 }
 

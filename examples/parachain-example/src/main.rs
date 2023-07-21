@@ -12,7 +12,6 @@ pub mod statemint {}
 pub enum StatemintConfig {}
 
 impl Config for StatemintConfig {
-    type Index = <PolkadotConfig as Config>::Index;
     type Hash = <PolkadotConfig as Config>::Hash;
     type AccountId = <PolkadotConfig as Config>::AccountId;
     type Address = <PolkadotConfig as Config>::Address;

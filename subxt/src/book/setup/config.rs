@@ -26,16 +26,15 @@
 //! Creating the config from scratch is the most arduous approach but also the most flexible, so first we'll walk through
 //! how to do this, and then we'll show how to simplify the process where possible.
 //!
-//! ### AccountId, Index, Hash, Hasher and Header
+//! ### AccountId, Hash, Hasher and Header
 //!
 //! For these config types, we need to find out where the parachain runtime implements the `frame_system::Config` trait.
 //! Look for a code fragment like `impl frame_system::Config for Runtime { ... }` In the source code.
 //! For Statemint it looks like [this](https://github.com/paritytech/cumulus/blob/e2b7ad2061824f490c08df27a922c64f50accd6b/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L179)
-//! at the time of writing. The `AccountId`, `Index`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
+//! at the time of writing. The `AccountId`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
 //! correspond to the ones we want to use for implementing [crate::Config]. In the Case of Statemint (Asset Hub) they are:
 //!
 //! - AccountId: [`sp_core::crypto::AccountId32`]
-//! - Index: [`u32`]
 //! - Hash: [`sp_core::H256`]
 //! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): [`sp_runtime::traits::BlakeTwo256`]
 //! - Header: [`sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>`](sp_runtime::generic::Header)
@@ -112,7 +111,7 @@
 //! | [`frame_system::CheckTxVersion`](https://docs.rs/frame-system/latest/frame_system/struct.CheckTxVersion.html)             | ()                                                                                                                                                       | [u32]                            |
 //! | [`frame_system::CheckGenesis`](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)                 | ()                                                                                                                                                       | `Config::Hash` = [sp_core::H256] |
 //! | [`frame_system::CheckMortality`](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)             | [sp_runtime::generic::Era]                                                                                                                               | `Config::Hash` = [sp_core::H256] |
-//! | [`frame_system::CheckNonce`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)                     | `Config::Index` = [u32]                                                                                                                                  | ()                               |
+//! | [`frame_system::CheckNonce`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)                     | `frame_system::pallet::Config::Index` = u32                                                                                                              | ()                               |
 //! | [`frame_system::CheckWeight`](https://docs.rs/frame-system/latest/frame_system/struct.CheckWeight.html)                   | ()                                                                                                                                                       | ()                               |
 //! | [`frame_system::ChargeAssetTxPayment`](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
 //!
@@ -147,7 +146,6 @@
 //! pub enum StatemintConfig {}
 //!
 //! impl Config for StatemintConfig {
-//!     type Index = <PolkadotConfig as Config>::Index;
 //!     type Hash = <PolkadotConfig as Config>::Hash;
 //!     type AccountId = <PolkadotConfig as Config>::AccountId;
 //!     type Address = <PolkadotConfig as Config>::Address;
