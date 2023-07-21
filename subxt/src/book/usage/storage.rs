@@ -47,7 +47,7 @@
 //! pub mod polkadot {}
 //!
 //! // A static query capable of iterating over accounts:
-//! let storage_query = polkadot::storage().system().account_root();
+//! let storage_query = polkadot::storage().system().account_iter();
 //! // A dynamic query to do the same:
 //! let storage_query = subxt::dynamic::storage_root("System", "Account");
 //! ```
