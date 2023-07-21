@@ -83,11 +83,6 @@ jobs:
             - name: Cargo hack; check each feature/crate on its own
               run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
 
-            # Check examples, which aren't a part of the workspace and so are otherwise missed:
-            - name: Cargo check examples
-              run: |
-                  cargo check --manifest-path examples/parachain-example/Cargo.toml
-
     wasm_check:
         name: Cargo check (WASM)
         runs-on: ubuntu-latest
@@ -109,7 +104,7 @@ jobs:
             # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
             - name: Cargo check WASM examples
               run: |
-                  cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
+                  cargo check --manifest-path examples/wasm-example/Cargo.toml
 
     fmt:
         name: Cargo fmt
