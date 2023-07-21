@@ -66,8 +66,8 @@
 //! There are two main ways to create a compatible signer instance:
 //! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
 //! for chains which require sr25519 or ecdsa signatures (requires the `subxt` feature to be enabled).
-//! 2. Alternately, Subxt can use instances of Substrate's [`sp_core::Pair`] to sign things by wrapping
-//! them in a [`crate::tx::PairSigner`] (requires the `substrate-compat` feature to be enabled).
+//! 2. Alternately, Subxt can use instances of Substrate's `sp_core::Pair` to sign things by wrapping
+//! them in a `crate::tx::PairSigner` (requires the `substrate-compat` feature to be enabled).
 //!
 //! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
 //! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
@@ -116,7 +116,7 @@
 //! }
 //! ```
 //!
-//! See the `subxt_signer` crate or the [`sp_core::Pair`] docs for more ways to construct
+//! See the `subxt_signer` crate or the `sp_core::Pair` docs for more ways to construct
 //! and work with key pairs.
 //!
 //! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
