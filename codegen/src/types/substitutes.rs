@@ -99,6 +99,14 @@ impl TypeSubstitutes {
                 parse_quote!(#crate_path::utils::KeyedVec),
             ),
             (path_segments!(BTreeSet), parse_quote!(::std::vec::Vec)),
+            // The `UncheckedExtrinsic(pub Vec<u8>)` is part of the runtime API calls.
+            // The inner bytes represent the encoded extrinsic, however when deriving the
+            // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes
+            // being altered by adding the length prefix in front of them.
+            (
+                path_segments!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
+                parse_quote!(#crate_path::utils::UncheckedExtrinsic),
+            ),
         ];
 
         let default_substitutes = defaults
@@ -339,7 +347,7 @@ impl<T: scale_info::form::Form> From<&scale_info::Path<T>> for PathSegments {
 /// to = ::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>
 /// ```
 ///
-/// And we encounter a `sp_runtime::MultiAddress<Foo, bar>`, then we will pass the `::sp_runtime::MultiAddress<A, B>`
+/// And we encounter a `sp_runtime::MultiAddress<Foo, Bar>`, then we will pass the `::sp_runtime::MultiAddress<A, B>`
 /// type param value into this call to turn it into `::sp_runtime::MultiAddress<Foo, Bar>`.
 fn replace_path_params_recursively<I: Borrow<syn::Ident>, P: Borrow<TypePath>>(
     path: &mut syn::Path,
