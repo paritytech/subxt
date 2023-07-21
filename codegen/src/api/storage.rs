@@ -102,7 +102,7 @@ fn generate_storage_entry_fns(
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
-    
+
     let is_defaultable_type = match storage_entry.modifier() {
         StorageEntryModifier::Default => quote!(#crate_path::storage::address::Yes),
         StorageEntryModifier::Optional => quote!(()),
