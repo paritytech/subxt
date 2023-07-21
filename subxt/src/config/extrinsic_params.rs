@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 /// "additional" parameters that are signed and used in transactions.
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
-pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
+pub trait ExtrinsicParams<Hash>: Debug + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
@@ -27,7 +27,7 @@ pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: Index,
+        nonce: u64,
         genesis_hash: Hash,
         other_params: Self::OtherParams,
     ) -> Self;
@@ -60,7 +60,7 @@ pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
     /// era
     pub era: Era,
     /// nonce (account nonce sent along an extrinsic, such that no extrinsic is submitted twice)
-    pub nonce: T::Index,
+    pub nonce: u64,
     /// tip
     pub tip: Tip,
     /// spec version
@@ -129,7 +129,7 @@ impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash>
+impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Hash>
     for BaseExtrinsicParams<T, Tip>
 {
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
@@ -138,7 +138,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash
         // Provided from subxt client:
         spec_version: u32,
         transaction_version: u32,
-        nonce: T::Index,
+        nonce: u64,
         genesis_hash: T::Hash,
         // Provided externally:
         other_params: Self::OtherParams,
@@ -156,7 +156,7 @@ impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash
     }
 
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        let nonce: u64 = self.nonce.into();
+        let nonce: u64 = self.nonce;
         let tip = Encoded(self.tip.encode());
         (self.era, Compact(nonce), tip).encode_to(v);
     }

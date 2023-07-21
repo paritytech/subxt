@@ -4,10 +4,11 @@
 
 use std::borrow::Cow;
 
-use codec::{Compact, Encode};
+use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
 
+use crate::error::DecodeError;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Hasher},
@@ -109,8 +110,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     pub fn create_partial_signed_with_nonce<Call>(
         &self,
         call: &Call,
-        account_nonce: T::Index,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        account_nonce: u64,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -126,7 +127,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let additional_and_extra_params = {
             // Obtain spec version and transaction version from the runtime version of the client.
             let runtime = self.client.runtime_version();
-            <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::new(
+            <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::new(
                 runtime.spec_version,
                 runtime.transaction_version,
                 account_nonce,
@@ -148,8 +149,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         signer: &Signer,
-        account_nonce: T::Index,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        account_nonce: u64,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -175,15 +176,26 @@ where
     C: OnlineClientT<T>,
 {
     /// Get the account nonce for a given account ID.
-    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<T::Index, Error> {
-        self.client
+    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
+        let account_nonce_bytes = self
+            .client
             .rpc()
-            .state_call(
+            .state_call_raw(
                 "AccountNonceApi_account_nonce",
                 Some(&account_id.encode()),
                 None,
             )
-            .await
+            .await?;
+
+        // custom decoding from a u16/u32/u64 into a u64, based on the number of bytes we got back.
+        let cursor = &mut &account_nonce_bytes[..];
+        let account_nonce: u64 = match account_nonce_bytes.len(){
+            2 => u16::decode(cursor)?.into(),
+            4 => u32::decode(cursor)?.into(),
+            8 => u64::decode(cursor)?,
+            _ => return Err(Error::Decode(DecodeError::custom(format!("state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)", account_nonce_bytes.len()))))
+        };
+        Ok(account_nonce)
     }
 
     /// Creates a partial signed extrinsic, without submitting it.
@@ -191,7 +203,7 @@ where
         &self,
         call: &Call,
         account_id: &T::AccountId,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -205,7 +217,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -228,7 +240,7 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
             .await
@@ -242,7 +254,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
@@ -272,7 +284,7 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
     }
@@ -289,7 +301,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
