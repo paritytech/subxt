@@ -50,7 +50,7 @@ mod pair_signer {
     where
         T: Config,
         Pair: PairT,
-        // We go via an sp_runtime::MultiSignature. We can probably generalise this
+        // We go via an `sp_runtime::MultiSignature`. We can probably generalise this
         // by implementing some of these traits on our built-in MultiSignature and then
         // requiring them on all T::Signatures, to avoid any go-between.
         <SpMultiSignature as Verify>::Signer: From<Pair::Public>,
