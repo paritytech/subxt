@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a storage query to iterate over account information.
-    let storage_query = polkadot::storage().system().account_root();
+    let storage_query = polkadot::storage().system().account_iter();
 
     // Get back an iterator of results (here, we are fetching 10 items at
     // a time from the node, but we always iterate over one at a time).

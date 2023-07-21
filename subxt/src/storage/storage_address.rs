@@ -50,7 +50,7 @@ pub trait StorageAddress {
 pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
-/// via the `subxt` macro) or dynamic values via [`dynamic`] and [`dynamic_root`].
+/// via the `subxt` macro) or dynamic values via [`dynamic`] and [`dynamic_iter`].
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
@@ -229,7 +229,7 @@ pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKe
 }
 
 /// Construct a new dynamic storage lookup to the root of some entry.
-pub fn dynamic_root(
+pub fn dynamic_iter(
     pallet_name: impl Into<String>,
     entry_name: impl Into<String>,
 ) -> DynamicAddress<Value> {
