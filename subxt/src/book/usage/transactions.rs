@@ -77,43 +77,43 @@
 //! Let's see how to use each of these approaches:
 //!
 //! ```rust
-//! #[cfg(feature = "substrate-compat")]
-//! {
-//!     use subxt::config::PolkadotConfig;
-//!     use std::str::FromStr;
+//! # #[cfg(feature = "substrate-compat")]
+//! # {
+//! use subxt::config::PolkadotConfig;
+//! use std::str::FromStr;
 //!
-//!     //// 1. Use a `subxt_signer` impl:
-//!     use subxt_signer::{ SecretUri, sr25519 };
+//! //// 1. Use a `subxt_signer` impl:
+//! use subxt_signer::{ SecretUri, sr25519 };
 //!
-//!     // Get hold of a `Signer` for a test account:
-//!     let alice = sr25519::dev::alice();
+//! // Get hold of a `Signer` for a test account:
+//! let alice = sr25519::dev::alice();
 //!
-//!     // Or generate a keypair, here from an SURI:
-//!     let uri = SecretUri::from_str("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password")
-//!         .expect("valid URI");
-//!     let keypair = sr25519::Keypair::from_uri(&uri)
-//!         .expect("valid keypair");
+//! // Or generate a keypair, here from an SURI:
+//! let uri = SecretUri::from_str("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password")
+//!     .expect("valid URI");
+//! let keypair = sr25519::Keypair::from_uri(&uri)
+//!     .expect("valid keypair");
 //!
-//!     //// 2. Use the corresponding `sp_core::Pair` impl:
-//!     use subxt::tx::PairSigner;
-//!     use sp_core::Pair;
+//! //// 2. Use the corresponding `sp_core::Pair` impl:
+//! use subxt::tx::PairSigner;
+//! use sp_core::Pair;
 //!
-//!     // Get hold of a `Signer` for a test account:
-//!     let alice = sp_keyring::AccountKeyring::Alice.pair();
-//!     let alice = PairSigner::<PolkadotConfig,_>::new(alice);
+//! // Get hold of a `Signer` for a test account:
+//! let alice = sp_keyring::AccountKeyring::Alice.pair();
+//! let alice = PairSigner::<PolkadotConfig,_>::new(alice);
 //!
-//!     // Or generate a keypair, here from an SURI:
-//!     let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
-//!         .expect("valid URI");
-//!     let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
-//!     #
-//!     # // Test that these all impl Signer trait while we're here:
-//!     #
-//!     # fn is_subxt_signer(_signer: impl subxt::tx::Signer<PolkadotConfig>) {}
-//!     # is_subxt_signer(subxt_signer::sr25519::dev::alice());
-//!     # is_subxt_signer(subxt_signer::ecdsa::dev::alice());
-//!     # is_subxt_signer(PairSigner::<PolkadotConfig,_>::new(sp_keyring::AccountKeyring::Alice.pair()));
-//! }
+//! // Or generate a keypair, here from an SURI:
+//! let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
+//!     .expect("valid URI");
+//! let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
+//! #
+//! # // Test that these all impl Signer trait while we're here:
+//! #
+//! # fn is_subxt_signer(_signer: impl subxt::tx::Signer<PolkadotConfig>) {}
+//! # is_subxt_signer(subxt_signer::sr25519::dev::alice());
+//! # is_subxt_signer(subxt_signer::ecdsa::dev::alice());
+//! # is_subxt_signer(PairSigner::<PolkadotConfig,_>::new(sp_keyring::AccountKeyring::Alice.pair()));
+//! # }
 //! ```
 //!
 //! See the `subxt_signer` crate or the `sp_core::Pair` docs for more ways to construct
