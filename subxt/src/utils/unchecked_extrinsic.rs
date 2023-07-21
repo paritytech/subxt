@@ -114,7 +114,8 @@ pub mod tests {
 
     #[test]
     fn unchecked_extrinsic_encoding() {
-        let tx_bytes = vec![1, 2, 3];
+        // A tx is basically some bytes with a compact length prefix; ie an encoded vec:
+        let tx_bytes = vec![1u8, 2, 3].encode();
 
         let unchecked_extrinsic = UncheckedExtrinsic::<(), (), (), ()>::new(tx_bytes.clone());
         let encoded_tx_bytes = unchecked_extrinsic.encode();
@@ -124,12 +125,12 @@ pub mod tests {
 
         // However, for decoding we expect to be able to read the extrinsic from the wire
         // which would be length prefixed.
-        let wire_bytes = tx_bytes.encode();
-        let decoded_tx =
-            UncheckedExtrinsic::<(), (), (), ()>::decode(&mut &wire_bytes[..]).unwrap();
+        let decoded_tx = UncheckedExtrinsic::<(), (), (), ()>::decode(&mut &tx_bytes[..]).unwrap();
+        let decoded_tx_bytes = decoded_tx.bytes();
         let encoded_tx_bytes = decoded_tx.encode();
 
-        assert_eq!(decoded_tx.bytes(), encoded_tx_bytes);
-        assert_eq!(tx_bytes, encoded_tx_bytes);
+        assert_eq!(decoded_tx_bytes, encoded_tx_bytes);
+        // Ensure we can decode the tx and fetch only the tx bytes.
+        assert_eq!(vec![1, 2, 3], encoded_tx_bytes);
     }
 }
