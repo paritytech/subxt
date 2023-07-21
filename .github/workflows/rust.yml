@@ -104,7 +104,7 @@ jobs:
             # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
             - name: Cargo check WASM examples
               run: |
-                  cargo check --manifest-path examples/wasm-example/Cargo.toml
+                  cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
     fmt:
         name: Cargo fmt
