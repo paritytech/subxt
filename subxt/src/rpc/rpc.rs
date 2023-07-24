@@ -562,7 +562,7 @@ impl<T: Config> Rpc<T> {
             .into_iter()
             .map(|item| StorageQuery {
                 key: to_hex(item.key),
-                queue_type: item.queue_type,
+                query_type: item.query_type,
             })
             .collect();
 

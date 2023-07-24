@@ -736,7 +736,7 @@ pub struct StorageQuery<Key> {
     pub key: Key,
     /// The type of the storage query.
     #[serde(rename = "type")]
-    pub queue_type: StorageQueryType,
+    pub query_type: StorageQueryType,
 }
 
 /// The type of the storage query.

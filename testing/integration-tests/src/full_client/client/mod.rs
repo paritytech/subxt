@@ -547,7 +547,7 @@ async fn chainhead_unstable_storage() {
 
     let items = vec![StorageQuery {
         key: addr_bytes.as_slice(),
-        queue_type: StorageQueryType::Value,
+        query_type: StorageQueryType::Value,
     }];
     let mut sub = api
         .rpc()
