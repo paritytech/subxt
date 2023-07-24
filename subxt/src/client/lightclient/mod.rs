@@ -8,8 +8,14 @@ mod builder;
 mod rpc;
 
 use crate::{
+    blocks::BlocksClient,
     client::{OfflineClientT, OnlineClientT},
     config::Config,
+    constants::ConstantsClient,
+    events::EventsClient,
+    runtime_api::RuntimeApiClient,
+    storage::StorageClient,
+    tx::TxClient,
     OnlineClient,
 };
 pub use builder::LightClientBuilder;
@@ -49,6 +55,62 @@ pub enum LightClientError {
 #[derivative(Clone(bound = ""))]
 pub struct LightClient<T: Config>(OnlineClient<T>);
 
+impl<T: Config> LightClient<T> {
+    /// Construct a [`LightClient`] using its builder interface.
+    pub fn builder() -> LightClientBuilder<T> {
+        LightClientBuilder::new()
+    }
+
+    // We add the below impls so that we don't need to
+    // think about importing the OnlineClientT/OfflineClientT
+    // traits to use these things:
+
+    /// Return the [`crate::Metadata`] used in this client.
+    fn metadata(&self) -> crate::Metadata {
+        self.0.metadata()
+    }
+
+    /// Return the genesis hash.
+    fn genesis_hash(&self) -> <T as Config>::Hash {
+        self.0.genesis_hash()
+    }
+
+    /// Return the runtime version.
+    fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
+        self.0.runtime_version()
+    }
+
+    /// Work with transactions.
+    pub fn tx(&self) -> TxClient<T, Self> {
+        <Self as OfflineClientT<T>>::tx(self)
+    }
+
+    /// Work with events.
+    pub fn events(&self) -> EventsClient<T, Self> {
+        <Self as OfflineClientT<T>>::events(self)
+    }
+
+    /// Work with storage.
+    pub fn storage(&self) -> StorageClient<T, Self> {
+        <Self as OfflineClientT<T>>::storage(self)
+    }
+
+    /// Access constants.
+    pub fn constants(&self) -> ConstantsClient<T, Self> {
+        <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Work with blocks.
+    pub fn blocks(&self) -> BlocksClient<T, Self> {
+        <Self as OfflineClientT<T>>::blocks(self)
+    }
+
+    /// Work with runtime API.
+    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        <Self as OfflineClientT<T>>::runtime_api(self)
+    }
+}
+
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
     fn rpc(&self) -> &crate::rpc::Rpc<T> {
         self.0.rpc()
@@ -57,14 +119,14 @@ impl<T: Config> OnlineClientT<T> for LightClient<T> {
 
 impl<T: Config> OfflineClientT<T> for LightClient<T> {
     fn metadata(&self) -> crate::Metadata {
-        self.0.metadata()
+        self.metadata()
     }
 
     fn genesis_hash(&self) -> <T as Config>::Hash {
-        self.0.genesis_hash()
+        self.genesis_hash()
     }
 
     fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
-        self.0.runtime_version()
+        self.runtime_version()
     }
 }
