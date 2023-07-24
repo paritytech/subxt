@@ -49,6 +49,13 @@ pub enum LightClientError {
 #[derivative(Clone(bound = ""))]
 pub struct LightClient<T: Config>(OnlineClient<T>);
 
+impl <T: Config> LightClient<T> {
+    /// Construct a [`LightClient`] using its builder interface.
+    pub fn build() -> LightClientBuilder {
+        LightClientBuilder::new()
+    }
+}
+
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
     fn rpc(&self) -> &crate::rpc::Rpc<T> {
         self.0.rpc()

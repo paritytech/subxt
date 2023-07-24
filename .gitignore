@@ -6,3 +6,4 @@ cargo-timing*
 /examples/wasm-example/target
 /examples/parachain-example/target
 /examples/parachain-example/metadata/target
+.vscode
