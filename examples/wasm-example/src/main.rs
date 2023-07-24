@@ -1,4 +1,3 @@
-use futures::{self, FutureExt};
 use routes::signing::SigningExamplesComponent;
 use yew::prelude::*;
 use yew_router::prelude::*;
