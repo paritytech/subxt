@@ -39,7 +39,7 @@ use crate::{error::Error, utils::PhantomDataSendSync, Config, Metadata};
 
 use super::{
     rpc_params,
-    types::{self, ChainHeadEvent, FollowEvent},
+    types::{self, ChainHeadEvent, ChainHeadStorageEvent, FollowEvent, StorageQuery},
     RpcClient, RpcClientT, Subscription,
 };
 
@@ -555,14 +555,22 @@ impl<T: Config> Rpc<T> {
         &self,
         subscription_id: String,
         hash: T::Hash,
-        key: &[u8],
+        items: Vec<StorageQuery<&[u8]>>,
         child_key: Option<&[u8]>,
-    ) -> Result<Subscription<ChainHeadEvent<Option<String>>>, Error> {
+    ) -> Result<Subscription<ChainHeadStorageEvent<Option<String>>>, Error> {
+        let items: Vec<StorageQuery<String>> = items
+            .into_iter()
+            .map(|item| StorageQuery {
+                key: to_hex(item.key),
+                query_type: item.query_type,
+            })
+            .collect();
+
         let subscription = self
             .client
             .subscribe(
                 "chainHead_unstable_storage",
-                rpc_params![subscription_id, hash, to_hex(key), child_key.map(to_hex)],
+                rpc_params![subscription_id, hash, items, child_key.map(to_hex)],
                 "chainHead_unstable_stopStorage",
             )
             .await?;
