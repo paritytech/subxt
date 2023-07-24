@@ -12,8 +12,9 @@ use sp_core::storage::well_known_keys;
 use subxt::{
     error::{DispatchError, Error, TokenError},
     rpc::types::{
-        ChainHeadEvent, DryRunResult, DryRunResultBytes, FollowEvent, Initialized, RuntimeEvent,
-        RuntimeVersionEvent,
+        ChainHeadEvent, ChainHeadStorageEvent, DryRunResult, DryRunResultBytes, FollowEvent,
+        Initialized, RuntimeEvent, RuntimeVersionEvent, StorageQuery, StorageQueryType,
+        StorageResultType,
     },
     utils::AccountId32,
 };
@@ -544,14 +545,28 @@ async fn chainhead_unstable_storage() {
     let addr = node_runtime::storage().system().account(alice);
     let addr_bytes = api.storage().address_bytes(&addr).unwrap();
 
+    let items = vec![StorageQuery {
+        key: addr_bytes.as_slice(),
+        queue_type: StorageQueryType::Value,
+    }];
     let mut sub = api
         .rpc()
-        .chainhead_unstable_storage(sub_id, hash, &addr_bytes, None)
+        .chainhead_unstable_storage(sub_id, hash, items, None)
         .await
         .unwrap();
     let event = sub.next().await.unwrap().unwrap();
 
-    assert_matches!(event, ChainHeadEvent::<Option<String>>::Done(done) if done.result.is_some());
+    match event {
+        ChainHeadStorageEvent::<Option<String>>::Items(event) => {
+            assert_eq!(event.items.len(), 1);
+            assert_eq!(event.items[0].key, format!("0x{}", hex::encode(addr_bytes)));
+            assert_matches!(&event.items[0].result, StorageResultType::Value(value) if value.is_some());
+        }
+        _ => panic!("unexpected ChainHeadStorageEvent"),
+    };
+
+    let event = sub.next().await.unwrap().unwrap();
+    assert_matches!(event, ChainHeadStorageEvent::<Option<String>>::Done);
 }
 
 #[tokio::test]
