@@ -12,14 +12,15 @@ use std::sync::Arc;
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
-pub struct LightClientBuilder {
+pub struct LightClientBuilder<T: Config> {
     max_pending_requests: NonZeroU32,
     max_subscriptions: u32,
     bootnodes: Option<Vec<serde_json::Value>>,
     potential_relay_chains: Option<Vec<ChainId>>,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl Default for LightClientBuilder {
+impl<T: Config> Default for LightClientBuilder<T> {
     fn default() -> Self {
         Self {
             max_pending_requests: NonZeroU32::new(128)
@@ -27,13 +28,14 @@ impl Default for LightClientBuilder {
             max_subscriptions: 1024,
             bootnodes: None,
             potential_relay_chains: None,
+            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl LightClientBuilder {
+impl<T: Config> LightClientBuilder<T> {
     /// Create a new [`LightClientBuilder`].
-    pub fn new() -> LightClientBuilder {
+    pub fn new() -> LightClientBuilder<T> {
         LightClientBuilder::default()
     }
 
@@ -90,10 +92,7 @@ impl LightClientBuilder {
     ///
     /// Panics if being called outside of `tokio` runtime context.
     #[cfg(feature = "jsonrpsee")]
-    pub async fn build_from_url<T: Config, Url: AsRef<str>>(
-        self,
-        url: Url,
-    ) -> Result<LightClient<T>, Error> {
+    pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         let chain_spec = fetch_url(url.as_ref()).await?;
 
         self.build_client(chain_spec).await
@@ -120,7 +119,7 @@ impl LightClientBuilder {
     /// ## Panics
     ///
     /// Panics if being called outside of `tokio` runtime context.
-    pub async fn build<T: Config>(self, chain_spec: &str) -> Result<LightClient<T>, Error> {
+    pub async fn build(self, chain_spec: &str) -> Result<LightClient<T>, Error> {
         let chain_spec = serde_json::from_str(chain_spec)
             .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
 
@@ -128,7 +127,7 @@ impl LightClientBuilder {
     }
 
     /// Build the light client.
-    async fn build_client<T: Config>(
+    async fn build_client(
         self,
         mut chain_spec: serde_json::Value,
     ) -> Result<LightClient<T>, Error> {
