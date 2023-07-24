@@ -20,7 +20,8 @@ exclude = [
     "testing/wasm-rpc-tests",
     "testing/wasm-lightclient-tests",
     "signer/wasm-tests",
-    "examples/wasm-example"
+    "examples/wasm-example",
+    "examples/parachain-example"
 ]
 resolver = "2"
 

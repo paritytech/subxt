@@ -11,14 +11,16 @@
 //!
 //! Both clients are generic over a [`crate::config::Config`] trait, which is the way that we give
 //! the client certain information about how to interact with a node that isn't otherwise available
-//! or possible to include in the node metadata. Subxt ships out of the box with two default
-//! implementations:
+//! or possible to include in the node metadata.
+//!
+//! The [`crate::config::Config`] trait mimics the `frame_system::Config` trait and
+//! subxt ships out of the box with two default implementations:
 //!
 //! - [`crate::config::PolkadotConfig`] for talking to Polkadot nodes, and
 //! - [`crate::config::SubstrateConfig`] for talking to generic nodes built with Substrate.
 //!
-//! The latter will generally work in many cases, but will need modifying if the chain you'd like to
-//! connect to has altered any of the details mentioned in [the trait](`crate::config::Config`).
+//! The latter will generally work in many cases, but [may need special customization](super::config) if
+//! the node differs in any of the types the [`Config`](crate::config::Config) trait wants to know about.
 //!
 //! In the case of the [`crate::OnlineClient`], we have a few options to instantiate it:
 //!

@@ -135,7 +135,23 @@ mod substrate_impls {
         }
     }
 
+    impl Hasher for sp_runtime::traits::BlakeTwo256 {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
+
     impl Hasher for sp_core::KeccakHasher {
+        type Output = H256;
+
+        fn hash(s: &[u8]) -> Self::Output {
+            <Self as sp_core::Hasher>::hash(s)
+        }
+    }
+
+    impl Hasher for sp_runtime::traits::Keccak256 {
         type Output = H256;
 
         fn hash(s: &[u8]) -> Self::Output {

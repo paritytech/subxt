@@ -1,16 +1,4 @@
-//! This is a small WASM app using the Yew UI framework showcasing how to use Subxt's features in a WASM environment.
-//!
-//! To run the app locally use Trunk, a WASM bundler:
-//! ```
-//! cargo install --locked trunk
-//! ```
-//! Run the app locally:
-//! ```
-//! trunk serve --open
-//! ```
-//! You need to have a local polkadot/substrate node with it's JSON-RPC HTTP server running at 127.0.0.1:9933 in order for the examples to be working.
-//! Also make sure your browser supports WASM.
-
+use futures::{self, FutureExt};
 use routes::signing::SigningExamplesComponent;
 use yew::prelude::*;
 use yew_router::prelude::*;

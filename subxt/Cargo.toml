@@ -17,7 +17,7 @@ keywords = ["parity", "substrate", "blockchain"]
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native", "substrate-compat"]
+default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
