@@ -94,15 +94,25 @@ pub fn generate_runtime_api_from_url(
     should_gen_docs: bool,
     runtime_types_only: bool,
 ) -> Result<TokenStream2, CodegenError> {
-    // Fetch latest unstable version, if that fails fall back to the latest stable.
-    let bytes = match fetch_metadata_bytes_blocking(url, MetadataVersion::Unstable) {
-        Ok(bytes) => bytes,
-        Err(_) => fetch_metadata_bytes_blocking(url, MetadataVersion::Latest)?,
+    fn fetch_metadata(url: &Uri, version: MetadataVersion) -> Result<Metadata, CodegenError> {
+        let bytes = fetch_metadata_bytes_blocking(url, version)?;
+        Ok(Metadata::decode(&mut &bytes[..])?)
+    }
+
+    let metadata = match fetch_metadata(url, MetadataVersion::Unstable) {
+        Ok(metadata) => metadata,
+        Err(_) => match fetch_metadata(url, MetadataVersion::Latest) {
+            Ok(metadata) => metadata,
+            Err(_) => match fetch_metadata(url, MetadataVersion::Version(15)) {
+                Ok(metadata) => metadata,
+                Err(_) => fetch_metadata(url, MetadataVersion::Version(14))?,
+            },
+        },
     };
 
-    generate_runtime_api_from_bytes(
+    generate_runtime_api_with_metadata(
         item_mod,
-        &bytes,
+        metadata,
         derives,
         type_substitutes,
         crate_path,
@@ -135,6 +145,28 @@ pub fn generate_runtime_api_from_bytes(
 ) -> Result<TokenStream2, CodegenError> {
     let metadata = Metadata::decode(&mut &bytes[..])?;
 
+    generate_runtime_api_with_metadata(
+        item_mod,
+        metadata,
+        derives,
+        type_substitutes,
+        crate_path,
+        should_gen_docs,
+        runtime_types_only,
+    )
+}
+
+/// Similar to [`generate_runtime_api_from_bytes`] that works with decoded `subxt::Metadata` instead
+/// of raw bytes.
+fn generate_runtime_api_with_metadata(
+    item_mod: syn::ItemMod,
+    metadata: Metadata,
+    derives: DerivesRegistry,
+    type_substitutes: TypeSubstitutes,
+    crate_path: CratePath,
+    should_gen_docs: bool,
+    runtime_types_only: bool,
+) -> Result<TokenStream2, CodegenError> {
     let generator = RuntimeGenerator::new(metadata);
     if runtime_types_only {
         generator.generate_runtime_types(
