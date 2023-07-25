@@ -47,6 +47,8 @@ struct RuntimeMetadataArgs {
     no_default_derives: bool,
     #[darling(default)]
     no_default_substitutions: bool,
+    #[darling(default)]
+    unstable_metadata: darling::util::Flag,
 }
 
 #[derive(Debug, FromMeta)]
@@ -131,8 +133,15 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let should_gen_docs = args.generate_docs.is_present();
+    let unstable_metadata = args.unstable_metadata.is_present();
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
+            if unstable_metadata {
+                abort_call_site!(
+                    "The 'unstable_metadata' is expected only for `runtime_metadata_url`"
+                )
+            }
+
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
@@ -159,6 +168,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 crate_path,
                 should_gen_docs,
                 args.runtime_types_only,
+                unstable_metadata,
             )
             .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }

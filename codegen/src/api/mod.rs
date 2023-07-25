@@ -83,6 +83,7 @@ where
 /// * `crate_path` - Path to the `subxt` crate.
 /// * `should_gen_docs` - True if the generated API contains the documentation from the metadata.
 /// * `runtime_types_only` - Whether to limit code generation to only runtime types.
+/// * `unstable_metadata` - Whether to fetch the unstable metadata first.
 ///
 /// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api_from_url(
@@ -93,21 +94,24 @@ pub fn generate_runtime_api_from_url(
     crate_path: CratePath,
     should_gen_docs: bool,
     runtime_types_only: bool,
+    unstable_metadata: bool,
 ) -> Result<TokenStream2, CodegenError> {
     fn fetch_metadata(url: &Uri, version: MetadataVersion) -> Result<Metadata, CodegenError> {
         let bytes = fetch_metadata_bytes_blocking(url, version)?;
         Ok(Metadata::decode(&mut &bytes[..])?)
     }
 
-    let metadata = match fetch_metadata(url, MetadataVersion::Unstable) {
-        Ok(metadata) => metadata,
-        Err(_) => match fetch_metadata(url, MetadataVersion::Latest) {
+    let metadata = unstable_metadata
+        .then(|| fetch_metadata(url, MetadataVersion::Unstable).ok())
+        .flatten();
+
+    let metadata = if let Some(unstable) = metadata {
+        unstable
+    } else {
+        match fetch_metadata(url, MetadataVersion::Version(15)) {
             Ok(metadata) => metadata,
-            Err(_) => match fetch_metadata(url, MetadataVersion::Version(15)) {
-                Ok(metadata) => metadata,
-                Err(_) => fetch_metadata(url, MetadataVersion::Version(14))?,
-            },
-        },
+            Err(_) => fetch_metadata(url, MetadataVersion::Version(14))?,
+        }
     };
 
     generate_runtime_api_with_metadata(
