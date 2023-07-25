@@ -9,7 +9,9 @@ use std::str::FromStr;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
-use subxt_codegen::{utils::Uri, CodegenError, DerivesRegistry, TypeSubstitutes};
+use subxt_codegen::{
+    utils::Uri, CodegenError, DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes,
+};
 use syn::{parse_macro_input, punctuated::Punctuated};
 
 #[derive(Clone, Debug)]
@@ -134,6 +136,13 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let should_gen_docs = args.generate_docs.is_present();
     let unstable_metadata = args.unstable_metadata.is_present();
+
+    let runtime_api_generator = GenerateRuntimeApi::new(item_mod, crate_path)
+        .derives_registry(derives_registry)
+        .type_substitutes(type_substitutes)
+        .generate_docs(should_gen_docs)
+        .runtime_types_only(args.runtime_types_only);
+
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
             if unstable_metadata {
@@ -145,32 +154,20 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
-            subxt_codegen::generate_runtime_api_from_path(
-                item_mod,
-                path,
-                derives_registry,
-                type_substitutes,
-                crate_path,
-                should_gen_docs,
-                args.runtime_types_only,
-            )
-            .map_or_else(|err| err.into_compile_error().into(), Into::into)
+
+            runtime_api_generator
+                .generate_from_path(path)
+                .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, Some(url_string)) => {
             let url = Uri::from_str(&url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
-            subxt_codegen::generate_runtime_api_from_url(
-                item_mod,
-                &url,
-                derives_registry,
-                type_substitutes,
-                crate_path,
-                should_gen_docs,
-                args.runtime_types_only,
-                unstable_metadata,
-            )
-            .map_or_else(|err| err.into_compile_error().into(), Into::into)
+
+            runtime_api_generator
+                .unstable_metadata(unstable_metadata)
+                .generate_from_url(&url)
+                .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, None) => {
             abort_call_site!(
