@@ -4,6 +4,157 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.0] - 2023-07-24
+
+This release beings with it a number of exciting additions. Let's cover a few of the most significant ones:
+
+### Light client support (unstable)
+
+This release adds support for light clients using Smoldot, both when compiling native binaries and when compiling to WASM to run in a browser environment. This is unstable for now while we continue testing it and work on making use of the new RPC APIs.
+
+Here's how to use it:
+
+```rust
+use subxt::{
+    client::{LightClient, LightClientBuilder},
+    PolkadotConfig
+};
+use subxt_signer::sr25519::dev;
+
+// Create a light client:
+let api = LightClient::<PolkadotConfig>::builder()
+    // You can also pass a chain spec directly using `build`, which is preferred:
+    .build_from_url("ws://127.0.0.1:9944")
+    .await?;
+
+// Working with the interface is then the same as before:
+let dest = dev::bob().public_key().into();
+let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
+let events = api
+    .tx()
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &dev::alice())
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+At the moment you may encounter certain things that don't work; please file an issue if you do!
+
+### V15 Metadata
+
+This release stabilizes the metadata V15 interface, which brings a few changes but primarily allows you to interact with Runtime APIs via an ergonomic Subxt interface:
+
+```rust
+// We can use the static interface to interact in a type safe way:
+#[subxt::subxt(runtime_metadata_path = "path/to/metadata.scale")]
+pub mod polkadot {}
+
+let runtime_call = polkadot::apis()
+    .metadata()
+    .metadata_versions();
+
+// Or we can use the dynamic interface like so:
+use subxt::dynamic::Value;
+
+let runtime_call = subxt::dynamic::runtime_api_call(
+    "Metadata",
+    "metadata_versions",
+    Vec::<Value<()>>::new()
+);
+```
+
+This is no longer behind a feature flag, but if the chain you're connecting to doesn't use V15 metadata yet then the above will be unavailable.
+
+### `subxt-signer`
+
+The new `subxt-signer` crate provides the ability to sign transactions using either sr25519 or ECDSA. It's WASM compatible, and brings in fewer dependencies than using `sp_core`/`sp_keyring` does, while having an easy to use interface. Here's an example of signing a transaction using it:
+
+```rust
+use subxt::{OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
+
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// Build the extrinsic; a transfer to bob:
+let dest = dev::bob().public_key().into();
+let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
+
+// Sign and submit the balance transfer extrinsic from Alice:
+let from = dev::alice();
+let events = api
+    .tx()
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+Dev keys should only be used for tests since they are publicly known. Actual keys can be generated from URIs, phrases or raw entropy, and derived using soft/hard junctions:
+
+```rust
+use subxt_signer::{ SecretUri, sr25519::Keypair };
+use std::str::FromStr;
+
+// From a phrase (see `bip39` crate on generating phrases):
+let phrase = bip39::Mnemonic::parse(phrase).unwrap();
+let keypair = Keypair::from_phrase(&phrase, Some("Password")).unwrap();
+
+// Or from a URI:
+let uri = SecretUri::from_str("//Alice").unwrap();
+let keypair = Keypair::from_uri(&uri).unwrap();
+
+// Deriving a new key from an existing one:
+let keypair = keypair.derive([
+    DeriveJunction::hard("Alice"),
+    DeriveJunction::soft("stash")
+]);
+```
+
+### Breaking changes
+
+A few small breaking changes have occurred:
+
+- There is no longer a need for an `Index` associated type in your `Config` implementations; we now work it out dynamically where needed.
+- The "substrate-compat" feature flag is no longer enabled by default. `subxt-signer` added native signing support and can be used instead of bringing in Substrate dependencies to sign transactions now. You can still enable this feature flag as before to make use of them if needed.
+    - **Note:** Be aware that Substrate crates haven't been published in a while and have fallen out of date, though. This will be addressed eventually, and when it is we can bring the Substrate crates back uptodate here.
+
+For anything else that crops up, the compile errors and API docs will hopefully point you in the right direction, but please raise an issue if not.
+
+For a full list of changes, see below:
+
+### Added
+
+- Example: How to connect to parachain ([#1043](https://github.com/paritytech/subxt/pull/1043))
+- ECDSA Support in signer ([#1064](https://github.com/paritytech/subxt/pull/1064))
+- Add `subxt_signer` crate for native & WASM compatible signing ([#1016](https://github.com/paritytech/subxt/pull/1016))
+- Add light client platform WASM compatible ([#1026](https://github.com/paritytech/subxt/pull/1026))
+- light-client: Add experimental light-client support ([#965](https://github.com/paritytech/subxt/pull/965))
+- Add `diff` command to CLI tool to visualize metadata changes ([#1015](https://github.com/paritytech/subxt/pull/1015))
+- CLI: Allow output to be written to file ([#1018](https://github.com/paritytech/subxt/pull/1018))
+
+### Changed
+
+- Remove `substrate-compat` default feature flag ([#1078](https://github.com/paritytech/subxt/pull/1078))
+- runtime API: Substitute `UncheckedExtrinsic` with custom encoding ([#1076](https://github.com/paritytech/subxt/pull/1076))
+- Remove `Index` type from Config trait ([#1074](https://github.com/paritytech/subxt/pull/1074))
+- Utilize Metadata V15 ([#1041](https://github.com/paritytech/subxt/pull/1041))
+- chain_getBlock extrinsics encoding ([#1024](https://github.com/paritytech/subxt/pull/1024))
+- Make tx payload details public ([#1014](https://github.com/paritytech/subxt/pull/1014))
+- CLI tool tests ([#977](https://github.com/paritytech/subxt/pull/977))
+- Support NonZero numbers ([#1012](https://github.com/paritytech/subxt/pull/1012))
+- Get account nonce via state_call ([#1002](https://github.com/paritytech/subxt/pull/1002))
+- add `#[allow(rustdoc::broken_intra_doc_links)]` to subxt-codegen ([#998](https://github.com/paritytech/subxt/pull/998))
+
+### Fixed
+
+- remove parens in hex output for CLI tool ([#1017](https://github.com/paritytech/subxt/pull/1017))
+- Prevent bugs when reusing type ids in hashing ([#1075](https://github.com/paritytech/subxt/pull/1075))
+- Fix invalid generation of types with >1 generic parameters ([#1023](https://github.com/paritytech/subxt/pull/1023))
+- Fix jsonrpsee web features ([#1025](https://github.com/paritytech/subxt/pull/1025))
+- Fix codegen validation when Runtime APIs are stripped ([#1000](https://github.com/paritytech/subxt/pull/1000))
+- Fix hyperlink ([#994](https://github.com/paritytech/subxt/pull/994))
+- Remove invalid redundant clone warning ([#996](https://github.com/paritytech/subxt/pull/996))
+
 ## [0.29.0] - 2023-06-01
 
 This is another big release for Subxt with a bunch of awesome changes. Let's talk about some of the notable ones:
