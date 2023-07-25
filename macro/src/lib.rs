@@ -147,7 +147,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         (Some(rest_of_path), None) => {
             if unstable_metadata {
                 abort_call_site!(
-                    "The 'unstable_metadata' is expected only for `runtime_metadata_url`"
+                    "The 'unstable_metadata' attribute requires `runtime_metadata_url`"
                 )
             }
 
