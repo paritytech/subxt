@@ -17,7 +17,7 @@ keywords = ["parity", "substrate", "blockchain"]
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native", "substrate-compat"]
+default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -116,7 +116,7 @@ sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 sp-version = { workspace = true }
 assert_matches = { workspace = true }
-subxt-signer = { workspace = true, features = ["subxt"] }
+subxt-signer = { path = "../signer", features = ["subxt"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with

@@ -34,17 +34,17 @@
 //! at the time of writing. The `AccountId`, `Hash` and `Header` types of the [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)
 //! correspond to the ones we want to use for implementing [crate::Config]. In the Case of Statemint (Asset Hub) they are:
 //!
-//! - AccountId: [`sp_core::crypto::AccountId32`]
-//! - Hash: [`sp_core::H256`]
-//! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): [`sp_runtime::traits::BlakeTwo256`]
-//! - Header: [`sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>`](sp_runtime::generic::Header)
+//! - AccountId: `sp_core::crypto::AccountId32`
+//! - Hash: `sp_core::H256`
+//! - Hasher (type `Hashing` in [frame_system::pallet::Config](https://docs.rs/frame-system/latest/frame_system/pallet/trait.Config.html)): `sp_runtime::traits::BlakeTwo256`
+//! - Header: `sp_runtime::generic::Header<u32, sp_runtime::traits::BlakeTwo256>`
 //!
 //! Subxt has its own versions of some of these types in order to avoid needing to pull in Substrate dependencies:
 //!
-//! - [`sp_core::crypto::AccountId32`] can be swapped with [`crate::utils::AccountId32`].
-//! - [`sp_core::H256`] is a re-export which subxt also provides as [`crate::config::substrate::H256`].
-//! - [`sp_runtime::traits::BlakeTwo256`] can be swapped with [`crate::config::substrate::BlakeTwo256`].
-//! - [`sp_runtime::generic::Header`] can be swapped with [`crate::config::substrate::SubstrateHeader`].
+//! - `sp_core::crypto::AccountId32` can be swapped with [`crate::utils::AccountId32`].
+//! - `sp_core::H256` is a re-export which subxt also provides as [`crate::config::substrate::H256`].
+//! - `sp_runtime::traits::BlakeTwo256` can be swapped with [`crate::config::substrate::BlakeTwo256`].
+//! - `sp_runtime::generic::Header` can be swapped with [`crate::config::substrate::SubstrateHeader`].
 //!
 //! Having a look at how those types are implemented can give some clues as to how to implement other custom types that
 //! you may need to use as part of your config.
@@ -53,20 +53,20 @@
 //!
 //! A Substrate runtime is typically constructed by using the [frame_support::construct_runtime](https://docs.rs/frame-support/latest/frame_support/macro.construct_runtime.html) macro.
 //! In this macro, we need to specify the type of an `UncheckedExtrinsic`. Most of the time, the `UncheckedExtrinsic` will be of the type
-//! [sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>](sp_runtime::generic::UncheckedExtrinsic).
+//! `sp_runtime::generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, SignedExtra>`.
 //! The generic parameters `Address` and `Signature` specified when declaring the `UncheckedExtrinsic` type
 //! are the types for `Address` and `Signature` we should use when implementing the [crate::Config] trait. This information can
 //! also be obtained from the metadata (see [`frame_metadata::v15::ExtrinsicMetadata`]). In case of Statemint (Polkadot Asset Hub)
 //! we see the following types being used in `UncheckedExtrinsic`:
 //!
-//! - Address: [sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress)
-//! - Signature: [sp_runtime::MultiSignature]
+//! - Address: `sp_runtime::MultiAddress<Self::AccountId, ()>](sp_runtime::MultiAddress`
+//! - Signature: `sp_runtime::MultiSignature`
 //!
 //! As above, Subxt has its own versions of these types that can be used instead to avoid pulling in Substrate dependencies.
 //! Using the Subxt versions also makes interacting with generated code (which uses them in some places) a little nicer:
 //!
-//! - [`sp_runtime::MultiAddress`] can be swapped with [`crate::utils::MultiAddress`].
-//! - [`sp_runtime::MultiSignature`] can be swapped with [`crate::utils::MultiSignature`].
+//! - `sp_runtime::MultiAddress` can be swapped with [`crate::utils::MultiAddress`].
+//! - `sp_runtime::MultiSignature` can be swapped with [`crate::utils::MultiSignature`].
 //!
 //! ### ExtrinsicParams
 //!
@@ -100,7 +100,7 @@
 //! );
 //! ```
 //!
-//! Each element of the `SignedExtra` tuple implements [codec::Encode] and [sp_runtime::traits::SignedExtension]
+//! Each element of the `SignedExtra` tuple implements [codec::Encode] and `sp_runtime::traits::SignedExtension`
 //! which has an associated type `AdditionalSigned` that also implements [codec::Encode]. Let's look at the underlying types
 //! for each tuple element. All zero-sized types have been replaced by `()` for simplicity.
 //!
@@ -109,8 +109,8 @@
 //! | [`frame_system::CheckNonZeroSender`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonZeroSender.html)     | ()                                                                                                                                                       | ()                               |
 //! | [`frame_system::CheckSpecVersion`](https://docs.rs/frame-system/latest/frame_system/struct.CheckSpecVersion.html)         | ()                                                                                                                                                       | [u32]                            |
 //! | [`frame_system::CheckTxVersion`](https://docs.rs/frame-system/latest/frame_system/struct.CheckTxVersion.html)             | ()                                                                                                                                                       | [u32]                            |
-//! | [`frame_system::CheckGenesis`](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)                 | ()                                                                                                                                                       | `Config::Hash` = [sp_core::H256] |
-//! | [`frame_system::CheckMortality`](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)             | [sp_runtime::generic::Era]                                                                                                                               | `Config::Hash` = [sp_core::H256] |
+//! | [`frame_system::CheckGenesis`](https://docs.rs/frame-system/latest/frame_system/struct.CheckGenesis.html)                 | ()                                                                                                                                                       | `Config::Hash` = `sp_core::H256` |
+//! | [`frame_system::CheckMortality`](https://docs.rs/frame-system/latest/frame_system/struct.CheckMortality.html)             | `sp_runtime::generic::Era`                                                                                                                               | `Config::Hash` = `sp_core::H256` |
 //! | [`frame_system::CheckNonce`](https://docs.rs/frame-system/latest/frame_system/struct.CheckNonce.html)                     | `frame_system::pallet::Config::Index` = u32                                                                                                              | ()                               |
 //! | [`frame_system::CheckWeight`](https://docs.rs/frame-system/latest/frame_system/struct.CheckWeight.html)                   | ()                                                                                                                                                       | ()                               |
 //! | [`frame_system::ChargeAssetTxPayment`](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
