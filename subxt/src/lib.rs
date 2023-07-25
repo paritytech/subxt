@@ -298,9 +298,9 @@ pub mod ext {
 /// ## `unstable_metadata`
 ///
 /// This attribute works only in combination with `runtime_metadata_url`. By default, the macro will fetch the latest stable
-/// version of the metadata from the target node. This attribute makes the codegen fetch the unstable version of the metadata.
-/// This can be useful in CI, but is **not recommended** in production code, since it runs at compile time and will cause
-/// compilation to fail if the node at the given address is unavailable or unresponsive.
+/// version of the metadata from the target node. This attribute makes the codegen attempt to fetch the unstable version of 
+/// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely 
+/// to be incompatible with Subxt.
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
