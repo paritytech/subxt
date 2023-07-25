@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.30.1] - 2023-07-25
+
+This patch release fixes a small issue whereby using `runtime_metadata_url` in the Subxt macro would still attempt to download unstable metadata, which can fail at the moment if the chain has not updated to stable V15 metadata yet (which has a couple of changes from the last unstable version). Note that you're generally encouraged to use `runtime_metadata_path` instead, which does not have this issue.
+
+### Fixes
+
+- codegen: Fetch and decode metadata version then fallback ([#1092](https://github.com/paritytech/subxt/pull/1092))
+
+
 ## [0.30.0] - 2023-07-24
 
 This release beings with it a number of exciting additions. Let's cover a few of the most significant ones:
