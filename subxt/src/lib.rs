@@ -295,11 +295,16 @@ pub mod ext {
 /// mod polkadot {}
 /// ```
 ///
+/// **Note**: At the moment, you must derive at least one of `codec::Encode` or `codec::Decode` or `scale_encode::EncodeAsType` or
+/// `scale_decode::DecodeAsType` (because we add `#[codec(..)]` attributes on some fields/types during codegen), and you must use this
+/// feature in conjunction with `runtime_types_only` (or manually specify a bunch of defaults to make codegen work properly when
+/// generating the subxt interfaces).
+///
 /// ## `unstable_metadata`
 ///
 /// This attribute works only in combination with `runtime_metadata_url`. By default, the macro will fetch the latest stable
-/// version of the metadata from the target node. This attribute makes the codegen attempt to fetch the unstable version of 
-/// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely 
+/// version of the metadata from the target node. This attribute makes the codegen attempt to fetch the unstable version of
+/// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely
 /// to be incompatible with Subxt.
 ///
 /// ```rust,no_run
@@ -309,9 +314,4 @@ pub mod ext {
 /// )]
 /// mod polkadot {}
 /// ```
-///
-/// **Note**: At the moment, you must derive at least one of `codec::Encode` or `codec::Decode` or `scale_encode::EncodeAsType` or
-/// `scale_decode::DecodeAsType` (because we add `#[codec(..)]` attributes on some fields/types during codegen), and you must use this
-/// feature in conjunction with `runtime_types_only` (or manually specify a bunch of defaults to make codegen work properly when
-/// generating the subxt interfaces).
 pub use subxt_macro::subxt;
