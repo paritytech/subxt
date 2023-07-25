@@ -304,8 +304,8 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_url = "wss://rpc.polkadot.io:443"
-///     unstable_metadata,
+///     runtime_metadata_url = "wss://rpc.polkadot.io:443",
+///     unstable_metadata
 /// )]
 /// mod polkadot {}
 /// ```
