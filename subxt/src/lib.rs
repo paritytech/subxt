@@ -279,6 +279,7 @@ pub mod ext {
 /// )]
 /// mod polkadot {}
 /// ```
+///
 /// ## `no_default_derives`
 ///
 /// By default, the macro will add all derives necessary for the generated code to play nicely with Subxt. Adding this attribute
@@ -298,4 +299,19 @@ pub mod ext {
 /// `scale_decode::DecodeAsType` (because we add `#[codec(..)]` attributes on some fields/types during codegen), and you must use this
 /// feature in conjunction with `runtime_types_only` (or manually specify a bunch of defaults to make codegen work properly when
 /// generating the subxt interfaces).
+///
+/// ## `unstable_metadata`
+///
+/// This attribute works only in combination with `runtime_metadata_url`. By default, the macro will fetch the latest stable
+/// version of the metadata from the target node. This attribute makes the codegen attempt to fetch the unstable version of
+/// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely
+/// to be incompatible with Subxt.
+///
+/// ```rust,no_run
+/// #[subxt::subxt(
+///     runtime_metadata_url = "wss://rpc.polkadot.io:443",
+///     unstable_metadata
+/// )]
+/// mod polkadot {}
+/// ```
 pub use subxt_macro::subxt;
