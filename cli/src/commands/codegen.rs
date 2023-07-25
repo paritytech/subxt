@@ -6,7 +6,7 @@ use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use color_eyre::eyre::eyre;
-use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
+use subxt_codegen::{DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes, TypeSubstitutionError};
 
 /// Generate runtime API client code from metadata.
 ///
