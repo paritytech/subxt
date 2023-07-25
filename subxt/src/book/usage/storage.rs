@@ -49,7 +49,7 @@
 //! // A static query capable of iterating over accounts:
 //! let storage_query = polkadot::storage().system().account_iter();
 //! // A dynamic query to do the same:
-//! let storage_query = subxt::dynamic::storage_root("System", "Account");
+//! let storage_query = subxt::dynamic::storage_iter("System", "Account");
 //! ```
 //!
 //! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing

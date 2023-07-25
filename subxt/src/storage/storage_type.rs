@@ -177,7 +177,7 @@ where
     /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
     /// // Address to the root of a storage entry that we'd like to iterate over.
-    /// let address = polkadot::storage().xcm_pallet().version_notifiers_root();
+    /// let address = polkadot::storage().xcm_pallet().version_notifiers_iter();
     ///
     /// // Iterate over keys and values at that address.
     /// let mut iter = api
