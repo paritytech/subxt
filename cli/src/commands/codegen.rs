@@ -6,7 +6,7 @@ use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
 use color_eyre::eyre;
 use color_eyre::eyre::eyre;
-use subxt_codegen::{DerivesRegistry, TypeSubstitutes, TypeSubstitutionError};
+use subxt_codegen::{DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes, TypeSubstitutionError};
 
 /// Generate runtime API client code from metadata.
 ///
@@ -185,16 +185,14 @@ fn codegen(
     }
 
     let should_gen_docs = !no_docs;
-    let runtime_api = subxt_codegen::generate_runtime_api_from_bytes(
-        item_mod,
-        metadata_bytes,
-        derives,
-        type_substitutes,
-        crate_path,
-        should_gen_docs,
-        runtime_types_only,
-    )
-    .map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
+
+    let runtime_api = GenerateRuntimeApi::new(item_mod, crate_path)
+        .derives_registry(derives)
+        .type_substitutes(type_substitutes)
+        .generate_docs(should_gen_docs)
+        .runtime_types_only(runtime_types_only)
+        .generate_from_bytes(metadata_bytes)
+        .map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
     writeln!(output, "{runtime_api}")?;
     Ok(())
 }
