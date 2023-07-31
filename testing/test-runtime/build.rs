@@ -6,6 +6,7 @@ use codec::{Decode, Encode};
 use std::{env, fs, path::Path};
 use substrate_runner::{Error as SubstrateNodeError, SubstrateNode};
 
+// This variable accepts a single binary name or comma separated list.
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
 #[tokio::main]
@@ -15,10 +16,15 @@ async fn main() {
 
 async fn run() {
     // Select substrate binary to run based on env var.
-    let substrate_bin = env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
+    let substrate_bins: String = env::var(SUBSTRATE_BIN_ENV_VAR)
+        .unwrap_or_else(|_| "substrate-node,substrate".to_owned());
+    let substrate_bins_vec: Vec<&str> = substrate_bins
+        .split(",")
+        .map(|s| s.trim())
+        .collect();
 
     let mut node_builder = SubstrateNode::builder();
-    node_builder.binary_path(substrate_bin.clone());
+    node_builder.binary_paths(substrate_bins_vec.iter());
 
     let node = match node_builder.spawn() {
         Ok(node) => node,
@@ -29,7 +35,7 @@ async fn run() {
             )
         }
         Err(e) => {
-            panic!("Cannot spawn substrate command '{substrate_bin}': {e}")
+            panic!("Cannot spawn substrate command from any of {substrate_bins_vec:?}: {e}")
         }
     };
 
@@ -81,14 +87,18 @@ async fn run() {
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
     fs::write(runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
 
-    let substrate_path =
-        which::which(substrate_bin).expect("Cannot resolve path to substrate binary");
+    for substrate_node_path in substrate_bins_vec {
+        let Ok(full_path) = which::which(substrate_node_path) else {
+            continue
+        };
 
-    // Re-build if the substrate binary we're pointed to changes (mtime):
-    println!(
-        "cargo:rerun-if-changed={}",
-        substrate_path.to_string_lossy()
-    );
+        // Re-build if the substrate binary we're pointed to changes (mtime):
+        println!(
+            "cargo:rerun-if-changed={}",
+            full_path.to_string_lossy()
+        );
+    }
+
     // Re-build if we point to a different substrate binary:
     println!("cargo:rerun-if-env-changed={SUBSTRATE_BIN_ENV_VAR}");
     // Re-build if this file changes:
