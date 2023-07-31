@@ -76,7 +76,7 @@ impl TestNodeProcessBuilder {
     {
         let mut node_builder = SubstrateNode::builder();
 
-        node_builder.binary_path(self.node_path);
+        node_builder.binary_paths(&[self.node_path]);
 
         if let Some(authority) = &self.authority {
             node_builder.arg(authority.to_lowercase());
