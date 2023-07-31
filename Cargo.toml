@@ -29,7 +29,7 @@ resolver = "2"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 version = "0.30.1"
-rust-version = "1.64.0"
+rust-version = "1.70.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
@@ -66,8 +66,8 @@ scale-value = "0.10.0"
 scale-bits = "0.3"
 scale-decode = "0.7.0"
 scale-encode = "0.3.0"
-serde = { version = "1.0.171" }
-serde_json = { version = "1.0.103" }
+serde = { version = "1.0.179" }
+serde_json = { version = "1.0.104" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.40"
 tokio = { version = "1.29", default-features = false }
