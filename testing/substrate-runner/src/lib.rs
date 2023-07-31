@@ -8,7 +8,7 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::io::{self, BufRead, BufReader, Read};
-use std::process::{self, Command, Child};
+use std::process::{self, Child, Command};
 
 pub use error::Error;
 
@@ -38,9 +38,8 @@ impl SubstrateNodeBuilder {
     /// or "substrate".
     pub fn binary_paths<Paths, S>(&mut self, paths: Paths) -> &mut Self
     where
-        Paths: IntoIterator<Item=S>,
-        S: Into<OsString>
-
+        Paths: IntoIterator<Item = S>,
+        S: Into<OsString>,
     {
         self.binary_paths = paths.into_iter().map(|p| p.into()).collect();
         self
@@ -62,17 +61,20 @@ impl SubstrateNodeBuilder {
     pub fn spawn(self) -> Result<SubstrateNode, Error> {
         // Try to spawn the binary at each path, returning the
         // first "ok" or last error that we encountered.
-        let mut res = Err(io::Error::new(io::ErrorKind::Other, "No binary path provided"));
+        let mut res = Err(io::Error::new(
+            io::ErrorKind::Other,
+            "No binary path provided",
+        ));
         for binary_path in &self.binary_paths {
             res = SubstrateNodeBuilder::try_spawn(binary_path, &self.custom_flags);
             if res.is_ok() {
-                break
+                break;
             }
         }
 
         let mut proc = match res {
             Ok(proc) => proc,
-            Err(e) => return Err(Error::Io(e))
+            Err(e) => return Err(Error::Io(e)),
         };
 
         // Wait for RPC port to be logged (it's logged to stderr).
@@ -92,7 +94,10 @@ impl SubstrateNodeBuilder {
     }
 
     // Attempt to spawn a binary with the path/flags given.
-    fn try_spawn(binary_path: &OsString, custom_flags: &HashMap<CowStr, Option<CowStr>>) -> Result<Child, std::io::Error> {
+    fn try_spawn(
+        binary_path: &OsString,
+        custom_flags: &HashMap<CowStr, Option<CowStr>>,
+    ) -> Result<Child, std::io::Error> {
         let mut cmd = Command::new(binary_path);
 
         cmd.env("RUST_LOG", "info,libp2p_tcp=debug")
