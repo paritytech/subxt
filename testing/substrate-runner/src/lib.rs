@@ -7,15 +7,15 @@ mod error;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ffi::OsString;
-use std::io::{BufRead, BufReader, Read};
-use std::process::{self, Command};
+use std::io::{self, BufRead, BufReader, Read};
+use std::process::{self, Child, Command};
 
 pub use error::Error;
 
 type CowStr = Cow<'static, str>;
 
 pub struct SubstrateNodeBuilder {
-    binary_path: OsString,
+    binary_paths: Vec<OsString>,
     custom_flags: HashMap<CowStr, Option<CowStr>>,
 }
 
@@ -29,14 +29,19 @@ impl SubstrateNodeBuilder {
     /// Configure a new Substrate node.
     pub fn new() -> Self {
         SubstrateNodeBuilder {
-            binary_path: "substrate".into(),
+            binary_paths: vec!["substrate-node".into(), "substrate".into()],
             custom_flags: Default::default(),
         }
     }
 
-    /// Set the path to the `substrate` binary; defaults to "substrate".
-    pub fn binary_path(&mut self, path: impl Into<OsString>) -> &mut Self {
-        self.binary_path = path.into();
+    /// Set the path to the `substrate` binary; defaults to "substrate-node"
+    /// or "substrate".
+    pub fn binary_paths<Paths, S>(&mut self, paths: Paths) -> &mut Self
+    where
+        Paths: IntoIterator<Item = S>,
+        S: Into<OsString>,
+    {
+        self.binary_paths = paths.into_iter().map(|p| p.into()).collect();
         self
     }
 
@@ -54,23 +59,23 @@ impl SubstrateNodeBuilder {
 
     /// Spawn the node, handing back an object which, when dropped, will stop it.
     pub fn spawn(self) -> Result<SubstrateNode, Error> {
-        let mut cmd = Command::new(self.binary_path);
-
-        cmd.env("RUST_LOG", "info,libp2p_tcp=debug")
-            .stdout(process::Stdio::piped())
-            .stderr(process::Stdio::piped())
-            .arg("--dev")
-            .arg("--port=0");
-
-        for (key, val) in self.custom_flags {
-            let arg = match val {
-                Some(val) => format!("--{key}={val}"),
-                None => format!("--{key}"),
-            };
-            cmd.arg(arg);
+        // Try to spawn the binary at each path, returning the
+        // first "ok" or last error that we encountered.
+        let mut res = Err(io::Error::new(
+            io::ErrorKind::Other,
+            "No binary path provided",
+        ));
+        for binary_path in &self.binary_paths {
+            res = SubstrateNodeBuilder::try_spawn(binary_path, &self.custom_flags);
+            if res.is_ok() {
+                break;
+            }
         }
 
-        let mut proc = cmd.spawn().map_err(Error::Io)?;
+        let mut proc = match res {
+            Ok(proc) => proc,
+            Err(e) => return Err(Error::Io(e)),
+        };
 
         // Wait for RPC port to be logged (it's logged to stderr).
         let stderr = proc.stderr.take().unwrap();
@@ -86,6 +91,30 @@ impl SubstrateNodeBuilder {
             p2p_address,
             p2p_port,
         })
+    }
+
+    // Attempt to spawn a binary with the path/flags given.
+    fn try_spawn(
+        binary_path: &OsString,
+        custom_flags: &HashMap<CowStr, Option<CowStr>>,
+    ) -> Result<Child, std::io::Error> {
+        let mut cmd = Command::new(binary_path);
+
+        cmd.env("RUST_LOG", "info,libp2p_tcp=debug")
+            .stdout(process::Stdio::piped())
+            .stderr(process::Stdio::piped())
+            .arg("--dev")
+            .arg("--port=0");
+
+        for (key, val) in custom_flags {
+            let arg = match val {
+                Some(val) => format!("--{key}={val}"),
+                None => format!("--{key}"),
+            };
+            cmd.arg(arg);
+        }
+
+        cmd.spawn()
     }
 }
 
