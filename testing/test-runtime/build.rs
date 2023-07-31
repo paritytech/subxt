@@ -18,7 +18,7 @@ async fn run() {
     // Select substrate binary to run based on env var.
     let substrate_bins: String =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate-node,substrate".to_owned());
-    let substrate_bins_vec: Vec<&str> = substrate_bins.split(",").map(|s| s.trim()).collect();
+    let substrate_bins_vec: Vec<&str> = substrate_bins.split(',').map(|s| s.trim()).collect();
 
     let mut node_builder = SubstrateNode::builder();
     node_builder.binary_paths(substrate_bins_vec.iter());
