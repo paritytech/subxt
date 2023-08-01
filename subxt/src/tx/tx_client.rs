@@ -44,8 +44,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
     /// the pallet or call in question do not exist at all).
     pub fn validate<Call>(&self, call: &Call) -> Result<(), Error>
-        where
-            Call: TxPayload,
+    where
+        Call: TxPayload,
     {
         if let Some(details) = call.validation_details() {
             let expected_hash = self
@@ -64,8 +64,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
     /// Return the SCALE encoded bytes representing the call data of the transaction.
     pub fn call_data<Call>(&self, call: &Call) -> Result<Vec<u8>, Error>
-        where
-            Call: TxPayload,
+    where
+        Call: TxPayload,
     {
         let metadata = self.client.metadata();
         let mut bytes = Vec::new();
@@ -75,8 +75,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
     /// Creates an unsigned extrinsic without submitting it.
     pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
-        where
-            Call: TxPayload,
+    where
+        Call: TxPayload,
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -113,8 +113,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         account_nonce: u64,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
-        where
-            Call: TxPayload,
+    where
+        Call: TxPayload,
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -152,9 +152,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         account_nonce: u64,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
@@ -171,9 +171,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 }
 
 impl<T, C> TxClient<T, C>
-    where
-        T: Config,
-        C: OnlineClientT<T>,
+where
+    T: Config,
+    C: OnlineClientT<T>,
 {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
@@ -205,8 +205,8 @@ impl<T, C> TxClient<T, C>
         account_id: &T::AccountId,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
-        where
-            Call: TxPayload,
+    where
+        Call: TxPayload,
     {
         let account_nonce = self.account_nonce(account_id).await?;
         self.create_partial_signed_with_nonce(call, account_nonce, other_params)
@@ -219,9 +219,9 @@ impl<T, C> TxClient<T, C>
         signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
     {
         let account_nonce = self.account_nonce(&signer.account_id()).await?;
         self.create_signed_with_nonce(call, signer, account_nonce, other_params)
@@ -237,10 +237,10 @@ impl<T, C> TxClient<T, C>
         call: &Call,
         signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
-            <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
             .await
@@ -256,9 +256,9 @@ impl<T, C> TxClient<T, C>
         signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -281,10 +281,10 @@ impl<T, C> TxClient<T, C>
         call: &Call,
         signer: &Signer,
     ) -> Result<T::Hash, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
-            <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
     }
@@ -303,9 +303,9 @@ impl<T, C> TxClient<T, C>
         signer: &Signer,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
     ) -> Result<T::Hash, Error>
-        where
-            Call: TxPayload,
-            Signer: SignerT<T>,
+    where
+        Call: TxPayload,
+        Signer: SignerT<T>,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -322,16 +322,16 @@ pub struct PartialExtrinsic<T: Config, C> {
 }
 
 impl<T, C> PartialExtrinsic<T, C>
-    where
-        T: Config,
-        C: OfflineClientT<T>,
+where
+    T: Config,
+    C: OfflineClientT<T>,
 {
     // Obtain bytes representing the signer payload and run call some function
     // with them. This can avoid an allocation in some cases when compared to
     // [`PartialExtrinsic::signer_payload()`].
     fn with_signer_payload<F, R>(&self, f: F) -> R
-        where
-            F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
+    where
+        F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
     {
         let mut bytes = self.call_data.clone();
         self.additional_and_extra_params.encode_extra_to(&mut bytes);
@@ -360,8 +360,8 @@ impl<T, C> PartialExtrinsic<T, C>
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
     pub fn sign<Signer>(&self, signer: &Signer) -> SubmittableExtrinsic<T, C>
-        where
-            Signer: SignerT<T>,
+    where
+        Signer: SignerT<T>,
     {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
@@ -415,9 +415,9 @@ pub struct SubmittableExtrinsic<T, C> {
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
-    where
-        T: Config,
-        C: OfflineClientT<T>,
+where
+    T: Config,
+    C: OfflineClientT<T>,
 {
     /// Create a [`SubmittableExtrinsic`] from some already-signed and prepared
     /// extrinsic bytes, and some client (anything implementing [`OfflineClientT`]
@@ -447,9 +447,9 @@ impl<T, C> SubmittableExtrinsic<T, C>
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
-    where
-        T: Config,
-        C: OnlineClientT<T>,
+where
+    T: Config,
+    C: OnlineClientT<T>,
 {
     /// Submits the extrinsic to the chain.
     ///
