@@ -7,6 +7,7 @@ use std::fmt::Write;
 use subxt::ext::codec::Encode;
 use subxt::tx::PartialExtrinsic;
 use subxt::{self, OnlineClient, PolkadotConfig};
+use subxt::utils::AccountId32;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::{AttrValue, Callback};
@@ -95,6 +96,7 @@ pub struct Account {
     pub name: String,
     /// name of the browser extension
     pub source: String,
+    /// the signature type, e.g. "sr25519" or "ed25519"
     pub ty: String,
     /// ss58 formatted address as string. Can be converted into AccountId32 via it's FromStr implementation.
     pub address: String,
@@ -127,21 +129,25 @@ fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
     format!("0x{}", hex::encode(bytes))
 }
 
+
+/// communicates with JavaScript to obtain a signature for the `partial_extrinsic` via a browser extension (e.g. polkadot-js or Talisman)
+///
+/// Some parameters are hard-coded here and not taken from the partial_extrinsic itself (mortality_checkpoint, era, tip).
 pub async fn extension_signature_for_partial_extrinsic(
     partial_extrinsic: &PartialExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
     api: &OnlineClient<PolkadotConfig>,
+    account_id: &AccountId32,
     account_source: String,
     account_address: String,
 ) -> Result<Vec<u8>, anyhow::Error> {
-    let params = &partial_extrinsic.additional_and_extra_params;
-
-    let spec_version = encode_to_hex_reverse(&params.spec_version);
-    let transaction_version = encode_to_hex_reverse(&params.transaction_version);
-    let mortality_checkpoint = encode_to_hex(&params.mortality_checkpoint);
-    let era = encode_to_hex(&params.era); // polkadot-js does not seem to accept mortal eras encoded like this
-    let genesis_hash = encode_to_hex(&params.genesis_hash);
+    let spec_version = encode_to_hex_reverse(&api.runtime_version().spec_version);
+    let transaction_version = encode_to_hex_reverse(&api.runtime_version().transaction_version);
+    let mortality_checkpoint = encode_to_hex(&api.genesis_hash());
+    let era = encode_to_hex(&subxt::config::extrinsic_params::Era::Immortal);
+    let genesis_hash = encode_to_hex(&api.genesis_hash());
     let method = to_hex(partial_extrinsic.call_data());
-    let nonce = encode_to_hex_reverse(&params.nonce);
+    let nonce = api.tx().account_nonce(account_id).await?;
+    let nonce = encode_to_hex_reverse(&nonce);
     let signed_extensions: Vec<String> = api
         .metadata()
         .extrinsic()
@@ -149,7 +155,7 @@ pub async fn extension_signature_for_partial_extrinsic(
         .iter()
         .map(|e| e.identifier().to_string())
         .collect();
-    let tip = encode_to_hex(&params.tip);
+    let tip = encode_to_hex(&subxt::config::polkadot::PlainTip::new(0));
 
     let payload = json!({
         "specVersion": spec_version,

@@ -1,7 +1,3 @@
-/// The `@polkadot/extension-dapp` package can be dynamically imported.
-/// Usually it is wise to use a package manager like npm or yarn to install it as a dependency.
-/// The `getPolkadotJsExtensionMod`
-
 /**
  * The `@polkadot/extension-dapp` package can be dynamically imported.
  * Usually it is wise to use a package manager like npm or yarn to install it as a dependency.
@@ -42,6 +38,7 @@ async function getAccounts() {
         ty: account.type, // e.g. "sr25519"
         address: account.address // e.g. "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
     }));
+    console.log(accountObjects);
     return JSON.stringify(accountObjects);
 }
 

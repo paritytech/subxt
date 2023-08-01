@@ -57,20 +57,21 @@ pub trait ExtrinsicParams<Hash>: Debug + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = "Tip: Debug"))]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
-    /// era
-    pub era: Era,
-    /// nonce (account nonce sent along an extrinsic, such that no extrinsic is submitted twice)
-    pub nonce: u64,
-    /// tip
-    pub tip: Tip,
+    /// Era defines how long the transaction will be valid for.
+    era: Era,
+    /// Nonce (account nonce sent along an extrinsic, such that no extrinsic is submitted twice)
+    nonce: u64,
+    /// The tip you would like to give to the block author for this transaction.
+    /// Note: Can be zero.
+    tip: Tip,
     /// spec version
-    pub spec_version: u32,
+    spec_version: u32,
     /// transaction version
-    pub transaction_version: u32,
+    transaction_version: u32,
     /// genesis hash of the chain
-    pub genesis_hash: T::Hash,
-    /// mortality checkpoint
-    pub mortality_checkpoint: T::Hash,
+    genesis_hash: T::Hash,
+    /// The block after which the transaction becomes valid.
+    mortality_checkpoint: T::Hash,
     marker: std::marker::PhantomData<T>,
 }
 
