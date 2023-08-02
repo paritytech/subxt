@@ -602,25 +602,9 @@ mod tests {
     /// Compare some actual [`RawEventDetails`] with a hand-constructed
     /// (probably) [`TestRawEventDetails`].
     pub fn assert_raw_events_match(
-        // Just for convenience, pass in the metadata type constructed
-        // by the `metadata` function above to simplify caller code.
-        metadata: &Metadata,
         actual: EventDetails<SubstrateConfig>,
         expected: TestRawEventDetails,
     ) {
-        let types = &metadata.types();
-
-        // Make sure that the bytes handed back line up with the fields handed back;
-        // encode the fields back into bytes and they should be equal.
-        let actual_fields = actual.field_values().expect("can decode field values (1)");
-
-        let mut actual_bytes = vec![];
-        for field in actual_fields.into_values() {
-            scale_value::scale::encode_as_type(&field, field.context, types, &mut actual_bytes)
-                .expect("should be able to encode properly");
-        }
-        assert_eq!(actual_bytes, actual.field_bytes());
-
         let actual_fields_no_context: Vec<_> = actual
             .field_values()
             .expect("can decode field values (2)")
@@ -691,7 +675,6 @@ mod tests {
 
         let mut event_details = events.iter();
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 phase: Phase::ApplyExtrinsic(123),
@@ -739,7 +722,6 @@ mod tests {
         let mut event_details = events.iter();
 
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -752,7 +734,6 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 1,
@@ -765,7 +746,6 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 2,
@@ -809,7 +789,6 @@ mod tests {
 
         let mut events_iter = events.iter();
         assert_raw_events_match(
-            &metadata,
             events_iter.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -822,7 +801,6 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata,
             events_iter.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 1,
@@ -862,7 +840,6 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter();
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -903,7 +880,6 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter();
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -912,7 +888,7 @@ mod tests {
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                fields: vec![Value::u128(1)],
+                fields: vec![Value::unnamed_composite(vec![Value::u128(1)])],
             },
         );
         assert!(event_details.next().is_none());
@@ -945,7 +921,6 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter();
         assert_raw_events_match(
-            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,

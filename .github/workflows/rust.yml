@@ -33,11 +33,11 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -139,11 +139,11 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -173,11 +173,11 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -208,11 +208,11 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -239,11 +239,11 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -283,30 +283,30 @@ jobs:
 
             - name: Download Substrate
               run: |
-                  curl $SUBSTRATE_URL --output substrate --location
-                  chmod +x substrate
-                  ./substrate --version
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
                   mkdir -p ~/.local/bin
-                  mv substrate ~/.local/bin
+                  mv substrate-node ~/.local/bin
 
             - name: Run subxt WASM tests
               run: |
                   # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
                   # `node-key` provides a deterministic p2p address.
-                  substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
+                  substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
-                  pkill substrate
+                  pkill substrate-node
               working-directory: testing/wasm-rpc-tests
 
             - name: Run subxt-lightclient WASM tests
               run: |
                   # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
                   # `node-key` provides a deterministic p2p address.
-                  substrate --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
+                  substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
-                  pkill substrate
+                  pkill substrate-node
               working-directory: testing/wasm-lightclient-tests
 
             - name: Run subxt-signer WASM tests
