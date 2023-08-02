@@ -26,11 +26,11 @@ where
     R: Config,
 {
     /// Construct a builder for spawning a test node process.
-    pub fn build<S>(program: S) -> TestNodeProcessBuilder
+    pub fn build<P>(paths: &[P]) -> TestNodeProcessBuilder
     where
-        S: AsRef<OsStr> + Clone,
+        P: AsRef<OsStr> + Clone,
     {
-        TestNodeProcessBuilder::new(program)
+        TestNodeProcessBuilder::new(paths)
     }
 
     /// Returns the subxt client connected to the running node.
@@ -48,17 +48,24 @@ where
 
 /// Construct a test node process.
 pub struct TestNodeProcessBuilder {
-    node_path: OsString,
+    node_paths: Vec<OsString>,
     authority: Option<String>,
 }
 
 impl TestNodeProcessBuilder {
-    pub fn new<P>(node_path: P) -> TestNodeProcessBuilder
+    pub fn new<P>(node_paths: &[P]) -> TestNodeProcessBuilder
     where
         P: AsRef<OsStr>,
     {
+        // Check that paths are valid and build up vec.
+        let mut paths = Vec::new();
+        for path in node_paths {
+            let path = path.as_ref();
+            paths.push(path.to_os_string())
+        }
+
         Self {
-            node_path: node_path.as_ref().into(),
+            node_paths: paths,
             authority: None,
         }
     }
@@ -76,7 +83,7 @@ impl TestNodeProcessBuilder {
     {
         let mut node_builder = SubstrateNode::builder();
 
-        node_builder.binary_paths(&[self.node_path]);
+        node_builder.binary_paths(&self.node_paths);
 
         if let Some(authority) = &self.authority {
             node_builder.arg(authority.to_lowercase());

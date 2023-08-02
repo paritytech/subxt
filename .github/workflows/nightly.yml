@@ -21,11 +21,11 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl $SUBSTRATE_URL --output substrate --location
-            chmod +x substrate
-            ./substrate --version
+            curl $SUBSTRATE_URL --output substrate-node --location
+            chmod +x substrate-node
+            ./substrate-node --version
             mkdir -p ~/.local/bin
-            mv substrate ~/.local/bin
+            mv substrate-node ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
