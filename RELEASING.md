@@ -50,11 +50,14 @@ We also assume that ongoing work done is being merged directly to the `master` b
     provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Fixed", "Added" and "Changed" sections, and make any
     other adjustments that you feel are necessary for clarity.
 
-7.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
+7.  If any of the differences impact the minimum version of `rustc` that the code will run on, please update the `rust-version`
+    field in the root `Cargo.toml` accordingly.
 
-8.  Once the branch has been reviewed and passes CI, merge it.
+8.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
 
-9.  Now, we're ready to publish the release to crates.io.
+9.  Once the branch has been reviewed and passes CI, merge it.
+
+10. Now, we're ready to publish the release to crates.io.
 
     1.  Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
 
@@ -81,7 +84,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
             (cd cli && cargo publish);
         ```
 
-10. If the release was successful, tag the commit that we released in the `master` branch with the
+11. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
 
     ```

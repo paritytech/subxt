@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.31.0] - 2023-08-02
+
+This is a small release whose primary goal is to bump the versions of `scale-encode`, `scale-decode` and `scale-value` being used, to benefit from recent changes in those crates.
+
+`scale-decode` changes how compact values are decoded as part of [#1103](https://github.com/paritytech/subxt/pull/1103). A compact encoded struct should now be properly decoded into a struct of matching shape (which implements `DecodeAsType`). This will hopefully resolve issues around structs like `Perbill`. When decoding the SCALE bytes for such types into `scale_value::Value`, the `Value` will now be a composite type wrapping a value, and not just the value.
+
+We've also figured out how to sign extrinsics using browser wallets when a Subxt app is compiled to WASM; see [#1067](https://github.com/paritytech/subxt/pull/1067) for more on that!
+
+The key commits:
+
+### Added
+
+- Add browser extension signing example ([#1067](https://github.com/paritytech/subxt/pull/1067))
+
+### Changed
+
+- Bump to latest scale-encode/decode/value and fix test running ([#1103](https://github.com/paritytech/subxt/pull/1103))
+- Set minimum supported `rust-version` to `1.70` ([#1097](https://github.com/paritytech/subxt/pull/1097))
+
+### Fixed
+
+- Tests: support 'substrate-node' too and allow multiple binary paths ([#1102](https://github.com/paritytech/subxt/pull/1102))
+
+
 ## [0.30.1] - 2023-07-25
 
 This patch release fixes a small issue whereby using `runtime_metadata_url` in the Subxt macro would still attempt to download unstable metadata, which can fail at the moment if the chain has not updated to stable V15 metadata yet (which has a couple of changes from the last unstable version). Note that you're generally encouraged to use `runtime_metadata_path` instead, which does not have this issue.
