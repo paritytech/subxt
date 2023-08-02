@@ -121,6 +121,3 @@ secp256k1 = "0.27.0"
 secrecy = "0.8.0"
 sha2 = "0.10.6"
 zeroize = { version = "1", default-features = false }
-
-[patch.crates-io]
-scale-decode = { path = "../scale-decode/scale-decode" }
