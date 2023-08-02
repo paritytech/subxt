@@ -19,6 +19,7 @@
 mod from_into;
 mod utils;
 
+use frame_metadata::v15::CustomMetadata;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -29,6 +30,9 @@ type ArcStr = Arc<str>;
 
 pub use from_into::TryFromError;
 pub use utils::validation::MetadataHasher;
+
+/// type alias for [frame_metadata::v15::CustomValueMetadata<PortableForm>]
+pub type CustomValueMetadata = frame_metadata::v15::CustomValueMetadata<PortableForm>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
@@ -51,6 +55,8 @@ pub struct Metadata {
     dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
+    /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
+    custom: CustomMetadata<PortableForm>,
 }
 
 impl Metadata {
@@ -130,6 +136,11 @@ impl Metadata {
             inner,
             types: self.types(),
         })
+    }
+
+    /// Returns custom user defined types
+    pub fn custom_metadata(&self) -> &CustomMetadata<PortableForm> {
+        &self.custom
     }
 
     /// Obtain a unique hash representing this metadata or specific parts of it.

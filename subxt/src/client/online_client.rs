@@ -18,7 +18,9 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
+use frame_metadata::v15::CustomMetadata;
 use futures::future;
+use scale_info::form::PortableForm;
 use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
@@ -290,6 +292,11 @@ impl<T: Config> OnlineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Access custom types.
+    pub fn custom_types(&self) -> &CustomMetadata<PortableForm> {
+        <Self as OfflineClientT<T>>::custom_types(self)
     }
 
     /// Work with blocks.

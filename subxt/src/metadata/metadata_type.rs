@@ -3,6 +3,9 @@
 // see LICENSE for license details.
 
 use crate::error::MetadataError;
+use scale_decode::DecodeAsType;
+use scale_encode::EncodeAsType;
+use scale_info::form::PortableForm;
 use std::sync::Arc;
 
 /// A cheaply clone-able representation of the runtime metadata received from a node.
@@ -69,5 +72,25 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for Metadata {
 impl codec::Decode for Metadata {
     fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
         subxt_metadata::Metadata::decode(input).map(Metadata::new)
+    }
+}
+
+pub struct CustomValueMetadata {
+    inner: subxt_metadata::CustomValueMetadata,
+    metadata: Metadata,
+}
+
+impl CustomValueMetadata {
+    pub fn encoded(&self) -> &[u8] {
+        &self.inner.value
+    }
+
+    pub fn type_id(&self) -> u32 {
+        self.inner.ty.id
+    }
+
+    pub fn as_type<T: DecodeAsType>(&self) -> Result<T, ()> {
+        // use inner Arc that points to metadata to decode...
+        todo!()
     }
 }
