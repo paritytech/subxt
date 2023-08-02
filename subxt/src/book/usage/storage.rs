@@ -39,7 +39,7 @@
 //! ```
 //!
 //! As well as accessing specific entries, some storage locations can also be iterated over (such as
-//! the map of account information). To do this, suffix `_root` onto the query constructor (this
+//! the map of account information). To do this, suffix `_iter` onto the query constructor (this
 //! will only be available on static constructors when iteration is actually possible):
 //!
 //! ```rust,no_run
@@ -51,6 +51,13 @@
 //! // A dynamic query to do the same:
 //! let storage_query = subxt::dynamic::storage_iter("System", "Account");
 //! ```
+//!
+//! Some storage entries require multiple keys to be accessed, for example
+//! `polkadot::storage().preimage().preimage_for(_, _)`, which takes a `H256` and a `u32` as keys.
+//! For these multi-key storage entries, the generated static interface also offers _partial iteration_.
+//! This means iterating over a subset of storage entries, where just a subset of the keys match.
+//! These generated constructors have a suffix `_iter1` / `_iter2` / ... added, to iterate over all
+//! storage entries given the first 1 / 2 / ... keys.
 //!
 //! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing
 //! how to build a valid storage query, this trait also has some associated types that determine the
