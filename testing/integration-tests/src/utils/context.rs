@@ -11,7 +11,8 @@ use subxt::SubstrateConfig;
 const SUBSTRATE_NODE_PATHS: &str = "substrate-node,substrate";
 
 pub async fn test_context_with(authority: String) -> TestContext {
-    let paths = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| SUBSTRATE_NODE_PATHS.to_string());
+    let paths =
+        std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| SUBSTRATE_NODE_PATHS.to_string());
     let paths: Vec<_> = paths.split(',').map(|p| p.trim()).collect();
 
     let mut proc = TestContext::build(&paths);

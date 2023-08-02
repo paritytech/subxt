@@ -122,7 +122,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
 
         if value.path().ident().as_deref() != Some("WrapperKeepOpaque") {
             return Err(Error::custom_str(
-                "Type to decode is not 'WrapperTypeKeepOpaque'"
+                "Type to decode is not 'WrapperTypeKeepOpaque'",
             ));
         }
         if value.remaining() != 2 {
