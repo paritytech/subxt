@@ -121,9 +121,9 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
         use scale_decode::error::{Error, ErrorKind};
 
         if value.path().ident().as_deref() != Some("WrapperKeepOpaque") {
-            return Err(Error::new(ErrorKind::Custom(
-                "Type to decode is not 'WrapperTypeKeepOpaque'".into(),
-            )));
+            return Err(Error::custom_str(
+                "Type to decode is not 'WrapperTypeKeepOpaque'"
+            ));
         }
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
@@ -140,7 +140,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
 
         // Sanity check that the compact length we decoded lines up with the number of bytes encoded in the next field.
         if field.bytes().len() != len as usize {
-            return Err(Error::new(ErrorKind::Custom("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len".into())));
+            return Err(Error::custom_str("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len".into()));
         }
 
         Ok(WrapperKeepOpaque {

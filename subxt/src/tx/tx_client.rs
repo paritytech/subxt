@@ -193,7 +193,7 @@ where
             2 => u16::decode(cursor)?.into(),
             4 => u32::decode(cursor)?.into(),
             8 => u64::decode(cursor)?,
-            _ => return Err(Error::Decode(DecodeError::custom(format!("state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)", account_nonce_bytes.len()))))
+            _ => return Err(Error::Decode(DecodeError::custom_string(format!("state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)", account_nonce_bytes.len()))))
         };
         Ok(account_nonce)
     }

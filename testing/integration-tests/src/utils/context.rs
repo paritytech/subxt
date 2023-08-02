@@ -6,21 +6,15 @@ pub(crate) use crate::{node_runtime, utils::TestNodeProcess};
 
 use subxt::SubstrateConfig;
 
-/// substrate node should be installed on the $PATH
-const SUBSTRATE_NODE_PATH: &str = "substrate";
+/// `substrate-node` should be installed on the $PATH. We fall back
+/// to also checking for an older `substrate` binary.
+const SUBSTRATE_NODE_PATHS: &str = "substrate-node,substrate";
 
 pub async fn test_context_with(authority: String) -> TestContext {
-    let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
-        if which::which(SUBSTRATE_NODE_PATH).is_err() {
-            panic!(
-                "A substrate binary should be installed on your path for integration tests. \
-            See https://github.com/paritytech/subxt/tree/master#integration-testing"
-            )
-        }
-        SUBSTRATE_NODE_PATH.to_string()
-    });
+    let paths = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| SUBSTRATE_NODE_PATHS.to_string());
+    let paths: Vec<_> = paths.split(',').map(|p| p.trim()).collect();
 
-    let mut proc = TestContext::build(path.as_str());
+    let mut proc = TestContext::build(&paths);
     proc.with_authority(authority);
     proc.spawn::<SubstrateConfig>().await.unwrap()
 }
