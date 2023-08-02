@@ -8,6 +8,8 @@ use crate::{
     tx::TxClient, Config, Metadata,
 };
 use derivative::Derivative;
+use frame_metadata::v15::CustomMetadata;
+use scale_info::form::PortableForm;
 use std::sync::Arc;
 
 /// A trait representing a client that can perform
@@ -48,6 +50,10 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Work with runtime API.
     fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         RuntimeApiClient::new(self.clone())
+    }
+
+    fn custom_types(&self) -> &CustomMetadata<PortableForm> {
+        self.metadata().custom_metadata()
     }
 }
 
@@ -120,6 +126,11 @@ impl<T: Config> OfflineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Access custom types
+    fn custom_types(&self) -> &CustomMetadata<PortableForm> {
+        <Self as OfflineClientT<T>>::custom_types(self)
     }
 }
 

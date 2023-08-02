@@ -93,6 +93,7 @@ mod from_v15 {
                     event_enum_ty: m.outer_enums.event_enum_ty.id,
                     error_enum_ty: m.outer_enums.error_enum_ty.id,
                 },
+                custom: m.custom,
             })
         }
     }
