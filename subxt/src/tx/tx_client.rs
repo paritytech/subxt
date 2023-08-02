@@ -189,7 +189,7 @@ where
 
         // custom decoding from a u16/u32/u64 into a u64, based on the number of bytes we got back.
         let cursor = &mut &account_nonce_bytes[..];
-        let account_nonce: u64 = match account_nonce_bytes.len(){
+        let account_nonce: u64 = match account_nonce_bytes.len() {
             2 => u16::decode(cursor)?.into(),
             4 => u32::decode(cursor)?.into(),
             8 => u64::decode(cursor)?,

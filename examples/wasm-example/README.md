@@ -21,3 +21,6 @@ Then, in another terminal, run the app locally with:
 trunk serve --open
 ```
 
+# signing example
+
+For the signing example, we use the `@polkadot/extension-dapp` NPM package to talk to wallets loaded as browser extensions. In order to sign and submit the transaction using the `polkadot --dev` node we spawned above, you'll need to create a dev account in your wallet of choice. Use the recovery phrase `bottom drive obey lake curtain smoke basket hold race lonely fit walk` and the derivation path `//Alice` to create a dev account that can be used.
