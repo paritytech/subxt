@@ -147,7 +147,7 @@ impl Component for SigningExamplesComponent {
                                         }
                                     };
 
-                                let Ok(signature) = extension_signature_for_partial_extrinsic(&partial_extrinsic, &api, &account_id, account_source, account_address).await else {
+                                let Ok(signature) = extension_signature_for_partial_extrinsic(partial_extrinsic.call_data(), &api, &account_id, account_source, account_address).await else {
                                     return Message::Error(anyhow!("Signing via extension failed"));
                                 };
 
@@ -193,7 +193,7 @@ impl Component for SigningExamplesComponent {
                         match submit_wait_finalized_and_get_extrinsic_success_event(
                             signed_extrinsic,
                         )
-                            .await
+                        .await
                         {
                             Ok(remark_event) => Message::ExtrinsicFinalized { remark_event },
                             Err(err) => Message::ExtrinsicFailed(err),

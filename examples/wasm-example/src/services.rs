@@ -5,9 +5,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
 use subxt::ext::codec::Encode;
-use subxt::tx::PartialExtrinsic;
-use subxt::{self, OnlineClient, PolkadotConfig};
 use subxt::utils::AccountId32;
+use subxt::{self, OnlineClient, PolkadotConfig};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::{AttrValue, Callback};
@@ -113,41 +112,34 @@ pub async fn get_accounts() -> Result<Vec<Account>, anyhow::Error> {
     Ok(accounts)
 }
 
+// represent byte slice as a hex string
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
-fn encode_to_hex<E: Encode>(input: &E) -> String {
-    format!("0x{}", hex::encode(input.encode()))
+// encode a value with scale encoding and then represent as a hex string
+fn scale_encode_to_hex<E: Encode>(input: &E) -> String {
+    to_hex(input.encode())
 }
-
-/// this is used because numeric types (e.g. u32) are encoded as little-endian via scale (e.g. 9430 -> d6240000)
-/// while we need a big-endian representation for the json (e.g. 9430 -> 000024d6).
-fn encode_to_hex_reverse<E: Encode>(input: &E) -> String {
-    let mut bytes = input.encode();
-    bytes.reverse();
-    format!("0x{}", hex::encode(bytes))
-}
-
 
 /// communicates with JavaScript to obtain a signature for the `partial_extrinsic` via a browser extension (e.g. polkadot-js or Talisman)
 ///
 /// Some parameters are hard-coded here and not taken from the partial_extrinsic itself (mortality_checkpoint, era, tip).
 pub async fn extension_signature_for_partial_extrinsic(
-    partial_extrinsic: &PartialExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+    call_data: &[u8],
     api: &OnlineClient<PolkadotConfig>,
     account_id: &AccountId32,
     account_source: String,
     account_address: String,
 ) -> Result<Vec<u8>, anyhow::Error> {
-    let spec_version = encode_to_hex_reverse(&api.runtime_version().spec_version);
-    let transaction_version = encode_to_hex_reverse(&api.runtime_version().transaction_version);
-    let mortality_checkpoint = encode_to_hex(&api.genesis_hash());
-    let era = encode_to_hex(&subxt::config::extrinsic_params::Era::Immortal);
-    let genesis_hash = encode_to_hex(&api.genesis_hash());
-    let method = to_hex(partial_extrinsic.call_data());
+    let spec_version = to_hex(api.runtime_version().spec_version.to_be_bytes());
+    let transaction_version = to_hex(api.runtime_version().transaction_version.to_be_bytes());
+    let mortality_checkpoint = scale_encode_to_hex(&api.genesis_hash());
+    let era = scale_encode_to_hex(&subxt::config::extrinsic_params::Era::Immortal);
+    let genesis_hash = scale_encode_to_hex(&api.genesis_hash());
+    let method = to_hex(call_data);
     let nonce = api.tx().account_nonce(account_id).await?;
-    let nonce = encode_to_hex_reverse(&nonce);
+    let nonce = to_hex(nonce.to_be_bytes());
     let signed_extensions: Vec<String> = api
         .metadata()
         .extrinsic()
@@ -155,7 +147,7 @@ pub async fn extension_signature_for_partial_extrinsic(
         .iter()
         .map(|e| e.identifier().to_string())
         .collect();
-    let tip = encode_to_hex(&subxt::config::polkadot::PlainTip::new(0));
+    let tip = scale_encode_to_hex(&subxt::config::polkadot::PlainTip::new(0));
 
     let payload = json!({
         "specVersion": spec_version,
