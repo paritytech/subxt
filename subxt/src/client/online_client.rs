@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
+use crate::custom_types::CustomTypes;
 use crate::{
     blocks::BlocksClient,
     constants::ConstantsClient,
@@ -18,9 +19,9 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
-use frame_metadata::v15::CustomMetadata;
+
 use futures::future;
-use scale_info::form::PortableForm;
+
 use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
@@ -295,7 +296,7 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Access custom types.
-    pub fn custom_types(&self) -> &CustomMetadata<PortableForm> {
+    pub fn custom_types(&self) -> CustomTypes {
         <Self as OfflineClientT<T>>::custom_types(self)
     }
 

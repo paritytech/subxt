@@ -2,14 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::custom_types::CustomTypes;
 use crate::{
     blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
     rpc::types::RuntimeVersion, runtime_api::RuntimeApiClient, storage::StorageClient,
     tx::TxClient, Config, Metadata,
 };
 use derivative::Derivative;
-use frame_metadata::v15::CustomMetadata;
-use scale_info::form::PortableForm;
+
 use std::sync::Arc;
 
 /// A trait representing a client that can perform
@@ -52,8 +52,9 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
         RuntimeApiClient::new(self.clone())
     }
 
-    fn custom_types(&self) -> &CustomMetadata<PortableForm> {
-        self.metadata().custom_metadata()
+    /// Work this custom types.
+    fn custom_types(&self) -> CustomTypes {
+        CustomTypes::new(self.metadata())
     }
 }
 
@@ -129,7 +130,7 @@ impl<T: Config> OfflineClient<T> {
     }
 
     /// Access custom types
-    fn custom_types(&self) -> &CustomMetadata<PortableForm> {
+    pub fn custom_types(&self) -> CustomTypes {
         <Self as OfflineClientT<T>>::custom_types(self)
     }
 }
