@@ -88,6 +88,12 @@ impl From<String> for Error {
     }
 }
 
+impl From<std::convert::Infallible> for Error {
+    fn from(value: std::convert::Infallible) -> Self {
+        match value {}
+    }
+}
+
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]

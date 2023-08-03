@@ -8,6 +8,8 @@
 //! default Substrate node implementation, and [`PolkadotConfig`] for a
 //! Polkadot node.
 
+pub mod signed_extensions;
+
 pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
