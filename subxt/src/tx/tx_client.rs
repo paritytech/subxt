@@ -111,7 +111,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         account_nonce: u64,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -145,7 +145,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         call: &Call,
         signer: &Signer,
         account_nonce: u64,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -198,7 +198,7 @@ where
         &self,
         call: &Call,
         account_id: &T::AccountId,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -212,7 +212,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -237,9 +237,7 @@ where
         Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
     {
-        let other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams =
-            Default::default();
-        self.sign_and_submit_then_watch(call, signer, other_params)
+        self.sign_and_submit_then_watch(call, signer, Default::default())
             .await
     }
 
@@ -251,7 +249,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
@@ -283,9 +281,7 @@ where
         Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
     {
-        let other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams =
-            Default::default();
-        self.sign_and_submit(call, signer, other_params).await
+        self.sign_and_submit(call, signer, Default::default()).await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.
@@ -300,7 +296,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: impl Into<<T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,

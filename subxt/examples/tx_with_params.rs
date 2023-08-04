@@ -18,7 +18,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Configure the transaction parameters; we give a small tip and set the
     // transaction to live for 32 blocks from the `latest_block` above.
-    let tx_params = Params::new().tip(1_000).mortal(latest_block.header(), 32);
+    let tx_params = Params::new()
+        .tip(1_000)
+        .mortal(latest_block.header(), 32)
+        .build();
 
     // submit the transaction:
     let from = dev::alice();

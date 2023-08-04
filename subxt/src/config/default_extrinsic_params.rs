@@ -92,8 +92,8 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         self
     }
 
-    /// Return the "raw" params as required. This doesn't need to be called in normal usage.
-    pub fn raw(self) -> OtherParams<T> {
+    /// Build the extrinsic parameters.
+    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams {
         let check_mortality_params = if let Some(checkpoint_hash) = self.mortality_checkpoint_hash {
             signed_extensions::CheckMortalityParams::mortal(
                 self.mortality_period,
@@ -122,34 +122,5 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             charge_asset_tx_params,
             charge_transaction_params,
         )
-    }
-}
-
-type OtherParams<T> = (
-    (),
-    (),
-    (),
-    (),
-    signed_extensions::CheckMortalityParams<T>,
-    signed_extensions::ChargeAssetTxPaymentParams,
-    signed_extensions::ChargeTransactionPaymentParams,
-);
-
-impl<T: Config> From<DefaultExtrinsicParamsBuilder<T>> for OtherParams<T> {
-    fn from(v: DefaultExtrinsicParamsBuilder<T>) -> Self {
-        v.raw()
-    }
-}
-
-// We have to manually write out `OtherParams<T>` for some reason to avoid type errors in the `From` impl.
-// So, here we ensure that `OtherParams<T>` is equal to `<DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams`.
-// We'll get a compile error if not.
-#[allow(unused)]
-fn assert_otherparams_eq() {
-    struct Ty<Inner>(Inner);
-    fn assert_eq<T: Config>(t: Ty<OtherParams<T>>) {
-        match t {
-            Ty::<<DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams>(_) => {}
-        }
     }
 }
