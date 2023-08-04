@@ -17,6 +17,7 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
+pub use crate::config::ExtrinsicParamsError;
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
@@ -58,6 +59,9 @@ pub enum Error {
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    /// Error constructing the appropriate extrinsic params.
+    #[error("{0}")]
+    ExtrinsicParams(#[from] ExtrinsicParamsError),
     /// Block related error.
     #[error("Block error: {0}")]
     Block(#[from] BlockError),

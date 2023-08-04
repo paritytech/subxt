@@ -4,10 +4,7 @@
 
 //! Substrate specific configuration
 
-use super::{
-    extrinsic_params::{BaseExtrinsicParams, BaseExtrinsicParamsBuilder},
-    Config, Hasher, Header,
-};
+use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
 use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
@@ -31,45 +28,11 @@ impl Config for SubstrateConfig {
 
 /// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for the default substrate node.
-pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
+pub type SubstrateExtrinsicParams<T> = DefaultExtrinsicParams<T>;
 
 /// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
 /// This is what you provide to methods like `sign_and_submit()`.
-pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
-
-// Because Era is one of the args to our extrinsic params.
-pub use super::extrinsic_params::Era;
-
-/// A tip payment made in the form of a specific asset.
-#[derive(Copy, Clone, Debug, Default, Encode)]
-pub struct AssetTip {
-    #[codec(compact)]
-    tip: u128,
-    asset: Option<u32>,
-}
-
-impl AssetTip {
-    /// Create a new tip of the amount provided.
-    pub fn new(amount: u128) -> Self {
-        AssetTip {
-            tip: amount,
-            asset: None,
-        }
-    }
-
-    /// Designate the tip as being of a particular asset class.
-    /// If this is not set, then the native currency is used.
-    pub fn of_asset(mut self, asset: u32) -> Self {
-        self.asset = Some(asset);
-        self
-    }
-}
-
-impl From<u128> for AssetTip {
-    fn from(n: u128) -> Self {
-        AssetTip::new(n)
-    }
-}
+pub type SubstrateExtrinsicParamsBuilder<T> = DefaultExtrinsicParamsBuilder<T>;
 
 /// A type that can hash values using the blaks2_256 algorithm.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Encode)]
