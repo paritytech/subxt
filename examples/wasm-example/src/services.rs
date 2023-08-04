@@ -4,7 +4,7 @@ use js_sys::Promise;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
-use subxt::ext::codec::Encode;
+use subxt::ext::codec::{ Compact, Encode };
 use subxt::tx::PartialExtrinsic;
 use subxt::{self, OnlineClient, PolkadotConfig};
 use subxt::utils::AccountId32;
@@ -143,7 +143,7 @@ pub async fn extension_signature_for_partial_extrinsic(
     let spec_version = encode_to_hex_reverse(&api.runtime_version().spec_version);
     let transaction_version = encode_to_hex_reverse(&api.runtime_version().transaction_version);
     let mortality_checkpoint = encode_to_hex(&api.genesis_hash());
-    let era = encode_to_hex(&subxt::config::extrinsic_params::Era::Immortal);
+    let era = encode_to_hex(&0u8);
     let genesis_hash = encode_to_hex(&api.genesis_hash());
     let method = to_hex(partial_extrinsic.call_data());
     let nonce = api.tx().account_nonce(account_id).await?;
@@ -155,7 +155,7 @@ pub async fn extension_signature_for_partial_extrinsic(
         .iter()
         .map(|e| e.identifier().to_string())
         .collect();
-    let tip = encode_to_hex(&subxt::config::polkadot::PlainTip::new(0));
+    let tip = encode_to_hex(&Compact(0u128));
 
     let payload = json!({
         "specVersion": spec_version,

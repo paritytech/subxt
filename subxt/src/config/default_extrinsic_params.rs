@@ -32,10 +32,8 @@ pub struct DefaultExtrinsicParamsBuilder<T: Config> {
     tip_of_asset_id: Option<u32>,
 }
 
-impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
-    /// Configure new extrinsic params. We default to providing no tip
-    /// and using an immortal transaction unless otherwise configured
-    pub fn new() -> Self {
+impl<T: Config> Default for DefaultExtrinsicParamsBuilder<T> {
+    fn default() -> Self {
         Self {
             mortality_checkpoint_hash: None,
             mortality_checkpoint_number: 0,
@@ -44,6 +42,14 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             tip_of: 0,
             tip_of_asset_id: None,
         }
+    }
+}
+
+impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
+    /// Configure new extrinsic params. We default to providing no tip
+    /// and using an immortal transaction unless otherwise configured
+    pub fn new() -> Self {
+        Default::default()
     }
 
     /// Make the transaction mortal, given a block header that it should be mortal from,

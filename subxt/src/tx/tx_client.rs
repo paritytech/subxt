@@ -127,7 +127,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
             account_nonce,
             self.client.clone(),
-            other_params.into(),
+            other_params,
         )
         .map_err(Into::into)?;
 

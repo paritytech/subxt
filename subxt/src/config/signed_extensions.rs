@@ -380,7 +380,7 @@ macro_rules! impl_tuples {
                 }
 
                 Ok(AnyOf {
-                    params: params,
+                    params,
                     _marker: std::marker::PhantomData
                 })
             }
