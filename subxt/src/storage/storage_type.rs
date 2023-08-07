@@ -3,6 +3,8 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
+
+use crate::utils::StorageVersion;
 use crate::{
     client::OnlineClientT,
     error::{Error, MetadataError},
@@ -10,6 +12,7 @@ use crate::{
     rpc::types::{StorageData, StorageKey},
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
@@ -236,6 +239,34 @@ where
                 _marker: std::marker::PhantomData,
             })
         }
+    }
+
+    /// the storage version of a pallet. Accessible via the magic key `:__STORAGE_VERSION__:`.
+    pub async fn storage_version(
+        &self,
+        pallet_name: impl AsRef<str>,
+    ) -> Result<StorageVersion, Error> {
+        // check that the pallet exists in the metadata:
+        self.client
+            .metadata()
+            .pallet_by_name(pallet_name.as_ref())
+            .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.as_ref().into()))?;
+
+        // construct the storage key. This is done similarly in `frame_support::traits::metadata::StorageVersion::storage_key()`.
+        pub const STORAGE_VERSION_STORAGE_KEY_POSTFIX: &[u8] = b":__STORAGE_VERSION__:";
+        let mut key_bytes: Vec<u8> = vec![];
+        key_bytes.extend(&sp_core_hashing::twox_128(pallet_name.as_ref().as_bytes()));
+        key_bytes.extend(&sp_core_hashing::twox_128(
+            STORAGE_VERSION_STORAGE_KEY_POSTFIX,
+        ));
+
+        // fetch the raw bytes and decode them into the StorageVersion struct:
+        let storage_version_bytes = self
+            .fetch_raw(&key_bytes)
+            .await?
+            .ok_or(Error::Other("storage version not found".into()))?;
+        let storage_version = StorageVersion::decode(&mut &storage_version_bytes[..])?;
+        Ok(storage_version)
     }
 }
 
