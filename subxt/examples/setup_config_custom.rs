@@ -91,5 +91,6 @@ async fn main() {
     // And provide them when submitting a transaction:
     let _ = client
         .tx()
-        .sign_and_submit_then_watch(&tx_payload, &dev::alice(), tx_config);
+        .sign_and_submit_then_watch(&tx_payload, &dev::alice(), tx_config)
+        .await;
 }
