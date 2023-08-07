@@ -86,7 +86,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     ) -> Self {
         self.mortality = Some(Mortality {
             checkpoint_hash: from_block_hash,
-            checkpoint_number: from_block_number.into(),
+            checkpoint_number: from_block_number,
             period: for_n_blocks,
         });
         self
