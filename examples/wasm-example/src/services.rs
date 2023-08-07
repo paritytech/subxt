@@ -4,7 +4,7 @@ use js_sys::Promise;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
-use subxt::ext::codec::{ Compact, Encode };
+use subxt::ext::codec::{Compact, Encode};
 use subxt::tx::PartialExtrinsic;
 use subxt::{self, OnlineClient, PolkadotConfig};
 use subxt::utils::AccountId32;
