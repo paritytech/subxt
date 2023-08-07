@@ -9,7 +9,6 @@
 //! Polkadot node.
 
 mod default_extrinsic_params;
-mod era;
 mod extrinsic_params;
 
 pub mod polkadot;

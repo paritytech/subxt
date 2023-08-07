@@ -7,8 +7,8 @@
 //! [`AnyOf`] to configure the set of signed extensions which are known about
 //! when interacting with a chain.
 
-use super::era::Era;
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;

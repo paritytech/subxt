@@ -24,20 +24,28 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
 /// [`DefaultExtrinsicParams`]. This may expose methods that aren't applicable to the current
 /// chain; such values will simply be ignored if so.
 pub struct DefaultExtrinsicParamsBuilder<T: Config> {
-    mortality_checkpoint_hash: Option<T::Hash>,
-    mortality_checkpoint_number: u64,
-    mortality_period: u64,
+    /// `None` means the tx will be immortal.
+    mortality: Option<Mortality<T::Hash>>,
+    /// `None` means we'll use the native token.
+    tip_of_asset_id: Option<u32>,
     tip: u128,
     tip_of: u128,
-    tip_of_asset_id: Option<u32>,
+}
+
+struct Mortality<Hash> {
+    /// Block hash that mortality starts from
+    checkpoint_hash: Hash,
+    /// Block number that mortality starts from (must
+    // point to the same block as the hash above)
+    checkpoint_number: u64,
+    /// How many blocks the tx is mortal for
+    period: u64,
 }
 
 impl<T: Config> Default for DefaultExtrinsicParamsBuilder<T> {
     fn default() -> Self {
         Self {
-            mortality_checkpoint_hash: None,
-            mortality_checkpoint_number: 0,
-            mortality_period: 0,
+            mortality: None,
             tip: 0,
             tip_of: 0,
             tip_of_asset_id: None,
@@ -56,9 +64,11 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     /// and the number of blocks (roughly; it'll be rounded to a power of two) that it will
     /// be mortal for.
     pub fn mortal(mut self, from_block: &T::Header, for_n_blocks: u64) -> Self {
-        self.mortality_checkpoint_hash = Some(from_block.hash());
-        self.mortality_checkpoint_number = from_block.number().into();
-        self.mortality_period = for_n_blocks;
+        self.mortality = Some(Mortality {
+            checkpoint_hash: from_block.hash(),
+            checkpoint_number: from_block.number().into(),
+            period: for_n_blocks,
+        });
         self
     }
 
@@ -74,9 +84,11 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         from_block_hash: T::Hash,
         for_n_blocks: u64,
     ) -> Self {
-        self.mortality_checkpoint_hash = Some(from_block_hash);
-        self.mortality_checkpoint_number = from_block_number;
-        self.mortality_period = for_n_blocks;
+        self.mortality = Some(Mortality {
+            checkpoint_hash: from_block_hash,
+            checkpoint_number: from_block_number.into(),
+            period: for_n_blocks,
+        });
         self
     }
 
@@ -100,11 +112,11 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
 
     /// Build the extrinsic parameters.
     pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams {
-        let check_mortality_params = if let Some(checkpoint_hash) = self.mortality_checkpoint_hash {
+        let check_mortality_params = if let Some(mortality) = self.mortality {
             signed_extensions::CheckMortalityParams::mortal(
-                self.mortality_period,
-                self.mortality_checkpoint_number,
-                checkpoint_hash,
+                mortality.period,
+                mortality.checkpoint_number,
+                mortality.checkpoint_hash,
             )
         } else {
             signed_extensions::CheckMortalityParams::immortal()
