@@ -74,21 +74,24 @@
 //! accept arbitrary `OtherParams` from users, and are then expected to provide this "extra" and "additional" data when asked
 //! via the required [`crate::config::ExtrinsicParamsEncoder`] impl.
 //!
-//! In most cases, the default [`crate::config::DefaultExtrinsicParams`] type will work here; it understands the "standard"
+//! **In most cases, the default [crate::config::DefaultExtrinsicParams] type will work**: it understands the "standard"
 //! signed extensions that are in use, and allows the user to provide things like a tip, and set the extrinsic mortality via
-//! [`crate::config::DefaultExtrinsicParamsBuilder`]. It will ensure that data is given in the correct order, and return an
-//! error if the chain is using signed extensions that are unknown to it which require data.
+//! [`crate::config::DefaultExtrinsicParamsBuilder`]. It will use the chain metadata to decide which signed extensions to use
+//! and in which order. It will return an error if the chain uses a signed extension which it doesn't know how to handle.
 //!
-//! In the event that novel signed extensions are in use (or if you just wish to provide a different interface for users to
-//! configure transactions), you can either implement an interface for the new signed extension and add it to the list of
-//! configured ones, or you can create an entirely custom implementation of [`crate::config::ExtrinsicParams`] with whatever
-//! arbitrary behaviour you require.
+//! If the chain uses novel signed extensions (or if you just wish to provide a different interface for users to configure
+//! transactions), you can either:
+//!
+//! 1. Implement a new signed extension and add it to the list.
+//! 2. Implement [`crate::config::DefaultExtrinsicParams`] from scratch.
+//!
+//! See below for examples of each.
 //!
 //! ### Finding out which signed extensions a chain is using.
 //!
-//! This information can be obtained from the `SignedExtra` parameter of the `UncheckedExtrinsic` of your
-//! parachain, which will be a tuple of signed extensions. It can also be obtained from the metadata (see
-//! [`frame_metadata::v15::SignedExtensionMetadata`]).
+//! In either case, you'll want to find out which signed extensions a chain is using. This information can be obtained from
+//! the `SignedExtra` parameter of the `UncheckedExtrinsic` of your parachain, which will be a tuple of signed extensions.
+//! It can also be obtained from the metadata (see [`frame_metadata::v15::SignedExtensionMetadata`]).
 //!
 //! For statemint, the signed extensions look like
 //! [this](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L779):
@@ -122,28 +125,27 @@
 //! | [`frame_system::ChargeAssetTxPayment`](https://docs.rs/frame-system/latest/frame_system/struct.ChargeAssetTxPayment.html) | [pallet_asset_tx_payment::ChargeAssetTxPayment](https://docs.rs/pallet-asset-tx-payment/latest/pallet_asset_tx_payment/struct.ChargeAssetTxPayment.html) | ()                               |
 //!
 //! All types in the `struct type` column make up the "extra" data that we're expected to provide. All types in the
-//! `AdditionalSigned` column make up the "additional" data that we're expected to provide. The goal of an
-//! [`crate::config::ExtrinsicParams`] impl then is to provide the appropriate (SCALE encoded) data for these.
-//! If the [`crate::config::ExtrinsicParams`] impl needs additional data to be able to do this, it can use
-//! the [`crate::config::ExtrinsicParams::OtherParams`] associated type to obtain it from the user.
+//! `AdditionalSigned` column make up the "additional" data that we're expected to provide. This information will be useful
+//! whether we want to implement [`crate::config::SignedExtension`] for a signed extension, or implement
+//! [`crate::config::ExtrinsicParams`] from scratch.
 //!
-//! ### Implementing and adding new signed extensions to the config.
+//! As it happens, all of the signed extensions in the table are either already exported in [`crate::config::signed_extensions`],
+//! or they hand back no "additional" or "extra" data. In both of these cases, the default `ExtrinsicParams` configuration will
+//! work out of the box.
 //!
-//! As it happens, Statemint only uses signed extensions that Subxt is natively aware of via [`crate::config::DefaultExtrinsicParams`],
-//! and so the default config will work just fine. If it did not, then you could implement [`crate::config::signed_extensions::SignedExtension`]
-//! on some custom type. This could then be placed into a new set of signed extensions, and (optionally) some novel interface could be
-//! constructed to make it easy for users to configure them when submitting transactions.
+//! ### Implementing and adding new signed extensions to the config
 //!
-//! Let's see what this looks like:
+//! If you do need to implement a novel signed extension, then you can implement [`crate::config::signed_extensions::SignedExtension`]
+//! on a custom type and place it into a new set of signed extensions, like so:
 //!
 //! ```rust,ignore
 #![doc = include_str ! ("../../../examples/setup_config_signed_extension.rs")]
 //! ```
 //!
-//! ### Implementing [`crate::config::ExtrinsicParams`] from scratch.
+//! ### Implementing [`crate::config::ExtrinsicParams`] from scratch
 //!
 //! Alternately, you are free to implement [`crate::config::ExtrinsicParams`] entirely from scratch if you know exactly what "extra" and`
-//! "additional" data your node needs and would prefer to  craft your own interface. This should be somewhat of a last resort.
+//! "additional" data your node needs and would prefer to craft your own interface.
 //!
 //! Let's see what this looks like (this config won't work on any real node):
 //!
