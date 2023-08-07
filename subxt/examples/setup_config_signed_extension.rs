@@ -23,7 +23,8 @@ impl Config for CustomConfig {
     type ExtrinsicParams = signed_extensions::AnyOf<
         Self,
         (
-            // Load in all of the existing signed extensions:
+            // Load in the existing signed extensions we're interested in
+            // (if the extension isn't actually needed it'll just be ignored):
             signed_extensions::CheckSpecVersion,
             signed_extensions::CheckTxVersion,
             signed_extensions::CheckNonce,
@@ -40,7 +41,7 @@ impl Config for CustomConfig {
 // Our custom signed extension doesn't do much:
 pub struct CustomSignedExtension;
 
-// Give the extension a name; this allows [`AnyOf`] to look it
+// Give the extension a name; this allows `AnyOf` to look it
 // up in the chain metadata in order to know when and if to use it.
 impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension {
     const NAME: &'static str = "CustomSignedExtension";
@@ -95,5 +96,6 @@ async fn main() {
     // And provide them when submitting a transaction:
     let _ = client
         .tx()
-        .sign_and_submit_then_watch(&tx_payload, &dev::alice(), custom(tx_config));
+        .sign_and_submit_then_watch(&tx_payload, &dev::alice(), custom(tx_config))
+        .await;
 }

@@ -3,9 +3,9 @@
 // see LICENSE for license details.
 
 //! This module contains a trait which controls the parameters that must
-//! be provided in order to successfully construct an extrinsic. A basic
-//! implementation of the trait is provided ([`BaseSignedExtensions`]) which is
-//! used by the provided Substrate and Polkadot configuration.
+//! be provided in order to successfully construct an extrinsic.
+//! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
+//! implementation of this that will work in many cases.
 
 use crate::{client::OfflineClientT, Config};
 use core::fmt::Debug;
@@ -33,8 +33,8 @@ impl From<std::convert::Infallible> for ExtrinsicParamsError {
 }
 
 /// This trait allows you to configure the "signed extra" and
-/// "additional" parameters that are signed and used in transactions.
-/// Tuples of [`SignedExtension`]'s automatically implement this.
+/// "additional" parameters that are a part of the transaction payload
+/// or the signer payload respectively.
 pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to

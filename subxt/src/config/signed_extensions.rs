@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! This module contains a trait which controls the parameters that must
-//! be provided in order to successfully construct an extrinsic. A basic
-//! implementation of the trait is provided ([`BaseSignedExtensions`]) which is
-//! used by the provided Substrate and Polkadot configuration.
+//! This module contains implementations for common signed extensions, each
+//! of which implements [`SignedExtension`], and can be used in conjunction with
+//! [`AnyOf`] to configure the set of signed extensions which are known about
+//! when interacting with a chain.
 
 use super::era::Era;
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};

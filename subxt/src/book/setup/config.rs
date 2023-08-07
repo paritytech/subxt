@@ -71,7 +71,8 @@
 //!
 //! The `ExtrinsicParams` config type expects to be given an implementation of the [`crate::config::ExtrinsicParams`] trait.
 //! Implementations of the [`crate::config::ExtrinsicParams`] trait are handed some parameters from Subxt itself, and can
-//! accept arbitrary `OtherParams` from users, and are then expected to provide this "extra" and "additional" data when asked.
+//! accept arbitrary `OtherParams` from users, and are then expected to provide this "extra" and "additional" data when asked
+//! via the required [`crate::config::ExtrinsicParamsEncoder`] impl.
 //!
 //! In most cases, the default [`crate::config::DefaultExtrinsicParams`] type will work here; it understands the "standard"
 //! signed extensions that are in use, and allows the user to provide things like a tip, and set the extrinsic mortality via
@@ -122,9 +123,8 @@
 //!
 //! All types in the `struct type` column make up the "extra" data that we're expected to provide. All types in the
 //! `AdditionalSigned` column make up the "additional" data that we're expected to provide. The goal of an
-//! [`crate::config::ExtrinsicParams`] impl then is to provide the appropriate (SCALE encoded) data for these via
-//! [`crate::config::ExtrinsicParams::encode_extra_to()`] and [`crate::config::ExtrinsicParams::encode_additional_to()`]
-//! respectively. If the [`crate::config::ExtrinsicParams`] impl needs additional data to be able to do this, it can use
+//! [`crate::config::ExtrinsicParams`] impl then is to provide the appropriate (SCALE encoded) data for these.
+//! If the [`crate::config::ExtrinsicParams`] impl needs additional data to be able to do this, it can use
 //! the [`crate::config::ExtrinsicParams::OtherParams`] associated type to obtain it from the user.
 //!
 //! ### Implementing and adding new signed extensions to the config.
