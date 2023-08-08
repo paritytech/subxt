@@ -141,13 +141,13 @@ async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     // cannot assume anything about version number, but should work to fetch it
-    let version = api
+    let _version = api
         .storage()
         .at_latest()
         .await?
         .storage_version("System")
         .await?;
-    let version = api
+    let _version = api
         .storage()
         .at_latest()
         .await?
