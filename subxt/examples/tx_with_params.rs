@@ -1,4 +1,4 @@
-use subxt::config::polkadot::{Era, PlainTip, PolkadotExtrinsicParamsBuilder as Params};
+use subxt::config::polkadot::PolkadotExtrinsicParamsBuilder as Params;
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 
@@ -14,10 +14,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = dev::bob().public_key().into();
     let tx = polkadot::tx().balances().transfer(dest, 10_000);
 
-    // Configure the transaction parameters; for Polkadot the tip and era:
+    let latest_block = api.blocks().at_latest().await?;
+
+    // Configure the transaction parameters; we give a small tip and set the
+    // transaction to live for 32 blocks from the `latest_block` above.
     let tx_params = Params::new()
-        .tip(PlainTip::new(1_000))
-        .era(Era::Immortal, api.genesis_hash());
+        .tip(1_000)
+        .mortal(latest_block.header(), 32)
+        .build();
 
     // submit the transaction:
     let from = dev::alice();
