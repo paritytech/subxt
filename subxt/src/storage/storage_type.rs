@@ -4,7 +4,6 @@
 
 use super::storage_address::{StorageAddress, Yes};
 
-use crate::storage::well_known_keys;
 use crate::utils::StorageVersion;
 use crate::{
     client::OnlineClientT,
@@ -242,7 +241,7 @@ where
         }
     }
 
-    /// the storage version of a pallet.
+    /// The storage version of a pallet.
     pub async fn storage_version(
         &self,
         pallet_name: impl AsRef<str>,
@@ -262,19 +261,23 @@ where
         ));
 
         // fetch the raw bytes and decode them into the StorageVersion struct:
-        let storage_version_bytes = self.fetch_raw(&key_bytes).await?.ok_or(format!(
-            "Unexpected: entry for storage version in pallet \"{}\" not found",
-            pallet_name.as_ref()
-        ))?;
+        let storage_version_bytes = self.fetch_raw(&key_bytes).await?.ok_or_else(|| {
+            format!(
+                "Unexpected: entry for storage version in pallet \"{}\" not found",
+                pallet_name.as_ref()
+            )
+        })?;
         let storage_version = StorageVersion::decode(&mut &storage_version_bytes[..])?;
         Ok(storage_version)
     }
 
-    /// fetches the Wasm code of the runtime.
+    /// Fetches the Wasm code of the runtime.
     pub async fn runtime_wasm_code(&self) -> Result<Vec<u8>, Error> {
-        let key = well_known_keys::CODE;
-        let data = self.fetch_raw(key.key()).await?.ok_or(format!(
-            "Unexpected: entry for well known key \"{key}\" not found"
+        // note: this should match the `CODE` constant in `sp_core::storage::well_known_keys`
+        const CODE: &[u8] = b":code";
+        let data = self.fetch_raw(CODE).await?.ok_or(format!(
+            "Unexpected: entry for well known key \"{}\" not found",
+            std::str::from_utf8(CODE).expect("qed;")
         ))?;
         Ok(data)
     }
