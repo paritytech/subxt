@@ -1,95 +1,96 @@
 use codec::Encode;
-use primitive_types::H256;
-use subxt::config::{Config, ExtrinsicParams};
+use subxt::client::OfflineClientT;
+use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
+use subxt_signer::sr25519::dev;
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+pub mod runtime {}
 
 // We don't need to construct this at runtime,
 // so an empty enum is appropriate:
-pub enum StatemintConfig {}
+pub enum CustomConfig {}
 
-impl Config for StatemintConfig {
+impl Config for CustomConfig {
     type Hash = subxt::utils::H256;
     type AccountId = subxt::utils::AccountId32;
     type Address = subxt::utils::MultiAddress<Self::AccountId, ()>;
     type Signature = subxt::utils::MultiSignature;
     type Hasher = subxt::config::substrate::BlakeTwo256;
     type Header = subxt::config::substrate::SubstrateHeader<u32, Self::Hasher>;
-    type ExtrinsicParams = StatemintExtrinsicParams;
+    type ExtrinsicParams = CustomExtrinsicParams<Self>;
 }
 
-#[derive(Encode, Debug, Clone, Eq, PartialEq)]
-pub struct StatemintExtrinsicParams {
-    extra_params: StatemintExtraParams,
-    additional_params: StatemintAdditionalParams,
+// This represents some arbitrary (and nonsensical) custom parameters that
+// will be attached to transaction extra and additional payloads:
+pub struct CustomExtrinsicParams<T: Config> {
+    genesis_hash: T::Hash,
+    tip: u128,
+    foo: bool,
 }
 
-impl ExtrinsicParams<H256> for StatemintExtrinsicParams {
-    // We need these additional values that aren't otherwise
-    // provided. Calls like api.tx().sign_and_submit_then_watch()
-    // allow the user to provide an instance of these, so it's wise
-    // to give this a nicer interface in reality:
-    type OtherParams = (
-        sp_core::H256,
-        sp_runtime::generic::Era,
-        ChargeAssetTxPayment,
-    );
+// We can provide a "pretty" interface to allow users to provide these:
+#[derive(Default)]
+pub struct CustomExtrinsicParamsBuilder {
+    tip: u128,
+    foo: bool,
+}
+
+impl CustomExtrinsicParamsBuilder {
+    pub fn new() -> Self {
+        Default::default()
+    }
+    pub fn tip(mut self, value: u128) -> Self {
+        self.tip = value;
+        self
+    }
+    pub fn enable_foo(mut self) -> Self {
+        self.foo = true;
+        self
+    }
+}
+
+// Describe how to fetch and then encode the params:
+impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
+    type OtherParams = CustomExtrinsicParamsBuilder;
+    type Error = std::convert::Infallible;
 
     // Gather together all of the params we will need to encode:
-    fn new(
-        spec_version: u32,
-        tx_version: u32,
-        nonce: u64,
-        genesis_hash: H256,
+    fn new<Client: OfflineClientT<T>>(
+        _nonce: u64,
+        client: Client,
         other_params: Self::OtherParams,
-    ) -> Self {
-        let (mortality_hash, era, charge) = other_params;
-
-        let extra_params = StatemintExtraParams { era, nonce, charge };
-        let additional_params = StatemintAdditionalParams {
-            spec_version,
-            tx_version,
-            genesis_hash,
-            mortality_hash,
-        };
-
-        Self {
-            extra_params,
-            additional_params,
-        }
+    ) -> Result<Self, Self::Error> {
+        Ok(Self {
+            genesis_hash: client.genesis_hash(),
+            tip: other_params.tip,
+            foo: other_params.foo,
+        })
     }
+}
 
-    // Encode the relevant params when asked:
+// Encode the relevant params when asked:
+impl<T: Config> ExtrinsicParamsEncoder for CustomExtrinsicParams<T> {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.extra_params.encode_to(v);
+        (self.tip, self.foo).encode_to(v);
     }
     fn encode_additional_to(&self, v: &mut Vec<u8>) {
-        self.additional_params.encode_to(v);
+        self.genesis_hash.encode_to(v)
     }
-}
-
-#[derive(Encode, Debug, Clone, Eq, PartialEq)]
-pub struct StatemintExtraParams {
-    era: sp_runtime::generic::Era,
-    nonce: u64,
-    charge: ChargeAssetTxPayment,
-}
-
-#[derive(Encode, Debug, Clone, Eq, PartialEq)]
-pub struct ChargeAssetTxPayment {
-    #[codec(compact)]
-    tip: u128,
-    asset_id: Option<u32>,
-}
-
-#[derive(Encode, Debug, Clone, Eq, PartialEq)]
-pub struct StatemintAdditionalParams {
-    spec_version: u32,
-    tx_version: u32,
-    genesis_hash: sp_core::H256,
-    mortality_hash: sp_core::H256,
 }
 
 #[tokio::main]
 async fn main() {
     // With the config defined, it can be handed to Subxt as follows:
-    let _client_fut = subxt::OnlineClient::<StatemintConfig>::new();
+    let client = subxt::OnlineClient::<CustomConfig>::new().await.unwrap();
+
+    let tx_payload = runtime::tx().system().remark(b"Hello".to_vec());
+
+    // Build your custom "OtherParams":
+    let tx_config = CustomExtrinsicParamsBuilder::new().tip(1234).enable_foo();
+
+    // And provide them when submitting a transaction:
+    let _ = client
+        .tx()
+        .sign_and_submit_then_watch(&tx_payload, &dev::alice(), tx_config)
+        .await;
 }

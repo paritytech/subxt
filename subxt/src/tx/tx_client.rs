@@ -11,7 +11,7 @@ use sp_core_hashing::blake2_256;
 use crate::error::DecodeError;
 use crate::{
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, Hasher},
+    config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
@@ -111,7 +111,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         account_nonce: u64,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -124,17 +124,12 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let call_data = self.call_data(call)?;
 
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = {
-            // Obtain spec version and transaction version from the runtime version of the client.
-            let runtime = self.client.runtime_version();
-            <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::new(
-                runtime.spec_version,
-                runtime.transaction_version,
-                account_nonce,
-                self.client.genesis_hash(),
-                other_params,
-            )
-        };
+        let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
+            account_nonce,
+            self.client.clone(),
+            other_params,
+        )
+        .map_err(Into::into)?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(PartialExtrinsic {
@@ -150,7 +145,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         call: &Call,
         signer: &Signer,
         account_nonce: u64,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -203,7 +198,7 @@ where
         &self,
         call: &Call,
         account_id: &T::AccountId,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -217,7 +212,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -240,7 +235,7 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
             .await
@@ -254,7 +249,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
@@ -284,7 +279,7 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
     }
@@ -301,7 +296,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Hash>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,
