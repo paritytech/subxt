@@ -83,7 +83,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         use scale_encode::error::{Error, ErrorKind, Kind};
 
         let Some(ty) = types.resolve(type_id) else {
-            return Err(Error::new(ErrorKind::TypeNotFound(type_id)))
+            return Err(Error::new(ErrorKind::TypeNotFound(type_id)));
         };
 
         // Do a basic check that the target shape lines up.
@@ -91,7 +91,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected: type_id,
-            }))
+            }));
         };
 
         // Check that the name also lines up.

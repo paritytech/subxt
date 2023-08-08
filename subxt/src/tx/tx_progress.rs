@@ -389,7 +389,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let Ok((_,stripped)) = strip_compact_prefix(&ext.0) else {
+                let Ok((_, stripped)) = strip_compact_prefix(&ext.0) else {
                     return false;
                 };
                 let hash = T::Hasher::hash_of(&stripped);

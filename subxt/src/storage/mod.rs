@@ -11,6 +11,7 @@ mod storage_type;
 pub mod utils;
 
 pub use storage_client::StorageClient;
+pub use utils::well_known_keys;
 
 pub use storage_type::{KeyIter, Storage};
 
