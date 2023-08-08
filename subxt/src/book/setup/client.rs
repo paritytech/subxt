@@ -2,25 +2,21 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! # Configuring the Subxt client
+//! # The Subxt client.
 //!
-//! Subxt ships with two clients, an [offline client](crate::client::OfflineClient) and an [online
-//! client](crate::client::OnlineClient). These are backed by the traits
-//! [`crate::client::OfflineClientT`] and [`crate::client::OnlineClientT`], so in theory it's
-//! possible for users to implement their own clients, although this isn't generally expected.
+//! The client forms the entry point to all of the Subxt APIs. Every client implements one or
+//! both of [`crate::client::OfflineClientT`] and [`crate::client::OnlineClientT`].
 //!
-//! Both clients are generic over a [`crate::config::Config`] trait, which is the way that we give
-//! the client certain information about how to interact with a node that isn't otherwise available
-//! or possible to include in the node metadata.
+//! Subxt ships with three clients which implement one or both of traits:
+//! - An [online client](crate::client::OnlineClient).
+//! - An [offline client](crate::client::OfflineClient).
+//! - A light client (which is currently still unstable).
 //!
-//! The [`crate::config::Config`] trait mimics the `frame_system::Config` trait and
-//! subxt ships out of the box with two default implementations:
+//! In theory it's possible for users to implement their own clients, although this isn't generally
+//! expected.
 //!
-//! - [`crate::config::PolkadotConfig`] for talking to Polkadot nodes, and
-//! - [`crate::config::SubstrateConfig`] for talking to generic nodes built with Substrate.
-//!
-//! The latter will generally work in many cases, but [may need special customization](super::config) if
-//! the node differs in any of the types the [`Config`](crate::config::Config) trait wants to know about.
+//! The provided clients are all generic over the [`crate::config::Config`] that they accept, which
+//! determines how they will interact with the chain.
 //!
 //! In the case of the [`crate::OnlineClient`], we have a few options to instantiate it:
 //!
@@ -31,23 +27,20 @@
 //!
 //! The latter accepts anything that implements the low level [`crate::rpc::RpcClientT`] trait; this
 //! allows you to decide how Subxt will attempt to talk to a node if you'd prefer something other
-//! than the provided interfaces.
+//! than the provided interfaces. Under the hood, this is also how the light client is implemented.
 //!
 //! ## Examples
 //!
-//! Defining some custom config based off the default Substrate config:
+//! Most of the other examples will instantiate a client. Here are a couple of examples for less common
+//! cases.
 //!
-//! ```rust,ignore
-#![doc = include_str!("../../../examples/setup_client_custom_config.rs")]
-//! ```
-//!
-//! Writing a custom [`crate::rpc::RpcClientT`] implementation:
+//! ### Writing a custom [`crate::rpc::RpcClientT`] implementation:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/setup_client_custom_rpc.rs")]
 //! ```
 //!
-//! Creating an [`crate::OfflineClient`]:
+//! ### Creating an [`crate::OfflineClient`]:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/setup_client_offline.rs")]

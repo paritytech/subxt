@@ -8,23 +8,28 @@
 //! default Substrate node implementation, and [`PolkadotConfig`] for a
 //! Polkadot node.
 
-pub mod extrinsic_params;
+mod default_extrinsic_params;
+mod extrinsic_params;
+
 pub mod polkadot;
+pub mod signed_extensions;
 pub mod substrate;
 
 use codec::{Decode, Encode};
 use core::fmt::Debug;
 use serde::{de::DeserializeOwned, Serialize};
 
-pub use extrinsic_params::ExtrinsicParams;
-pub use polkadot::PolkadotConfig;
-pub use substrate::SubstrateConfig;
+pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
+pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
+pub use signed_extensions::SignedExtension;
+pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
 
 /// Runtime types.
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
 // automatically applies a 'static bound to all generic types (including this one),
 // and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
-pub trait Config: 'static {
+pub trait Config: Sized + 'static {
     /// The output of the `Hasher` function.
     type Hash: Debug
         + Copy
@@ -53,8 +58,11 @@ pub trait Config: 'static {
     type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: extrinsic_params::ExtrinsicParams<Self::Hash>;
+    type ExtrinsicParams: ExtrinsicParams<Self>;
 }
+
+/// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
+pub type OtherParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams;
 
 /// This represents the hasher used by a node to hash things like block headers
 /// and extrinsics.
@@ -86,25 +94,6 @@ pub trait Header: Sized + Encode {
     fn hash(&self) -> <Self::Hasher as Hasher>::Output {
         Self::Hasher::hash_of(self)
     }
-}
-
-/// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
-/// additional and extra parameters to pass to an extrinsic (see [`ExtrinsicParams`]),
-/// and returns a type implementing [`Config`] with those new [`ExtrinsicParams`].
-pub struct WithExtrinsicParams<T: Config, E: extrinsic_params::ExtrinsicParams<T::Hash>> {
-    _marker: std::marker::PhantomData<(T, E)>,
-}
-
-impl<T: Config, E: extrinsic_params::ExtrinsicParams<T::Hash>> Config
-    for WithExtrinsicParams<T, E>
-{
-    type Hash = T::Hash;
-    type AccountId = T::AccountId;
-    type Address = T::Address;
-    type Signature = T::Signature;
-    type Hasher = T::Hasher;
-    type Header = T::Header;
-    type ExtrinsicParams = E;
 }
 
 /// implement subxt's Hasher and Header traits for some substrate structs
