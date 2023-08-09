@@ -512,7 +512,7 @@ pub struct OperationError {
 /// - OperationStorageItems: Items produced by the `chianHead_storage`
 /// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
 ///   call `chainHead_continue`
-/// - OperationStorageDone: The `chianHead_storage` method has produced all the results
+/// - OperationStorageDone: The `chainHead_storage` method has produced all the results
 /// - OperationInaccessible: The server was unable to provide the result, retries might succeed in
 ///   the future
 /// - OperationError: The server encountered an error, retries will not succeed
