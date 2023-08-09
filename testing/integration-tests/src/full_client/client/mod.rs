@@ -15,7 +15,7 @@ use subxt::{
     rpc::{
         types::{
             DryRunResult, DryRunResultBytes, FollowEvent, Initialized, MethodResponse,
-            RuntimeEvent, RuntimeVersionEvent, StorageQuery, StorageQueryType, StorageResultType,
+            RuntimeEvent, RuntimeVersionEvent, StorageQuery, StorageQueryType,
         },
         Subscription,
     },
