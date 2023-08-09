@@ -234,4 +234,7 @@ pub enum MetadataError {
     /// The generated interface used is not compatible with the node.
     #[error("The generated code is not compatible with the node")]
     IncompatibleCodegen,
+    /// Custom value not found.
+    #[error("Custom value with name {0} not found")]
+    CustomValueNameNotFound(String),
 }

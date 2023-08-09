@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
-use crate::custom_types::CustomTypes;
+use crate::custom_values::CustomValuesClient;
 use crate::{
     blocks::BlocksClient,
     constants::ConstantsClient,
@@ -296,8 +296,8 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Access custom types.
-    pub fn custom_types(&self) -> CustomTypes {
-        <Self as OfflineClientT<T>>::custom_types(self)
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 
     /// Work with blocks.
