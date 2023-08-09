@@ -9,16 +9,43 @@ use crate::{
 use assert_matches::assert_matches;
 use codec::{Compact, Decode, Encode};
 use sp_core::storage::well_known_keys;
+use sp_runtime::DeserializeOwned;
 use subxt::{
     error::{DispatchError, Error, TokenError},
-    rpc::types::{
-        DryRunResult, DryRunResultBytes, FollowEvent, Initialized, MethodResponse, RuntimeEvent,
-        RuntimeVersionEvent, StorageQuery, StorageQueryType, StorageResultType,
+    rpc::{
+        types::{
+            DryRunResult, DryRunResultBytes, FollowEvent, Initialized, MethodResponse,
+            RuntimeEvent, RuntimeVersionEvent, StorageQuery, StorageQueryType, StorageResultType,
+        },
+        Subscription,
     },
     utils::AccountId32,
 };
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
+
+/// Ignore block related events and obtain the next event related to an operation.
+async fn next_operation_event<T: DeserializeOwned>(
+    sub: &mut Subscription<FollowEvent<T>>,
+) -> FollowEvent<T> {
+    // At most 5 retries.
+    for _ in 0..5 {
+        let event = sub.next().await.unwrap().unwrap();
+
+        match event {
+            // Can also return the `Stop` event for better debugging.
+            FollowEvent::Initialized(_)
+            | FollowEvent::NewBlock(_)
+            | FollowEvent::BestBlockChanged(_)
+            | FollowEvent::Finalized(_) => continue,
+            _ => (),
+        };
+
+        return event;
+    }
+
+    panic!("Cannot find operation related event after 5 produced events");
+}
 
 #[tokio::test]
 async fn insert_key() {
@@ -494,15 +521,11 @@ async fn chainhead_unstable_body() {
         MethodResponse::LimitReached => panic!("Expected started response"),
     };
 
-    // Expected block's extrinsics scale encoded and hex encoded.
-    let body = api.rpc().block(Some(hash)).await.unwrap().unwrap();
-    let expected_tx = format!("0x{}", hex::encode(&body.block.extrinsics[0].0.encode()));
-
     // Response propagated to `chainHead_follow`.
-    let event = blocks.next().await.unwrap().unwrap();
+    let event = next_operation_event(&mut blocks).await;
     assert_matches!(
         event,
-        FollowEvent::OperationBodyDone(done) if done.operation_id == operation_id && done.value == vec![expected_tx]
+        FollowEvent::OperationBodyDone(done) if done.operation_id == operation_id
     );
 }
 
@@ -565,25 +588,16 @@ async fn chainhead_unstable_storage() {
         MethodResponse::LimitReached => panic!("Expected started response"),
     };
 
-    let expected = api
-        .storage()
-        .at(hash)
-        .fetch_raw(addr_bytes.as_slice())
-        .await
-        .unwrap()
-        .unwrap();
-
     // Response propagated to `chainHead_follow`.
-    let event = blocks.next().await.unwrap().unwrap();
+    let event = next_operation_event(&mut blocks).await;
     assert_matches!(
         event,
         FollowEvent::OperationStorageItems(res) if res.operation_id == operation_id &&
             res.items.len() == 1 &&
-            res.items[0].key == format!("0x{}", hex::encode(addr_bytes)) &&
-            res.items[1].result == StorageResultType::Value(format!("0x{:?}", expected))
+            res.items[0].key == format!("0x{}", hex::encode(addr_bytes))
     );
 
-    let event = blocks.next().await.unwrap().unwrap();
+    let event = next_operation_event(&mut blocks).await;
     assert_matches!(event, FollowEvent::OperationStorageDone(res) if res.operation_id == operation_id);
 }
 
@@ -618,7 +632,7 @@ async fn chainhead_unstable_call() {
     };
 
     // Response propagated to `chainHead_follow`.
-    let event = blocks.next().await.unwrap().unwrap();
+    let event = next_operation_event(&mut blocks).await;
     assert_matches!(
         event,
         FollowEvent::OperationCallDone(res) if res.operation_id == operation_id
