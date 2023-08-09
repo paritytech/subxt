@@ -1,5 +1,5 @@
 use crate::client::OfflineClientT;
-use crate::custom_values::custom_value_adress::CustomValueAddress;
+use crate::custom_values::custom_value_address::CustomValueAddress;
 use crate::error::MetadataError;
 use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
@@ -100,11 +100,7 @@ mod tests {
                 error_enum_ty: unit_id,
             },
             custom: frame_metadata::v15::CustomMetadata {
-                map: {
-                    let mut m = BTreeMap::new();
-                    m.insert("Person".to_string(), person_value_metadata);
-                    m
-                },
+                map: BTreeMap::from_iter([("Person".to_string(), person_value_metadata)]),
             },
         };
 

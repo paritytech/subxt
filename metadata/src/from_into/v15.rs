@@ -5,10 +5,10 @@
 use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadata,
-    RuntimeApiMethodParamMetadata, SignedExtensionMetadata, StorageEntryMetadata,
-    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
+    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, CustomMetadata, ExtrinsicMetadata,
+    Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
+    RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata, SignedExtensionMetadata,
+    StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use frame_metadata::v15;
 use scale_info::form::PortableForm;
@@ -17,7 +17,6 @@ use std::collections::HashMap;
 // Converting from V15 metadata into our Subxt repr.
 mod from_v15 {
     use super::*;
-    use crate::CustomMetadata;
 
     impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
         type Error = TryFromError;

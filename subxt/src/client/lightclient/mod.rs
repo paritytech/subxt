@@ -12,6 +12,7 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::Config,
     constants::ConstantsClient,
+    custom_values::CustomValuesClient,
     events::EventsClient,
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
@@ -98,6 +99,11 @@ impl<T: Config> LightClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Access custom types.
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 
     /// Work with blocks.

@@ -641,7 +641,7 @@ pub struct RuntimeApiMethodParamMetadata {
 /// Metadata of custom types with custom values, basically the same as `frame_metadata::v15::CustomMetadata<PortableForm>>`.
 #[derive(Debug, Clone)]
 pub struct CustomMetadata {
-    pub(crate) map: BTreeMap<String, frame_metadata::v15::CustomValueMetadata<PortableForm>>,
+    map: BTreeMap<String, frame_metadata::v15::CustomValueMetadata<PortableForm>>,
 }
 
 impl CustomMetadata {
@@ -662,8 +662,8 @@ pub struct CustomMetadataValue<'a> {
 
 impl<'a> CustomMetadataValue<'a> {
     /// the scale encoded value
-    pub fn bytes(&self) -> &[u8] {
-        &self.data
+    pub fn bytes(&self) -> &'a [u8] {
+        self.data
     }
 
     /// the type id in the TypeRegistry
