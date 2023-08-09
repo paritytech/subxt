@@ -8,7 +8,7 @@ use subxt::tx::SubmittableExtrinsic;
 use subxt::tx::TxPayload;
 use subxt::utils::{AccountId32, MultiSignature};
 
-use crate::services::{extension_signature_for_partial_extrinsic, get_accounts, polkadot, Account};
+use crate::services::{extension_signature_for_extrinsic, get_accounts, polkadot, Account};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -139,15 +139,15 @@ impl Component for SigningExamplesComponent {
                     ctx.link()
                         .send_future(
                             async move {
-                                let partial_extrinsic =
-                                    match api.tx().create_partial_signed(&remark_call, &account_id, Default::default()).await {
-                                        Ok(partial_extrinsic) => partial_extrinsic,
-                                        Err(err) => {
-                                            return Message::Error(anyhow!("could not create partial extrinsic:\n{:?}", err));
-                                        }
-                                    };
+                                let Ok(account_nonce) = api.tx().account_nonce(&account_id).await else {
+                                    return Message::Error(anyhow!("Fetching account nonce failed"));
+                                };
 
-                                let Ok(signature) = extension_signature_for_partial_extrinsic(&partial_extrinsic, &api, &account_id, account_source, account_address).await else {
+                                let Ok(call_data) = api.tx().call_data(&remark_call) else {
+                                    return Message::Error(anyhow!("could not encode call data"));
+                                };
+
+                                let Ok(signature) = extension_signature_for_extrinsic(&call_data, &api, account_nonce, account_source, account_address).await else {
                                     return Message::Error(anyhow!("Signing via extension failed"));
                                 };
 
@@ -155,7 +155,12 @@ impl Component for SigningExamplesComponent {
                                     return Message::Error(anyhow!("MultiSignature Decoding"));
                                 };
 
-                                let signed_extrinsic = partial_extrinsic.sign_with_address_and_signature(&account_id.into(), &multi_signature);
+                                let Ok(partial_signed) = api.tx().create_partial_signed_with_nonce(&remark_call, account_nonce, Default::default()) else {
+                                    return Message::Error(anyhow!("PartialExtrinsic creation failed"));
+                                };
+
+                                // Apply the signature
+                                let signed_extrinsic = partial_signed.sign_with_address_and_signature(&account_id.into(), &multi_signature);
 
                                 // do a dry run (to debug in the js console if the extrinsic would work)
                                 let dry_res = signed_extrinsic.dry_run(None).await;
@@ -193,7 +198,7 @@ impl Component for SigningExamplesComponent {
                         match submit_wait_finalized_and_get_extrinsic_success_event(
                             signed_extrinsic,
                         )
-                            .await
+                        .await
                         {
                             Ok(remark_event) => Message::ExtrinsicFinalized { remark_event },
                             Err(err) => Message::ExtrinsicFailed(err),

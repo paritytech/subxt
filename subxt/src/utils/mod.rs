@@ -6,6 +6,7 @@
 
 mod account_id;
 pub mod bits;
+mod era;
 mod multi_address;
 mod multi_signature;
 mod static_type;
@@ -16,6 +17,7 @@ use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 
 pub use account_id::AccountId32;
+pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
