@@ -558,7 +558,7 @@ pub enum FollowEvent<Hash> {
 }
 
 /// The storage item received as paramter.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageQuery<Key> {
     /// The provided key.
@@ -569,7 +569,7 @@ pub struct StorageQuery<Key> {
 }
 
 /// The type of the storage query.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum StorageQueryType {
     /// Fetch the value of the provided key.
