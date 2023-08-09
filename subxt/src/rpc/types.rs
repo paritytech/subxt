@@ -507,7 +507,7 @@ pub struct OperationError {
 /// 4. Finalized - State the finalized and pruned blocks.
 ///
 /// The following events are related to operations:
-/// - OperationBodyDone: The response of the `chianHead_body`
+/// - OperationBodyDone: The response of the `chainHead_body`
 /// - OperationCallDone: The response of the `chainHead_call`
 /// - OperationStorageItems: Items produced by the `chianHead_storage`
 /// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
