@@ -557,7 +557,7 @@ pub enum FollowEvent<Hash> {
     Stop,
 }
 
-/// The storage item received as paramter.
+/// The storage item received as parameter.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StorageQuery<Key> {
