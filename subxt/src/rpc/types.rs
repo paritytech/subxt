@@ -625,8 +625,6 @@ pub struct MethodResponseStarted {
     /// The operation id of the response.
     pub operation_id: String,
     /// The number of items from the back of the `chainHead_storage` that have been discarded.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(default)]
     pub discarded_items: Option<usize>,
 }
 
