@@ -49,7 +49,7 @@
 //! // A static query capable of iterating over accounts:
 //! let storage_query = polkadot::storage().system().account_iter();
 //! // A dynamic query to do the same:
-//! let storage_query = subxt::dynamic::storage_iter("System", "Account");
+//! let storage_query = subxt::dynamic::storage("System", "Account", vec![]);
 //! ```
 //!
 //! Some storage entries are maps with multiple keys. As an example, we might end up with
@@ -59,11 +59,11 @@
 //!
 //! - `runtime::storage().foo().bar(u8, bool, u16, String)`: fetch a single entry from the "bar" map.
 //! - `runtime::storage().foo().bar_iter()`: iterate over all of the entries in the "bar" map.
-//! - `runtime::storage().foo().bar_iter1(u8)`: iterate over all of the entries in the "bar" map under 
+//! - `runtime::storage().foo().bar_iter1(u8)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8`.
-//! - `runtime::storage().foo().bar_iter2(u8, bool)`: iterate over all of the entries in the "bar" map under 
+//! - `runtime::storage().foo().bar_iter2(u8, bool)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8` and `bool` value.
-//! - `runtime::storage().foo().bar_iter2(u8, bool, u16)`: iterate over all of the entries in the "bar" map under 
+//! - `runtime::storage().foo().bar_iter2(u8, bool, u16)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8`, `bool` and `u16` value.
 //!
 //! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing
