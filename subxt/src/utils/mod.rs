@@ -76,19 +76,3 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// with collections like BTreeMap. This has the same type params
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
-
-/// This is a simplified version of Substrate's
-/// `frame_support::traits::Metadata::StorageVersion`.
-#[derive(
-    Clone,
-    Eq,
-    PartialEq,
-    Ord,
-    PartialOrd,
-    Encode,
-    Decode,
-    Debug,
-    scale_encode::EncodeAsType,
-    scale_decode::DecodeAsType,
-)]
-pub struct StorageVersion(u16);

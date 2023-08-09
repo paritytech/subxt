@@ -4,7 +4,6 @@
 
 use super::storage_address::{StorageAddress, Yes};
 
-use crate::utils::StorageVersion;
 use crate::{
     client::OnlineClientT,
     error::{Error, MetadataError},
@@ -242,10 +241,8 @@ where
     }
 
     /// The storage version of a pallet.
-    pub async fn storage_version(
-        &self,
-        pallet_name: impl AsRef<str>,
-    ) -> Result<StorageVersion, Error> {
+    /// The storage version refers to the `frame_support::traits::Metadata::StorageVersion` type.
+    pub async fn storage_version(&self, pallet_name: impl AsRef<str>) -> Result<u16, Error> {
         // check that the pallet exists in the metadata:
         self.client
             .metadata()
@@ -267,19 +264,16 @@ where
                 pallet_name.as_ref()
             )
         })?;
-        let storage_version = StorageVersion::decode(&mut &storage_version_bytes[..])?;
-        Ok(storage_version)
+        u16::decode(&mut &storage_version_bytes[..]).map_err(Into::into)
     }
 
     /// Fetches the Wasm code of the runtime.
     pub async fn runtime_wasm_code(&self) -> Result<Vec<u8>, Error> {
         // note: this should match the `CODE` constant in `sp_core::storage::well_known_keys`
-        const CODE: &[u8] = b":code";
-        let data = self.fetch_raw(CODE).await?.ok_or(format!(
-            "Unexpected: entry for well known key \"{}\" not found",
-            std::str::from_utf8(CODE).expect("qed;")
-        ))?;
-        Ok(data)
+        const CODE: &str = ":code";
+        self.fetch_raw(CODE.as_bytes()).await?.ok_or_else(|| {
+            format!("Unexpected: entry for well known key \"{CODE}\" not found").into()
+        })
     }
 }
 
