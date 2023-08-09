@@ -508,7 +508,7 @@ pub struct OperationError {
 ///
 /// The following events are related to operations:
 /// - OperationBodyDone: The response of the `chianHead_body`
-/// - OperationCallDone: The response of the `chianHead_call`
+/// - OperationCallDone: The response of the `chainHead_call`
 /// - OperationStorageItems: Items produced by the `chianHead_storage`
 /// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
 ///   call `chainHead_continue`
