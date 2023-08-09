@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::custom_types::CustomTypes;
+use crate::custom_values::CustomValuesClient;
 use crate::{
     blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
     rpc::types::RuntimeVersion, runtime_api::RuntimeApiClient, storage::StorageClient,
@@ -53,8 +53,8 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     }
 
     /// Work this custom types.
-    fn custom_types(&self) -> CustomTypes {
-        CustomTypes::new(self.metadata())
+    fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        CustomValuesClient::new(self.clone())
     }
 }
 
@@ -130,8 +130,8 @@ impl<T: Config> OfflineClient<T> {
     }
 
     /// Access custom types
-    pub fn custom_types(&self) -> CustomTypes {
-        <Self as OfflineClientT<T>>::custom_types(self)
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 }
 

@@ -17,6 +17,7 @@ use std::collections::HashMap;
 // Converting from V15 metadata into our Subxt repr.
 mod from_v15 {
     use super::*;
+    use crate::CustomMetadata;
 
     impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
         type Error = TryFromError;
@@ -93,7 +94,7 @@ mod from_v15 {
                     event_enum_ty: m.outer_enums.event_enum_ty.id,
                     error_enum_ty: m.outer_enums.error_enum_ty.id,
                 },
-                custom: m.custom,
+                custom: CustomMetadata { map: m.custom.map },
             })
         }
     }
