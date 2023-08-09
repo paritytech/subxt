@@ -52,12 +52,19 @@
 //! let storage_query = subxt::dynamic::storage_iter("System", "Account");
 //! ```
 //!
-//! Some storage entries require multiple keys to be accessed, for example
-//! `polkadot::storage().preimage().preimage_for(_, _)`, which takes a `H256` and a `u32` as keys.
-//! For these multi-key storage entries, the generated static interface also offers _partial iteration_.
-//! This means iterating over a subset of storage entries, where just a subset of the keys match.
-//! These generated constructors have a suffix `_iter1` / `_iter2` / ... added, to iterate over all
-//! storage entries given the first 1 / 2 / ... keys.
+//! Some storage entries are maps with multiple keys. As an example, we might end up with
+//! an API like `runtime::storage().foo().bar(u8, bool, u16, String)` to fetch some entry "bar".
+//! When this is the case, the codegen will generate multiple iterator query functions alongside
+//! the function to fetch an individual value:
+//!
+//! - `runtime::storage().foo().bar(u8, bool, u16, String)`: fetch a single entry from the "bar" map.
+//! - `runtime::storage().foo().bar_iter()`: iterate over all of the entries in the "bar" map.
+//! - `runtime::storage().foo().bar_iter1(u8)`: iterate over all of the entries in the "bar" map under 
+//!   a given `u8`.
+//! - `runtime::storage().foo().bar_iter2(u8, bool)`: iterate over all of the entries in the "bar" map under 
+//!   a given `u8` and `bool` value.
+//! - `runtime::storage().foo().bar_iter2(u8, bool, u16)`: iterate over all of the entries in the "bar" map under 
+//!   a given `u8`, `bool` and `u16` value.
 //!
 //! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing
 //! how to build a valid storage query, this trait also has some associated types that determine the
