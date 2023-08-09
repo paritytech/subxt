@@ -31,7 +31,7 @@ use crate::utils::node_runtime;
 use codec::{Compact, Encode};
 use futures::StreamExt;
 use subxt::{
-    client::{LightClient, LightClientBuilder, OfflineClientT, OnlineClientT},
+    client::{LightClient, LightClientBuilder, OnlineClientT},
     config::PolkadotConfig,
     rpc::types::FollowEvent,
 };
