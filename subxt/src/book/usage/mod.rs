@@ -11,6 +11,7 @@
 //! - [Blocks](blocks)
 //! - [Runtime APIs](runtime_apis)
 //! - [Unstable Light Client](light_client)
+//! - [Custom Values](custom_values)
 //!
 //! Alternately, [go back](super).
 
@@ -21,3 +22,4 @@ pub mod light_client;
 pub mod runtime_apis;
 pub mod storage;
 pub mod transactions;
+pub mod custom_values;
