@@ -52,7 +52,7 @@ pub fn generate_custom_values(
 
         )
     });
-    
+
     if custom_value_fns.is_empty() {
         None
     } else {

@@ -14,7 +14,7 @@ pub struct CustomValuesClient<T, Client> {
 }
 
 impl<T, Client> CustomValuesClient<T, Client> {
-    /// Create a new [`ConstantsClient`].
+    /// Create a new [`CustomValuesClient`].
     pub fn new(client: Client) -> Self {
         Self {
             client,
@@ -24,7 +24,8 @@ impl<T, Client> CustomValuesClient<T, Client> {
 }
 
 impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
-    /// get a [CustomMetadataValue] by the string key it is registered under
+    /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
+    /// or a static address from the generated static interface to get a value of a static type returned.
     pub fn at<Address: CustomValueAddress + ?Sized>(
         &self,
         address: &Address,
