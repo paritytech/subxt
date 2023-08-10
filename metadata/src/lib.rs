@@ -641,6 +641,7 @@ pub struct RuntimeApiMethodParamMetadata {
 /// Metadata of custom types with custom values, basically the same as `frame_metadata::v15::CustomMetadata<PortableForm>>`.
 #[derive(Debug, Clone)]
 pub struct CustomMetadata {
+    /// custom values accessible via a name.
     map: BTreeMap<String, frame_metadata::v15::CustomValueMetadata<PortableForm>>,
 }
 
@@ -651,6 +652,18 @@ impl CustomMetadata {
             type_id: e.ty.id,
             data: &e.value,
         })
+    }
+
+    /// Iterates over names (keys) and associated custom values
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<
+        Item = (
+            &String,
+            &frame_metadata::v15::CustomValueMetadata<PortableForm>,
+        ),
+    > {
+        self.map.iter()
     }
 }
 

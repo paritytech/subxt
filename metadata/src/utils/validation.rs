@@ -5,9 +5,10 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadata, RuntimeApiMetadata,
-    RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
+    CustomMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadata,
+    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
+use frame_metadata::v15::CustomValueMetadata;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
 use std::collections::HashMap;
 
@@ -67,6 +68,7 @@ concat_and_hash_n!(concat_and_hash2(a b));
 concat_and_hash_n!(concat_and_hash3(a b c));
 concat_and_hash_n!(concat_and_hash4(a b c d));
 concat_and_hash_n!(concat_and_hash5(a b c d e));
+concat_and_hash_n!(concat_and_hash6(a b c d e f));
 
 /// Obtain the hash representation of a `scale_info::Field`.
 fn get_field_hash(
@@ -393,6 +395,36 @@ pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_L
     concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
 }
 
+pub fn get_custom_metadata_hash(
+    custom_metadata: &CustomMetadata,
+    registry: &PortableRegistry,
+) -> [u8; HASH_LEN] {
+    let mut cache = HashMap::new();
+    custom_metadata
+        .map
+        .iter()
+        .fold([0u8; HASH_LEN], |bytes, (key, custom_value)| {
+            xor(
+                bytes,
+                get_custom_value_hash(registry, key, custom_value, &mut cache),
+            )
+        })
+}
+
+/// Obtain the hash of some custom value in the metadata including it's name/key.
+pub fn get_custom_value_hash(
+    registry: &PortableRegistry,
+    name: &str,
+    metadata: &CustomValueMetadata<PortableForm>,
+    cache: &mut HashMap<u32, CachedHash>,
+) -> [u8; HASH_LEN] {
+    concat_and_hash3(
+        &hash(name.as_bytes()),
+        &get_type_hash(registry, metadata.type_id(), cache),
+        &hash(metadata.encoded()),
+    )
+}
+
 /// Obtain the hash for a specific storage item, or an error if it's not found.
 pub fn get_storage_hash(pallet: &PalletMetadata, entry_name: &str) -> Option<[u8; HASH_LEN]> {
     let storage = pallet.storage()?;
@@ -494,6 +526,7 @@ pub struct MetadataHasher<'a> {
     metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,
     specific_runtime_apis: Option<Vec<&'a str>>,
+    include_custom_values: bool,
 }
 
 impl<'a> MetadataHasher<'a> {
@@ -503,6 +536,7 @@ impl<'a> MetadataHasher<'a> {
             metadata,
             specific_pallets: None,
             specific_runtime_apis: None,
+            include_custom_values: true,
         }
     }
 
@@ -554,7 +588,7 @@ impl<'a> MetadataHasher<'a> {
                 // We don't care what order the runtime APIs are seen in, so XOR their
                 // hashes together to be order independent.
                 if should_hash {
-                    xor(bytes, xor(bytes, get_runtime_trait_hash(api)))
+                    xor(bytes, get_runtime_trait_hash(api))
                 } else {
                     bytes
                 }
@@ -569,12 +603,18 @@ impl<'a> MetadataHasher<'a> {
             self.specific_pallets.as_deref(),
         );
 
-        concat_and_hash5(
+        let custom_values_hash = self
+            .include_custom_values
+            .then(|| get_custom_metadata_hash(metadata.custom(), &metadata.types))
+            .unwrap_or_default();
+
+        concat_and_hash6(
             &pallet_hash,
             &apis_hash,
             &extrinsic_hash,
             &runtime_hash,
             &outer_enums_hash,
+            &custom_values_hash,
         )
     }
 }
