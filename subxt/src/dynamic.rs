@@ -26,7 +26,7 @@ pub use crate::tx::dynamic as tx;
 pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::{dynamic as storage, dynamic_root as storage_root};
+pub use crate::storage::dynamic as storage;
 
 // Execute runtime API function call dynamically.
 pub use crate::runtime_api::dynamic as runtime_api_call;

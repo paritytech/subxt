@@ -133,7 +133,7 @@ async fn fetch_keys() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let addr = node_runtime::storage().system().account_root();
+    let addr = node_runtime::storage().system().account_iter();
     let keys = api
         .storage()
         .at_latest()
@@ -150,7 +150,7 @@ async fn test_iter() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let addr = node_runtime::storage().system().account_root();
+    let addr = node_runtime::storage().system().account_iter();
     let mut iter = api
         .storage()
         .at_latest()
@@ -435,7 +435,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let expected_tx_bytes = hex::decode(
         "b004060700d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0f0090c04bb6db2b"
     )
-    .unwrap();
+        .unwrap();
 
     // Make sure our encoding is the same as the encoding polkadot UI created.
     assert_eq!(actual_tx_bytes, expected_tx_bytes);

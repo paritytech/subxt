@@ -21,11 +21,11 @@ pub use crate::rpc::types::StorageKey;
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        dynamic, dynamic_root, make_static_storage_map_key, Address, DynamicAddress,
-        StaticStorageMapKey, StorageAddress, Yes,
+        dynamic, make_static_storage_map_key, Address, DynamicAddress, StaticStorageMapKey,
+        StorageAddress, Yes,
     };
 }
 
 // For consistency with other modules, also expose
 // the basic address stuff at the root of the module.
-pub use storage_address::{dynamic, dynamic_root, Address, DynamicAddress, StorageAddress};
+pub use storage_address::{dynamic, Address, DynamicAddress, StorageAddress};
