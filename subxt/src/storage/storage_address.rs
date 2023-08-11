@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    dynamic::{DecodedValueThunk},
+    dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
