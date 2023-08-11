@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
+use crate::custom_values::CustomValuesClient;
 use crate::{
     blocks::BlocksClient,
     constants::ConstantsClient,
@@ -18,7 +19,9 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
+
 use futures::future;
+
 use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
@@ -290,6 +293,11 @@ impl<T: Config> OnlineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Access custom types.
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 
     /// Work with blocks.

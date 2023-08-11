@@ -2,12 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::custom_values::CustomValuesClient;
 use crate::{
     blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
     rpc::types::RuntimeVersion, runtime_api::RuntimeApiClient, storage::StorageClient,
     tx::TxClient, Config, Metadata,
 };
 use derivative::Derivative;
+
 use std::sync::Arc;
 
 /// A trait representing a client that can perform
@@ -48,6 +50,11 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Work with runtime API.
     fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         RuntimeApiClient::new(self.clone())
+    }
+
+    /// Work this custom types.
+    fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        CustomValuesClient::new(self.clone())
     }
 }
 
@@ -120,6 +127,11 @@ impl<T: Config> OfflineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Access custom types
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 }
 

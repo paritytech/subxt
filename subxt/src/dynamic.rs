@@ -75,4 +75,12 @@ impl DecodedValueThunk {
         )?;
         Ok(val)
     }
+    /// decode the `DecodedValueThunk` into a concrete type.
+    pub fn as_type<T: DecodeAsType>(&self) -> Result<T, scale_decode::Error> {
+        T::decode_as_type(
+            &mut &self.scale_bytes[..],
+            self.type_id,
+            self.metadata.types(),
+        )
+    }
 }

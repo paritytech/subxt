@@ -20,7 +20,7 @@ mod from_into;
 mod utils;
 
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
@@ -51,6 +51,8 @@ pub struct Metadata {
     dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
+    /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
+    custom: CustomMetadata,
 }
 
 impl Metadata {
@@ -130,6 +132,11 @@ impl Metadata {
             inner,
             types: self.types(),
         })
+    }
+
+    /// Returns custom user defined types
+    pub fn custom(&self) -> &CustomMetadata {
+        &self.custom
     }
 
     /// Obtain a unique hash representing this metadata or specific parts of it.
@@ -629,6 +636,40 @@ pub struct RuntimeApiMethodParamMetadata {
     pub name: String,
     /// Parameter type.
     pub ty: u32,
+}
+
+/// Metadata of custom types with custom values, basically the same as `frame_metadata::v15::CustomMetadata<PortableForm>>`.
+#[derive(Debug, Clone)]
+pub struct CustomMetadata {
+    map: BTreeMap<String, frame_metadata::v15::CustomValueMetadata<PortableForm>>,
+}
+
+impl CustomMetadata {
+    /// Get a certain [CustomMetadataValue] by its name.
+    pub fn get(&self, name: &str) -> Option<CustomMetadataValue<'_>> {
+        self.map.get(name).map(|e| CustomMetadataValue {
+            type_id: e.ty.id,
+            data: &e.value,
+        })
+    }
+}
+
+/// Basically the same as `frame_metadata::v15::CustomValueMetadata<PortableForm>>`, but borrowed.
+pub struct CustomMetadataValue<'a> {
+    type_id: u32,
+    data: &'a [u8],
+}
+
+impl<'a> CustomMetadataValue<'a> {
+    /// the scale encoded value
+    pub fn bytes(&self) -> &'a [u8] {
+        self.data
+    }
+
+    /// the type id in the TypeRegistry
+    pub fn type_id(&self) -> u32 {
+        self.type_id
+    }
 }
 
 // Support decoding metadata from the "wire" format directly into this.

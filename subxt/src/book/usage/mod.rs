@@ -11,11 +11,13 @@
 //! - [Blocks](blocks)
 //! - [Runtime APIs](runtime_apis)
 //! - [Unstable Light Client](light_client)
+//! - [Custom Values](custom_values)
 //!
 //! Alternately, [go back](super).
 
 pub mod blocks;
 pub mod constants;
+pub mod custom_values;
 pub mod events;
 pub mod light_client;
 pub mod runtime_apis;

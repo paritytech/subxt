@@ -67,6 +67,7 @@ pub mod blocks;
 pub mod client;
 pub mod config;
 pub mod constants;
+pub mod custom_values;
 pub mod dynamic;
 pub mod error;
 pub mod events;
