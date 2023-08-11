@@ -6,7 +6,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a dynamic storage query to iterate account information.
-    let storage_query = subxt::dynamic::storage_iter("System", "Account");
+    // With a dynamic query, we can just provide an empty Vec as the keys to iterate over all entries.
+    let keys = Vec::<()>::new();
+    let storage_query = subxt::dynamic::storage("System", "Account", keys);
 
     // Use that query to return an iterator over the results.
     let mut results = api
