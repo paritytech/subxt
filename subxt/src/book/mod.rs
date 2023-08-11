@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 // Dev note; I used the following command to normalize and wrap comments:
-// rustfmt +nightly --config wrap_comments=true,comment_width=100,normalize_comments=true subxt/src/book/mod.rs
+// rustfmt +nightly --config wrap_comments=true,comment_width=100,normalize_comments=true subxt/src/book/custom_values
 // It messed up comments in code blocks though, so be prepared to go and fix those.
 
 //! # The Subxt Guide
