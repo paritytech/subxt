@@ -646,34 +646,35 @@ pub struct CustomMetadata {
 }
 
 impl CustomMetadata {
-    /// Get a certain [CustomMetadataValue] by its name.
-    pub fn get(&self, name: &str) -> Option<CustomMetadataValue<'_>> {
-        self.map.get(name).map(|e| CustomMetadataValue {
+    /// Get a certain [CustomValueMetadata] by its name.
+    pub fn get(&self, name: &str) -> Option<CustomValueMetadata<'_>> {
+        self.map.get(name).map(|e| CustomValueMetadata {
             type_id: e.ty.id,
             data: &e.value,
         })
     }
 
     /// Iterates over names (keys) and associated custom values
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<
-        Item = (
-            &String,
-            &frame_metadata::v15::CustomValueMetadata<PortableForm>,
-        ),
-    > {
-        self.map.iter()
+    pub fn iter(&self) -> impl Iterator<Item = (&str, CustomValueMetadata)> {
+        self.map.iter().map(|(name, el)| {
+            (
+                name.as_ref(),
+                CustomValueMetadata {
+                    type_id: el.ty.id,
+                    data: &el.value,
+                },
+            )
+        })
     }
 }
 
 /// Basically the same as `frame_metadata::v15::CustomValueMetadata<PortableForm>>`, but borrowed.
-pub struct CustomMetadataValue<'a> {
+pub struct CustomValueMetadata<'a> {
     type_id: u32,
     data: &'a [u8],
 }
 
-impl<'a> CustomMetadataValue<'a> {
+impl<'a> CustomValueMetadata<'a> {
     /// the scale encoded value
     pub fn bytes(&self) -> &'a [u8] {
         self.data

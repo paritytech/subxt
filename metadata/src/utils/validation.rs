@@ -5,10 +5,10 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    CustomMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadata,
-    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
+    CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
+    PalletMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
+    StorageEntryType,
 };
-use frame_metadata::v15::CustomValueMetadata;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
 use std::collections::HashMap;
 
@@ -401,7 +401,6 @@ pub fn get_custom_metadata_hash(
 ) -> [u8; HASH_LEN] {
     let mut cache = HashMap::new();
     custom_metadata
-        .map
         .iter()
         .fold([0u8; HASH_LEN], |bytes, (key, custom_value)| {
             xor(
@@ -415,13 +414,13 @@ pub fn get_custom_metadata_hash(
 pub fn get_custom_value_hash(
     registry: &PortableRegistry,
     name: &str,
-    metadata: &CustomValueMetadata<PortableForm>,
+    metadata: CustomValueMetadata,
     cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     concat_and_hash3(
         &hash(name.as_bytes()),
         &get_type_hash(registry, metadata.type_id(), cache),
-        &hash(metadata.encoded()),
+        &hash(metadata.bytes()),
     )
 }
 
