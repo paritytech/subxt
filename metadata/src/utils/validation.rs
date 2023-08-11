@@ -13,7 +13,7 @@ use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVa
 use std::collections::HashMap;
 
 // The number of bytes our `hash` function produces.
-const HASH_LEN: usize = 32;
+pub(crate) const HASH_LEN: usize = 32;
 
 /// Internal byte representation for various metadata types utilized for
 /// generating deterministic hashes between different rust versions.
@@ -402,10 +402,10 @@ pub fn get_custom_metadata_hash(
     let mut cache = HashMap::new();
     custom_metadata
         .iter()
-        .fold([0u8; HASH_LEN], |bytes, (key, custom_value)| {
+        .fold([0u8; HASH_LEN], |bytes, custom_value| {
             xor(
                 bytes,
-                get_custom_value_hash(registry, key, custom_value, &mut cache),
+                get_custom_value_hash(registry, &custom_value, &mut cache),
             )
         })
 }
@@ -413,14 +413,13 @@ pub fn get_custom_metadata_hash(
 /// Obtain the hash of some custom value in the metadata including it's name/key.
 pub fn get_custom_value_hash(
     registry: &PortableRegistry,
-    name: &str,
-    metadata: CustomValueMetadata,
+    custom_value: &CustomValueMetadata,
     cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     concat_and_hash3(
-        &hash(name.as_bytes()),
-        &get_type_hash(registry, metadata.type_id(), cache),
-        &hash(metadata.bytes()),
+        &hash(custom_value.name.as_bytes()),
+        &get_type_hash(registry, custom_value.type_id(), cache),
+        &hash(custom_value.bytes()),
     )
 }
 

@@ -14,9 +14,8 @@ mod storage;
 
 use subxt_metadata::Metadata;
 
-use self::custom_values::generate_custom_values;
-
 use super::DerivesRegistry;
+use crate::api::custom_values::generate_custom_values;
 use crate::error::CodegenError;
 use crate::{
     ir,
@@ -472,10 +471,7 @@ impl RuntimeGenerator {
         let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty());
         let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty());
 
-        // if there are no custom values this will be empty:
-        let custom_values_mod_and_fn =
-            generate_custom_values(&self.metadata, &type_gen, types_mod_ident, &crate_path)
-                .unwrap_or_default();
+        let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 
         Ok(quote! {
             #( #item_mod_attrs )*
@@ -529,7 +525,11 @@ impl RuntimeGenerator {
 
                 #apis_mod
 
-                #custom_values_mod_and_fn
+                pub fn custom() -> CustomValuesApi {
+                    CustomValuesApi
+                }
+
+                #custom_values
 
                 pub struct ConstantsApi;
                 impl ConstantsApi {

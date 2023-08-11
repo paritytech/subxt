@@ -30,6 +30,10 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {
+        // 1. Validate custom value shape if hash given:
+        self.validate(address)?;
+
+        // 2. Attempt to decode custom value:
         let metadata = self.client.metadata();
         let custom_value = metadata
             .custom()
@@ -42,6 +46,33 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
             &metadata,
         )?;
         Ok(value)
+    }
+
+    /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
+    /// if the address is valid (or if it's not possible to check since the address has no validation hash).
+    /// Returns an error if the address was not valid (wrong name, type or raw bytes)
+    pub fn validate<Address: CustomValueAddress + ?Sized>(
+        &self,
+        address: &Address,
+    ) -> Result<(), Error> {
+        if let Some(actual_hash) = address.validation_hash() {
+            let metadata = self.client.metadata();
+            let custom_value = metadata
+                .custom()
+                .get(address.name())
+                .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
+            // make sure the custom_value type is in the metadata.
+            metadata
+                .types()
+                .resolve(custom_value.type_id())
+                .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
+            // Because of the check above this cannot panic:
+            let expected_hash = custom_value.get_hash(metadata.types());
+            if actual_hash != expected_hash {
+                return Err(MetadataError::IncompatibleCodegen.into());
+            }
+        }
+        Ok(())
     }
 }
 

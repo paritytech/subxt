@@ -27,6 +27,7 @@ use utils::variant_index::VariantIndex;
 
 type ArcStr = Arc<str>;
 
+use crate::utils::validation::{get_custom_value_hash, HASH_LEN};
 pub use from_into::TryFromError;
 pub use utils::validation::MetadataHasher;
 
@@ -647,23 +648,20 @@ pub struct CustomMetadata {
 
 impl CustomMetadata {
     /// Get a certain [CustomValueMetadata] by its name.
-    pub fn get(&self, name: &str) -> Option<CustomValueMetadata<'_>> {
+    pub fn get<'a>(&'a self, name: &'a str) -> Option<CustomValueMetadata<'_>> {
         self.map.get(name).map(|e| CustomValueMetadata {
             type_id: e.ty.id,
             data: &e.value,
+            name,
         })
     }
 
     /// Iterates over names (keys) and associated custom values
-    pub fn iter(&self) -> impl Iterator<Item = (&str, CustomValueMetadata)> {
-        self.map.iter().map(|(name, el)| {
-            (
-                name.as_ref(),
-                CustomValueMetadata {
-                    type_id: el.ty.id,
-                    data: &el.value,
-                },
-            )
+    pub fn iter(&self) -> impl Iterator<Item = CustomValueMetadata> {
+        self.map.iter().map(|(name, el)| CustomValueMetadata {
+            type_id: el.ty.id,
+            data: &el.value,
+            name: name.as_ref(),
         })
     }
 }
@@ -672,17 +670,33 @@ impl CustomMetadata {
 pub struct CustomValueMetadata<'a> {
     type_id: u32,
     data: &'a [u8],
+    name: &'a str,
 }
 
 impl<'a> CustomValueMetadata<'a> {
-    /// the scale encoded value
+    /// The scale encoded value
     pub fn bytes(&self) -> &'a [u8] {
         self.data
     }
 
-    /// the type id in the TypeRegistry
+    /// The type id in the TypeRegistry
     pub fn type_id(&self) -> u32 {
         self.type_id
+    }
+
+    /// The name under which the custom value is registered.
+    pub fn name(&self) -> &str {
+        self.name
+    }
+
+    /// Calculates the hash for the CustomValueMetadata.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self.type_id` is not registered in the provided type registry
+    pub fn get_hash(&self, registry: &PortableRegistry) -> [u8; HASH_LEN] {
+        let mut cache = HashMap::new();
+        get_custom_value_hash(registry, self, &mut cache)
     }
 }
 

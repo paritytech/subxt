@@ -13,6 +13,11 @@ pub trait CustomValueAddress {
 
     /// the name (key) by which the custom value can be accessed in the metadata.
     fn name(&self) -> &str;
+
+    /// An optional hash which, if present, can be checked against node metadata.
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        None
+    }
 }
 
 impl CustomValueAddress for str {
@@ -26,14 +31,16 @@ impl CustomValueAddress for str {
 /// A static address to a custom value.
 pub struct StaticAddress<R> {
     name: &'static str,
+    hash: [u8; 32],
     phantom: PhantomData<R>,
 }
 
 impl<R> StaticAddress<R> {
     /// Creates a new StaticAddress.
-    pub fn new(name: &'static str) -> Self {
+    pub fn new(name: &'static str, hash: [u8; 32]) -> Self {
         StaticAddress {
             name,
+            hash,
             phantom: PhantomData,
         }
     }
@@ -44,5 +51,9 @@ impl<R: DecodeWithMetadata> CustomValueAddress for StaticAddress<R> {
 
     fn name(&self) -> &str {
         self.name
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        Some(self.hash)
     }
 }
