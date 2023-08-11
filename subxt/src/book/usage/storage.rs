@@ -63,7 +63,7 @@
 //!   a given `u8`.
 //! - `runtime::storage().foo().bar_iter2(u8, bool)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8` and `bool` value.
-//! - `runtime::storage().foo().bar_iter2(u8, bool, u16)`: iterate over all of the entries in the "bar" map under
+//! - `runtime::storage().foo().bar_iter3(u8, bool, u16)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8`, `bool` and `u16` value.
 //!
 //! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing
