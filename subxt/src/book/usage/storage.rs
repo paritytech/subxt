@@ -49,7 +49,7 @@
 //! // A static query capable of iterating over accounts:
 //! let storage_query = polkadot::storage().system().account_iter();
 //! // A dynamic query to do the same:
-//! let storage_query = subxt::dynamic::storage("System", "Account", vec![]);
+//! let storage_query = subxt::dynamic::storage("System", "Account", Vec::<u8>::new());
 //! ```
 //!
 //! Some storage entries are maps with multiple keys. As an example, we might end up with
@@ -111,6 +111,13 @@
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/storage_iterating_dynamic.rs")]
+//! ```
+//!
+//! Here is an example of iterating over partial keys. In this example some multi-signature operations
+//! are sent to the node. We can iterate over the pending multisig operations of a single multisig account:
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../examples/storage_iterating_partial.rs")]
 //! ```
 //!
 //! ### Advanced
