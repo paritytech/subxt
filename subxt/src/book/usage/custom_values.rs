@@ -18,7 +18,7 @@
 //! An address can be as simple as the aforementioned __name__ as a [str]. This will return a dynamic value, that you can manually decode into the type you want.
 //! Suppose, the custom types contain a value of type `Foo` under the name `"foo"` you can access it like in this example:
 //!
-//! ```rust
+//! ```rust,ignore
 //! use subxt::{OnlineClient, PolkadotConfig, ext::{codec::Decode, scale_decode::DecodeAsType}};
 //!
 //! #[derive(Decode, DecodeAsType, Debug)]
@@ -36,7 +36,7 @@
 //!
 //! Alternatively we also provide a statically generated api for custom values:
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! #[subxt::subxt(runtime_metadata_path = "some_metadata.scale")]
 //! pub mod interface {}
 //!
