@@ -63,6 +63,7 @@ use tracing_subscriber as _;
 #[allow(unused_imports)]
 pub use getrandom as _;
 
+pub mod backend;
 pub mod blocks;
 pub mod client;
 pub mod config;

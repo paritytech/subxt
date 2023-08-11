@@ -4217,6 +4217,7 @@ name = "subxt"
 version = "0.31.0"
 dependencies = [
  "assert_matches",
+ "async-trait",
  "base58",
  "bitvec",
  "blake2",
