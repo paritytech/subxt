@@ -102,7 +102,7 @@ async fn run() {
 // Use jsonrpsee to obtain metadata from the node.
 mod client {
     pub use jsonrpsee::{
-        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
         core::{
             client::{Client, ClientBuilder},
             Error,
@@ -114,13 +114,11 @@ mod client {
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {
         let (sender, receiver) = ws_transport(url).await?;
-        Ok(ClientBuilder::default().build_with_tokio(sender, receiver))
+        Ok(Client::builder().build_with_tokio(sender, receiver))
     }
 
     async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
-        let url: Uri = url
-            .parse()
-            .map_err(|e: InvalidUri| Error::Transport(e.into()))?;
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
         WsTransportClientBuilder::default()
             .build(url)
             .await

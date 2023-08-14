@@ -23,7 +23,7 @@ default = ["jsonrpsee", "native"]
 # Exactly 1 of "web" and "native" is expected.
 native = [
     "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport",
+    "jsonrpsee?/client-ws-transport-native-tls",
     "subxt-lightclient?/native"
 ]
 
@@ -31,7 +31,7 @@ native = [
 # Exactly 1 of "web" and "native" is expected.
 web = [
     "jsonrpsee?/async-wasm-client",
-    "jsonrpsee?/client-web-transport",
+    "jsonrpsee?/client-ws-transport-native-tls",
     "getrandom/js",
     "subxt-lightclient?/web"
 ]
