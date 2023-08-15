@@ -9,7 +9,6 @@ use crate::{
     error::{BlockError, Error, MetadataError},
     events,
     metadata::types::PalletMetadata,
-    rpc::types::ChainBlockExtrinsic,
     Metadata,
 };
 
@@ -40,7 +39,7 @@ pub trait StaticExtrinsic: DecodeAsFields {
 /// The body of a block.
 pub struct Extrinsics<T: Config, C> {
     client: C,
-    extrinsics: Vec<ChainBlockExtrinsic>,
+    extrinsics: Vec<Vec<u8>>,
     cached_events: CachedEvents<T>,
     ids: ExtrinsicPartTypeIds,
     hash: T::Hash,
@@ -53,7 +52,7 @@ where
 {
     pub(crate) fn new(
         client: C,
-        extrinsics: Vec<ChainBlockExtrinsic>,
+        extrinsics: Vec<Vec<u8>>,
         cached_events: CachedEvents<T>,
         ids: ExtrinsicPartTypeIds,
         hash: T::Hash,
@@ -103,7 +102,7 @@ where
             } else {
                 match ExtrinsicDetails::decode_from(
                     index as u32,
-                    &extrinsics[index].0,
+                    &extrinsics[index],
                     client.clone(),
                     hash,
                     cached_events.clone(),

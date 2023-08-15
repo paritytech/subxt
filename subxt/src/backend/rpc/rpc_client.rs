@@ -19,12 +19,12 @@ use crate::config::Config;
 /// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
 /// without getting into issues with non-object-safe methods or no `async` in traits.
 #[derive(Clone)]
-pub struct RpcClient<T: Config> {
+pub struct RpcClient<T> {
     client: Arc<dyn RpcClientT>,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl RpcClient {
+impl <T: Config> RpcClient<T> {
     pub(crate) fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         RpcClient {
             client,
@@ -62,16 +62,16 @@ impl RpcClient {
     }
 }
 
-impl std::fmt::Debug for RpcClient {
+impl <T> std::fmt::Debug for RpcClient<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("RpcClient").finish()
     }
 }
 
-impl std::ops::Deref for RpcClient {
+impl <T> std::ops::Deref for RpcClient<T> {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &*self.client
     }
 }
 
@@ -100,7 +100,7 @@ macro_rules! rpc_params {
     ($($p:expr), *) => {{
         // May be unused if empty; no params.
         #[allow(unused_mut)]
-        let mut params = $crate::rpc::RpcParams::new();
+        let mut params = $crate::backend::rpc::RpcParams::new();
         $(
             params.push($p).expect("values passed to rpc_params! must be serializable to JSON");
         )*

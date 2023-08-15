@@ -8,12 +8,13 @@ use crate::{
     config::{Config, Header},
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
+    backend::{StreamOfResults, BlockRef},
 };
 use derivative::Derivative;
 use futures::{future::Either, stream, Stream, StreamExt};
-use std::{future::Future, pin::Pin};
+use std::future::Future;
 
-type BlockStream<T> = Pin<Box<dyn Stream<Item = Result<T, Error>> + Send>>;
+type BlockStream<T> = StreamOfResults<T>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
 
 /// A client for working with blocks.
@@ -48,9 +49,9 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
-        block_hash: T::Hash,
+        block_ref: BlockRef<T::Hash>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
-        self.at_or_latest(Some(block_hash))
+        self.at_or_latest(Some(block_ref))
     }
 
     /// Obtain block details of the latest block hash.
@@ -64,24 +65,22 @@ where
     /// provided.
     fn at_or_latest(
         &self,
-        block_hash: Option<T::Hash>,
+        block_ref: Option<BlockRef<T::Hash>>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         let client = self.client.clone();
         async move {
-            // If block hash is not provided, get the hash
-            // for the latest block and use that.
-            let block_hash = match block_hash {
-                Some(hash) => hash,
+            // If a block ref isn't provided, we'll get the latest best block to use.
+            let block_ref = match block_ref {
+                Some(r) => r,
                 None => client
-                    .rpc()
-                    .block_hash(None)
+                    .backend()
+                    .latest_best_block_hash()
                     .await?
-                    .expect("didn't pass a block number; qed"),
             };
 
-            let block_header = match client.rpc().header(Some(block_hash)).await? {
+            let block_header = match client.backend().block_header(Some(block_ref.hash())).await? {
                 Some(header) => header,
-                None => return Err(BlockError::not_found(block_hash).into()),
+                None => return Err(BlockError::not_found(block_ref.hash()).into()),
             };
 
             Ok(Block::new(block_header, client))
@@ -100,7 +99,7 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let sub = client.rpc().subscribe_all_block_headers().await?;
+            let sub = client.backend().stream_all_block_headers().await?;
             BlockStreamRes::Ok(Box::pin(sub))
         })
     }
@@ -117,7 +116,7 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let sub = client.rpc().subscribe_best_block_headers().await?;
+            let sub = client.backend().stream_best_block_headers().await?;
             BlockStreamRes::Ok(Box::pin(sub))
         })
     }
@@ -133,14 +132,14 @@ where
         header_sub_fut_to_block_sub(self.clone(), async move {
             // Fetch the last finalised block details immediately, so that we'll get
             // all blocks after this one.
-            let last_finalized_block_hash = client.rpc().finalized_head().await?;
+            let last_finalized_block_ref = client.backend().latest_finalized_block_hash().await?;
             let last_finalized_block_num = client
-                .rpc()
-                .header(Some(last_finalized_block_hash))
+                .backend()
+                .block_header(Some(last_finalized_block_ref.hash()))
                 .await?
                 .map(|h| h.number().into());
 
-            let sub = client.rpc().subscribe_finalized_block_headers().await?;
+            let sub = client.backend().stream_finalized_block_headers().await?;
 
             // Adjust the subscription stream to fill in any missing blocks.
             BlockStreamRes::Ok(
@@ -159,18 +158,18 @@ async fn header_sub_fut_to_block_sub<T, Client, S>(
 ) -> Result<BlockStream<Block<T, Client>>, Error>
 where
     T: Config,
-    S: Future<Output = Result<BlockStream<T::Header>, Error>> + Send + 'static,
+    S: Future<Output = Result<BlockStream<(T::Header, BlockRef<T::Hash>)>, Error>> + Send + 'static,
     Client: OnlineClientT<T> + Send + Sync + 'static,
 {
-    let sub = sub.await?.then(move |header| {
+    let sub = sub.await?.then(move |header_and_ref| {
         let client = blocks_client.client.clone();
         async move {
-            let header = match header {
-                Ok(header) => header,
+            let (header, block_ref) = match header_and_ref {
+                Ok(header_and_ref) => header_and_ref,
                 Err(e) => return Err(e),
             };
 
-            Ok(Block::new(header, client))
+            Ok(Block::new(header, block_ref, client))
         }
     });
     BlockStreamRes::Ok(Box::pin(sub))
