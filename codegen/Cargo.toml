@@ -21,7 +21,7 @@ quote = { workspace = true }
 syn = { workspace = true }
 scale-info = { workspace = true }
 subxt-metadata = { workspace = true }
-jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport", "http-client"] }
+jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 hex = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 thiserror = { workspace = true }
