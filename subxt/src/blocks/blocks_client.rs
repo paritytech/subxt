@@ -11,7 +11,7 @@ use crate::{
     backend::{StreamOfResults, BlockRef},
 };
 use derivative::Derivative;
-use futures::{future::Either, stream, Stream, StreamExt};
+use futures::StreamExt;
 use std::future::Future;
 
 type BlockStream<T> = StreamOfResults<T>;
@@ -49,9 +49,9 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
-        block_ref: BlockRef<T::Hash>,
+        block_ref: impl Into<BlockRef<T::Hash>>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
-        self.at_or_latest(Some(block_ref))
+        self.at_or_latest(Some(block_ref.into()))
     }
 
     /// Obtain block details of the latest block hash.
@@ -78,12 +78,12 @@ where
                     .await?
             };
 
-            let block_header = match client.backend().block_header(Some(block_ref.hash())).await? {
+            let block_header = match client.backend().block_header(block_ref.hash()).await? {
                 Some(header) => header,
                 None => return Err(BlockError::not_found(block_ref.hash()).into()),
             };
 
-            Ok(Block::new(block_header, client))
+            Ok(Block::new(block_header, block_ref, client))
         }
     }
 
@@ -135,17 +135,12 @@ where
             let last_finalized_block_ref = client.backend().latest_finalized_block_hash().await?;
             let last_finalized_block_num = client
                 .backend()
-                .block_header(Some(last_finalized_block_ref.hash()))
+                .block_header(last_finalized_block_ref.hash())
                 .await?
                 .map(|h| h.number().into());
 
             let sub = client.backend().stream_finalized_block_headers().await?;
-
-            // Adjust the subscription stream to fill in any missing blocks.
-            BlockStreamRes::Ok(
-                subscribe_to_block_headers_filling_in_gaps(client, last_finalized_block_num, sub)
-                    .boxed(),
-            )
+            BlockStreamRes::Ok(sub)
         })
     }
 }
@@ -173,54 +168,4 @@ where
         }
     });
     BlockStreamRes::Ok(Box::pin(sub))
-}
-
-/// Note: This is exposed for testing but is not considered stable and may change
-/// without notice in a patch release.
-#[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
-    client: Client,
-    mut last_block_num: Option<u64>,
-    sub: S,
-) -> impl Stream<Item = Result<T::Header, Error>> + Send
-where
-    T: Config,
-    Client: OnlineClientT<T>,
-    S: Stream<Item = Result<T::Header, E>> + Send,
-    E: Into<Error> + Send + 'static,
-{
-    sub.flat_map(move |s| {
-        let client = client.clone();
-
-        // Get the header, or return a stream containing just the error.
-        let header = match s {
-            Ok(header) => header,
-            Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
-        };
-
-        // We want all previous details up to, but not including this current block num.
-        let end_block_num = header.number().into();
-
-        // This is one after the last block we returned details for last time.
-        let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
-
-        // Iterate over all of the previous blocks we need headers for, ignoring the current block
-        // (which we already have the header info for):
-        let previous_headers = stream::iter(start_block_num..end_block_num)
-            .then(move |n| {
-                let rpc = client.rpc().clone();
-                async move {
-                    let hash = rpc.block_hash(Some(n.into())).await?;
-                    let header = rpc.header(hash).await?;
-                    Ok::<_, Error>(header)
-                }
-            })
-            .filter_map(|h| async { h.transpose() });
-
-        // On the next iteration, we'll get details starting just after this end block.
-        last_block_num = Some(end_block_num);
-
-        // Return a combination of any previous headers plus the new header.
-        Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
-    })
 }

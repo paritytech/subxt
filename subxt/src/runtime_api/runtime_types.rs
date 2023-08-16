@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
+    backend::{ BackendExt, BlockRef },
     client::OnlineClientT,
     error::{Error, MetadataError},
     metadata::DecodeWithMetadata,
@@ -19,16 +20,16 @@ use super::RuntimeApiPayload;
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct RuntimeApi<T: Config, Client> {
     client: Client,
-    block_hash: T::Hash,
+    block_ref: BlockRef<T::Hash>,
     _marker: PhantomData<T>,
 }
 
 impl<T: Config, Client> RuntimeApi<T, Client> {
     /// Create a new [`RuntimeApi`]
-    pub(crate) fn new(client: Client, block_hash: T::Hash) -> Self {
+    pub(crate) fn new(client: Client, block_ref: BlockRef<T::Hash>) -> Self {
         Self {
             client,
-            block_hash,
+            block_ref,
             _marker: PhantomData,
         }
     }
@@ -46,13 +47,13 @@ where
         call_parameters: Option<&'a [u8]>,
     ) -> impl Future<Output = Result<Res, Error>> + 'a {
         let client = self.client.clone();
-        let block_hash = self.block_hash;
+        let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
             let data: Res = client
-                .rpc()
-                .state_call(function, call_parameters, Some(block_hash))
+                .backend()
+                .call_decoding(function, call_parameters, block_hash)
                 .await?;
             Ok(data)
         }
@@ -64,7 +65,7 @@ where
         payload: Call,
     ) -> impl Future<Output = Result<Call::ReturnType, Error>> {
         let client = self.client.clone();
-        let block_hash = self.block_hash;
+        let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
@@ -94,8 +95,8 @@ where
             let call_name = format!("{}_{}", payload.trait_name(), payload.method_name());
 
             let bytes = client
-                .rpc()
-                .state_call_raw(&call_name, Some(params.as_slice()), Some(block_hash))
+                .backend()
+                .call(&call_name, Some(params.as_slice()), block_hash)
                 .await?;
 
             let value = <Call::ReturnType as DecodeWithMetadata>::decode_with_metadata(

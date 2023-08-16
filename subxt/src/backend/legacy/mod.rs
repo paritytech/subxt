@@ -9,25 +9,28 @@ pub mod rpc_methods;
 
 use async_trait::async_trait;
 use std::sync::Arc;
-use futures::StreamExt;
+use std::collections::VecDeque;
+use futures::{ future, stream, Future, FutureExt, Stream, StreamExt, future::Either };
 use crate::backend::{
     Backend,
     BlockRef,
     StreamOfResults,
     RuntimeVersion,
     TransactionStatus,
+    StorageResponse,
     rpc::{RpcClient, RpcClientT}
 };
 use crate::{ Config, Error, config::Header };
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
-
+use std::pin::Pin;
+use std::task::{Poll,Context};
 
 /// The legacy backend.
-pub struct LegacyBackend<T: Config + Send + Sync + 'static> {
+pub struct LegacyBackend<T> {
     client: RpcClient<T>
 }
 
-impl <T: Config + Send + Sync + 'static> LegacyBackend<T> {
+impl <T> LegacyBackend<T> {
     pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         Self {
             client: RpcClient::new(client)
@@ -35,36 +38,84 @@ impl <T: Config + Send + Sync + 'static> LegacyBackend<T> {
     }
 }
 
+impl <T: Config> super::sealed::Sealed for LegacyBackend<T> {}
+
 #[async_trait]
 impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
-    async fn storage_fetch_value(
+    async fn storage_fetch_values(
         &self,
-        key: &[u8],
-        at: Option<T::Hash>,
-    ) -> Result<Option<Vec<u8>>, Error> {
-        rpc_methods::state_get_storage(&self.client, key, at).await
+        keys: Vec<Vec<u8>>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+        let client = self.client.clone();
+
+        // For each key, return it + a future to get the result.
+        let iter = keys.into_iter().map(move |key| {
+            let client = client.clone();
+            async move {
+                let res = rpc_methods::state_get_storage(&client, &key, Some(at)).await?;
+                Ok(res.map(|value| StorageResponse { key, value }))
+            }
+        });
+
+        let s = stream::iter(iter)
+            // Resolve the future
+            .then(|fut| fut)
+            // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
+            .filter_map(|r| future::ready(r.transpose()));
+
+        Ok(Box::pin(s))
     }
 
-    async fn storage_fetch_keys(
+    async fn storage_fetch_descendant_keys(
         &self,
-        key: &[u8],
-        count: u32,
-        start_key: Option<&[u8]>,
-        at: Option<T::Hash>,
-    ) -> Result<Vec<Vec<u8>>, Error> {
-        rpc_methods::state_get_keys_paged(&self.client, key, count, start_key, at).await
+        key: Vec<u8>,
+        starting_at: Option<Vec<u8>>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<Vec<u8>>, Error> {
+        Ok(Box::pin(StorageFetchDescendantKeysStream {
+            at,
+            key: key.clone(),
+            client: self.client.clone(),
+            done: Default::default(),
+            keys: Default::default(),
+            keys_fut: Default::default(),
+            pagination_start_key: starting_at,
+        }))
+    }
+
+    async fn storage_fetch_descendant_values(
+        &self,
+        key: Vec<u8>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+        let keys_stream = StorageFetchDescendantKeysStream {
+            at,
+            key: key.clone(),
+            client: self.client.clone(),
+            done: Default::default(),
+            keys: Default::default(),
+            keys_fut: Default::default(),
+            pagination_start_key: Default::default(),
+        };
+
+        Ok(Box::pin(StorageFetchDescendantValuesStream {
+            keys: keys_stream,
+            next_key: None,
+            value_fut: Default::default(),
+        }))
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         rpc_methods::genesis_hash(&self.client).await
     }
 
-    async fn block_header(&self, at: Option<T::Hash>) -> Result<Option<T::Header>, Error> {
-        rpc_methods::chain_get_header(&self.client, at).await
+    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
+        rpc_methods::chain_get_header(&self.client, Some(at)).await
     }
 
-    async fn block_body(&self, at: Option<T::Hash>) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let Some(details) = rpc_methods::chain_get_block(&self.client, at).await? else {
+    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
+        let Some(details) = rpc_methods::chain_get_block(&self.client, Some(at)).await? else {
             return Ok(None)
         };
         Ok(Some(details.block.extrinsics.into_iter().map(|b| b.0).collect()))
@@ -107,6 +158,9 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn stream_finalized_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub: super::rpc::Subscription<<T as Config>::Header> = rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
+        // This API method can miss some finalized headers, so we make sure to fill them in. This isn't really important
+        // with "best" or "all" blocks, which can vary across nodes anyway, but for finalized blocks we expect a complete list.
+        let sub = subscribe_to_block_headers_filling_in_gaps(self.client.clone(), sub);
         let sub = sub.map(|r| r.map(|h| (h, BlockRef::from_hash(h.hash()))));
         Ok(Box::pin(sub))
     }
@@ -136,8 +190,206 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         method: &str,
         call_parameters: Option<&[u8]>,
-        at: Option<T::Hash>,
+        at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        rpc_methods::state_call(&self.client, method, call_parameters, at).await
+        rpc_methods::state_call(&self.client, method, call_parameters, Some(at)).await
+    }
+}
+
+/// Note: This is exposed for testing but is not considered stable and may change
+/// without notice in a patch release.
+#[doc(hidden)]
+pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
+    rpc: RpcClient<T>,
+    sub: S,
+) -> impl Stream<Item = Result<T::Header, Error>> + Send
+where
+    T: Config,
+    S: Stream<Item = Result<T::Header, E>> + Send,
+    E: Into<Error> + Send + 'static,
+{
+    let mut last_block_num = None;
+    sub.flat_map(move |s| {
+        // Get the header, or return a stream containing just the error.
+        let header = match s {
+            Ok(header) => header,
+            Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
+        };
+
+        // We want all previous details up to, but not including this current block num.
+        let end_block_num = header.number().into();
+
+        // This is one after the last block we returned details for last time.
+        let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
+
+        // Iterate over all of the previous blocks we need headers for, ignoring the current block
+        // (which we already have the header info for):
+        let rpc = rpc.clone();
+        let previous_headers = stream::iter(start_block_num..end_block_num)
+            .then(move |n| {
+                let rpc = rpc.clone();
+                async move {
+                    let hash = rpc_methods::chain_get_block_hash(&rpc, Some(n.into())).await?;
+                    let header = rpc_methods::chain_get_header(&rpc, hash).await?;
+                    Ok::<_, Error>(header)
+                }
+            })
+            .filter_map(|h| async { h.transpose() });
+
+        // On the next iteration, we'll get details starting just after this end block.
+        last_block_num = Some(end_block_num);
+
+        // Return a combination of any previous headers plus the new header.
+        Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
+    })
+}
+
+/// This provides a stream of values given some prefix `key`. It
+/// internally manages pagination and such.
+pub struct StorageFetchDescendantKeysStream<T: Config> {
+    client: RpcClient<T>,
+    key: Vec<u8>,
+    at: T::Hash,
+    // What key do we start paginating from? None = from the beginning.
+    pagination_start_key: Option<Vec<u8>>,
+    // Keys, future and cached:
+    keys_fut: Option<Pin<Box<dyn Future<Output=Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
+    keys: VecDeque<Vec<u8>>,
+    // Set to true when we're done:
+    done: bool,
+}
+
+impl <T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
+
+// How many storage keys to ask for each time.
+const STORAGE_FETCH_PAGE_SIZE: u32 = 32;
+
+impl <T: Config> Stream for StorageFetchDescendantKeysStream<T> {
+    type Item = Result<Vec<u8>, Error>;
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        loop {
+            let mut this = self.as_mut();
+
+            // We're already done.
+            if this.done {
+                return Poll::Ready(None)
+            }
+
+            // We have some keys to hand back already, so do that.
+            if let Some(key) = this.keys.pop_front() {
+                return Poll::Ready(Some(Ok(key)))
+            }
+
+            // Else, we don't have any keys, but we have a fut to get more so poll it.
+            if let Some(mut keys_fut) = this.keys_fut.take() {
+                let Poll::Ready(keys) = keys_fut.poll_unpin(cx) else {
+                    this.keys_fut = Some(keys_fut);
+                    return Poll::Pending
+                };
+
+                match keys {
+                    Ok(keys) => {
+                        if keys.is_empty() {
+                            // No keys left; we're done!
+                            this.done = true;
+                            return Poll::Ready(None)
+                        }
+                        // The last key is where we want to paginate from next time.
+                        this.pagination_start_key = keys.last().cloned();
+                        // Got new keys; loop around to start returning them.
+                        this.keys = keys.into_iter().collect();
+                        continue;
+                    },
+                    Err(e) => {
+                        // Error getting keys? Return it.
+                        return Poll::Ready(Some(Err(e)))
+                    }
+                }
+            }
+
+            // Else, we don't have a fut to get keys yet so start one going.
+            let client = this.client.clone();
+            let key = this.key.clone();
+            let at = this.at;
+            let pagination_start_key = this.pagination_start_key.take();
+            let keys_fut = async move {
+                rpc_methods::state_get_keys_paged(
+                    &client,
+                    &key,
+                    STORAGE_FETCH_PAGE_SIZE,
+                    pagination_start_key.as_deref(),
+                    Some(at)
+                ).await
+            };
+            this.keys_fut = Some(Box::pin(keys_fut));
+        }
+    }
+}
+
+/// This provides a stream of values given some stream of keys.
+pub struct StorageFetchDescendantValuesStream<T: Config> {
+    // Stream of keys.
+    keys: StorageFetchDescendantKeysStream<T>,
+    next_key: Option<Vec<u8>>,
+    // Then we track the next value:
+    value_fut: Option<Pin<Box<dyn Future<Output=Result<Option<Vec<u8>>, Error>> + Send + 'static>>>,
+}
+
+impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
+    type Item = Result<StorageResponse, Error>;
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        loop {
+            let mut this = self.as_mut();
+
+            // If we're waiting on the next value then poll that future:
+            if let Some(mut value_fut) = this.value_fut.take() {
+                match value_fut.poll_unpin(cx) {
+                    Poll::Ready(Ok(Some(value))) => {
+                        let key = this.next_key.take().expect("key should exist");
+                        return Poll::Ready(Some(Ok(StorageResponse { key, value })))
+                    },
+                    Poll::Ready(Ok(None)) => {
+                        // No value back for some key? Skip.
+                        continue
+                    },
+                    Poll::Ready(Err(e)) => {
+                        return Poll::Ready(Some(Err(e)))
+                    },
+                    Poll::Pending => {
+                        this.value_fut = Some(value_fut);
+                        return Poll::Pending;
+                    }
+                }
+            }
+
+            // Else, if we have the next key then let's start waiting on the next value.
+            if let Some(key) = &this.next_key {
+                let key = key.clone();
+                let client = this.keys.client.clone();
+                let fut = async move {
+                    rpc_methods::state_get_storage(&client, &key, Some(this.keys.at)).await
+                };
+
+                this.value_fut = Some(Box::pin(fut));
+                continue
+            }
+
+            // Else, poll the keys stream to get the next key.
+            match this.keys.poll_next_unpin(cx) {
+                Poll::Ready(Some(Ok(key))) => {
+                    this.next_key = Some(key);
+                    continue;
+                },
+                Poll::Ready(Some(Err(e))) => {
+                    return Poll::Ready(Some(Err(e)))
+                },
+                Poll::Ready(None) => {
+                    return Poll::Ready(None)
+                },
+                Poll::Pending => {
+                    return Poll::Pending;
+                }
+            }
+        }
     }
 }

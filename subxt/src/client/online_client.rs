@@ -84,10 +84,12 @@ impl<T: Config> OnlineClient<T> {
     pub async fn from_backend<B: Backend<T>>(
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
+        let latest_block = backend.latest_best_block_hash().await?;
+
         let (genesis_hash, runtime_version, metadata) = future::join3(
             backend.genesis_hash(),
             backend.current_runtime_version(),
-            OnlineClient::fetch_metadata(&*backend),
+            OnlineClient::fetch_metadata(&*backend, latest_block.hash()),
         )
         .await;
 
@@ -123,7 +125,7 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Fetch the metadata from substrate using the runtime API.
-    async fn fetch_metadata(backend: &dyn Backend<T>) -> Result<Metadata, Error> {
+    async fn fetch_metadata(backend: &dyn Backend<T>, block_hash: T::Hash) -> Result<Metadata, Error> {
         #[cfg(feature = "unstable-metadata")]
         {
             /// The unstable metadata version number.
@@ -131,28 +133,28 @@ impl<T: Config> OnlineClient<T> {
 
             // Try to fetch the latest unstable metadata, if that fails fall back to
             // fetching the latest stable metadata.
-            match backend.metadata_at_version(UNSTABLE_METADATA_VERSION).await {
+            match backend.metadata_at_version(UNSTABLE_METADATA_VERSION, block_hash).await {
                 Ok(bytes) => Ok(bytes),
-                Err(_) => OnlineClient::fetch_latest_stable_metadata(backend).await,
+                Err(_) => OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await,
             }
         }
 
         #[cfg(not(feature = "unstable-metadata"))]
-        OnlineClient::fetch_latest_stable_metadata(backend).await
+        OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await
     }
 
     /// Fetch the latest stable metadata from the node.
-    async fn fetch_latest_stable_metadata(backend: &dyn Backend<T>) -> Result<Metadata, Error> {
+    async fn fetch_latest_stable_metadata(backend: &dyn Backend<T>, block_hash: T::Hash) -> Result<Metadata, Error> {
         // This is the latest stable metadata that subxt can utilize.
         const V15_METADATA_VERSION: u32 = 15;
 
         // Try to fetch the metadata version.
-        if let Ok(bytes) = backend.metadata_at_version(V15_METADATA_VERSION).await {
+        if let Ok(bytes) = backend.metadata_at_version(V15_METADATA_VERSION, block_hash).await {
             return Ok(bytes);
         }
 
         // If that fails, fetch the metadata V14 using the old API.
-        backend.legacy_metadata().await
+        backend.legacy_metadata(block_hash).await
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -396,8 +398,12 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
+        let latest_block_ref = match self.client.backend().latest_best_block_hash().await {
+            Ok(block_ref) => block_ref,
+            Err(e) => return Some(Err(e))
+        };
 
-        let metadata = match OnlineClient::fetch_metadata(self.client.backend()).await {
+        let metadata = match OnlineClient::fetch_metadata(self.client.backend(), latest_block_ref.hash()).await {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };

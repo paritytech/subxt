@@ -172,13 +172,14 @@ where
 {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
+        let block_ref = self.client.backend().latest_best_block_hash().await?;
         let account_nonce_bytes = self
             .client
-            .rpc()
-            .state_call_raw(
+            .backend()
+            .call(
                 "AccountNonceApi_account_nonce",
                 Some(&account_id.encode()),
-                None,
+                block_ref.hash(),
             )
             .await?;
 

@@ -6,8 +6,8 @@ use super::{
     storage_type::{validate_storage_address, Storage},
     utils, StorageAddress,
 };
-
 use crate::{
+    backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
     error::Error,
     Config,
@@ -73,8 +73,8 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain storage at some block hash.
-    pub fn at(&self, block_hash: T::Hash) -> Storage<T, Client> {
-        Storage::new(self.client.clone(), block_hash)
+    pub fn at(&self, block_ref: impl Into<BlockRef<T::Hash>>) -> Storage<T, Client> {
+        Storage::new(self.client.clone(), block_ref.into())
     }
 
     /// Obtain storage at the latest block hash.
@@ -85,14 +85,13 @@ where
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // get the hash for the latest block and use that.
-            let block_hash = client
-                .rpc()
-                .block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed");
+            // get the ref for the latest block and use that.
+            let block_ref = client
+                .backend()
+                .latest_best_block_hash()
+                .await?;
 
-            Ok(Storage::new(client, block_hash))
+            Ok(Storage::new(client, block_ref))
         }
     }
 }

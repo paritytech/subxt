@@ -12,5 +12,5 @@ mod extrinsic_types;
 pub use crate::backend::BlockRef;
 
 pub use block_types::Block;
-pub use blocks_client::{subscribe_to_block_headers_filling_in_gaps, BlocksClient};
+pub use blocks_client::BlocksClient;
 pub use extrinsic_types::{ExtrinsicDetails, ExtrinsicEvents, Extrinsics, StaticExtrinsic};

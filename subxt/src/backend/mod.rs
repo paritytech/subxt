@@ -15,41 +15,51 @@ use crate::metadata::Metadata;
 use codec::{Encode, Decode};
 use async_trait::async_trait;
 use std::pin::Pin;
-use futures::Stream;
+use futures::{Stream, StreamExt};
 use std::sync::Arc;
+
+/// Prevent the backend trait being implemented externally.
+#[doc(hidden)]
+pub(crate) mod sealed {
+    pub trait Sealed {}
+}
 
 /// This trait exposes the interface that Subxt will use to communicate with
 /// a backend. Its goal is to be as minimal as possible.
 #[async_trait]
-pub trait Backend<T: Config>: Send + Sync + 'static {
-    /// Fetch the raw bytes at a given storage key
-    async fn storage_fetch_value(
+pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
+    /// Fetch values from storage.
+    async fn storage_fetch_values(
         &self,
-        key: &[u8],
-        at: Option<T::Hash>,
-    ) -> Result<Option<Vec<u8>>, Error>;
+        keys: Vec<Vec<u8>>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error>;
 
-    /// Returns the keys with prefix with pagination support.
-    /// Up to `count` keys will be returned.
-    /// If `start_key` is passed, return next keys in storage in lexicographic order.
-    async fn storage_fetch_keys(
+    /// Fetch keys underneath the given key from storage.
+    async fn storage_fetch_descendant_keys(
         &self,
-        key: &[u8],
-        count: u32,
-        start_key: Option<&[u8]>,
-        at: Option<T::Hash>,
-    ) -> Result<Vec<Vec<u8>>, Error>;
+        key: Vec<u8>,
+        starting_at: Option<Vec<u8>>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<Vec<u8>>, Error>;
+
+    /// Fetch values underneath the given key from storage.
+    async fn storage_fetch_descendant_values(
+        &self,
+        key: Vec<u8>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error>;
 
     /// Fetch the genesis hash
     async fn genesis_hash(&self) -> Result<T::Hash, Error>;
 
     /// Get a block header
-    async fn block_header(&self, at: Option<T::Hash>) -> Result<Option<T::Header>, Error>;
+    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error>;
 
     /// Return the extrinsics found in the block. Each extrinsic is represented
     /// by a vector of bytes which has _not_ been SCALE decoded (in other words, the
     /// first bytes in the vector will decode to the compact encoded length of the extrinsic)
-    async fn block_body(&self, at: Option<T::Hash>) -> Result<Option<Vec<Vec<u8>>>, Error>;
+    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error>;
 
     /// Get the most recent finalized block hash.
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
@@ -85,21 +95,48 @@ pub trait Backend<T: Config>: Send + Sync + 'static {
         &self,
         method: &str,
         call_parameters: Option<&[u8]>,
-        at: Option<T::Hash>,
+        at: T::Hash,
     ) -> Result<Vec<u8>, Error>;
 }
 
 /// helpeful utility methods derived from those provided on [`Backend`]
 #[async_trait]
 pub trait BackendExt<T: Config>: Backend<T> {
+    /// Fetch a single value from storage.
+    async fn storage_fetch_value(
+        &self,
+        key: Vec<u8>,
+        at: T::Hash,
+    ) -> Result<Option<Vec<u8>>, Error> {
+        self.storage_fetch_values(vec![key], at)
+            .await?
+            .next()
+            .await
+            .transpose()
+            .map(|o| o.map(|s| s.value))
+    }
+
+    /// The same as a [`Backend::call()`], but it will also attempt to decode the
+    /// result into the given type, which is a fairly common operation.
+    async fn call_decoding<D: codec::Decode>(
+        &self,
+        method: &str,
+        call_parameters: Option<&[u8]>,
+        at: T::Hash
+    ) -> Result<D, Error> {
+        let bytes = self.call(method, call_parameters, at).await?;
+        let res = D::decode(&mut &*bytes)?;
+        Ok(res)
+    }
+
     /// Return the metadata at some version.
-    async fn metadata_at_version(&self, version: u32) -> Result<Metadata, Error> {
+    async fn metadata_at_version(&self, version: u32, at: T::Hash) -> Result<Metadata, Error> {
         let param = version.encode();
 
-        let metadata_bytes = self
-            .call("Metadata_metadata_at_version", Some(&param), None)
+        let opaque: Option<frame_metadata::OpaqueMetadata> = self
+            .call_decoding("Metadata_metadata_at_version", Some(&param), at)
             .await?;
-        let Some(opaque) = <Option<frame_metadata::OpaqueMetadata>>::decode(&mut &*metadata_bytes)? else {
+        let Some(opaque) = opaque else {
             return Err(Error::Other("Metadata version not found".into()));
         };
 
@@ -108,10 +145,8 @@ pub trait BackendExt<T: Config>: Backend<T> {
     }
 
     /// Return V14 metadata from the legacy `Metadata_metadata` call.
-    async fn legacy_metadata(&self) -> Result<Metadata, Error> {
-        let metadata_bytes = self.call("Metadata_metadata", None, None).await?;
-        let opaque = frame_metadata::OpaqueMetadata::decode(&mut &*metadata_bytes)?;
-
+    async fn legacy_metadata(&self, at: T::Hash) -> Result<Metadata, Error> {
+        let opaque: frame_metadata::OpaqueMetadata = self.call_decoding("Metadata_metadata", None, at).await?;
         let metadata: Metadata = Decode::decode(&mut &opaque.0[..])?;
         Ok(metadata)
     }
@@ -129,6 +164,12 @@ impl <B: Backend<T> + ?Sized, T: Config> BackendExt<T> for B {}
 pub struct BlockRef<H> {
     hash: H,
     pointer: Option<Arc<dyn BlockRefT>>
+}
+
+impl <H> From<H> for BlockRef<H> {
+    fn from(value: H) -> Self {
+        BlockRef::from_hash(value)
+    }
 }
 
 impl <H: PartialEq> PartialEq for BlockRef<H> {
@@ -242,6 +283,14 @@ pub enum TransactionStatus<Hash> {
     Dropped,
     /// Transaction is no longer valid in the current state.
     Invalid,
+}
+
+/// A response from [`Backend::storage_fetch`].
+pub struct StorageResponse {
+    /// The key.
+    pub key: Vec<u8>,
+    /// The associated value.
+    pub value: Vec<u8>
 }
 
 // Just a test that the trait is object safe.

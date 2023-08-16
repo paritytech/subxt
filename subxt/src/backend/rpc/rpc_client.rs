@@ -8,9 +8,8 @@ use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
-use crate::config::Config;
 
-/// A concrete wrapper around an [`RpcClientT`] which exposes the udnerlying interface via some
+/// A concrete wrapper around an [`RpcClientT`] which exposes the underlying interface via some
 /// higher level methods that make it a little easier to work with. For the sake of convenience,
 /// it also carries a `T: Config` bound. This isn't strictly necessary, but typically you'll use
 /// a client against a single node with fixed config, so it makes some type inference easier to
@@ -18,13 +17,12 @@ use crate::config::Config;
 ///
 /// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
 /// without getting into issues with non-object-safe methods or no `async` in traits.
-#[derive(Clone)]
 pub struct RpcClient<T> {
     client: Arc<dyn RpcClientT>,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl <T: Config> RpcClient<T> {
+impl <T> RpcClient<T> {
     pub(crate) fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         RpcClient {
             client,
@@ -72,6 +70,15 @@ impl <T> std::ops::Deref for RpcClient<T> {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
         &*self.client
+    }
+}
+
+impl <T> Clone for RpcClient<T> {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            _marker: std::marker::PhantomData
+        }
     }
 }
 

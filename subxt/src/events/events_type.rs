@@ -107,7 +107,7 @@ impl<T: Config> Events<T> {
     where
         Client: OnlineClientT<T>,
     {
-        let event_bytes = get_event_bytes(&client, Some(block_hash)).await?;
+        let event_bytes = get_event_bytes(client.backend(), block_hash).await?;
         Ok(Events::new(metadata, block_hash, event_bytes))
     }
 

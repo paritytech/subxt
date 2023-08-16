@@ -224,7 +224,7 @@ where
 {
     // At the time of writing, Smoldot gives back block numbers in numeric rather
     // than hex format. So let's support deserializing from both here:
-    use crate::rpc::types::NumberOrHex;
+    use crate::backend::legacy::rpc_methods::NumberOrHex;
     let number_or_hex = NumberOrHex::deserialize(d)?;
     let u256 = number_or_hex.into_u256();
     TryFrom::try_from(u256).map_err(|_| serde::de::Error::custom("Try from failed"))

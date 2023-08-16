@@ -74,7 +74,7 @@ where
     pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, Error> {
         let ids = ExtrinsicPartTypeIds::new(&self.client.metadata())?;
         let block_hash = self.header.hash();
-        let Some(extrinsics) = self.client.backend().block_body(Some(block_hash)).await? else {
+        let Some(extrinsics) = self.client.backend().block_body(block_hash).await? else {
             return Err(BlockError::not_found(block_hash).into());
         };
 
@@ -89,13 +89,12 @@ where
 
     /// Work with storage.
     pub fn storage(&self) -> Storage<T, C> {
-        let block_hash = self.hash();
-        Storage::new(self.client.clone(), block_hash)
+        Storage::new(self.client.clone(), self.block_ref.clone())
     }
 
     /// Execute a runtime API call at this block.
     pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
-        Ok(RuntimeApi::new(self.client.clone(), self.hash()))
+        Ok(RuntimeApi::new(self.client.clone(), self.block_ref.clone()))
     }
 }
 

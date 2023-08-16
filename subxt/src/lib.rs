@@ -72,7 +72,6 @@ pub mod dynamic;
 pub mod error;
 pub mod events;
 pub mod metadata;
-pub mod rpc;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
