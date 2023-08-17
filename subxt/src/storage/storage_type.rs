@@ -201,7 +201,7 @@ where
     pub fn iter<Address>(
         &self,
         address: Address,
-    ) -> impl Future<Output = Result<StreamOfResults<KeyVal<Address::Target>>, Error>> + 'static
+    ) -> impl Future<Output = Result<StreamOfResults<(Vec<u8>, Address::Target)>, Error>> + 'static
     where
         Address: StorageAddress<IsIterable = Yes> + 'static,
     {
@@ -240,19 +240,13 @@ where
                         return_type_id,
                         &metadata,
                     )?;
-                    Ok(KeyVal { key: kv.key, val })
+                    Ok((kv.key, val))
                 });
 
-            let s: StreamOfResults<KeyVal<Address::Target>> = Box::pin(s);
+            let s = StreamOfResults::new(Box::pin(s));
             Ok(s)
         }
     }
-}
-
-/// A key/value pair returned from our storage iteration stream.
-pub struct KeyVal<Val> {
-    pub key: Vec<u8>,
-    pub val: Val
 }
 
 /// Validate a storage address against the metadata.

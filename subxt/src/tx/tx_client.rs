@@ -7,18 +7,17 @@ use std::borrow::Cow;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
-
+use futures::StreamExt;
 use crate::error::DecodeError;
 use crate::{
+    metadata::Metadata,
+    backend::{TransactionStatus, BackendExt, BlockRef},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-
-// This is returned from an API below, so expose it here.
-pub use crate::rpc::types::DryRunResult;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -456,29 +455,65 @@ where
         let ext_hash = T::Hasher::hash_of(&self.encoded);
 
         // Submit and watch for transaction progress.
-        let sub = self.client.rpc().watch_extrinsic(&self.encoded).await?;
+        let sub = self.client.backend().submit_transaction(&self.encoded.0).await?;
 
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
     }
 
     /// Submits the extrinsic to the chain for block inclusion.
     ///
-    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
-    ///
-    /// # Note
-    ///
-    /// Success does not mean the extrinsic has been included in the block, just that it is valid
-    /// and has been included in the transaction pool.
+    /// It's usually better to call `submit_and_watch` to get an idea of the progress of the
+    /// submission and whether it's eventually successful or not. This call does not guarantee
+    /// success, and is just sending the transaction to the chain.
     pub async fn submit(&self) -> Result<T::Hash, Error> {
-        self.client.rpc().submit_extrinsic(&self.encoded).await
+        let ext_hash = T::Hasher::hash_of(&self.encoded);
+        let mut sub = self.client.backend().submit_transaction(&self.encoded.0).await?;
+
+        // If we get a bad status or error back straight away then error, else return the hash.
+        match sub.next().await {
+            Some(Ok(status)) => {
+                match status {
+                    TransactionStatus::Validated |
+                    TransactionStatus::Broadcasted { .. } |
+                    TransactionStatus::InBestBlock { .. } |
+                    TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
+                    TransactionStatus::Error { message } => Err(Error::Other(format!("Transaction error: {message}"))),
+                    TransactionStatus::Invalid { message } => Err(Error::Other(format!("Transaction invalid: {message}"))),
+                    TransactionStatus::Dropped { message } => Err(Error::Other(format!("Transaction dropped: {message}"))),
+                }
+            },
+            Some(Err(e)) => Err(e),
+            None => Err(Error::Other("Transaction broadcast was unsuccessful; stream terminated early".into()))
+        }
     }
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
     /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
-    pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
-        let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
-        dry_run_bytes.into_dry_run_result(&self.client.metadata())
+    pub async fn dry_run(&self) -> Result<DryRunResult, Error> {
+        let latest_block_ref = self.client.backend().latest_best_block_hash().await?;
+        self.dry_run_at(latest_block_ref).await
+    }
+
+    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    ///
+    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn dry_run_at(&self, at: impl Into<BlockRef<T::Hash>>) -> Result<DryRunResult, Error> {
+        let block_hash = at.into().hash();
+
+        // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
+        let mut params = Vec::with_capacity(8 + self.encoded.0.len() + 8);
+        Compact(2u64).encode_to(&mut params);
+        params.extend(self.encoded().iter());
+        block_hash.encode_to(&mut params);
+
+        let res: Vec<u8> = self.client.backend().call(
+            "TaggedTransactionQueue_validate_transaction",
+            Some(&params),
+            block_hash
+        ).await?;
+
+        DryRunResult::try_from_bytes(res, &self.client.metadata())
     }
 
     /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
@@ -486,17 +521,52 @@ where
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
+        let latest_block_ref = self.client.backend().latest_best_block_hash().await?;
+
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
         let (_, _, _, partial_fee) = self
             .client
-            .rpc()
-            .state_call::<(Compact<u64>, Compact<u64>, u8, u128)>(
+            .backend()
+            .call_decoding::<(Compact<u64>, Compact<u64>, u8, u128)>(
                 "TransactionPaymentApi_query_info",
                 Some(&params),
-                None,
+                latest_block_ref.hash(),
             )
             .await?;
         Ok(partial_fee)
+    }
+}
+
+/// An error dry running an extrinsic.
+#[derive(Debug, PartialEq, Eq)]
+pub enum DryRunResult {
+    /// The transaction could be included in the block and executed.
+    Success,
+    /// The transaction could be included in the block, but the call failed to dispatch.
+    DispatchError(crate::error::DispatchError),
+    /// The transaction could not be included in the block.
+    TransactionValidityError,
+}
+
+impl DryRunResult {
+    pub fn try_from_bytes(bytes: Vec<u8>, metadata: &Metadata) -> Result<DryRunResult, crate::Error> {
+        // dryRun returns an ApplyExtrinsicResult, which is basically a
+        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
+        if bytes[0] == 0 && bytes[1] == 0 {
+            // Ok(Ok(())); transaction is valid and executed ok
+            Ok(DryRunResult::Success)
+        } else if bytes[0] == 0 && bytes[1] == 1 {
+            // Ok(Err(dispatch_error)); transaction is valid but execution failed
+            let dispatch_error =
+                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
+            Ok(DryRunResult::DispatchError(dispatch_error))
+        } else if bytes[0] == 1 {
+            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
+            Ok(DryRunResult::TransactionValidityError)
+        } else {
+            // unable to decode the bytes; they aren't what we expect.
+            Err(crate::Error::Unknown(bytes))
+        }
     }
 }

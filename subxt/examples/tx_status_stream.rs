@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(status) = balance_transfer_progress.next().await {
         match status? {
             // It's finalized in a block!
-            TxStatus::Finalized(in_block) => {
+            TxStatus::InFinalizedBlock(in_block) => {
                 println!(
                     "Transaction {:?} is finalized in block {:?}",
                     in_block.extrinsic_hash(),

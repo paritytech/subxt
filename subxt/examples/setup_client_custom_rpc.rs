@@ -4,7 +4,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use subxt::{
-    rpc::{RawValue, RpcClientT, RpcFuture, RpcSubscription},
+    backend::rpc::{RawValue, RpcClientT, RpcFuture, RpcSubscription},
     OnlineClient, PolkadotConfig,
 };
 

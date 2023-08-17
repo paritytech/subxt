@@ -98,7 +98,6 @@ tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
 sp-core = { workspace = true }
 sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
-sp-version = { workspace = true }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["subxt"] }
 # Tracing subscriber is useful for light-client examples to ensure that

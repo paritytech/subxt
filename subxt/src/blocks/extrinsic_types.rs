@@ -561,7 +561,7 @@ impl<T: Config> ExtrinsicEvents<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{rpc::types::RuntimeVersion, OfflineClient, PolkadotConfig};
+    use crate::{backend::RuntimeVersion, OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
     use frame_metadata::v15::{CustomMetadata, OuterEnums};
@@ -696,7 +696,6 @@ mod tests {
         let rt_version = RuntimeVersion {
             spec_version: 1,
             transaction_version: 4,
-            other: Default::default(),
         };
         let block_hash = H256::random();
         OfflineClient::new(block_hash, rt_version, metadata)

@@ -13,6 +13,7 @@ use std::collections::VecDeque;
 use futures::{ future, stream, Future, FutureExt, Stream, StreamExt, future::Either };
 use crate::backend::{
     Backend,
+    StreamOf,
     BlockRef,
     StreamOfResults,
     RuntimeVersion,
@@ -31,6 +32,8 @@ pub struct LegacyBackend<T> {
 }
 
 impl <T> LegacyBackend<T> {
+    /// Instantiate a new backend which uses the legacy API methods by providing
+    /// an [`RpcClientT`] implementation.
     pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         Self {
             client: RpcClient::new(client)
@@ -64,7 +67,7 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
             .filter_map(|r| future::ready(r.transpose()));
 
-        Ok(Box::pin(s))
+        Ok(StreamOf(Box::pin(s)))
     }
 
     async fn storage_fetch_descendant_keys(
@@ -73,7 +76,7 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         starting_at: Option<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        Ok(Box::pin(StorageFetchDescendantKeysStream {
+        Ok(StreamOf(Box::pin(StorageFetchDescendantKeysStream {
             at,
             key: key.clone(),
             client: self.client.clone(),
@@ -81,7 +84,7 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             keys: Default::default(),
             keys_fut: Default::default(),
             pagination_start_key: starting_at,
-        }))
+        })))
     }
 
     async fn storage_fetch_descendant_values(
@@ -99,11 +102,11 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             pagination_start_key: Default::default(),
         };
 
-        Ok(Box::pin(StorageFetchDescendantValuesStream {
+        Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
             keys: keys_stream,
             next_key: None,
             value_fut: Default::default(),
-        }))
+        })))
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
@@ -141,49 +144,71 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         let sub = rpc_methods::state_subscribe_runtime_version(&self.client).await?;
         let sub = sub.map(|r| r.map(|v| RuntimeVersion { spec_version: v.spec_version, transaction_version: v.transaction_version }));
-        Ok(Box::pin(sub))
+        Ok(StreamOf(Box::pin(sub)))
     }
 
     async fn stream_all_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub = rpc_methods::chain_subscribe_all_heads(&self.client).await?;
-        let sub = sub.map(|r| r.map(|h| (h, BlockRef::from_hash(h.hash()))));
-        Ok(Box::pin(sub))
+        let sub = sub.map(|r| r.map(|h| {
+            let hash = h.hash();
+            (h, BlockRef::from_hash(hash))
+        }));
+        Ok(StreamOf(Box::pin(sub)))
     }
 
     async fn stream_best_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub = rpc_methods::chain_subscribe_new_heads(&self.client).await?;
-        let sub = sub.map(|r| r.map(|h| (h, BlockRef::from_hash(h.hash()))));
-        Ok(Box::pin(sub))
+        let sub = sub.map(|r| r.map(|h| {
+            let hash = h.hash();
+            (h, BlockRef::from_hash(hash))
+        }));
+        Ok(StreamOf(Box::pin(sub)))
     }
 
     async fn stream_finalized_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub: super::rpc::Subscription<<T as Config>::Header> = rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
-        // This API method can miss some finalized headers, so we make sure to fill them in. This isn't really important
-        // with "best" or "all" blocks, which can vary across nodes anyway, but for finalized blocks we expect a complete list.
-        let sub = subscribe_to_block_headers_filling_in_gaps(self.client.clone(), sub);
-        let sub = sub.map(|r| r.map(|h| (h, BlockRef::from_hash(h.hash()))));
-        Ok(Box::pin(sub))
+
+        // Get the last finalized block immediately so that the stream will emit every finalized block after this.
+        let last_finalized_block_ref = self.latest_finalized_block_hash().await?;
+        let last_finalized_block_num = self
+            .block_header(last_finalized_block_ref.hash())
+            .await?
+            .map(|h| h.number().into());
+
+        // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
+        // are finalized each time.
+        let sub = subscribe_to_block_headers_filling_in_gaps(self.client.clone(), sub, last_finalized_block_num);
+        let sub = sub.map(|r| r.map(|h| {
+            let hash = h.hash();
+            (h, BlockRef::from_hash(hash))
+        }));
+        Ok(StreamOf(Box::pin(sub)))
     }
 
     async fn submit_transaction(&self, extrinsic: &[u8]) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         let sub = rpc_methods::author_submit_and_watch_extrinsic(&self.client, extrinsic).await?;
-        let sub = sub.map(|r| r.map(|tx| {
-            // Dev note: When the new backend is implemented, I expect the shape or the output status to change, so
-            // we'll have to adapt this old API version into the new API version here.
-            match tx {
-                RpcTransactionStatus::Future => TransactionStatus::Future,
-                RpcTransactionStatus::Ready => TransactionStatus::Ready,
-                RpcTransactionStatus::Broadcast(s) => TransactionStatus::Broadcast(s),
-                RpcTransactionStatus::InBlock(s) => TransactionStatus::InBlock(s),
-                RpcTransactionStatus::Retracted(s) => TransactionStatus::Retracted(s),
-                RpcTransactionStatus::FinalityTimeout(s) => TransactionStatus::FinalityTimeout(s),
-                RpcTransactionStatus::Finalized(s) => TransactionStatus::Finalized(s),
-                RpcTransactionStatus::Usurped(s) => TransactionStatus::Usurped(s),
-                RpcTransactionStatus::Dropped => TransactionStatus::Dropped,
-                RpcTransactionStatus::Invalid => TransactionStatus::Invalid,
-            }
-        }));
-        Ok(Box::pin(sub))
+        let sub = sub.filter_map(|r| {
+            let mapped = r.map(|tx| {
+                match tx {
+                    // We ignore these because they don't map nicely to the new API. They don't signal "end states" so this should be fine.
+                    RpcTransactionStatus::Future => None,
+                    RpcTransactionStatus::Retracted(_) => None,
+                    // These roughly map across:
+                    RpcTransactionStatus::Ready => Some(TransactionStatus::Validated),
+                    RpcTransactionStatus::Broadcast(peers) => Some(TransactionStatus::Broadcasted { num_peers: peers.len() as u32 }),
+                    RpcTransactionStatus::InBlock(hash) => Some(TransactionStatus::InBestBlock { hash }),
+                    // These 5 mean that the stream will very likely end:
+                    RpcTransactionStatus::FinalityTimeout(_) => Some(TransactionStatus::Invalid { message: "Finality timeout".into() }),
+                    RpcTransactionStatus::Finalized(hash) => Some(TransactionStatus::InFinalizedBlock { hash }),
+                    RpcTransactionStatus::Usurped(_) => Some(TransactionStatus::Invalid { message: "Transaction was usurped by another with the same nonce".into() }),
+                    RpcTransactionStatus::Dropped => Some(TransactionStatus::Dropped { message: "Transaction was dropped".into() }),
+                    RpcTransactionStatus::Invalid => Some(TransactionStatus::Invalid { message: "Transaction is invalid (eg because of a bad nonce, signature etc)".into() }),
+                }
+            }).transpose();
+
+            future::ready(mapped)
+        });
+        Ok(StreamOf(Box::pin(sub)))
     }
 
     async fn call(
@@ -202,13 +227,13 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
     rpc: RpcClient<T>,
     sub: S,
+    mut last_block_num: Option<u64>,
 ) -> impl Stream<Item = Result<T::Header, Error>> + Send
 where
     T: Config,
     S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<Error> + Send + 'static,
 {
-    let mut last_block_num = None;
     sub.flat_map(move |s| {
         // Get the header, or return a stream containing just the error.
         let header = match s {
@@ -338,8 +363,8 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
 impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
     type Item = Result<StorageResponse, Error>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let mut this = self.as_mut();
         loop {
-            let mut this = self.as_mut();
 
             // If we're waiting on the next value then poll that future:
             if let Some(mut value_fut) = this.value_fut.take() {
@@ -366,8 +391,9 @@ impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
             if let Some(key) = &this.next_key {
                 let key = key.clone();
                 let client = this.keys.client.clone();
+                let at = this.keys.at;
                 let fut = async move {
-                    rpc_methods::state_get_storage(&client, &key, Some(this.keys.at)).await
+                    rpc_methods::state_get_storage(&client, &key, Some(at)).await
                 };
 
                 this.value_fut = Some(Box::pin(fut));

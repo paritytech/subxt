@@ -79,8 +79,41 @@ impl<T: Config> OnlineClient<T> {
 }
 
 impl<T: Config> OnlineClient<T> {
-    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
-    /// implementation to drive the connection.
+    /// Construct a new [`OnlineClient`] by providing an underlying [`rpc::RpcClientT`]
+    /// implementation to drive the connection. This will use the current default
+    /// [`Backend`], which may change in future releases.
+    pub async fn from_rpc_client<R: rpc::RpcClientT>(
+        rpc_client: Arc<R>,
+    ) -> Result<OnlineClient<T>, Error> {
+        let backend = Arc::new(LegacyBackend::new(rpc_client));
+        OnlineClient::from_backend(backend).await
+    }
+
+    /// Construct a new [`OnlineClient`] by providing an RPC client along with the other
+    /// necessary details. This will use the current default [`Backend`], which may change
+    /// in future releases.
+    ///
+    /// # Warning
+    ///
+    /// This is considered the most primitive and also error prone way to
+    /// instantiate a client; the genesis hash, metadata and runtime version provided will
+    /// entirely determine which node and blocks this client will be able to interact with,
+    /// and whether it will be able to successfully do things like submit transactions.
+    ///
+    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
+    /// a client.
+    pub fn from_rpc_client_with<R: rpc::RpcClientT>(
+        genesis_hash: T::Hash,
+        runtime_version: RuntimeVersion,
+        metadata: impl Into<Metadata>,
+        rpc_client: Arc<R>,
+    ) -> Result<OnlineClient<T>, Error> {
+        let backend = Arc::new(LegacyBackend::new(rpc_client));
+        OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)
+    }
+
+    /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
+    /// implementation to power it. Other details will be obtained from the chain.
     pub async fn from_backend<B: Backend<T>>(
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {

@@ -5,7 +5,7 @@
 use super::Block;
 use crate::{
     client::OnlineClientT,
-    config::{Config, Header},
+    config::Config,
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
     backend::{StreamOfResults, BlockRef},
@@ -100,7 +100,7 @@ where
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
             let sub = client.backend().stream_all_block_headers().await?;
-            BlockStreamRes::Ok(Box::pin(sub))
+            BlockStreamRes::Ok(sub)
         })
     }
 
@@ -117,7 +117,7 @@ where
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
             let sub = client.backend().stream_best_block_headers().await?;
-            BlockStreamRes::Ok(Box::pin(sub))
+            BlockStreamRes::Ok(sub)
         })
     }
 
@@ -130,15 +130,6 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            // Fetch the last finalised block details immediately, so that we'll get
-            // all blocks after this one.
-            let last_finalized_block_ref = client.backend().latest_finalized_block_hash().await?;
-            let last_finalized_block_num = client
-                .backend()
-                .block_header(last_finalized_block_ref.hash())
-                .await?
-                .map(|h| h.number().into());
-
             let sub = client.backend().stream_finalized_block_headers().await?;
             BlockStreamRes::Ok(sub)
         })
@@ -167,5 +158,5 @@ where
             Ok(Block::new(header, block_ref, client))
         }
     });
-    BlockStreamRes::Ok(Box::pin(sub))
+    BlockStreamRes::Ok(StreamOfResults::new(Box::pin(sub)))
 }

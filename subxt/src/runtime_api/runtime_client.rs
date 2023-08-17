@@ -44,7 +44,7 @@ where
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // get the hash for the latest block and use that.
+            // get the ref for the latest block and use that.
             let block_ref = client
                 .backend()
                 .latest_best_block_hash()

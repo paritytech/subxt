@@ -2584,12 +2584,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "parity-wasm"
-version = "0.45.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1ad0aff30c1da14b1254fcb2af73e1fa9a28670e584a626f53a369d0e157304"
-
-[[package]]
 name = "parking"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3825,18 +3819,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-core-hashing-proc-macro"
-version = "9.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "727d7c7d42e59a13eb1412758630569dd6c3640c4754d9a948e8d943f99bc932"
-dependencies = [
- "proc-macro2",
- "quote",
- "sp-core-hashing",
- "syn 2.0.28",
-]
-
-[[package]]
 name = "sp-debug-derive"
 version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4057,36 +4039,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-version"
-version = "22.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a49e88372c9d923e95dc855f1e7bdbca6638574d59a8c3cb9f7e5ecea638481"
-dependencies = [
- "impl-serde",
- "parity-scale-codec",
- "parity-wasm",
- "scale-info",
- "serde",
- "sp-core-hashing-proc-macro",
- "sp-runtime",
- "sp-std",
- "sp-version-proc-macro",
- "thiserror",
-]
-
-[[package]]
-name = "sp-version-proc-macro"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39e1e11ab230fd0ede7aefeb246a1ef7e6af58634c490a2d911ce71aabc0718a"
-dependencies = [
- "parity-scale-codec",
- "proc-macro2",
- "quote",
- "syn 2.0.28",
-]
-
-[[package]]
 name = "sp-wasm-interface"
 version = "14.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4242,7 +4194,6 @@ dependencies = [
  "sp-core-hashing",
  "sp-keyring",
  "sp-runtime",
- "sp-version",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",

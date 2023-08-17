@@ -87,9 +87,6 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// Submit a transaction. This will return a stream of events about it.
     async fn submit_transaction(&self, bytes: &[u8]) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error>;
 
-    // Dev note: no dry_run function exists, but see this for how to call it via runtime API:
-    // https://github.com/paritytech/json-rpc-interface-spec/issues/55
-
     /// Make a call to some runtime API.
     async fn call(
         &self,
@@ -163,7 +160,9 @@ impl <B: Backend<T> + ?Sized, T: Config> BackendExt<T> for B {}
 #[derive(Clone)]
 pub struct BlockRef<H> {
     hash: H,
-    pointer: Option<Arc<dyn BlockRefT>>
+    // We keep this around so that when it is dropped, it has the
+    // opportunity to tell the backend.
+    _pointer: Option<Arc<dyn BlockRefT>>
 }
 
 impl <H> From<H> for BlockRef<H> {
@@ -209,7 +208,7 @@ impl <H> BlockRef<H> {
     pub fn from_hash(hash: H) -> Self {
         Self {
             hash,
-            pointer: None
+            _pointer: None
         }
     }
     /// Construct a [`BlockRef`] from an instance of the underlying trait. It's expected
@@ -218,7 +217,7 @@ impl <H> BlockRef<H> {
     pub fn new<P: BlockRefT>(hash: H, inner: P) -> Self {
         Self {
             hash,
-            pointer: Some(Arc::new(inner))
+            _pointer: Some(Arc::new(inner))
         }
     }
 
@@ -234,7 +233,33 @@ impl <H> BlockRef<H> {
 pub trait BlockRefT: Send + Sync + 'static {}
 
 /// A stream of some item.
-pub type StreamOf<T> = Pin<Box<dyn Stream<Item = T> + Send + 'static>>;
+pub struct StreamOf<T>(Pin<Box<dyn Stream<Item = T> + Send + 'static>>);
+
+impl <T> Stream for StreamOf<T> {
+    type Item = T;
+    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+        self.0.poll_next_unpin(cx)
+    }
+}
+
+impl <T> std::fmt::Debug for StreamOf<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("StreamOf").field(&"<stream>").finish()
+    }
+}
+
+impl <T> StreamOf<T> {
+    /// Construct a new stream.
+    pub fn new(inner: Pin<Box<dyn Stream<Item = T> + Send + 'static>>) -> Self {
+        StreamOf(inner)
+    }
+
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
+    pub async fn next_item(&mut self) -> Option<T> {
+        self.next().await
+    }
+}
 
 /// A stream of [`Result<Item, Error>`].
 pub type StreamOfResults<T> = StreamOf<Result<T, Error>>;
@@ -260,29 +285,44 @@ pub struct RuntimeVersion {
 }
 
 /// The status of the transaction.
+///
+/// If the status is [`TransactionStatus::InFinalizedBlock`], [`TransactionStatus::Error`],
+/// [`TransactionStatus::Invalid`] or [`TransactionStatus::Dropped`], then no future
+/// events will be emitted.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TransactionStatus<Hash> {
     /// Transaction is part of the future queue.
-    Future,
-    /// Transaction is part of the ready queue.
-    Ready,
-    /// The transaction has been broadcast to the given peers.
-    Broadcast(Vec<String>),
+    Validated,
+    /// The transaction has been broadcast to other nodes.
+    Broadcasted {
+        /// Number of peers it's been broadcast to.
+        num_peers: u32
+    },
     /// Transaction has been included in block with given hash.
-    InBlock(Hash),
-    /// The block this transaction was included in has been retracted.
-    Retracted(Hash),
-    /// Maximum number of finality watchers has been reached,
-    /// old watchers are being removed.
-    FinalityTimeout(Hash),
+    InBestBlock {
+        /// Block hash the transaction is in.
+        hash: Hash,
+    },
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
-    Finalized(Hash),
-    /// Transaction has been replaced in the pool, by another transaction
-    /// that provides the same tags. (e.g. same (sender, nonce)).
-    Usurped(Hash),
-    /// Transaction has been dropped from the pool because of the limit.
-    Dropped,
-    /// Transaction is no longer valid in the current state.
-    Invalid,
+    InFinalizedBlock {
+        /// Block hash the transaction is in.
+        hash: Hash,
+    },
+    /// Something went wrong in the node.
+    Error {
+        /// Human readable message; what went wrong.
+        message: String
+    },
+    /// Transaction is invalid (bad nonce, signature etc).
+    Invalid {
+        /// Human readable message; why was it invalid.
+        message: String
+    },
+    /// The transaction was dropped.
+    Dropped {
+        /// Human readable message; why was it dropped.
+        message: String
+    }
 }
 
 /// A response from [`Backend::storage_fetch`].
@@ -293,11 +333,10 @@ pub struct StorageResponse {
     pub value: Vec<u8>
 }
 
-// Just a test that the trait is object safe.
+// Just a test that the backend trait is object safe.
 #[cfg(test)]
 #[allow(dead_code)]
 fn is_object_safe() {
     use crate::config::PolkadotConfig;
     let _: Box<dyn Backend<PolkadotConfig>> = unimplemented!();
-    let _: Box<dyn BackendExt<PolkadotConfig>> = unimplemented!();
 }
