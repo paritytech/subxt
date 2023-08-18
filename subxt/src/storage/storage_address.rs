@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    dynamic::{DecodedValueThunk, Value},
+    dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
@@ -50,7 +50,7 @@ pub trait StorageAddress {
 pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
-/// via the `subxt` macro) or dynamic values via [`dynamic`] and [`dynamic_root`].
+/// via the `subxt` macro) or dynamic values via [`dynamic`].
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
@@ -226,14 +226,6 @@ pub type StaticStorageMapKey = Static<Encoded>;
 #[doc(hidden)]
 pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKey {
     Static(Encoded(t.encode()))
-}
-
-/// Construct a new dynamic storage lookup to the root of some entry.
-pub fn dynamic_root(
-    pallet_name: impl Into<String>,
-    entry_name: impl Into<String>,
-) -> DynamicAddress<Value> {
-    DynamicAddress::new(pallet_name, entry_name, vec![])
 }
 
 /// Construct a new dynamic storage lookup.

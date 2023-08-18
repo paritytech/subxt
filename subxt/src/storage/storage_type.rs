@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
+
 use crate::{
     backend::{BlockRef, BackendExt},
     client::OnlineClientT,
@@ -11,6 +12,7 @@ use crate::{
     Config,
 };
 use futures::StreamExt;
+use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
@@ -180,7 +182,7 @@ where
     /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
     /// // Address to the root of a storage entry that we'd like to iterate over.
-    /// let address = polkadot::storage().xcm_pallet().version_notifiers_root();
+    /// let address = polkadot::storage().xcm_pallet().version_notifiers_iter();
     ///
     /// // Iterate over keys and values at that address.
     /// let mut iter = api
@@ -283,7 +285,7 @@ fn validate_storage(
     hash: [u8; 32],
 ) -> Result<(), Error> {
     let Some(expected_hash) = pallet.storage_hash(storage_name) else {
-        return Err(MetadataError::IncompatibleCodegen.into())
+        return Err(MetadataError::IncompatibleCodegen.into());
     };
     if expected_hash != hash {
         return Err(MetadataError::IncompatibleCodegen.into());

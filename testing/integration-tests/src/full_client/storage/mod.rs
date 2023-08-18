@@ -125,3 +125,33 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
 }
+
+#[tokio::test]
+async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let wasm_blob = api.storage().at_latest().await?.runtime_wasm_code().await?;
+    assert!(wasm_blob.len() > 1000); // the wasm should be super big
+    Ok(())
+}
+
+#[tokio::test]
+async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // cannot assume anything about version number, but should work to fetch it
+    let _version = api
+        .storage()
+        .at_latest()
+        .await?
+        .storage_version("System")
+        .await?;
+    let _version = api
+        .storage()
+        .at_latest()
+        .await?
+        .storage_version("Balances")
+        .await?;
+    Ok(())
+}

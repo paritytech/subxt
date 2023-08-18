@@ -13,6 +13,6 @@ impl-serde = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 which = { workspace = true }
-jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport"] }
+jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls"] }
 hex = { workspace = true }
 codec = { workspace = true }

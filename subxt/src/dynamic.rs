@@ -26,7 +26,7 @@ pub use crate::tx::dynamic as tx;
 pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::{dynamic as storage, dynamic_root as storage_root};
+pub use crate::storage::dynamic as storage;
 
 // Execute runtime API function call dynamically.
 pub use crate::runtime_api::dynamic as runtime_api_call;
@@ -74,5 +74,13 @@ impl DecodedValueThunk {
             self.metadata.types(),
         )?;
         Ok(val)
+    }
+    /// decode the `DecodedValueThunk` into a concrete type.
+    pub fn as_type<T: DecodeAsType>(&self) -> Result<T, scale_decode::Error> {
+        T::decode_as_type(
+            &mut &self.scale_bytes[..],
+            self.type_id,
+            self.metadata.types(),
+        )
     }
 }

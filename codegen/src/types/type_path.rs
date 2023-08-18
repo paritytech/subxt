@@ -61,6 +61,10 @@ impl TypePath {
         matches!(&self.0, TypePathInner::Type(ty) if ty.is_compact())
     }
 
+    pub(crate) fn is_string(&self) -> bool {
+        matches!(&self.0, TypePathInner::Type(ty) if ty.is_string())
+    }
+
     /// Returns the type parameters in a path which are inherited from the containing type.
     ///
     /// # Example
@@ -212,6 +216,15 @@ impl TypePathType {
 
     pub(crate) fn is_compact(&self) -> bool {
         matches!(self, TypePathType::Compact { .. })
+    }
+
+    pub(crate) fn is_string(&self) -> bool {
+        matches!(
+            self,
+            TypePathType::Primitive {
+                def: TypeDefPrimitive::Str
+            }
+        )
     }
 
     fn to_syn_type(&self) -> syn::Type {

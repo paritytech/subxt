@@ -8,7 +8,7 @@ use color_eyre::eyre;
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
 
-use subxt_codegen::utils::{MetadataVersion, Uri};
+use subxt_codegen::utils::{MetadataVersion, Url};
 
 pub mod type_description;
 pub mod type_example;
@@ -18,7 +18,7 @@ pub mod type_example;
 pub struct FileOrUrl {
     /// The url of the substrate node to query for metadata for codegen.
     #[clap(long, value_parser)]
-    pub url: Option<Uri>,
+    pub url: Option<Url>,
     /// The path to the encoded metadata file.
     #[clap(long, value_parser)]
     pub file: Option<PathBuf>,
@@ -62,15 +62,15 @@ impl FileOrUrl {
             }
             // Fetch from --url
             (None, Some(uri), version) => Ok(subxt_codegen::utils::fetch_metadata_bytes(
-                uri,
+                uri.clone(),
                 version.unwrap_or_default(),
             )
             .await?),
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
-                let uri = Uri::from_static("ws://localhost:9944");
+                let url = Url::parse("ws://localhost:9944").expect("Valid URL; qed");
                 Ok(
-                    subxt_codegen::utils::fetch_metadata_bytes(&uri, version.unwrap_or_default())
+                    subxt_codegen::utils::fetch_metadata_bytes(url, version.unwrap_or_default())
                         .await?,
                 )
             }
@@ -109,7 +109,7 @@ impl FromStr for FileOrUrl {
                 version: None,
             })
         } else {
-            Uri::from_str(s)
+            Url::parse(s)
                 .map_err(|_| "no path or uri could be crated")
                 .map(|uri| FileOrUrl {
                     url: Some(uri),
