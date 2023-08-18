@@ -4,8 +4,8 @@
 
 use super::LightClientError;
 use crate::{
+    backend::rpc::{RpcClientT, RpcFuture, RpcSubscription},
     error::{Error, RpcError},
-    rpc::{RpcClientT, RpcFuture, RpcSubscription},
 };
 use futures::{Stream, StreamExt};
 use serde_json::value::RawValue;
