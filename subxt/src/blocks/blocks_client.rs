@@ -74,7 +74,7 @@ where
                 Some(r) => r,
                 None => client
                     .backend()
-                    .latest_best_block_hash()
+                    .latest_best_block_ref()
                     .await?
             };
 

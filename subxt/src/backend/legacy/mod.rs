@@ -124,12 +124,12 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         Ok(Some(details.block.extrinsics.into_iter().map(|b| b.0).collect()))
     }
 
-    async fn latest_finalized_block_hash(&self) -> Result<BlockRef<T::Hash>, Error> {
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
         let hash = rpc_methods::chain_get_finalized_head(&self.client).await?;
         Ok(BlockRef::from_hash(hash))
     }
 
-    async fn latest_best_block_hash(&self) -> Result<BlockRef<T::Hash>, Error> {
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
         let hash = rpc_methods::chain_get_block_hash(&self.client, None)
             .await?
             .ok_or_else(|| Error::Other("Latest best block doesn't exist".into()))?;
@@ -169,7 +169,7 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub: super::rpc::Subscription<<T as Config>::Header> = rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
 
         // Get the last finalized block immediately so that the stream will emit every finalized block after this.
-        let last_finalized_block_ref = self.latest_finalized_block_hash().await?;
+        let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
         let last_finalized_block_num = self
             .block_header(last_finalized_block_ref.hash())
             .await?

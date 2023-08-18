@@ -13,14 +13,14 @@ use subxt::{client::OnlineClientT, Config};
 /// errors caused by loading information that is not available in the first 2 blocks
 /// (`Failed to load the block weight for block`).
 pub async fn wait_for_blocks<C: Config>(api: &impl OnlineClientT<C>) {
-    let mut sub = api.rpc().subscribe_all_block_headers().await.unwrap();
-    sub.next().await;
-    sub.next().await;
+    let mut sub = api.backend().stream_all_block_headers().await.unwrap();
+    sub.next_item().await;
+    sub.next_item().await;
 
     #[cfg(feature = "unstable-light-client")]
     {
-        sub.next().await;
-        sub.next().await;
-        sub.next().await;
+        sub.next_item().await;
+        sub.next_item().await;
+        sub.next_item().await;
     }
 }

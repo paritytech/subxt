@@ -10,7 +10,6 @@ use sp_core_hashing::blake2_256;
 use futures::StreamExt;
 use crate::error::DecodeError;
 use crate::{
-    metadata::Metadata,
     backend::{TransactionStatus, BackendExt, BlockRef},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
@@ -171,7 +170,7 @@ where
 {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
-        let block_ref = self.client.backend().latest_best_block_hash().await?;
+        let block_ref = self.client.backend().latest_best_block_ref().await?;
         let account_nonce_bytes = self
             .client
             .backend()
@@ -491,7 +490,7 @@ where
     ///
     /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
     pub async fn dry_run(&self) -> Result<DryRunResult, Error> {
-        let latest_block_ref = self.client.backend().latest_best_block_hash().await?;
+        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
         self.dry_run_at(latest_block_ref).await
     }
 
@@ -503,7 +502,7 @@ where
 
         // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
         let mut params = Vec::with_capacity(8 + self.encoded.0.len() + 8);
-        Compact(2u64).encode_to(&mut params);
+        2u8.encode_to(&mut params);
         params.extend(self.encoded().iter());
         block_hash.encode_to(&mut params);
 
@@ -513,7 +512,7 @@ where
             block_hash
         ).await?;
 
-        DryRunResult::try_from_bytes(res, &self.client.metadata())
+        DryRunResult::try_from_bytes(res)
     }
 
     /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
@@ -521,7 +520,7 @@ where
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
-        let latest_block_ref = self.client.backend().latest_best_block_hash().await?;
+        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
 
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
@@ -538,35 +537,171 @@ where
     }
 }
 
-/// An error dry running an extrinsic.
-#[derive(Debug, PartialEq, Eq)]
-pub enum DryRunResult {
-    /// The transaction could be included in the block and executed.
-    Success,
-    /// The transaction could be included in the block, but the call failed to dispatch.
-    DispatchError(crate::error::DispatchError),
-    /// The transaction could not be included in the block.
-    TransactionValidityError,
-}
-
 impl DryRunResult {
-    pub fn try_from_bytes(bytes: Vec<u8>, metadata: &Metadata) -> Result<DryRunResult, crate::Error> {
-        // dryRun returns an ApplyExtrinsicResult, which is basically a
-        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
-        if bytes[0] == 0 && bytes[1] == 0 {
-            // Ok(Ok(())); transaction is valid and executed ok
-            Ok(DryRunResult::Success)
-        } else if bytes[0] == 0 && bytes[1] == 1 {
-            // Ok(Err(dispatch_error)); transaction is valid but execution failed
-            let dispatch_error =
-                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
-            Ok(DryRunResult::DispatchError(dispatch_error))
-        } else if bytes[0] == 1 {
-            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
-            Ok(DryRunResult::TransactionValidityError)
+    fn try_from_bytes(bytes: Vec<u8>) -> Result<DryRunResult, crate::Error> {
+        // TaggedTransactionQueue_validate_transaction returns this:
+        // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
+        // We copy some of the inner types and put the three states (valid, invalid, unknown) into one enum,
+        // because from our perspective, the call was successful regardless.
+        if bytes[0] == 0 {
+            // ok: valid (more detail is available here, but ).
+            Ok(DryRunResult::Valid)
+        } else if bytes[0] == 1 && bytes[1] == 0 {
+            // error: invalid
+            let res = TransactionInvalid::decode(&mut &bytes[2..])?;
+            Ok(DryRunResult::Invalid(res))
+        } else if bytes[0] == 1 && bytes[1] == 1 {
+            // error: unknown
+            let res = TransactionUnknown::decode(&mut &bytes[2..])?;
+            Ok(DryRunResult::Unknown(res))
         } else {
             // unable to decode the bytes; they aren't what we expect.
             Err(crate::Error::Unknown(bytes))
+        }
+    }
+}
+
+/// The result of performing a `dry_run` call.
+#[derive(Clone,Debug,PartialEq)]
+pub enum DryRunResult {
+    /// The transaction is valid
+    Valid,
+    /// The transaction is invalid
+    Invalid(TransactionInvalid),
+    /// Unable to validate the transaction
+    Unknown(TransactionUnknown)
+}
+
+impl DryRunResult {
+    /// Is the transaction valid.
+    pub fn is_valid(&self) -> bool {
+        matches!(self, DryRunResult::Valid)
+    }
+}
+
+/// The runtime was unable to validate the transaction.
+#[derive(Decode,Clone,Debug,PartialEq)]
+pub enum TransactionUnknown {
+	/// Could not lookup some information that is required to validate the transaction.
+	CannotLookup,
+	/// No validator found for the given unsigned transaction.
+	NoUnsignedValidator,
+	/// Any other custom unknown validity that is not covered by this enum.
+	Custom(u8),
+}
+
+/// The transaction is invalid.
+#[derive(Decode,Clone,Debug,PartialEq)]
+pub enum TransactionInvalid {
+	/// The call of the transaction is not expected.
+	Call,
+	/// General error to do with the inability to pay some fees (e.g. account balance too low).
+	Payment,
+	/// General error to do with the transaction not yet being valid (e.g. nonce too high).
+	Future,
+	/// General error to do with the transaction being outdated (e.g. nonce too low).
+	Stale,
+	/// General error to do with the transaction's proofs (e.g. signature).
+	///
+	/// # Possible causes
+	///
+	/// When using a signed extension that provides additional data for signing, it is required
+	/// that the signing and the verifying side use the same additional data. Additional
+	/// data will only be used to generate the signature, but will not be part of the transaction
+	/// itself. As the verifying side does not know which additional data was used while signing
+	/// it will only be able to assume a bad signature and cannot express a more meaningful error.
+	BadProof,
+	/// The transaction birth block is ancient.
+	///
+	/// # Possible causes
+	///
+	/// For `FRAME`-based runtimes this would be caused by `current block number
+	/// - Era::birth block number > BlockHashCount`. (e.g. in Polkadot `BlockHashCount` = 2400, so
+	///   a
+	/// transaction with birth block number 1337 would be valid up until block number 1337 + 2400,
+	/// after which point the transaction would be considered to have an ancient birth block.)
+	AncientBirthBlock,
+	/// The transaction would exhaust the resources of current block.
+	///
+	/// The transaction might be valid, but there are not enough resources
+	/// left in the current block.
+	ExhaustsResources,
+	/// Any other custom invalid validity that is not covered by this enum.
+	Custom(u8),
+	/// An extrinsic with a Mandatory dispatch resulted in Error. This is indicative of either a
+	/// malicious validator or a buggy `provide_inherent`. In any case, it can result in
+	/// dangerously overweight blocks and therefore if found, invalidates the block.
+	BadMandatory,
+	/// An extrinsic with a mandatory dispatch tried to be validated.
+	/// This is invalid; only inherent extrinsics are allowed to have mandatory dispatches.
+	MandatoryValidation,
+	/// The sending address is disabled or known to be invalid.
+	BadSigner,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn transaction_validity_decoding_is_ok() {
+        use sp_runtime::transaction_validity as sp;
+        use sp_runtime::transaction_validity::TransactionValidity as T;
+
+        let pairs = vec![
+            (T::Ok(sp::ValidTransaction { ..Default::default() }), DryRunResult::Valid),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::BadProof)),
+                DryRunResult::Invalid(TransactionInvalid::BadProof)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::Call)),
+                DryRunResult::Invalid(TransactionInvalid::Call)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::Payment)),
+                DryRunResult::Invalid(TransactionInvalid::Payment)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::Future)),
+                DryRunResult::Invalid(TransactionInvalid::Future)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::Stale)),
+                DryRunResult::Invalid(TransactionInvalid::Stale)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::AncientBirthBlock)),
+                DryRunResult::Invalid(TransactionInvalid::AncientBirthBlock)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::ExhaustsResources)),
+                DryRunResult::Invalid(TransactionInvalid::ExhaustsResources)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::BadMandatory)),
+                DryRunResult::Invalid(TransactionInvalid::BadMandatory)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::MandatoryValidation)),
+                DryRunResult::Invalid(TransactionInvalid::MandatoryValidation)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::BadSigner)),
+                DryRunResult::Invalid(TransactionInvalid::BadSigner)),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(sp::InvalidTransaction::Custom(123))),
+                DryRunResult::Invalid(TransactionInvalid::Custom(123))
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(sp::UnknownTransaction::CannotLookup)),
+                DryRunResult::Unknown(TransactionUnknown::CannotLookup)
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(sp::UnknownTransaction::NoUnsignedValidator)),
+                DryRunResult::Unknown(TransactionUnknown::NoUnsignedValidator)
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(sp::UnknownTransaction::Custom(123))),
+                DryRunResult::Unknown(TransactionUnknown::Custom(123))
+            ),
+        ];
+
+        for (sp, dry_run) in pairs {
+            let encoded = sp.encode();
+            let decoded = DryRunResult::try_from_bytes(encoded).expect("should decode OK");
+            assert_eq!(decoded, dry_run);
         }
     }
 }

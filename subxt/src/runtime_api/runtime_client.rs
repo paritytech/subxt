@@ -47,7 +47,7 @@ where
             // get the ref for the latest block and use that.
             let block_ref = client
                 .backend()
-                .latest_best_block_hash()
+                .latest_best_block_ref()
                 .await?;
 
             Ok(RuntimeApi::new(client, block_ref))

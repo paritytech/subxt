@@ -5,6 +5,7 @@
 use std::ffi::{OsStr, OsString};
 use substrate_runner::SubstrateNode;
 use subxt::{Config, OnlineClient};
+use std::sync::Arc;
 
 #[cfg(feature = "unstable-light-client")]
 use subxt::client::{LightClient, LightClientBuilder};
@@ -12,7 +13,7 @@ use subxt::client::{LightClient, LightClientBuilder};
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
-    _proc: SubstrateNode,
+    proc: SubstrateNode,
 
     #[cfg(not(feature = "unstable-light-client"))]
     client: OnlineClient<R>,
@@ -31,6 +32,15 @@ where
         P: AsRef<OsStr> + Clone,
     {
         TestNodeProcessBuilder::new(paths)
+    }
+
+    /// Hand back an RPC client connected to the test node.
+    pub async fn rpc(&self) -> subxt::backend::rpc::RpcClient<R> {
+        let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
+        let rpc_client = subxt::client::default_rpc_client(url)
+            .await
+            .expect("Unable to connect RPC client to test node");
+        subxt::backend::rpc::RpcClient::new(Arc::new(rpc_client))
     }
 
     /// Returns the subxt client connected to the running node.
@@ -102,7 +112,7 @@ impl TestNodeProcessBuilder {
 
         match client {
             Ok(client) => Ok(TestNodeProcess {
-                _proc: proc,
+                proc,
                 client,
             }),
             Err(err) => Err(format!("Failed to connect to node rpc at {ws_url}: {err}")),

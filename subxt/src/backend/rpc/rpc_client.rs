@@ -23,7 +23,8 @@ pub struct RpcClient<T> {
 }
 
 impl <T> RpcClient<T> {
-    pub(crate) fn new<R: RpcClientT>(client: Arc<R>) -> Self {
+    /// Create a new [`RpcClient`] from an [`RpcClientT`] implementation.
+    pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         RpcClient {
             client,
             _marker: std::marker::PhantomData

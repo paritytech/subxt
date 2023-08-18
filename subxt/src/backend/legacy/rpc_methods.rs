@@ -46,55 +46,6 @@ pub async fn state_get_keys_paged<T: Config>(
 /// Storage data.
 pub type StorageData = Vec<u8>;
 
-// /// Query storage entries
-// pub async fn state_query_storage<T: Config>(
-//     client: &RpcClient<T>,
-//     keys: &mut dyn Iterator<Item = &[u8]>,
-//     from: T::Hash,
-//     to: Option<T::Hash>,
-// ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-//     let keys: Vec<String> = keys.map(to_hex).collect();
-//     let params = rpc_params![keys, from, to];
-//     client
-//         .request("state_queryStorage", params)
-//         .await
-//         .map_err(Into::into)
-// }
-
-// /// Storage change set
-// #[derive(Deserialize, Clone, Debug)]
-// #[serde(rename_all = "camelCase")]
-// pub struct StorageChangeSet<Hash> {
-//     /// Block hash
-//     pub block: Hash,
-//     /// A list of changes
-//     pub changes: Vec<(StorageKey, Option<StorageData>)>,
-// }
-
-// /// Return the storage entries starting with the given keys.
-// pub async fn state_query_storage_at<T: Config>(
-//     client: &RpcClient<T>,
-//     keys: &mut dyn Iterator<Item = &[u8]>,
-//     at: Option<T::Hash>,
-// ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-//     #[derive(Deserialize)]
-//     #[serde(rename_all = "camelCase")]
-//     pub struct StorageChangeSet<Hash> {
-//         /// A list of changes
-//         changes: Vec<(Bytes, Option<Bytes>)>,
-//     }
-
-
-//     let keys: Vec<String> = keys.map(to_hex).collect();
-//     let params = rpc_params![keys, at];
-//     let res: Vec<StorageChangeSet<T::Hash>> = client
-//         .request("state_queryStorageAt", params)
-//         .await
-//         .map_err(Into::into)?;
-
-//     Ok(res)
-// }
-
 /// Fetch the genesis hash
 pub async fn genesis_hash<T: Config>(client: &RpcClient<T>) -> Result<T::Hash, Error> {
     let block_zero = 0u32;
@@ -113,34 +64,49 @@ pub async fn state_get_metadata<T: Config>(client: &RpcClient<T>, at: Option<T::
     Ok(metadata)
 }
 
-// /// Fetch system properties
-// pub async fn system_properties<T: Config>(client: &RpcClient<T>) -> Result<SystemProperties, Error> {
-//     client
-//         .request("system_properties", rpc_params![])
-//         .await
-// }
+/// Fetch system health
+pub async fn system_health<T: Config>(client: &RpcClient<T>) -> Result<SystemHealth, Error> {
+    client.request("system_health", rpc_params![]).await
+}
 
-// /// System properties; an arbitrary JSON object.
-// pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
+/// Health struct returned by the RPC
+#[derive(Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemHealth {
+    /// Number of connected peers
+    pub peers: usize,
+    /// Is the node syncing
+    pub is_syncing: bool,
+    /// Should this node have any peers
+    ///
+    /// Might be false for local chains or when running without discovery.
+    pub should_have_peers: bool,
+}
 
-// /// Fetch system health
-// pub async fn system_health<T: Config>(client: &RpcClient<T>) -> Result<Health, Error> {
-//     client.request("system_health", rpc_params![]).await
-// }
+/// Fetch system chain
+pub async fn system_chain<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
+    client.request("system_chain", rpc_params![]).await
+}
 
-// /// Health struct returned by the RPC
-// #[derive(Deserialize, Clone, Debug)]
-// #[serde(rename_all = "camelCase")]
-// pub struct Health {
-//     /// Number of connected peers
-//     pub peers: usize,
-//     /// Is the node syncing
-//     pub is_syncing: bool,
-//     /// Should this node have any peers
-//     ///
-//     /// Might be false for local chains or when running without discovery.
-//     pub should_have_peers: bool,
-// }
+/// Fetch system name
+pub async fn system_name<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
+    client.request("system_name", rpc_params![]).await
+}
+
+/// Fetch system version
+pub async fn system_version<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
+    client.request("system_version", rpc_params![]).await
+}
+
+/// Fetch system properties
+pub async fn system_properties<T: Config>(client: &RpcClient<T>) -> Result<SystemProperties, Error> {
+    client
+        .request("system_properties", rpc_params![])
+        .await
+}
+
+/// System properties; an arbitrary JSON object.
+pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 
 /// Get a header
 pub async fn chain_get_header<T: Config>(client: &RpcClient<T>, hash: Option<T::Hash>) -> Result<Option<T::Header>, Error> {

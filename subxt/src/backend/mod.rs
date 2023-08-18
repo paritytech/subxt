@@ -63,11 +63,11 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
 
     /// Get the most recent finalized block hash.
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
-    async fn latest_finalized_block_hash(&self) -> Result<BlockRef<T::Hash>, Error>;
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error>;
 
     /// Get the most recent best block hash.
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
-    async fn latest_best_block_hash(&self) -> Result<BlockRef<T::Hash>, Error>;
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<T::Hash>, Error>;
 
     /// Get information about the current runtime.
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
