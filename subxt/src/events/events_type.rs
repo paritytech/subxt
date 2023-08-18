@@ -669,7 +669,7 @@ mod tests {
         // construst an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::ApplyExtrinsic(123), event)],
         );
 
@@ -711,7 +711,7 @@ mod tests {
         let event3 = Event::A(234);
 
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![
                 event_record(Phase::Initialization, event1),
                 event_record(Phase::ApplyExtrinsic(123), event2),
@@ -782,7 +782,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events_raw(
-            metadata.clone(),
+            metadata,
             event_bytes,
             3, // 2 "good" events, and then it'll hit the naff bytes.
         );
@@ -833,7 +833,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::Finalization, Event::A(1))],
         );
 
@@ -870,7 +870,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(
                 Phase::Finalization,
                 Event::A(CompactWrapper(1)),
@@ -914,7 +914,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::Finalization, Event::A(MyType::B))],
         );
 

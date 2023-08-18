@@ -11,6 +11,7 @@ use crate::{
     metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
@@ -250,6 +251,42 @@ where
             let s = StreamOfResults::new(Box::pin(s));
             Ok(s)
         }
+    }
+
+    /// The storage version of a pallet.
+    /// The storage version refers to the `frame_support::traits::Metadata::StorageVersion` type.
+    pub async fn storage_version(&self, pallet_name: impl AsRef<str>) -> Result<u16, Error> {
+        // check that the pallet exists in the metadata:
+        self.client
+            .metadata()
+            .pallet_by_name(pallet_name.as_ref())
+            .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.as_ref().into()))?;
+
+        // construct the storage key. This is done similarly in `frame_support::traits::metadata::StorageVersion::storage_key()`.
+        pub const STORAGE_VERSION_STORAGE_KEY_POSTFIX: &[u8] = b":__STORAGE_VERSION__:";
+        let mut key_bytes: Vec<u8> = vec![];
+        key_bytes.extend(&sp_core_hashing::twox_128(pallet_name.as_ref().as_bytes()));
+        key_bytes.extend(&sp_core_hashing::twox_128(
+            STORAGE_VERSION_STORAGE_KEY_POSTFIX,
+        ));
+
+        // fetch the raw bytes and decode them into the StorageVersion struct:
+        let storage_version_bytes = self.fetch_raw(key_bytes).await?.ok_or_else(|| {
+            format!(
+                "Unexpected: entry for storage version in pallet \"{}\" not found",
+                pallet_name.as_ref()
+            )
+        })?;
+        u16::decode(&mut &storage_version_bytes[..]).map_err(Into::into)
+    }
+
+    /// Fetch the runtime WASM code.
+    pub async fn runtime_wasm_code(&self) -> Result<Vec<u8>, Error> {
+        // note: this should match the `CODE` constant in `sp_core::storage::well_known_keys`
+        const CODE: &str = ":code";
+        self.fetch_raw(CODE.as_bytes()).await?.ok_or_else(|| {
+            format!("Unexpected: entry for well known key \"{CODE}\" not found").into()
+        })
     }
 }
 

@@ -203,6 +203,7 @@ async fn tx_call() {
     let info_addr = node_runtime::storage()
         .contracts()
         .contract_info_of(&contract);
+    let info_addr_iter = node_runtime::storage().contracts().contract_info_of_iter();
 
     let contract_info = cxt
         .client()
@@ -220,10 +221,12 @@ async fn tx_call() {
         .at_latest()
         .await
         .unwrap()
-        .iter(info_addr)
+        .iter(info_addr_iter)
         .await
         .unwrap()
         .collect::<Vec<_>>();
+
+    assert_eq!(keys_and_values.len(), 1);
     println!("keys+values post: {keys_and_values:?}");
 
     let executed = cxt.call(contract, vec![]).await;

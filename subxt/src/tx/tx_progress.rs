@@ -437,7 +437,7 @@ mod test {
     fn create_substrate_tx_status_subscription(
         elements: Vec<MockSubstrateTxStatus>,
     ) -> StreamOfResults<MockSubstrateTxStatus> {
-        let results = elements.into_iter().map(|s| Ok(s));
+        let results = elements.into_iter().map(Ok);
         let stream = Box::pin(futures::stream::iter(results));
         let sub: StreamOfResults<MockSubstrateTxStatus> = StreamOfResults::new(stream);
         sub

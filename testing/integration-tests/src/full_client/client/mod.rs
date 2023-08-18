@@ -22,7 +22,7 @@ async fn storage_fetch_raw_keys() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let addr = node_runtime::storage().system().account_root();
+    let addr = node_runtime::storage().system().account_iter();
     let len = api
         .storage()
         .at_latest()
@@ -43,7 +43,7 @@ async fn storage_iter() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let addr = node_runtime::storage().system().account_root();
+    let addr = node_runtime::storage().system().account_iter();
     let len = api
         .storage()
         .at_latest()

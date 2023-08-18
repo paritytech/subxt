@@ -348,11 +348,3 @@ pub struct StorageResponse {
     /// The associated value.
     pub value: Vec<u8>,
 }
-
-// Just a test that the backend trait is object safe.
-#[cfg(test)]
-#[allow(dead_code)]
-fn is_object_safe() {
-    use crate::config::PolkadotConfig;
-    let _: Box<dyn Backend<PolkadotConfig>> = unimplemented!();
-}

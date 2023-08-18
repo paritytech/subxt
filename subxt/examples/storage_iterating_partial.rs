@@ -1,15 +1,13 @@
-use subxt::{OnlineClient, PolkadotConfig};
-
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
-pub mod polkadot {}
-
-use subxt::utils::AccountId32;
-use subxt_signer::sr25519::{dev, Keypair};
-
 use polkadot::multisig::events::NewMultisig;
 use polkadot::runtime_types::{
     frame_system::pallet::Call, polkadot_runtime::RuntimeCall, sp_weights::weight_v2::Weight,
 };
+use subxt::utils::AccountId32;
+use subxt::{OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::{dev, Keypair};
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
+pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,6 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let new_multisig_1 = submit_remark_as_multi(&alice_signer, &bob, b"Hello", &api).await?;
     let new_multisig_2 = submit_remark_as_multi(&alice_signer, &bob, b"Hi", &api).await?;
     let new_multisig_3 = submit_remark_as_multi(&alice_signer, &charlie, b"Hello", &api).await?;
+
     // Note: the NewMultisig event contains the multisig address we need to use for the storage queries:
     assert_eq!(new_multisig_1.multisig, new_multisig_2.multisig);
     assert_ne!(new_multisig_1.multisig, new_multisig_3.multisig);
@@ -35,16 +34,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .multisig()
         .multisigs_iter1(alice_bob_account_id);
 
-    // Get back an iterator of results (here, we are fetching 10 items at
-    // a time from the node, but we always iterate over one at a time).
-    let mut results = api
-        .storage()
-        .at_latest()
-        .await?
-        .iter(storage_query, 10)
-        .await?;
+    // Get back an iterator of results.
+    let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
 
-    while let Some((key, value)) = results.next().await? {
+    while let Some(Ok((key, value))) = results.next_item().await {
         println!("Key: 0x{}", hex::encode(&key));
         println!("Value: {:?}", value);
     }
