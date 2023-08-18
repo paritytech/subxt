@@ -73,7 +73,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
         Ok(StreamOf(Box::pin(StorageFetchDescendantKeysStream {
             at,
-            key: key.clone(),
+            key,
             client: self.client.clone(),
             done: Default::default(),
             keys: Default::default(),
@@ -89,7 +89,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
         let keys_stream = StorageFetchDescendantKeysStream {
             at,
-            key: key.clone(),
+            key,
             client: self.client.clone(),
             done: Default::default(),
             keys: Default::default(),

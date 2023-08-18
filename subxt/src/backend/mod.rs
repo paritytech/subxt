@@ -281,7 +281,7 @@ impl<T> StreamOf<T> {
 pub type StreamOfResults<T> = StreamOf<Result<T, Error>>;
 
 /// Runtime version information needed to submit transactions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,

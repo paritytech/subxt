@@ -11,7 +11,6 @@ use crate::{
     metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
-use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
@@ -46,7 +45,7 @@ where
     Client: OnlineClientT<T>,
 {
     /// Fetch the raw encoded value at the key given.
-    pub fn fetch_raw<'address>(
+    pub fn fetch_raw(
         &self,
         key: impl Into<Vec<u8>>,
     ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'static {

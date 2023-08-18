@@ -92,5 +92,5 @@ pub(crate) async fn get_event_bytes<T: Config>(
     Ok(backend
         .storage_fetch_value(system_events_key().to_vec(), block_hash)
         .await?
-        .unwrap_or_else(Vec::new))
+        .unwrap_or_default())
 }
