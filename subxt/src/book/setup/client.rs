@@ -41,7 +41,7 @@
 //! Most of the other examples will instantiate a client. Here are a couple of examples for less common
 //! cases.
 //!
-//! ### Writing a custom [`crate::rpc::RpcClientT`] implementation:
+//! ### Writing a custom [`crate::backend::rpc::RpcClientT`] implementation:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/setup_client_custom_rpc.rs")]
