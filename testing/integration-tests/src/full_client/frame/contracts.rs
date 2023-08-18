@@ -224,7 +224,8 @@ async fn tx_call() {
         .iter(info_addr_iter)
         .await
         .unwrap()
-        .collect::<Vec<_>>();
+        .collect::<Vec<_>>()
+        .await;
 
     assert_eq!(keys_and_values.len(), 1);
     println!("keys+values post: {keys_and_values:?}");
