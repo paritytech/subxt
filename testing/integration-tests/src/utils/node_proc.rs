@@ -37,7 +37,7 @@ where
     /// Hand back an RPC client connected to the test node.
     pub async fn rpc(&self) -> subxt::backend::rpc::RpcClient<R> {
         let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
-        let rpc_client = subxt::client::default_rpc_client(url)
+        let rpc_client = subxt::backend::rpc::default_rpc_client(url)
             .await
             .expect("Unable to connect RPC client to test node");
         subxt::backend::rpc::RpcClient::new(Arc::new(rpc_client))
