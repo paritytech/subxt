@@ -23,12 +23,16 @@
 //! # #[tokio::main]
 //! # async fn main() {
 //! use subxt::{
+//!     config::SubstrateConfig,
 //!     backend::rpc::RpcClient,
 //!     backend::legacy::rpc_methods,
-//! }
+//! };
 //!
-//! // Instantiate a default RPC client pointing at some URL.
-//! let rpc_client = RpcClient::from_url("ws://localhost:9944").await.unwrap();
+//! // Instantiate a default RPC client pointing at some URL. Use types from
+//! // SubstrateConfig where necessary.
+//! let rpc_client = RpcClient::<SubstrateConfig>::from_url("ws://localhost:9944")
+//!     .await
+//!     .unwrap();
 //!
 //! // Use it to make RPC calls, here using the legacy genesis_hash method.
 //! let genesis_hash = rpc_methods::genesis_hash(&rpc_client)

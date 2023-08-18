@@ -103,7 +103,7 @@ impl<T> Clone for RpcClient<T> {
 /// # Example
 ///
 /// ```rust
-/// use subxt::rpc::{ rpc_params, RpcParams };
+/// use subxt::backend::rpc::{ rpc_params, RpcParams };
 ///
 /// // If you provide no params you get `None` back
 /// let params: RpcParams = rpc_params![];
@@ -135,7 +135,7 @@ pub use rpc_params;
 /// # Example
 ///
 /// ```rust
-/// use subxt::rpc::RpcParams;
+/// use subxt::backend::rpc::RpcParams;
 ///
 /// let mut params = RpcParams::new();
 /// params.push(1).unwrap();

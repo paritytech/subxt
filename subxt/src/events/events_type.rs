@@ -69,36 +69,13 @@ impl<T: Config> Events<T> {
 
     /// Obtain the events from a block hash given custom metadata and a client.
     ///
-    /// This method gives users the ability to inspect the events of older blocks,
-    /// where the metadata changed. For those cases, the user is responsible for
-    /// providing a valid metadata.
+    /// # Notes
     ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # #[tokio::main]
-    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///  use subxt::{ OnlineClient, PolkadotConfig, events::Events };
-    ///
-    ///  let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
-    ///
-    ///  // Get the hash of an older block.
-    ///  let block_hash = client
-    ///     .rpc()
-    ///     .block_hash(Some(1u32.into()))
-    ///     .await?
-    ///     .expect("didn't pass a block number; qed");
-    ///  // Fetch the metadata of the given block.
-    ///  let metadata = client.rpc().metadata_legacy(Some(block_hash)).await?;
-    ///  // Fetch the events from the client.
-    ///  let events = Events::new_from_client(metadata, block_hash, client);
-    /// # Ok(())
-    /// # }
-    /// ```
-    ///
-    /// # Note
-    ///
-    /// Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    /// - Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    /// - Subxt may fail to decode things that aren't from a runtime using the
+    ///   latest metadata version.
+    /// - The client may not be able to obtain the block at the given hash. Only
+    ///   archive nodes keep hold of all past block information.
     pub async fn new_from_client<Client>(
         metadata: Metadata,
         block_hash: T::Hash,

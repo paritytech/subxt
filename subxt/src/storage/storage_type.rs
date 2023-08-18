@@ -197,7 +197,7 @@ where
     ///     .await
     ///     .unwrap();
     ///
-    /// while let Some((key, value)) = iter.next().await.unwrap() {
+    /// while let Some(Ok((key, value))) = iter.next_item().await {
     ///     println!("Key: 0x{}", hex::encode(&key));
     ///     println!("Value: {}", value);
     /// }
