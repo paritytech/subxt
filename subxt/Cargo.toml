@@ -96,7 +96,6 @@ codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
 sp-core = { workspace = true }
-sp-runtime = { workspace = true }
 sp-keyring = { workspace = true }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["subxt"] }

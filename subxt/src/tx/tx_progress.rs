@@ -337,23 +337,16 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
 #[cfg(test)]
 mod test {
-    use std::pin::Pin;
-
-    use futures::Stream;
-
     use crate::{
         client::{OfflineClientT, OnlineClientT},
-        error::RpcError,
-        rpc::{types::SubstrateTxStatus, RpcSubscription, Subscription},
+        backend::{ TransactionStatus, StreamOfResults },
         tx::TxProgress,
         Config, Error, SubstrateConfig,
     };
 
-    use serde_json::value::RawValue;
-
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;
     type MockHash = <SubstrateConfig as Config>::Hash;
-    type MockSubstrateTxStatus = SubstrateTxStatus<MockHash, MockHash>;
+    type MockSubstrateTxStatus = TransactionStatus<MockHash>;
 
     /// a mock client to satisfy trait bounds in tests
     #[derive(Clone, Debug)]
@@ -380,37 +373,41 @@ mod test {
     }
 
     #[tokio::test]
-    async fn wait_for_finalized_returns_err_when_usurped() {
+    async fn wait_for_finalized_returns_err_when_error() {
         let tx_progress = mock_tx_progress(vec![
-            SubstrateTxStatus::Ready,
-            SubstrateTxStatus::Usurped(Default::default()),
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Error { message: "err".into() },
         ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Usurped))
-        ));
-    }
-
-    #[tokio::test]
-    async fn wait_for_finalized_returns_err_when_dropped() {
-        let tx_progress =
-            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Dropped]);
-        let finalized_result = tx_progress.wait_for_finalized().await;
-        assert!(matches!(
-            finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Dropped))
+            Err(Error::Transaction(crate::error::TransactionError::Error(e))) if e == "err"
         ));
     }
 
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_invalid() {
-        let tx_progress =
-            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Invalid]);
+        let tx_progress = mock_tx_progress(vec![
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Invalid { message: "err".into() },
+        ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Invalid))
+            Err(Error::Transaction(crate::error::TransactionError::Invalid(e))) if e == "err"
+        ));
+    }
+
+    #[tokio::test]
+    async fn wait_for_finalized_returns_err_when_dropped() {
+        let tx_progress = mock_tx_progress(vec![
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Dropped { message: "err".into() },
+        ]);
+        let finalized_result = tx_progress.wait_for_finalized().await;
+        assert!(matches!(
+            finalized_result,
+            Err(Error::Transaction(crate::error::TransactionError::Dropped(e))) if e == "err"
         ));
     }
 
@@ -421,21 +418,10 @@ mod test {
 
     fn create_substrate_tx_status_subscription(
         elements: Vec<MockSubstrateTxStatus>,
-    ) -> Subscription<MockSubstrateTxStatus> {
-        let rpc_substription_stream: Pin<
-            Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
-        > = Box::pin(futures::stream::iter(elements.into_iter().map(|e| {
-            let s = serde_json::to_string(&e).unwrap();
-            let r: Box<RawValue> = RawValue::from_string(s).unwrap();
-            Ok(r)
-        })));
-
-        let rpc_subscription: RpcSubscription = RpcSubscription {
-            stream: rpc_substription_stream,
-            id: None,
-        };
-
-        let sub: Subscription<MockSubstrateTxStatus> = Subscription::new(rpc_subscription);
+    ) -> StreamOfResults<MockSubstrateTxStatus> {
+        let results = elements.into_iter().map(|s| Ok(s));
+        let stream = Box::pin(futures::stream::iter(results));
+        let sub: StreamOfResults<MockSubstrateTxStatus> = StreamOfResults::new(stream);
         sub
     }
 }
