@@ -52,15 +52,6 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
-/// The default RPC client that's used (based on [`jsonrpsee`]).
-#[cfg(feature = "jsonrpsee")]
-pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl rpc::RpcClientT, Error> {
-    let client = jsonrpsee_helpers::client(url.as_ref())
-        .await
-        .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
-    Ok(client)
-}
-
 // The default constructors assume Jsonrpsee.
 #[cfg(feature = "jsonrpsee")]
 impl<T: Config> OnlineClient<T> {
@@ -73,7 +64,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let rpc_client = default_rpc_client(url).await?;
+        let rpc_client = crate::backend::rpc::default_rpc_client(url).await?;
         let backend = LegacyBackend::new(Arc::new(rpc_client));
         OnlineClient::from_backend(Arc::new(backend)).await
     }
@@ -492,55 +483,5 @@ impl Update {
     /// Get the metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
-    }
-}
-
-// helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
-    };
-
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = ws_transport(url).await?;
-        Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
-    }
-
-    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
-        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))
-    }
-}
-
-// helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
-    };
-
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))?;
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
     }
 }

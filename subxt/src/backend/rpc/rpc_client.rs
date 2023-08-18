@@ -23,6 +23,13 @@ pub struct RpcClient<T> {
 }
 
 impl<T> RpcClient<T> {
+    #[cfg(feature = "jsonrpsee")]
+    /// Create a default RPC client that's used (currently based on [`jsonrpsee`]).
+    pub async fn from_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
+        let client = super::default_rpc_client(url).await?;
+        Ok(Self::new(Arc::new(client)))
+    }
+
     /// Create a new [`RpcClient`] from an [`RpcClientT`] implementation.
     pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         RpcClient {

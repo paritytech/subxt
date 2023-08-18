@@ -20,10 +20,17 @@
 //!
 //! In the case of the [`crate::OnlineClient`], we have a few options to instantiate it:
 //!
-//! - [`crate::OnlineClient::new()`] to connect to a node running locally.
-//! - [`crate::OnlineClient::from_url()`] to connect to a node at a specific URL.
+//! - [`crate::OnlineClient::new()`] to connect to a node running locally. This uses the default Subxt
+//!   backend, and the default RPC client.
+//! - [`crate::OnlineClient::from_url()`] to connect to a node at a specific URL. This uses the default Subxt
+//!   backend, and the default RPC client.
 //! - [`crate::OnlineClient::from_rpc_client()`] to instantiate the client with a custom RPC
-//!   implementation.
+//!   implementation, ie anything which implements [`crate::backend::rpc::RpcClientT`]. This uses the default
+//!   backend.
+//! - [`crate::OnlineClient::from_backend()`] to instantiate Subxt using a custom backend. Currently there
+//!   is just one backend, [`crate::backend::legacy::LegacyBackend`]. This backend can be instantiated from
+//!   a custom [`crate::backend::rpc::RpcClientT`] implementation. It is currently not possible for third parties
+//!   to implement custom backends.
 //!
 //! The latter accepts anything that implements the low level [`crate::rpc::RpcClientT`] trait; this
 //! allows you to decide how Subxt will attempt to talk to a node if you'd prefer something other

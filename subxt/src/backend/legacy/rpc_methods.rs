@@ -357,19 +357,6 @@ pub async fn state_call<T: Config>(
     Ok(bytes.0)
 }
 
-/// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
-///
-/// Returns a [`types::DryRunResult`], which is the result of performing the dry run.
-pub async fn system_dry_run<T: Config>(
-    client: &RpcClient<T>,
-    encoded_signed: &[u8],
-    at: Option<T::Hash>,
-) -> Result<Vec<u8>, Error> {
-    let params = rpc_params![to_hex(encoded_signed), at];
-    let result_bytes: Bytes = client.request("system_dryRun", params).await?;
-    Ok(result_bytes.0)
-}
-
 /// A quick helper to encode some bytes to hex.
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))

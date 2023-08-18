@@ -4,35 +4,34 @@
 
 //! RPC types and client for interacting with a substrate node.
 //!
-//! These is used behind the scenes by various `subxt` APIs, but can
-//! also be used directly.
+//! These are used behind the scenes by Subxt backend implementations, for
+//! example [`crate::backend::legacy::LegacyBackend`]. If you need an RPC client,
+//! then you can manually instantiate one, and then hand it to Subxt if you'd like
+//! to re-use it for the Subxt connection.
 //!
-//! - [`Rpc`] is the highest level wrapper, and the one you will run into
-//!   first. It contains the higher level methods for interacting with a node.
-//! - [`RpcClient`] is what [`Rpc`] uses to actually talk to a node, offering
-//!   a [`RpcClient::request`] and [`RpcClient::subscribe`] method to do so.
 //! - [`RpcClientT`] is the underlying dynamic RPC implementation. This provides
 //!   the low level [`RpcClientT::request_raw`] and [`RpcClientT::subscribe_raw`]
-//!   methods. This can be swapped out for a custom implementation, but by default
-//!   we'll rely on `jsonrpsee` for this.
+//!   methods.
+//! - [`RpcClient`] is then a slightly higher level wrapper around this, offering
+//!   the [`RpcClient::request`] and [`RpcClient::subscribe`] methods.
 //!
 //! # Example
 //!
-//! Fetching storage keys
+//! Fetching the genesis hash.
 //!
 //! ```no_run
 //! # #[tokio::main]
 //! # async fn main() {
-//! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
+//! use subxt::{
+//!     backend::rpc::RpcClient,
+//!     backend::legacy::rpc_methods,
+//! }
 //!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
-//! pub mod polkadot {}
+//! // Instantiate a default RPC client pointing at some URL.
+//! let rpc_client = RpcClient::from_url("ws://localhost:9944").await.unwrap();
 //!
-//! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
-//!
-//! let genesis_hash = api
-//!     .rpc()
-//!     .genesis_hash()
+//! // Use it to make RPC calls, here using the legacy genesis_hash method.
+//! let genesis_hash = rpc_methods::genesis_hash(&rpc_client)
 //!     .await
 //!     .unwrap();
 //!
@@ -55,3 +54,62 @@ pub use rpc_client_t::{
 };
 
 pub use rpc_client::{rpc_params, RpcClient, RpcParams, Subscription};
+
+/// The default RPC client that's used (based on [`jsonrpsee`]).
+#[cfg(feature = "jsonrpsee")]
+pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT, crate::Error> {
+    let client = jsonrpsee_helpers::client(url.as_ref())
+        .await
+        .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+    Ok(client)
+}
+
+// helpers for a jsonrpsee specific OnlineClient.
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build WS RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
+    }
+}
+
+// helpers for a jsonrpsee specific OnlineClient.
+#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))?;
+        Ok(ClientBuilder::default()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
+    }
+}

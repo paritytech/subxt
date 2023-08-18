@@ -341,7 +341,8 @@ pub enum TransactionStatus<Hash> {
     },
 }
 
-/// A response from [`Backend::storage_fetch`].
+/// A response from calls like [`Backend::storage_fetch_values`] or
+/// [`Backend::storage_fetch_descendant_values`].
 pub struct StorageResponse {
     /// The key.
     pub key: Vec<u8>,
