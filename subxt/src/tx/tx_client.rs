@@ -600,9 +600,7 @@ impl DryRunResult {
     }
 }
 
-/// The runtime was unable to validate the transaction. This is copied from
-/// `substrate/primitives/runtime/src/transaction_validity.rs` and is expected to
-/// stay in line with that type.
+/// The runtime was unable to validate the transaction.
 #[derive(Decode, Clone, Debug, PartialEq)]
 pub enum TransactionUnknown {
     /// Could not lookup some information that is required to validate the transaction.

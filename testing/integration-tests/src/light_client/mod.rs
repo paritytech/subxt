@@ -28,12 +28,11 @@
 //!
 
 use crate::utils::node_runtime;
-use codec::{Compact, Encode};
+use codec::Compact;
 use futures::StreamExt;
 use subxt::{
     client::{LightClient, LightClientBuilder, OnlineClientT},
     config::PolkadotConfig,
-    rpc::types::FollowEvent,
 };
 use subxt_metadata::Metadata;
 
@@ -44,7 +43,6 @@ use hex as _;
 use regex as _;
 use scale_info as _;
 use sp_core as _;
-use sp_runtime as _;
 use subxt_codegen as _;
 use subxt_signer as _;
 use syn as _;
@@ -58,7 +56,7 @@ async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::E
     let mut sub = api.blocks().subscribe_best().await?;
     let header = sub.next().await.unwrap()?;
     let block_hash = header.hash();
-    let current_block_hash = api.rpc().block_hash(None).await?.unwrap();
+    let current_block_hash = api.backend().latest_best_block_ref().await.unwrap().hash();
 
     assert_eq!(block_hash, current_block_hash);
 
@@ -73,7 +71,12 @@ async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::E
 async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_finalized().await?;
     let header = sub.next().await.unwrap()?;
-    let finalized_hash = api.rpc().finalized_head().await?;
+    let finalized_hash = api
+        .backend()
+        .latest_finalized_block_ref()
+        .await
+        .unwrap()
+        .hash();
 
     assert_eq!(header.hash(), finalized_hash);
 
@@ -91,16 +94,10 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
     let block = sub.next().await.unwrap()?;
     let rt = block.runtime_api().await?;
 
-    // get metadata via state_call.
-    let (_, meta1) = rt
+    // get metadata via state_call. if it decodes ok, it's probably all good.
+    let _ = rt
         .call_raw::<(Compact<u32>, Metadata)>("Metadata_metadata", None)
         .await?;
-
-    // get metadata via `state_getMetadata`.
-    let meta2 = api.rpc().metadata_legacy(None).await?;
-
-    // They should be the same.
-    assert_eq!(meta1.encode(), meta2.encode());
 
     Ok(())
 }
@@ -114,39 +111,9 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
         .await?
         .fetch_or_default(&addr)
         .await?;
+
     assert!(entry > 0);
 
-    Ok(())
-}
-
-// Subscribe to produced blocks using the `ChainHead` spec V2 and fetch the header of
-// just a few reported blocks.
-async fn follow_chain_head(api: &Client) -> Result<(), subxt::Error> {
-    let mut blocks = api.rpc().chainhead_unstable_follow(false).await?;
-    let sub_id = blocks
-        .subscription_id()
-        .expect("RPC provides a valid subscription id; qed")
-        .to_owned();
-
-    let event = blocks.next().await.unwrap()?;
-    if let FollowEvent::BestBlockChanged(best_block) = event {
-        let hash = best_block.best_block_hash;
-        let _header = api
-            .rpc()
-            .chainhead_unstable_header(sub_id.clone(), hash)
-            .await?
-            .unwrap();
-    }
-
-    let event = blocks.next().await.unwrap()?;
-    if let FollowEvent::BestBlockChanged(best_block) = event {
-        let hash = best_block.best_block_hash;
-        let _header = api
-            .rpc()
-            .chainhead_unstable_header(sub_id.clone(), hash)
-            .await?
-            .unwrap();
-    }
     Ok(())
 }
 
@@ -169,15 +136,6 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     Ok(())
 }
 
-// Make a few raw RPC calls to the chain.
-async fn various_rpc_calls(api: &Client) -> Result<(), subxt::Error> {
-    let _system_chain = api.rpc().system_chain().await?;
-    let _system_name = api.rpc().system_name().await?;
-    let _finalized_hash = api.rpc().finalized_head().await?;
-
-    Ok(())
-}
-
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
@@ -188,10 +146,8 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     finalized_headers_subscription(&api).await?;
     runtime_api_call(&api).await?;
     storage_plain_lookup(&api).await?;
-    follow_chain_head(&api).await?;
     dynamic_constant_query(&api).await?;
     dynamic_events(&api).await?;
-    various_rpc_calls(&api).await?;
 
     Ok(())
 }
