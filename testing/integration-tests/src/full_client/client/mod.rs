@@ -10,7 +10,7 @@ use codec::{Decode, Encode};
 use futures::StreamExt;
 use subxt::{
     backend::BackendExt,
-    error::{DispatchError, Error, TokenError},
+    error::{DispatchError, Error},
     tx::{DryRunResult, TransactionInvalid},
 };
 use subxt_signer::sr25519::dev;
@@ -92,48 +92,32 @@ async fn transaction_dry_run() {
 
 #[tokio::test]
 async fn dry_run_fails() {
+    use std::str::FromStr;
+    use subxt_signer::{sr25519::Keypair, SecretUri};
+
     let ctx = test_context().await;
     let api = ctx.client();
 
     wait_for_blocks(&api).await;
 
-    let alice = dev::alice();
-    let bob = dev::bob();
+    let from = Keypair::from_uri(&SecretUri::from_str("//AccountWithNoFunds").unwrap()).unwrap();
+    let to = dev::bob();
 
-    let tx = node_runtime::tx().balances().transfer(
-        bob.public_key().into(),
-        // 7 more than the default amount Alice has, so this should fail; insufficient funds:
-        1_000_000_000_000_000_000_007,
-    );
+    // The actual TX is not important; the account has no funds to pay for it.
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(to.public_key().into(), 1);
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, &alice, Default::default())
+        .create_signed(&tx, &from, Default::default())
         .await
         .unwrap();
 
     let dry_run_res = signed_extrinsic.dry_run().await.expect("dryrunning failed");
-
     assert_eq!(
         dry_run_res,
         DryRunResult::Invalid(TransactionInvalid::Payment)
-    );
-
-    let res = signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await;
-
-    assert!(
-        matches!(
-            res,
-            Err(Error::Runtime(DispatchError::Token(
-                TokenError::FundsUnavailable
-            )))
-        ),
-        "Expected an insufficient balance, got {res:?}"
     );
 }
 

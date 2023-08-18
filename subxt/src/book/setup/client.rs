@@ -32,7 +32,7 @@
 //!   a custom [`crate::backend::rpc::RpcClientT`] implementation. It is currently not possible for third parties
 //!   to implement custom backends.
 //!
-//! The latter accepts anything that implements the low level [`crate::rpc::RpcClientT`] trait; this
+//! The latter accepts anything that implements the low level [`crate::backend::rpc::RpcClientT`] trait; this
 //! allows you to decide how Subxt will attempt to talk to a node if you'd prefer something other
 //! than the provided interfaces. Under the hood, this is also how the light client is implemented.
 //!
