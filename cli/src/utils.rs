@@ -24,15 +24,11 @@ pub struct FileOrUrl {
     pub file: Option<PathBuf>,
     /// Specify the metadata version.
     ///
-    ///  - unstable:
+    ///  - "latest": Use the latest stable version available.
+    ///  - "unstable": Use the unstable metadata, if present.
+    ///  - a number: Use a specific metadata version.
     ///
-    ///    Use the latest unstable metadata of the node.
-    ///
-    ///  - number
-    ///
-    ///    Use this specific metadata version.
-    ///
-    /// Defaults to 14.
+    /// Defaults to asking for the latest stable metadata version.
     #[clap(long)]
     pub version: Option<MetadataVersion>,
 }
