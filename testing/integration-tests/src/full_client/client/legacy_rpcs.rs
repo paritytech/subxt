@@ -47,7 +47,9 @@ async fn chain_subscribe_finalized_heads() {
     let ctx = test_context().await;
     let rpc = ctx.rpc().await;
 
-    let mut sub = rpc_methods::chain_subscribe_finalized_heads(&rpc).await.unwrap();
+    let mut sub = rpc_methods::chain_subscribe_finalized_heads(&rpc)
+        .await
+        .unwrap();
     let _block_header = sub.next().await.unwrap().unwrap();
 }
 
@@ -81,7 +83,9 @@ async fn state_call() {
     let ctx = test_context().await;
     let rpc = ctx.rpc().await;
 
-    let _metadata = rpc_methods::state_call(&rpc, "Metadata_metadata", None, None).await.unwrap();
+    let _metadata = rpc_methods::state_call(&rpc, "Metadata_metadata", None, None)
+        .await
+        .unwrap();
 }
 
 #[tokio::test]

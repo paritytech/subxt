@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    backend::{ BackendExt, BlockRef },
+    backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError},
     metadata::DecodeWithMetadata,

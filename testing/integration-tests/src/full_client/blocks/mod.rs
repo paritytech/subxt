@@ -67,11 +67,8 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
         .map(|(_, r)| r);
 
     // This should spot any gaps in the middle and fill them back in.
-    let all_finalized_blocks = legacy::subscribe_to_block_headers_filling_in_gaps(
-        rpc,
-        some_finalized_blocks,
-        None,
-    );
+    let all_finalized_blocks =
+        legacy::subscribe_to_block_headers_filling_in_gaps(rpc, some_finalized_blocks, None);
     futures::pin_mut!(all_finalized_blocks);
 
     // Iterate the block headers, making sure we get them all in order.

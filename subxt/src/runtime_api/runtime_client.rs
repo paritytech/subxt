@@ -4,7 +4,7 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{client::OnlineClientT, error::Error, backend::BlockRef, Config};
+use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 
@@ -45,10 +45,7 @@ where
         let client = self.client.clone();
         async move {
             // get the ref for the latest block and use that.
-            let block_ref = client
-                .backend()
-                .latest_best_block_ref()
-                .await?;
+            let block_ref = client.backend().latest_best_block_ref().await?;
 
             Ok(RuntimeApi::new(client, block_ref))
         }

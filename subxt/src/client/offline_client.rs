@@ -4,9 +4,9 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
-    backend::RuntimeVersion, runtime_api::RuntimeApiClient, storage::StorageClient,
-    tx::TxClient, Config, Metadata,
+    backend::RuntimeVersion, blocks::BlocksClient, constants::ConstantsClient,
+    events::EventsClient, runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
+    Config, Metadata,
 };
 use derivative::Derivative;
 

@@ -22,12 +22,12 @@ pub struct RpcClient<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
-impl <T> RpcClient<T> {
+impl<T> RpcClient<T> {
     /// Create a new [`RpcClient`] from an [`RpcClientT`] implementation.
     pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         RpcClient {
             client,
-            _marker: std::marker::PhantomData
+            _marker: std::marker::PhantomData,
         }
     }
 
@@ -56,29 +56,32 @@ impl <T> RpcClient<T> {
         params: RpcParams,
         unsub: &str,
     ) -> Result<Subscription<Res>, Error> {
-        let sub = self.client.subscribe_raw(sub, params.build(), unsub).await?;
+        let sub = self
+            .client
+            .subscribe_raw(sub, params.build(), unsub)
+            .await?;
         Ok(Subscription::new(sub))
     }
 }
 
-impl <T> std::fmt::Debug for RpcClient<T> {
+impl<T> std::fmt::Debug for RpcClient<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("RpcClient").finish()
     }
 }
 
-impl <T> std::ops::Deref for RpcClient<T> {
+impl<T> std::ops::Deref for RpcClient<T> {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
         &*self.client
     }
 }
 
-impl <T> Clone for RpcClient<T> {
+impl<T> Clone for RpcClient<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
-            _marker: std::marker::PhantomData
+            _marker: std::marker::PhantomData,
         }
     }
 }

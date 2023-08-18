@@ -5,15 +5,15 @@
 use super::storage_address::{StorageAddress, Yes};
 
 use crate::{
-    backend::{BlockRef, BackendExt},
+    backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError},
     metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
-use futures::StreamExt;
 use codec::Decode;
 use derivative::Derivative;
+use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
@@ -56,7 +56,10 @@ where
         let block_ref = self.block_ref.clone();
         // Manual future so lifetime not tied to api.storage().
         async move {
-            let data = client.backend().storage_fetch_value(key, block_ref.hash()).await?;
+            let data = client
+                .backend()
+                .storage_fetch_value(key, block_ref.hash())
+                .await?;
             Ok(data)
         }
     }
@@ -235,7 +238,7 @@ where
                 .map(move |kv| {
                     let kv = match kv {
                         Ok(kv) => kv,
-                        Err(e) => return Err(e)
+                        Err(e) => return Err(e),
                     };
                     let val = Address::Target::decode_with_metadata(
                         &mut &*kv.value,

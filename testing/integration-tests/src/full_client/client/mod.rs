@@ -9,9 +9,9 @@ use crate::{
 use codec::{Decode, Encode};
 use futures::StreamExt;
 use subxt::{
-    tx::{DryRunResult, TransactionInvalid},
     backend::BackendExt,
     error::{DispatchError, Error, TokenError},
+    tx::{DryRunResult, TransactionInvalid},
 };
 use subxt_signer::sr25519::dev;
 
@@ -79,10 +79,7 @@ async fn transaction_dry_run() {
         .await
         .unwrap();
 
-    signed_extrinsic
-        .dry_run()
-        .await
-        .expect("dryrunning failed");
+    signed_extrinsic.dry_run().await.expect("dryrunning failed");
 
     signed_extrinsic
         .submit_and_watch()
@@ -115,10 +112,7 @@ async fn dry_run_fails() {
         .await
         .unwrap();
 
-    let dry_run_res = signed_extrinsic
-        .dry_run()
-        .await
-        .expect("dryrunning failed");
+    let dry_run_res = signed_extrinsic.dry_run().await.expect("dryrunning failed");
 
     assert_eq!(
         dry_run_res,

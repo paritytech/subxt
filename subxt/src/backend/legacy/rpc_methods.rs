@@ -6,12 +6,12 @@
 //!
 //! **Note:** These will eventually be removed in a future release.
 
-use serde::{ Serialize, Deserialize };
-use primitive_types::U256;
-use codec::Decode;
+use crate::backend::rpc::{rpc_params, RpcClient, Subscription};
 use crate::metadata::Metadata;
-use crate::{ Error, Config };
-use crate::backend::rpc::{ RpcClient, Subscription, rpc_params };
+use crate::{Config, Error};
+use codec::Decode;
+use primitive_types::U256;
+use serde::{Deserialize, Serialize};
 
 /// Fetch the raw bytes for a given storage key
 pub async fn state_get_storage<T: Config>(
@@ -50,16 +50,16 @@ pub type StorageData = Vec<u8>;
 pub async fn genesis_hash<T: Config>(client: &RpcClient<T>) -> Result<T::Hash, Error> {
     let block_zero = 0u32;
     let params = rpc_params![block_zero];
-    let genesis_hash: Option<T::Hash> =
-        client.request("chain_getBlockHash", params).await?;
+    let genesis_hash: Option<T::Hash> = client.request("chain_getBlockHash", params).await?;
     genesis_hash.ok_or_else(|| "Genesis hash not found".into())
 }
 
 /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
-pub async fn state_get_metadata<T: Config>(client: &RpcClient<T>, at: Option<T::Hash>) -> Result<Metadata, Error> {
-    let bytes: Bytes = client
-        .request("state_getMetadata", rpc_params![at])
-        .await?;
+pub async fn state_get_metadata<T: Config>(
+    client: &RpcClient<T>,
+    at: Option<T::Hash>,
+) -> Result<Metadata, Error> {
+    let bytes: Bytes = client.request("state_getMetadata", rpc_params![at]).await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
     Ok(metadata)
 }
@@ -99,17 +99,20 @@ pub async fn system_version<T: Config>(client: &RpcClient<T>) -> Result<String, 
 }
 
 /// Fetch system properties
-pub async fn system_properties<T: Config>(client: &RpcClient<T>) -> Result<SystemProperties, Error> {
-    client
-        .request("system_properties", rpc_params![])
-        .await
+pub async fn system_properties<T: Config>(
+    client: &RpcClient<T>,
+) -> Result<SystemProperties, Error> {
+    client.request("system_properties", rpc_params![]).await
 }
 
 /// System properties; an arbitrary JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 
 /// Get a header
-pub async fn chain_get_header<T: Config>(client: &RpcClient<T>, hash: Option<T::Hash>) -> Result<Option<T::Header>, Error> {
+pub async fn chain_get_header<T: Config>(
+    client: &RpcClient<T>,
+    hash: Option<T::Hash>,
+) -> Result<Option<T::Header>, Error> {
     let params = rpc_params![hash];
     let header = client.request("chain_getHeader", params).await?;
     Ok(header)
@@ -178,9 +181,7 @@ pub async fn state_get_runtime_version<T: Config>(
     at: Option<T::Hash>,
 ) -> Result<RuntimeVersion, Error> {
     let params = rpc_params![at];
-    let version = client
-        .request("state_getRuntimeVersion", params)
-        .await?;
+    let version = client.request("state_getRuntimeVersion", params).await?;
     Ok(version)
 }
 
@@ -211,7 +212,9 @@ pub struct RuntimeVersion {
 }
 
 /// Subscribe to all new best block headers.
-pub async fn chain_subscribe_new_heads<T: Config>(client: &RpcClient<T>) -> Result<Subscription<T::Header>, Error> {
+pub async fn chain_subscribe_new_heads<T: Config>(
+    client: &RpcClient<T>,
+) -> Result<Subscription<T::Header>, Error> {
     let subscription = client
         .subscribe(
             // Despite the name, this returns a stream of all new blocks
@@ -227,7 +230,9 @@ pub async fn chain_subscribe_new_heads<T: Config>(client: &RpcClient<T>) -> Resu
 }
 
 /// Subscribe to all new block headers.
-pub async fn chain_subscribe_all_heads<T: Config>(client: &RpcClient<T>) -> Result<Subscription<T::Header>, Error> {
+pub async fn chain_subscribe_all_heads<T: Config>(
+    client: &RpcClient<T>,
+) -> Result<Subscription<T::Header>, Error> {
     let subscription = client
         .subscribe(
             // Despite the name, this returns a stream of all new blocks
@@ -277,11 +282,12 @@ pub async fn state_subscribe_runtime_version<T: Config>(
 }
 
 /// Create and submit an extrinsic and return corresponding Hash if successful
-pub async fn author_submit_extrinsic<T: Config>(client: &RpcClient<T>, extrinsic: &[u8]) -> Result<T::Hash, Error> {
+pub async fn author_submit_extrinsic<T: Config>(
+    client: &RpcClient<T>,
+    extrinsic: &[u8],
+) -> Result<T::Hash, Error> {
     let params = rpc_params![to_hex(extrinsic)];
-    let xt_hash = client
-        .request("author_submitExtrinsic", params)
-        .await?;
+    let xt_hash = client.request("author_submitExtrinsic", params).await?;
     Ok(xt_hash)
 }
 

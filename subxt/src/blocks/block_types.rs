@@ -83,7 +83,7 @@ where
             extrinsics,
             self.cached_events.clone(),
             ids,
-            block_hash
+            block_hash,
         ))
     }
 

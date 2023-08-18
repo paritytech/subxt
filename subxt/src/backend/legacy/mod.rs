@@ -7,44 +7,39 @@
 
 pub mod rpc_methods;
 
-use async_trait::async_trait;
-use std::sync::Arc;
-use std::collections::VecDeque;
-use futures::{ future, stream, Future, FutureExt, Stream, StreamExt, future::Either };
-use crate::backend::{
-    Backend,
-    StreamOf,
-    BlockRef,
-    StreamOfResults,
-    RuntimeVersion,
-    TransactionStatus,
-    StorageResponse,
-    rpc::{RpcClient, RpcClientT}
-};
-use crate::{ Config, Error, config::Header };
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
+use crate::backend::{
+    rpc::{RpcClient, RpcClientT},
+    Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
+    TransactionStatus,
+};
+use crate::{config::Header, Config, Error};
+use async_trait::async_trait;
+use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
+use std::collections::VecDeque;
 use std::pin::Pin;
-use std::task::{Poll,Context};
+use std::sync::Arc;
+use std::task::{Context, Poll};
 
 /// The legacy backend.
 pub struct LegacyBackend<T> {
-    client: RpcClient<T>
+    client: RpcClient<T>,
 }
 
-impl <T> LegacyBackend<T> {
+impl<T> LegacyBackend<T> {
     /// Instantiate a new backend which uses the legacy API methods by providing
     /// an [`RpcClientT`] implementation.
     pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
         Self {
-            client: RpcClient::new(client)
+            client: RpcClient::new(client),
         }
     }
 }
 
-impl <T: Config> super::sealed::Sealed for LegacyBackend<T> {}
+impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
 #[async_trait]
-impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
+impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
@@ -121,7 +116,9 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let Some(details) = rpc_methods::chain_get_block(&self.client, Some(at)).await? else {
             return Ok(None)
         };
-        Ok(Some(details.block.extrinsics.into_iter().map(|b| b.0).collect()))
+        Ok(Some(
+            details.block.extrinsics.into_iter().map(|b| b.0).collect(),
+        ))
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
@@ -138,35 +135,54 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
         let details = rpc_methods::state_get_runtime_version(&self.client, None).await?;
-        Ok(RuntimeVersion { spec_version: details.spec_version, transaction_version: details.transaction_version })
+        Ok(RuntimeVersion {
+            spec_version: details.spec_version,
+            transaction_version: details.transaction_version,
+        })
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         let sub = rpc_methods::state_subscribe_runtime_version(&self.client).await?;
-        let sub = sub.map(|r| r.map(|v| RuntimeVersion { spec_version: v.spec_version, transaction_version: v.transaction_version }));
+        let sub = sub.map(|r| {
+            r.map(|v| RuntimeVersion {
+                spec_version: v.spec_version,
+                transaction_version: v.transaction_version,
+            })
+        });
         Ok(StreamOf(Box::pin(sub)))
     }
 
-    async fn stream_all_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+    async fn stream_all_block_headers(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub = rpc_methods::chain_subscribe_all_heads(&self.client).await?;
-        let sub = sub.map(|r| r.map(|h| {
-            let hash = h.hash();
-            (h, BlockRef::from_hash(hash))
-        }));
+        let sub = sub.map(|r| {
+            r.map(|h| {
+                let hash = h.hash();
+                (h, BlockRef::from_hash(hash))
+            })
+        });
         Ok(StreamOf(Box::pin(sub)))
     }
 
-    async fn stream_best_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+    async fn stream_best_block_headers(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub = rpc_methods::chain_subscribe_new_heads(&self.client).await?;
-        let sub = sub.map(|r| r.map(|h| {
-            let hash = h.hash();
-            (h, BlockRef::from_hash(hash))
-        }));
+        let sub = sub.map(|r| {
+            r.map(|h| {
+                let hash = h.hash();
+                (h, BlockRef::from_hash(hash))
+            })
+        });
         Ok(StreamOf(Box::pin(sub)))
     }
 
-    async fn stream_finalized_block_headers(&self) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub: super::rpc::Subscription<<T as Config>::Header> = rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
+    async fn stream_finalized_block_headers(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let sub: super::rpc::Subscription<<T as Config>::Header> =
+            rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
 
         // Get the last finalized block immediately so that the stream will emit every finalized block after this.
         let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
@@ -177,34 +193,66 @@ impl <T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
         // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
         // are finalized each time.
-        let sub = subscribe_to_block_headers_filling_in_gaps(self.client.clone(), sub, last_finalized_block_num);
-        let sub = sub.map(|r| r.map(|h| {
-            let hash = h.hash();
-            (h, BlockRef::from_hash(hash))
-        }));
+        let sub = subscribe_to_block_headers_filling_in_gaps(
+            self.client.clone(),
+            sub,
+            last_finalized_block_num,
+        );
+        let sub = sub.map(|r| {
+            r.map(|h| {
+                let hash = h.hash();
+                (h, BlockRef::from_hash(hash))
+            })
+        });
         Ok(StreamOf(Box::pin(sub)))
     }
 
-    async fn submit_transaction(&self, extrinsic: &[u8]) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+    async fn submit_transaction(
+        &self,
+        extrinsic: &[u8],
+    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         let sub = rpc_methods::author_submit_and_watch_extrinsic(&self.client, extrinsic).await?;
         let sub = sub.filter_map(|r| {
-            let mapped = r.map(|tx| {
-                match tx {
-                    // We ignore these because they don't map nicely to the new API. They don't signal "end states" so this should be fine.
-                    RpcTransactionStatus::Future => None,
-                    RpcTransactionStatus::Retracted(_) => None,
-                    // These roughly map across:
-                    RpcTransactionStatus::Ready => Some(TransactionStatus::Validated),
-                    RpcTransactionStatus::Broadcast(peers) => Some(TransactionStatus::Broadcasted { num_peers: peers.len() as u32 }),
-                    RpcTransactionStatus::InBlock(hash) => Some(TransactionStatus::InBestBlock { hash }),
-                    // These 5 mean that the stream will very likely end:
-                    RpcTransactionStatus::FinalityTimeout(_) => Some(TransactionStatus::Invalid { message: "Finality timeout".into() }),
-                    RpcTransactionStatus::Finalized(hash) => Some(TransactionStatus::InFinalizedBlock { hash }),
-                    RpcTransactionStatus::Usurped(_) => Some(TransactionStatus::Invalid { message: "Transaction was usurped by another with the same nonce".into() }),
-                    RpcTransactionStatus::Dropped => Some(TransactionStatus::Dropped { message: "Transaction was dropped".into() }),
-                    RpcTransactionStatus::Invalid => Some(TransactionStatus::Invalid { message: "Transaction is invalid (eg because of a bad nonce, signature etc)".into() }),
-                }
-            }).transpose();
+            let mapped = r
+                .map(|tx| {
+                    match tx {
+                        // We ignore these because they don't map nicely to the new API. They don't signal "end states" so this should be fine.
+                        RpcTransactionStatus::Future => None,
+                        RpcTransactionStatus::Retracted(_) => None,
+                        // These roughly map across:
+                        RpcTransactionStatus::Ready => Some(TransactionStatus::Validated),
+                        RpcTransactionStatus::Broadcast(peers) => {
+                            Some(TransactionStatus::Broadcasted {
+                                num_peers: peers.len() as u32,
+                            })
+                        }
+                        RpcTransactionStatus::InBlock(hash) => {
+                            Some(TransactionStatus::InBestBlock { hash })
+                        }
+                        // These 5 mean that the stream will very likely end:
+                        RpcTransactionStatus::FinalityTimeout(_) => {
+                            Some(TransactionStatus::Invalid {
+                                message: "Finality timeout".into(),
+                            })
+                        }
+                        RpcTransactionStatus::Finalized(hash) => {
+                            Some(TransactionStatus::InFinalizedBlock { hash })
+                        }
+                        RpcTransactionStatus::Usurped(_) => Some(TransactionStatus::Invalid {
+                            message: "Transaction was usurped by another with the same nonce"
+                                .into(),
+                        }),
+                        RpcTransactionStatus::Dropped => Some(TransactionStatus::Dropped {
+                            message: "Transaction was dropped".into(),
+                        }),
+                        RpcTransactionStatus::Invalid => Some(TransactionStatus::Invalid {
+                            message:
+                                "Transaction is invalid (eg because of a bad nonce, signature etc)"
+                                    .into(),
+                        }),
+                    }
+                })
+                .transpose();
 
             future::ready(mapped)
         });
@@ -278,18 +326,18 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     // What key do we start paginating from? None = from the beginning.
     pagination_start_key: Option<Vec<u8>>,
     // Keys, future and cached:
-    keys_fut: Option<Pin<Box<dyn Future<Output=Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
+    keys_fut: Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
     keys: VecDeque<Vec<u8>>,
     // Set to true when we're done:
     done: bool,
 }
 
-impl <T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
+impl<T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
 
 // How many storage keys to ask for each time.
 const STORAGE_FETCH_PAGE_SIZE: u32 = 32;
 
-impl <T: Config> Stream for StorageFetchDescendantKeysStream<T> {
+impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
     type Item = Result<Vec<u8>, Error>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         loop {
@@ -297,12 +345,12 @@ impl <T: Config> Stream for StorageFetchDescendantKeysStream<T> {
 
             // We're already done.
             if this.done {
-                return Poll::Ready(None)
+                return Poll::Ready(None);
             }
 
             // We have some keys to hand back already, so do that.
             if let Some(key) = this.keys.pop_front() {
-                return Poll::Ready(Some(Ok(key)))
+                return Poll::Ready(Some(Ok(key)));
             }
 
             // Else, we don't have any keys, but we have a fut to get more so poll it.
@@ -317,17 +365,17 @@ impl <T: Config> Stream for StorageFetchDescendantKeysStream<T> {
                         if keys.is_empty() {
                             // No keys left; we're done!
                             this.done = true;
-                            return Poll::Ready(None)
+                            return Poll::Ready(None);
                         }
                         // The last key is where we want to paginate from next time.
                         this.pagination_start_key = keys.last().cloned();
                         // Got new keys; loop around to start returning them.
                         this.keys = keys.into_iter().collect();
                         continue;
-                    },
+                    }
                     Err(e) => {
                         // Error getting keys? Return it.
-                        return Poll::Ready(Some(Err(e)))
+                        return Poll::Ready(Some(Err(e)));
                     }
                 }
             }
@@ -343,8 +391,9 @@ impl <T: Config> Stream for StorageFetchDescendantKeysStream<T> {
                     &key,
                     STORAGE_FETCH_PAGE_SIZE,
                     pagination_start_key.as_deref(),
-                    Some(at)
-                ).await
+                    Some(at),
+                )
+                .await
             };
             this.keys_fut = Some(Box::pin(keys_fut));
         }
@@ -357,29 +406,27 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
     keys: StorageFetchDescendantKeysStream<T>,
     next_key: Option<Vec<u8>>,
     // Then we track the next value:
-    value_fut: Option<Pin<Box<dyn Future<Output=Result<Option<Vec<u8>>, Error>> + Send + 'static>>>,
+    value_fut:
+        Option<Pin<Box<dyn Future<Output = Result<Option<Vec<u8>>, Error>> + Send + 'static>>>,
 }
 
-impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
+impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
     type Item = Result<StorageResponse, Error>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
         loop {
-
             // If we're waiting on the next value then poll that future:
             if let Some(mut value_fut) = this.value_fut.take() {
                 match value_fut.poll_unpin(cx) {
                     Poll::Ready(Ok(Some(value))) => {
                         let key = this.next_key.take().expect("key should exist");
-                        return Poll::Ready(Some(Ok(StorageResponse { key, value })))
-                    },
+                        return Poll::Ready(Some(Ok(StorageResponse { key, value })));
+                    }
                     Poll::Ready(Ok(None)) => {
                         // No value back for some key? Skip.
-                        continue
-                    },
-                    Poll::Ready(Err(e)) => {
-                        return Poll::Ready(Some(Err(e)))
-                    },
+                        continue;
+                    }
+                    Poll::Ready(Err(e)) => return Poll::Ready(Some(Err(e))),
                     Poll::Pending => {
                         this.value_fut = Some(value_fut);
                         return Poll::Pending;
@@ -392,12 +439,11 @@ impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                 let key = key.clone();
                 let client = this.keys.client.clone();
                 let at = this.keys.at;
-                let fut = async move {
-                    rpc_methods::state_get_storage(&client, &key, Some(at)).await
-                };
+                let fut =
+                    async move { rpc_methods::state_get_storage(&client, &key, Some(at)).await };
 
                 this.value_fut = Some(Box::pin(fut));
-                continue
+                continue;
             }
 
             // Else, poll the keys stream to get the next key.
@@ -405,13 +451,9 @@ impl <T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                 Poll::Ready(Some(Ok(key))) => {
                     this.next_key = Some(key);
                     continue;
-                },
-                Poll::Ready(Some(Err(e))) => {
-                    return Poll::Ready(Some(Err(e)))
-                },
-                Poll::Ready(None) => {
-                    return Poll::Ready(None)
-                },
+                }
+                Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
+                Poll::Ready(None) => return Poll::Ready(None),
                 Poll::Pending => {
                     return Poll::Pending;
                 }

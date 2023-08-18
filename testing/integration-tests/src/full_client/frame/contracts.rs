@@ -11,9 +11,9 @@ use crate::{
     },
     test_context, TestContext,
 };
+use subxt::ext::futures::StreamExt;
 use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error, OnlineClient, SubstrateConfig};
 use subxt_signer::sr25519::{self, dev};
-use subxt::ext::futures::StreamExt;
 
 struct ContractsTestContext {
     cxt: TestContext,

@@ -8,10 +8,10 @@ use std::task::Poll;
 
 use crate::utils::strip_compact_prefix;
 use crate::{
+    backend::{StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
-    backend::{ StreamOfResults, TransactionStatus as BackendTxStatus},
     Config,
 };
 use derivative::Derivative;
@@ -24,7 +24,7 @@ pub struct TxProgress<T: Config, C> {
     client: C,
 }
 
-impl <T: Config, C> std::fmt::Debug for TxProgress<T, C> {
+impl<T: Config, C> std::fmt::Debug for TxProgress<T, C> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TxProgress")
             .field("sub", &"<subscription>")
@@ -89,8 +89,12 @@ where
                 TxStatus::InBestBlock(s) | TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
-                TxStatus::Invalid { message } => return Err(TransactionError::Invalid(message).into()),
-                TxStatus::Dropped { message } => return Err(TransactionError::Dropped(message).into()),
+                TxStatus::Invalid { message } => {
+                    return Err(TransactionError::Invalid(message).into())
+                }
+                TxStatus::Dropped { message } => {
+                    return Err(TransactionError::Dropped(message).into())
+                }
                 // Ignore anything else and wait for next status event:
                 _ => continue,
             }
@@ -115,8 +119,12 @@ where
                 TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
                 TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
-                TxStatus::Invalid { message } => return Err(TransactionError::Invalid(message).into()),
-                TxStatus::Dropped { message } => return Err(TransactionError::Dropped(message).into()),
+                TxStatus::Invalid { message } => {
+                    return Err(TransactionError::Invalid(message).into())
+                }
+                TxStatus::Dropped { message } => {
+                    return Err(TransactionError::Dropped(message).into())
+                }
                 // Ignore and wait for next status event:
                 _ => continue,
             }
@@ -161,12 +169,16 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
                 BackendTxStatus::Broadcasted { num_peers } => TxStatus::Broadcasted { num_peers },
                 BackendTxStatus::InBestBlock { hash } => {
                     TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
-                },
+                }
                 // These stream events mean that nothing further will be sent:
                 BackendTxStatus::InFinalizedBlock { hash } => {
                     self.sub = None;
-                    TxStatus::InFinalizedBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
-                },
+                    TxStatus::InFinalizedBlock(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
+                }
                 BackendTxStatus::Error { message } => {
                     self.sub = None;
                     TxStatus::Error { message }
@@ -174,11 +186,11 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
                 BackendTxStatus::Invalid { message } => {
                     self.sub = None;
                     TxStatus::Invalid { message }
-                },
+                }
                 BackendTxStatus::Dropped { message } => {
                     self.sub = None;
                     TxStatus::Dropped { message }
-                },
+                }
             }
         })
     }
@@ -187,13 +199,13 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 /// Possible transaction statuses returned from our [`TxProgress::next_item()`] call.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub enum TxStatus<T: Config, C>  {
+pub enum TxStatus<T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
     /// The transaction has been broadcast to other nodes.
     Broadcasted {
         /// Number of peers it's been broadcast to.
-        num_peers: u32
+        num_peers: u32,
     },
     /// Transaction has been included in block with given hash.
     InBestBlock(TxInBlock<T, C>),
@@ -202,18 +214,18 @@ pub enum TxStatus<T: Config, C>  {
     /// Something went wrong in the node.
     Error {
         /// Human readable message; what went wrong.
-        message: String
+        message: String,
     },
     /// Transaction is invalid (bad nonce, signature etc).
     Invalid {
         /// Human readable message; why was it invalid.
-        message: String
+        message: String,
     },
     /// The transaction was dropped.
     Dropped {
         /// Human readable message; why was it dropped.
-        message: String
-    }
+        message: String,
+    },
 }
 
 impl<T: Config, C> TxStatus<T, C> {
@@ -338,8 +350,8 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 #[cfg(test)]
 mod test {
     use crate::{
+        backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
-        backend::{ TransactionStatus, StreamOfResults },
         tx::TxProgress,
         Config, Error, SubstrateConfig,
     };
@@ -376,7 +388,9 @@ mod test {
     async fn wait_for_finalized_returns_err_when_error() {
         let tx_progress = mock_tx_progress(vec![
             MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
-            MockSubstrateTxStatus::Error { message: "err".into() },
+            MockSubstrateTxStatus::Error {
+                message: "err".into(),
+            },
         ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
@@ -389,7 +403,9 @@ mod test {
     async fn wait_for_finalized_returns_err_when_invalid() {
         let tx_progress = mock_tx_progress(vec![
             MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
-            MockSubstrateTxStatus::Invalid { message: "err".into() },
+            MockSubstrateTxStatus::Invalid {
+                message: "err".into(),
+            },
         ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
@@ -402,7 +418,9 @@ mod test {
     async fn wait_for_finalized_returns_err_when_dropped() {
         let tx_progress = mock_tx_progress(vec![
             MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
-            MockSubstrateTxStatus::Dropped { message: "err".into() },
+            MockSubstrateTxStatus::Dropped {
+                message: "err".into(),
+            },
         ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(

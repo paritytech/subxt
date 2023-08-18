@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::backend::{BlockRef, Backend, BackendExt};
+use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{client::OnlineClientT, error::Error, events::Events, Config};
 use derivative::Derivative;
 use std::future::Future;
@@ -61,14 +61,15 @@ where
             // If a block ref isn't provided, we'll get the latest best block to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client
-                    .backend()
-                    .latest_best_block_ref()
-                    .await?
+                None => client.backend().latest_best_block_ref().await?,
             };
 
             let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;
-            Ok(Events::new(client.metadata(), block_ref.hash(), event_bytes))
+            Ok(Events::new(
+                client.metadata(),
+                block_ref.hash(),
+                event_bytes,
+            ))
         }
     }
 }

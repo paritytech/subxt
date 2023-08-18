@@ -3,9 +3,9 @@
 // see LICENSE for license details.
 
 use std::ffi::{OsStr, OsString};
+use std::sync::Arc;
 use substrate_runner::SubstrateNode;
 use subxt::{Config, OnlineClient};
-use std::sync::Arc;
 
 #[cfg(feature = "unstable-light-client")]
 use subxt::client::{LightClient, LightClientBuilder};
@@ -111,10 +111,7 @@ impl TestNodeProcessBuilder {
         let client = OnlineClient::from_url(ws_url.clone()).await;
 
         match client {
-            Ok(client) => Ok(TestNodeProcess {
-                proc,
-                client,
-            }),
+            Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => Err(format!("Failed to connect to node rpc at {ws_url}: {err}")),
         }
     }

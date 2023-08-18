@@ -4,11 +4,11 @@
 
 use super::Block;
 use crate::{
+    backend::{BlockRef, StreamOfResults},
     client::OnlineClientT,
     config::Config,
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
-    backend::{StreamOfResults, BlockRef},
 };
 use derivative::Derivative;
 use futures::StreamExt;
@@ -72,10 +72,7 @@ where
             // If a block ref isn't provided, we'll get the latest best block to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client
-                    .backend()
-                    .latest_best_block_ref()
-                    .await?
+                None => client.backend().latest_best_block_ref().await?,
             };
 
             let block_header = match client.backend().block_header(block_ref.hash()).await? {
