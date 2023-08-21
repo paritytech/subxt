@@ -9,32 +9,28 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 
-/// A concrete wrapper around an [`RpcClientT`] which exposes the underlying interface via some
-/// higher level methods that make it a little easier to work with. For the sake of convenience,
-/// it also carries a `T: Config` bound. This isn't strictly necessary, but typically you'll use
-/// a client against a single node with fixed config, so it makes some type inference easier to
-/// just declare this bound once, rather than on every RPC method.
-///
-/// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
-/// without getting into issues with non-object-safe methods or no `async` in traits.
-pub struct RpcClient<T> {
+/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods,
+/// is cheaply cloneable, and can be handed to things like [`crate::client::OnlineClient`] to
+/// instantiate it.
+#[derive(Clone)]
+pub struct RpcClient {
     client: Arc<dyn RpcClientT>,
-    _marker: std::marker::PhantomData<T>,
 }
 
-impl<T> RpcClient<T> {
+impl RpcClient {
     #[cfg(feature = "jsonrpsee")]
-    /// Create a default RPC client that's used (currently based on [`jsonrpsee`]).
+    /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
     pub async fn from_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
-        let client = super::default_rpc_client(url).await?;
-        Ok(Self::new(Arc::new(client)))
+        let client = jsonrpsee_helpers::client(url.as_ref())
+            .await
+            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+        Ok(Self::new(client))
     }
 
-    /// Create a new [`RpcClient`] from an [`RpcClientT`] implementation.
-    pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
+    /// Create a new [`RpcClient`] from an arbitrary [`RpcClientT`] implementation.
+    pub fn new<R: RpcClientT>(client: R) -> Self {
         RpcClient {
-            client,
-            _marker: std::marker::PhantomData,
+            client: Arc::new(client),
         }
     }
 
@@ -71,25 +67,16 @@ impl<T> RpcClient<T> {
     }
 }
 
-impl<T> std::fmt::Debug for RpcClient<T> {
+impl std::fmt::Debug for RpcClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("RpcClient").finish()
     }
 }
 
-impl<T> std::ops::Deref for RpcClient<T> {
+impl std::ops::Deref for RpcClient {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
         &*self.client
-    }
-}
-
-impl<T> Clone for RpcClient<T> {
-    fn clone(&self) -> Self {
-        Self {
-            client: self.client.clone(),
-            _marker: std::marker::PhantomData,
-        }
     }
 }
 
@@ -235,5 +222,55 @@ impl<Res: DeserializeOwned> Stream for Subscription<Res> {
         });
 
         Poll::Ready(res)
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build WS RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))?;
+        Ok(ClientBuilder::default()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
     }
 }

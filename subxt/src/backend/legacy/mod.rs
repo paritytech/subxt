@@ -9,8 +9,7 @@ pub mod rpc_methods;
 
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
 use crate::backend::{
-    rpc::{RpcClient, RpcClientT},
-    Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
+    rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
 use crate::{config::Header, Config, Error};
@@ -18,20 +17,21 @@ use async_trait::async_trait;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::pin::Pin;
-use std::sync::Arc;
 use std::task::{Context, Poll};
 
+pub use rpc_methods::LegacyRpcMethods;
+
 /// The legacy backend.
+#[derive(Debug, Clone)]
 pub struct LegacyBackend<T> {
-    client: RpcClient<T>,
+    methods: LegacyRpcMethods<T>,
 }
 
-impl<T> LegacyBackend<T> {
-    /// Instantiate a new backend which uses the legacy API methods by providing
-    /// an [`RpcClientT`] implementation.
-    pub fn new<R: RpcClientT>(client: Arc<R>) -> Self {
+impl<T: Config> LegacyBackend<T> {
+    /// Instantiate a new backend which uses the legacy API methods.
+    pub fn new(client: RpcClient) -> Self {
         Self {
-            client: RpcClient::new(client),
+            methods: LegacyRpcMethods::new(client),
         }
     }
 }
@@ -45,13 +45,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let client = self.client.clone();
+        let methods = self.methods.clone();
 
         // For each key, return it + a future to get the result.
         let iter = keys.into_iter().map(move |key| {
-            let client = client.clone();
+            let methods = methods.clone();
             async move {
-                let res = rpc_methods::state_get_storage(&client, &key, Some(at)).await?;
+                let res = methods.state_get_storage(&key, Some(at)).await?;
                 Ok(res.map(|value| StorageResponse { key, value }))
             }
         });
@@ -74,7 +74,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         Ok(StreamOf(Box::pin(StorageFetchDescendantKeysStream {
             at,
             key,
-            client: self.client.clone(),
+            methods: self.methods.clone(),
             done: Default::default(),
             keys: Default::default(),
             keys_fut: Default::default(),
@@ -90,7 +90,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let keys_stream = StorageFetchDescendantKeysStream {
             at,
             key,
-            client: self.client.clone(),
+            methods: self.methods.clone(),
             done: Default::default(),
             keys: Default::default(),
             keys_fut: Default::default(),
@@ -105,15 +105,15 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        rpc_methods::genesis_hash(&self.client).await
+        self.methods.genesis_hash().await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        rpc_methods::chain_get_header(&self.client, Some(at)).await
+        self.methods.chain_get_header(Some(at)).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let Some(details) = rpc_methods::chain_get_block(&self.client, Some(at)).await? else {
+        let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
             return Ok(None)
         };
         Ok(Some(
@@ -122,19 +122,21 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let hash = rpc_methods::chain_get_finalized_head(&self.client).await?;
+        let hash = self.methods.chain_get_finalized_head().await?;
         Ok(BlockRef::from_hash(hash))
     }
 
     async fn latest_best_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let hash = rpc_methods::chain_get_block_hash(&self.client, None)
+        let hash = self
+            .methods
+            .chain_get_block_hash(None)
             .await?
             .ok_or_else(|| Error::Other("Latest best block doesn't exist".into()))?;
         Ok(BlockRef::from_hash(hash))
     }
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
-        let details = rpc_methods::state_get_runtime_version(&self.client, None).await?;
+        let details = self.methods.state_get_runtime_version(None).await?;
         Ok(RuntimeVersion {
             spec_version: details.spec_version,
             transaction_version: details.transaction_version,
@@ -142,7 +144,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
-        let sub = rpc_methods::state_subscribe_runtime_version(&self.client).await?;
+        let sub = self.methods.state_subscribe_runtime_version().await?;
         let sub = sub.map(|r| {
             r.map(|v| RuntimeVersion {
                 spec_version: v.spec_version,
@@ -155,7 +157,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_all_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub = rpc_methods::chain_subscribe_all_heads(&self.client).await?;
+        let sub = self.methods.chain_subscribe_all_heads().await?;
         let sub = sub.map(|r| {
             r.map(|h| {
                 let hash = h.hash();
@@ -168,7 +170,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_best_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub = rpc_methods::chain_subscribe_new_heads(&self.client).await?;
+        let sub = self.methods.chain_subscribe_new_heads().await?;
         let sub = sub.map(|r| {
             r.map(|h| {
                 let hash = h.hash();
@@ -182,7 +184,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub: super::rpc::Subscription<<T as Config>::Header> =
-            rpc_methods::chain_subscribe_finalized_heads(&self.client).await?;
+            self.methods.chain_subscribe_finalized_heads().await?;
 
         // Get the last finalized block immediately so that the stream will emit every finalized block after this.
         let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
@@ -194,7 +196,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
         // are finalized each time.
         let sub = subscribe_to_block_headers_filling_in_gaps(
-            self.client.clone(),
+            self.methods.clone(),
             sub,
             last_finalized_block_num,
         );
@@ -211,7 +213,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        let sub = rpc_methods::author_submit_and_watch_extrinsic(&self.client, extrinsic).await?;
+        let sub = self
+            .methods
+            .author_submit_and_watch_extrinsic(extrinsic)
+            .await?;
         let sub = sub.filter_map(|r| {
             let mapped = r
                 .map(|tx| {
@@ -265,7 +270,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        rpc_methods::state_call(&self.client, method, call_parameters, Some(at)).await
+        self.methods
+            .state_call(method, call_parameters, Some(at))
+            .await
     }
 }
 
@@ -273,7 +280,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 /// without notice in a patch release.
 #[doc(hidden)]
 pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
-    rpc: RpcClient<T>,
+    methods: LegacyRpcMethods<T>,
     sub: S,
     mut last_block_num: Option<u64>,
 ) -> impl Stream<Item = Result<T::Header, Error>> + Send
@@ -297,13 +304,13 @@ where
 
         // Iterate over all of the previous blocks we need headers for, ignoring the current block
         // (which we already have the header info for):
-        let rpc = rpc.clone();
+        let methods = methods.clone();
         let previous_headers = stream::iter(start_block_num..end_block_num)
             .then(move |n| {
-                let rpc = rpc.clone();
+                let methods = methods.clone();
                 async move {
-                    let hash = rpc_methods::chain_get_block_hash(&rpc, Some(n.into())).await?;
-                    let header = rpc_methods::chain_get_header(&rpc, hash).await?;
+                    let hash = methods.chain_get_block_hash(Some(n.into())).await?;
+                    let header = methods.chain_get_header(hash).await?;
                     Ok::<_, Error>(header)
                 }
             })
@@ -320,7 +327,7 @@ where
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
 pub struct StorageFetchDescendantKeysStream<T: Config> {
-    client: RpcClient<T>,
+    methods: LegacyRpcMethods<T>,
     key: Vec<u8>,
     at: T::Hash,
     // What key do we start paginating from? None = from the beginning.
@@ -381,19 +388,19 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             }
 
             // Else, we don't have a fut to get keys yet so start one going.
-            let client = this.client.clone();
+            let methods = this.methods.clone();
             let key = this.key.clone();
             let at = this.at;
             let pagination_start_key = this.pagination_start_key.take();
             let keys_fut = async move {
-                rpc_methods::state_get_keys_paged(
-                    &client,
-                    &key,
-                    STORAGE_FETCH_PAGE_SIZE,
-                    pagination_start_key.as_deref(),
-                    Some(at),
-                )
-                .await
+                methods
+                    .state_get_keys_paged(
+                        &key,
+                        STORAGE_FETCH_PAGE_SIZE,
+                        pagination_start_key.as_deref(),
+                        Some(at),
+                    )
+                    .await
             };
             this.keys_fut = Some(Box::pin(keys_fut));
         }
@@ -437,10 +444,9 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
             // Else, if we have the next key then let's start waiting on the next value.
             if let Some(key) = &this.next_key {
                 let key = key.clone();
-                let client = this.keys.client.clone();
+                let methods = this.keys.methods.clone();
                 let at = this.keys.at;
-                let fut =
-                    async move { rpc_methods::state_get_storage(&client, &key, Some(at)).await };
+                let fut = async move { methods.state_get_storage(&key, Some(at)).await };
 
                 this.value_fut = Some(Box::pin(fut));
                 continue;

@@ -29,7 +29,6 @@
 
 use crate::utils::node_runtime;
 use codec::Compact;
-use futures::StreamExt;
 use subxt::{
     client::{LightClient, LightClientBuilder, OnlineClientT},
     config::PolkadotConfig,

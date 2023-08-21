@@ -51,12 +51,13 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     use subxt::backend::legacy;
 
     let ctx = test_context().await;
-    let rpc = ctx.rpc().await;
+    let rpc = ctx.legacy_rpc_methods().await;
 
     // Manually subscribe to the next 6 finalized block headers, but deliberately
     // filter out some in the middle so we get back b _ _ b _ b. This guarantees
     // that there will be some gaps, even if there aren't any from the subscription.
-    let some_finalized_blocks = legacy::rpc_methods::chain_subscribe_finalized_heads(&rpc)
+    let some_finalized_blocks = rpc
+        .chain_subscribe_finalized_heads()
         .await?
         .enumerate()
         .take(6)
@@ -92,11 +93,9 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 // Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
 async fn runtime_api_call() -> Result<(), subxt::Error> {
-    use subxt::backend::legacy;
-
     let ctx = test_context().await;
     let api = ctx.client();
-    let rpc = ctx.rpc().await;
+    let rpc = ctx.legacy_rpc_methods().await;
 
     let mut sub = api.blocks().subscribe_best().await?;
 
@@ -109,7 +108,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
         .await?;
 
     // get metadata via `state_getMetadata`.
-    let meta2 = legacy::rpc_methods::state_get_metadata(&rpc, Some(block.hash())).await?;
+    let meta2 = rpc.state_get_metadata(Some(block.hash())).await?;
 
     // They should be the same.
     assert_eq!(meta1.encode(), meta2.encode());

@@ -13,61 +13,285 @@ use codec::Decode;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
-/// Fetch the raw bytes for a given storage key
-pub async fn state_get_storage<T: Config>(
-    client: &RpcClient<T>,
-    key: &[u8],
-    hash: Option<T::Hash>,
-) -> Result<Option<StorageKey>, Error> {
-    let params = rpc_params![to_hex(key), hash];
-    let data: Option<Bytes> = client.request("state_getStorage", params).await?;
-    Ok(data.map(|b| b.0))
+/// An interface to call the legacy RPC methods. This interface is instantiated with
+/// some `T: Config` trait which determines some of the types that the RPC methods will
+/// take or hand back.
+pub struct LegacyRpcMethods<T> {
+    client: RpcClient,
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T> Clone for LegacyRpcMethods<T> {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            _marker: self._marker,
+        }
+    }
+}
+
+impl<T> std::fmt::Debug for LegacyRpcMethods<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LegacyRpcMethods")
+            .field("client", &self.client)
+            .field("_marker", &self._marker)
+            .finish()
+    }
+}
+
+impl<T: Config> LegacyRpcMethods<T> {
+    /// Instantiate the legacy RPC method interface.
+    pub fn new(client: RpcClient) -> Self {
+        LegacyRpcMethods {
+            client,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Fetch the raw bytes for a given storage key
+    pub async fn state_get_storage(
+        &self,
+        key: &[u8],
+        hash: Option<T::Hash>,
+    ) -> Result<Option<StorageKey>, Error> {
+        let params = rpc_params![to_hex(key), hash];
+        let data: Option<Bytes> = self.client.request("state_getStorage", params).await?;
+        Ok(data.map(|b| b.0))
+    }
+
+    /// Returns the keys with prefix with pagination support.
+    /// Up to `count` keys will be returned.
+    /// If `start_key` is passed, return next keys in storage in lexicographic order.
+    pub async fn state_get_keys_paged(
+        &self,
+        key: &[u8],
+        count: u32,
+        start_key: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<Vec<StorageData>, Error> {
+        let start_key = start_key.map(to_hex);
+        let params = rpc_params![to_hex(key), count, start_key, at];
+        let data: Vec<Bytes> = self.client.request("state_getKeysPaged", params).await?;
+        Ok(data.into_iter().map(|b| b.0).collect())
+    }
+
+    /// Fetch the genesis hash
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
+        let block_zero = 0u32;
+        let params = rpc_params![block_zero];
+        let genesis_hash: Option<T::Hash> =
+            self.client.request("chain_getBlockHash", params).await?;
+        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
+    }
+
+    /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
+    pub async fn state_get_metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
+        let bytes: Bytes = self
+            .client
+            .request("state_getMetadata", rpc_params![at])
+            .await?;
+        let metadata = Metadata::decode(&mut &bytes[..])?;
+        Ok(metadata)
+    }
+
+    /// Fetch system health
+    pub async fn system_health(&self) -> Result<SystemHealth, Error> {
+        self.client.request("system_health", rpc_params![]).await
+    }
+
+    /// Fetch system chain
+    pub async fn system_chain(&self) -> Result<String, Error> {
+        self.client.request("system_chain", rpc_params![]).await
+    }
+
+    /// Fetch system name
+    pub async fn system_name(&self) -> Result<String, Error> {
+        self.client.request("system_name", rpc_params![]).await
+    }
+
+    /// Fetch system version
+    pub async fn system_version(&self) -> Result<String, Error> {
+        self.client.request("system_version", rpc_params![]).await
+    }
+
+    /// Fetch system properties
+    pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
+        self.client
+            .request("system_properties", rpc_params![])
+            .await
+    }
+
+    /// Get a header
+    pub async fn chain_get_header(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<T::Header>, Error> {
+        let params = rpc_params![hash];
+        let header = self.client.request("chain_getHeader", params).await?;
+        Ok(header)
+    }
+
+    /// Get a block hash, returns hash of latest _best_ block by default.
+    pub async fn chain_get_block_hash(
+        &self,
+        block_number: Option<BlockNumber>,
+    ) -> Result<Option<T::Hash>, Error> {
+        let params = rpc_params![block_number];
+        let block_hash = self.client.request("chain_getBlockHash", params).await?;
+        Ok(block_hash)
+    }
+
+    /// Get a block hash of the latest finalized block
+    pub async fn chain_get_finalized_head(&self) -> Result<T::Hash, Error> {
+        let hash = self
+            .client
+            .request("chain_getFinalizedHead", rpc_params![])
+            .await?;
+        Ok(hash)
+    }
+
+    /// Get a Block
+    pub async fn chain_get_block(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<BlockDetails<T>>, Error> {
+        let params = rpc_params![hash];
+        let block = self.client.request("chain_getBlock", params).await?;
+        Ok(block)
+    }
+
+    /// Fetch the runtime version
+    pub async fn state_get_runtime_version(
+        &self,
+        at: Option<T::Hash>,
+    ) -> Result<RuntimeVersion, Error> {
+        let params = rpc_params![at];
+        let version = self
+            .client
+            .request("state_getRuntimeVersion", params)
+            .await?;
+        Ok(version)
+    }
+
+    /// Subscribe to all new best block headers.
+    pub async fn chain_subscribe_new_heads(&self) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeNewHeads",
+                rpc_params![],
+                "chain_unsubscribeNewHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to all new block headers.
+    pub async fn chain_subscribe_all_heads(&self) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeAllHeads",
+                rpc_params![],
+                "chain_unsubscribeAllHeads",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Subscribe to finalized block headers.
+    ///
+    /// Note: this may not produce _every_ block in the finalized chain;
+    /// sometimes multiple blocks are finalized at once, and in this case only the
+    /// latest one is returned. the higher level APIs that use this "fill in" the
+    /// gaps for us.
+    pub async fn chain_subscribe_finalized_heads(&self) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chain_subscribeFinalizedHeads",
+                rpc_params![],
+                "chain_unsubscribeFinalizedHeads",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
+    /// Subscribe to runtime version updates that produce changes in the metadata.
+    /// The first item emitted by the stream is the current runtime version.
+    pub async fn state_subscribe_runtime_version(
+        &self,
+    ) -> Result<Subscription<RuntimeVersion>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "state_subscribeRuntimeVersion",
+                rpc_params![],
+                "state_unsubscribeRuntimeVersion",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub async fn author_submit_extrinsic(&self, extrinsic: &[u8]) -> Result<T::Hash, Error> {
+        let params = rpc_params![to_hex(extrinsic)];
+        let xt_hash = self
+            .client
+            .request("author_submitExtrinsic", params)
+            .await?;
+        Ok(xt_hash)
+    }
+
+    /// Create and submit an extrinsic and return a subscription to the events triggered.
+    pub async fn author_submit_and_watch_extrinsic(
+        &self,
+        extrinsic: &[u8],
+    ) -> Result<Subscription<TransactionStatus<T::Hash>>, Error> {
+        let params = rpc_params![to_hex(extrinsic)];
+        let subscription = self
+            .client
+            .subscribe(
+                "author_submitAndWatchExtrinsic",
+                params,
+                "author_unwatchExtrinsic",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
+    /// Execute a runtime API call via `state_call` RPC method.
+    pub async fn state_call(
+        &self,
+        function: &str,
+        call_parameters: Option<&[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<Vec<u8>, Error> {
+        let call_parameters = call_parameters.unwrap_or_default();
+        let bytes: Bytes = self
+            .client
+            .request(
+                "state_call",
+                rpc_params![function, to_hex(call_parameters), at],
+            )
+            .await?;
+        Ok(bytes.0)
+    }
 }
 
 /// Storage key.
 pub type StorageKey = Vec<u8>;
 
-/// Returns the keys with prefix with pagination support.
-/// Up to `count` keys will be returned.
-/// If `start_key` is passed, return next keys in storage in lexicographic order.
-pub async fn state_get_keys_paged<T: Config>(
-    client: &RpcClient<T>,
-    key: &[u8],
-    count: u32,
-    start_key: Option<&[u8]>,
-    at: Option<T::Hash>,
-) -> Result<Vec<StorageData>, Error> {
-    let start_key = start_key.map(to_hex);
-    let params = rpc_params![to_hex(key), count, start_key, at];
-    let data: Vec<Bytes> = client.request("state_getKeysPaged", params).await?;
-    Ok(data.into_iter().map(|b| b.0).collect())
-}
-
 /// Storage data.
 pub type StorageData = Vec<u8>;
-
-/// Fetch the genesis hash
-pub async fn genesis_hash<T: Config>(client: &RpcClient<T>) -> Result<T::Hash, Error> {
-    let block_zero = 0u32;
-    let params = rpc_params![block_zero];
-    let genesis_hash: Option<T::Hash> = client.request("chain_getBlockHash", params).await?;
-    genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-}
-
-/// Fetch the metadata via the legacy `state_getMetadata` RPC method.
-pub async fn state_get_metadata<T: Config>(
-    client: &RpcClient<T>,
-    at: Option<T::Hash>,
-) -> Result<Metadata, Error> {
-    let bytes: Bytes = client.request("state_getMetadata", rpc_params![at]).await?;
-    let metadata = Metadata::decode(&mut &bytes[..])?;
-    Ok(metadata)
-}
-
-/// Fetch system health
-pub async fn system_health<T: Config>(client: &RpcClient<T>) -> Result<SystemHealth, Error> {
-    client.request("system_health", rpc_params![]).await
-}
 
 /// Health struct returned by the RPC
 #[derive(Deserialize, Clone, Debug)]
@@ -83,71 +307,11 @@ pub struct SystemHealth {
     pub should_have_peers: bool,
 }
 
-/// Fetch system chain
-pub async fn system_chain<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
-    client.request("system_chain", rpc_params![]).await
-}
-
-/// Fetch system name
-pub async fn system_name<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
-    client.request("system_name", rpc_params![]).await
-}
-
-/// Fetch system version
-pub async fn system_version<T: Config>(client: &RpcClient<T>) -> Result<String, Error> {
-    client.request("system_version", rpc_params![]).await
-}
-
-/// Fetch system properties
-pub async fn system_properties<T: Config>(
-    client: &RpcClient<T>,
-) -> Result<SystemProperties, Error> {
-    client.request("system_properties", rpc_params![]).await
-}
-
 /// System properties; an arbitrary JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 
-/// Get a header
-pub async fn chain_get_header<T: Config>(
-    client: &RpcClient<T>,
-    hash: Option<T::Hash>,
-) -> Result<Option<T::Header>, Error> {
-    let params = rpc_params![hash];
-    let header = client.request("chain_getHeader", params).await?;
-    Ok(header)
-}
-
-/// Get a block hash, returns hash of latest _best_ block by default.
-pub async fn chain_get_block_hash<T: Config>(
-    client: &RpcClient<T>,
-    block_number: Option<BlockNumber>,
-) -> Result<Option<T::Hash>, Error> {
-    let params = rpc_params![block_number];
-    let block_hash = client.request("chain_getBlockHash", params).await?;
-    Ok(block_hash)
-}
-
 /// A block number
 pub type BlockNumber = NumberOrHex;
-
-/// Get a block hash of the latest finalized block
-pub async fn chain_get_finalized_head<T: Config>(client: &RpcClient<T>) -> Result<T::Hash, Error> {
-    let hash = client
-        .request("chain_getFinalizedHead", rpc_params![])
-        .await?;
-    Ok(hash)
-}
-
-/// Get a Block
-pub async fn chain_get_block<T: Config>(
-    client: &RpcClient<T>,
-    hash: Option<T::Hash>,
-) -> Result<Option<BlockDetails<T>>, Error> {
-    let params = rpc_params![hash];
-    let block = client.request("chain_getBlock", params).await?;
-    Ok(block)
-}
 
 /// The response from `chain_getBlock`
 #[derive(Debug, Deserialize)]
@@ -175,16 +339,6 @@ pub type ConsensusEngineId = [u8; 4];
 /// The encoded justification specific to a consensus engine.
 pub type EncodedJustification = Vec<u8>;
 
-/// Fetch the runtime version
-pub async fn state_get_runtime_version<T: Config>(
-    client: &RpcClient<T>,
-    at: Option<T::Hash>,
-) -> Result<RuntimeVersion, Error> {
-    let params = rpc_params![at];
-    let version = client.request("state_getRuntimeVersion", params).await?;
-    Ok(version)
-}
-
 /// This contains the runtime version information necessary to make transactions, as obtained from
 /// the RPC call `state_getRuntimeVersion`,
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
@@ -209,102 +363,6 @@ pub struct RuntimeVersion {
     /// Fields unnecessary to Subxt are written out to this map.
     #[serde(flatten)]
     pub other: std::collections::HashMap<String, serde_json::Value>,
-}
-
-/// Subscribe to all new best block headers.
-pub async fn chain_subscribe_new_heads<T: Config>(
-    client: &RpcClient<T>,
-) -> Result<Subscription<T::Header>, Error> {
-    let subscription = client
-        .subscribe(
-            // Despite the name, this returns a stream of all new blocks
-            // imported by the node that happen to be added to the current best chain
-            // (ie all best blocks).
-            "chain_subscribeNewHeads",
-            rpc_params![],
-            "chain_unsubscribeNewHeads",
-        )
-        .await?;
-
-    Ok(subscription)
-}
-
-/// Subscribe to all new block headers.
-pub async fn chain_subscribe_all_heads<T: Config>(
-    client: &RpcClient<T>,
-) -> Result<Subscription<T::Header>, Error> {
-    let subscription = client
-        .subscribe(
-            // Despite the name, this returns a stream of all new blocks
-            // imported by the node that happen to be added to the current best chain
-            // (ie all best blocks).
-            "chain_subscribeAllHeads",
-            rpc_params![],
-            "chain_unsubscribeAllHeads",
-        )
-        .await?;
-
-    Ok(subscription)
-}
-
-/// Subscribe to finalized block headers.
-///
-/// Note: this may not produce _every_ block in the finalized chain;
-/// sometimes multiple blocks are finalized at once, and in this case only the
-/// latest one is returned. the higher level APIs that use this "fill in" the
-/// gaps for us.
-pub async fn chain_subscribe_finalized_heads<T: Config>(
-    client: &RpcClient<T>,
-) -> Result<Subscription<T::Header>, Error> {
-    let subscription = client
-        .subscribe(
-            "chain_subscribeFinalizedHeads",
-            rpc_params![],
-            "chain_unsubscribeFinalizedHeads",
-        )
-        .await?;
-    Ok(subscription)
-}
-
-/// Subscribe to runtime version updates that produce changes in the metadata.
-/// The first item emitted by the stream is the current runtime version.
-pub async fn state_subscribe_runtime_version<T: Config>(
-    client: &RpcClient<T>,
-) -> Result<Subscription<RuntimeVersion>, Error> {
-    let subscription = client
-        .subscribe(
-            "state_subscribeRuntimeVersion",
-            rpc_params![],
-            "state_unsubscribeRuntimeVersion",
-        )
-        .await?;
-    Ok(subscription)
-}
-
-/// Create and submit an extrinsic and return corresponding Hash if successful
-pub async fn author_submit_extrinsic<T: Config>(
-    client: &RpcClient<T>,
-    extrinsic: &[u8],
-) -> Result<T::Hash, Error> {
-    let params = rpc_params![to_hex(extrinsic)];
-    let xt_hash = client.request("author_submitExtrinsic", params).await?;
-    Ok(xt_hash)
-}
-
-/// Create and submit an extrinsic and return a subscription to the events triggered.
-pub async fn author_submit_and_watch_extrinsic<T: Config>(
-    client: &RpcClient<T>,
-    extrinsic: &[u8],
-) -> Result<Subscription<TransactionStatus<T::Hash>>, Error> {
-    let params = rpc_params![to_hex(extrinsic)];
-    let subscription = client
-        .subscribe(
-            "author_submitAndWatchExtrinsic",
-            params,
-            "author_unwatchExtrinsic",
-        )
-        .await?;
-    Ok(subscription)
 }
 
 /// Possible transaction status events.
@@ -338,28 +396,6 @@ pub enum TransactionStatus<Hash> {
     Dropped,
     /// Transaction is no longer valid in the current state.
     Invalid,
-}
-
-/// Execute a runtime API call via `state_call` RPC method.
-pub async fn state_call<T: Config>(
-    client: &RpcClient<T>,
-    function: &str,
-    call_parameters: Option<&[u8]>,
-    at: Option<T::Hash>,
-) -> Result<Vec<u8>, Error> {
-    let call_parameters = call_parameters.unwrap_or_default();
-    let bytes: Bytes = client
-        .request(
-            "state_call",
-            rpc_params![function, to_hex(call_parameters), at],
-        )
-        .await?;
-    Ok(bytes.0)
-}
-
-/// A quick helper to encode some bytes to hex.
-fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 /// Hex-serialized shim for `Vec<u8>`.
@@ -433,4 +469,9 @@ impl From<U256> for NumberOrHex {
     fn from(n: U256) -> Self {
         NumberOrHex::Hex(n)
     }
+}
+
+/// A quick helper to encode some bytes to hex.
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
 }

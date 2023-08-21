@@ -3,9 +3,11 @@
 // see LICENSE for license details.
 
 use std::ffi::{OsStr, OsString};
-use std::sync::Arc;
 use substrate_runner::SubstrateNode;
-use subxt::{Config, OnlineClient};
+use subxt::{
+    backend::{legacy, rpc},
+    Config, OnlineClient,
+};
 
 #[cfg(feature = "unstable-light-client")]
 use subxt::client::{LightClient, LightClientBuilder};
@@ -35,12 +37,12 @@ where
     }
 
     /// Hand back an RPC client connected to the test node.
-    pub async fn rpc(&self) -> subxt::backend::rpc::RpcClient<R> {
+    pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
         let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
-        let rpc_client = subxt::backend::rpc::default_rpc_client(url)
+        let rpc_client = rpc::RpcClient::from_url(url)
             .await
             .expect("Unable to connect RPC client to test node");
-        subxt::backend::rpc::RpcClient::new(Arc::new(rpc_client))
+        legacy::LegacyRpcMethods::new(rpc_client)
     }
 
     /// Returns the subxt client connected to the running node.

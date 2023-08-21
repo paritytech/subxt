@@ -5,7 +5,9 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{legacy::LegacyBackend, rpc, Backend, BackendExt, RuntimeVersion, StreamOfResults},
+    backend::{
+        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
+    },
     blocks::BlocksClient,
     constants::ConstantsClient,
     error::Error,
@@ -64,19 +66,16 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let rpc_client = crate::backend::rpc::default_rpc_client(url).await?;
-        let backend = LegacyBackend::new(Arc::new(rpc_client));
+        let client = RpcClient::from_url(url).await?;
+        let backend = LegacyBackend::new(client);
         OnlineClient::from_backend(Arc::new(backend)).await
     }
 }
 
 impl<T: Config> OnlineClient<T> {
-    /// Construct a new [`OnlineClient`] by providing an underlying [`rpc::RpcClientT`]
-    /// implementation to drive the connection. This will use the current default
-    /// [`Backend`], which may change in future releases.
-    pub async fn from_rpc_client<R: rpc::RpcClientT>(
-        rpc_client: Arc<R>,
-    ) -> Result<OnlineClient<T>, Error> {
+    /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
+    /// This will use the current default [`Backend`], which may change in future releases.
+    pub async fn from_rpc_client(rpc_client: RpcClient) -> Result<OnlineClient<T>, Error> {
         let backend = Arc::new(LegacyBackend::new(rpc_client));
         OnlineClient::from_backend(backend).await
     }
@@ -94,11 +93,11 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
     /// a client.
-    pub fn from_rpc_client_with<R: rpc::RpcClientT>(
+    pub fn from_rpc_client_with(
         genesis_hash: T::Hash,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
-        rpc_client: Arc<R>,
+        rpc_client: RpcClient,
     ) -> Result<OnlineClient<T>, Error> {
         let backend = Arc::new(LegacyBackend::new(rpc_client));
         OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)

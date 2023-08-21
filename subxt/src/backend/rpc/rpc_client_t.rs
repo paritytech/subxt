@@ -10,8 +10,8 @@ use std::{future::Future, pin::Pin};
 pub use serde_json::value::RawValue;
 
 /// A trait describing low level JSON-RPC interactions. Implementations of this can be
-/// used to instantiate Subxt clients or backends, or to instantiate a [`super::RpcClient`]
-/// to make RPC calls from eg [`crate::backend::legacy::rpc_methods`].
+/// used to instantiate a [`super::RpcClient`], which can be passed to [`crate::OnlineClient`]
+/// or used for lower level RPC calls via eg [`crate::backend::legacy::LegacyRpcMethods`].
 ///
 /// This is a low level interface whose methods expect an already-serialized set of params,
 /// and return an owned but still-serialized [`RawValue`], deferring deserialization to
