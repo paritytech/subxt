@@ -76,7 +76,7 @@ where
     /// waiting for this to happen.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
@@ -106,7 +106,7 @@ where
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
@@ -196,7 +196,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
     }
 }
 
-/// Possible transaction statuses returned from our [`TxProgress::next_item()`] call.
+/// Possible transaction statuses returned from our [`TxProgress::next()`] call.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub enum TxStatus<T: Config, C> {

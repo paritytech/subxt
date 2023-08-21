@@ -1,4 +1,3 @@
-use futures::StreamExt;
 use subxt::{tx::TxStatus, OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 

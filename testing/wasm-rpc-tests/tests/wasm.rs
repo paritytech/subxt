@@ -30,5 +30,5 @@ async fn wasm_ws_transport_works() {
         .unwrap();
 
     let mut stream = client.backend().stream_best_block_headers().await.unwrap();
-    stream.next_item().await;
+    stream.next().await;
 }
