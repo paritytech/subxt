@@ -2,9 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! The raw legacy RPC methods.
-//!
-//! **Note:** These will eventually be removed in a future release.
+//! An interface to call the raw legacy RPC methods.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
@@ -287,6 +285,19 @@ impl<T: Config> LegacyRpcMethods<T> {
             .await?;
         Ok(bytes.0)
     }
+
+    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    ///
+    /// Returns a [`DryRunResult`], which is the result of performing the dry run.
+    pub async fn dry_run(
+        &self,
+        encoded_signed: &[u8],
+        at: Option<T::Hash>,
+    ) -> Result<DryRunResultBytes, Error> {
+        let params = rpc_params![to_hex(encoded_signed), at];
+        let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
+        Ok(DryRunResultBytes(result_bytes.0))
+    }
 }
 
 /// Storage key.
@@ -412,6 +423,48 @@ impl std::ops::Deref for Bytes {
 impl From<Vec<u8>> for Bytes {
     fn from(s: Vec<u8>) -> Self {
         Bytes(s)
+    }
+}
+
+/// The decoded result returned from calling `system_dryRun` on some extrinsic.
+#[derive(Debug, PartialEq, Eq)]
+pub enum DryRunResult {
+    /// The transaction could be included in the block and executed.
+    Success,
+    /// The transaction could be included in the block, but the call failed to dispatch.
+    DispatchError(crate::error::DispatchError),
+    /// The transaction could not be included in the block.
+    TransactionValidityError,
+}
+
+/// The bytes representing an error dry running an extrinsic. call [`DryRunResultBytes::into_dry_run_result`]
+/// to attempt to decode this into something more meaningful.
+pub struct DryRunResultBytes(pub Vec<u8>);
+
+impl DryRunResultBytes {
+    /// Attempt to decode the error bytes into a [`DryRunResult`] using the provided [`Metadata`].
+    pub fn into_dry_run_result(
+        self,
+        metadata: &crate::metadata::Metadata,
+    ) -> Result<DryRunResult, crate::Error> {
+        // dryRun returns an ApplyExtrinsicResult, which is basically a
+        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
+        let bytes = self.0;
+        if bytes[0] == 0 && bytes[1] == 0 {
+            // Ok(Ok(())); transaction is valid and executed ok
+            Ok(DryRunResult::Success)
+        } else if bytes[0] == 0 && bytes[1] == 1 {
+            // Ok(Err(dispatch_error)); transaction is valid but execution failed
+            let dispatch_error =
+                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
+            Ok(DryRunResult::DispatchError(dispatch_error))
+        } else if bytes[0] == 1 {
+            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
+            Ok(DryRunResult::TransactionValidityError)
+        } else {
+            // unable to decode the bytes; they aren't what we expect.
+            Err(crate::Error::Unknown(bytes))
+        }
     }
 }
 

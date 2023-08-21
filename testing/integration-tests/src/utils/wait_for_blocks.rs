@@ -6,7 +6,7 @@ use subxt::{client::OnlineClientT, Config};
 
 /// Wait for blocks to be produced before running tests. Waiting for two blocks
 /// (the genesis block and another one) seems to be enough to allow tests
-/// like `dry_run_passes` to work properly.
+/// like `validation_passes` to work properly.
 ///
 /// If the "unstable-light-client" feature flag is enabled, this will wait for
 /// 5 blocks instead of two. The light client needs the extra blocks to avoid

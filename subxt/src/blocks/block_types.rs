@@ -44,6 +44,12 @@ where
         }
     }
 
+    /// Return a reference to the given block. While this reference is kept alive,
+    /// the backend will (if possible) endeavour to keep hold of the block.
+    pub fn reference(&self) -> BlockRef<T::Hash> {
+        self.block_ref.clone()
+    }
+
     /// Return the block hash.
     pub fn hash(&self) -> T::Hash {
         self.block_ref.hash()

@@ -22,8 +22,8 @@ pub use self::signer::PairSigner;
 pub use self::{
     signer::Signer,
     tx_client::{
-        DryRunResult, PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid,
-        TransactionUnknown, TxClient,
+        PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,
+        ValidationResult,
     },
     tx_payload::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
     tx_progress::{TxInBlock, TxProgress, TxStatus},

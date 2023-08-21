@@ -499,21 +499,23 @@ where
         }
     }
 
-    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
+    /// valid can be added to a block, but may still end up in an error state.
     ///
-    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
-    pub async fn dry_run(&self) -> Result<DryRunResult, Error> {
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn validate(&self) -> Result<ValidationResult, Error> {
         let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
-        self.dry_run_at(latest_block_ref).await
+        self.validate_at(latest_block_ref).await
     }
 
-    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
+    /// valid can be added to a block, but may still end up in an error state.
     ///
-    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
-    pub async fn dry_run_at(
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn validate_at(
         &self,
         at: impl Into<BlockRef<T::Hash>>,
-    ) -> Result<DryRunResult, Error> {
+    ) -> Result<ValidationResult, Error> {
         let block_hash = at.into().hash();
 
         // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
@@ -532,7 +534,7 @@ where
             )
             .await?;
 
-        DryRunResult::try_from_bytes(res)
+        ValidationResult::try_from_bytes(res)
     }
 
     /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
@@ -557,23 +559,23 @@ where
     }
 }
 
-impl DryRunResult {
-    fn try_from_bytes(bytes: Vec<u8>) -> Result<DryRunResult, crate::Error> {
+impl ValidationResult {
+    fn try_from_bytes(bytes: Vec<u8>) -> Result<ValidationResult, crate::Error> {
         // TaggedTransactionQueue_validate_transaction returns this:
         // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
         // We copy some of the inner types and put the three states (valid, invalid, unknown) into one enum,
         // because from our perspective, the call was successful regardless.
         if bytes[0] == 0 {
             // ok: valid (more detail is available here, but ).
-            Ok(DryRunResult::Valid)
+            Ok(ValidationResult::Valid)
         } else if bytes[0] == 1 && bytes[1] == 0 {
             // error: invalid
             let res = TransactionInvalid::decode(&mut &bytes[2..])?;
-            Ok(DryRunResult::Invalid(res))
+            Ok(ValidationResult::Invalid(res))
         } else if bytes[0] == 1 && bytes[1] == 1 {
             // error: unknown
             let res = TransactionUnknown::decode(&mut &bytes[2..])?;
-            Ok(DryRunResult::Unknown(res))
+            Ok(ValidationResult::Unknown(res))
         } else {
             // unable to decode the bytes; they aren't what we expect.
             Err(crate::Error::Unknown(bytes))
@@ -581,9 +583,9 @@ impl DryRunResult {
     }
 }
 
-/// The result of performing a `dry_run` call.
+/// The result of performing [`SubmittableExtrinsic::validate()`].
 #[derive(Clone, Debug, PartialEq)]
-pub enum DryRunResult {
+pub enum ValidationResult {
     /// The transaction is valid
     Valid,
     /// The transaction is invalid
@@ -592,10 +594,10 @@ pub enum DryRunResult {
     Unknown(TransactionUnknown),
 }
 
-impl DryRunResult {
+impl ValidationResult {
     /// Is the transaction valid.
     pub fn is_valid(&self) -> bool {
-        matches!(self, DryRunResult::Valid)
+        matches!(self, ValidationResult::Valid)
     }
 }
 
@@ -673,98 +675,98 @@ mod test {
                 T::Ok(sp::ValidTransaction {
                     ..Default::default()
                 }),
-                DryRunResult::Valid,
+                ValidationResult::Valid,
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::BadProof,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::BadProof),
+                ValidationResult::Invalid(TransactionInvalid::BadProof),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::Call,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::Call),
+                ValidationResult::Invalid(TransactionInvalid::Call),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::Payment,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::Payment),
+                ValidationResult::Invalid(TransactionInvalid::Payment),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::Future,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::Future),
+                ValidationResult::Invalid(TransactionInvalid::Future),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::Stale,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::Stale),
+                ValidationResult::Invalid(TransactionInvalid::Stale),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::AncientBirthBlock,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::AncientBirthBlock),
+                ValidationResult::Invalid(TransactionInvalid::AncientBirthBlock),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::ExhaustsResources,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::ExhaustsResources),
+                ValidationResult::Invalid(TransactionInvalid::ExhaustsResources),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::BadMandatory,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::BadMandatory),
+                ValidationResult::Invalid(TransactionInvalid::BadMandatory),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::MandatoryValidation,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::MandatoryValidation),
+                ValidationResult::Invalid(TransactionInvalid::MandatoryValidation),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::BadSigner,
                 )),
-                DryRunResult::Invalid(TransactionInvalid::BadSigner),
+                ValidationResult::Invalid(TransactionInvalid::BadSigner),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
                     sp::InvalidTransaction::Custom(123),
                 )),
-                DryRunResult::Invalid(TransactionInvalid::Custom(123)),
+                ValidationResult::Invalid(TransactionInvalid::Custom(123)),
             ),
             (
                 T::Err(sp::TransactionValidityError::Unknown(
                     sp::UnknownTransaction::CannotLookup,
                 )),
-                DryRunResult::Unknown(TransactionUnknown::CannotLookup),
+                ValidationResult::Unknown(TransactionUnknown::CannotLookup),
             ),
             (
                 T::Err(sp::TransactionValidityError::Unknown(
                     sp::UnknownTransaction::NoUnsignedValidator,
                 )),
-                DryRunResult::Unknown(TransactionUnknown::NoUnsignedValidator),
+                ValidationResult::Unknown(TransactionUnknown::NoUnsignedValidator),
             ),
             (
                 T::Err(sp::TransactionValidityError::Unknown(
                     sp::UnknownTransaction::Custom(123),
                 )),
-                DryRunResult::Unknown(TransactionUnknown::Custom(123)),
+                ValidationResult::Unknown(TransactionUnknown::Custom(123)),
             ),
         ];
 
-        for (sp, dry_run) in pairs {
+        for (sp, validation_result) in pairs {
             let encoded = sp.encode();
-            let decoded = DryRunResult::try_from_bytes(encoded).expect("should decode OK");
-            assert_eq!(decoded, dry_run);
+            let decoded = ValidationResult::try_from_bytes(encoded).expect("should decode OK");
+            assert_eq!(decoded, validation_result);
         }
     }
 }

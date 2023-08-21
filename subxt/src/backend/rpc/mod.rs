@@ -39,7 +39,8 @@
 //! let rpc_methods = LegacyRpcMethods::<SubstrateConfig>::new(rpc_client.clone());
 //!
 //! // Use it to make RPC calls, here using the legacy genesis_hash method.
-//! let genesis_hash = rpc_methods.genesis_hash()
+//! let genesis_hash = rpc_methods
+//!     .genesis_hash()
 //!     .await
 //!     .unwrap();
 //!

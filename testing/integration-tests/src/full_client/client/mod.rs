@@ -11,7 +11,7 @@ use futures::StreamExt;
 use subxt::{
     backend::BackendExt,
     error::{DispatchError, Error},
-    tx::{DryRunResult, TransactionInvalid},
+    tx::{TransactionInvalid, ValidationResult},
 };
 use subxt_signer::sr25519::dev;
 
@@ -60,7 +60,7 @@ async fn storage_iter() {
 }
 
 #[tokio::test]
-async fn transaction_dry_run() {
+async fn transaction_validation() {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -79,7 +79,10 @@ async fn transaction_dry_run() {
         .await
         .unwrap();
 
-    signed_extrinsic.dry_run().await.expect("dryrunning failed");
+    signed_extrinsic
+        .validate()
+        .await
+        .expect("validation failed");
 
     signed_extrinsic
         .submit_and_watch()
@@ -91,7 +94,7 @@ async fn transaction_dry_run() {
 }
 
 #[tokio::test]
-async fn dry_run_fails() {
+async fn validation_fails() {
     use std::str::FromStr;
     use subxt_signer::{sr25519::Keypair, SecretUri};
 
@@ -114,10 +117,13 @@ async fn dry_run_fails() {
         .await
         .unwrap();
 
-    let dry_run_res = signed_extrinsic.dry_run().await.expect("dryrunning failed");
+    let validation_res = signed_extrinsic
+        .validate()
+        .await
+        .expect("dryrunning failed");
     assert_eq!(
-        dry_run_res,
-        DryRunResult::Invalid(TransactionInvalid::Payment)
+        validation_res,
+        ValidationResult::Invalid(TransactionInvalid::Payment)
     );
 }
 
