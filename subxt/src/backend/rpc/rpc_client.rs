@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{RpcClientT, RpcSubscription, RpcSubscriptionId};
+use super::{RawRpcSubscription, RpcClientT};
 use crate::error::Error;
 use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
@@ -58,12 +58,12 @@ impl RpcClient {
         sub: &str,
         params: RpcParams,
         unsub: &str,
-    ) -> Result<Subscription<Res>, Error> {
+    ) -> Result<RpcSubscription<Res>, Error> {
         let sub = self
             .client
             .subscribe_raw(sub, params.build(), unsub)
             .await?;
-        Ok(Subscription::new(sub))
+        Ok(RpcSubscription::new(sub))
     }
 }
 
@@ -166,12 +166,12 @@ impl RpcParams {
 /// A generic RPC Subscription. This implements [`Stream`], and so most of
 /// the functionality you'll need to interact with it comes from the
 /// [`StreamExt`] extension trait.
-pub struct Subscription<Res> {
-    inner: RpcSubscription,
+pub struct RpcSubscription<Res> {
+    inner: RawRpcSubscription,
     _marker: std::marker::PhantomData<Res>,
 }
 
-impl<Res> std::fmt::Debug for Subscription<Res> {
+impl<Res> std::fmt::Debug for RpcSubscription<Res> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Subscription")
             .field("inner", &"RpcSubscription")
@@ -180,9 +180,9 @@ impl<Res> std::fmt::Debug for Subscription<Res> {
     }
 }
 
-impl<Res> Subscription<Res> {
+impl<Res> RpcSubscription<Res> {
     /// Creates a new [`Subscription`].
-    pub fn new(inner: RpcSubscription) -> Self {
+    pub fn new(inner: RawRpcSubscription) -> Self {
         Self {
             inner,
             _marker: std::marker::PhantomData,
@@ -190,12 +190,12 @@ impl<Res> Subscription<Res> {
     }
 
     /// Obtain the ID associated with this subscription.
-    pub fn subscription_id(&self) -> Option<&RpcSubscriptionId> {
-        self.inner.id.as_ref()
+    pub fn subscription_id(&self) -> Option<&str> {
+        self.inner.id.as_deref()
     }
 }
 
-impl<Res: DeserializeOwned> Subscription<Res> {
+impl<Res: DeserializeOwned> RpcSubscription<Res> {
     /// Returns the next item in the stream. This is just a wrapper around
     /// [`StreamExt::next()`] so that you can avoid the extra import.
     pub async fn next(&mut self) -> Option<Result<Res, Error>> {
@@ -203,9 +203,9 @@ impl<Res: DeserializeOwned> Subscription<Res> {
     }
 }
 
-impl<Res> std::marker::Unpin for Subscription<Res> {}
+impl<Res> std::marker::Unpin for RpcSubscription<Res> {}
 
-impl<Res: DeserializeOwned> Stream for Subscription<Res> {
+impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
     type Item = Result<Res, Error>;
 
     fn poll_next(

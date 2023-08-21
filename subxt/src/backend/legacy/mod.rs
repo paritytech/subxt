@@ -183,7 +183,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub: super::rpc::Subscription<<T as Config>::Header> =
+        let sub: super::rpc::RpcSubscription<<T as Config>::Header> =
             self.methods.chain_subscribe_finalized_heads().await?;
 
         // Get the last finalized block immediately so that the stream will emit every finalized block after this.

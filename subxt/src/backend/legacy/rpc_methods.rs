@@ -6,7 +6,7 @@
 //!
 //! **Note:** These will eventually be removed in a future release.
 
-use crate::backend::rpc::{rpc_params, RpcClient, Subscription};
+use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
@@ -174,7 +174,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn chain_subscribe_new_heads(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn chain_subscribe_new_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -191,7 +191,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     }
 
     /// Subscribe to all new block headers.
-    pub async fn chain_subscribe_all_heads(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn chain_subscribe_all_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -213,7 +213,9 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// sometimes multiple blocks are finalized at once, and in this case only the
     /// latest one is returned. the higher level APIs that use this "fill in" the
     /// gaps for us.
-    pub async fn chain_subscribe_finalized_heads(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn chain_subscribe_finalized_heads(
+        &self,
+    ) -> Result<RpcSubscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -229,7 +231,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// The first item emitted by the stream is the current runtime version.
     pub async fn state_subscribe_runtime_version(
         &self,
-    ) -> Result<Subscription<RuntimeVersion>, Error> {
+    ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -255,7 +257,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     pub async fn author_submit_and_watch_extrinsic(
         &self,
         extrinsic: &[u8],
-    ) -> Result<Subscription<TransactionStatus<T::Hash>>, Error> {
+    ) -> Result<RpcSubscription<TransactionStatus<T::Hash>>, Error> {
         let params = rpc_params![to_hex(extrinsic)];
         let subscription = self
             .client

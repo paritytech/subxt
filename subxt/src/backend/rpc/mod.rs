@@ -61,8 +61,6 @@ mod jsonrpsee_impl;
 mod rpc_client;
 mod rpc_client_t;
 
-pub use rpc_client_t::{
-    RawValue, RpcClientT, RpcFuture, RpcSubscription, RpcSubscriptionId, RpcSubscriptionStream,
-};
+pub use rpc_client_t::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClientT};
 
-pub use rpc_client::{rpc_params, RpcClient, RpcParams, Subscription};
+pub use rpc_client::{rpc_params, RpcClient, RpcParams, RpcSubscription};

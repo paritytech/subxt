@@ -5,8 +5,8 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::{config::Config, error::Error, OnlineClient};
-use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
 use std::num::NonZeroU32;
+use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]

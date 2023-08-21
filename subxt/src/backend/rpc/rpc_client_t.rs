@@ -36,7 +36,7 @@ pub trait RpcClientT: Send + Sync + 'static {
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
-    ) -> RpcFuture<'a, Box<RawValue>>;
+    ) -> RawRpcFuture<'a, Box<RawValue>>;
 
     /// Subscribe to some method. Implementations should expect that the params will
     /// either be `None`, or be an already-serialized JSON array of parameters.
@@ -50,23 +50,16 @@ pub trait RpcClientT: Send + Sync + 'static {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription>;
+    ) -> RawRpcFuture<'a, RawRpcSubscription>;
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
+pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
-pub struct RpcSubscription {
+pub struct RawRpcSubscription {
     /// The subscription stream.
-    pub stream: RpcSubscriptionStream,
+    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>,
     /// The ID associated with the subscription.
-    pub id: Option<RpcSubscriptionId>,
+    pub id: Option<String>,
 }
-
-/// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscriptionStream =
-    Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>;
-
-/// The ID associated with the [`RpcClientT`]'s `subscription`.
-pub type RpcSubscriptionId = String;
