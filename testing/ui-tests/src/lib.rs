@@ -11,6 +11,7 @@
 //! Use with `TRYBUILD=overwrite` after updating codebase (see `trybuild` docs for more details on that)
 //! to automatically regenerate `stderr` files, but don't forget to check that new files make sense.
 
+mod custom_values;
 mod dispatch_errors;
 mod storage;
 mod utils;
@@ -49,6 +50,12 @@ fn ui_tests() {
         m.new_test_case()
             .name("array_dispatch_error")
             .build(dispatch_errors::metadata_array_dispatch_error()),
+    );
+
+    t.pass(
+        m.new_test_case()
+            .name("custom_values_foo")
+            .build(custom_values::metadata_custom_values_foo()),
     );
 
     // Test retaining only specific pallets and ensure that works.
