@@ -252,6 +252,31 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     assert_eq!(actual_tx_bytes, expected_tx_bytes);
 }
 
+#[tokio::test]
+async fn extrinsic_hash_is_same_as_returned() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let rpc = ctx.legacy_rpc_methods().await;
+
+    let payload = node_runtime::tx()
+        .balances()
+        .transfer(dev::alice().public_key().into(), 12345000000000000);
+
+    let tx = api
+        .tx()
+        .create_signed(&payload, &dev::bob(), Default::default())
+        .await
+        .unwrap();
+
+    // 1. Calculate the hash locally:
+    let local_hash = tx.hash();
+
+    // 2. Submit and get the hash back from the node:
+    let external_hash = rpc.author_submit_extrinsic(tx.encoded()).await.unwrap();
+
+    assert_eq!(local_hash, external_hash);
+}
+
 /// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
 #[derive(Encode, Decode, Debug, Clone, Eq, PartialEq)]
 pub struct FeeDetails {

@@ -427,6 +427,11 @@ where
         }
     }
 
+    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
+    pub fn hash(&self) -> T::Hash {
+        T::Hasher::hash_of(&self.encoded)
+    }
+
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
@@ -450,7 +455,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hasher::hash_of(&self.encoded);
+        let ext_hash = self.hash();
 
         // Submit and watch for transaction progress.
         let sub = self
@@ -468,7 +473,7 @@ where
     /// submission and whether it's eventually successful or not. This call does not guarantee
     /// success, and is just sending the transaction to the chain.
     pub async fn submit(&self) -> Result<T::Hash, Error> {
-        let ext_hash = T::Hasher::hash_of(&self.encoded);
+        let ext_hash = self.hash();
         let mut sub = self
             .client
             .backend()
