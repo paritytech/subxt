@@ -67,8 +67,8 @@ where
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
     /// avoid importing that trait if you don't otherwise need it.
-    pub async fn next_item(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
-        self.next().await
+    pub async fn next(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
+        StreamExt::next(self).await
     }
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
@@ -83,7 +83,7 @@ where
     /// that this is true. In those cases the stream is closed however, so you currently have no way to find
     /// out if they finally made it into a block or not.
     pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
-        while let Some(status) = self.next_item().await {
+        while let Some(status) = self.next().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
                 TxStatus::InBestBlock(s) | TxStatus::InFinalizedBlock(s) => return Ok(s),
@@ -113,7 +113,7 @@ where
     /// that this is true. In those cases the stream is closed however, so you currently have no way to find
     /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
-        while let Some(status) = self.next_item().await {
+        while let Some(status) = self.next().await {
             match status? {
                 // Finalized! Return.
                 TxStatus::InFinalizedBlock(s) => return Ok(s),

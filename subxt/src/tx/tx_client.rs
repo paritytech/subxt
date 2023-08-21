@@ -15,7 +15,6 @@ use crate::{
 };
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use futures::StreamExt;
 use sp_core_hashing::blake2_256;
 
 /// A client for working with transactions.

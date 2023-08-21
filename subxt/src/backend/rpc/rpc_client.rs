@@ -209,7 +209,8 @@ impl<Res> Subscription<Res> {
 }
 
 impl<Res: DeserializeOwned> Subscription<Res> {
-    /// Wait for the next item from the subscription.
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
     pub async fn next(&mut self) -> Option<Result<Res, Error>> {
         StreamExt::next(self).await
     }

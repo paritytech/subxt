@@ -272,8 +272,8 @@ impl<T> StreamOf<T> {
 
     /// Returns the next item in the stream. This is just a wrapper around
     /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next_item(&mut self) -> Option<T> {
-        self.next().await
+    pub async fn next(&mut self) -> Option<T> {
+        StreamExt::next(self).await
     }
 }
 

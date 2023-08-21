@@ -16,7 +16,7 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
-use futures::{future, StreamExt};
+use futures::future;
 use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
@@ -429,7 +429,7 @@ pub struct RuntimeUpdaterStream<T: Config> {
 }
 
 impl<T: Config> RuntimeUpdaterStream<T> {
-    /// Get the next element of the stream.
+    /// Wait for the next runtime update.
     pub async fn next(&mut self) -> Option<Result<Update, Error>> {
         let maybe_runtime_version = self.stream.next().await?;
 
