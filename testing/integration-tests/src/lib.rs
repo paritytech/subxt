@@ -21,6 +21,8 @@ mod light_client;
 use test_runtime::node_runtime;
 
 // These dependencies are used for the full client.
+#[cfg(all(test, feature = "unstable-light-client"))]
+use futures as _;
 #[cfg(all(test, not(feature = "unstable-light-client")))]
 use regex as _;
 #[cfg(all(test, not(feature = "unstable-light-client")))]
