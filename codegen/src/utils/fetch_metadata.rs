@@ -201,14 +201,18 @@ async fn fetch_metadata(
         client: &impl ClientT,
         version: MetadataVersion,
     ) -> Result<Vec<u8>, FetchMetadataError> {
-        if !matches!(version, MetadataVersion::Version(14)) {
+        // If the user specifically asks for anything other than version 14 or "latest", error.
+        if !matches!(
+            version,
+            MetadataVersion::Latest | MetadataVersion::Version(14)
+        ) {
             return Err(FetchMetadataError::Other(
                 "The node can only return version 14 metadata using the legacy API but you've asked for something else"
                     .to_string(),
             ));
         }
 
-        // Fetch the metadata at that version:
+        // Fetch the metadata.
         let metadata_string: String = client
             .request("state_call", rpc_params!["Metadata_metadata", "0x"])
             .await?;
