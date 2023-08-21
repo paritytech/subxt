@@ -20,7 +20,7 @@ use crate::error::CodegenError;
 use crate::{
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-    utils::{fetch_metadata_bytes_blocking, MetadataVersion, Uri},
+    utils::{fetch_metadata_bytes_blocking, MetadataVersion, Url},
     CratePath,
 };
 use codec::Decode;
@@ -146,21 +146,21 @@ impl GenerateRuntimeApi {
     /// # Warning
     ///
     /// Not recommended to be used in production environments.
-    pub fn generate_from_url(self, url: &Uri) -> Result<TokenStream2, CodegenError> {
-        fn fetch_metadata(url: &Uri, version: MetadataVersion) -> Result<Metadata, CodegenError> {
+    pub fn generate_from_url(self, url: Url) -> Result<TokenStream2, CodegenError> {
+        fn fetch_metadata(url: Url, version: MetadataVersion) -> Result<Metadata, CodegenError> {
             let bytes = fetch_metadata_bytes_blocking(url, version)?;
             Ok(Metadata::decode(&mut &bytes[..])?)
         }
 
         let metadata = self
             .unstable_metadata
-            .then(|| fetch_metadata(url, MetadataVersion::Unstable).ok())
+            .then(|| fetch_metadata(url.clone(), MetadataVersion::Unstable).ok())
             .flatten();
 
         let metadata = if let Some(unstable) = metadata {
             unstable
         } else {
-            match fetch_metadata(url, MetadataVersion::Version(15)) {
+            match fetch_metadata(url.clone(), MetadataVersion::Version(15)) {
                 Ok(metadata) => metadata,
                 Err(_) => fetch_metadata(url, MetadataVersion::Version(14))?,
             }

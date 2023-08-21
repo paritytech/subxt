@@ -5,7 +5,7 @@
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::WrapErr;
-use jsonrpsee::client_transport::ws::Uri;
+use jsonrpsee::client_transport::ws::Url;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_codegen::utils::MetadataVersion;
@@ -16,7 +16,7 @@ use subxt_metadata::Metadata;
 pub struct Opts {
     /// Urls of the substrate nodes to verify for metadata compatibility.
     #[clap(name = "nodes", long, use_value_delimiter = true, value_parser)]
-    nodes: Vec<Uri>,
+    nodes: Vec<Url>,
     /// Check the compatibility of metadata for a particular pallet.
     ///
     /// ### Note
@@ -49,7 +49,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
 }
 
 async fn handle_pallet_metadata(
-    nodes: &[Uri],
+    nodes: &[Url],
     name: &str,
     version: MetadataVersion,
     output: &mut impl std::io::Write,
@@ -63,7 +63,7 @@ async fn handle_pallet_metadata(
 
     let mut compatibility: CompatibilityPallet = Default::default();
     for node in nodes.iter() {
-        let metadata = fetch_runtime_metadata(node, version).await?;
+        let metadata = fetch_runtime_metadata(node.clone(), version).await?;
 
         match metadata.pallet_by_name(name) {
             Some(pallet_metadata) => {
@@ -97,13 +97,13 @@ async fn handle_pallet_metadata(
 }
 
 async fn handle_full_metadata(
-    nodes: &[Uri],
+    nodes: &[Url],
     version: MetadataVersion,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
-        let metadata = fetch_runtime_metadata(node, version).await?;
+        let metadata = fetch_runtime_metadata(node.clone(), version).await?;
         let hash = metadata.hasher().hash();
         let hex_hash = hex::encode(hash);
         writeln!(output, "Node {node:?} has metadata hash {hex_hash:?}",)?;
@@ -125,7 +125,7 @@ async fn handle_full_metadata(
 }
 
 async fn fetch_runtime_metadata(
-    url: &Uri,
+    url: Url,
     version: MetadataVersion,
 ) -> color_eyre::Result<Metadata> {
     let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version).await?;

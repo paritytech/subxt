@@ -4,13 +4,11 @@
 
 extern crate proc_macro;
 
-use std::str::FromStr;
-
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{
-    utils::Uri, CodegenError, DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes,
+    utils::Url, CodegenError, DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes,
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
 
@@ -160,13 +158,13 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, Some(url_string)) => {
-            let url = Uri::from_str(&url_string).unwrap_or_else(|_| {
+            let url = Url::parse(&url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
 
             runtime_api_generator
                 .unstable_metadata(unstable_metadata)
-                .generate_from_url(&url)
+                .generate_from_url(url)
                 .map_or_else(|err| err.into_compile_error().into(), Into::into)
         }
         (None, None) => {

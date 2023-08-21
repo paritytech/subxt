@@ -449,7 +449,7 @@ impl Update {
 #[cfg(all(feature = "jsonrpsee", feature = "native"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
-        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
         core::{
             client::{Client, ClientBuilder},
             Error,
@@ -459,15 +459,13 @@ mod jsonrpsee_helpers {
     /// Build WS RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
         let (sender, receiver) = ws_transport(url).await?;
-        Ok(ClientBuilder::default()
-            .max_notifs_per_subscription(4096)
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
             .build_with_tokio(sender, receiver))
     }
 
     async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
-        let url: Uri = url
-            .parse()
-            .map_err(|e: InvalidUri| Error::Transport(e.into()))?;
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
         WsTransportClientBuilder::default()
             .build(url)
             .await
@@ -492,7 +490,7 @@ mod jsonrpsee_helpers {
             .await
             .map_err(|e| Error::Transport(e.into()))?;
         Ok(ClientBuilder::default()
-            .max_notifs_per_subscription(4096)
+            .max_buffer_capacity_per_subscription(4096)
             .build_with_wasm(sender, receiver))
     }
 }

@@ -40,7 +40,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.4", default-features = false }
-clap = { version = "4.3.19", features = ["derive", "cargo"] }
+clap = { version = "4.3.23", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -54,12 +54,12 @@ getrandom = { version = "0.2", default-features = false }
 hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
-jsonrpsee = { version = "0.16" }
+jsonrpsee = { version = "0.20" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.66"
-quote = "1.0.31"
+quote = "1.0.33"
 regex = "1.9.3"
 scale-info = "2.9.0"
 scale-value = "0.12.0"
@@ -69,12 +69,12 @@ scale-encode = "0.5.0"
 serde = { version = "1.0.183" }
 serde_json = { version = "1.0.104" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.40"
-tokio = { version = "1.29", default-features = false }
+thiserror = "1.0.47"
+tokio = { version = "1.32", default-features = false }
 tracing = "0.1.34"
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.17"
-trybuild = "1.0.82"
+trybuild = "1.0.83"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "4.4.0"

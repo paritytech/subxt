@@ -172,28 +172,26 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
 mod jsonrpsee_helpers {
     use crate::error::{Error, LightClientError};
     pub use jsonrpsee::{
-        client_transport::ws::{InvalidUri, Receiver, Sender, Uri, WsTransportClientBuilder},
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
         core::client::{Client, ClientBuilder},
     };
 
     /// Build WS RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
-        let url = url
-            .parse::<Uri>()
-            .map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+        let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
 
-        if url.scheme_str() != Some("ws") && url.scheme_str() != Some("wss") {
+        if url.scheme() != "ws" && url.scheme() != "wss" {
             return Err(Error::LightClient(LightClientError::InvalidScheme));
         }
 
         let (sender, receiver) = ws_transport(url).await?;
 
-        Ok(ClientBuilder::default()
-            .max_notifs_per_subscription(4096)
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
             .build_with_tokio(sender, receiver))
     }
 
-    async fn ws_transport(url: Uri) -> Result<(Sender, Receiver), Error> {
+    async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
         WsTransportClientBuilder::default()
             .build(url)
             .await
@@ -216,7 +214,7 @@ mod jsonrpsee_helpers {
             .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
 
         Ok(ClientBuilder::default()
-            .max_notifs_per_subscription(4096)
+            .max_buffer_capacity_per_subscription(4096)
             .build_with_wasm(sender, receiver))
     }
 }
