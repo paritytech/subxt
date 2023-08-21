@@ -137,7 +137,7 @@ where
     /// as well as a couple of other details (block hash and extrinsic hash).
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TxProgress::next_item()`] instead.
+    /// use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee

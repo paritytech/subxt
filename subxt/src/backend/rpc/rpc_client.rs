@@ -173,15 +173,15 @@ pub struct RpcSubscription<Res> {
 
 impl<Res> std::fmt::Debug for RpcSubscription<Res> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Subscription")
-            .field("inner", &"RpcSubscription")
+        f.debug_struct("RpcSubscription")
+            .field("inner", &"RawRpcSubscription")
             .field("_marker", &self._marker)
             .finish()
     }
 }
 
 impl<Res> RpcSubscription<Res> {
-    /// Creates a new [`Subscription`].
+    /// Creates a new [`RpcSubscription`].
     pub fn new(inner: RawRpcSubscription) -> Self {
         Self {
             inner,
