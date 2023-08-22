@@ -705,6 +705,13 @@ mod test {
     use super::*;
 
     #[test]
+    fn transaction_validity_decoding_empty_bytes() {
+        // No panic should occur decoding empty bytes.
+        let decoded = ValidationResult::try_from_bytes(vec![]);
+        assert!(decoded.is_err())
+    }
+
+    #[test]
     fn transaction_validity_decoding_is_ok() {
         use sp_runtime::transaction_validity as sp;
         use sp_runtime::transaction_validity::TransactionValidity as T;
