@@ -565,6 +565,7 @@ where
 }
 
 impl ValidationResult {
+    #[allow(clippy::get_first)]
     fn try_from_bytes(bytes: Vec<u8>) -> Result<ValidationResult, crate::Error> {
         // TaggedTransactionQueue_validate_transaction returns this:
         // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
