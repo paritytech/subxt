@@ -23,12 +23,12 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     }
 
     let foo_value_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
-        let foo = Foo { a: 0, b: "Hello" };
+        let value = Foo { a: 0, b: "Hello" };
         let foo_ty = scale_info::MetaType::new::<Foo>();
         let foo_ty_id = registry.register_type(&foo_ty);
         frame_metadata::v15::CustomValueMetadata {
             ty: foo_ty_id,
-            value: foo.encode(),
+            value: value.encode(),
         }
     };
 
@@ -62,7 +62,13 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
             error_enum_ty: unit_ty,
         },
         custom: CustomMetadata {
-            map: BTreeMap::from_iter([("Foo".into(), foo_value_metadata)]),
+            // provide foo twice, to make sure nothing breaks in these cases:
+            map: BTreeMap::from_iter([
+                ("Foo".into(), foo_value_metadata.clone()),
+                ("foo".into(), foo_value_metadata.clone()),
+                ("12".into(), foo_value_metadata.clone()),
+                ("&Hello".into(), foo_value_metadata.clone()),
+            ]),
         },
     };
 

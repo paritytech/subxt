@@ -54,7 +54,7 @@ fn generate_custom_value_fn(
 
     Some(quote!(
         pub fn #fn_name_ident() -> #crate_path::custom_values::StaticAddress<#return_ty> {
-            #crate_path::custom_values::StaticAddress::new(#name,  [#(#custom_value_hash,)*])
+            #crate_path::custom_values::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
         }
     ))
 }

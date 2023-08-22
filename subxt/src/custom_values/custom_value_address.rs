@@ -31,17 +31,27 @@ impl CustomValueAddress for str {
 /// A static address to a custom value.
 pub struct StaticAddress<R> {
     name: &'static str,
-    hash: [u8; 32],
+    hash: Option<[u8; 32]>,
     phantom: PhantomData<R>,
 }
 
 impl<R> StaticAddress<R> {
+    #[doc(hidden)]
     /// Creates a new StaticAddress.
-    pub fn new(name: &'static str, hash: [u8; 32]) -> Self {
+    pub fn new_static(name: &'static str, hash: [u8; 32]) -> Self {
         StaticAddress {
             name,
-            hash,
+            hash: Some(hash),
             phantom: PhantomData,
+        }
+    }
+
+    /// Do not validate this custom value prior to accessing it.
+    pub fn unvalidated(self) -> Self {
+        Self {
+            name: self.name,
+            hash: None,
+            phantom: self.phantom,
         }
     }
 }
@@ -54,6 +64,6 @@ impl<R: DecodeWithMetadata> CustomValueAddress for StaticAddress<R> {
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
-        Some(self.hash)
+        self.hash
     }
 }

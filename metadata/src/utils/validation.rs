@@ -554,6 +554,12 @@ impl<'a> MetadataHasher<'a> {
         self
     }
 
+    /// Do not hash the custom values
+    pub fn ignore_custom_values(&mut self) -> &mut Self {
+        self.include_custom_values = false;
+        self
+    }
+
     /// Hash the given metadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
         let metadata = self.metadata;
