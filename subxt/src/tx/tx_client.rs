@@ -570,14 +570,15 @@ impl ValidationResult {
         // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
         // We copy some of the inner types and put the three states (valid, invalid, unknown) into one enum,
         // because from our perspective, the call was successful regardless.
-        if bytes[0] == 0 {
-            // ok: valid (more detail is available here, but ).
-            Ok(ValidationResult::Valid)
-        } else if bytes[0] == 1 && bytes[1] == 0 {
+        if bytes.get(0) == Some(&0) {
+            // ok: valid. Decode but, for now we discard most of the information
+            let res = TransactionValid::decode(&mut &bytes[1..])?;
+            Ok(ValidationResult::Valid(res))
+        } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&0) {
             // error: invalid
             let res = TransactionInvalid::decode(&mut &bytes[2..])?;
             Ok(ValidationResult::Invalid(res))
-        } else if bytes[0] == 1 && bytes[1] == 1 {
+        } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&1) {
             // error: unknown
             let res = TransactionUnknown::decode(&mut &bytes[2..])?;
             Ok(ValidationResult::Unknown(res))
@@ -592,7 +593,7 @@ impl ValidationResult {
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValidationResult {
     /// The transaction is valid
-    Valid,
+    Valid(TransactionValid),
     /// The transaction is invalid
     Invalid(TransactionInvalid),
     /// Unable to validate the transaction
@@ -602,8 +603,41 @@ pub enum ValidationResult {
 impl ValidationResult {
     /// Is the transaction valid.
     pub fn is_valid(&self) -> bool {
-        matches!(self, ValidationResult::Valid)
+        matches!(self, ValidationResult::Valid(_))
     }
+}
+
+/// Transaction is valid; here is some more information about it.
+#[derive(Decode, Clone, Debug, PartialEq)]
+pub struct TransactionValid {
+    /// Priority of the transaction.
+    ///
+    /// Priority determines the ordering of two transactions that have all
+    /// their dependencies (required tags) satisfied.
+    pub priority: u64,
+    /// Transaction dependencies
+    ///
+    /// A non-empty list signifies that some other transactions which provide
+    /// given tags are required to be included before that one.
+    pub requires: Vec<Vec<u8>>,
+    /// Provided tags
+    ///
+    /// A list of tags this transaction provides. Successfully importing the transaction
+    /// will enable other transactions that depend on (require) those tags to be included as well.
+    /// Provided and required tags allow Substrate to build a dependency graph of transactions
+    /// and import them in the right (linear) order.
+    pub provides: Vec<Vec<u8>>,
+    /// Transaction longevity
+    ///
+    /// Longevity describes minimum number of blocks the validity is correct.
+    /// After this period transaction should be removed from the pool or revalidated.
+    pub longevity: u64,
+    /// A flag indicating if the transaction should be propagated to other peers.
+    ///
+    /// By setting `false` here the transaction will still be considered for
+    /// including in blocks that are authored on the current node, but will
+    /// never be sent to other peers.
+    pub propagate: bool,
 }
 
 /// The runtime was unable to validate the transaction.
@@ -680,7 +714,15 @@ mod test {
                 T::Ok(sp::ValidTransaction {
                     ..Default::default()
                 }),
-                ValidationResult::Valid,
+                ValidationResult::Valid(TransactionValid {
+                    // By default, tx is immortal
+                    longevity: u64::MAX,
+                    // Default is true
+                    propagate: true,
+                    priority: 0,
+                    provides: vec![],
+                    requires: vec![],
+                }),
             ),
             (
                 T::Err(sp::TransactionValidityError::Invalid(
