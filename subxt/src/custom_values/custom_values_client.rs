@@ -55,8 +55,8 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<(), Error> {
+        let metadata = self.client.metadata();
         if let Some(actual_hash) = address.validation_hash() {
-            let metadata = self.client.metadata();
             let custom_value = metadata
                 .custom()
                 .get(address.name())
@@ -71,6 +71,9 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
             if actual_hash != expected_hash {
                 return Err(MetadataError::IncompatibleCodegen.into());
             }
+        }
+        if metadata.custom().get(address.name()).is_none() {
+            return Err(MetadataError::IncompatibleCodegen.into());
         }
         Ok(())
     }
