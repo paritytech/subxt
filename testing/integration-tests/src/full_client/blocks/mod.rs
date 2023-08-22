@@ -22,7 +22,7 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
     // (this can be a bit slow as we have to wait for finalization)
     let header = sub.next().await.unwrap()?;
     let block_hash = header.hash();
-    let current_block_hash = api.rpc().block_hash(None).await?.unwrap();
+    let current_block_hash = api.backend().latest_best_block_ref().await?.hash();
 
     assert_eq!(block_hash, current_block_hash);
     Ok(())
@@ -40,7 +40,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     // associated block hash is the one we just finalized.
     // (this can be a bit slow as we have to wait for finalization)
     let header = sub.next().await.unwrap()?;
-    let finalized_hash = api.rpc().finalized_head().await?;
+    let finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
 
     assert_eq!(header.hash(), finalized_hash);
     Ok(())
@@ -48,15 +48,16 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
+    use subxt::backend::legacy;
+
     let ctx = test_context().await;
-    let api = ctx.client();
+    let rpc = ctx.legacy_rpc_methods().await;
 
     // Manually subscribe to the next 6 finalized block headers, but deliberately
     // filter out some in the middle so we get back b _ _ b _ b. This guarantees
     // that there will be some gaps, even if there aren't any from the subscription.
-    let some_finalized_blocks = api
-        .rpc()
-        .subscribe_finalized_block_headers()
+    let some_finalized_blocks = rpc
+        .chain_subscribe_finalized_heads()
         .await?
         .enumerate()
         .take(6)
@@ -64,14 +65,11 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
             let n = *n;
             async move { n == 0 || n == 3 || n == 5 }
         })
-        .map(|(_, h)| h);
+        .map(|(_, r)| r);
 
     // This should spot any gaps in the middle and fill them back in.
-    let all_finalized_blocks = subxt::blocks::subscribe_to_block_headers_filling_in_gaps(
-        ctx.client(),
-        None,
-        some_finalized_blocks,
-    );
+    let all_finalized_blocks =
+        legacy::subscribe_to_block_headers_filling_in_gaps(rpc, some_finalized_blocks, None);
     futures::pin_mut!(all_finalized_blocks);
 
     // Iterate the block headers, making sure we get them all in order.
@@ -97,6 +95,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 async fn runtime_api_call() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
+    let rpc = ctx.legacy_rpc_methods().await;
 
     let mut sub = api.blocks().subscribe_best().await?;
 
@@ -109,7 +108,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
         .await?;
 
     // get metadata via `state_getMetadata`.
-    let meta2 = api.rpc().metadata_legacy(None).await?;
+    let meta2 = rpc.state_get_metadata(Some(block.hash())).await?;
 
     // They should be the same.
     assert_eq!(meta1.encode(), meta2.encode());
@@ -147,7 +146,7 @@ async fn decode_extrinsics() {
     let block_hash = in_block.block_hash();
 
     let block = BlocksClient::new(api).at(block_hash).await.unwrap();
-    let extrinsics = block.body().await.unwrap().extrinsics();
+    let extrinsics = block.extrinsics().await.unwrap();
     assert_eq!(extrinsics.len(), 2);
     assert_eq!(extrinsics.block_hash(), block_hash);
 

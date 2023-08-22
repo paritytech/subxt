@@ -4,7 +4,7 @@ use std::{
     sync::{Arc, Mutex},
 };
 use subxt::{
-    rpc::{RawValue, RpcClientT, RpcFuture, RpcSubscription},
+    backend::rpc::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClient, RpcClientT},
     OnlineClient, PolkadotConfig,
 };
 
@@ -22,7 +22,7 @@ impl RpcClientT for MyLoggingClient {
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
-    ) -> RpcFuture<'a, Box<RawValue>> {
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
         writeln!(
             self.log.lock().unwrap(),
             "{method}({})",
@@ -41,7 +41,7 @@ impl RpcClientT for MyLoggingClient {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription> {
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
         writeln!(
             self.log.lock().unwrap(),
             "{sub}({}) (unsub: {unsub})",
@@ -56,7 +56,10 @@ impl RpcClientT for MyLoggingClient {
         let stream = futures::stream::once(async move { Ok(res) });
         let stream: Pin<Box<dyn futures::Stream<Item = _> + Send>> = Box::pin(stream);
         // This subscription does not provide an ID.
-        Box::pin(std::future::ready(Ok(RpcSubscription { stream, id: None })))
+        Box::pin(std::future::ready(Ok(RawRpcSubscription {
+            stream,
+            id: None,
+        })))
     }
 }
 
@@ -64,14 +67,17 @@ impl RpcClientT for MyLoggingClient {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Instantiate our replacement RPC client.
     let log = Arc::default();
-    let rpc_client = MyLoggingClient {
-        log: Arc::clone(&log),
+    let rpc_client = {
+        let inner = MyLoggingClient {
+            log: Arc::clone(&log),
+        };
+        RpcClient::new(inner)
     };
 
     // Pass this into our OnlineClient to instantiate it. This will lead to some
     // RPC calls being made to fetch chain details/metadata, which will immediately
     // fail..
-    let _ = OnlineClient::<PolkadotConfig>::from_rpc_client(Arc::new(rpc_client)).await;
+    let _ = OnlineClient::<PolkadotConfig>::from_rpc_client(rpc_client).await;
 
     // But, we can see that the calls were made via our custom RPC client:
     println!("Log of calls made:\n\n{}", log.lock().unwrap().as_str());

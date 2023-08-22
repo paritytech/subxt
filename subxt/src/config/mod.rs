@@ -26,10 +26,11 @@ pub use signed_extensions::SignedExtension;
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
 
 /// Runtime types.
-// Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
-// automatically applies a 'static bound to all generic types (including this one),
-// and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
-pub trait Config: Sized + 'static {
+// Note: the `Send + Sync + 'static` bound isn't strictly required, but currently deriving
+// TypeInfo automatically applies a 'static bound to all generic types (including this one),
+// And we want the compiler to infer `Send` and `Sync` OK for things which have `T: Config`
+// rather than having to `unsafe impl` them ourselves.
+pub trait Config: Sized + Send + Sync + 'static {
     /// The output of the `Hasher` function.
     type Hash: Debug
         + Copy

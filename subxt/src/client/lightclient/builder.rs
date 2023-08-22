@@ -3,12 +3,10 @@
 // see LICENSE for license details.
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
+use crate::backend::rpc::RpcClient;
 use crate::{config::Config, error::Error, OnlineClient};
-
-use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
-
 use std::num::NonZeroU32;
-use std::sync::Arc;
+use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
@@ -149,8 +147,8 @@ impl<T: Config> LightClientBuilder<T> {
             user_data: (),
         };
 
-        let rpc = LightClientRpc::new(config)?;
-        let online_client = OnlineClient::<T>::from_rpc_client(Arc::new(rpc)).await?;
+        let rpc_client = RpcClient::new(LightClientRpc::new(config)?);
+        let online_client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
         Ok(LightClient(online_client))
     }
 }

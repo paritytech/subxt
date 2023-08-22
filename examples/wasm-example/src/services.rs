@@ -48,8 +48,8 @@ pub(crate) async fn subscribe_to_finalized_blocks(
         writeln!(output, "Block #{}:", block.header().number).ok();
         writeln!(output, "  Hash: {}", block.hash()).ok();
         writeln!(output, "  Extrinsics:").ok();
-        let body = block.body().await?;
-        for ext in body.extrinsics().iter() {
+        let extrinsics = block.extrinsics().await?;
+        for ext in extrinsics.iter() {
             let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;

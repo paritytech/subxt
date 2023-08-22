@@ -77,7 +77,7 @@ impl<T: Config> LightClient<T> {
     }
 
     /// Return the runtime version.
-    fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
+    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
         self.0.runtime_version()
     }
 
@@ -118,8 +118,8 @@ impl<T: Config> LightClient<T> {
 }
 
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
-    fn rpc(&self) -> &crate::rpc::Rpc<T> {
-        self.0.rpc()
+    fn backend(&self) -> &dyn crate::backend::Backend<T> {
+        self.0.backend()
     }
 }
 
@@ -132,7 +132,7 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
         self.genesis_hash()
     }
 
-    fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
+    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
         self.runtime_version()
     }
 }

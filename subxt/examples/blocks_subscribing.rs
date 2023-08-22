@@ -1,4 +1,3 @@
-use futures::StreamExt;
 use subxt::{OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -24,8 +23,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  Extrinsics:");
 
         // Log each of the extrinsic with it's associated events:
-        let body = block.body().await?;
-        for ext in body.extrinsics().iter() {
+        let extrinsics = block.extrinsics().await?;
+        for ext in extrinsics.iter() {
             let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;

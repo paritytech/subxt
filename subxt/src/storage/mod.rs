@@ -12,10 +12,7 @@ pub mod utils;
 
 pub use storage_client::StorageClient;
 
-pub use storage_type::{KeyIter, Storage};
-
-// Re-export as this is used in the public API in this module:
-pub use crate::rpc::types::StorageKey;
+pub use storage_type::Storage;
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.

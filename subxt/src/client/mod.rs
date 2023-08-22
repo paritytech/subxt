@@ -19,8 +19,5 @@ pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
 };
 
-#[cfg(feature = "jsonrpsee")]
-pub use online_client::default_rpc_client;
-
 #[cfg(feature = "unstable-light-client")]
 pub use lightclient::{LightClient, LightClientBuilder, LightClientError};

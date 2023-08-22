@@ -5,30 +5,27 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
+    backend::{
+        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
+    },
     blocks::BlocksClient,
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
-    rpc::{
-        types::{RuntimeVersion, Subscription},
-        Rpc, RpcClientT,
-    },
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
     Config, Metadata,
 };
 use derivative::Derivative;
-
 use futures::future;
-
 use std::sync::{Arc, RwLock};
 
 /// A trait representing a client that can perform
 /// online actions.
 pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
-    /// Return an RPC client that can be used to communicate with a node.
-    fn rpc(&self) -> &Rpc<T>;
+    /// Return a backend that can be used to communicate with a node.
+    fn backend(&self) -> &dyn Backend<T>;
 }
 
 /// A client that can be used to perform API calls (that is, either those
@@ -37,7 +34,7 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
     inner: Arc<RwLock<Inner<T>>>,
-    rpc: Rpc<T>,
+    backend: Arc<dyn Backend<T>>,
 }
 
 #[derive(Derivative)]
@@ -57,15 +54,6 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
-/// The default RPC client that's used (based on [`jsonrpsee`]).
-#[cfg(feature = "jsonrpsee")]
-pub async fn default_rpc_client<U: AsRef<str>>(url: U) -> Result<impl RpcClientT, Error> {
-    let client = jsonrpsee_helpers::client(url.as_ref())
-        .await
-        .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
-    Ok(client)
-}
-
 // The default constructors assume Jsonrpsee.
 #[cfg(feature = "jsonrpsee")]
 impl<T: Config> OnlineClient<T> {
@@ -78,26 +66,56 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let client = default_rpc_client(url).await?;
-        OnlineClient::from_rpc_client(Arc::new(client)).await
+        let client = RpcClient::from_url(url).await?;
+        let backend = LegacyBackend::new(client);
+        OnlineClient::from_backend(Arc::new(backend)).await
     }
 }
 
 impl<T: Config> OnlineClient<T> {
-    /// Construct a new [`OnlineClient`] by providing an underlying [`RpcClientT`]
-    /// implementation to drive the connection.
-    pub async fn from_rpc_client<R: RpcClientT>(
-        rpc_client: Arc<R>,
+    /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
+    /// This will use the current default [`Backend`], which may change in future releases.
+    pub async fn from_rpc_client(rpc_client: RpcClient) -> Result<OnlineClient<T>, Error> {
+        let backend = Arc::new(LegacyBackend::new(rpc_client));
+        OnlineClient::from_backend(backend).await
+    }
+
+    /// Construct a new [`OnlineClient`] by providing an RPC client along with the other
+    /// necessary details. This will use the current default [`Backend`], which may change
+    /// in future releases.
+    ///
+    /// # Warning
+    ///
+    /// This is considered the most primitive and also error prone way to
+    /// instantiate a client; the genesis hash, metadata and runtime version provided will
+    /// entirely determine which node and blocks this client will be able to interact with,
+    /// and whether it will be able to successfully do things like submit transactions.
+    ///
+    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
+    /// a client.
+    pub fn from_rpc_client_with(
+        genesis_hash: T::Hash,
+        runtime_version: RuntimeVersion,
+        metadata: impl Into<Metadata>,
+        rpc_client: RpcClient,
     ) -> Result<OnlineClient<T>, Error> {
-        let rpc = Rpc::<T>::new(rpc_client.clone());
+        let backend = Arc::new(LegacyBackend::new(rpc_client));
+        OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)
+    }
+
+    /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
+    /// implementation to power it. Other details will be obtained from the chain.
+    pub async fn from_backend<B: Backend<T>>(backend: Arc<B>) -> Result<OnlineClient<T>, Error> {
+        let latest_block = backend.latest_best_block_ref().await?;
+
         let (genesis_hash, runtime_version, metadata) = future::join3(
-            rpc.genesis_hash(),
-            rpc.runtime_version(None),
-            OnlineClient::fetch_metadata(&rpc),
+            backend.genesis_hash(),
+            backend.current_runtime_version(),
+            OnlineClient::fetch_metadata(&*backend, latest_block.hash()),
         )
         .await;
 
-        OnlineClient::from_rpc_client_with(genesis_hash?, runtime_version?, metadata?, rpc_client)
+        OnlineClient::from_backend_with(genesis_hash?, runtime_version?, metadata?, backend)
     }
 
     /// Construct a new [`OnlineClient`] by providing all of the underlying details needed
@@ -112,11 +130,11 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
     /// a client.
-    pub fn from_rpc_client_with<R: RpcClientT>(
+    pub fn from_backend_with<B: Backend<T>>(
         genesis_hash: T::Hash,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
-        rpc_client: Arc<R>,
+        backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
@@ -124,12 +142,15 @@ impl<T: Config> OnlineClient<T> {
                 runtime_version,
                 metadata: metadata.into(),
             })),
-            rpc: Rpc::new(rpc_client),
+            backend,
         })
     }
 
     /// Fetch the metadata from substrate using the runtime API.
-    async fn fetch_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
+    async fn fetch_metadata(
+        backend: &dyn Backend<T>,
+        block_hash: T::Hash,
+    ) -> Result<Metadata, Error> {
         #[cfg(feature = "unstable-metadata")]
         {
             /// The unstable metadata version number.
@@ -137,28 +158,37 @@ impl<T: Config> OnlineClient<T> {
 
             // Try to fetch the latest unstable metadata, if that fails fall back to
             // fetching the latest stable metadata.
-            match rpc.metadata_at_version(UNSTABLE_METADATA_VERSION).await {
+            match backend
+                .metadata_at_version(UNSTABLE_METADATA_VERSION, block_hash)
+                .await
+            {
                 Ok(bytes) => Ok(bytes),
-                Err(_) => OnlineClient::fetch_latest_stable_metadata(rpc).await,
+                Err(_) => OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await,
             }
         }
 
         #[cfg(not(feature = "unstable-metadata"))]
-        OnlineClient::fetch_latest_stable_metadata(rpc).await
+        OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await
     }
 
     /// Fetch the latest stable metadata from the node.
-    async fn fetch_latest_stable_metadata(rpc: &Rpc<T>) -> Result<Metadata, Error> {
+    async fn fetch_latest_stable_metadata(
+        backend: &dyn Backend<T>,
+        block_hash: T::Hash,
+    ) -> Result<Metadata, Error> {
         // This is the latest stable metadata that subxt can utilize.
         const V15_METADATA_VERSION: u32 = 15;
 
         // Try to fetch the metadata version.
-        if let Ok(bytes) = rpc.metadata_at_version(V15_METADATA_VERSION).await {
+        if let Ok(bytes) = backend
+            .metadata_at_version(V15_METADATA_VERSION, block_hash)
+            .await
+        {
             return Ok(bytes);
         }
 
         // If that fails, fetch the metadata V14 using the old API.
-        rpc.metadata().await
+        backend.legacy_metadata(block_hash).await
     }
 
     /// Create an object which can be used to keep the runtime up to date
@@ -258,8 +288,8 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Return an RPC client to make raw requests with.
-    pub fn rpc(&self) -> &Rpc<T> {
-        &self.rpc
+    pub fn backend(&self) -> &dyn Backend<T> {
+        &*self.backend
     }
 
     /// Return an offline client with the same configuration as this.
@@ -324,8 +354,8 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
 }
 
 impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
-    fn rpc(&self) -> &Rpc<T> {
-        &self.rpc
+    fn backend(&self) -> &dyn Backend<T> {
+        &*self.backend
     }
 }
 
@@ -383,7 +413,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
     pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
-        let stream = self.0.rpc().subscribe_runtime_version().await?;
+        let stream = self.0.backend().stream_runtime_version().await?;
         Ok(RuntimeUpdaterStream {
             stream,
             client: self.0.clone(),
@@ -393,12 +423,12 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 
 /// Stream to perform runtime upgrades.
 pub struct RuntimeUpdaterStream<T: Config> {
-    stream: Subscription<RuntimeVersion>,
+    stream: StreamOfResults<RuntimeVersion>,
     client: OnlineClient<T>,
 }
 
 impl<T: Config> RuntimeUpdaterStream<T> {
-    /// Get the next element of the stream.
+    /// Wait for the next runtime update.
     pub async fn next(&mut self) -> Option<Result<Update, Error>> {
         let maybe_runtime_version = self.stream.next().await?;
 
@@ -407,7 +437,17 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let metadata = match self.client.rpc().metadata().await {
+        let latest_block_ref = match self.client.backend().latest_best_block_ref().await {
+            Ok(block_ref) => block_ref,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let metadata = match OnlineClient::fetch_metadata(
+            self.client.backend(),
+            latest_block_ref.hash(),
+        )
+        .await
+        {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };
@@ -442,55 +482,5 @@ impl Update {
     /// Get the metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
-    }
-}
-
-// helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
-    };
-
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = ws_transport(url).await?;
-        Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
-    }
-
-    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
-        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))
-    }
-}
-
-// helpers for a jsonrpsee specific OnlineClient.
-#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
-    };
-
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))?;
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
     }
 }

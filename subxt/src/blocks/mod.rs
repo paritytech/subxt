@@ -8,6 +8,9 @@ mod block_types;
 mod blocks_client;
 mod extrinsic_types;
 
-pub use block_types::{Block, BlockBody};
-pub use blocks_client::{subscribe_to_block_headers_filling_in_gaps, BlocksClient};
+/// A reference to a block.
+pub use crate::backend::BlockRef;
+
+pub use block_types::Block;
+pub use blocks_client::BlocksClient;
 pub use extrinsic_types::{ExtrinsicDetails, ExtrinsicEvents, Extrinsics, StaticExtrinsic};

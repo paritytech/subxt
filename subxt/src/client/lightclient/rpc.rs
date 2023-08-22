@@ -4,12 +4,11 @@
 
 use super::LightClientError;
 use crate::{
+    backend::rpc::{RawRpcFuture, RawRpcSubscription, RpcClientT},
     error::{Error, RpcError},
-    rpc::{RpcClientT, RpcFuture, RpcSubscription},
 };
-use futures::{Stream, StreamExt};
+use futures::StreamExt;
 use serde_json::value::RawValue;
-use std::pin::Pin;
 use subxt_lightclient::{AddChainConfig, ChainId, LightClientRpcError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
@@ -45,7 +44,7 @@ impl RpcClientT for LightClientRpc {
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
-    ) -> RpcFuture<'a, Box<RawValue>> {
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
         let client = self.clone();
 
         Box::pin(async move {
@@ -78,7 +77,7 @@ impl RpcClientT for LightClientRpc {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         _unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription> {
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
         let client = self.clone();
 
         Box::pin(async move {
@@ -121,12 +120,8 @@ impl RpcClientT for LightClientRpc {
 
             let stream = UnboundedReceiverStream::new(notif);
 
-            let rpc_substription_stream: Pin<
-                Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
-            > = Box::pin(stream.map(Ok));
-
-            let rpc_subscription: RpcSubscription = RpcSubscription {
-                stream: rpc_substription_stream,
+            let rpc_subscription = RawRpcSubscription {
+                stream: Box::pin(stream.map(Ok)),
                 id: Some(sub_id),
             };
 

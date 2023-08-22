@@ -13,14 +13,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Get back an iterator of results (here, we are fetching 10 items at
     // a time from the node, but we always iterate over one at a time).
-    let mut results = api
-        .storage()
-        .at_latest()
-        .await?
-        .iter(storage_query, 10)
-        .await?;
+    let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
 
-    while let Some((key, value)) = results.next().await? {
+    while let Some(Ok((key, value))) = results.next().await {
         println!("Key: 0x{}", hex::encode(&key));
         println!("Value: {:?}", value);
     }
