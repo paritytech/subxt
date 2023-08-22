@@ -3,12 +3,12 @@
 // see LICENSE for license details.
 
 use crate::{
+    backend::BlockRef,
     blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Header},
     error::{BlockError, Error},
     events,
-    rpc::types::ChainBlockResponse,
     runtime_api::RuntimeApi,
     storage::Storage,
 };
@@ -19,6 +19,7 @@ use std::sync::Arc;
 /// A representation of a block.
 pub struct Block<T: Config, C> {
     header: T::Header,
+    block_ref: BlockRef<T::Hash>,
     client: C,
     // Since we obtain the same events for every extrinsic, let's
     // cache them so that we only ever do that once:
@@ -34,17 +35,24 @@ where
     T: Config,
     C: OfflineClientT<T>,
 {
-    pub(crate) fn new(header: T::Header, client: C) -> Self {
+    pub(crate) fn new(header: T::Header, block_ref: BlockRef<T::Hash>, client: C) -> Self {
         Block {
             header,
+            block_ref,
             client,
             cached_events: Default::default(),
         }
     }
 
+    /// Return a reference to the given block. While this reference is kept alive,
+    /// the backend will (if possible) endeavour to keep hold of the block.
+    pub fn reference(&self) -> BlockRef<T::Hash> {
+        self.block_ref.clone()
+    }
+
     /// Return the block hash.
     pub fn hash(&self) -> T::Hash {
-        self.header.hash()
+        self.block_ref.hash()
     }
 
     /// Return the block number.
@@ -68,72 +76,31 @@ where
         get_events(&self.client, self.header.hash(), &self.cached_events).await
     }
 
-    /// Fetch and return the block body.
-    pub async fn body(&self) -> Result<BlockBody<T, C>, Error> {
+    /// Fetch and return the extrinsics in the block body.
+    pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, Error> {
         let ids = ExtrinsicPartTypeIds::new(&self.client.metadata())?;
         let block_hash = self.header.hash();
-        let Some(block_details) = self.client.rpc().block(Some(block_hash)).await? else {
+        let Some(extrinsics) = self.client.backend().block_body(block_hash).await? else {
             return Err(BlockError::not_found(block_hash).into());
         };
 
-        Ok(BlockBody::new(
+        Ok(Extrinsics::new(
             self.client.clone(),
-            block_details,
+            extrinsics,
             self.cached_events.clone(),
             ids,
+            block_hash,
         ))
     }
 
     /// Work with storage.
     pub fn storage(&self) -> Storage<T, C> {
-        let block_hash = self.hash();
-        Storage::new(self.client.clone(), block_hash)
+        Storage::new(self.client.clone(), self.block_ref.clone())
     }
 
     /// Execute a runtime API call at this block.
     pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
-        Ok(RuntimeApi::new(self.client.clone(), self.hash()))
-    }
-}
-
-/// The body of a block.
-pub struct BlockBody<T: Config, C> {
-    details: ChainBlockResponse<T>,
-    client: C,
-    cached_events: CachedEvents<T>,
-    ids: ExtrinsicPartTypeIds,
-}
-
-impl<T, C> BlockBody<T, C>
-where
-    T: Config,
-    C: OfflineClientT<T>,
-{
-    pub(crate) fn new(
-        client: C,
-        details: ChainBlockResponse<T>,
-        cached_events: CachedEvents<T>,
-        ids: ExtrinsicPartTypeIds,
-    ) -> Self {
-        Self {
-            details,
-            client,
-            cached_events,
-            ids,
-        }
-    }
-
-    /// Returns an iterator over the extrinsics in the block body.
-    // Dev note: The returned iterator is 'static + Send so that we can box it up and make
-    // use of it with our `FilterExtrinsic` stuff.
-    pub fn extrinsics(&self) -> Extrinsics<T, C> {
-        Extrinsics::new(
-            self.client.clone(),
-            self.details.block.extrinsics.clone(),
-            self.cached_events.clone(),
-            self.ids,
-            self.details.block.header.hash(),
-        )
+        Ok(RuntimeApi::new(self.client.clone(), self.block_ref.clone()))
     }
 }
 

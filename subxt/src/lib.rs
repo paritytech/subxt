@@ -63,6 +63,7 @@ use tracing_subscriber as _;
 #[allow(unused_imports)]
 pub use getrandom as _;
 
+pub mod backend;
 pub mod blocks;
 pub mod client;
 pub mod config;
@@ -72,7 +73,6 @@ pub mod dynamic;
 pub mod error;
 pub mod events;
 pub mod metadata;
-pub mod rpc;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
@@ -91,6 +91,7 @@ pub use crate::{
 pub mod ext {
     pub use codec;
     pub use frame_metadata;
+    pub use futures;
     pub use scale_bits;
     pub use scale_decode;
     pub use scale_encode;

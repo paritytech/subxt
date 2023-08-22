@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{RpcClientT, RpcFuture, RpcSubscription};
+use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
 use crate::error::RpcError;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
@@ -28,7 +28,7 @@ impl RpcClientT for Client {
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
-    ) -> RpcFuture<'a, Box<RawValue>> {
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
             let res = ClientT::request(self, method, Params(params))
                 .await
@@ -42,7 +42,7 @@ impl RpcClientT for Client {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription> {
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
         Box::pin(async move {
             let stream = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
                 self,
@@ -63,7 +63,7 @@ impl RpcClientT for Client {
             let stream = stream
                 .map_err(|e| RpcError::ClientError(Box::new(e)))
                 .boxed();
-            Ok(RpcSubscription { stream, id })
+            Ok(RawRpcSubscription { stream, id })
         })
     }
 }

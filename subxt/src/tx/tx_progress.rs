@@ -8,22 +8,30 @@ use std::task::Poll;
 
 use crate::utils::strip_compact_prefix;
 use crate::{
+    backend::{StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
-    rpc::types::{Subscription, SubstrateTxStatus},
     Config,
 };
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
-#[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TxProgress<T: Config, C> {
-    sub: Option<Subscription<SubstrateTxStatus<T::Hash, T::Hash>>>,
+    sub: Option<StreamOfResults<BackendTxStatus<T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
+}
+
+impl<T: Config, C> std::fmt::Debug for TxProgress<T, C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TxProgress")
+            .field("sub", &"<subscription>")
+            .field("ext_hash", &self.ext_hash)
+            .field("client", &"<client>")
+            .finish()
+    }
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
@@ -34,7 +42,7 @@ impl<T: Config, C> Unpin for TxProgress<T, C> {}
 impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
-        sub: Subscription<SubstrateTxStatus<T::Hash, T::Hash>>,
+        sub: StreamOfResults<BackendTxStatus<T::Hash>>,
         client: C,
         ext_hash: T::Hash,
     ) -> Self {
@@ -59,8 +67,8 @@ where
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
     /// avoid importing that trait if you don't otherwise need it.
-    pub async fn next_item(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
-        self.next().await
+    pub async fn next(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
+        StreamExt::next(self).await
     }
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
@@ -68,24 +76,25 @@ where
     /// waiting for this to happen.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
     /// that this is true. In those cases the stream is closed however, so you currently have no way to find
     /// out if they finally made it into a block or not.
     pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
-        while let Some(status) = self.next_item().await {
+        while let Some(status) = self.next().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
-                TxStatus::InBlock(s) | TxStatus::Finalized(s) => return Ok(s),
+                TxStatus::InBestBlock(s) | TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalityTimeout.into());
+                TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
+                TxStatus::Invalid { message } => {
+                    return Err(TransactionError::Invalid(message).into())
                 }
-                TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
-                TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
-                TxStatus::Dropped => return Err(TransactionError::Dropped.into()),
+                TxStatus::Dropped { message } => {
+                    return Err(TransactionError::Dropped(message).into())
+                }
                 // Ignore anything else and wait for next status event:
                 _ => continue,
             }
@@ -97,24 +106,25 @@ where
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next_item()`] instead.
+    /// transaction progresses, use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
     /// that this is true. In those cases the stream is closed however, so you currently have no way to find
     /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
-        while let Some(status) = self.next_item().await {
+        while let Some(status) = self.next().await {
             match status? {
                 // Finalized! Return.
-                TxStatus::Finalized(s) => return Ok(s),
+                TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TxStatus::FinalityTimeout(_) => {
-                    return Err(TransactionError::FinalityTimeout.into());
+                TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
+                TxStatus::Invalid { message } => {
+                    return Err(TransactionError::Invalid(message).into())
                 }
-                TxStatus::Invalid => return Err(TransactionError::Invalid.into()),
-                TxStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
-                TxStatus::Dropped => return Err(TransactionError::Dropped.into()),
+                TxStatus::Dropped { message } => {
+                    return Err(TransactionError::Dropped(message).into())
+                }
                 // Ignore and wait for next status event:
                 _ => continue,
             }
@@ -127,7 +137,7 @@ where
     /// as well as a couple of other details (block hash and extrinsic hash).
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TxProgress::next_item()`] instead.
+    /// use [`TxProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
@@ -155,156 +165,84 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 
         sub.poll_next_unpin(cx).map_ok(|status| {
             match status {
-                SubstrateTxStatus::Future => TxStatus::Future,
-                SubstrateTxStatus::Ready => TxStatus::Ready,
-                SubstrateTxStatus::Broadcast(peers) => TxStatus::Broadcast(peers),
-                SubstrateTxStatus::InBlock(hash) => {
-                    TxStatus::InBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
+                BackendTxStatus::Validated => TxStatus::Validated,
+                BackendTxStatus::Broadcasted { num_peers } => TxStatus::Broadcasted { num_peers },
+                BackendTxStatus::InBestBlock { hash } => {
+                    TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
                 }
-                SubstrateTxStatus::Retracted(hash) => TxStatus::Retracted(hash),
-                // Only the following statuses are considered "final", in a sense that they end the stream (see the substrate
-                // docs on `TxStatus`):
-                //
-                // - Usurped
-                // - Finalized
-                // - FinalityTimeout
-                // - Invalid
-                // - Dropped
-                //
-                // Even though `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually,
-                // the server considers them final and closes the connection, when they are encountered.
-                // In those cases the stream is closed however, so you currently have no way to find
-                // out if they finally made it into a block or not.
-                //
-                // As an example, a transaction that is `Invalid` on one node due to having the wrong
-                // nonce might still be valid on some fork on another node which ends up being finalized.
-                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
-                // and make it into a block, on another node. Likewise with `Usurped`.
-                SubstrateTxStatus::FinalityTimeout(hash) => {
+                // These stream events mean that nothing further will be sent:
+                BackendTxStatus::InFinalizedBlock { hash } => {
                     self.sub = None;
-                    TxStatus::FinalityTimeout(hash)
+                    TxStatus::InFinalizedBlock(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    ))
                 }
-                SubstrateTxStatus::Finalized(hash) => {
+                BackendTxStatus::Error { message } => {
                     self.sub = None;
-                    TxStatus::Finalized(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
+                    TxStatus::Error { message }
                 }
-                SubstrateTxStatus::Usurped(hash) => {
+                BackendTxStatus::Invalid { message } => {
                     self.sub = None;
-                    TxStatus::Usurped(hash)
+                    TxStatus::Invalid { message }
                 }
-                SubstrateTxStatus::Dropped => {
+                BackendTxStatus::Dropped { message } => {
                     self.sub = None;
-                    TxStatus::Dropped
-                }
-                SubstrateTxStatus::Invalid => {
-                    self.sub = None;
-                    TxStatus::Invalid
+                    TxStatus::Dropped { message }
                 }
             }
         })
     }
 }
 
-//* Dev note: The below is adapted from the substrate docs on `TxStatus`, which this
-//* enum was adapted from (and which is an exact copy of `SubstrateTxStatus` in this crate).
-//* Note that the number of finality watchers is, at the time of writing, found in the constant
-//* `MAX_FINALITY_WATCHERS` in the `sc_transaction_pool` crate.
-//*
-/// Possible transaction statuses returned from our [`TxProgress::next_item()`] call.
-///
-/// These status events can be grouped based on their kinds as:
-///
-/// 1. Entering/Moving within the pool:
-///    - `Future`
-///    - `Ready`
-/// 2. Inside `Ready` queue:
-///    - `Broadcast`
-/// 3. Leaving the pool:
-///    - `InBlock`
-///    - `Invalid`
-///    - `Usurped`
-///    - `Dropped`
-/// 4. Re-entering the pool:
-///    - `Retracted`
-/// 5. Block finalized:
-///    - `Finalized`
-///    - `FinalityTimeout`
-///
-/// The events will always be received in the order described above, however
-/// there might be cases where transactions alternate between `Future` and `Ready`
-/// pool, and are `Broadcast` in the meantime.
-///
-/// You are free to unsubscribe from notifications at any point.
-/// The first one will be emitted when the block in which the transaction was included gets
-/// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
-/// within 512 blocks. This either indicates that finality is not available for your chain,
-/// or that finality gadget is lagging behind.
-///
-/// Note that there are conditions that may cause transactions to reappear in the pool:
-///
-/// 1. Due to possible forks, the transaction that ends up being included
-///    in one block may later re-enter the pool or be marked as invalid.
-/// 2. A transaction that is `Dropped` at one point may later re-enter the pool if
-///    some other transactions are removed.
-/// 3. `Invalid` transactions may become valid at some point in the future.
-///    (Note that runtimes are encouraged to use `UnknownValidity` to inform the
-///    pool about such cases).
-/// 4. `Retracted` transactions might be included in a future block.
-///
-/// Even though these cases can happen, the server-side of the stream is closed, if one of the following is encountered:
-/// - Usurped
-/// - Finalized
-/// - FinalityTimeout
-/// - Invalid
-/// - Dropped
-///
-/// In any of these cases the client side TxProgress stream is also closed.
-/// In those cases the stream is closed however, so you currently have no way to find
-/// out if they finally made it into a block or not.
+/// Possible transaction statuses returned from our [`TxProgress::next()`] call.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub enum TxStatus<T: Config, C> {
-    /// The transaction is part of the "future" queue.
-    Future,
-    /// The transaction is part of the "ready" queue.
-    Ready,
-    /// The transaction has been broadcast to the given peers.
-    Broadcast(Vec<String>),
-    /// The transaction has been included in a block with given hash.
-    InBlock(TxInBlock<T, C>),
-    /// The block this transaction was included in has been retracted,
-    /// probably because it did not make it onto the blocks which were
-    /// finalized.
-    Retracted(T::Hash),
-    /// A block containing the transaction did not reach finality within 512
-    /// blocks, and so the subscription has ended.
-    FinalityTimeout(T::Hash),
-    /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TxInBlock<T, C>),
-    /// The transaction has been replaced in the pool by another transaction
-    /// that provides the same tags. (e.g. same (sender, nonce)).
-    Usurped(T::Hash),
-    /// The transaction has been dropped from the pool because of the limit.
-    Dropped,
-    /// The transaction is no longer valid in the current state.
-    Invalid,
+    /// Transaction is part of the future queue.
+    Validated,
+    /// The transaction has been broadcast to other nodes.
+    Broadcasted {
+        /// Number of peers it's been broadcast to.
+        num_peers: u32,
+    },
+    /// Transaction has been included in block with given hash.
+    InBestBlock(TxInBlock<T, C>),
+    /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
+    InFinalizedBlock(TxInBlock<T, C>),
+    /// Something went wrong in the node.
+    Error {
+        /// Human readable message; what went wrong.
+        message: String,
+    },
+    /// Transaction is invalid (bad nonce, signature etc).
+    Invalid {
+        /// Human readable message; why was it invalid.
+        message: String,
+    },
+    /// The transaction was dropped.
+    Dropped {
+        /// Human readable message; why was it dropped.
+        message: String,
+    },
 }
 
 impl<T: Config, C> TxStatus<T, C> {
-    /// A convenience method to return the `Finalized` details. Returns
-    /// [`None`] if the enum variant is not [`TxStatus::Finalized`].
+    /// A convenience method to return the finalized details. Returns
+    /// [`None`] if the enum variant is not [`TxStatus::InFinalizedBlock`].
     pub fn as_finalized(&self) -> Option<&TxInBlock<T, C>> {
         match self {
-            Self::Finalized(val) => Some(val),
+            Self::InFinalizedBlock(val) => Some(val),
             _ => None,
         }
     }
 
-    /// A convenience method to return the `InBlock` details. Returns
-    /// [`None`] if the enum variant is not [`TxStatus::InBlock`].
+    /// A convenience method to return the best block details. Returns
+    /// [`None`] if the enum variant is not [`TxStatus::InBestBlock`].
     pub fn as_in_block(&self) -> Option<&TxInBlock<T, C>> {
         match self {
-            Self::InBlock(val) => Some(val),
+            Self::InBestBlock(val) => Some(val),
             _ => None,
         }
     }
@@ -376,20 +314,18 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
     pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
-        let block = self
+        let block_body = self
             .client
-            .rpc()
-            .block(Some(self.block_hash))
+            .backend()
+            .block_body(self.block_hash)
             .await?
             .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
-        let extrinsic_idx = block
-            .block
-            .extrinsics
+        let extrinsic_idx = block_body
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let Ok((_, stripped)) = strip_compact_prefix(&ext.0) else {
+                let Ok((_,stripped)) = strip_compact_prefix(ext) else {
                     return false;
                 };
                 let hash = T::Hasher::hash_of(&stripped);
@@ -413,23 +349,16 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
 #[cfg(test)]
 mod test {
-    use std::pin::Pin;
-
-    use futures::Stream;
-
     use crate::{
+        backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
-        error::RpcError,
-        rpc::{types::SubstrateTxStatus, RpcSubscription, Subscription},
         tx::TxProgress,
         Config, Error, SubstrateConfig,
     };
 
-    use serde_json::value::RawValue;
-
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;
     type MockHash = <SubstrateConfig as Config>::Hash;
-    type MockSubstrateTxStatus = SubstrateTxStatus<MockHash, MockHash>;
+    type MockSubstrateTxStatus = TransactionStatus<MockHash>;
 
     /// a mock client to satisfy trait bounds in tests
     #[derive(Clone, Debug)]
@@ -444,49 +373,59 @@ mod test {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
-        fn runtime_version(&self) -> crate::rpc::types::RuntimeVersion {
+        fn runtime_version(&self) -> crate::backend::RuntimeVersion {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }
 
     impl OnlineClientT<SubstrateConfig> for MockClient {
-        fn rpc(&self) -> &crate::rpc::Rpc<SubstrateConfig> {
+        fn backend(&self) -> &dyn crate::backend::Backend<SubstrateConfig> {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }
 
     #[tokio::test]
-    async fn wait_for_finalized_returns_err_when_usurped() {
+    async fn wait_for_finalized_returns_err_when_error() {
         let tx_progress = mock_tx_progress(vec![
-            SubstrateTxStatus::Ready,
-            SubstrateTxStatus::Usurped(Default::default()),
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Error {
+                message: "err".into(),
+            },
         ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Usurped))
-        ));
-    }
-
-    #[tokio::test]
-    async fn wait_for_finalized_returns_err_when_dropped() {
-        let tx_progress =
-            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Dropped]);
-        let finalized_result = tx_progress.wait_for_finalized().await;
-        assert!(matches!(
-            finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Dropped))
+            Err(Error::Transaction(crate::error::TransactionError::Error(e))) if e == "err"
         ));
     }
 
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_invalid() {
-        let tx_progress =
-            mock_tx_progress(vec![SubstrateTxStatus::Ready, SubstrateTxStatus::Invalid]);
+        let tx_progress = mock_tx_progress(vec![
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Invalid {
+                message: "err".into(),
+            },
+        ]);
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Invalid))
+            Err(Error::Transaction(crate::error::TransactionError::Invalid(e))) if e == "err"
+        ));
+    }
+
+    #[tokio::test]
+    async fn wait_for_finalized_returns_err_when_dropped() {
+        let tx_progress = mock_tx_progress(vec![
+            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Dropped {
+                message: "err".into(),
+            },
+        ]);
+        let finalized_result = tx_progress.wait_for_finalized().await;
+        assert!(matches!(
+            finalized_result,
+            Err(Error::Transaction(crate::error::TransactionError::Dropped(e))) if e == "err"
         ));
     }
 
@@ -497,21 +436,10 @@ mod test {
 
     fn create_substrate_tx_status_subscription(
         elements: Vec<MockSubstrateTxStatus>,
-    ) -> Subscription<MockSubstrateTxStatus> {
-        let rpc_substription_stream: Pin<
-            Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>,
-        > = Box::pin(futures::stream::iter(elements.into_iter().map(|e| {
-            let s = serde_json::to_string(&e).unwrap();
-            let r: Box<RawValue> = RawValue::from_string(s).unwrap();
-            Ok(r)
-        })));
-
-        let rpc_subscription: RpcSubscription = RpcSubscription {
-            stream: rpc_substription_stream,
-            id: None,
-        };
-
-        let sub: Subscription<MockSubstrateTxStatus> = Subscription::new(rpc_subscription);
+    ) -> StreamOfResults<MockSubstrateTxStatus> {
+        let results = elements.into_iter().map(Ok);
+        let stream = Box::pin(futures::stream::iter(results));
+        let sub: StreamOfResults<MockSubstrateTxStatus> = StreamOfResults::new(stream);
         sub
     }
 }

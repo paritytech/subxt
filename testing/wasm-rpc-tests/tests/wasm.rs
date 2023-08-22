@@ -29,6 +29,6 @@ async fn wasm_ws_transport_works() {
         .await
         .unwrap();
 
-    let chain = client.rpc().system_chain().await.unwrap();
-    assert_eq!(&chain, "Development");
+    let mut stream = client.backend().stream_best_block_headers().await.unwrap();
+    stream.next().await;
 }

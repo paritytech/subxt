@@ -69,36 +69,13 @@ impl<T: Config> Events<T> {
 
     /// Obtain the events from a block hash given custom metadata and a client.
     ///
-    /// This method gives users the ability to inspect the events of older blocks,
-    /// where the metadata changed. For those cases, the user is responsible for
-    /// providing a valid metadata.
+    /// # Notes
     ///
-    /// # Example
-    ///
-    /// ```no_run
-    /// # #[tokio::main]
-    /// # async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///  use subxt::{ OnlineClient, PolkadotConfig, events::Events };
-    ///
-    ///  let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
-    ///
-    ///  // Get the hash of an older block.
-    ///  let block_hash = client
-    ///     .rpc()
-    ///     .block_hash(Some(1u32.into()))
-    ///     .await?
-    ///     .expect("didn't pass a block number; qed");
-    ///  // Fetch the metadata of the given block.
-    ///  let metadata = client.rpc().metadata_legacy(Some(block_hash)).await?;
-    ///  // Fetch the events from the client.
-    ///  let events = Events::new_from_client(metadata, block_hash, client);
-    /// # Ok(())
-    /// # }
-    /// ```
-    ///
-    /// # Note
-    ///
-    /// Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    /// - Prefer to use [`crate::events::EventsClient::at`] to obtain the events.
+    /// - Subxt may fail to decode things that aren't from a runtime using the
+    ///   latest metadata version.
+    /// - The client may not be able to obtain the block at the given hash. Only
+    ///   archive nodes keep hold of all past block information.
     pub async fn new_from_client<Client>(
         metadata: Metadata,
         block_hash: T::Hash,
@@ -107,7 +84,7 @@ impl<T: Config> Events<T> {
     where
         Client: OnlineClientT<T>,
     {
-        let event_bytes = get_event_bytes(&client, Some(block_hash)).await?;
+        let event_bytes = get_event_bytes(client.backend(), block_hash).await?;
         Ok(Events::new(metadata, block_hash, event_bytes))
     }
 
@@ -669,7 +646,7 @@ mod tests {
         // construst an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::ApplyExtrinsic(123), event)],
         );
 
@@ -711,7 +688,7 @@ mod tests {
         let event3 = Event::A(234);
 
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![
                 event_record(Phase::Initialization, event1),
                 event_record(Phase::ApplyExtrinsic(123), event2),
@@ -782,7 +759,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events_raw(
-            metadata.clone(),
+            metadata,
             event_bytes,
             3, // 2 "good" events, and then it'll hit the naff bytes.
         );
@@ -833,7 +810,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::Finalization, Event::A(1))],
         );
 
@@ -870,7 +847,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(
                 Phase::Finalization,
                 Event::A(CompactWrapper(1)),
@@ -914,7 +891,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata.clone(),
+            metadata,
             vec![event_record(Phase::Finalization, Event::A(MyType::B))],
         );
 

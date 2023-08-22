@@ -16,7 +16,7 @@
 //!
 //! In either case, you'll end up with [`crate::blocks::Block`]'s, from which you can access various
 //! information about the block, such a the [header](crate::blocks::Block::header()), [block
-//! number](crate::blocks::Block::number()) and [body](crate::blocks::Block::body()).
+//! number](crate::blocks::Block::number()) and [body (the extrinsics)](crate::blocks::Block::extrinsics()).
 //! [`crate::blocks::Block`]'s also provide shortcuts to other Subxt APIs that will operate at the
 //! given block:
 //!
@@ -29,9 +29,9 @@
 //!
 //! ## Example
 //!
-//! Given a block, you can [download the block body](crate::blocks::Block::body()) and iterate over
-//! the extrinsics stored within it using [`crate::blocks::BlockBody::extrinsics()`]. From there, you
-//! can decode the extrinsics and access various details, including the associated events:
+//! Given a block, you can [download the block body](crate::blocks::Block::extrinsics()) and iterate over
+//! the extrinsics stored within it. From there, you can decode the extrinsics and access various details,
+//! including the associated events:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/blocks_subscribing.rs")]

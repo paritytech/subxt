@@ -2,24 +2,36 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{RpcClientT, RpcSubscription, RpcSubscriptionId};
+use super::{RawRpcSubscription, RpcClientT};
 use crate::error::Error;
 use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 
-/// A concrete wrapper around an [`RpcClientT`] which exposes the udnerlying interface via some
-/// higher level methods that make it a little easier to work with.
-///
-/// Wrapping [`RpcClientT`] in this way is simply a way to expose this additional functionality
-/// without getting into issues with non-object-safe methods or no `async` in traits.
+/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods,
+/// is cheaply cloneable, and can be handed to things like [`crate::client::OnlineClient`] to
+/// instantiate it.
 #[derive(Clone)]
-pub struct RpcClient(Arc<dyn RpcClientT>);
+pub struct RpcClient {
+    client: Arc<dyn RpcClientT>,
+}
 
 impl RpcClient {
-    pub(crate) fn new<R: RpcClientT>(client: Arc<R>) -> Self {
-        RpcClient(client)
+    #[cfg(feature = "jsonrpsee")]
+    /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
+    pub async fn from_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
+        let client = jsonrpsee_helpers::client(url.as_ref())
+            .await
+            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+        Ok(Self::new(client))
+    }
+
+    /// Create a new [`RpcClient`] from an arbitrary [`RpcClientT`] implementation.
+    pub fn new<R: RpcClientT>(client: R) -> Self {
+        RpcClient {
+            client: Arc::new(client),
+        }
     }
 
     /// Make an RPC request, given a method name and some parameters.
@@ -31,7 +43,7 @@ impl RpcClient {
         method: &str,
         params: RpcParams,
     ) -> Result<Res, Error> {
-        let res = self.0.request_raw(method, params.build()).await?;
+        let res = self.client.request_raw(method, params.build()).await?;
         let val = serde_json::from_str(res.get())?;
         Ok(val)
     }
@@ -46,9 +58,12 @@ impl RpcClient {
         sub: &str,
         params: RpcParams,
         unsub: &str,
-    ) -> Result<Subscription<Res>, Error> {
-        let sub = self.0.subscribe_raw(sub, params.build(), unsub).await?;
-        Ok(Subscription::new(sub))
+    ) -> Result<RpcSubscription<Res>, Error> {
+        let sub = self
+            .client
+            .subscribe_raw(sub, params.build(), unsub)
+            .await?;
+        Ok(RpcSubscription::new(sub))
     }
 }
 
@@ -61,7 +76,7 @@ impl std::fmt::Debug for RpcClient {
 impl std::ops::Deref for RpcClient {
     type Target = dyn RpcClientT;
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &*self.client
     }
 }
 
@@ -75,7 +90,7 @@ impl std::ops::Deref for RpcClient {
 /// # Example
 ///
 /// ```rust
-/// use subxt::rpc::{ rpc_params, RpcParams };
+/// use subxt::backend::rpc::{ rpc_params, RpcParams };
 ///
 /// // If you provide no params you get `None` back
 /// let params: RpcParams = rpc_params![];
@@ -90,7 +105,7 @@ macro_rules! rpc_params {
     ($($p:expr), *) => {{
         // May be unused if empty; no params.
         #[allow(unused_mut)]
-        let mut params = $crate::rpc::RpcParams::new();
+        let mut params = $crate::backend::rpc::RpcParams::new();
         $(
             params.push($p).expect("values passed to rpc_params! must be serializable to JSON");
         )*
@@ -107,7 +122,7 @@ pub use rpc_params;
 /// # Example
 ///
 /// ```rust
-/// use subxt::rpc::RpcParams;
+/// use subxt::backend::rpc::RpcParams;
 ///
 /// let mut params = RpcParams::new();
 /// params.push(1).unwrap();
@@ -151,23 +166,23 @@ impl RpcParams {
 /// A generic RPC Subscription. This implements [`Stream`], and so most of
 /// the functionality you'll need to interact with it comes from the
 /// [`StreamExt`] extension trait.
-pub struct Subscription<Res> {
-    inner: RpcSubscription,
+pub struct RpcSubscription<Res> {
+    inner: RawRpcSubscription,
     _marker: std::marker::PhantomData<Res>,
 }
 
-impl<Res> std::fmt::Debug for Subscription<Res> {
+impl<Res> std::fmt::Debug for RpcSubscription<Res> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Subscription")
-            .field("inner", &"RpcSubscription")
+        f.debug_struct("RpcSubscription")
+            .field("inner", &"RawRpcSubscription")
             .field("_marker", &self._marker)
             .finish()
     }
 }
 
-impl<Res> Subscription<Res> {
-    /// Creates a new [`Subscription`].
-    pub fn new(inner: RpcSubscription) -> Self {
+impl<Res> RpcSubscription<Res> {
+    /// Creates a new [`RpcSubscription`].
+    pub fn new(inner: RawRpcSubscription) -> Self {
         Self {
             inner,
             _marker: std::marker::PhantomData,
@@ -175,21 +190,22 @@ impl<Res> Subscription<Res> {
     }
 
     /// Obtain the ID associated with this subscription.
-    pub fn subscription_id(&self) -> Option<&RpcSubscriptionId> {
-        self.inner.id.as_ref()
+    pub fn subscription_id(&self) -> Option<&str> {
+        self.inner.id.as_deref()
     }
 }
 
-impl<Res: DeserializeOwned> Subscription<Res> {
-    /// Wait for the next item from the subscription.
+impl<Res: DeserializeOwned> RpcSubscription<Res> {
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
     pub async fn next(&mut self) -> Option<Result<Res, Error>> {
         StreamExt::next(self).await
     }
 }
 
-impl<Res> std::marker::Unpin for Subscription<Res> {}
+impl<Res> std::marker::Unpin for RpcSubscription<Res> {}
 
-impl<Res: DeserializeOwned> Stream for Subscription<Res> {
+impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
     type Item = Result<Res, Error>;
 
     fn poll_next(
@@ -206,5 +222,55 @@ impl<Res: DeserializeOwned> Stream for Subscription<Res> {
         });
 
         Poll::Ready(res)
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build WS RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::{
+            client::{Client, ClientBuilder},
+            Error,
+        },
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))?;
+        Ok(ClientBuilder::default()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
     }
 }

@@ -4,7 +4,7 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{client::OnlineClientT, error::Error, Config};
+use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 
@@ -32,8 +32,8 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain a runtime API interface at some block hash.
-    pub fn at(&self, block_hash: T::Hash) -> RuntimeApi<T, Client> {
-        RuntimeApi::new(self.client.clone(), block_hash)
+    pub fn at(&self, block_ref: impl Into<BlockRef<T::Hash>>) -> RuntimeApi<T, Client> {
+        RuntimeApi::new(self.client.clone(), block_ref.into())
     }
 
     /// Obtain a runtime API interface at the latest block hash.
@@ -44,14 +44,10 @@ where
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // get the hash for the latest block and use that.
-            let block_hash = client
-                .rpc()
-                .block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed");
+            // get the ref for the latest block and use that.
+            let block_ref = client.backend().latest_best_block_ref().await?;
 
-            Ok(RuntimeApi::new(client, block_hash))
+            Ok(RuntimeApi::new(client, block_ref))
         }
     }
 }

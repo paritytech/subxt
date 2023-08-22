@@ -123,7 +123,7 @@
 //! ### Advanced
 //!
 //! For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and
-//! [`crate::storage::Storage::fetch_keys`]. Both of these take raw bytes as arguments, which can be
+//! [`crate::storage::Storage::fetch_raw_keys`]. Both of these take raw bytes as arguments, which can be
 //! obtained from a [`crate::storage::StorageAddress`] by using
 //! [`crate::storage::StorageClient::address_bytes()`] or
 //! [`crate::storage::StorageClient::address_root_bytes()`].

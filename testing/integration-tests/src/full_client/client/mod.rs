@@ -3,181 +3,64 @@
 // see LICENSE for license details.
 
 use crate::{
-    test_context, test_context_with,
+    test_context,
     utils::{node_runtime, wait_for_blocks},
 };
-use assert_matches::assert_matches;
-use codec::{Compact, Decode, Encode};
-use sp_core::storage::well_known_keys;
-use sp_runtime::DeserializeOwned;
+use codec::{Decode, Encode};
+use futures::StreamExt;
 use subxt::{
-    error::{DispatchError, Error, TokenError},
-    rpc::{
-        types::{
-            DryRunResult, DryRunResultBytes, FollowEvent, Initialized, MethodResponse,
-            RuntimeEvent, RuntimeVersionEvent, StorageQuery, StorageQueryType,
-        },
-        Subscription,
-    },
-    utils::AccountId32,
+    backend::BackendExt,
+    error::{DispatchError, Error},
+    tx::{TransactionInvalid, ValidationResult},
 };
-use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
-/// Ignore block related events and obtain the next event related to an operation.
-async fn next_operation_event<T: DeserializeOwned>(
-    sub: &mut Subscription<FollowEvent<T>>,
-) -> FollowEvent<T> {
-    // At most 5 retries.
-    for _ in 0..5 {
-        let event = sub.next().await.unwrap().unwrap();
-
-        match event {
-            // Can also return the `Stop` event for better debugging.
-            FollowEvent::Initialized(_)
-            | FollowEvent::NewBlock(_)
-            | FollowEvent::BestBlockChanged(_)
-            | FollowEvent::Finalized(_) => continue,
-            _ => (),
-        };
-
-        return event;
-    }
-
-    panic!("Cannot find operation related event after 5 produced events");
-}
+mod legacy_rpcs;
 
 #[tokio::test]
-async fn insert_key() {
-    let ctx = test_context_with("bob".to_string()).await;
-    let api = ctx.client();
-
-    let public = dev::alice().public_key().as_ref().to_vec();
-    api.rpc()
-        .insert_key(
-            "aura".to_string(),
-            "//Alice".to_string(),
-            public.clone().into(),
-        )
-        .await
-        .unwrap();
-    assert!(api
-        .rpc()
-        .has_key(public.clone().into(), "aura".to_string())
-        .await
-        .unwrap());
-}
-
-#[tokio::test]
-async fn fetch_block_hash() {
-    let ctx = test_context().await;
-    ctx.client().rpc().block_hash(None).await.unwrap();
-}
-
-#[tokio::test]
-async fn fetch_block() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let block_hash = api.rpc().block_hash(None).await.unwrap();
-    api.rpc().block(block_hash).await.unwrap();
-}
-
-#[tokio::test]
-async fn fetch_read_proof() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let block_hash = api.rpc().block_hash(None).await.unwrap();
-    api.rpc()
-        .read_proof(
-            vec![
-                well_known_keys::HEAP_PAGES,
-                well_known_keys::EXTRINSIC_INDEX,
-            ],
-            block_hash,
-        )
-        .await
-        .unwrap();
-}
-
-#[tokio::test]
-async fn chain_subscribe_all_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().subscribe_all_block_headers().await.unwrap();
-    blocks.next().await.unwrap().unwrap();
-}
-
-#[tokio::test]
-async fn chain_subscribe_best_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().subscribe_best_block_headers().await.unwrap();
-    blocks.next().await.unwrap().unwrap();
-}
-
-#[tokio::test]
-async fn chain_subscribe_finalized_blocks() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().subscribe_finalized_block_headers().await.unwrap();
-    blocks.next().await.unwrap().unwrap();
-}
-
-#[tokio::test]
-async fn fetch_keys() {
+async fn storage_fetch_raw_keys() {
     let ctx = test_context().await;
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_iter();
-    let keys = api
+    let len = api
         .storage()
         .at_latest()
         .await
         .unwrap()
-        .fetch_keys(&addr.to_root_bytes(), 4, None)
+        .fetch_raw_keys(addr.to_root_bytes())
         .await
-        .unwrap();
-    assert_eq!(keys.len(), 4)
+        .unwrap()
+        .filter_map(|r| async move { r.ok() })
+        .count()
+        .await;
+
+    assert_eq!(len, 13)
 }
 
 #[tokio::test]
-async fn test_iter() {
+async fn storage_iter() {
     let ctx = test_context().await;
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_iter();
-    let mut iter = api
+    let len = api
         .storage()
         .at_latest()
         .await
         .unwrap()
-        .iter(addr, 10)
+        .iter(addr)
         .await
-        .unwrap();
-    let mut i = 0;
-    while iter.next().await.unwrap().is_some() {
-        i += 1;
-    }
-    assert_eq!(i, 13);
+        .unwrap()
+        .filter_map(|r| async move { r.ok() })
+        .count()
+        .await;
+
+    assert_eq!(len, 13);
 }
 
 #[tokio::test]
-async fn fetch_system_info() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    assert_eq!(api.rpc().system_chain().await.unwrap(), "Development");
-    assert_eq!(api.rpc().system_name().await.unwrap(), "Substrate Node");
-    assert!(!api.rpc().system_version().await.unwrap().is_empty());
-}
-
-#[tokio::test]
-async fn dry_run_passes() {
+async fn transaction_validation() {
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -197,9 +80,9 @@ async fn dry_run_passes() {
         .unwrap();
 
     signed_extrinsic
-        .dry_run(None)
+        .validate()
         .await
-        .expect("dryrunning failed");
+        .expect("validation failed");
 
     signed_extrinsic
         .submit_and_watch()
@@ -211,109 +94,37 @@ async fn dry_run_passes() {
 }
 
 #[tokio::test]
-async fn dry_run_fails() {
+async fn validation_fails() {
+    use std::str::FromStr;
+    use subxt_signer::{sr25519::Keypair, SecretUri};
+
     let ctx = test_context().await;
     let api = ctx.client();
 
     wait_for_blocks(&api).await;
 
-    let alice = dev::alice();
-    let bob = dev::bob();
+    let from = Keypair::from_uri(&SecretUri::from_str("//AccountWithNoFunds").unwrap()).unwrap();
+    let to = dev::bob();
 
-    let tx = node_runtime::tx().balances().transfer(
-        bob.public_key().into(),
-        // 7 more than the default amount Alice has, so this should fail; insufficient funds:
-        1_000_000_000_000_000_000_007,
-    );
+    // The actual TX is not important; the account has no funds to pay for it.
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer(to.public_key().into(), 1);
 
     let signed_extrinsic = api
         .tx()
-        .create_signed(&tx, &alice, Default::default())
+        .create_signed(&tx, &from, Default::default())
         .await
         .unwrap();
 
-    let dry_run_res = signed_extrinsic
-        .dry_run(None)
+    let validation_res = signed_extrinsic
+        .validate()
         .await
         .expect("dryrunning failed");
-
     assert_eq!(
-        dry_run_res,
-        DryRunResult::DispatchError(DispatchError::Token(TokenError::FundsUnavailable))
+        validation_res,
+        ValidationResult::Invalid(TransactionInvalid::Payment)
     );
-
-    let res = signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await;
-
-    assert!(
-        matches!(
-            res,
-            Err(Error::Runtime(DispatchError::Token(
-                TokenError::FundsUnavailable
-            )))
-        ),
-        "Expected an insufficient balance, got {res:?}"
-    );
-}
-
-#[tokio::test]
-async fn dry_run_result_is_substrate_compatible() {
-    use sp_runtime::{
-        transaction_validity::{
-            InvalidTransaction as SpInvalidTransaction,
-            TransactionValidityError as SpTransactionValidityError,
-        },
-        ApplyExtrinsicResult as SpApplyExtrinsicResult, DispatchError as SpDispatchError,
-        TokenError as SpTokenError,
-    };
-
-    // We really just connect to a node to get some valid metadata to help us
-    // decode Dispatch Errors.
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let pairs = vec![
-        // All ok
-        (SpApplyExtrinsicResult::Ok(Ok(())), DryRunResult::Success),
-        // Some transaction error
-        (
-            SpApplyExtrinsicResult::Err(SpTransactionValidityError::Invalid(
-                SpInvalidTransaction::BadProof,
-            )),
-            DryRunResult::TransactionValidityError,
-        ),
-        // Some dispatch errors to check that they decode OK. We've tested module errors
-        // "in situ" in other places so avoid the complexity of testing them properly here.
-        (
-            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Other("hi"))),
-            DryRunResult::DispatchError(DispatchError::Other),
-        ),
-        (
-            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::CannotLookup)),
-            DryRunResult::DispatchError(DispatchError::CannotLookup),
-        ),
-        (
-            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::BadOrigin)),
-            DryRunResult::DispatchError(DispatchError::BadOrigin),
-        ),
-        (
-            SpApplyExtrinsicResult::Ok(Err(SpDispatchError::Token(SpTokenError::CannotCreate))),
-            DryRunResult::DispatchError(DispatchError::Token(TokenError::CannotCreate)),
-        ),
-    ];
-
-    for (actual, expected) in pairs {
-        let encoded = actual.encode();
-        let res = DryRunResultBytes(encoded)
-            .into_dry_run_result(&api.metadata())
-            .unwrap();
-
-        assert_eq!(res, expected);
-    }
 }
 
 #[tokio::test]
@@ -442,227 +253,28 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 }
 
 #[tokio::test]
-async fn rpc_state_call() -> Result<(), subxt::Error> {
+async fn extrinsic_hash_is_same_as_returned() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let rpc = ctx.legacy_rpc_methods().await;
 
-    // get metadata via state_call.
-    let (_, meta1) = api
-        .rpc()
-        .state_call::<(Compact<u32>, Metadata)>("Metadata_metadata", None, None)
-        .await?;
+    let payload = node_runtime::tx()
+        .balances()
+        .transfer(dev::alice().public_key().into(), 12345000000000000);
 
-    // get metadata via `state_getMetadata`.
-    let meta2 = api.rpc().metadata_legacy(None).await?;
-
-    // They should be the same.
-    assert_eq!(meta1.encode(), meta2.encode());
-
-    Ok(())
-}
-
-#[tokio::test]
-async fn chainhead_unstable_follow() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    // Check subscription with runtime updates set on false.
-    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    // The initialized event should contain the finalized block hash.
-    let finalized_block_hash = api.rpc().finalized_head().await.unwrap();
-    assert_eq!(
-        event,
-        FollowEvent::Initialized(Initialized {
-            finalized_block_hash,
-            finalized_block_runtime: None,
-        })
-    );
-
-    // Expect subscription to produce runtime versions.
-    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    // The initialized event should contain the finalized block hash.
-    let finalized_block_hash = api.rpc().finalized_head().await.unwrap();
-    let runtime_version = ctx.client().runtime_version();
-
-    assert_matches!(
-        event,
-        FollowEvent::Initialized(init) => {
-            assert_eq!(init.finalized_block_hash, finalized_block_hash);
-            assert_eq!(init.finalized_block_runtime, Some(RuntimeEvent::Valid(RuntimeVersionEvent {
-                spec: runtime_version,
-            })));
-        }
-    );
-}
-
-#[tokio::test]
-async fn chainhead_unstable_body() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
-        _ => panic!("Unexpected event"),
-    };
-    let sub_id = blocks.subscription_id().unwrap().clone();
-
-    // Fetch the block's body.
-    let response = api
-        .rpc()
-        .chainhead_unstable_body(sub_id, hash)
+    let tx = api
+        .tx()
+        .create_signed(&payload, &dev::bob(), Default::default())
         .await
         .unwrap();
-    let operation_id = match response {
-        MethodResponse::Started(started) => started.operation_id,
-        MethodResponse::LimitReached => panic!("Expected started response"),
-    };
 
-    // Response propagated to `chainHead_follow`.
-    let event = next_operation_event(&mut blocks).await;
-    assert_matches!(
-        event,
-        FollowEvent::OperationBodyDone(done) if done.operation_id == operation_id
-    );
-}
+    // 1. Calculate the hash locally:
+    let local_hash = tx.hash();
 
-#[tokio::test]
-async fn chainhead_unstable_header() {
-    let ctx = test_context().await;
-    let api = ctx.client();
+    // 2. Submit and get the hash back from the node:
+    let external_hash = rpc.author_submit_extrinsic(tx.encoded()).await.unwrap();
 
-    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
-        _ => panic!("Unexpected event"),
-    };
-    let sub_id = blocks.subscription_id().unwrap().clone();
-
-    let header = api.rpc().header(Some(hash)).await.unwrap().unwrap();
-    let expected = format!("0x{}", hex::encode(header.encode()));
-
-    let header = api
-        .rpc()
-        .chainhead_unstable_header(sub_id, hash)
-        .await
-        .unwrap()
-        .unwrap();
-
-    assert_eq!(header, expected);
-}
-
-#[tokio::test]
-async fn chainhead_unstable_storage() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().chainhead_unstable_follow(false).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
-        _ => panic!("Unexpected event"),
-    };
-    let sub_id = blocks.subscription_id().unwrap().clone();
-
-    let alice: AccountId32 = dev::alice().public_key().into();
-    let addr = node_runtime::storage().system().account(alice);
-    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
-
-    let items = vec![StorageQuery {
-        key: addr_bytes.as_slice(),
-        query_type: StorageQueryType::Value,
-    }];
-
-    // Fetch storage.
-    let response = api
-        .rpc()
-        .chainhead_unstable_storage(sub_id, hash, items, None)
-        .await
-        .unwrap();
-    let operation_id = match response {
-        MethodResponse::Started(started) => started.operation_id,
-        MethodResponse::LimitReached => panic!("Expected started response"),
-    };
-
-    // Response propagated to `chainHead_follow`.
-    let event = next_operation_event(&mut blocks).await;
-    assert_matches!(
-        event,
-        FollowEvent::OperationStorageItems(res) if res.operation_id == operation_id &&
-            res.items.len() == 1 &&
-            res.items[0].key == format!("0x{}", hex::encode(addr_bytes))
-    );
-
-    let event = next_operation_event(&mut blocks).await;
-    assert_matches!(event, FollowEvent::OperationStorageDone(res) if res.operation_id == operation_id);
-}
-
-#[tokio::test]
-async fn chainhead_unstable_call() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
-        _ => panic!("Unexpected event"),
-    };
-    let sub_id = blocks.subscription_id().unwrap().clone();
-
-    let alice_id = dev::alice().public_key().to_account_id();
-    // Runtime API call.
-    let response = api
-        .rpc()
-        .chainhead_unstable_call(
-            sub_id,
-            hash,
-            "AccountNonceApi_account_nonce".into(),
-            &alice_id.encode(),
-        )
-        .await
-        .unwrap();
-    let operation_id = match response {
-        MethodResponse::Started(started) => started.operation_id,
-        MethodResponse::LimitReached => panic!("Expected started response"),
-    };
-
-    // Response propagated to `chainHead_follow`.
-    let event = next_operation_event(&mut blocks).await;
-    assert_matches!(
-        event,
-        FollowEvent::OperationCallDone(res) if res.operation_id == operation_id
-    );
-}
-
-#[tokio::test]
-async fn chainhead_unstable_unpin() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let mut blocks = api.rpc().chainhead_unstable_follow(true).await.unwrap();
-    let event = blocks.next().await.unwrap().unwrap();
-    let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
-        _ => panic!("Unexpected event"),
-    };
-    let sub_id = blocks.subscription_id().unwrap().clone();
-
-    assert!(api
-        .rpc()
-        .chainhead_unstable_unpin(sub_id.clone(), hash)
-        .await
-        .is_ok());
-    // The block was already unpinned.
-    assert!(api
-        .rpc()
-        .chainhead_unstable_unpin(sub_id, hash)
-        .await
-        .is_err());
+    assert_eq!(local_hash, external_hash);
 }
 
 /// taken from original type <https://docs.rs/pallet-transaction-payment/latest/pallet_transaction_payment/struct.FeeDetails.html>
@@ -713,6 +325,7 @@ async fn partial_fee_estimate_correct() {
     let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
 
     // Method II: TransactionPaymentApi_query_fee_details + calculations
+    let latest_block_ref = api.backend().latest_best_block_ref().await.unwrap();
     let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
     let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
     let InclusionFee {
@@ -720,11 +333,11 @@ async fn partial_fee_estimate_correct() {
         len_fee,
         adjusted_weight_fee,
     } = api
-        .rpc()
-        .state_call::<FeeDetails>(
+        .backend()
+        .call_decoding::<FeeDetails>(
             "TransactionPaymentApi_query_fee_details",
             Some(&encoded_with_len),
-            None,
+            latest_block_ref.hash(),
         )
         .await
         .unwrap()

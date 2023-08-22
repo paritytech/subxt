@@ -4,21 +4,18 @@
 
 use std::borrow::Cow;
 
-use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
-use sp_core_hashing::blake2_256;
-
 use crate::error::DecodeError;
 use crate::{
+    backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-
-// This is returned from an API below, so expose it here.
-pub use crate::rpc::types::DryRunResult;
+use codec::{Compact, Decode, Encode};
+use derivative::Derivative;
+use sp_core_hashing::blake2_256;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -172,13 +169,14 @@ where
 {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
+        let block_ref = self.client.backend().latest_best_block_ref().await?;
         let account_nonce_bytes = self
             .client
-            .rpc()
-            .state_call_raw(
+            .backend()
+            .call(
                 "AccountNonceApi_account_nonce",
                 Some(&account_id.encode()),
-                None,
+                block_ref.hash(),
             )
             .await?;
 
@@ -429,6 +427,11 @@ where
         }
     }
 
+    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
+    pub fn hash(&self) -> T::Hash {
+        T::Hasher::hash_of(&self.encoded)
+    }
+
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
@@ -452,32 +455,91 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
         // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hasher::hash_of(&self.encoded);
+        let ext_hash = self.hash();
 
         // Submit and watch for transaction progress.
-        let sub = self.client.rpc().watch_extrinsic(&self.encoded).await?;
+        let sub = self
+            .client
+            .backend()
+            .submit_transaction(&self.encoded.0)
+            .await?;
 
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
     }
 
     /// Submits the extrinsic to the chain for block inclusion.
     ///
-    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
-    ///
-    /// # Note
-    ///
-    /// Success does not mean the extrinsic has been included in the block, just that it is valid
-    /// and has been included in the transaction pool.
+    /// It's usually better to call `submit_and_watch` to get an idea of the progress of the
+    /// submission and whether it's eventually successful or not. This call does not guarantee
+    /// success, and is just sending the transaction to the chain.
     pub async fn submit(&self) -> Result<T::Hash, Error> {
-        self.client.rpc().submit_extrinsic(&self.encoded).await
+        let ext_hash = self.hash();
+        let mut sub = self
+            .client
+            .backend()
+            .submit_transaction(&self.encoded.0)
+            .await?;
+
+        // If we get a bad status or error back straight away then error, else return the hash.
+        match sub.next().await {
+            Some(Ok(status)) => match status {
+                TransactionStatus::Validated
+                | TransactionStatus::Broadcasted { .. }
+                | TransactionStatus::InBestBlock { .. }
+                | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
+                TransactionStatus::Error { message } => {
+                    Err(Error::Other(format!("Transaction error: {message}")))
+                }
+                TransactionStatus::Invalid { message } => {
+                    Err(Error::Other(format!("Transaction invalid: {message}")))
+                }
+                TransactionStatus::Dropped { message } => {
+                    Err(Error::Other(format!("Transaction dropped: {message}")))
+                }
+            },
+            Some(Err(e)) => Err(e),
+            None => Err(Error::Other(
+                "Transaction broadcast was unsuccessful; stream terminated early".into(),
+            )),
+        }
     }
 
-    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
+    /// valid can be added to a block, but may still end up in an error state.
     ///
-    /// Returns `Ok` with a [`DryRunResult`], which is the result of attempting to dry run the extrinsic.
-    pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<DryRunResult, Error> {
-        let dry_run_bytes = self.client.rpc().dry_run(self.encoded(), at).await?;
-        dry_run_bytes.into_dry_run_result(&self.client.metadata())
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn validate(&self) -> Result<ValidationResult, Error> {
+        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
+        self.validate_at(latest_block_ref).await
+    }
+
+    /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
+    /// valid can be added to a block, but may still end up in an error state.
+    ///
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    pub async fn validate_at(
+        &self,
+        at: impl Into<BlockRef<T::Hash>>,
+    ) -> Result<ValidationResult, Error> {
+        let block_hash = at.into().hash();
+
+        // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
+        let mut params = Vec::with_capacity(8 + self.encoded.0.len() + 8);
+        2u8.encode_to(&mut params);
+        params.extend(self.encoded().iter());
+        block_hash.encode_to(&mut params);
+
+        let res: Vec<u8> = self
+            .client
+            .backend()
+            .call(
+                "TaggedTransactionQueue_validate_transaction",
+                Some(&params),
+                block_hash,
+            )
+            .await?;
+
+        ValidationResult::try_from_bytes(res)
     }
 
     /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
@@ -485,17 +547,281 @@ where
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
+        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
+
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
         let (_, _, _, partial_fee) = self
             .client
-            .rpc()
-            .state_call::<(Compact<u64>, Compact<u64>, u8, u128)>(
+            .backend()
+            .call_decoding::<(Compact<u64>, Compact<u64>, u8, u128)>(
                 "TransactionPaymentApi_query_info",
                 Some(&params),
-                None,
+                latest_block_ref.hash(),
             )
             .await?;
         Ok(partial_fee)
+    }
+}
+
+impl ValidationResult {
+    #[allow(clippy::get_first)]
+    fn try_from_bytes(bytes: Vec<u8>) -> Result<ValidationResult, crate::Error> {
+        // TaggedTransactionQueue_validate_transaction returns this:
+        // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
+        // We copy some of the inner types and put the three states (valid, invalid, unknown) into one enum,
+        // because from our perspective, the call was successful regardless.
+        if bytes.get(0) == Some(&0) {
+            // ok: valid. Decode but, for now we discard most of the information
+            let res = TransactionValid::decode(&mut &bytes[1..])?;
+            Ok(ValidationResult::Valid(res))
+        } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&0) {
+            // error: invalid
+            let res = TransactionInvalid::decode(&mut &bytes[2..])?;
+            Ok(ValidationResult::Invalid(res))
+        } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&1) {
+            // error: unknown
+            let res = TransactionUnknown::decode(&mut &bytes[2..])?;
+            Ok(ValidationResult::Unknown(res))
+        } else {
+            // unable to decode the bytes; they aren't what we expect.
+            Err(crate::Error::Unknown(bytes))
+        }
+    }
+}
+
+/// The result of performing [`SubmittableExtrinsic::validate()`].
+#[derive(Clone, Debug, PartialEq)]
+pub enum ValidationResult {
+    /// The transaction is valid
+    Valid(TransactionValid),
+    /// The transaction is invalid
+    Invalid(TransactionInvalid),
+    /// Unable to validate the transaction
+    Unknown(TransactionUnknown),
+}
+
+impl ValidationResult {
+    /// Is the transaction valid.
+    pub fn is_valid(&self) -> bool {
+        matches!(self, ValidationResult::Valid(_))
+    }
+}
+
+/// Transaction is valid; here is some more information about it.
+#[derive(Decode, Clone, Debug, PartialEq)]
+pub struct TransactionValid {
+    /// Priority of the transaction.
+    ///
+    /// Priority determines the ordering of two transactions that have all
+    /// their dependencies (required tags) satisfied.
+    pub priority: u64,
+    /// Transaction dependencies
+    ///
+    /// A non-empty list signifies that some other transactions which provide
+    /// given tags are required to be included before that one.
+    pub requires: Vec<Vec<u8>>,
+    /// Provided tags
+    ///
+    /// A list of tags this transaction provides. Successfully importing the transaction
+    /// will enable other transactions that depend on (require) those tags to be included as well.
+    /// Provided and required tags allow Substrate to build a dependency graph of transactions
+    /// and import them in the right (linear) order.
+    pub provides: Vec<Vec<u8>>,
+    /// Transaction longevity
+    ///
+    /// Longevity describes minimum number of blocks the validity is correct.
+    /// After this period transaction should be removed from the pool or revalidated.
+    pub longevity: u64,
+    /// A flag indicating if the transaction should be propagated to other peers.
+    ///
+    /// By setting `false` here the transaction will still be considered for
+    /// including in blocks that are authored on the current node, but will
+    /// never be sent to other peers.
+    pub propagate: bool,
+}
+
+/// The runtime was unable to validate the transaction.
+#[derive(Decode, Clone, Debug, PartialEq)]
+pub enum TransactionUnknown {
+    /// Could not lookup some information that is required to validate the transaction.
+    CannotLookup,
+    /// No validator found for the given unsigned transaction.
+    NoUnsignedValidator,
+    /// Any other custom unknown validity that is not covered by this enum.
+    Custom(u8),
+}
+
+/// The transaction is invalid.
+#[derive(Decode, Clone, Debug, PartialEq)]
+pub enum TransactionInvalid {
+    /// The call of the transaction is not expected.
+    Call,
+    /// General error to do with the inability to pay some fees (e.g. account balance too low).
+    Payment,
+    /// General error to do with the transaction not yet being valid (e.g. nonce too high).
+    Future,
+    /// General error to do with the transaction being outdated (e.g. nonce too low).
+    Stale,
+    /// General error to do with the transaction's proofs (e.g. signature).
+    ///
+    /// # Possible causes
+    ///
+    /// When using a signed extension that provides additional data for signing, it is required
+    /// that the signing and the verifying side use the same additional data. Additional
+    /// data will only be used to generate the signature, but will not be part of the transaction
+    /// itself. As the verifying side does not know which additional data was used while signing
+    /// it will only be able to assume a bad signature and cannot express a more meaningful error.
+    BadProof,
+    /// The transaction birth block is ancient.
+    ///
+    /// # Possible causes
+    ///
+    /// For `FRAME`-based runtimes this would be caused by `current block number
+    /// - Era::birth block number > BlockHashCount`. (e.g. in Polkadot `BlockHashCount` = 2400, so
+    ///   a
+    /// transaction with birth block number 1337 would be valid up until block number 1337 + 2400,
+    /// after which point the transaction would be considered to have an ancient birth block.)
+    AncientBirthBlock,
+    /// The transaction would exhaust the resources of current block.
+    ///
+    /// The transaction might be valid, but there are not enough resources
+    /// left in the current block.
+    ExhaustsResources,
+    /// Any other custom invalid validity that is not covered by this enum.
+    Custom(u8),
+    /// An extrinsic with a Mandatory dispatch resulted in Error. This is indicative of either a
+    /// malicious validator or a buggy `provide_inherent`. In any case, it can result in
+    /// dangerously overweight blocks and therefore if found, invalidates the block.
+    BadMandatory,
+    /// An extrinsic with a mandatory dispatch tried to be validated.
+    /// This is invalid; only inherent extrinsics are allowed to have mandatory dispatches.
+    MandatoryValidation,
+    /// The sending address is disabled or known to be invalid.
+    BadSigner,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn transaction_validity_decoding_empty_bytes() {
+        // No panic should occur decoding empty bytes.
+        let decoded = ValidationResult::try_from_bytes(vec![]);
+        assert!(decoded.is_err())
+    }
+
+    #[test]
+    fn transaction_validity_decoding_is_ok() {
+        use sp_runtime::transaction_validity as sp;
+        use sp_runtime::transaction_validity::TransactionValidity as T;
+
+        let pairs = vec![
+            (
+                T::Ok(sp::ValidTransaction {
+                    ..Default::default()
+                }),
+                ValidationResult::Valid(TransactionValid {
+                    // By default, tx is immortal
+                    longevity: u64::MAX,
+                    // Default is true
+                    propagate: true,
+                    priority: 0,
+                    provides: vec![],
+                    requires: vec![],
+                }),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::BadProof,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::BadProof),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::Call,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::Call),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::Payment,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::Payment),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::Future,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::Future),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::Stale,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::Stale),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::AncientBirthBlock,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::AncientBirthBlock),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::ExhaustsResources,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::ExhaustsResources),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::BadMandatory,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::BadMandatory),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::MandatoryValidation,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::MandatoryValidation),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::BadSigner,
+                )),
+                ValidationResult::Invalid(TransactionInvalid::BadSigner),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Invalid(
+                    sp::InvalidTransaction::Custom(123),
+                )),
+                ValidationResult::Invalid(TransactionInvalid::Custom(123)),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(
+                    sp::UnknownTransaction::CannotLookup,
+                )),
+                ValidationResult::Unknown(TransactionUnknown::CannotLookup),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(
+                    sp::UnknownTransaction::NoUnsignedValidator,
+                )),
+                ValidationResult::Unknown(TransactionUnknown::NoUnsignedValidator),
+            ),
+            (
+                T::Err(sp::TransactionValidityError::Unknown(
+                    sp::UnknownTransaction::Custom(123),
+                )),
+                ValidationResult::Unknown(TransactionUnknown::Custom(123)),
+            ),
+        ];
+
+        for (sp, validation_result) in pairs {
+            let encoded = sp.encode();
+            let decoded = ValidationResult::try_from_bytes(encoded).expect("should decode OK");
+            assert_eq!(decoded, validation_result);
+        }
     }
 }

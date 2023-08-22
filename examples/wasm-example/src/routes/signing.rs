@@ -162,9 +162,9 @@ impl Component for SigningExamplesComponent {
                                 // Apply the signature
                                 let signed_extrinsic = partial_signed.sign_with_address_and_signature(&account_id.into(), &multi_signature);
 
-                                // do a dry run (to debug in the js console if the extrinsic would work)
-                                let dry_res = signed_extrinsic.dry_run(None).await;
-                                web_sys::console::log_1(&format!("Dry Run Result: {:?}", dry_res).into());
+                                // check the TX validity (to debug in the js console if the extrinsic would work)
+                                let dry_res = signed_extrinsic.validate().await;
+                                web_sys::console::log_1(&format!("Validation Result: {:?}", dry_res).into());
 
                                 // return the signature and signed extrinsic
                                 Message::ReceivedSignature(multi_signature, signed_extrinsic)

@@ -9,8 +9,9 @@ use std::{future::Future, pin::Pin};
 // Re-exporting for simplicity since it's used a bunch in the trait definition.
 pub use serde_json::value::RawValue;
 
-/// Any RPC client which implements this can be used in our [`super::Rpc`] type
-/// to talk to a node.
+/// A trait describing low level JSON-RPC interactions. Implementations of this can be
+/// used to instantiate a [`super::RpcClient`], which can be passed to [`crate::OnlineClient`]
+/// or used for lower level RPC calls via eg [`crate::backend::legacy::LegacyRpcMethods`].
 ///
 /// This is a low level interface whose methods expect an already-serialized set of params,
 /// and return an owned but still-serialized [`RawValue`], deferring deserialization to
@@ -35,7 +36,7 @@ pub trait RpcClientT: Send + Sync + 'static {
         &'a self,
         method: &'a str,
         params: Option<Box<RawValue>>,
-    ) -> RpcFuture<'a, Box<RawValue>>;
+    ) -> RawRpcFuture<'a, Box<RawValue>>;
 
     /// Subscribe to some method. Implementations should expect that the params will
     /// either be `None`, or be an already-serialized JSON array of parameters.
@@ -49,23 +50,16 @@ pub trait RpcClientT: Send + Sync + 'static {
         sub: &'a str,
         params: Option<Box<RawValue>>,
         unsub: &'a str,
-    ) -> RpcFuture<'a, RpcSubscription>;
+    ) -> RawRpcFuture<'a, RawRpcSubscription>;
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
+pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
-pub struct RpcSubscription {
+pub struct RawRpcSubscription {
     /// The subscription stream.
-    pub stream: RpcSubscriptionStream,
+    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>,
     /// The ID associated with the subscription.
-    pub id: Option<RpcSubscriptionId>,
+    pub id: Option<String>,
 }
-
-/// The inner subscription stream returned from our [`RpcClientT`]'s `subscription` method.
-pub type RpcSubscriptionStream =
-    Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>;
-
-/// The ID associated with the [`RpcClientT`]'s `subscription`.
-pub type RpcSubscriptionId = String;

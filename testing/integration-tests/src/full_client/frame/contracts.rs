@@ -11,6 +11,7 @@ use crate::{
     },
     test_context, TestContext,
 };
+use subxt::ext::futures::StreamExt;
 use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error, OnlineClient, SubstrateConfig};
 use subxt_signer::sr25519::{self, dev};
 
@@ -202,8 +203,7 @@ async fn tx_call() {
     let info_addr = node_runtime::storage()
         .contracts()
         .contract_info_of(&contract);
-
-    let info_addr_bytes = cxt.client().storage().address_bytes(&info_addr).unwrap();
+    let info_addr_iter = node_runtime::storage().contracts().contract_info_of_iter();
 
     let contract_info = cxt
         .client()
@@ -215,19 +215,20 @@ async fn tx_call() {
         .await;
     assert!(contract_info.is_ok());
 
-    let keys = cxt
+    let keys_and_values = cxt
         .client()
         .storage()
         .at_latest()
         .await
         .unwrap()
-        .fetch_keys(&info_addr_bytes, 10, None)
+        .iter(info_addr_iter)
         .await
         .unwrap()
-        .iter()
-        .map(|key| hex::encode(&key.0))
-        .collect::<Vec<_>>();
-    println!("keys post: {keys:?}");
+        .collect::<Vec<_>>()
+        .await;
+
+    assert_eq!(keys_and_values.len(), 1);
+    println!("keys+values post: {keys_and_values:?}");
 
     let executed = cxt.call(contract, vec![]).await;
 
