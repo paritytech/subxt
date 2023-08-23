@@ -18,7 +18,8 @@ pub fn generate_custom_values<'a>(
     crate_path: &'a CratePath,
 ) -> TokenStream2 {
     let mut fn_names_taken = HashSet::new();
-    let custom_values_fns = metadata.custom().iter().filter_map(|custom_value| {
+    let custom = metadata.custom();
+    let custom_values_fns = custom.iter().filter_map(|custom_value| {
         generate_custom_value_fn(custom_value, type_gen, crate_path, &mut fn_names_taken)
     });
 
@@ -49,7 +50,7 @@ fn generate_custom_value_fn(
     let fn_name_ident = format_ident!("{fn_name}");
     fn_names_taken.insert(fn_name);
 
-    let custom_value_hash = custom_value.get_hash(type_gen.types());
+    let custom_value_hash = custom_value.hash();
     let return_ty = type_gen.resolve_type_path(custom_value.type_id());
 
     Some(quote!(

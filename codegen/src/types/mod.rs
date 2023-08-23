@@ -117,11 +117,6 @@ impl<'a> TypeGenerator<'a> {
             .clone()
     }
 
-    /// Returns a reference to the type registry
-    pub fn types(&self) -> &PortableRegistry {
-        self.type_registry
-    }
-
     /// Get the type path for a field of a struct or an enum variant, providing any generic
     /// type parameters from the containing type. This is for identifying where a generic type
     /// parameter is used in a field type e.g.

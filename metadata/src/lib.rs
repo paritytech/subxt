@@ -20,7 +20,7 @@ mod from_into;
 mod utils;
 
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::sync::Arc;
 use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
@@ -53,7 +53,7 @@ pub struct Metadata {
     /// Details about each of the runtime API traits.
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
     /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
-    custom: CustomMetadata,
+    custom: frame_metadata::v15::CustomMetadata<PortableForm>,
 }
 
 impl Metadata {
@@ -136,8 +136,11 @@ impl Metadata {
     }
 
     /// Returns custom user defined types
-    pub fn custom(&self) -> &CustomMetadata {
-        &self.custom
+    pub fn custom(&self) -> CustomMetadata<'_> {
+        CustomMetadata {
+            types: self.types(),
+            inner: &self.custom,
+        }
     }
 
     /// Obtain a unique hash representing this metadata or specific parts of it.
@@ -155,7 +158,7 @@ impl Metadata {
     }
 
     /// Get type hash for a type in the registry
-    pub fn type_hash(&self, id: u32) -> Option<[u8; 32]> {
+    pub fn type_hash(&self, id: u32) -> Option<[u8; HASH_LEN]> {
         self.types.resolve(id)?;
         Some(crate::utils::validation::get_type_hash(
             &self.types,
@@ -266,22 +269,22 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// Return a hash for the storage entry, or None if it was not found.
-    pub fn storage_hash(&self, entry_name: &str) -> Option<[u8; 32]> {
+    pub fn storage_hash(&self, entry_name: &str) -> Option<[u8; HASH_LEN]> {
         crate::utils::validation::get_storage_hash(self, entry_name)
     }
 
     /// Return a hash for the constant, or None if it was not found.
-    pub fn constant_hash(&self, constant_name: &str) -> Option<[u8; 32]> {
+    pub fn constant_hash(&self, constant_name: &str) -> Option<[u8; HASH_LEN]> {
         crate::utils::validation::get_constant_hash(self, constant_name)
     }
 
     /// Return a hash for the call, or None if it was not found.
-    pub fn call_hash(&self, call_name: &str) -> Option<[u8; 32]> {
+    pub fn call_hash(&self, call_name: &str) -> Option<[u8; HASH_LEN]> {
         crate::utils::validation::get_call_hash(self, call_name)
     }
 
     /// Return a hash for the entire pallet.
-    pub fn hash(&self) -> [u8; 32] {
+    pub fn hash(&self) -> [u8; HASH_LEN] {
         crate::utils::validation::get_pallet_hash(*self)
     }
 }
@@ -578,12 +581,12 @@ impl<'a> RuntimeApiMetadata<'a> {
         self.inner.methods.get_by_key(name)
     }
     /// Return a hash for the constant, or None if it was not found.
-    pub fn method_hash(&self, method_name: &str) -> Option<[u8; 32]> {
+    pub fn method_hash(&self, method_name: &str) -> Option<[u8; HASH_LEN]> {
         crate::utils::validation::get_runtime_api_hash(self, method_name)
     }
 
     /// Return a hash for the runtime API trait.
-    pub fn hash(&self) -> [u8; 32] {
+    pub fn hash(&self) -> [u8; HASH_LEN] {
         crate::utils::validation::get_runtime_trait_hash(*self)
     }
 }
@@ -641,15 +644,16 @@ pub struct RuntimeApiMethodParamMetadata {
 
 /// Metadata of custom types with custom values, basically the same as `frame_metadata::v15::CustomMetadata<PortableForm>>`.
 #[derive(Debug, Clone)]
-pub struct CustomMetadata {
-    /// custom values accessible via a name.
-    map: BTreeMap<String, frame_metadata::v15::CustomValueMetadata<PortableForm>>,
+pub struct CustomMetadata<'a> {
+    types: &'a PortableRegistry,
+    inner: &'a frame_metadata::v15::CustomMetadata<PortableForm>,
 }
 
-impl CustomMetadata {
+impl<'a> CustomMetadata<'a> {
     /// Get a certain [CustomValueMetadata] by its name.
-    pub fn get<'a>(&'a self, name: &'a str) -> Option<CustomValueMetadata<'_>> {
-        self.map.get(name).map(|e| CustomValueMetadata {
+    pub fn get(&'a self, name: &'a str) -> Option<CustomValueMetadata<'a>> {
+        self.inner.map.get(name).map(|e| CustomValueMetadata {
+            types: self.types,
             type_id: e.ty.id,
             data: &e.value,
             name,
@@ -658,16 +662,23 @@ impl CustomMetadata {
 
     /// Iterates over names (keys) and associated custom values
     pub fn iter(&self) -> impl Iterator<Item = CustomValueMetadata> {
-        self.map.iter().map(|(name, el)| CustomValueMetadata {
-            type_id: el.ty.id,
-            data: &el.value,
+        self.inner.map.iter().map(|(name, e)| CustomValueMetadata {
+            types: self.types,
+            type_id: e.ty.id,
+            data: &e.value,
             name: name.as_ref(),
         })
+    }
+
+    /// Access the underlying type registry.
+    pub fn types(&self) -> &PortableRegistry {
+        self.types
     }
 }
 
 /// Basically the same as `frame_metadata::v15::CustomValueMetadata<PortableForm>>`, but borrowed.
 pub struct CustomValueMetadata<'a> {
+    types: &'a PortableRegistry,
     type_id: u32,
     data: &'a [u8],
     name: &'a str,
@@ -694,9 +705,9 @@ impl<'a> CustomValueMetadata<'a> {
     /// # Panics
     ///
     /// Panics if `self.type_id` is not registered in the provided type registry
-    pub fn get_hash(&self, registry: &PortableRegistry) -> [u8; HASH_LEN] {
+    pub fn hash(&self) -> [u8; HASH_LEN] {
         let mut cache = HashMap::new();
-        get_custom_value_hash(registry, self, &mut cache)
+        get_custom_value_hash(self, &mut cache)
     }
 }
 

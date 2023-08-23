@@ -395,30 +395,23 @@ pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_L
     concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
 }
 
-pub fn get_custom_metadata_hash(
-    custom_metadata: &CustomMetadata,
-    registry: &PortableRegistry,
-) -> [u8; HASH_LEN] {
+pub fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> [u8; HASH_LEN] {
     let mut cache = HashMap::new();
     custom_metadata
         .iter()
         .fold([0u8; HASH_LEN], |bytes, custom_value| {
-            xor(
-                bytes,
-                get_custom_value_hash(registry, &custom_value, &mut cache),
-            )
+            xor(bytes, get_custom_value_hash(&custom_value, &mut cache))
         })
 }
 
 /// Obtain the hash of some custom value in the metadata including it's name/key.
 pub fn get_custom_value_hash(
-    registry: &PortableRegistry,
     custom_value: &CustomValueMetadata,
     cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     concat_and_hash3(
         &hash(custom_value.name.as_bytes()),
-        &get_type_hash(registry, custom_value.type_id(), cache),
+        &get_type_hash(custom_value.types, custom_value.type_id(), cache),
         &hash(custom_value.bytes()),
     )
 }
@@ -609,7 +602,7 @@ impl<'a> MetadataHasher<'a> {
 
         let custom_values_hash = self
             .include_custom_values
-            .then(|| get_custom_metadata_hash(metadata.custom(), &metadata.types))
+            .then(|| get_custom_metadata_hash(&metadata.custom()))
             .unwrap_or_default();
 
         concat_and_hash6(
@@ -855,8 +848,12 @@ mod tests {
         let a_hash2 = get_type_hash(&registry, a_type_id, &mut cache);
         let b_hash = get_type_hash(&registry, b_type_id, &mut cache);
 
-        let CachedHash::Hash(a_cache_hash) = cache[&a_type_id] else { panic!() };
-        let CachedHash::Hash(b_cache_hash) = cache[&b_type_id] else { panic!() };
+        let CachedHash::Hash(a_cache_hash) = cache[&a_type_id] else {
+            panic!()
+        };
+        let CachedHash::Hash(b_cache_hash) = cache[&b_type_id] else {
+            panic!()
+        };
 
         assert_eq!(a_hash, a_cache_hash);
         assert_eq!(b_hash, b_cache_hash);
