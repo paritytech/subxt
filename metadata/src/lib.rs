@@ -651,13 +651,16 @@ pub struct CustomMetadata<'a> {
 
 impl<'a> CustomMetadata<'a> {
     /// Get a certain [CustomValueMetadata] by its name.
-    pub fn get(&'a self, name: &'a str) -> Option<CustomValueMetadata<'a>> {
-        self.inner.map.get(name).map(|e| CustomValueMetadata {
-            types: self.types,
-            type_id: e.ty.id,
-            data: &e.value,
-            name,
-        })
+    pub fn get(&self, name: &str) -> Option<CustomValueMetadata<'a>> {
+        self.inner
+            .map
+            .get_key_value(name)
+            .map(|(name, e)| CustomValueMetadata {
+                types: self.types,
+                type_id: e.ty.id,
+                data: &e.value,
+                name,
+            })
     }
 
     /// Iterates over names (keys) and associated custom values

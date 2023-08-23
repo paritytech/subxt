@@ -38,7 +38,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         let custom = metadata.custom();
         let custom_value = custom
             .get(address.name())
-            .expect("custom value is present, checked above; qed");
+            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
 
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut custom_value.bytes(),
@@ -61,7 +61,6 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
             let custom_value = custom
                 .get(address.name())
                 .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
-            // Because of the check above this cannot panic:
             let expected_hash = custom_value.hash();
             if actual_hash != expected_hash {
                 return Err(MetadataError::IncompatibleCodegen.into());
