@@ -69,7 +69,7 @@ async fn chainhead_unstable_body() {
         FollowEvent::Initialized(init) => init.finalized_block_hash,
         _ => panic!("Unexpected event"),
     };
-    let sub_id = blocks.subscription_id().unwrap().clone();
+    let sub_id = blocks.subscription_id().unwrap();
 
     // Fetch the block's body.
     let response = rpc.chainhead_unstable_body(sub_id, hash).await.unwrap();
@@ -98,7 +98,7 @@ async fn chainhead_unstable_header() {
         FollowEvent::Initialized(init) => init.finalized_block_hash,
         _ => panic!("Unexpected event"),
     };
-    let sub_id = blocks.subscription_id().unwrap().clone();
+    let sub_id = blocks.subscription_id().unwrap();
 
     let new_header = legacy_rpc
         .chain_get_header(Some(hash))
@@ -126,7 +126,7 @@ async fn chainhead_unstable_storage() {
         FollowEvent::Initialized(init) => init.finalized_block_hash,
         _ => panic!("Unexpected event"),
     };
-    let sub_id = blocks.subscription_id().unwrap().clone();
+    let sub_id = blocks.subscription_id().unwrap();
 
     let alice: AccountId32 = dev::alice().public_key().into();
     let addr = node_runtime::storage().system().account(alice);
@@ -171,7 +171,7 @@ async fn chainhead_unstable_call() {
         FollowEvent::Initialized(init) => init.finalized_block_hash,
         _ => panic!("Unexpected event"),
     };
-    let sub_id = blocks.subscription_id().unwrap().clone();
+    let sub_id = blocks.subscription_id().unwrap();
 
     let alice_id = dev::alice().public_key().to_account_id();
     // Runtime API call.
@@ -179,7 +179,7 @@ async fn chainhead_unstable_call() {
         .chainhead_unstable_call(
             sub_id,
             hash,
-            "AccountNonceApi_account_nonce".into(),
+            "AccountNonceApi_account_nonce",
             &alice_id.encode(),
         )
         .await
@@ -208,7 +208,7 @@ async fn chainhead_unstable_unpin() {
         FollowEvent::Initialized(init) => init.finalized_block_hash,
         _ => panic!("Unexpected event"),
     };
-    let sub_id = blocks.subscription_id().unwrap().clone();
+    let sub_id = blocks.subscription_id().unwrap();
 
     assert!(rpc
         .chainhead_unstable_unpin(sub_id.clone(), hash)
