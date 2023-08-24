@@ -88,16 +88,23 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     // if no pallet specified, show user the pallets to choose from:
     let Some(pallet_name) = opts.pallet else {
         let available_pallets = print_available_pallets(&metadata);
-        writeln!(output, "Usage:", )?;
-        writeln!(output, "    subxt explore <PALLET>", )?;
-        writeln!(output, "        explore a specific pallet", )?;
-        writeln!(output, "\n{available_pallets}", )?;
+        writeln!(output, "Usage:",)?;
+        writeln!(output, "    subxt explore <PALLET>",)?;
+        writeln!(output, "        explore a specific pallet",)?;
+        writeln!(output, "\n{available_pallets}",)?;
         return Ok(());
     };
 
     // if specified pallet is wrong, show user the pallets to choose from (but this time as an error):
-    let Some(pallet_metadata) = metadata.pallets().find(|pallet| pallet.name().to_lowercase() == pallet_name.to_lowercase()) else {
-        return Err(eyre!("pallet \"{}\" not found in metadata!\n{}", pallet_name, print_available_pallets(&metadata)));
+    let Some(pallet_metadata) = metadata
+        .pallets()
+        .find(|pallet| pallet.name().to_lowercase() == pallet_name.to_lowercase())
+    else {
+        return Err(eyre!(
+            "pallet \"{}\" not found in metadata!\n{}",
+            pallet_name,
+            print_available_pallets(&metadata)
+        ));
     };
 
     // if correct pallet was specified but no subcommand, instruct the user how to proceed:
@@ -108,11 +115,17 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
         }
         writeln!(output, "Usage:")?;
         writeln!(output, "    subxt explore {pallet_name} calls")?;
-        writeln!(output, "        explore the calls that can be made into this pallet")?;
+        writeln!(
+            output,
+            "        explore the calls that can be made into this pallet"
+        )?;
         writeln!(output, "    subxt explore {pallet_name} constants")?;
         writeln!(output, "        explore the constants held in this pallet")?;
         writeln!(output, "    subxt explore {pallet_name} storage")?;
-        writeln!(output, "        explore the storage values held in this pallet")?;
+        writeln!(
+            output,
+            "        explore the storage values held in this pallet"
+        )?;
         return Ok(());
     };
 
