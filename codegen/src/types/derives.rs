@@ -146,8 +146,8 @@ impl Derives {
 
     /// Extend this set of `Derives` from another.
     pub fn extend_from(&mut self, other: Derives) {
-        self.derives.extend(other.derives.into_iter());
-        self.attributes.extend(other.attributes.into_iter());
+        self.derives.extend(other.derives);
+        self.attributes.extend(other.attributes);
     }
 
     /// Add `#crate_path::ext::codec::CompactAs` to the derives.

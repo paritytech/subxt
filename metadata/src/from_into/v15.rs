@@ -5,10 +5,10 @@
 use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, CustomMetadata, ExtrinsicMetadata,
-    Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
-    RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata, SignedExtensionMetadata,
-    StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
+    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
+    OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadata,
+    RuntimeApiMethodParamMetadata, SignedExtensionMetadata, StorageEntryMetadata,
+    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use frame_metadata::v15;
 use scale_info::form::PortableForm;
@@ -93,7 +93,7 @@ mod from_v15 {
                     event_enum_ty: m.outer_enums.event_enum_ty.id,
                     error_enum_ty: m.outer_enums.error_enum_ty.id,
                 },
-                custom: CustomMetadata { map: m.custom.map },
+                custom: m.custom,
             })
         }
     }
