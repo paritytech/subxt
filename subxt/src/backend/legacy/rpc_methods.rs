@@ -73,6 +73,35 @@ impl<T: Config> LegacyRpcMethods<T> {
         Ok(data.into_iter().map(|b| b.0).collect())
     }
 
+    /// Query historical storage entries
+    pub async fn state_query_storage(
+        &self,
+        keys: impl IntoIterator<Item = &[u8]>,
+        from: T::Hash,
+        to: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, from, to];
+        self.client
+            .request("state_queryStorage", params)
+            .await
+            .map_err(Into::into)
+    }
+
+    /// Query historical storage entries
+    pub async fn state_query_storage_at(
+        &self,
+        keys: impl IntoIterator<Item = &[u8]>,
+        at: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, at];
+        self.client
+            .request("state_queryStorageAt", params)
+            .await
+            .map_err(Into::into)
+    }
+
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = 0u32;
@@ -156,6 +185,32 @@ impl<T: Config> LegacyRpcMethods<T> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
+    }
+
+    /// Reexecute the specified `block_hash` and gather statistics while doing so.
+    ///
+    /// This function requires the specified block and its parent to be available
+    /// at the queried node. If either the specified block or the parent is pruned,
+    /// this function will return `None`.
+    pub async fn dev_get_block_stats(
+        &self,
+        block_hash: T::Hash,
+    ) -> Result<Option<BlockStats>, Error> {
+        let params = rpc_params![block_hash];
+        let stats = self.client.request("dev_getBlockStats", params).await?;
+        Ok(stats)
+    }
+
+    /// Get proof of storage entries at a specific block's state.
+    pub async fn state_get_read_proof(
+        &self,
+        keys: impl IntoIterator<Item = &[u8]>,
+        hash: Option<T::Hash>,
+    ) -> Result<ReadProof<T::Hash>, Error> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, hash];
+        let proof = self.client.request("state_getReadProof", params).await?;
+        Ok(proof)
     }
 
     /// Fetch the runtime version
@@ -266,6 +321,49 @@ impl<T: Config> LegacyRpcMethods<T> {
             )
             .await?;
         Ok(subscription)
+    }
+
+    /// Insert a key into the keystore.
+    pub async fn author_insert_key(
+        &self,
+        key_type: String,
+        suri: String,
+        public: Vec<u8>,
+    ) -> Result<(), Error> {
+        let params = rpc_params![key_type, suri, Bytes(public)];
+        self.client.request("author_insertKey", params).await?;
+        Ok(())
+    }
+
+    /// Generate new session keys and returns the corresponding public keys.
+    pub async fn author_rotate_keys(&self) -> Result<Vec<u8>, Error> {
+        let bytes: Bytes = self
+            .client
+            .request("author_rotateKeys", rpc_params![])
+            .await?;
+        Ok(bytes.0)
+    }
+
+    /// Checks if the keystore has private keys for the given session public keys.
+    ///
+    /// `session_keys` is the SCALE encoded session keys object from the runtime.
+    ///
+    /// Returns `true` if all private keys could be found.
+    pub async fn author_has_session_keys(&self, session_keys: Vec<u8>) -> Result<bool, Error> {
+        let params = rpc_params![Bytes(session_keys)];
+        self.client.request("author_hasSessionKeys", params).await
+    }
+
+    /// Checks if the keystore has private keys for the given public key and key type.
+    ///
+    /// Returns `true` if a private key could be found.
+    pub async fn author_has_key(
+        &self,
+        public_key: Vec<u8>,
+        key_type: String,
+    ) -> Result<bool, Error> {
+        let params = rpc_params![Bytes(public_key), key_type];
+        self.client.request("author_hasKey", params).await
     }
 
     /// Execute a runtime API call via `state_call` RPC method.
@@ -411,21 +509,6 @@ pub enum TransactionStatus<Hash> {
     Invalid,
 }
 
-/// Hex-serialized shim for `Vec<u8>`.
-#[derive(PartialEq, Eq, Clone, Serialize, Deserialize, Hash, PartialOrd, Ord, Debug)]
-pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
-impl std::ops::Deref for Bytes {
-    type Target = [u8];
-    fn deref(&self) -> &[u8] {
-        &self.0[..]
-    }
-}
-impl From<Vec<u8>> for Bytes {
-    fn from(s: Vec<u8>) -> Self {
-        Bytes(s)
-    }
-}
-
 /// The decoded result returned from calling `system_dryRun` on some extrinsic.
 #[derive(Debug, PartialEq, Eq)]
 pub enum DryRunResult {
@@ -466,6 +549,51 @@ impl DryRunResultBytes {
             Err(crate::Error::Unknown(bytes))
         }
     }
+}
+
+/// Storage change set
+#[derive(Clone, Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct StorageChangeSet<Hash> {
+    /// Block hash
+    pub block: Hash,
+    /// A list of changes; tuples of storage key and optional storage data.
+    pub changes: Vec<(Bytes, Option<Bytes>)>,
+}
+
+/// Statistics of a block returned by the `dev_getBlockStats` RPC.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockStats {
+    /// The length in bytes of the storage proof produced by executing the block.
+    pub witness_len: u64,
+    /// The length in bytes of the storage proof after compaction.
+    pub witness_compact_len: u64,
+    /// Length of the block in bytes.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub block_len: u64,
+    /// Number of extrinsics in the block.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub num_extrinsics: u64,
+}
+
+/// ReadProof struct returned by the RPC
+///
+/// # Note
+///
+/// This is copied from `sc-rpc-api` to avoid a dependency on that crate. Therefore it
+/// must be kept compatible with that type from the target substrate version.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReadProof<Hash> {
+    /// Block hash used to generate the proof
+    pub at: Hash,
+    /// A proof used to prove that storage entries are included in the storage trie
+    pub proof: Vec<Bytes>,
 }
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -529,4 +657,19 @@ impl From<U256> for NumberOrHex {
 /// A quick helper to encode some bytes to hex.
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
+}
+
+/// Hex-serialized shim for `Vec<u8>`.
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize, Hash, PartialOrd, Ord, Debug)]
+pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
+impl std::ops::Deref for Bytes {
+    type Target = [u8];
+    fn deref(&self) -> &[u8] {
+        &self.0[..]
+    }
+}
+impl From<Vec<u8>> for Bytes {
+    fn from(s: Vec<u8>) -> Self {
+        Bytes(s)
+    }
 }

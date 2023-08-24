@@ -1,0 +1,539 @@
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+//! An interface to call the  API methods. See
+//! https://github.com/paritytech/json-rpc-interface-spec/ for details of the API
+//! methods exposed here.
+
+use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
+use crate::{Config, Error};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+/// An interface to call the legacy RPC methods. This interface is instantiated with
+/// some `T: Config` trait which determines some of the types that the RPC methods will
+/// take or hand back.
+pub struct UnstableRpcMethods<T> {
+    client: RpcClient,
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T> Clone for UnstableRpcMethods<T> {
+    fn clone(&self) -> Self {
+        Self {
+            client: self.client.clone(),
+            _marker: self._marker,
+        }
+    }
+}
+
+impl<T> std::fmt::Debug for UnstableRpcMethods<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UnstableRpcMethods")
+            .field("client", &self.client)
+            .field("_marker", &self._marker)
+            .finish()
+    }
+}
+
+impl<T: Config> UnstableRpcMethods<T> {
+    /// Instantiate the legacy RPC method interface.
+    pub fn new(client: RpcClient) -> Self {
+        UnstableRpcMethods {
+            client,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
+    ///
+    /// The subscription ID can be used to make queries for the
+    /// block's body ([`chainhead_unstable_body`](Rpc::chainhead_unstable_follow)),
+    /// block's header ([`chainhead_unstable_header`](Rpc::chainhead_unstable_header)),
+    /// block's storage ([`chainhead_unstable_storage`](Rpc::chainhead_unstable_storage)) and submitting
+    /// runtime API calls at this block ([`chainhead_unstable_call`](Rpc::chainhead_unstable_call)).
+    ///
+    /// # Note
+    ///
+    /// When the user is no longer interested in a block, the user is responsible
+    /// for calling the [`chainhead_unstable_unpin`](Rpc::chainhead_unstable_unpin) method.
+    /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
+    pub async fn chainhead_unstable_follow(
+        &self,
+        runtime_updates: bool,
+    ) -> Result<RpcSubscription<FollowEvent<T::Hash>>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chainHead_unstable_follow",
+                rpc_params![runtime_updates],
+                "chainHead_unstable_unfollow",
+            )
+            .await?;
+
+        Ok(subscription)
+    }
+
+    /// Call the `chainHead_unstable_body` method and return an operation ID to obtain the block's body.
+    ///
+    /// The response events are provided on the `chainHead_follow` subscription and identified by
+    /// the returned operation ID.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    pub async fn chainhead_unstable_body(
+        &self,
+        subscription_id: &str,
+        hash: T::Hash,
+    ) -> Result<MethodResponse, Error> {
+        let response = self
+            .client
+            .request(
+                "chainHead_unstable_body",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        Ok(response)
+    }
+
+    /// Get the block's header using the `chainHead_unstable_header` method.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    pub async fn chainhead_unstable_header(
+        &self,
+        subscription_id: &str,
+        hash: T::Hash,
+    ) -> Result<Option<T::Header>, Error> {
+        // header returned as hex encoded SCALE encoded bytes.
+        let header: Option<Bytes> = self
+            .client
+            .request(
+                "chainHead_unstable_header",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        let header = header
+            .map(|h| codec::Decode::decode(&mut &*h.0))
+            .transpose()?;
+        Ok(header)
+    }
+
+    /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the block's storage.
+    ///
+    /// The response events are provided on the `chainHead_follow` subscription and identified by
+    /// the returned operation ID.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    pub async fn chainhead_unstable_storage(
+        &self,
+        subscription_id: &str,
+        hash: T::Hash,
+        items: impl IntoIterator<Item = StorageQuery<&[u8]>>,
+        child_key: Option<&[u8]>,
+    ) -> Result<MethodResponse, Error> {
+        let items: Vec<StorageQuery<String>> = items
+            .into_iter()
+            .map(|item| StorageQuery {
+                key: to_hex(item.key),
+                query_type: item.query_type,
+            })
+            .collect();
+
+        let response = self
+            .client
+            .request(
+                "chainHead_unstable_storage",
+                rpc_params![subscription_id, hash, items, child_key.map(to_hex)],
+            )
+            .await?;
+
+        Ok(response)
+    }
+
+    /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the runtime API result.
+    ///
+    /// The response events are provided on the `chainHead_follow` subscription and identified by
+    /// the returned operation ID.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    pub async fn chainhead_unstable_call(
+        &self,
+        subscription_id: &str,
+        hash: T::Hash,
+        function: &str,
+        call_parameters: &[u8],
+    ) -> Result<MethodResponse, Error> {
+        let response = self
+            .client
+            .request(
+                "chainHead_unstable_call",
+                rpc_params![subscription_id, hash, function, to_hex(call_parameters)],
+            )
+            .await?;
+
+        Ok(response)
+    }
+
+    /// Unpin a block reported by the `chainHead_follow` subscription.
+    ///
+    /// # Note
+    ///
+    /// The subscription ID is obtained from an open subscription created by
+    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    pub async fn chainhead_unstable_unpin(
+        &self,
+        subscription_id: &str,
+        hash: T::Hash,
+    ) -> Result<(), Error> {
+        self.client
+            .request(
+                "chainHead_unstable_unpin",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    /// Get genesis hash obtained from the `chainHead_genesisHash` method.
+    pub async fn chainhead_unstable_genesishash(&self) -> Result<T::Hash, Error> {
+        let hash = self
+            .client
+            .request("chainHead_unstable_genesisHash", rpc_params![])
+            .await?;
+
+        Ok(hash)
+    }
+}
+
+/// This represents events generated by the `follow` method.
+///
+/// The block events are generated in the following order:
+/// 1. Initialized - generated only once to signal the latest finalized block
+/// 2. NewBlock - a new block was added.
+/// 3. BestBlockChanged - indicate that the best block is now the one from this event. The block was
+///    announced priorly with the `NewBlock` event.
+/// 4. Finalized - State the finalized and pruned blocks.
+///
+/// The following events are related to operations:
+/// - OperationBodyDone: The response of the `chainHead_body`
+/// - OperationCallDone: The response of the `chainHead_call`
+/// - OperationStorageItems: Items produced by the `chianHead_storage`
+/// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
+///   call `chainHead_continue`
+/// - OperationStorageDone: The `chainHead_storage` method has produced all the results
+/// - OperationInaccessible: The server was unable to provide the result, retries might succeed in
+///   the future
+/// - OperationError: The server encountered an error, retries will not succeed
+///
+/// The stop event indicates that the JSON-RPC server was unable to provide a consistent list of
+/// the blocks at the head of the chain.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "event")]
+pub enum FollowEvent<Hash> {
+    /// The latest finalized block.
+    ///
+    /// This event is generated only once.
+    Initialized(Initialized<Hash>),
+    /// A new non-finalized block was added.
+    NewBlock(NewBlock<Hash>),
+    /// The best block of the chain.
+    BestBlockChanged(BestBlockChanged<Hash>),
+    /// A list of finalized and pruned blocks.
+    Finalized(Finalized<Hash>),
+    /// The response of the `chainHead_body` method.
+    OperationBodyDone(OperationBodyDone),
+    /// The response of the `chainHead_call` method.
+    OperationCallDone(OperationCallDone),
+    /// Yield one or more items found in the storage.
+    OperationStorageItems(OperationStorageItems),
+    /// Ask the user to call `chainHead_continue` to produce more events
+    /// regarding the operation id.
+    OperationWaitingForContinue(OperationId),
+    /// The responses of the `chainHead_storage` method have been produced.
+    OperationStorageDone(OperationId),
+    /// The RPC server was unable to provide the response of the following operation id.
+    ///
+    /// Repeating the same operation in the future might succeed.
+    OperationInaccessible(OperationId),
+    /// The RPC server encountered an error while processing an operation id.
+    ///
+    /// Repeating the same operation in the future will not succeed.
+    OperationError(OperationError),
+    /// The subscription is dropped and no further events
+    /// will be generated.
+    Stop,
+}
+
+/// Contain information about the latest finalized block.
+///
+/// # Note
+///
+/// This is the first event generated by the `follow` subscription
+/// and is submitted only once.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Initialized<Hash> {
+    /// The hash of the latest finalized block.
+    pub finalized_block_hash: Hash,
+    /// The runtime version of the finalized block.
+    ///
+    /// # Note
+    ///
+    /// This is present only if the `with_runtime` flag is set for
+    /// the `follow` subscription.
+    pub finalized_block_runtime: Option<RuntimeEvent>,
+}
+
+/// The runtime event generated if the `follow` subscription
+/// has set the `with_runtime` flag.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "type")]
+pub enum RuntimeEvent {
+    /// The runtime version of this block.
+    Valid(RuntimeVersionEvent),
+    /// The runtime could not be obtained due to an error.
+    Invalid(ErrorEvent),
+}
+
+/// The runtime specification of the current block.
+///
+/// This event is generated for:
+///   - the first announced block by the follow subscription
+///   - blocks that suffered a change in runtime compared with their parents
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeVersionEvent {
+    /// Details about this runtime.
+    pub spec: RuntimeSpec,
+}
+
+/// This contains the runtime version information necessary to make transactions, and is obtained from
+/// the "initialized" event of `chainHead_follow` if the `withRuntime` flag is set.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeSpec {
+    /// Opaque string indicating the name of the chain.
+    pub spec_name: String,
+
+    /// Opaque string indicating the name of the implementation of the chain.
+    pub impl_name: String,
+
+    /// Opaque integer. The JSON-RPC client can assume that the Runtime API call to `Metadata_metadata`
+    /// will always produce the same output as long as the specVersion is the same.
+    pub spec_version: u32,
+
+    /// Opaque integer. Whenever the runtime code changes in a backwards-compatible way, the implVersion
+    /// is modified while the specVersion is left untouched.
+    pub impl_version: u32,
+
+    /// Opaque integer. Necessary when building the bytes of a transaction. Transactions that have been
+    /// generated with a different `transaction_version` are incompatible.
+    pub transaction_version: u32,
+
+    /// Object containing a list of "entry point APIs" supported by the runtime. Each key is an opaque string
+    /// indicating the API, and each value is an integer version number. Before making a runtime call (using
+    /// chainHead_call), you should make sure that this list contains the entry point API corresponding to the
+    /// call and with a known version number.
+    ///
+    /// **Note:** In Substrate, the keys in the apis field consists of the hexadecimal-encoded 8-bytes blake2
+    /// hash of the name of the API. For example, the `TaggedTransactionQueue` API is 0xd2bc9897eed08f15.
+    pub apis: HashMap<String, u32>,
+}
+
+/// The operation could not be processed due to an error.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ErrorEvent {
+    /// Reason of the error.
+    pub error: String,
+}
+
+/// Indicate a new non-finalized block.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewBlock<Hash> {
+    /// The hash of the new block.
+    pub block_hash: Hash,
+    /// The parent hash of the new block.
+    pub parent_block_hash: Hash,
+    /// The runtime version of the new block.
+    ///
+    /// # Note
+    ///
+    /// This is present only if the `with_runtime` flag is set for
+    /// the `follow` subscription.
+    pub new_runtime: Option<RuntimeEvent>,
+}
+
+/// Indicate the block hash of the new best block.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BestBlockChanged<Hash> {
+    /// The block hash of the new best block.
+    pub best_block_hash: Hash,
+}
+
+/// Indicate the finalized and pruned block hashes.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Finalized<Hash> {
+    /// Block hashes that are finalized.
+    pub finalized_block_hashes: Vec<Hash>,
+    /// Block hashes that are pruned (removed).
+    pub pruned_block_hashes: Vec<Hash>,
+}
+
+/// Indicate the operation id of the event.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OperationId {
+    /// The operation id of the event.
+    pub operation_id: String,
+}
+
+/// The response of the `chainHead_body` method.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OperationBodyDone {
+    /// The operation id of the event.
+    pub operation_id: String,
+    /// Array of hexadecimal-encoded scale-encoded extrinsics found in the block.
+    pub value: Vec<String>,
+}
+
+/// The response of the `chainHead_call` method.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OperationCallDone {
+    /// The operation id of the event.
+    pub operation_id: String,
+    /// Hexadecimal-encoded output of the runtime function call.
+    pub output: String,
+}
+
+/// The response of the `chainHead_call` method.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OperationStorageItems {
+    /// The operation id of the event.
+    pub operation_id: String,
+    /// The resulting items.
+    pub items: Vec<StorageResult>,
+}
+
+/// Indicate a problem during the operation.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OperationError {
+    /// The operation id of the event.
+    pub operation_id: String,
+    /// The reason of the error.
+    pub error: String,
+}
+
+/// The storage result.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StorageResult {
+    /// The hex-encoded key of the result.
+    pub key: String,
+    /// The result of the query.
+    #[serde(flatten)]
+    pub result: StorageResultType,
+}
+
+/// The type of the storage query.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StorageResultType {
+    /// Fetch the value of the provided key.
+    Value(String),
+    /// Fetch the hash of the value of the provided key.
+    Hash(String),
+    /// Fetch the closest descendant merkle value.
+    ClosestDescendantMerkleValue(String),
+}
+
+/// The method respose of `chainHead_body`, `chainHead_call` and `chainHead_storage`.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "result")]
+pub enum MethodResponse {
+    /// The method has started.
+    Started(MethodResponseStarted),
+    /// The RPC server cannot handle the request at the moment.
+    LimitReached,
+}
+
+/// The `started` result of a method.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MethodResponseStarted {
+    /// The operation id of the response.
+    pub operation_id: String,
+    /// The number of items from the back of the `chainHead_storage` that have been discarded.
+    pub discarded_items: Option<usize>,
+}
+
+/// The storage item received as parameter.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StorageQuery<Key> {
+    /// The provided key.
+    pub key: Key,
+    /// The type of the storage query.
+    #[serde(rename = "type")]
+    pub query_type: StorageQueryType,
+}
+
+/// The type of the storage query.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum StorageQueryType {
+    /// Fetch the value of the provided key.
+    Value,
+    /// Fetch the hash of the value of the provided key.
+    Hash,
+    /// Fetch the closest descendant merkle value.
+    ClosestDescendantMerkleValue,
+    /// Fetch the values of all descendants of they provided key.
+    DescendantsValues,
+    /// Fetch the hashes of the values of all descendants of they provided key.
+    DescendantsHashes,
+}
+
+/// Hex-serialized shim for `Vec<u8>`.
+#[derive(PartialEq, Eq, Clone, Serialize, Deserialize, Hash, PartialOrd, Ord, Debug)]
+pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
+impl std::ops::Deref for Bytes {
+    type Target = [u8];
+    fn deref(&self) -> &[u8] {
+        &self.0[..]
+    }
+}
+impl From<Vec<u8>> for Bytes {
+    fn from(s: Vec<u8>) -> Self {
+        Bytes(s)
+    }
+}
+
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
+}

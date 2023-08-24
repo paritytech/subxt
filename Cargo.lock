@@ -1986,6 +1986,7 @@ dependencies = [
  "parity-scale-codec",
  "regex",
  "scale-info",
+ "serde",
  "sp-core",
  "substrate-runner",
  "subxt",
