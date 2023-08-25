@@ -755,13 +755,13 @@ pub(crate) mod unsigned_number_as_string {
 
 /// A temporary shim to decode "spec.apis" if it comes back as an array like:
 ///
-/// ```
+/// ```text
 /// [["0xABC", 1], ["0xCDE", 2]]
 /// ```
 ///
 /// The expected format (which this also supports deserializing from) is:
 ///
-/// ```
+/// ```text
 /// { "0xABC": 1, "0xCDE": 2 }
 /// ```
 ///
