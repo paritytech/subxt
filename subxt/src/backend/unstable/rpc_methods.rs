@@ -785,8 +785,6 @@ pub(crate) mod hashmap_as_tuple_list {
     {
         deserializer.deserialize_any(HashMapVisitor(PhantomData))
     }
-
-    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
     struct HashMapVisitor<K, V, BH>(PhantomData<fn() -> HashMap<K, V, BH>>);
 
     impl<'de, K, V, BH> Visitor<'de> for HashMapVisitor<K, V, BH>
