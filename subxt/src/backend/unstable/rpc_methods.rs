@@ -725,7 +725,7 @@ pub(crate) mod unsigned_number_as_string {
     use serde::de::{Deserializer, Visitor};
     use std::fmt;
 
-    /// Deserialize a [`HashMap`] from a list of tuples or object
+    /// Deserialize a number from a string or number.
     pub fn deserialize<'de, N: From<u64>, D>(deserializer: D) -> Result<N, D::Error>
     where
         D: Deserializer<'de>,
