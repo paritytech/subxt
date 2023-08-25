@@ -395,6 +395,23 @@ pub enum StorageEntryType {
     },
 }
 
+impl StorageEntryType {
+    /// returns the type of the value.
+    pub fn value_ty(&self) -> u32 {
+        match self {
+            StorageEntryType::Map { value_ty, .. } | StorageEntryType::Plain(value_ty) => *value_ty,
+        }
+    }
+
+    /// The type of the key, can be a tuple with elements for each of the hashers. None for a Plain storage entry
+    pub fn key_ty(&self) -> Option<u32> {
+        match self {
+            StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
+            StorageEntryType::Plain(_) => None,
+        }
+    }
+}
+
 /// Hasher used by storage maps.
 #[derive(Debug, Clone, Copy)]
 pub enum StorageHasher {

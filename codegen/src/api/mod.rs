@@ -233,7 +233,7 @@ impl RuntimeGenerator {
     /// unique path, so that types with matching paths don't end up overwriting each other
     /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
     /// de-duplicate those into single types with a generic.
-    fn ensure_unique_type_paths(metadata: &mut Metadata) {
+    pub fn ensure_unique_type_paths(metadata: &mut Metadata) {
         let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
         for ty in metadata.types_mut().types.iter_mut() {
             // Ignore types without a path (ie prelude types).

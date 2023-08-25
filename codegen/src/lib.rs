@@ -55,5 +55,8 @@ pub mod utils;
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
     error::{CodegenError, TypeSubstitutionError},
-    types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
+    types::{
+        CratePath, Derives, DerivesRegistry, Module, TypeDefGen, TypeDefParameters, TypeGenerator,
+        TypeSubstitutes,
+    },
 };

@@ -60,6 +60,11 @@ impl TypeDefParameters {
     pub fn params(&self) -> &[TypeParameter] {
         &self.params
     }
+
+    /// Returns true if there are any unused type params
+    pub fn has_unused_type_params(&self) -> bool {
+        !self.unused.is_empty()
+    }
 }
 
 impl quote::ToTokens for TypeDefParameters {
