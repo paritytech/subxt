@@ -62,7 +62,6 @@ impl RpcClientT for Client {
 
             let stream = stream
                 .map_err(|e| RpcError::ClientError(Box::new(e)))
-                .inspect(|v| println!("{v:?}"))
                 .boxed();
             Ok(RawRpcSubscription { stream, id })
         })
