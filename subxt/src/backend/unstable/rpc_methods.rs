@@ -8,8 +8,10 @@
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::{Config, Error};
+use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::task::Poll;
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
@@ -73,6 +75,46 @@ impl<T: Config> UnstableRpcMethods<T> {
             .await?;
 
         Ok(subscription)
+    }
+
+    /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
+    /// `operationWaitingForContinue` event.
+    ///
+    /// Has no effect if the operationId is invalid or refers to an operation that has emitted a
+    /// `{"event": "operationInaccessible"` event, or if the followSubscription is invalid or stale.
+    pub async fn chainhead_unstable_continue(
+        &self,
+        follow_subscription: &str,
+        operation_id: &str,
+    ) -> Result<(), Error> {
+        self.client
+            .request(
+                "chainHead_unstable_continue",
+                rpc_params![follow_subscription, operation_id],
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    /// Stops an operation started with `chainHead_unstable_body`, `chainHead_unstable_call`, or
+    /// `chainHead_unstable_storage¦. If the operation was still in progress, this interrupts it.
+    /// If the operation was already finished, this call has no effect.
+    ///
+    /// Has no effect if the `followSubscription` is invalid or stale.
+    pub async fn chainhead_unstable_stop_operation(
+        &self,
+        follow_subscription: &str,
+        operation_id: &str,
+    ) -> Result<(), Error> {
+        self.client
+            .request(
+                "chainHead_unstable_stopOperation",
+                rpc_params![follow_subscription, operation_id],
+            )
+            .await?;
+
+        Ok(())
     }
 
     /// Call the `chainHead_unstable_body` method and return an operation ID to obtain the block's body.
@@ -209,14 +251,56 @@ impl<T: Config> UnstableRpcMethods<T> {
         Ok(())
     }
 
-    /// Get genesis hash obtained from the `chainHead_genesisHash` method.
-    pub async fn chainhead_unstable_genesishash(&self) -> Result<T::Hash, Error> {
+    /// Return the genesis hash.
+    pub async fn chainspec_v1_genesishash(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
-            .request("chainHead_unstable_genesisHash", rpc_params![])
+            .request("chainSpec_v1_genesisHash", rpc_params![])
+            .await?;
+        Ok(hash)
+    }
+
+    /// Return a string containing the human-readable name of the chain.
+    pub async fn chainspec_v1_chainname(&self) -> Result<String, Error> {
+        let hash = self
+            .client
+            .request("chainSpec_v1_chainName", rpc_params![])
+            .await?;
+        Ok(hash)
+    }
+
+    /// Returns the JSON payload found in the chain specification under the key properties.
+    /// No guarantee is offered about the content of this object, and so it's up to the caller
+    /// to decide what to deserialize it into.
+    pub async fn chainspec_v1_properties<Props: serde::de::DeserializeOwned>(
+        &self,
+    ) -> Result<Props, Error> {
+        self.client
+            .request("chainSpec_v1_properties", rpc_params![])
+            .await
+    }
+
+    /// Returns an array of strings indicating the names of all the JSON-RPC functions supported by
+    /// the JSON-RPC server.
+    pub async fn rpc_methods(&self) -> Result<Vec<String>, Error> {
+        self.client.request("rpc_methods", rpc_params![]).await
+    }
+
+    /// Attempt to submit a transaction, returning events about its progress.
+    pub async fn transaction_unstable_submit_and_watch(
+        &self,
+        tx: &[u8],
+    ) -> Result<TransactionSubscription<T::Hash>, Error> {
+        let sub = self
+            .client
+            .subscribe(
+                "transaction_unstable_submitAndWatch",
+                rpc_params![to_hex(tx)],
+                "transaction_unstable_unwatch",
+            )
             .await?;
 
-        Ok(hash)
+        Ok(TransactionSubscription { sub, done: false })
     }
 }
 
@@ -520,6 +604,102 @@ pub enum StorageQueryType {
     DescendantsHashes,
 }
 
+/// A subscription which returns transaction status events, stopping
+/// when no more events will be sent.
+pub struct TransactionSubscription<Hash> {
+    sub: RpcSubscription<TransactionStatus<Hash>>,
+    done: bool,
+}
+
+impl<Hash: serde::de::DeserializeOwned> TransactionSubscription<Hash> {
+    /// Fetch the next item in the stream.
+    pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
+        StreamExt::next(self).await
+    }
+}
+
+impl<Hash: serde::de::DeserializeOwned> Stream for TransactionSubscription<Hash> {
+    type Item = <RpcSubscription<TransactionStatus<Hash>> as Stream>::Item;
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        if self.done {
+            return Poll::Ready(None);
+        }
+
+        let res = self.sub.poll_next_unpin(cx);
+
+        if let Poll::Ready(Some(Ok(res))) = &res {
+            if matches!(
+                res,
+                TransactionStatus::Dropped { .. }
+                    | TransactionStatus::Error { .. }
+                    | TransactionStatus::Invalid { .. }
+                    | TransactionStatus::Finalized { .. }
+            ) {
+                // No more events will occur after these ones.
+                self.done = true
+            }
+        }
+
+        res
+    }
+}
+
+/// Transaction progress events
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "event")]
+pub enum TransactionStatus<Hash> {
+    /// Transaction is part of the future queue.
+    Validated,
+    /// The transaction has been broadcast to other nodes.
+    Broadcasted {
+        /// Number of peers it's been broadcast to.
+        num_peers: u32,
+    },
+    /// Transaction has been included in block with given details.
+    /// Null is returned if the transaction is no longer in any block
+    /// of the best chain.
+    BestChainBlockIncluded {
+        /// Details of the block it's been seen in.
+        block: Option<TransactionBlockDetails<Hash>>,
+    },
+    /// The transaction is in a block that's been finalized.
+    Finalized {
+        /// Details of the block it's been seen in.
+        block: TransactionBlockDetails<Hash>,
+    },
+    /// Something went wrong in the node.
+    Error {
+        /// Human readable message; what went wrong.
+        error: String,
+    },
+    /// Transaction is invalid (bad nonce, signature etc).
+    Invalid {
+        /// Human readable message; why was it invalid.
+        error: String,
+    },
+    /// The transaction was dropped.
+    Dropped {
+        /// Was the transaction broadcasted to other nodes before being dropped?
+        broadcasted: bool,
+        /// Human readable message; why was it dropped.
+        error: String,
+    },
+}
+
+/// Details of a block that a transaction is seen in.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+pub struct TransactionBlockDetails<Hash> {
+    /// The block hash.
+    hash: Hash,
+    /// The index of the transaction in the block.
+    #[serde(with = "unsigned_number_as_string")]
+    index: u64,
+}
+
 /// Hex-serialized shim for `Vec<u8>`.
 #[derive(PartialEq, Eq, Clone, Serialize, Deserialize, Hash, PartialOrd, Ord, Debug)]
 pub struct Bytes(#[serde(with = "impl_serde::serialize")] pub Vec<u8>);
@@ -537,6 +717,40 @@ impl From<Vec<u8>> for Bytes {
 
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
+}
+
+/// Attempt to deserialize either a string or integer into an integer.
+/// See <https://github.com/paritytech/json-rpc-interface-spec/issues/83>
+pub(crate) mod unsigned_number_as_string {
+    use serde::de::{Deserializer, Visitor};
+    use std::fmt;
+
+    /// Deserialize a [`HashMap`] from a list of tuples or object
+    pub fn deserialize<'de, N: From<u64>, D>(deserializer: D) -> Result<N, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_any(NumberVisitor(std::marker::PhantomData))
+    }
+
+    struct NumberVisitor<N>(std::marker::PhantomData<N>);
+
+    impl<'de, N: From<u64>> Visitor<'de> for NumberVisitor<N> {
+        type Value = N;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("an unsigned integer or a string containing one")
+        }
+
+        fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+            let n: u64 = v.parse().map_err(serde::de::Error::custom)?;
+            Ok(n.into())
+        }
+
+        fn visit_u64<E: serde::de::Error>(self, v: u64) -> Result<Self::Value, E> {
+            Ok(v.into())
+        }
+    }
 }
 
 /// A temporary shim to decode "spec.apis" if it comes back as an array like:

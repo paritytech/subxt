@@ -218,6 +218,77 @@ async fn chainhead_unstable_unpin() {
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
 }
 
+// Ignored until this is implemented in Substrate
+#[ignore]
+#[tokio::test]
+async fn chainspec_v1_genesishash() {
+    let ctx = test_context().await;
+    let old_rpc = ctx.legacy_rpc_methods().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let a = old_rpc.genesis_hash().await.unwrap();
+    let b = rpc.chainspec_v1_genesishash().await.unwrap();
+
+    assert_eq!(a, b);
+}
+
+// Ignored until this is implemented in Substrate
+#[ignore]
+#[tokio::test]
+async fn chainspec_v1_chainname() {
+    let ctx = test_context().await;
+    let old_rpc = ctx.legacy_rpc_methods().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let a = old_rpc.system_name().await.unwrap();
+    let b = rpc.chainspec_v1_chainname().await.unwrap();
+
+    assert_eq!(a, b);
+}
+
+// Ignored until this is implemented in Substrate
+#[ignore]
+#[tokio::test]
+async fn chainspec_v1_properties() {
+    let ctx = test_context().await;
+    let old_rpc = ctx.legacy_rpc_methods().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let a = old_rpc.system_properties().await.unwrap();
+    let b = rpc.chainspec_v1_properties().await.unwrap();
+
+    assert_eq!(a, b);
+}
+
+#[tokio::test]
+async fn transaction_unstable_submit_and_watch() {
+    let ctx = test_context().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    // Build and sign some random tx, just to get some appropriate bytes:
+    let payload = node_runtime::tx().system().remark(b"hello".to_vec());
+    let tx_bytes = ctx
+        .client()
+        .tx()
+        .create_signed_with_nonce(&payload, &dev::alice(), 0, Default::default())
+        .unwrap()
+        .into_encoded();
+
+    // Test submitting it:
+    let mut sub = rpc
+        .transaction_unstable_submit_and_watch(&tx_bytes)
+        .await
+        .unwrap();
+
+    // Check that the messages we get back on the way to it finishing deserialize ok
+    // (this will miss some cases).
+    while let Some(_ev) = sub.next().await.transpose().unwrap() {
+        // This stream should end when it hits the relevant stopping event.
+        // If the test continues forever then something isn't working.
+        // If we hit an error then that's also an issue!
+    }
+}
+
 /// Ignore block related events and obtain the next event related to an operation.
 async fn next_operation_event<T: serde::de::DeserializeOwned>(
     sub: &mut RpcSubscription<FollowEvent<T>>,
