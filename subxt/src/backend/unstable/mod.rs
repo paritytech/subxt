@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 //! This module will expose a backend implementation based on the new APIs
-//! described at https://github.com/paritytech/json-rpc-interface-spec/. See
+//! described at <https://github.com/paritytech/json-rpc-interface-spec/>. See
 //! [`rpc_methods`] for the raw API calls.
 //!
 //! # Warning

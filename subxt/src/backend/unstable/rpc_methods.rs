@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 //! An interface to call the  API methods. See
-//! https://github.com/paritytech/json-rpc-interface-spec/ for details of the API
+//! <https://github.com/paritytech/json-rpc-interface-spec/> for details of the API
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
@@ -49,15 +49,15 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
     ///
     /// The subscription ID can be used to make queries for the
-    /// block's body ([`chainhead_unstable_body`](Rpc::chainhead_unstable_follow)),
-    /// block's header ([`chainhead_unstable_header`](Rpc::chainhead_unstable_header)),
-    /// block's storage ([`chainhead_unstable_storage`](Rpc::chainhead_unstable_storage)) and submitting
-    /// runtime API calls at this block ([`chainhead_unstable_call`](Rpc::chainhead_unstable_call)).
+    /// block's body ([`chainhead_unstable_body`](UnstableRpcMethods::chainhead_unstable_follow)),
+    /// block's header ([`chainhead_unstable_header`](UnstableRpcMethods::chainhead_unstable_header)),
+    /// block's storage ([`chainhead_unstable_storage`](UnstableRpcMethods::chainhead_unstable_storage)) and submitting
+    /// runtime API calls at this block ([`chainhead_unstable_call`](UnstableRpcMethods::chainhead_unstable_call)).
     ///
     /// # Note
     ///
     /// When the user is no longer interested in a block, the user is responsible
-    /// for calling the [`chainhead_unstable_unpin`](Rpc::chainhead_unstable_unpin) method.
+    /// for calling the [`chainhead_unstable_unpin`](UnstableRpcMethods::chainhead_unstable_unpin) method.
     /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
     pub async fn chainhead_unstable_follow(
         &self,
@@ -83,7 +83,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
     pub async fn chainhead_unstable_body(
         &self,
         subscription_id: &str,
@@ -105,7 +105,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
     pub async fn chainhead_unstable_header(
         &self,
         subscription_id: &str,
@@ -134,7 +134,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
     pub async fn chainhead_unstable_storage(
         &self,
         subscription_id: &str,
@@ -169,7 +169,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
     pub async fn chainhead_unstable_call(
         &self,
         subscription_id: &str,
@@ -193,7 +193,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](Rpc::chainhead_unstable_follow).
+    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
     pub async fn chainhead_unstable_unpin(
         &self,
         subscription_id: &str,
@@ -354,6 +354,7 @@ pub struct RuntimeSpec {
     ///
     /// **Note:** In Substrate, the keys in the apis field consists of the hexadecimal-encoded 8-bytes blake2
     /// hash of the name of the API. For example, the `TaggedTransactionQueue` API is 0xd2bc9897eed08f15.
+    #[serde(with = "hashmap_as_tuple_list")]
     pub apis: HashMap<String, u32>,
 }
 
@@ -536,4 +537,142 @@ impl From<Vec<u8>> for Bytes {
 
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     format!("0x{}", hex::encode(bytes.as_ref()))
+}
+
+/// A temporary shim to decode "spec.apis" if it comes back as an array like:
+///
+/// ```
+/// [["0xABC", 1], ["0xCDE", 2]]
+/// ```
+///
+/// The expected format (which this also supports deserializing from) is:
+///
+/// ```
+/// { "0xABC": 1, "0xCDE": 2 }
+/// ```
+///
+/// We can delete this when the correct format is being returned.
+///
+/// Adapted from <https://tikv.github.io/doc/serde_with/rust/hashmap_as_tuple_list>
+pub(crate) mod hashmap_as_tuple_list {
+    use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
+    use std::collections::HashMap;
+    use std::fmt;
+    use std::hash::{BuildHasher, Hash};
+    use std::marker::PhantomData;
+
+    /// Deserialize a [`HashMap`] from a list of tuples or object
+    pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>
+    where
+        D: Deserializer<'de>,
+        K: Eq + Hash + Deserialize<'de>,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        deserializer.deserialize_any(HashMapVisitor(PhantomData))
+    }
+
+    #[cfg_attr(feature = "cargo-clippy", allow(type_complexity))]
+    struct HashMapVisitor<K, V, BH>(PhantomData<fn() -> HashMap<K, V, BH>>);
+
+    impl<'de, K, V, BH> Visitor<'de> for HashMapVisitor<K, V, BH>
+    where
+        K: Deserialize<'de> + Eq + Hash,
+        V: Deserialize<'de>,
+        BH: BuildHasher + Default,
+    {
+        type Value = HashMap<K, V, BH>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("a list of key-value pairs")
+        }
+
+        // Work with maps too:
+        fn visit_map<A>(self, mut m: A) -> Result<Self::Value, A::Error>
+        where
+            A: serde::de::MapAccess<'de>,
+        {
+            let mut map =
+                HashMap::with_capacity_and_hasher(m.size_hint().unwrap_or(0), BH::default());
+            while let Some((key, value)) = m.next_entry()? {
+                map.insert(key, value);
+            }
+            Ok(map)
+        }
+
+        // The shim to also work with sequences of tuples.
+        fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut map =
+                HashMap::with_capacity_and_hasher(seq.size_hint().unwrap_or(0), BH::default());
+            while let Some((key, value)) = seq.next_element()? {
+                map.insert(key, value);
+            }
+            Ok(map)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn can_deserialize_apis_from_tuple_or_object() {
+        let old_response = serde_json::json!({
+            "authoringVersion": 10,
+            "specName": "westend",
+            "implName": "parity-westend",
+            "specVersion": 9122,
+            "implVersion": 0,
+            "stateVersion": 1,
+            "transactionVersion": 7,
+            "apis": [
+                ["0xdf6acb689907609b", 3],
+                ["0x37e397fc7c91f5e4", 1],
+                ["0x40fe3ad401f8959a", 5],
+                ["0xd2bc9897eed08f15", 3],
+                ["0xf78b278be53f454c", 2],
+                ["0xaf2c0297a23e6d3d", 1],
+                ["0x49eaaf1b548a0cb0", 1],
+                ["0x91d5df18b0d2cf58", 1],
+                ["0xed99c5acb25eedf5", 3],
+                ["0xcbca25e39f142387", 2],
+                ["0x687ad44ad37f03c2", 1],
+                ["0xab3c0572291feb8b", 1],
+                ["0xbc9d89904f5b923f", 1],
+                ["0x37c8bb1350a9a2a8", 1]
+            ]
+        });
+        let old_spec: RuntimeSpec = serde_json::from_value(old_response).unwrap();
+
+        let new_response = serde_json::json!({
+            "specName": "westend",
+            "implName": "parity-westend",
+            "specVersion": 9122,
+            "implVersion": 0,
+            "transactionVersion": 7,
+            "apis": {
+                "0xdf6acb689907609b": 3,
+                "0x37e397fc7c91f5e4": 1,
+                "0x40fe3ad401f8959a": 5,
+                "0xd2bc9897eed08f15": 3,
+                "0xf78b278be53f454c": 2,
+                "0xaf2c0297a23e6d3d": 1,
+                "0x49eaaf1b548a0cb0": 1,
+                "0x91d5df18b0d2cf58": 1,
+                "0xed99c5acb25eedf5": 3,
+                "0xcbca25e39f142387": 2,
+                "0x687ad44ad37f03c2": 1,
+                "0xab3c0572291feb8b": 1,
+                "0xbc9d89904f5b923f": 1,
+                "0x37c8bb1350a9a2a8": 1
+            }
+        });
+        let new_spec: RuntimeSpec = serde_json::from_value(new_response).unwrap();
+
+        assert_eq!(old_spec, new_spec);
+    }
 }
