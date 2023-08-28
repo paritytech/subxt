@@ -187,11 +187,21 @@ impl TypeSubstitutes {
         src_path: &syn::Path,
         target_path: &syn::Path,
     ) -> Result<TypeParamMapping, TypeSubstitutionError> {
-        let Some(syn::PathSegment { arguments: src_path_args, .. }) = src_path.segments.last() else {
+        let Some(syn::PathSegment {
+            arguments: src_path_args,
+            ..
+        }) = src_path.segments.last()
+        else {
             return Err(TypeSubstitutionError::EmptySubstitutePath(src_path.span()));
         };
-        let Some(syn::PathSegment { arguments: target_path_args, .. }) = target_path.segments.last() else {
-            return Err(TypeSubstitutionError::EmptySubstitutePath(target_path.span()));
+        let Some(syn::PathSegment {
+            arguments: target_path_args,
+            ..
+        }) = target_path.segments.last()
+        else {
+            return Err(TypeSubstitutionError::EmptySubstitutePath(
+                target_path.span(),
+            ));
         };
 
         // Get hold of the generic args for the "from" type, erroring if they aren't valid.

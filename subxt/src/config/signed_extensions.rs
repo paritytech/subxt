@@ -435,7 +435,7 @@ const _: () = {
 fn is_type_empty(type_id: u32, types: &scale_info::PortableRegistry) -> bool {
     let Some(ty) = types.resolve(type_id) else {
         // Can't resolve; type may not be empty. Not expected to hit this.
-        return false
+        return false;
     };
 
     use scale_info::TypeDef;
