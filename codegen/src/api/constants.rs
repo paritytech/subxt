@@ -45,31 +45,37 @@ pub fn generate_constants(
         return Ok(quote!());
     }
 
-    let constant_fns = pallet.constants().map(|constant| {
-        let fn_name = format_ident!("{}", constant.name().to_snake_case());
-        let pallet_name = pallet.name();
-        let constant_name = constant.name();
-        let Some(constant_hash) = pallet.constant_hash(constant_name) else {
-            return Err(CodegenError::MissingConstantMetadata(constant_name.into(), pallet_name.into()));
-        };
+    let constant_fns = pallet
+        .constants()
+        .map(|constant| {
+            let fn_name = format_ident!("{}", constant.name().to_snake_case());
+            let pallet_name = pallet.name();
+            let constant_name = constant.name();
+            let Some(constant_hash) = pallet.constant_hash(constant_name) else {
+                return Err(CodegenError::MissingConstantMetadata(
+                    constant_name.into(),
+                    pallet_name.into(),
+                ));
+            };
 
-        let return_ty = type_gen.resolve_type_path(constant.ty());
-        let docs = constant.docs();
-        let docs = should_gen_docs
-            .then_some(quote! { #( #[doc = #docs ] )* })
-            .unwrap_or_default();
+            let return_ty = type_gen.resolve_type_path(constant.ty());
+            let docs = constant.docs();
+            let docs = should_gen_docs
+                .then_some(quote! { #( #[doc = #docs ] )* })
+                .unwrap_or_default();
 
-        Ok(quote! {
-            #docs
-            pub fn #fn_name(&self) -> #crate_path::constants::Address<#return_ty> {
-                #crate_path::constants::Address::new_static(
-                    #pallet_name,
-                    #constant_name,
-                    [#(#constant_hash,)*]
-                )
-            }
+            Ok(quote! {
+                #docs
+                pub fn #fn_name(&self) -> #crate_path::constants::Address<#return_ty> {
+                    #crate_path::constants::Address::new_static(
+                        #pallet_name,
+                        #constant_name,
+                        [#(#constant_hash,)*]
+                    )
+                }
+            })
         })
-    }).collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()?;
 
     Ok(quote! {
         pub mod constants {
