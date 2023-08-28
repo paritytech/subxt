@@ -44,10 +44,16 @@ pub fn explore_calls(
     };
 
     // if specified call is wrong, show user the calls to choose from (but this time as an error):
-    let Some(call) = calls_enum_type_def.variants.iter().find(|variant| variant.name.to_lowercase() == call_name.to_lowercase()) else {
+    let Some(call) = calls_enum_type_def
+        .variants
+        .iter()
+        .find(|variant| variant.name.to_lowercase() == call_name.to_lowercase())
+    else {
         let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
         let description = format!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", );
-        return Err(eyre!("\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{description}"));
+        return Err(eyre!(
+            "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{description}"
+        ));
     };
 
     // collect all the trailing arguments into a single string that is later into a scale_value::Value

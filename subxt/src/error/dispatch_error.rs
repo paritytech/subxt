@@ -145,7 +145,8 @@ impl Eq for ModuleError {}
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let Ok(details) = self.details() else {
-            return f.write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
+            return f
+                .write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
         };
 
         let pallet = details.pallet.name();

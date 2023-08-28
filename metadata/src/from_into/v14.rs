@@ -268,7 +268,7 @@ impl ExtrinsicPartTypeIds {
 
         let extrinsic_id = metadata.extrinsic.ty.id;
         let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
-            return Err("Missing extrinsic type".into())
+            return Err("Missing extrinsic type".into());
         };
 
         let params: HashMap<_, _> = extrinsic_ty
@@ -313,7 +313,9 @@ fn generate_outer_enums(
         .types
         .iter()
         .find(|ty| {
-            let Some(ident) = ty.ty.path.ident() else { return false };
+            let Some(ident) = ty.ty.path.ident() else {
+                return false;
+            };
             ident == "RuntimeCall"
         })
         .expect("RuntimeCall exists in V14; qed");
@@ -323,7 +325,9 @@ fn generate_outer_enums(
         .types
         .iter()
         .find(|ty| {
-            let Some(ident) = ty.ty.path.ident() else { return false };
+            let Some(ident) = ty.ty.path.ident() else {
+                return false;
+            };
             ident == "RuntimeEvent"
         })
         .expect("RuntimeEvent exists in V14; qed");
@@ -357,7 +361,9 @@ fn generate_runtime_error_type(
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let Some(pallet_error) = &pallet.error else { return None };
+            let Some(pallet_error) = &pallet.error else {
+                return None;
+            };
             let path = format!("{}Error", pallet.name);
 
             Some(scale_info::Variant {

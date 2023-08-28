@@ -176,10 +176,10 @@ impl Keypair {
 /// ```
 pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -> bool {
     let Ok(signature) = schnorrkel::Signature::from_bytes(&sig.0) else {
-        return false
+        return false;
     };
     let Ok(public) = schnorrkel::PublicKey::from_bytes(&pubkey.0) else {
-        return false
+        return false;
     };
     public
         .verify_simple(SIGNING_CTX, message.as_ref(), &signature)

@@ -22,18 +22,35 @@ pub fn explore_constants(
     let Some(constant_name) = command.constant else {
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
         writeln!(output, "Usage:")?;
-        writeln!(output, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        writeln!(output, "        explore a specific call within this pallet\n\n{available_constants}")?;
+        writeln!(
+            output,
+            "    subxt explore {pallet_name} constants <CONSTANT>"
+        )?;
+        writeln!(
+            output,
+            "        explore a specific call within this pallet\n\n{available_constants}"
+        )?;
         return Ok(());
     };
 
     // if specified constant is wrong, show user the constants to choose from (but this time as an error):
-    let Some(constant) = pallet_metadata.constants().find(|constant| constant.name().to_lowercase() == constant_name.to_lowercase()) else {
+    let Some(constant) = pallet_metadata
+        .constants()
+        .find(|constant| constant.name().to_lowercase() == constant_name.to_lowercase())
+    else {
         let available_constants = print_available_constants(pallet_metadata, pallet_name);
         let mut description = "Usage:".to_string();
-        writeln!(description, "    subxt explore {pallet_name} constants <CONSTANT>")?;
-        writeln!(description, "        explore a specific call within this pallet\n\n{available_constants}")?;
-        let err = eyre!("constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}");
+        writeln!(
+            description,
+            "    subxt explore {pallet_name} constants <CONSTANT>"
+        )?;
+        writeln!(
+            description,
+            "        explore a specific call within this pallet\n\n{available_constants}"
+        )?;
+        let err = eyre!(
+            "constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}"
+        );
         return Err(err);
     };
 
