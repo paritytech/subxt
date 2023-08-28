@@ -70,7 +70,7 @@ pub fn generate_calls(
                 return Err(CodegenError::MissingCallMetadata(
                     pallet_name.into(),
                     call_name.to_string(),
-                ))
+                ));
             };
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while

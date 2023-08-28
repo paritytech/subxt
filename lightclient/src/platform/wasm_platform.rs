@@ -114,7 +114,9 @@ impl PlatformRef for SubxtPlatform {
         Box::pin(future::poll_fn(|cx| {
             // The `connect` is expected to be called before this method and would populate
             // the buffers properly. When the buffers are empty, this future is shortly dropped.
-            let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else { return Poll::Pending };
+            let Some((read_buffer, write_buffer)) = stream.buffers.as_mut() else {
+                return Poll::Pending;
+            };
 
             // Whether the future returned by `update_stream` should return `Ready` or `Pending`.
             let mut update_stream_future_ready = false;
@@ -246,7 +248,7 @@ impl PlatformRef for SubxtPlatform {
             stream.buffers.as_mut().map(|(r, _)| r)
         else {
             assert_eq!(extra_bytes, 0);
-            return
+            return;
         };
 
         assert!(cursor.start + extra_bytes <= cursor.end);
@@ -254,8 +256,14 @@ impl PlatformRef for SubxtPlatform {
     }
 
     fn writable_bytes(&self, stream: &mut Self::Stream) -> usize {
-        let Some(StreamWriteBuffer::Open { ref mut buffer, must_close: false, ..}) =
-            stream.buffers.as_mut().map(|(_, w)| w) else { return 0 };
+        let Some(StreamWriteBuffer::Open {
+            ref mut buffer,
+            must_close: false,
+            ..
+        }) = stream.buffers.as_mut().map(|(_, w)| w)
+        else {
+            return 0;
+        };
         buffer.capacity() - buffer.len()
     }
 
@@ -265,15 +273,20 @@ impl PlatformRef for SubxtPlatform {
         // Because `writable_bytes` returns 0 if the writing side is closed, and because `data`
         // must always have a size inferior or equal to `writable_bytes`, we know for sure that
         // the writing side isn't closed.
-        let Some(StreamWriteBuffer::Open { ref mut buffer, .. } )=
-            stream.buffers.as_mut().map(|(_, w)| w) else { panic!() };
+        let Some(StreamWriteBuffer::Open { ref mut buffer, .. }) =
+            stream.buffers.as_mut().map(|(_, w)| w)
+        else {
+            panic!()
+        };
         buffer.reserve(data.len());
         buffer.extend(data.iter().copied());
     }
 
     fn close_send(&self, stream: &mut Self::Stream) {
         // It is not illegal to call this on an already-reset stream.
-        let Some((_, write_buffer)) = stream.buffers.as_mut() else { return };
+        let Some((_, write_buffer)) = stream.buffers.as_mut() else {
+            return;
+        };
 
         match write_buffer {
             StreamWriteBuffer::Open {

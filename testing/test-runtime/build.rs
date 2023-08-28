@@ -86,7 +86,7 @@ async fn run() {
 
     for substrate_node_path in substrate_bins_vec {
         let Ok(full_path) = which::which(substrate_node_path) else {
-            continue
+            continue;
         };
 
         // Re-build if the substrate binary we're pointed to changes (mtime):
