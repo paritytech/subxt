@@ -47,7 +47,7 @@ pub fn generate_events(
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.
     let Some(event_ty) = pallet.event_ty_id() else {
-        return Ok(quote!())
+        return Ok(quote!());
     };
 
     let struct_defs = super::generate_structs_from_variants(
