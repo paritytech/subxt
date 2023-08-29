@@ -63,13 +63,13 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
     pub async fn chainhead_unstable_follow(
         &self,
-        runtime_updates: bool,
+        with_runtime: bool,
     ) -> Result<RpcSubscription<FollowEvent<T::Hash>>, Error> {
         let subscription = self
             .client
             .subscribe(
                 "chainHead_unstable_follow",
-                rpc_params![runtime_updates],
+                rpc_params![with_runtime],
                 "chainHead_unstable_unfollow",
             )
             .await?;
