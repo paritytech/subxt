@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::task::Poll;
 
-/// An interface to call the legacy RPC methods. This interface is instantiated with
+/// An interface to call the unstable RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
 pub struct UnstableRpcMethods<T> {
