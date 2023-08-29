@@ -67,7 +67,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
                 ("Foo".into(), foo_value_metadata.clone()),
                 ("foo".into(), foo_value_metadata.clone()),
                 ("12".into(), foo_value_metadata.clone()),
-                ("&Hello".into(), foo_value_metadata.clone()),
+                ("&Hello".into(), foo_value_metadata),
             ]),
         },
     };

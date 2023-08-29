@@ -8,6 +8,7 @@
 
 pub mod legacy;
 pub mod rpc;
+pub mod unstable;
 
 use crate::error::Error;
 use crate::metadata::Metadata;

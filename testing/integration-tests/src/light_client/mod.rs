@@ -35,19 +35,6 @@ use subxt::{
 };
 use subxt_metadata::Metadata;
 
-// We don't use these dependencies.
-use assert_matches as _;
-use frame_metadata as _;
-use hex as _;
-use regex as _;
-use scale_info as _;
-use sp_core as _;
-use subxt_codegen as _;
-use subxt_signer as _;
-use syn as _;
-use tracing as _;
-use wabt as _;
-
 type Client = LightClient<PolkadotConfig>;
 
 // Check that we can subscribe to non-finalized blocks.

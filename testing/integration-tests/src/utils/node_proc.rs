@@ -5,7 +5,7 @@
 use std::ffi::{OsStr, OsString};
 use substrate_runner::SubstrateNode;
 use subxt::{
-    backend::{legacy, rpc},
+    backend::{legacy, rpc, unstable},
     Config, OnlineClient,
 };
 
@@ -36,13 +36,23 @@ where
         TestNodeProcessBuilder::new(paths)
     }
 
-    /// Hand back an RPC client connected to the test node.
+    /// Hand back an RPC client connected to the test node which exposes the legacy RPC methods.
     pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
-        let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
-        let rpc_client = rpc::RpcClient::from_url(url)
-            .await
-            .expect("Unable to connect RPC client to test node");
+        let rpc_client = self.rpc_client().await;
         legacy::LegacyRpcMethods::new(rpc_client)
+    }
+
+    /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
+    pub async fn unstable_rpc_methods(&self) -> unstable::UnstableRpcMethods<R> {
+        let rpc_client = self.rpc_client().await;
+        unstable::UnstableRpcMethods::new(rpc_client)
+    }
+
+    async fn rpc_client(&self) -> rpc::RpcClient {
+        let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
+        rpc::RpcClient::from_url(url)
+            .await
+            .expect("Unable to connect RPC client to test node")
     }
 
     /// Returns the subxt client connected to the running node.

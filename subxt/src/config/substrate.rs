@@ -71,7 +71,7 @@ impl<N, H> Header for SubstrateHeader<N, H>
 where
     N: Copy + Into<u64> + Into<U256> + TryFrom<U256> + Encode,
     H: Hasher + Encode,
-    SubstrateHeader<N, H>: Encode,
+    SubstrateHeader<N, H>: Encode + Decode,
 {
     type Number = N;
     type Hasher = H;
