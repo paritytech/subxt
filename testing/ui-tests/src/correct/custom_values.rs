@@ -17,14 +17,13 @@ fn main() {
 
     // static query:
     let foo_address = node::custom().foo();
-    let foo = api.custom_values().at(&foo_address)?;
+    let foo = api.custom_values().at(&foo_address).unwrap();
     assert_eq!(foo, expected_foo);
 
     // dynamic query:
-    let foo_value = api.custom_values().at("Foo")?;
-    let foo: Foo = foo_value.as_type()?;
+    let foo_value = api.custom_values().at("Foo").unwrap();
+    let foo: Foo = foo_value.as_type().unwrap();
     assert_eq!(foo, expected_foo);
-
 }
 
 fn construct_offline_client() -> OfflineClient<PolkadotConfig> {
