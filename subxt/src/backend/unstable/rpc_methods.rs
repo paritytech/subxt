@@ -252,7 +252,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Return the genesis hash.
-    pub async fn chainspec_v1_genesishash(&self) -> Result<T::Hash, Error> {
+    pub async fn chainspec_v1_genesis_hash(&self) -> Result<T::Hash, Error> {
         let hash = self
             .client
             .request("chainSpec_v1_genesisHash", rpc_params![])
@@ -261,7 +261,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Return a string containing the human-readable name of the chain.
-    pub async fn chainspec_v1_chainname(&self) -> Result<String, Error> {
+    pub async fn chainspec_v1_chain_name(&self) -> Result<String, Error> {
         let hash = self
             .client
             .request("chainSpec_v1_chainName", rpc_params![])
@@ -886,5 +886,44 @@ mod test {
         let new_spec: RuntimeSpec = serde_json::from_value(new_response).unwrap();
 
         assert_eq!(old_spec, new_spec);
+    }
+
+    #[test]
+    fn can_deserialize_from_number_or_string() {
+        #[derive(Debug, Deserialize)]
+        struct Foo64 {
+            #[serde(with = "super::unsigned_number_as_string")]
+            num: u64,
+        }
+        #[derive(Debug, Deserialize)]
+        struct Foo32 {
+            #[serde(with = "super::unsigned_number_as_string")]
+            num: u128,
+        }
+
+        let from_string = serde_json::json!({
+            "num": "123"
+        });
+        let from_num = serde_json::json!({
+            "num": 123
+        });
+        let from_err = serde_json::json!({
+            "num": "123a"
+        });
+
+        let f1: Foo64 =
+            serde_json::from_value(from_string.clone()).expect("can deser string into u64");
+        let f2: Foo32 = serde_json::from_value(from_string).expect("can deser string into u32");
+        let f3: Foo64 = serde_json::from_value(from_num.clone()).expect("can deser num into u64");
+        let f4: Foo32 = serde_json::from_value(from_num).expect("can deser num into u32");
+
+        assert_eq!(f1.num, 123);
+        assert_eq!(f2.num, 123);
+        assert_eq!(f3.num, 123);
+        assert_eq!(f4.num, 123);
+
+        // Invalid things should lead to an error:
+        let _ = serde_json::from_value::<Foo32>(from_err)
+            .expect_err("can't deser invalid num into u32");
     }
 }

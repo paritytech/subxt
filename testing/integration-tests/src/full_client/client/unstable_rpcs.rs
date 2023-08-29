@@ -227,7 +227,7 @@ async fn chainspec_v1_genesishash() {
     let rpc = ctx.unstable_rpc_methods().await;
 
     let a = old_rpc.genesis_hash().await.unwrap();
-    let b = rpc.chainspec_v1_genesishash().await.unwrap();
+    let b = rpc.chainspec_v1_genesis_hash().await.unwrap();
 
     assert_eq!(a, b);
 }
@@ -241,7 +241,7 @@ async fn chainspec_v1_chainname() {
     let rpc = ctx.unstable_rpc_methods().await;
 
     let a = old_rpc.system_name().await.unwrap();
-    let b = rpc.chainspec_v1_chainname().await.unwrap();
+    let b = rpc.chainspec_v1_chain_name().await.unwrap();
 
     assert_eq!(a, b);
 }
