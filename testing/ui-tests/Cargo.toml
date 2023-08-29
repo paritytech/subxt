@@ -10,6 +10,7 @@ publish = false
 
 [dev-dependencies]
 trybuild = { workspace = true }
+hex = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 frame-metadata ={ workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
