@@ -55,7 +55,7 @@ fn generate_custom_value_fn(
     let return_ty = type_gen.resolve_type_path(custom_value.type_id());
 
     Some(quote!(
-        pub fn #fn_name_ident() -> #crate_path::custom_values::StaticAddress<#return_ty> {
+        pub fn #fn_name_ident(&self) -> #crate_path::custom_values::StaticAddress<#return_ty> {
             #crate_path::custom_values::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
         }
     ))
