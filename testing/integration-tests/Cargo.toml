@@ -25,6 +25,7 @@ frame-metadata = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
 regex = { workspace = true }
+serde = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 syn = { workspace = true }

@@ -82,7 +82,7 @@ pub trait Hasher {
 }
 
 /// This represents the block header type used by a node.
-pub trait Header: Sized + Encode {
+pub trait Header: Sized + Encode + Decode {
     /// The block number type for this header.
     type Number: Into<u64>;
     /// The hasher used to hash this header.
@@ -105,7 +105,7 @@ mod substrate_impls {
 
     impl<N, H> Header for sp_runtime::generic::Header<N, H>
     where
-        Self: Encode,
+        Self: Encode + Decode,
         N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
         H: sp_runtime::traits::Hash + Hasher,
     {
