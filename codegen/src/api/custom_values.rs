@@ -47,7 +47,8 @@ fn generate_custom_value_fn(
     if fn_names_taken.contains(&fn_name) {
         return None;
     }
-    let fn_name_ident = format_ident!("{fn_name}");
+    // if the fn_name would be an invalid ident, return None:
+    let fn_name_ident = syn::parse_str::<syn::Ident>(&fn_name).ok()?;
     fn_names_taken.insert(fn_name);
 
     let custom_value_hash = custom_value.hash();
