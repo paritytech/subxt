@@ -40,7 +40,6 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn storage_fetch_descendant_keys(
         &self,
         key: Vec<u8>,
-        starting_at: Option<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error>;
 
