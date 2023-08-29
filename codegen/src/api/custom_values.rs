@@ -9,7 +9,7 @@ use heck::ToSnakeCase as _;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
+use quote::quote;
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values<'a>(
@@ -47,14 +47,15 @@ fn generate_custom_value_fn(
     if fn_names_taken.contains(&fn_name) {
         return None;
     }
-    let fn_name_ident = format_ident!("{fn_name}");
+    // if the fn_name would be an invalid ident, return None:
+    let fn_name_ident = syn::parse_str::<syn::Ident>(&fn_name).ok()?;
     fn_names_taken.insert(fn_name);
 
     let custom_value_hash = custom_value.hash();
     let return_ty = type_gen.resolve_type_path(custom_value.type_id());
 
     Some(quote!(
-        pub fn #fn_name_ident() -> #crate_path::custom_values::StaticAddress<#return_ty> {
+        pub fn #fn_name_ident(&self) -> #crate_path::custom_values::StaticAddress<#return_ty> {
             #crate_path::custom_values::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
         }
     ))

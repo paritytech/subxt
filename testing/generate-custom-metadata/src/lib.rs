@@ -1,14 +1,13 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
-// This file is dual-licensed as Apache-2.0 or GPL-3.0.
-// see LICENSE for license details.
-
 use codec::Encode;
 use frame_metadata::v15::{CustomMetadata, ExtrinsicMetadata, OuterEnums, RuntimeMetadataV15};
 use frame_metadata::RuntimeMetadataPrefixed;
+
 use scale_info::form::PortableForm;
-use scale_info::TypeInfo;
 use scale_info::{meta_type, IntoPortable};
+use scale_info::{TypeInfo};
 use std::collections::BTreeMap;
+
+pub mod dispatch_error;
 
 /// Generate metadata which contains a `Foo { a: u8, b: &str }` custom value.
 pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
@@ -23,7 +22,10 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     }
 
     let foo_value_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
-        let value = Foo { a: 0, b: "Hello" };
+        let value = Foo {
+            a: 42,
+            b: "Have a great day!",
+        };
         let foo_ty = scale_info::MetaType::new::<Foo>();
         let foo_ty_id = registry.register_type(&foo_ty);
         frame_metadata::v15::CustomValueMetadata {
@@ -48,7 +50,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     let unit_ty = registry.register_type(&meta_type::<()>());
 
     // Metadata needs to contain this DispatchError, since codegen looks for it.
-    registry.register_type(&meta_type::<crate::utils::dispatch_error::ArrayDispatchError>());
+    registry.register_type(&meta_type::<dispatch_error::ArrayDispatchError>());
 
     let metadata = RuntimeMetadataV15 {
         types: registry.into(),
