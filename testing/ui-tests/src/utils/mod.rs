@@ -11,9 +11,7 @@ use frame_metadata::{
     },
     RuntimeMetadataPrefixed,
 };
-use generate_custom_metadata::dispatch_error::{
-    ArrayDispatchError,
-};
+use generate_custom_metadata::dispatch_error::ArrayDispatchError;
 use scale_info::{meta_type, IntoPortable, TypeInfo};
 
 pub use metadata_test_runner::MetadataTestRunner;

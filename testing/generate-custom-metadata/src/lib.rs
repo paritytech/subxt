@@ -3,8 +3,8 @@ use frame_metadata::v15::{CustomMetadata, ExtrinsicMetadata, OuterEnums, Runtime
 use frame_metadata::RuntimeMetadataPrefixed;
 
 use scale_info::form::PortableForm;
+use scale_info::TypeInfo;
 use scale_info::{meta_type, IntoPortable};
-use scale_info::{TypeInfo};
 use std::collections::BTreeMap;
 
 pub mod dispatch_error;

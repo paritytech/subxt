@@ -13,6 +13,6 @@ trybuild = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 frame-metadata ={ workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
-subxt = { workspace = true, features = ["native", "jsonrpsee"] }
+subxt = { workspace = true, features = ["native", "jsonrpsee", "substrate-compat"] }
 subxt-metadata = { workspace = true }
 generate-custom-metadata = { path = "../generate-custom-metadata" }
