@@ -76,7 +76,7 @@ where
         async move {
             let keys = client
                 .backend()
-                .storage_fetch_descendant_keys(key, None, block_hash)
+                .storage_fetch_descendant_keys(key, block_hash)
                 .await?;
             Ok(keys)
         }
