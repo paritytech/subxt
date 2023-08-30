@@ -3,12 +3,15 @@
 // see LICENSE for license details.
 
 use codec::Encode;
+use std::io::{self, Write};
 
-/// can be called from the root of the project with: `cargo run --bin generate-custom-metadata`.
-/// Generates a "./artifacts/metadata_with_custom_values.scale" file.
-fn main() {
+/// Creates some scale encoded metadata with custom values and writes it out to stdout (as raw bytes)
+/// 
+/// Can be called from the root of the project with: `cargo run --bin generate-custom-metadata > output.scale`.
+fn main() -> io::Result<()> {
     let metadata_prefixed = generate_custom_metadata::metadata_custom_values_foo();
-    let bytes = metadata_prefixed.encode();
-    std::fs::write("./artifacts/metadata_with_custom_values.scale", bytes)
-        .expect("should be able to write custom metadata");
+    let stdout = io::stdout();
+    let mut handle = stdout.lock();
+    handle.write_all(&metadata_prefixed.encode())?;
+    Ok(())
 }

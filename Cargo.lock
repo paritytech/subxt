@@ -4753,6 +4753,7 @@ version = "0.31.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
+ "hex",
  "parity-scale-codec",
  "scale-info",
  "subxt",
