@@ -64,8 +64,8 @@ impl<T: Config> UnstableRpcMethods<T> {
     pub async fn chainhead_unstable_follow(
         &self,
         with_runtime: bool,
-    ) -> Result<RpcSubscription<FollowEvent<T::Hash>>, Error> {
-        let subscription = self
+    ) -> Result<FollowSubscription<T::Hash>, Error> {
+        let sub = self
             .client
             .subscribe(
                 "chainHead_unstable_follow",
@@ -74,7 +74,7 @@ impl<T: Config> UnstableRpcMethods<T> {
             )
             .await?;
 
-        Ok(subscription)
+        Ok(FollowSubscription { sub, done: false })
     }
 
     /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
@@ -604,6 +604,45 @@ pub enum StorageQueryType {
     DescendantsHashes,
 }
 
+/// A subscription which returns follow events, and ends when a Stop event occurs.
+pub struct FollowSubscription<Hash> {
+    sub: RpcSubscription<FollowEvent<Hash>>,
+    done: bool,
+}
+
+impl <Hash> std::ops::Deref for FollowSubscription<Hash> {
+    type Target = RpcSubscription<FollowEvent<Hash>>;
+    fn deref(&self) -> &Self::Target {
+        &self.sub
+    }
+}
+
+impl<Hash: serde::de::DeserializeOwned> Stream for FollowSubscription<Hash> {
+    type Item = <RpcSubscription<FollowEvent<Hash>> as Stream>::Item;
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        if self.done {
+            return Poll::Ready(None);
+        }
+
+        let res = self.sub.poll_next_unpin(cx);
+
+        if let Poll::Ready(Some(Ok(res))) = &res {
+            if matches!(
+                res,
+                FollowEvent::Stop
+            ) {
+                // No more events will occur after these ones.
+                self.done = true
+            }
+        }
+
+        res
+    }
+}
+
 /// A subscription which returns transaction status events, stopping
 /// when no more events will be sent.
 pub struct TransactionSubscription<Hash> {
@@ -611,10 +650,10 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash: serde::de::DeserializeOwned> TransactionSubscription<Hash> {
-    /// Fetch the next item in the stream.
-    pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
-        StreamExt::next(self).await
+impl <Hash> std::ops::Deref for TransactionSubscription<Hash> {
+    type Target = RpcSubscription<TransactionStatus<Hash>>;
+    fn deref(&self) -> &Self::Target {
+        &self.sub
     }
 }
 
