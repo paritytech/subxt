@@ -34,7 +34,7 @@ type FollowEventStream<Hash> = Pin<Box<dyn Stream<Item = Result<FollowEvent<Hash
 /// Either a ready message with the current subscription ID, or
 /// an event from the stream itself.
 #[derive(Debug,Clone,PartialEq,Eq)]
-pub enum Msg<Hash> {
+pub enum FollowStreamMsg<Hash> {
     /// The stream is ready (and has a subscription ID)
     Ready(String),
     /// An event from the stream.
@@ -87,10 +87,10 @@ impl <Hash> FollowStream<Hash> {
     }
 }
 
-impl <Hash: std::marker::Unpin> std::marker::Unpin for FollowStream<Hash> {}
+impl <Hash> std::marker::Unpin for FollowStream<Hash> {}
 
-impl <Hash: std::marker::Unpin> Stream for FollowStream<Hash> {
-    type Item = Result<Msg<Hash>, Error>;
+impl <Hash> Stream for FollowStream<Hash> {
+    type Item = Result<FollowStreamMsg<Hash>, Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.get_mut();
@@ -121,7 +121,7 @@ impl <Hash: std::marker::Unpin> Stream for FollowStream<Hash> {
                 InnerStreamState::Ready(stream) => {
                     let (sub, sub_id) = stream.take().expect("should always be Some");
                     this.stream = InnerStreamState::ReceivingEvents(sub);
-                    return Poll::Ready(Some(Ok(Msg::Ready(sub_id))));
+                    return Poll::Ready(Some(Ok(FollowStreamMsg::Ready(sub_id))));
                 },
                 InnerStreamState::ReceivingEvents(stream) => {
                     match stream.poll_next_unpin(cx) {
@@ -141,7 +141,7 @@ impl <Hash: std::marker::Unpin> Stream for FollowStream<Hash> {
                                 this.stream = InnerStreamState::Stopped;
                                 continue;
                             }
-                            return Poll::Ready(Some(Ok(Msg::Event(ev))));
+                            return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         },
                         Poll::Ready(Some(Err(e))) => {
                             // Finish forever if there's an error, passing it on.
@@ -152,7 +152,7 @@ impl <Hash: std::marker::Unpin> Stream for FollowStream<Hash> {
                 },
                 InnerStreamState::Stopped => {
                     this.stream = InnerStreamState::New;
-                    return Poll::Ready(Some(Ok(Msg::Event(FollowEvent::Stop))));
+                    return Poll::Ready(Some(Ok(FollowStreamMsg::Event(FollowEvent::Stop))));
                 }
                 InnerStreamState::Finished => {
                     return Poll::Ready(None);
@@ -172,6 +172,8 @@ mod test {
         Initialized, NewBlock
     };
 
+    // Given some events, returns a follow stream getter that we can use in
+    // place of the usual RPC method.
     fn test_stream_getter<Hash, F, I>(events: F) -> FollowEventStreamGetter<Hash>
     where
         Hash: Send + 'static,
@@ -234,16 +236,16 @@ mod test {
 
         // The expected response, given the above.
         assert_eq!(out, vec![
-            Msg::Ready("sub_id_0".to_owned()),
-            Msg::Event(FollowEvent::Initialized(Initialized {
+            FollowStreamMsg::Ready("sub_id_0".to_owned()),
+            FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
                 finalized_block_hash: H256::from_low_u64_le(1),
                 finalized_block_runtime: None
             })),
-            Msg::Event(FollowEvent::Stop),
-            Msg::Ready("sub_id_2".to_owned()),
-            Msg::Event(FollowEvent::Stop),
-            Msg::Ready("sub_id_3".to_owned()),
-            Msg::Event(FollowEvent::NewBlock(NewBlock {
+            FollowStreamMsg::Event(FollowEvent::Stop),
+            FollowStreamMsg::Ready("sub_id_2".to_owned()),
+            FollowStreamMsg::Event(FollowEvent::Stop),
+            FollowStreamMsg::Ready("sub_id_3".to_owned()),
+            FollowStreamMsg::Event(FollowEvent::NewBlock(NewBlock {
                 parent_block_hash: H256::from_low_u64_le(2),
                 block_hash: H256::from_low_u64_le(3),
                 new_runtime: None

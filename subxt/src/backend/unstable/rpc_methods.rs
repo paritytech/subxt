@@ -629,14 +629,9 @@ impl<Hash: serde::de::DeserializeOwned> Stream for FollowSubscription<Hash> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        if let Poll::Ready(Some(Ok(res))) = &res {
-            if matches!(
-                res,
-                FollowEvent::Stop
-            ) {
-                // No more events will occur after these ones.
-                self.done = true
-            }
+        if let Poll::Ready(Some(Ok(FollowEvent::Stop))) = &res {
+            // No more events will occur after this one.
+            self.done = true
         }
 
         res

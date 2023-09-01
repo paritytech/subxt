@@ -12,6 +12,7 @@
 //! warning at any time.
 
 mod follow_stream;
+mod follow_stream_unpin;
 
 pub mod rpc_methods;
 
