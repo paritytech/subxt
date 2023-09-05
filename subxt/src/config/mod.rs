@@ -57,7 +57,8 @@ pub trait Config: Sized + Send + Sync + 'static {
 pub type OtherParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams;
 
 /// Block hashes must conform to a bunch of things to be used in Subxt.
-pub trait BlockHash: Debug
+pub trait BlockHash:
+    Debug
     + Copy
     + Send
     + Sync
@@ -69,21 +70,25 @@ pub trait BlockHash: Debug
     + PartialEq
     + std::cmp::Eq
     + std::cmp::PartialEq
-    + std::hash::Hash {}
-impl <T> BlockHash for T
-where T: Debug
-    + Copy
-    + Send
-    + Sync
-    + Decode
-    + AsRef<[u8]>
-    + Serialize
-    + DeserializeOwned
-    + Encode
-    + PartialEq
-    + std::cmp::Eq
-    + std::cmp::PartialEq
-    + std::hash::Hash {}
+    + std::hash::Hash
+{
+}
+impl<T> BlockHash for T where
+    T: Debug
+        + Copy
+        + Send
+        + Sync
+        + Decode
+        + AsRef<[u8]>
+        + Serialize
+        + DeserializeOwned
+        + Encode
+        + PartialEq
+        + std::cmp::Eq
+        + std::cmp::PartialEq
+        + std::hash::Hash
+{
+}
 
 /// This represents the hasher used by a node to hash things like block headers
 /// and extrinsics.

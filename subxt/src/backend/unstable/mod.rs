@@ -16,12 +16,12 @@ mod follow_stream_unpin;
 
 pub mod rpc_methods;
 
-use crate::{config::Header, Config, Error};
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
 use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
+use crate::{config::Header, Config, Error};
 
 pub use rpc_methods::UnstableRpcMethods;
 
@@ -78,7 +78,6 @@ pub struct UnstableBackendDriver<T> {
 //     (backend, driver)
 // }
 
-impl<T: Config> UnstableBackend<T> {
-}
+impl<T: Config> UnstableBackend<T> {}
 
 impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}

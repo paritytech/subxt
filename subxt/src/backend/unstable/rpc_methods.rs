@@ -610,7 +610,7 @@ pub struct FollowSubscription<Hash> {
     done: bool,
 }
 
-impl <Hash> std::ops::Deref for FollowSubscription<Hash> {
+impl<Hash> std::ops::Deref for FollowSubscription<Hash> {
     type Target = RpcSubscription<FollowEvent<Hash>>;
     fn deref(&self) -> &Self::Target {
         &self.sub
@@ -645,7 +645,7 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl <Hash> std::ops::Deref for TransactionSubscription<Hash> {
+impl<Hash> std::ops::Deref for TransactionSubscription<Hash> {
     type Target = RpcSubscription<TransactionStatus<Hash>>;
     fn deref(&self) -> &Self::Target {
         &self.sub
