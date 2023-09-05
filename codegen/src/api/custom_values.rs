@@ -3,13 +3,14 @@
 // see LICENSE for license details.
 
 use std::collections::HashSet;
+use codec::alloc;
 
 use crate::{types::TypeGenerator, CratePath};
 use heck::ToSnakeCase as _;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{quote, ToTokens};
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values<'a>(
@@ -52,7 +53,14 @@ fn generate_custom_value_fn(
     fn_names_taken.insert(fn_name);
 
     let custom_value_hash = custom_value.hash();
-    let return_ty = type_gen.resolve_type_path(custom_value.type_id());
+
+    // for custom values it is important to check if the type id is actually in the metadata:
+    let return_ty = if type_gen.types().resolve(custom_value.type_id()).is_some() {
+       type_gen.resolve_type_path(custom_value.type_id()).to_token_stream()
+    } else {
+        // if type registry does not contain the type, we can just return the Encoded scale bytes.
+        quote!(#crate_path::utils::Encoded)
+    };
 
     Some(quote!(
         pub fn #fn_name_ident(&self) -> #crate_path::custom_values::StaticAddress<#return_ty> {
