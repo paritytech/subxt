@@ -62,7 +62,7 @@ impl DerivesRegistry {
         let type_derives = self
             .specific_type_derives
             .entry(ty)
-            .or_insert_with(Derives::new);
+            .or_default();
         type_derives.derives.extend(derives);
         type_derives.attributes.extend(attributes);
     }

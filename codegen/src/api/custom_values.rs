@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+
 use std::collections::HashSet;
-use codec::alloc;
 
 use crate::{types::TypeGenerator, CratePath};
 use heck::ToSnakeCase as _;
@@ -56,7 +56,9 @@ fn generate_custom_value_fn(
 
     // for custom values it is important to check if the type id is actually in the metadata:
     let return_ty = if type_gen.types().resolve(custom_value.type_id()).is_some() {
-       type_gen.resolve_type_path(custom_value.type_id()).to_token_stream()
+        type_gen
+            .resolve_type_path(custom_value.type_id())
+            .to_token_stream()
     } else {
         // if type registry does not contain the type, we can just return the Encoded scale bytes.
         quote!(#crate_path::utils::Encoded)

@@ -119,7 +119,7 @@ impl<'a> TypeGenerator<'a> {
 
     /// Returns type registry.
     pub fn types(&self) -> &PortableRegistry {
-        &self.type_registry
+        self.type_registry
     }
 
     /// Get the type path for a field of a struct or an enum variant, providing any generic
