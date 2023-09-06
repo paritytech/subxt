@@ -19,6 +19,15 @@ pub struct FollowStream<Hash> {
     stream: InnerStreamState<Hash>,
 }
 
+impl<Hash> std::fmt::Debug for FollowStream<Hash> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FollowStream")
+            .field("stream_getter", &"..")
+            .field("stream", &self.stream)
+            .finish()
+    }
+}
+
 /// A getter function that returns an [`FollowEventStreamFut<Hash>`].
 pub type FollowEventStreamGetter<Hash> = Box<dyn FnMut() -> FollowEventStreamFut<Hash> + Send>;
 
@@ -54,6 +63,19 @@ enum InnerStreamState<Hash> {
     Stopped,
     /// The stream is finished and will not restart (likely due to an error).
     Finished,
+}
+
+impl<Hash> std::fmt::Debug for InnerStreamState<Hash> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::New => write!(f, "New"),
+            Self::Initializing(_) => write!(f, "Initializing(..)"),
+            Self::Ready(_) => write!(f, "Ready(..)"),
+            Self::ReceivingEvents(_) => write!(f, "ReceivingEvents(..)"),
+            Self::Stopped => write!(f, "Stopped"),
+            Self::Finished => write!(f, "Finished"),
+        }
+    }
 }
 
 impl<Hash> FollowStream<Hash> {

@@ -23,11 +23,12 @@ pub use crate::backend::unstable::rpc_methods::{
 /// keeps track of pinned blocks, unpinning anything that gets too
 /// old. When blocks that are handed out are dropped, they are also
 /// unpinned.
+#[derive(Debug)]
 pub struct FollowStreamUnpin<Hash: BlockHash> {
     // The underlying stream of events.
     inner: FollowStream<Hash>,
     // A method to call to unpin a block, given a block hash and a subscription ID.
-    unpin_method: UnpinMethod<Hash>,
+    unpin_method: UnpinMethodHolder<Hash>,
     // Futures for sending unpin events that we'll poll to completion as
     // part of polling the stream as a whole.
     unpin_futs: FuturesUnordered<UnpinFut>,
@@ -45,6 +46,17 @@ pub struct FollowStreamUnpin<Hash: BlockHash> {
     pinned: HashMap<Hash, PinnedDetails<Hash>>,
     // Shared state about blocks we've flagged to unpin from elsewhere
     unpin_flags: UnpinFlags<Hash>,
+}
+
+// Just a wrapper to make implementing debug on the whole thing easier.
+struct UnpinMethodHolder<Hash>(UnpinMethod<Hash>);
+impl<Hash> std::fmt::Debug for UnpinMethodHolder<Hash> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "UnpinMethodHolder(Box<dyn FnMut(Hash, Arc<str>) -> UnpinFut>)"
+        )
+    }
 }
 
 /// The type of the unpin method that we need to provide.
@@ -222,7 +234,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
     ) -> Self {
         Self {
             inner: follow_stream,
-            unpin_method,
+            unpin_method: UnpinMethodHolder(unpin_method),
             min_block_life,
             max_block_life,
             pinned: Default::default(),
@@ -284,7 +296,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
     /// Unpin any blocks that are either too old, or have the unpin flag set and are old enough.
     fn unpin_blocks(&mut self, waker: &Waker) {
-        let unpin_flags = std::mem::take(&mut *self.unpin_flags.lock().unwrap());
+        let mut unpin_flags = self.unpin_flags.lock().unwrap();
         let rel_block_num = self.rel_block_num;
 
         // If we asked to unpin and there was no subscription_id, then there's nothing to
@@ -303,16 +315,20 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
             {
                 // the block is old enough to be unpinned, and is flagged as such.
                 blocks_to_unpin.push(*hash);
+                // So, also clear it from the unpin list now:
+                unpin_flags.remove(hash);
             }
         }
 
+        // We don't need to keep the lock any more:
+        drop(unpin_flags);
         if blocks_to_unpin.is_empty() {
             return;
         }
 
         for hash in blocks_to_unpin {
             self.pinned.remove(&hash);
-            let fut = (self.unpin_method)(hash, sub_id.clone());
+            let fut = (self.unpin_method.0)(hash, sub_id.clone());
             self.unpin_futs.push(fut);
         }
 
@@ -386,10 +402,11 @@ impl<Hash: BlockHash> Drop for BlockRef<Hash> {
 mod test {
     use super::*;
     use crate::backend::unstable::follow_stream::{test_utils::test_stream_getter, FollowStream};
-    use crate::backend::unstable::rpc_methods::{Finalized, Initialized, NewBlock};
+    use crate::backend::unstable::rpc_methods::{
+        BestBlockChanged, Finalized, Initialized, NewBlock,
+    };
     use crate::config::substrate::H256;
     use assert_matches::assert_matches;
-    use std::time::Duration;
 
     type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
 
@@ -428,6 +445,12 @@ mod test {
             parent_block_hash: H256::from_low_u64_le(parent),
             block_hash: H256::from_low_u64_le(n),
             new_runtime: None,
+        })
+    }
+
+    fn ev_best_block(n: u64) -> FollowEvent<H256> {
+        FollowEvent::BestBlockChanged(BestBlockChanged {
+            best_block_hash: H256::from_low_u64_le(n),
         })
     }
 
@@ -490,35 +513,48 @@ mod test {
         let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
             || {
                 [
-                    Ok(ev_new_block(0, 1)),
-                    Ok(ev_new_block(1, 2)),
-                    Ok(ev_new_block(2, 3)),
-                    Ok(ev_finalized([1, 2, 3])),
+                    Ok(ev_initialized(0)),
+                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([2])),
+                    Ok(ev_finalized([3])),
+                    Ok(ev_finalized([4])),
+                    Ok(ev_finalized([5])),
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
             0,
-            2,
+            3,
         );
 
-        let _n1 = follow_unpin.next().await.unwrap().unwrap();
-        let _n2 = follow_unpin.next().await.unwrap().unwrap();
-        let _n3 = follow_unpin.next().await.unwrap().unwrap();
+        let _i0 = follow_unpin.next().await.unwrap().unwrap();
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+        let _f1 = follow_unpin.next().await.unwrap().unwrap();
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+        let _f2 = follow_unpin.next().await.unwrap().unwrap();
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+        let _f3 = follow_unpin.next().await.unwrap().unwrap();
 
-        // n1 is old but no finalized ev for it yet so nothing back.
-        unpin_rx
-            .recv_timeout(Duration::from_millis(50))
-            .expect_err("nothing yet");
-
-        // Finalized event will unpin old blocks. max age is 2 here, so first new block too old.
-        let _f123 = follow_unpin.next().await.unwrap().unwrap();
-
-        // Check that we get the expected unpin event.
-        let (h, s) = unpin_rx
-            .recv_timeout(Duration::from_millis(50))
+        // Max age is 3, so after block 3 finalized, block 0 becomes too old and is unpinned.
+        let (hash, _) = unpin_rx
+            .try_recv()
             .expect("unpin call should have happened");
-        assert_eq!(h, H256::from_low_u64_le(1));
-        assert_eq!(&*s, "sub_id_0");
+        assert_eq!(hash, H256::from_low_u64_le(0));
+
+        let _f4 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Block 1 is now too old and is unpinned.
+        let (hash, _) = unpin_rx
+            .try_recv()
+            .expect("unpin call should have happened");
+        assert_eq!(hash, H256::from_low_u64_le(1));
+
+        let _f5 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Block 2 is now too old and is unpinned.
+        let (hash, _) = unpin_rx
+            .try_recv()
+            .expect("unpin call should have happened");
+        assert_eq!(hash, H256::from_low_u64_le(2));
     }
 
     #[tokio::test]
@@ -527,9 +563,7 @@ mod test {
             || {
                 [
                     Ok(ev_initialized(0)),
-                    Ok(ev_new_block(0, 1)),
                     Ok(ev_finalized([1])),
-                    Ok(ev_new_block(1, 2)),
                     Ok(ev_finalized([2])),
                     Err(Error::Other("ended".to_owned())),
                 ]
@@ -539,34 +573,96 @@ mod test {
         );
 
         let _i0 = follow_unpin.next().await.unwrap().unwrap();
-        let n1 = follow_unpin.next().await.unwrap().unwrap();
         let f1 = follow_unpin.next().await.unwrap().unwrap();
-        let n2 = follow_unpin.next().await.unwrap().unwrap();
 
-        // all are still alive and shouldnt be unpinned.
-        unpin_rx
-            .recv_timeout(Duration::from_millis(50))
-            .expect_err("nothing yet");
-
-        // We don't care about 1 any more; drop all references to it (it's a parent in n2);
-        // block 0 is still referenced and block 2 will be referenced by f2.
-        drop(n1);
+        // We don't care about block 1 any more; drop it. unpins happen at finalized evs.
         drop(f1);
-        drop(n2);
 
-        // Now, next time a finalized event is seen we'll unpin block 1.
         let _f2 = follow_unpin.next().await.unwrap().unwrap();
 
         // Check that we get the expected unpin event.
-        let (h, s) = unpin_rx
-            .recv_timeout(Duration::from_millis(50))
+        let (hash, _) = unpin_rx
+            .try_recv()
             .expect("unpin call should have happened");
-        assert_eq!(h, H256::from_low_u64_le(1));
-        assert_eq!(&*s, "sub_id_0");
+        assert_eq!(hash, H256::from_low_u64_le(1));
 
         // Confirm that 0 and 2 are still pinned and that 1 isnt.
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+    }
+
+    #[tokio::test]
+    async fn eventually_unpins_dropped_young_blocks() {
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([2])),
+                    Ok(ev_finalized([3])),
+                    Ok(ev_finalized([4])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            3,
+            100,
+        );
+
+        let i0 = follow_unpin.next().await.unwrap().unwrap();
+
+        // drop all references to block 0. it's too young to unpin though (min_life: 3).
+        drop(i0);
+
+        // It shouldn't be unpinned now until 3 finalized events happen.
+        let _f1 = follow_unpin.next().await.unwrap().unwrap();
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+        let _f2 = follow_unpin.next().await.unwrap().unwrap();
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+        let _f3 = follow_unpin.next().await.unwrap().unwrap();
+
+        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
+
+        assert_eq!(hash, H256::from_low_u64_le(0));
+    }
+
+    #[tokio::test]
+    async fn only_unpins_if_finalized_is_dropped() {
+        // If we drop the "new block" and "best block" BlockRefs,
+        // and then the block comes back as finalized (for instance),
+        // no unpin call should be made unless we also drop the finalized
+        // one.
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([2])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            0,
+            100,
+        );
+
+        let _i0 = follow_unpin.next().await.unwrap().unwrap();
+        let n1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(n1);
+        let b1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(b1);
+        let f1 = follow_unpin.next().await.unwrap().unwrap();
+
+        // even though we dropped our block 1 in the new/best events, it won't be unpinned
+        // because it occurred again in finalized event.
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+
+        drop(f1);
+        let _f2 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Since we dropped the finalized block 1, we'll now unpin it when next block finalized.
+        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
+        assert_eq!(hash, H256::from_low_u64_le(1));
     }
 }
