@@ -152,7 +152,10 @@ impl Debug for ModuleError {
                 pallet_name = details.pallet.name(),
                 variant_name = details.variant.name,
             ),
-            Err(_) => "Unknown pallet error (pallet and error details cannot be retrieved)",
+            Err(_) => format!(
+                "Unknown pallet error '{bytes:?}' (pallet and error details cannot be retrieved)",
+                bytes = self.bytes
+            ),
         };
 
         write!(f, "ModuleError(<{details}>)")
