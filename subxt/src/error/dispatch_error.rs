@@ -146,15 +146,16 @@ impl Eq for ModuleError {}
 /// intended) to resolve the actual pallet and error names. This is much more useful for debugging.
 impl Debug for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Ok(details) = self.details() else {
-            return f
-                .write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
+        let details = match self.details() {
+            Ok(details) => format!(
+                "{pallet_name}::{variant_name}",
+                pallet_name = details.pallet.name(),
+                variant_name = details.variant.name,
+            ),
+            Err(_) => "Unknown pallet error (pallet and error details cannot be retrieved)",
         };
-        f.debug_struct("ModuleError")
-            .field("bytes", &self.bytes)
-            .field("pallet", &details.pallet.name())
-            .field("error", &details.variant.name)
-            .finish()
+
+        write!(f, "ModuleError(<{details}>)")
     }
 }
 
