@@ -122,7 +122,7 @@ pub enum TransactionalError {
 }
 
 /// Details about a module error that has occurred.
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Clone, thiserror::Error)]
 #[non_exhaustive]
 pub struct ModuleError {
     metadata: Metadata,
@@ -141,6 +141,22 @@ impl PartialEq for ModuleError {
 }
 
 impl Eq for ModuleError {}
+
+/// Custom `Debug` implementation, ignores the very large `metadata` field, using it instead (as
+/// intended) to resolve the actual pallet and error names. This is much more useful for debugging.
+impl Debug for ModuleError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Ok(details) = self.details() else {
+            return f
+                .write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
+        };
+        f.debug_struct("ModuleError")
+            .field("bytes", &self.bytes)
+            .field("pallet", &details.pallet.name())
+            .field("error", &details.variant.name)
+            .finish()
+    }
+}
 
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
