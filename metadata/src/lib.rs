@@ -721,10 +721,6 @@ impl<'a> CustomValueMetadata<'a> {
     }
 
     /// Calculates the hash for the CustomValueMetadata.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `self.type_id` is not registered in the provided type registry
     pub fn hash(&self) -> [u8; HASH_LEN] {
         let mut cache = HashMap::new();
         get_custom_value_hash(self, &mut cache)

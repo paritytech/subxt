@@ -187,7 +187,7 @@ impl BackgroundTask {
             Ok(RpcResponse::Error { id, error }) => {
                 let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send error. Id={id} is not a valid number");
-                    return
+                    return;
                 };
 
                 if let Some(sender) = self.requests.remove(&id) {
@@ -216,7 +216,7 @@ impl BackgroundTask {
             Ok(RpcResponse::Method { id, result }) => {
                 let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send response. Id={id} is not a valid number");
-                    return
+                    return;
                 };
 
                 // Send the response back.
@@ -232,12 +232,13 @@ impl BackgroundTask {
                         .get()
                         .trim_start_matches('"')
                         .trim_end_matches('"')
-                        .parse::<usize>() else {
-                            tracing::warn!(
-                                target: LOG_TARGET,
-                                "Subscription id={result} is not a valid number",
-                            );
-                            return;
+                        .parse::<usize>()
+                    else {
+                        tracing::warn!(
+                            target: LOG_TARGET,
+                            "Subscription id={result} is not a valid number",
+                        );
+                        return;
                     };
 
                     tracing::trace!(target: LOG_TARGET, "Received subscription id={sub_id}");
@@ -256,7 +257,7 @@ impl BackgroundTask {
             Ok(RpcResponse::Subscription { method, id, result }) => {
                 let Ok(id) = id.parse::<usize>() else {
                     tracing::warn!(target: LOG_TARGET, "Cannot send subscription. Id={id} is not a valid number");
-                    return
+                    return;
                 };
 
                 if let Some(sender) = self.subscriptions.get_mut(&id) {

@@ -16,6 +16,7 @@ use subxt::{
 use subxt_signer::sr25519::dev;
 
 mod legacy_rpcs;
+mod unstable_rpcs;
 
 #[tokio::test]
 async fn storage_fetch_raw_keys() {

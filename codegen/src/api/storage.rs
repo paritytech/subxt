@@ -89,7 +89,10 @@ fn generate_storage_entry_fns(
     let pallet_name = pallet.name();
     let storage_name = storage_entry.name();
     let Some(storage_hash) = pallet.storage_hash(storage_name) else {
-        return Err(CodegenError::MissingStorageMetadata(pallet_name.into(), storage_name.into()));
+        return Err(CodegenError::MissingStorageMetadata(
+            pallet_name.into(),
+            storage_name.into(),
+        ));
     };
 
     let snake_case_name = storage_entry.name().to_snake_case();

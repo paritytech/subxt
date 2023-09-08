@@ -68,7 +68,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn storage_fetch_descendant_keys(
         &self,
         key: Vec<u8>,
-        starting_at: Option<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
         Ok(StreamOf(Box::pin(StorageFetchDescendantKeysStream {
@@ -78,7 +77,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             done: Default::default(),
             keys: Default::default(),
             keys_fut: Default::default(),
-            pagination_start_key: starting_at,
+            pagination_start_key: None,
         })))
     }
 
@@ -114,7 +113,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
         let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
-            return Ok(None)
+            return Ok(None);
         };
         Ok(Some(
             details.block.extrinsics.into_iter().map(|b| b.0).collect(),
@@ -364,7 +363,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             if let Some(mut keys_fut) = this.keys_fut.take() {
                 let Poll::Ready(keys) = keys_fut.poll_unpin(cx) else {
                     this.keys_fut = Some(keys_fut);
-                    return Poll::Pending
+                    return Poll::Pending;
                 };
 
                 match keys {
