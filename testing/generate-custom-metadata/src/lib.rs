@@ -38,6 +38,13 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
         }
     };
 
+    let invalid_type_id_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
+        frame_metadata::v15::CustomValueMetadata {
+            ty: u32::MAX.into(),
+            value: vec![0,1,2,3],
+        }
+    };
+
     // We don't care about the extrinsic type.
     let extrinsic = ExtrinsicMetadata {
         version: 0,
@@ -74,6 +81,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
                 ("foo".into(), foo_value_metadata.clone()),
                 ("12".into(), foo_value_metadata.clone()),
                 ("&Hello".into(), foo_value_metadata),
+                ("InvalidTypeId".into(), invalid_type_id_metadata),
             ]),
         },
     };

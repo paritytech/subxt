@@ -24,6 +24,10 @@ fn main() {
     let foo_value = api.custom_values().at("Foo").unwrap();
     let foo: Foo = foo_value.as_type().unwrap();
     assert_eq!(foo, expected_foo);
+
+    // static query for some custom value that has an invalid type id: (we can still access the bytes)
+    let custom_bytes = api.custom_values().bytes_at("InvalidTypeId").unwrap();
+    assert_eq!(vec![0,1,2,3], custom_bytes);
 }
 
 fn construct_offline_client() -> OfflineClient<PolkadotConfig> {

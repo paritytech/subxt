@@ -10,6 +10,9 @@ use crate::metadata::DecodeWithMetadata;
 pub trait CustomValueAddress {
     /// The type of the custom value.
     type Target: DecodeWithMetadata;
+    /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
+    /// Should be `()` for custom values, that have an invalid type id.
+    type Decodable;
 
     /// the name (key) by which the custom value can be accessed in the metadata.
     fn name(&self) -> &str;
@@ -22,24 +25,28 @@ pub trait CustomValueAddress {
 
 impl CustomValueAddress for str {
     type Target = DecodedValueThunk;
+    type Decodable = Yes;
 
     fn name(&self) -> &str {
         self
     }
 }
 
+/// Used to signal whether a [`CustomValueAddress`] can be decoded.
+pub struct Yes;
+
 /// A static address to a custom value.
-pub struct StaticAddress<R> {
+pub struct StaticAddress<ReturnTy, Decodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,
-    phantom: PhantomData<R>,
+    phantom: PhantomData<(ReturnTy, Decodable)>,
 }
 
-impl<R> StaticAddress<R> {
+impl<ReturnTy, Decodable> StaticAddress<ReturnTy, Decodable> {
     #[doc(hidden)]
     /// Creates a new StaticAddress.
-    pub fn new_static(name: &'static str, hash: [u8; 32]) -> Self {
-        StaticAddress {
+    pub fn new_static(name: &'static str, hash: [u8; 32]) ->  StaticAddress<ReturnTy, Decodable> {
+        StaticAddress::<ReturnTy, Decodable> {
             name,
             hash: Some(hash),
             phantom: PhantomData,
@@ -56,8 +63,9 @@ impl<R> StaticAddress<R> {
     }
 }
 
-impl<R: DecodeWithMetadata> CustomValueAddress for StaticAddress<R> {
+impl<R: DecodeWithMetadata, Y> CustomValueAddress for StaticAddress<R, Y> {
     type Target = R;
+    type Decodable = Y;
 
     fn name(&self) -> &str {
         self.name
