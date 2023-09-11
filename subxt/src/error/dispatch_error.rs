@@ -122,7 +122,7 @@ pub enum TransactionalError {
 }
 
 /// Details about a module error that has occurred.
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Clone, thiserror::Error)]
 #[non_exhaustive]
 pub struct ModuleError {
     metadata: Metadata,
@@ -142,16 +142,19 @@ impl PartialEq for ModuleError {
 
 impl Eq for ModuleError {}
 
+/// Custom `Debug` implementation, ignores the very large `metadata` field, using it instead (as
+/// intended) to resolve the actual pallet and error names. This is much more useful for debugging.
+impl Debug for ModuleError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let details = self.details_string();
+        write!(f, "ModuleError(<{details}>)")
+    }
+}
+
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let Ok(details) = self.details() else {
-            return f
-                .write_str("Unknown pallet error (pallet and error details cannot be retrieved)");
-        };
-
-        let pallet = details.pallet.name();
-        let error = &details.variant.name;
-        write!(f, "Pallet error {pallet}::{error}")
+        let details = self.details_string();
+        write!(f, "{details}")
     }
 }
 
@@ -164,6 +167,21 @@ impl ModuleError {
             .ok_or_else(|| MetadataError::VariantIndexNotFound(self.error_index()))?;
 
         Ok(ModuleErrorDetails { pallet, variant })
+    }
+
+    /// Return a formatted string of the resolved error details for debugging/display purposes.
+    pub fn details_string(&self) -> String {
+        match self.details() {
+            Ok(details) => format!(
+                "{pallet_name}::{variant_name}",
+                pallet_name = details.pallet.name(),
+                variant_name = details.variant.name,
+            ),
+            Err(_) => format!(
+                "Unknown pallet error '{bytes:?}' (pallet and error details cannot be retrieved)",
+                bytes = self.bytes
+            ),
+        }
     }
 
     /// Return the underlying module error data that was decoded.

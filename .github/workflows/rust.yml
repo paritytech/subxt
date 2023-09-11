@@ -29,7 +29,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Download Substrate
               run: |
@@ -88,7 +88,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -111,7 +111,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install Rust nightly toolchain
               uses: actions-rs/toolchain@v1
@@ -135,7 +135,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Download Substrate
               run: |
@@ -169,7 +169,7 @@ jobs:
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Download Substrate
               run: |
@@ -204,7 +204,7 @@ jobs:
         timeout-minutes: 25
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Download Substrate
               run: |
@@ -235,7 +235,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Download Substrate
               run: |
@@ -267,7 +267,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3.1.0
+            - uses: actions/checkout@v4
 
             - name: Install wasm-pack
               run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
