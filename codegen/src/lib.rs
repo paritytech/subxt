@@ -50,7 +50,12 @@ mod error;
 mod ir;
 mod types;
 
+#[cfg(feature = "fetch_metadata")]
 pub mod utils;
+
+#[cfg(feature = "web")]
+#[allow(unused_imports)]
+pub use getrandom as _;
 
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
