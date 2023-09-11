@@ -78,7 +78,7 @@ tracing-subscriber = "0.3.17"
 trybuild = "1.0.83"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
-which = "4.4.0"
+which = "4.4.2"
 
 # Light client support:
 smoldot = { version = "0.8.0", default-features = false }
