@@ -12,7 +12,7 @@ pub trait CustomValueAddress {
     type Target: DecodeWithMetadata;
     /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
     /// Should be `()` for custom values, that have an invalid type id.
-    type Decodable;
+    type IsDecodable;
 
     /// the name (key) by which the custom value can be accessed in the metadata.
     fn name(&self) -> &str;
@@ -25,7 +25,7 @@ pub trait CustomValueAddress {
 
 impl CustomValueAddress for str {
     type Target = DecodedValueThunk;
-    type Decodable = Yes;
+    type IsDecodable = Yes;
 
     fn name(&self) -> &str {
         self
@@ -36,17 +36,17 @@ impl CustomValueAddress for str {
 pub struct Yes;
 
 /// A static address to a custom value.
-pub struct StaticAddress<ReturnTy, Decodable> {
+pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,
-    phantom: PhantomData<(ReturnTy, Decodable)>,
+    phantom: PhantomData<(ReturnTy, IsDecodable)>,
 }
 
-impl<ReturnTy, Decodable> StaticAddress<ReturnTy, Decodable> {
+impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     #[doc(hidden)]
     /// Creates a new StaticAddress.
-    pub fn new_static(name: &'static str, hash: [u8; 32]) ->  StaticAddress<ReturnTy, Decodable> {
-        StaticAddress::<ReturnTy, Decodable> {
+    pub fn new_static(name: &'static str, hash: [u8; 32]) -> StaticAddress<ReturnTy, IsDecodable> {
+        StaticAddress::<ReturnTy, IsDecodable> {
             name,
             hash: Some(hash),
             phantom: PhantomData,
@@ -65,7 +65,7 @@ impl<ReturnTy, Decodable> StaticAddress<ReturnTy, Decodable> {
 
 impl<R: DecodeWithMetadata, Y> CustomValueAddress for StaticAddress<R, Y> {
     type Target = R;
-    type Decodable = Y;
+    type IsDecodable = Y;
 
     fn name(&self) -> &str {
         self.name

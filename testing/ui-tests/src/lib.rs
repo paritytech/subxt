@@ -27,7 +27,6 @@ fn ui_tests() {
     let t = trybuild::TestCases::new();
 
     t.pass("src/correct/*.rs");
-
     // Check that storage maps with no keys are handled properly.
     t.pass(
         m.new_test_case()

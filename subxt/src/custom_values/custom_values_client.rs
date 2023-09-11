@@ -26,7 +26,7 @@ impl<T, Client> CustomValuesClient<T, Client> {
 impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
     /// or a static address from the generated static interface to get a value of a static type returned.
-    pub fn at<Address: CustomValueAddress<Decodable =Yes> + ?Sized>(
+    pub fn at<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>(
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {

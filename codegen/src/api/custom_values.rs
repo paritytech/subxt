@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-
 use std::collections::HashSet;
 
 use crate::{types::TypeGenerator, CratePath};

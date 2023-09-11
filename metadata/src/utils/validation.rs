@@ -413,20 +413,14 @@ pub fn get_custom_value_hash(
     cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
     let name_hash = hash(custom_value.name.as_bytes());
-    let bytes_hash =hash(custom_value.bytes());
-
-    if custom_value.types.resolve(custom_value.type_id()).is_none(){
+    if custom_value.types.resolve(custom_value.type_id()).is_none() {
+        hash(&name_hash)
+    } else {
         concat_and_hash2(
-            &name_hash,&bytes_hash
-          )
-    }else{
-        concat_and_hash3(
             &name_hash,
             &get_type_hash(custom_value.types, custom_value.type_id(), cache),
-            &bytes_hash,
         )
     }
-
 }
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.

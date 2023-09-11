@@ -41,7 +41,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     let invalid_type_id_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
         frame_metadata::v15::CustomValueMetadata {
             ty: u32::MAX.into(),
-            value: vec![0,1,2,3],
+            value: vec![0, 1, 2, 3],
         }
     };
 
