@@ -12,11 +12,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
-
-// Events we'll emit here.
-pub use crate::backend::unstable::rpc_methods::{
-    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock, OperationBodyDone,
-    OperationCallDone, OperationError, OperationId, OperationStorageItems,
+use crate::backend::unstable::rpc_methods::{
+    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
 };
 
 /// This subscribes to `chainHead_follow` when polled, and also

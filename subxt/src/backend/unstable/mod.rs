@@ -13,6 +13,7 @@
 
 mod follow_stream;
 mod follow_stream_unpin;
+mod follow_stream_driver;
 
 pub mod rpc_methods;
 
