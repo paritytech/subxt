@@ -154,7 +154,7 @@ impl Debug for ModuleError {
 impl std::fmt::Display for ModuleError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let details = self.details_string();
-        write!(f, "Pallet error: {details}")
+        write!(f, "{details}")
     }
 }
 
