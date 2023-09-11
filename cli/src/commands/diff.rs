@@ -13,7 +13,6 @@ use scale_info::Variant;
 
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
-    StorageEntryType,
 };
 
 /// Explore the differences between two nodes
@@ -222,11 +221,11 @@ impl StorageEntryDiff {
     ) -> Self {
         let value_1_ty_id = storage_entry_1.entry_type().value_ty();
         let value_1_hash = metadata_1
-            .type_hash(*value_1_ty_id)
+            .type_hash(value_1_ty_id)
             .expect("type should be present");
         let value_2_ty_id = storage_entry_2.entry_type().value_ty();
         let value_2_hash = metadata_1
-            .type_hash(*value_2_ty_id)
+            .type_hash(value_2_ty_id)
             .expect("type should be present");
         let value_different = value_1_hash != value_2_hash;
 

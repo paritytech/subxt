@@ -9,7 +9,7 @@ use heck::ToSnakeCase as _;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote};
+use quote::quote;
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values<'a>(
