@@ -98,7 +98,7 @@ tokio-util = "0.7.8"
 
 # Substrate crates:
 sp-core = { version = "21.0.0", default-features = false }
-sp-core-hashing = "9.0.0"
+sp-core-hashing = { version = "9.0.0", default-features = false }
 sp-runtime = "24.0.0"
 sp-keyring = "24.0.0"
 
