@@ -688,6 +688,11 @@ pub struct CustomValueMetadata<'a> {
 }
 
 impl<'a> CustomValueMetadata<'a> {
+    /// Access the underlying type registry.
+    pub fn types(&self) -> &PortableRegistry {
+        self.types
+    }
+
     /// The scale encoded value
     pub fn bytes(&self) -> &'a [u8] {
         self.data

@@ -53,7 +53,10 @@ fn generate_custom_value_fn(
     let custom_value_hash = custom_value.hash();
 
     // for custom values it is important to check if the type id is actually in the metadata:
-    let type_is_valid = type_gen.types().resolve(custom_value.type_id()).is_some();
+    let type_is_valid = custom_value
+        .types()
+        .resolve(custom_value.type_id())
+        .is_some();
     let (return_ty, decodable) = if type_is_valid {
         let return_ty = type_gen
             .resolve_type_path(custom_value.type_id())
