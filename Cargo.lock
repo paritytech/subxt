@@ -1521,6 +1521,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "generate-custom-metadata"
+version = "0.31.0"
+dependencies = [
+ "frame-metadata 16.0.0",
+ "parity-scale-codec",
+ "scale-info",
+ "subxt",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.12.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4774,6 +4784,8 @@ name = "ui-tests"
 version = "0.31.0"
 dependencies = [
  "frame-metadata 16.0.0",
+ "generate-custom-metadata",
+ "hex",
  "parity-scale-codec",
  "scale-info",
  "subxt",

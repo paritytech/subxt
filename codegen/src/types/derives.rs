@@ -59,10 +59,7 @@ impl DerivesRegistry {
         derives: impl IntoIterator<Item = syn::Path>,
         attributes: impl IntoIterator<Item = syn::Attribute>,
     ) {
-        let type_derives = self
-            .specific_type_derives
-            .entry(ty)
-            .or_insert_with(Derives::new);
+        let type_derives = self.specific_type_derives.entry(ty).or_default();
         type_derives.derives.extend(derives);
         type_derives.attributes.extend(attributes);
     }

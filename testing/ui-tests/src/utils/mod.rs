@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub mod dispatch_error;
 mod metadata_test_runner;
 
 use frame_metadata::{
@@ -12,6 +11,7 @@ use frame_metadata::{
     },
     RuntimeMetadataPrefixed,
 };
+use generate_custom_metadata::dispatch_error::ArrayDispatchError;
 use scale_info::{meta_type, IntoPortable, TypeInfo};
 
 pub use metadata_test_runner::MetadataTestRunner;
@@ -78,9 +78,7 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeI
 /// We default to a useless extrinsic type, and register a fake `DispatchError`
 /// type so that codegen is happy with the metadata generated.
 pub fn generate_metadata_from_pallets(pallets: Vec<PalletMetadata>) -> RuntimeMetadataPrefixed {
-    generate_metadata_from_pallets_custom_dispatch_error::<dispatch_error::ArrayDispatchError>(
-        pallets,
-    )
+    generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(pallets)
 }
 
 /// Given some storage entries, generate a [`RuntimeMetadataPrefixed`] struct.
