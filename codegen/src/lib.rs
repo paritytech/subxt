@@ -53,7 +53,7 @@ mod types;
 #[cfg(feature = "fetch_metadata")]
 pub mod utils;
 
-#[cfg(any(all(feature = "web", feature = "fetch_metadata")))]
+#[cfg(all(feature = "web", feature = "fetch_metadata"))]
 compile_error!("subxt-codegen: the features 'web' and 'fetch_metadata' cannot be used together.");
 
 #[cfg(feature = "web")]
