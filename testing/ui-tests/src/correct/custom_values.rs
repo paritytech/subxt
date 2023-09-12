@@ -1,10 +1,9 @@
 use codec::{Decode};
-use subxt::{ext::sp_core::H256, OfflineClient, PolkadotConfig};
+use subxt::{config::substrate::H256, OfflineClient, PolkadotConfig};
 use subxt_metadata::Metadata;
 
 #[subxt::subxt(runtime_metadata_path = "../../../../artifacts/metadata_with_custom_values.scale", derive_for_all_types = "Eq, PartialEq")]
 pub mod node {}
-
 use node::runtime_types::generate_custom_metadata::Foo;
 
 fn main() {
