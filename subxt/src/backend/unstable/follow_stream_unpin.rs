@@ -4,6 +4,9 @@
 
 use super::follow_stream::{FollowStream, FollowStreamMsg};
 use super::UnstableRpcMethods;
+use crate::backend::unstable::rpc_methods::{
+    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
+};
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
@@ -12,9 +15,6 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
-use crate::backend::unstable::rpc_methods::{
-    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
-};
 
 /// This subscribes to `chainHead_follow` when polled, and also
 /// keeps track of pinned blocks, unpinning anything that gets too
@@ -57,7 +57,7 @@ impl<Hash> std::fmt::Debug for UnpinMethodHolder<Hash> {
 }
 
 /// The type of the unpin method that we need to provide.
-pub type UnpinMethod<Hash> = Box<dyn FnMut(Hash, Arc<str>) -> UnpinFut>;
+pub type UnpinMethod<Hash> = Box<dyn FnMut(Hash, Arc<str>) -> UnpinFut + Send>;
 
 /// The future returned from [`UnpinMethod`].
 pub type UnpinFut = Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
@@ -363,7 +363,19 @@ struct BlockRefInner<Hash> {
 }
 
 impl<Hash: BlockHash> BlockRef<Hash> {
-    // Return the hash for this block.
+    /// For testing purposes only, create a BlockRef from a hash
+    /// that isn't pinned.
+    #[cfg(test)]
+    pub fn new(hash: Hash) -> Self {
+        BlockRef {
+            inner: Arc::new(BlockRefInner {
+                hash,
+                unpin_flags: Default::default(),
+            }),
+        }
+    }
+
+    /// Return the hash for this block.
     pub fn hash(&self) -> Hash {
         self.inner.hash
     }
@@ -396,18 +408,15 @@ impl<Hash: BlockHash> Drop for BlockRef<Hash> {
 }
 
 #[cfg(test)]
-mod test {
+pub(super) mod test_utils {
+    use super::super::follow_stream::{test_utils::test_stream_getter, FollowStream};
     use super::*;
-    use crate::backend::unstable::follow_stream::{test_utils::test_stream_getter, FollowStream};
-    use crate::backend::unstable::rpc_methods::{
-        BestBlockChanged, Finalized, Initialized, NewBlock,
-    };
     use crate::config::substrate::H256;
-    use assert_matches::assert_matches;
 
-    type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
+    pub type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
 
-    fn test_unpin_stream_getter<Hash, F, I>(
+    /// Get a `FolowStreamUnpin` from an iterator over events.
+    pub fn test_unpin_stream_getter<Hash, F, I>(
         events: F,
         min_life: usize,
         max_life: usize,
@@ -430,33 +439,52 @@ mod test {
         (follow_unpin, unpin_rx)
     }
 
-    fn ev_initialized(n: u64) -> FollowEvent<H256> {
+    /// An initialized event containing a BlockRef (useful for comparisons)
+    pub fn ev_initialized_ref(n: u64) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::Initialized(Initialized {
-            finalized_block_hash: H256::from_low_u64_le(n),
+            finalized_block_hash: BlockRef::new(H256::from_low_u64_le(n)),
             finalized_block_runtime: None,
         })
     }
 
-    fn ev_new_block(parent: u64, n: u64) -> FollowEvent<H256> {
+    /// A new block event containing a BlockRef (useful for comparisons)
+    pub fn ev_new_block_ref(parent: u64, n: u64) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::NewBlock(NewBlock {
-            parent_block_hash: H256::from_low_u64_le(parent),
-            block_hash: H256::from_low_u64_le(n),
+            parent_block_hash: BlockRef::new(H256::from_low_u64_le(parent)),
+            block_hash: BlockRef::new(H256::from_low_u64_le(n)),
             new_runtime: None,
         })
     }
 
-    fn ev_best_block(n: u64) -> FollowEvent<H256> {
+    /// A best block event containing a BlockRef (useful for comparisons)
+    pub fn ev_best_block_ref(n: u64) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::BestBlockChanged(BestBlockChanged {
-            best_block_hash: H256::from_low_u64_le(n),
+            best_block_hash: BlockRef::new(H256::from_low_u64_le(n)),
         })
     }
 
-    fn ev_finalized(ns: impl IntoIterator<Item = u64>) -> FollowEvent<H256> {
+    /// A finalized event containing a BlockRef (useful for comparisons)
+    pub fn ev_finalized_ref(ns: impl IntoIterator<Item = u64>) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::Finalized(Finalized {
-            finalized_block_hashes: ns.into_iter().map(H256::from_low_u64_le).collect(),
+            finalized_block_hashes: ns
+                .into_iter()
+                .map(|h| BlockRef::new(H256::from_low_u64_le(h)))
+                .collect(),
             pruned_block_hashes: vec![],
         })
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::super::follow_stream::test_utils::{
+        ev_best_block, ev_finalized, ev_initialized, ev_new_block,
+    };
+    use super::test_utils::{ev_new_block_ref, test_unpin_stream_getter};
+    use super::*;
+    use crate::backend::unstable::rpc_methods::NewBlock;
+    use crate::config::substrate::H256;
+    use assert_matches::assert_matches;
 
     #[tokio::test]
     async fn hands_back_blocks() {
@@ -478,30 +506,13 @@ mod test {
             .collect()
             .await;
 
-        assert_eq!(out.len(), 3);
-        assert_matches!(
-            out.remove(0),
-            FollowEvent::NewBlock(NewBlock {
-                parent_block_hash,
-                block_hash,
-                ..
-            }) if parent_block_hash == H256::from_low_u64_le(0) && block_hash == H256::from_low_u64_le(1)
-        );
-        assert_matches!(
-            out.remove(0),
-            FollowEvent::NewBlock(NewBlock {
-                parent_block_hash,
-                block_hash,
-                ..
-            }) if parent_block_hash == H256::from_low_u64_le(1) && block_hash == H256::from_low_u64_le(2)
-        );
-        assert_matches!(
-            out.remove(0),
-            FollowEvent::NewBlock(NewBlock {
-                parent_block_hash,
-                block_hash,
-                ..
-            }) if parent_block_hash == H256::from_low_u64_le(2) && block_hash == H256::from_low_u64_le(3)
+        assert_eq!(
+            out,
+            vec![
+                ev_new_block_ref(0, 1),
+                ev_new_block_ref(1, 2),
+                ev_new_block_ref(2, 3),
+            ]
         );
     }
 

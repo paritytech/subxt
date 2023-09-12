@@ -190,11 +190,15 @@ impl<Hash> Stream for FollowStream<Hash> {
 #[cfg(test)]
 pub(super) mod test_utils {
     use super::*;
+    use crate::backend::unstable::rpc_methods::{
+        BestBlockChanged, Finalized, Initialized, NewBlock,
+    };
+    use crate::config::substrate::H256;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
 
-    // Given some events, returns a follow stream getter that we can use in
-    // place of the usual RPC method.
+    /// Given some events, returns a follow stream getter that we can use in
+    /// place of the usual RPC method.
     pub fn test_stream_getter<Hash, F, I>(events: F) -> FollowEventStreamGetter<Hash>
     where
         Hash: Send + 'static,
@@ -222,39 +226,58 @@ pub(super) mod test_utils {
             })
         })
     }
+
+    /// An initialized event
+    pub fn ev_initialized(n: u64) -> FollowEvent<H256> {
+        FollowEvent::Initialized(Initialized {
+            finalized_block_hash: H256::from_low_u64_le(n),
+            finalized_block_runtime: None,
+        })
+    }
+
+    /// A new block event
+    pub fn ev_new_block(parent: u64, n: u64) -> FollowEvent<H256> {
+        FollowEvent::NewBlock(NewBlock {
+            parent_block_hash: H256::from_low_u64_le(parent),
+            block_hash: H256::from_low_u64_le(n),
+            new_runtime: None,
+        })
+    }
+
+    /// A best block event
+    pub fn ev_best_block(n: u64) -> FollowEvent<H256> {
+        FollowEvent::BestBlockChanged(BestBlockChanged {
+            best_block_hash: H256::from_low_u64_le(n),
+        })
+    }
+
+    /// A finalized event
+    pub fn ev_finalized(ns: impl IntoIterator<Item = u64>) -> FollowEvent<H256> {
+        FollowEvent::Finalized(Finalized {
+            finalized_block_hashes: ns.into_iter().map(H256::from_low_u64_le).collect(),
+            pruned_block_hashes: vec![],
+        })
+    }
 }
 
 #[cfg(test)]
 pub mod test {
     use super::*;
-    use crate::backend::unstable::rpc_methods::{Initialized, NewBlock};
-    use crate::config::substrate::H256;
-    use test_utils::test_stream_getter;
+    use test_utils::{ev_initialized, ev_new_block, test_stream_getter};
 
     #[tokio::test]
     async fn follow_stream_provides_messages_until_error() {
         // The events we'll get back on the stream.
         let stream_getter = test_stream_getter(|| {
             [
-                Ok(FollowEvent::Initialized(Initialized {
-                    finalized_block_hash: H256::from_low_u64_le(1),
-                    finalized_block_runtime: None,
-                })),
+                Ok(ev_initialized(1)),
                 // Stop should lead to a drop and resubscribe:
                 Ok(FollowEvent::Stop),
                 Ok(FollowEvent::Stop),
-                Ok(FollowEvent::NewBlock(NewBlock {
-                    parent_block_hash: H256::from_low_u64_le(2),
-                    block_hash: H256::from_low_u64_le(3),
-                    new_runtime: None,
-                })),
+                Ok(ev_new_block(1, 2)),
                 // Nothing should be emitted after an error:
                 Err(Error::Other("ended".to_owned())),
-                Ok(FollowEvent::NewBlock(NewBlock {
-                    parent_block_hash: H256::from_low_u64_le(3),
-                    block_hash: H256::from_low_u64_le(4),
-                    new_runtime: None,
-                })),
+                Ok(ev_new_block(2, 3)),
             ]
         });
 
@@ -266,19 +289,12 @@ pub mod test {
             out,
             vec![
                 FollowStreamMsg::Ready("sub_id_0".to_owned()),
-                FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
-                    finalized_block_hash: H256::from_low_u64_le(1),
-                    finalized_block_runtime: None
-                })),
+                FollowStreamMsg::Event(ev_initialized(1)),
                 FollowStreamMsg::Event(FollowEvent::Stop),
                 FollowStreamMsg::Ready("sub_id_2".to_owned()),
                 FollowStreamMsg::Event(FollowEvent::Stop),
                 FollowStreamMsg::Ready("sub_id_3".to_owned()),
-                FollowStreamMsg::Event(FollowEvent::NewBlock(NewBlock {
-                    parent_block_hash: H256::from_low_u64_le(2),
-                    block_hash: H256::from_low_u64_le(3),
-                    new_runtime: None
-                })),
+                FollowStreamMsg::Event(ev_new_block(1, 2)),
             ]
         );
     }
