@@ -53,6 +53,14 @@ mod types;
 #[cfg(feature = "fetch_metadata")]
 pub mod utils;
 
+#[cfg(any(
+    all(feature = "web", feature = "fetch_metadata"),
+    not(any(feature = "web", feature = "fetch_metadata"))
+))]
+compile_error!(
+    "subxt-codegen: exactly one of the 'web' and 'fetch_metadata' features should be used."
+);
+
 #[cfg(feature = "web")]
 #[allow(unused_imports)]
 pub use getrandom as _;
