@@ -48,7 +48,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         Ok(value)
     }
 
-    /// Access the bytes of a  custom value by the address it is registered under.
+    /// Access the bytes of a custom value by the address it is registered under.
     pub fn bytes_at<Address: CustomValueAddress + ?Sized>(
         &self,
         address: &Address,
