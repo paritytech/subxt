@@ -1,0 +1,18 @@
+[package]
+name = "generate-custom-metadata"
+authors.workspace = true
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+subxt = { workspace = true, features = ["native"] }
+scale-info = { workspace = true, features = ["bit-vec"] }
+frame-metadata = { workspace = true }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }

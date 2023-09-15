@@ -1,5 +1,5 @@
 use crate::client::OfflineClientT;
-use crate::custom_values::custom_value_address::CustomValueAddress;
+use crate::custom_values::custom_value_address::{CustomValueAddress, Yes};
 use crate::error::MetadataError;
 use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
@@ -26,7 +26,7 @@ impl<T, Client> CustomValuesClient<T, Client> {
 impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
     /// or a static address from the generated static interface to get a value of a static type returned.
-    pub fn at<Address: CustomValueAddress + ?Sized>(
+    pub fn at<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>(
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {
@@ -46,6 +46,24 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
             &metadata,
         )?;
         Ok(value)
+    }
+
+    /// Access the bytes of a custom value by the address it is registered under.
+    pub fn bytes_at<Address: CustomValueAddress + ?Sized>(
+        &self,
+        address: &Address,
+    ) -> Result<Vec<u8>, Error> {
+        // 1. Validate custom value shape if hash given:
+        self.validate(address)?;
+
+        // 2. Return the underlying bytes:
+        let metadata = self.client.metadata();
+        let custom = metadata.custom();
+        let custom_value = custom
+            .get(address.name())
+            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
+
+        Ok(custom_value.bytes().to_vec())
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
