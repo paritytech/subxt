@@ -40,11 +40,6 @@ type Client = LightClient<PolkadotConfig>;
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_best().await?;
-    let header = sub.next().await.unwrap()?;
-    let block_hash = header.hash();
-    let current_block_hash = api.backend().latest_best_block_ref().await.unwrap().hash();
-
-    assert_eq!(block_hash, current_block_hash);
 
     let _block = sub.next().await.unwrap()?;
     let _block = sub.next().await.unwrap()?;

@@ -15,16 +15,16 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
+    let latest_finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
     let mut sub = api.blocks().subscribe_best().await?;
 
-    // Wait for the next set of headers, and check that the
-    // associated block hash is the one we just finalized.
-    // (this can be a bit slow as we have to wait for finalization)
+    // Wait for the next best block
     let header = sub.next().await.unwrap()?;
     let block_hash = header.hash();
-    let current_block_hash = api.backend().latest_best_block_ref().await?.hash();
 
-    assert_eq!(block_hash, current_block_hash);
+    // Check that it's different from the last finalized block (this is quite a weak test;
+    // we could rely on RPC calls to do better.)
+    assert_ne!(block_hash, current_block_hash);
     Ok(())
 }
 

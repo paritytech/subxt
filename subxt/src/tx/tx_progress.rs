@@ -8,7 +8,7 @@ use std::task::Poll;
 
 use crate::utils::strip_compact_prefix;
 use crate::{
-    backend::{StreamOfResults, TransactionStatus as BackendTxStatus},
+    backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
@@ -167,6 +167,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
             match status {
                 BackendTxStatus::Validated => TxStatus::Validated,
                 BackendTxStatus::Broadcasted { num_peers } => TxStatus::Broadcasted { num_peers },
+                BackendTxStatus::NoLongerInBestBlock => TxStatus::NoLongerInBestBlock,
                 BackendTxStatus::InBestBlock { hash } => {
                     TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
                 }
@@ -207,6 +208,8 @@ pub enum TxStatus<T: Config, C> {
         /// Number of peers it's been broadcast to.
         num_peers: u32,
     },
+    /// Transaction is no longer in a best block.
+    NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.
     InBestBlock(TxInBlock<T, C>),
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
@@ -252,15 +255,15 @@ impl<T: Config, C> TxStatus<T, C> {
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TxInBlock<T: Config, C> {
-    block_hash: T::Hash,
+    block_ref: BlockRef<T::Hash>,
     ext_hash: T::Hash,
     client: C,
 }
 
 impl<T: Config, C> TxInBlock<T, C> {
-    pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
+    pub(crate) fn new(block_ref: BlockRef<T::Hash>, ext_hash: T::Hash, client: C) -> Self {
         Self {
-            block_hash,
+            block_ref,
             ext_hash,
             client,
         }
@@ -268,7 +271,7 @@ impl<T: Config, C> TxInBlock<T, C> {
 
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
-        self.block_hash
+        self.block_ref.hash()
     }
 
     /// Return the hash of the extrinsic that was submitted.
@@ -317,7 +320,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let block_body = self
             .client
             .backend()
-            .block_body(self.block_hash)
+            .block_body(self.block_ref.hash())
             .await?
             .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
@@ -336,7 +339,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
 
         let events = EventsClient::new(self.client.clone())
-            .at(self.block_hash)
+            .at(self.block_ref.clone())
             .await?;
 
         Ok(crate::blocks::ExtrinsicEvents::new(

@@ -10,7 +10,7 @@ use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::{Config, Error};
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::task::Poll;
 
 /// An interface to call the unstable RPC methods. This interface is instantiated with
@@ -500,7 +500,7 @@ pub struct OperationBodyDone {
     /// The operation id of the event.
     pub operation_id: String,
     /// Array of hexadecimal-encoded scale-encoded extrinsics found in the block.
-    pub value: Vec<String>,
+    pub value: Vec<Bytes>,
 }
 
 /// The response of the `chainHead_call` method.
@@ -510,7 +510,7 @@ pub struct OperationCallDone {
     /// The operation id of the event.
     pub operation_id: String,
     /// Hexadecimal-encoded output of the runtime function call.
-    pub output: String,
+    pub output: Bytes,
 }
 
 /// The response of the `chainHead_call` method.
@@ -520,7 +520,7 @@ pub struct OperationStorageItems {
     /// The operation id of the event.
     pub operation_id: String,
     /// The resulting items.
-    pub items: Vec<StorageResult>,
+    pub items: VecDeque<StorageResult>,
 }
 
 /// Indicate a problem during the operation.
@@ -538,7 +538,7 @@ pub struct OperationError {
 #[serde(rename_all = "camelCase")]
 pub struct StorageResult {
     /// The hex-encoded key of the result.
-    pub key: String,
+    pub key: Bytes,
     /// The result of the query.
     #[serde(flatten)]
     pub result: StorageResultType,
@@ -549,11 +549,11 @@ pub struct StorageResult {
 #[serde(rename_all = "camelCase")]
 pub enum StorageResultType {
     /// Fetch the value of the provided key.
-    Value(String),
+    Value(Bytes),
     /// Fetch the hash of the value of the provided key.
-    Hash(String),
+    Hash(Bytes),
     /// Fetch the closest descendant merkle value.
-    ClosestDescendantMerkleValue(String),
+    ClosestDescendantMerkleValue(Bytes),
 }
 
 /// The method respose of `chainHead_body`, `chainHead_call` and `chainHead_storage`.
@@ -728,10 +728,10 @@ pub enum TransactionStatus<Hash> {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct TransactionBlockDetails<Hash> {
     /// The block hash.
-    hash: Hash,
+    pub hash: Hash,
     /// The index of the transaction in the block.
     #[serde(with = "unsigned_number_as_string")]
-    index: u64,
+    pub index: u64,
 }
 
 /// Hex-serialized shim for `Vec<u8>`.

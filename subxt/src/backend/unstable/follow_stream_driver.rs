@@ -2,12 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::follow_stream_unpin::{BlockRef, FollowStreamUnpin};
-use crate::backend::unstable::rpc_methods::FollowEvent;
+use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
+use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::Error;
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, VecDeque};
+use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
@@ -76,17 +77,21 @@ impl<Hash: BlockHash> FollowStreamDriverHandle<Hash> {
     }
 }
 
-/// A subscription to events from the [`FollowStreamDriver`].
+/// A subscription to events from the [`FollowStreamDriver`]. All subscriptions
+/// begin first with a `Ready` event containing the current subscription ID, and
+/// then with an `Initialized` event containing the latest finalized block and latest
+/// runtime information, and then any new/best block events and so on received since
+/// the latest finalized block.
 #[derive(Debug)]
 pub struct FollowStreamDriverSubscription<Hash: BlockHash> {
     id: usize,
     done: bool,
     shared: Shared<Hash>,
-    local_items: VecDeque<Ev<Hash>>,
+    local_items: VecDeque<FollowStreamMsg<BlockRef<Hash>>>,
 }
 
 impl<Hash: BlockHash> Stream for FollowStreamDriverSubscription<Hash> {
-    type Item = Ev<Hash>;
+    type Item = FollowStreamMsg<BlockRef<Hash>>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.done {
@@ -118,6 +123,27 @@ impl<Hash: BlockHash> Stream for FollowStreamDriverSubscription<Hash> {
     }
 }
 
+impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
+    /// Return the current subscription ID. If the subscription has stopped, then this will
+    /// wait until a new subscription has started with a new ID.
+    pub async fn subscription_id(self) -> Option<String> {
+        let ready_event = self
+            .skip_while(|ev| std::future::ready(!matches!(ev, FollowStreamMsg::Ready(_))))
+            .next()
+            .await?;
+
+        match ready_event {
+            FollowStreamMsg::Ready(sub_id) => Some(sub_id),
+            _ => None,
+        }
+    }
+
+    /// Subscribe to the follow events, ignoring any other messages.
+    pub fn events(self) -> impl Stream<Item = FollowEvent<BlockRef<Hash>>> + Send + Sync {
+        self.filter_map(|ev| std::future::ready(ev.to_event()))
+    }
+}
+
 impl<Hash: BlockHash> Clone for FollowStreamDriverSubscription<Hash> {
     fn clone(&self) -> Self {
         self.shared.subscribe()
@@ -134,12 +160,32 @@ impl<Hash: BlockHash> Drop for FollowStreamDriverSubscription<Hash> {
 #[derive(Debug, Clone)]
 struct Shared<Hash: BlockHash>(Arc<Mutex<SharedState<Hash>>>);
 
+#[derive(Debug)]
+struct SharedState<Hash: BlockHash> {
+    done: bool,
+    next_id: usize,
+    subscribers: HashMap<usize, SubscriberDetails<Hash>>,
+    // Keep a buffer of all events from last finalized block so that new
+    // subscriptions can be handed this info first.
+    block_events_from_last_finalized: VecDeque<Ev<Hash>>,
+    // Keep track of the subscription ID we send out on new subs.
+    current_subscription_id: Option<String>,
+    // Keep track of the init message we send out on new subs.
+    current_init_message: Option<Initialized<BlockRef<Hash>>>,
+    // Runtime events by block hash; we need to track these to know
+    // whether the runtime has changed when we see a finalized block notification.
+    seen_runtime_events: HashMap<Hash, RuntimeEvent>,
+}
+
 impl<Hash: BlockHash> Default for Shared<Hash> {
     fn default() -> Self {
         Shared(Arc::new(Mutex::new(SharedState {
             next_id: 1,
             done: false,
             subscribers: HashMap::new(),
+            current_init_message: None,
+            current_subscription_id: None,
+            seen_runtime_events: HashMap::new(),
             block_events_from_last_finalized: VecDeque::new(),
         })))
     }
@@ -163,7 +209,7 @@ impl<Hash: BlockHash> Shared<Hash> {
         &self,
         sub_id: usize,
         waker: &Waker,
-    ) -> Option<VecDeque<Ev<Hash>>> {
+    ) -> Option<VecDeque<FollowStreamMsg<BlockRef<Hash>>>> {
         let mut shared = self.0.lock().unwrap();
 
         let is_done = shared.done;
@@ -183,8 +229,9 @@ impl<Hash: BlockHash> Shared<Hash> {
     }
 
     /// Push a new item out to subscribers.
-    pub fn push_item(&self, item: Ev<Hash>) {
+    pub fn push_item(&self, item: FollowStreamMsg<BlockRef<Hash>>) {
         let mut shared = self.0.lock().unwrap();
+        let shared = shared.deref_mut();
 
         // broadcast item to subscribers:
         for details in shared.subscribers.values_mut() {
@@ -194,21 +241,68 @@ impl<Hash: BlockHash> Shared<Hash> {
             }
         }
 
-        // Keep our buffer of block events from latest finalized block uptodate:
-        if matches!(
-            item,
-            FollowEvent::Initialized(_)
-                | FollowEvent::Finalized(_)
-                | FollowEvent::NewBlock(_)
-                | FollowEvent::BestBlockChanged(_)
-        ) {
-            if matches!(
-                item,
-                FollowEvent::Finalized(_) | FollowEvent::Initialized(_)
-            ) {
-                shared.block_events_from_last_finalized = VecDeque::new();
+        // Keep our buffer of ready/block events uptodate:
+        match item {
+            FollowStreamMsg::Ready(sub_id) => {
+                // Set new subscription ID when it comes in.
+                shared.current_subscription_id = Some(sub_id);
             }
-            shared.block_events_from_last_finalized.push_back(item);
+            FollowStreamMsg::Event(FollowEvent::Initialized(ev)) => {
+                // New subscriptions will be given this init message:
+                shared.current_init_message = Some(ev.clone());
+                // Clear block cache (since a new finalized block hash is seen):
+                shared.block_events_from_last_finalized.clear();
+            }
+            FollowStreamMsg::Event(FollowEvent::Finalized(finalized_ev)) => {
+                // Update the init message that we'll hand out to new subscriptions. If the init message
+                // is `None` for some reason, we just ignore this step.
+                if let Some(init_message) = &mut shared.current_init_message {
+                    // Find the latest runtime update that's been finalized.
+                    let newest_runtime = finalized_ev
+                        .finalized_block_hashes
+                        .iter()
+                        .rev()
+                        .filter_map(|h| shared.seen_runtime_events.get(&h.hash()).cloned())
+                        .next();
+
+                    shared.seen_runtime_events.clear();
+
+                    if let Some(finalized) = finalized_ev.finalized_block_hashes.last() {
+                        init_message.finalized_block_hash = finalized.clone();
+                    }
+                    if let Some(runtime_ev) = newest_runtime {
+                        init_message.finalized_block_runtime = Some(runtime_ev);
+                    }
+                }
+
+                // New finalized block, so clear the cache of older block events.
+                shared.block_events_from_last_finalized.clear();
+            }
+            FollowStreamMsg::Event(FollowEvent::NewBlock(new_block_ev)) => {
+                // If a new runtime is seen, note it so that when a block is finalized, we
+                // can associate that with a runtime update having happened.
+                if let Some(runtime_event) = &new_block_ev.new_runtime {
+                    shared
+                        .seen_runtime_events
+                        .insert(new_block_ev.block_hash.hash(), runtime_event.clone());
+                }
+
+                shared
+                    .block_events_from_last_finalized
+                    .push_back(FollowEvent::NewBlock(new_block_ev));
+            }
+            FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
+                shared.block_events_from_last_finalized.push_back(ev);
+            }
+            FollowStreamMsg::Event(FollowEvent::Stop) => {
+                // On a stop event, clear everything. Wait for resubscription and new ready/initialised events.
+                shared.block_events_from_last_finalized.clear();
+                shared.current_subscription_id = None;
+                shared.current_init_message = None;
+            }
+            _ => {
+                // We don't buffer any other events.
+            }
         }
     }
 
@@ -227,11 +321,22 @@ impl<Hash: BlockHash> Shared<Hash> {
             },
         );
 
-        // The initial events in the stream will be any block events
-        // since/including the last finalized block. This means that we can
-        // immediately see the current finalized and best blocks for things like
-        // submitting transactions, making calls etc.
-        let block_events_so_far = shared.block_events_from_last_finalized.clone();
+        // Any new subscription should start with a "Ready" message and then an "Initialized"
+        // message, and then any non-finalized block events since that. If these don't exist,
+        // it means the subscription is currently stopped, and we should expect new Ready/Init
+        // messages anyway once it restarts.
+        let mut local_items = VecDeque::new();
+        if let Some(sub_id) = &shared.current_subscription_id {
+            local_items.push_back(FollowStreamMsg::Ready(sub_id.clone()));
+        }
+        if let Some(init_msg) = &shared.current_init_message {
+            local_items.push_back(FollowStreamMsg::Event(FollowEvent::Initialized(
+                init_msg.clone(),
+            )));
+        }
+        for ev in &shared.block_events_from_last_finalized {
+            local_items.push_back(FollowStreamMsg::Event(ev.clone()));
+        }
 
         drop(shared);
 
@@ -239,27 +344,16 @@ impl<Hash: BlockHash> Shared<Hash> {
             id,
             done: false,
             shared: self.clone(),
-            local_items: block_events_so_far,
+            local_items,
         }
     }
-}
-
-/// Shared state.
-#[derive(Debug)]
-struct SharedState<Hash: BlockHash> {
-    done: bool,
-    next_id: usize,
-    subscribers: HashMap<usize, SubscriberDetails<Hash>>,
-    // Keep a buffer of all events from last finalized block so that new
-    // subscriptions can be handed this info first.
-    block_events_from_last_finalized: VecDeque<Ev<Hash>>,
 }
 
 /// Details for a given subscriber: any items it's not yet claimed,
 /// and a way to wake it up when there are more items for it.
 #[derive(Debug)]
 struct SubscriberDetails<Hash: BlockHash> {
-    items: VecDeque<Ev<Hash>>,
+    items: VecDeque<FollowStreamMsg<BlockRef<Hash>>>,
     waker: Option<Waker>,
 }
 
@@ -271,7 +365,6 @@ mod test_utils {
     /// Return a `FollowStreamDriver`
     pub fn test_follow_stream_driver_getter<Hash, F, I>(
         events: F,
-        min_life: usize,
         max_life: usize,
     ) -> FollowStreamDriver<Hash>
     where
@@ -279,7 +372,7 @@ mod test_utils {
         F: Fn() -> I + Send + 'static,
         I: IntoIterator<Item = Result<FollowEvent<Hash>, Error>>,
     {
-        let (stream, _) = test_unpin_stream_getter(events, min_life, max_life);
+        let (stream, _) = test_unpin_stream_getter(events, max_life);
         FollowStreamDriver::new(stream)
     }
 }
@@ -298,7 +391,7 @@ mod test {
     #[test]
     fn follow_stream_driver_is_sendable() {
         fn assert_send<T: Send + 'static>(_: T) {}
-        let stream_getter = test_follow_stream_driver_getter(|| [Ok(ev_initialized(1))], 0, 10);
+        let stream_getter = test_follow_stream_driver_getter(|| [Ok(ev_initialized(1))], 10);
         assert_send(stream_getter);
     }
 
@@ -314,7 +407,6 @@ mod test {
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
-            0,
             10,
         );
 
@@ -332,10 +424,11 @@ mod test {
         let c_vec: Vec<_> = c.collect().await;
 
         let expected = vec![
-            ev_initialized_ref(0),
-            ev_new_block_ref(0, 1),
-            ev_best_block_ref(1),
-            ev_finalized_ref([1]),
+            FollowStreamMsg::Ready("sub_id_0".into()),
+            FollowStreamMsg::Event(ev_initialized_ref(0)),
+            FollowStreamMsg::Event(ev_new_block_ref(0, 1)),
+            FollowStreamMsg::Event(ev_best_block_ref(1)),
+            FollowStreamMsg::Event(ev_finalized_ref([1])),
         ];
 
         assert_eq!(a_vec, expected);
@@ -357,21 +450,22 @@ mod test {
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
-            0,
             10,
         );
 
-        // Skip past init, new, best events.
+        // Skip past ready, init, new, best events.
+        let _r = driver.next().await.unwrap();
         let _i0 = driver.next().await.unwrap();
         let _n1 = driver.next().await.unwrap();
         let _b1 = driver.next().await.unwrap();
 
         // THEN subscribe; subscription should still receive them:
-        let evs: Vec<_> = driver.handle().subscribe().take(3).collect().await;
+        let evs: Vec<_> = driver.handle().subscribe().take(4).collect().await;
         let expected = vec![
-            ev_initialized_ref(0),
-            ev_new_block_ref(0, 1),
-            ev_best_block_ref(1),
+            FollowStreamMsg::Ready("sub_id_0".into()),
+            FollowStreamMsg::Event(ev_initialized_ref(0)),
+            FollowStreamMsg::Event(ev_new_block_ref(0, 1)),
+            FollowStreamMsg::Event(ev_best_block_ref(1)),
         ];
         assert_eq!(evs, expected);
 
@@ -380,12 +474,14 @@ mod test {
         let _n2 = driver.next().await.unwrap();
         let _n3 = driver.next().await.unwrap();
 
-        // THEN subscribe again; subscription should start at finalized 1.
-        let evs: Vec<_> = driver.handle().subscribe().take(3).collect().await;
+        // THEN subscribe again; new subs will see an updated initialized message
+        // with the latest finalized block hash.
+        let evs: Vec<_> = driver.handle().subscribe().take(4).collect().await;
         let expected = vec![
-            ev_finalized_ref([1]),
-            ev_new_block_ref(1, 2),
-            ev_new_block_ref(2, 3),
+            FollowStreamMsg::Ready("sub_id_0".into()),
+            FollowStreamMsg::Event(ev_initialized_ref(1)),
+            FollowStreamMsg::Event(ev_new_block_ref(1, 2)),
+            FollowStreamMsg::Event(ev_new_block_ref(2, 3)),
         ];
         assert_eq!(evs, expected);
     }

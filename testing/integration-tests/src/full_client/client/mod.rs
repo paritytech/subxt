@@ -326,7 +326,7 @@ async fn partial_fee_estimate_correct() {
     let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
 
     // Method II: TransactionPaymentApi_query_fee_details + calculations
-    let latest_block_ref = api.backend().latest_best_block_ref().await.unwrap();
+    let latest_block_ref = api.backend().latest_finalized_block_ref().await.unwrap();
     let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
     let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
     let InclusionFee {
