@@ -77,7 +77,7 @@ async fn handle_pallet_metadata(
                 compatibility
                     .pallet_present
                     .entry(hex_hash)
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(node.to_string());
             }
             None => {
@@ -110,7 +110,7 @@ async fn handle_full_metadata(
 
         compatibility_map
             .entry(hex_hash)
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(node.to_string());
     }
 
