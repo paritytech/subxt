@@ -617,6 +617,12 @@ impl<Hash> std::ops::Deref for FollowSubscription<Hash> {
     }
 }
 
+impl<Hash> std::ops::DerefMut for FollowSubscription<Hash> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.sub
+    }
+}
+
 impl<Hash: serde::de::DeserializeOwned> Stream for FollowSubscription<Hash> {
     type Item = <RpcSubscription<FollowEvent<Hash>> as Stream>::Item;
     fn poll_next(
@@ -649,6 +655,12 @@ impl<Hash> std::ops::Deref for TransactionSubscription<Hash> {
     type Target = RpcSubscription<TransactionStatus<Hash>>;
     fn deref(&self) -> &Self::Target {
         &self.sub
+    }
+}
+
+impl<Hash> std::ops::DerefMut for TransactionSubscription<Hash> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.sub
     }
 }
 

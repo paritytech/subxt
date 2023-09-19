@@ -153,7 +153,7 @@ async fn chainhead_unstable_storage() {
         event,
         FollowEvent::OperationStorageItems(res) if res.operation_id == operation_id &&
             res.items.len() == 1 &&
-            res.items[0].key == format!("0x{}", hex::encode(addr_bytes))
+            res.items[0].key.0 == addr_bytes
     );
 
     let event = next_operation_event(&mut blocks).await;

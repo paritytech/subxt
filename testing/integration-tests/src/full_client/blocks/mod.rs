@@ -24,7 +24,7 @@ async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
 
     // Check that it's different from the last finalized block (this is quite a weak test;
     // we could rely on RPC calls to do better.)
-    assert_ne!(block_hash, current_block_hash);
+    assert_ne!(block_hash, latest_finalized_hash);
     Ok(())
 }
 
