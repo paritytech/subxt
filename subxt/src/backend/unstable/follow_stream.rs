@@ -52,7 +52,7 @@ pub enum FollowStreamMsg<Hash> {
 
 impl<Hash> FollowStreamMsg<Hash> {
     /// Return an event, or none if the message is a "ready" one.
-    pub fn to_event(self) -> Option<FollowEvent<Hash>> {
+    pub fn into_event(self) -> Option<FollowEvent<Hash>> {
         match self {
             FollowStreamMsg::Ready(_) => None,
             FollowStreamMsg::Event(e) => Some(e),

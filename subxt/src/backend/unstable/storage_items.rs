@@ -132,19 +132,19 @@ impl<T: Config> Stream for StorageItems<T> {
 
             match ev {
                 FollowEvent::OperationWaitingForContinue(id)
-                    if id.operation_id == &*self.operation_id =>
+                    if id.operation_id == *self.operation_id =>
                 {
                     // Start a call to ask for more events
                     self.continue_fut = Some((self.continue_call)());
                     continue;
                 }
-                FollowEvent::OperationStorageDone(id) if id.operation_id == &*self.operation_id => {
+                FollowEvent::OperationStorageDone(id) if id.operation_id == *self.operation_id => {
                     // We're finished!
                     self.done = true;
                     return Poll::Ready(None);
                 }
                 FollowEvent::OperationStorageItems(items)
-                    if items.operation_id == &*self.operation_id =>
+                    if items.operation_id == *self.operation_id =>
                 {
                     // We have items; buffer them to emit next loops.
                     self.buffered_responses = items.items;

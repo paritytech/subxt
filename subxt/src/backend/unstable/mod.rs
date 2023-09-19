@@ -45,6 +45,12 @@ pub struct UnstableBackendBuilder<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
+impl<T: Config> Default for UnstableBackendBuilder<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T: Config> UnstableBackendBuilder<T> {
     /// Create a new [`UnstableBackendBuilder`].
     pub fn new() -> Self {

@@ -140,7 +140,7 @@ impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
 
     /// Subscribe to the follow events, ignoring any other messages.
     pub fn events(self) -> impl Stream<Item = FollowEvent<BlockRef<Hash>>> + Send + Sync {
-        self.filter_map(|ev| std::future::ready(ev.to_event()))
+        self.filter_map(|ev| std::future::ready(ev.into_event()))
     }
 }
 
