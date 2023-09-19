@@ -417,7 +417,7 @@ mod test {
         let c = handle.subscribe();
 
         // Drive to completion (the sort of real life usage I'd expect):
-        tokio::spawn(async move { while let Some(_) = driver.next().await {} });
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
 
         let a_vec: Vec<_> = a.collect().await;
         let b_vec: Vec<_> = b.collect().await;

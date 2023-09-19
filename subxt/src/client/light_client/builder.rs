@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
-use crate::backend::rpc::RpcClient;
+use crate::backend::{ Backend, rpc::RpcClient };
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
@@ -125,8 +125,9 @@ impl<T: Config> LightClientBuilder<T> {
     }
 
     /// Build the light client.
-    async fn build_client(
+    async fn build_client<B: Backend<T>>(
         self,
+        backend: Arc<B>,
         mut chain_spec: serde_json::Value,
     ) -> Result<LightClient<T>, Error> {
         // Set custom bootnodes if provided.
