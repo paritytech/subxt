@@ -127,7 +127,6 @@ impl<T: Config> LightClientBuilder<T> {
     /// Build the light client.
     async fn build_client<B: Backend<T>>(
         self,
-        backend: Arc<B>,
         mut chain_spec: serde_json::Value,
     ) -> Result<LightClient<T>, Error> {
         // Set custom bootnodes if provided.
