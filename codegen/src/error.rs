@@ -8,6 +8,7 @@ use proc_macro2::{Span, TokenStream as TokenStream2};
 
 /// Error returned when the Codegen cannot generate the runtime API.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum CodegenError {
     /// The given metadata type could not be found.
     #[error("Could not find type with ID {0} in the type registry; please raise a support issue.")]
@@ -82,6 +83,7 @@ impl CodegenError {
 
 /// Error attempting to load metadata.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum FetchMetadataError {
     #[error("Cannot decode hex value: {0}")]
     DecodeError(#[from] hex::FromHexError),
@@ -98,6 +100,7 @@ pub enum FetchMetadataError {
 
 /// Error attempting to do type substitution.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum TypeSubstitutionError {
     /// Substitute "to" type must be an absolute path.
     #[error("`substitute_type(with = <path>)` must be a path prefixed with 'crate::' or '::'")]

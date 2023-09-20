@@ -23,9 +23,6 @@ use crate::{
     CratePath,
 };
 
-#[cfg(feature = "fetch-metadata")]
-use crate::utils::{fetch_metadata_bytes_blocking, MetadataVersion, Url};
-
 use codec::Decode;
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -150,7 +147,9 @@ impl GenerateRuntimeApi {
     ///
     /// Not recommended to be used in production environments.
     #[cfg(feature = "fetch-metadata")]
-    pub fn generate_from_url(self, url: Url) -> Result<TokenStream2, CodegenError> {
+    pub fn generate_from_url(self, url: crate::utils::Url) -> Result<TokenStream2, CodegenError> {
+        use crate::utils::{fetch_metadata_bytes_blocking, MetadataVersion, Url};
+
         fn fetch_metadata(url: Url, version: MetadataVersion) -> Result<Metadata, CodegenError> {
             let bytes = fetch_metadata_bytes_blocking(url, version)?;
             Ok(Metadata::decode(&mut &bytes[..])?)

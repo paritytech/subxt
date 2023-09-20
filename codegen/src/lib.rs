@@ -60,9 +60,6 @@ compile_error!("subxt-codegen: the features 'web' and 'fetch_metadata' cannot be
 #[allow(unused_imports)]
 pub use getrandom as _;
 
-#[allow(unused_imports)]
-use frame_metadata as _;
-
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
     error::{CodegenError, TypeSubstitutionError},
