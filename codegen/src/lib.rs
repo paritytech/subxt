@@ -50,10 +50,17 @@ mod error;
 mod ir;
 mod types;
 
+#[cfg(feature = "fetch-metadata")]
 pub mod utils;
+
+#[cfg(all(feature = "web", feature = "fetch-metadata"))]
+compile_error!("subxt-codegen: the features 'web' and 'fetch_metadata' cannot be used together.");
 
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
     error::{CodegenError, TypeSubstitutionError},
-    types::{CratePath, Derives, DerivesRegistry, Module, TypeGenerator, TypeSubstitutes},
+    types::{
+        CratePath, Derives, DerivesRegistry, Module, TypeDefGen, TypeDefParameters, TypeGenerator,
+        TypeSubstitutes,
+    },
 };
