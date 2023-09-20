@@ -125,7 +125,7 @@ impl<T: Config> LightClientBuilder<T> {
     }
 
     /// Build the light client.
-    async fn build_client<B: Backend<T>>(
+    async fn build_client(
         self,
         mut chain_spec: serde_json::Value,
     ) -> Result<LightClient<T>, Error> {
