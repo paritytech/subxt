@@ -59,8 +59,8 @@ compile_error!("subxt-codegen: the features 'web' and 'fetch_metadata' cannot be
 #[cfg(feature = "web")]
 #[allow(unused_imports)]
 const _: () = {
-    pub use getrandom as _;
     use frame_metadata as _;
+    pub use getrandom as _;
 };
 
 pub use self::{
