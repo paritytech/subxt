@@ -170,7 +170,6 @@ fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
     quote!(#type_path)
 }
 
-#[cfg(feature = "fetch_metadata")]
 #[cfg(test)]
 mod tests {
     use crate::RuntimeGenerator;
