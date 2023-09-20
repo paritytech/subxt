@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
-use crate::backend::{ Backend, rpc::RpcClient };
+use crate::backend::{rpc::RpcClient, Backend};
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
