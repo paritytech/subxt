@@ -120,7 +120,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let tx = subxt::dynamic::tx(
         "Balances",
-        "transfer",
+        "transfer_allow_death",
         vec![
             Value::unnamed_variant(
                 "Id",
@@ -215,7 +215,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let bob_account_addr = node_runtime::storage()
+    let bob_account_info_addr = node_runtime::storage()
         .system()
         .account(bob.public_key().to_account_id());
 
@@ -223,7 +223,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&bob_account_addr)
+        .fetch_or_default(&bob_account_info_addr)
         .await?;
 
     let tx = node_runtime::tx()
@@ -243,7 +243,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&bob_account_addr)
+        .fetch_or_default(&bob_account_info_addr)
         .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);

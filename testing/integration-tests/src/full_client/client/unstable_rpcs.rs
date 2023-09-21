@@ -236,7 +236,7 @@ async fn chainspec_v1_chainname() {
     let old_rpc = ctx.legacy_rpc_methods().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let a = old_rpc.system_name().await.unwrap();
+    let a = old_rpc.system_chain().await.unwrap();
     let b = rpc.chainspec_v1_chain_name().await.unwrap();
 
     assert_eq!(a, b);

@@ -63,7 +63,7 @@ async fn run() {
 
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
-    let metadata_path = Path::new(&out_dir).join("metadata.scale");
+    let metadata_path = Path::new(&out_dir).join("test_node_runtime_metadata.scale");
     fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
