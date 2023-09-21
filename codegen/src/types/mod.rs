@@ -262,6 +262,11 @@ impl<'a> TypeGenerator<'a> {
         self.derives.default_derives()
     }
 
+    /// Returns the type registry.
+    pub fn types(&self) -> &PortableRegistry {
+        self.type_registry
+    }
+
     /// Returns the derives to be applied to a generated type.
     pub fn type_derives(&self, ty: &Type<PortableForm>) -> Result<Derives, CodegenError> {
         let joined_path = ty.path.segments.join("::");

@@ -118,6 +118,11 @@ impl TypeDefGen {
             ty_docs,
         })
     }
+
+    /// are there unused type params?
+    pub fn has_unused_type_params(&self) -> bool {
+        self.type_params.has_unused_type_params()
+    }
 }
 
 impl quote::ToTokens for TypeDefGen {

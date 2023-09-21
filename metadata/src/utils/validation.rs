@@ -405,15 +405,22 @@ pub fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> [u8; HASH_L
 }
 
 /// Obtain the hash of some custom value in the metadata including it's name/key.
+///
+/// If the `custom_value` has a type id that is not present in the metadata,
+/// only the name and bytes are used for hashing.
 pub fn get_custom_value_hash(
     custom_value: &CustomValueMetadata,
     cache: &mut HashMap<u32, CachedHash>,
 ) -> [u8; HASH_LEN] {
-    concat_and_hash3(
-        &hash(custom_value.name.as_bytes()),
-        &get_type_hash(custom_value.types, custom_value.type_id(), cache),
-        &hash(custom_value.bytes()),
-    )
+    let name_hash = hash(custom_value.name.as_bytes());
+    if custom_value.types.resolve(custom_value.type_id()).is_none() {
+        hash(&name_hash)
+    } else {
+        concat_and_hash2(
+            &name_hash,
+            &get_type_hash(custom_value.types, custom_value.type_id(), cache),
+        )
+    }
 }
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.

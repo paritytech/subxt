@@ -96,10 +96,7 @@ fn generate_storage_entry_fns(
     };
 
     let snake_case_name = storage_entry.name().to_snake_case();
-    let storage_entry_ty = match storage_entry.entry_type() {
-        StorageEntryType::Plain(ty) => *ty,
-        StorageEntryType::Map { value_ty, .. } => *value_ty,
-    };
+    let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty);
     let docs = storage_entry.docs();
     let docs = should_gen_docs

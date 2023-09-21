@@ -166,6 +166,45 @@ impl Metadata {
             &mut HashMap::new(),
         ))
     }
+
+    /// Ensure that every unique type we'll be generating or referring to also has a
+    /// unique path, so that types with matching paths don't end up overwriting each other
+    /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
+    /// de-duplicate those into single types with a generic.
+    pub fn ensure_unique_type_paths(&mut self) {
+        let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
+        for ty in self.types.types.iter_mut() {
+            // Ignore types without a path (ie prelude types).
+            if ty.ty.path.namespace().is_empty() {
+                continue;
+            }
+
+            let has_valid_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
+
+            // Ignore types which have generic params that the type generation will use.
+            // Ordinarily we'd expect that any two types with identical paths must be parameterized
+            // in order to share the path. However scale-info doesn't understand all forms of generics
+            // properly I think (eg generics that have associated types that can differ), and so in
+            // those cases we need to fix the paths for Subxt to generate correct code.
+            if has_valid_type_params {
+                continue;
+            }
+
+            // Count how many times we've seen the same path already.
+            let visited_count = visited_path_counts
+                .entry(ty.ty.path.segments.clone())
+                .or_default();
+            *visited_count += 1;
+
+            // alter the type so that if it's been seen more than once, we append a number to
+            // its name to ensure that every unique type has a unique path, too.
+            if *visited_count > 1 {
+                if let Some(name) = ty.ty.path.segments.last_mut() {
+                    *name = format!("{name}{visited_count}");
+                }
+            }
+        }
+    }
 }
 
 /// Metadata for a specific pallet.
@@ -393,6 +432,23 @@ pub enum StorageEntryType {
         /// The type of the value.
         value_ty: u32,
     },
+}
+
+impl StorageEntryType {
+    /// The type of the value.
+    pub fn value_ty(&self) -> u32 {
+        match self {
+            StorageEntryType::Map { value_ty, .. } | StorageEntryType::Plain(value_ty) => *value_ty,
+        }
+    }
+
+    /// The type of the key, can be a tuple with elements for each of the hashers. None for a Plain storage entry.
+    pub fn key_ty(&self) -> Option<u32> {
+        match self {
+            StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
+            StorageEntryType::Plain(_) => None,
+        }
+    }
 }
 
 /// Hasher used by storage maps.
@@ -688,6 +744,11 @@ pub struct CustomValueMetadata<'a> {
 }
 
 impl<'a> CustomValueMetadata<'a> {
+    /// Access the underlying type registry.
+    pub fn types(&self) -> &PortableRegistry {
+        self.types
+    }
+
     /// The scale encoded value
     pub fn bytes(&self) -> &'a [u8] {
         self.data

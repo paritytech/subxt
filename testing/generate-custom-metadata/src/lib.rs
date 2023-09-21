@@ -5,10 +5,13 @@
 use codec::Encode;
 use frame_metadata::v15::{CustomMetadata, ExtrinsicMetadata, OuterEnums, RuntimeMetadataV15};
 use frame_metadata::RuntimeMetadataPrefixed;
+
 use scale_info::form::PortableForm;
 use scale_info::TypeInfo;
 use scale_info::{meta_type, IntoPortable};
 use std::collections::BTreeMap;
+
+pub mod dispatch_error;
 
 /// Generate metadata which contains a `Foo { a: u8, b: &str }` custom value.
 pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
@@ -23,12 +26,22 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     }
 
     let foo_value_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
-        let value = Foo { a: 0, b: "Hello" };
+        let value = Foo {
+            a: 42,
+            b: "Have a great day!",
+        };
         let foo_ty = scale_info::MetaType::new::<Foo>();
         let foo_ty_id = registry.register_type(&foo_ty);
         frame_metadata::v15::CustomValueMetadata {
             ty: foo_ty_id,
             value: value.encode(),
+        }
+    };
+
+    let invalid_type_id_metadata: frame_metadata::v15::CustomValueMetadata<PortableForm> = {
+        frame_metadata::v15::CustomValueMetadata {
+            ty: u32::MAX.into(),
+            value: vec![0, 1, 2, 3],
         }
     };
 
@@ -48,7 +61,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
     let unit_ty = registry.register_type(&meta_type::<()>());
 
     // Metadata needs to contain this DispatchError, since codegen looks for it.
-    registry.register_type(&meta_type::<crate::utils::dispatch_error::ArrayDispatchError>());
+    registry.register_type(&meta_type::<dispatch_error::ArrayDispatchError>());
 
     let metadata = RuntimeMetadataV15 {
         types: registry.into(),
@@ -68,6 +81,7 @@ pub fn metadata_custom_values_foo() -> RuntimeMetadataPrefixed {
                 ("foo".into(), foo_value_metadata.clone()),
                 ("12".into(), foo_value_metadata.clone()),
                 ("&Hello".into(), foo_value_metadata),
+                ("InvalidTypeId".into(), invalid_type_id_metadata),
             ]),
         },
     };

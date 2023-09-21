@@ -7,5 +7,5 @@
 mod custom_value_address;
 mod custom_values_client;
 
-pub use custom_value_address::{CustomValueAddress, StaticAddress};
+pub use custom_value_address::{CustomValueAddress, StaticAddress, Yes};
 pub use custom_values_client::CustomValuesClient;

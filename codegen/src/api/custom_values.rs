@@ -9,7 +9,7 @@ use heck::ToSnakeCase as _;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{format_ident, quote};
+use quote::{quote, ToTokens};
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values<'a>(
@@ -43,18 +43,33 @@ fn generate_custom_value_fn(
     // names are transformed to snake case to make for good function identifiers.
     let name = custom_value.name();
     let fn_name = name.to_snake_case();
-    // Skip elements where the fn name is already occupied. E.g. if you have custom values with names "Foo" and "foo" in the metadata.
     if fn_names_taken.contains(&fn_name) {
         return None;
     }
-    let fn_name_ident = format_ident!("{fn_name}");
+    // if the fn_name would be an invalid ident, return None:
+    let fn_name_ident = syn::parse_str::<syn::Ident>(&fn_name).ok()?;
     fn_names_taken.insert(fn_name);
 
     let custom_value_hash = custom_value.hash();
-    let return_ty = type_gen.resolve_type_path(custom_value.type_id());
+
+    // for custom values it is important to check if the type id is actually in the metadata:
+    let type_is_valid = custom_value
+        .types()
+        .resolve(custom_value.type_id())
+        .is_some();
+    let (return_ty, decodable) = if type_is_valid {
+        let return_ty = type_gen
+            .resolve_type_path(custom_value.type_id())
+            .to_token_stream();
+        let decodable = quote!(#crate_path::custom_values::Yes);
+        (return_ty, decodable)
+    } else {
+        // if type registry does not contain the type, we can just return the Encoded scale bytes.
+        (quote!(()), quote!(()))
+    };
 
     Some(quote!(
-        pub fn #fn_name_ident() -> #crate_path::custom_values::StaticAddress<#return_ty> {
+        pub fn #fn_name_ident(&self) -> #crate_path::custom_values::StaticAddress<#return_ty, #decodable> {
             #crate_path::custom_values::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
         }
     ))

@@ -293,8 +293,10 @@ async fn next_operation_event<
 ) -> FollowEvent<T> {
     use futures::StreamExt;
 
-    // At most 5 retries.
-    for _ in 0..5 {
+    // Number of events to wait for the next operation event.
+    const NUM_EVENTS: usize = 10;
+
+    for _ in 0..NUM_EVENTS {
         let event = sub.next().await.unwrap().unwrap();
 
         match event {
@@ -309,5 +311,5 @@ async fn next_operation_event<
         return event;
     }
 
-    panic!("Cannot find operation related event after 5 produced events");
+    panic!("Cannot find operation related event after {NUM_EVENTS} produced events");
 }
