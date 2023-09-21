@@ -72,7 +72,7 @@ async fn transaction_validation() {
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.public_key().into(), 10_000);
+        .transfer_allow_death(bob.public_key().into(), 10_000);
 
     let signed_extrinsic = api
         .tx()
@@ -110,7 +110,7 @@ async fn validation_fails() {
     // The actual TX is not important; the account has no funds to pay for it.
     let tx = node_runtime::tx()
         .balances()
-        .transfer(to.public_key().into(), 1);
+        .transfer_allow_death(to.public_key().into(), 1);
 
     let signed_extrinsic = api
         .tx()
@@ -232,7 +232,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(dev::alice().public_key().into(), 12345000000000000);
+        .transfer_allow_death(dev::alice().public_key().into(), 12345000000000000);
 
     let actual_tx = api.tx().create_unsigned(&tx).unwrap();
 
@@ -261,7 +261,7 @@ async fn extrinsic_hash_is_same_as_returned() {
 
     let payload = node_runtime::tx()
         .balances()
-        .transfer(dev::alice().public_key().into(), 12345000000000000);
+        .transfer_allow_death(dev::alice().public_key().into(), 12345000000000000);
 
     let tx = api
         .tx()
@@ -314,7 +314,7 @@ async fn partial_fee_estimate_correct() {
     let bob = dev::bob();
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.public_key().into(), 1_000_000_000_000);
+        .transfer_allow_death(bob.public_key().into(), 1_000_000_000_000);
 
     let signed_extrinsic = api
         .tx()

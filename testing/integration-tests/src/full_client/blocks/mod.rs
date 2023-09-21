@@ -5,30 +5,73 @@
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
-use subxt::blocks::BlocksClient;
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
-// Check that we can subscribe to non-finalized blocks.
 #[tokio::test]
-async fn non_finalized_headers_subscription() -> Result<(), subxt::Error> {
+async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let latest_finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
-    let mut sub = api.blocks().subscribe_best().await?;
+    let mut all_sub = api.blocks().subscribe_all().await?;
+    let mut best_sub = api.blocks().subscribe_best().await?;
+    let mut finalized_sub = api.blocks().subscribe_finalized().await?;
 
-    // Wait for the next best block
-    let header = sub.next().await.unwrap()?;
-    let block_hash = header.hash();
+    let mut finals = vec![];
+    let mut bests = vec![];
+    let mut alls = vec![];
 
-    // Check that it's different from the last finalized block (this is quite a weak test;
-    // we could rely on RPC calls to do better.)
-    assert_ne!(block_hash, latest_finalized_hash);
+    // Finalization can run behind a bit; blocks that were reported a while ago can
+    // only just now be being finalized (in the new RPCs this isn't true and we'll be
+    // told about all of those blocks up front). So, first we wait until finalization reports
+    // a block that we've seen as new.
+    loop {
+        tokio::select! {biased;
+            Some(Ok(b)) = all_sub.next() => alls.push(b.hash()),
+            Some(Ok(b)) = best_sub.next() => bests.push(b.hash()),
+            Some(Ok(b)) = finalized_sub.next() => if alls.contains(&b.hash()) { break },
+        }
+    }
+
+    // Now, gather a couple more finalized blocks as well as anything else we hear about.
+    while finals.len() < 2 {
+        tokio::select! {biased;
+            Some(Ok(b)) = all_sub.next() => alls.push(b.hash()),
+            Some(Ok(b)) = best_sub.next() => bests.push(b.hash()),
+            Some(Ok(b)) = finalized_sub.next() => finals.push(b.hash()),
+        }
+    }
+
+    // Check that the items in the first slice are found in the same order in the second slice.
+    fn are_same_order_in<T: PartialEq>(a_items: &[T], b_items: &[T]) -> bool {
+        let mut b_idx = 0;
+        for a in a_items {
+            if let Some((idx, _)) = b_items[b_idx..]
+                .iter()
+                .enumerate()
+                .find(|(_idx, b)| a == *b)
+            {
+                b_idx += idx;
+            } else {
+                return false;
+            }
+        }
+        true
+    }
+
+    // Final blocks and best blocks should both be subsets of _all_ of the blocks reported.
+    assert!(
+        are_same_order_in(&bests, &alls),
+        "Best set {bests:?} should be a subset of all: {alls:?}"
+    );
+    assert!(
+        are_same_order_in(&finals, &alls),
+        "Final set {finals:?} should be a subset of all: {alls:?}"
+    );
+
     Ok(())
 }
 
-// Check that we can subscribe to finalized blocks.
 #[tokio::test]
 async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -36,13 +79,13 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
 
     let mut sub = api.blocks().subscribe_finalized().await?;
 
-    // Wait for the next set of headers, and check that the
-    // associated block hash is the one we just finalized.
-    // (this can be a bit slow as we have to wait for finalization)
-    let header = sub.next().await.unwrap()?;
-    let finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
+    // check that the finalized block reported lines up with the `latest_finalized_block_ref`.
+    for _ in 0..2 {
+        let header = sub.next().await.unwrap()?;
+        let finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
+        assert_eq!(header.hash(), finalized_hash);
+    }
 
-    assert_eq!(header.hash(), finalized_hash);
     Ok(())
 }
 
@@ -117,17 +160,17 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
-async fn decode_extrinsics() {
+async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
     let api = ctx.client();
 
     let alice = dev::alice();
     let bob = dev::bob();
 
-    // Generate a block that has unsigned and signed transactions.
+    // Setup; put an extrinsic into a block:
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.public_key().into(), 10_000);
+        .transfer_allow_death(bob.public_key().into(), 10_000);
 
     let signed_extrinsic = api
         .tx()
@@ -143,19 +186,21 @@ async fn decode_extrinsics() {
         .await
         .unwrap();
 
+    // Now, separately, download that block. Let's see what it contains..
     let block_hash = in_block.block_hash();
-
-    let block = BlocksClient::new(api).at(block_hash).await.unwrap();
+    let block = api.blocks().at(block_hash).await.unwrap();
     let extrinsics = block.extrinsics().await.unwrap();
-    assert_eq!(extrinsics.len(), 2);
+
     assert_eq!(extrinsics.block_hash(), block_hash);
 
+    // `.has` should work and find a transfer call.
     assert!(extrinsics
-        .has::<node_runtime::balances::calls::types::Transfer>()
+        .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
         .unwrap());
 
+    // `.find_first` should similarly work to find the transfer call:
     assert!(extrinsics
-        .find_first::<node_runtime::balances::calls::types::Transfer>()
+        .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
         .unwrap()
         .is_some());
 
@@ -164,7 +209,7 @@ async fn decode_extrinsics() {
         .map(|res| res.unwrap())
         .collect::<Vec<_>>();
 
-    assert_eq!(block_extrinsics.len(), 2);
+    // All blocks contain a timestamp; check this first:
     let timestamp = block_extrinsics.get(0).unwrap();
     timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
     timestamp
@@ -172,9 +217,13 @@ async fn decode_extrinsics() {
         .unwrap();
     assert!(!timestamp.is_signed());
 
+    // Next we expect our transfer:
     let tx = block_extrinsics.get(1).unwrap();
     tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    tx.as_extrinsic::<node_runtime::balances::calls::types::Transfer>()
+    let ext = tx
+        .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+        .unwrap()
         .unwrap();
+    assert_eq!(ext.value, 10_000);
     assert!(tx.is_signed());
 }

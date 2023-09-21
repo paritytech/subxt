@@ -2,7 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use futures::StreamExt;
 use std::ffi::{OsStr, OsString};
+use std::sync::Arc;
 use substrate_runner::SubstrateNode;
 use subxt::{
     backend::{legacy, rpc, unstable},
@@ -118,9 +120,14 @@ impl TestNodeProcessBuilder {
         #[cfg(feature = "unstable-light-client")]
         let client = build_light_client(&proc).await;
 
-        // Connect to the node with a subxt client:
-        #[cfg(not(feature = "unstable-light-client"))]
-        let client = OnlineClient::from_url(ws_url.clone()).await;
+        #[cfg(feature = "unstable-backend-client")]
+        let client = build_unstable_client(&proc).await;
+
+        #[cfg(all(
+            not(feature = "unstable-light-client"),
+            not(feature = "unstable-backend-client")
+        ))]
+        let client = build_legacy_client(&proc).await;
 
         match client {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
@@ -129,13 +136,58 @@ impl TestNodeProcessBuilder {
     }
 }
 
+#[cfg(all(
+    not(feature = "unstable-light-client"),
+    not(feature = "unstable-backend-client")
+))]
+async fn build_legacy_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
+    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+
+    let rpc_client = rpc::RpcClient::from_url(ws_url)
+        .await
+        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+    let backend = legacy::LegacyBackend::new(rpc_client);
+    let client = OnlineClient::from_backend(Arc::new(backend))
+        .await
+        .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
+
+    Ok(client)
+}
+
+#[cfg(feature = "unstable-backend-client")]
+async fn build_unstable_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
+    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+
+    let rpc_client = rpc::RpcClient::from_url(ws_url)
+        .await
+        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+
+    let (backend, mut driver) = unstable::UnstableBackend::builder().build(rpc_client);
+
+    // The unstable backend needs driving:
+    tokio::spawn(async move {
+        while let Some(val) = driver.next().await {
+            if let Err(e) = val {
+                eprintln!("Error driving unstable backend: {e}");
+                break;
+            }
+        }
+    });
+
+    let client = OnlineClient::from_backend(Arc::new(backend))
+        .await
+        .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
+
+    Ok(client)
+}
+
 #[cfg(feature = "unstable-light-client")]
-async fn build_light_client<R: Config>(proc: &SubstrateNode) -> Result<LightClient<R>, String> {
+async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClient<T>, String> {
     // RPC endpoint.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
     // Step 1. Wait for a few blocks to be produced using the subxt client.
-    let client = OnlineClient::<R>::from_url(ws_url.clone())
+    let client = OnlineClient::<T>::from_url(ws_url.clone())
         .await
         .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
 

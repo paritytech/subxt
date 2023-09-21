@@ -41,7 +41,9 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .fetch_or_default(&bob_account_addr)
         .await?;
 
-    let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address, 10_000);
 
     let events = api
         .tx()
@@ -226,7 +228,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob_address.clone(), 10_000);
+        .transfer_allow_death(bob_address.clone(), 10_000);
     for _ in 0..3 {
         api.tx()
             .sign_and_submit_then_watch_default(&tx, &alice)
@@ -317,10 +319,10 @@ async fn transfer_error() {
 
     let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer(bob_address, 100_000_000_000_000_000);
+        .transfer_allow_death(bob_address, 100_000_000_000_000_000);
     let to_alice_tx = node_runtime::tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000);
+        .transfer_allow_death(alice_addr, 100_000_000_000_000_000);
 
     api.tx()
         .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
@@ -360,7 +362,7 @@ async fn transfer_implicit_subscription() {
 
     let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer(bob.clone().into(), 10_000);
+        .transfer_allow_death(bob.clone().into(), 10_000);
 
     let event = api
         .tx()

@@ -218,8 +218,6 @@ async fn chainhead_unstable_unpin() {
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
@@ -232,8 +230,6 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
@@ -246,8 +242,6 @@ async fn chainspec_v1_chainname() {
     assert_eq!(a, b);
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;

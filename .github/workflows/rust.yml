@@ -198,6 +198,40 @@ jobs:
                   command: nextest
                   args: run --workspace
 
+    unstable_backend_tests:
+        name: "Test non-wasm"
+        runs-on: ubuntu-latest-16-cores
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v3
+
+            - name: Download Substrate
+              run: |
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
+                  mkdir -p ~/.local/bin
+                  mv substrate-node ~/.local/bin
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2.6.2
+
+            - name: Install cargo-nextest
+              run: cargo install cargo-nextest
+
+            - name: Run tests
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: nextest
+                  args: run --workspace --features unstable-backend-client
+
     light_client_tests:
         name: "Test Light Client"
         runs-on: ubuntu-latest-16-cores
