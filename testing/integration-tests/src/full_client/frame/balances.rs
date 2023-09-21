@@ -208,7 +208,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
-async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
+async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
@@ -226,6 +226,8 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .fetch_or_default(&bob_account_info_addr)
         .await?;
 
+    // Do a transfer several times. If this works, it indicates that the
+    // nonce is properly incremented each time.
     let tx = node_runtime::tx()
         .balances()
         .transfer_allow_death(bob_address.clone(), 10_000);
@@ -233,9 +235,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         api.tx()
             .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
-            .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
-            .await?
-            .wait_for_success()
+            .wait_for_finalized_success()
             .await?;
     }
 

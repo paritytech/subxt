@@ -8,8 +8,8 @@
 use crate::{test_context, utils::node_runtime};
 use assert_matches::assert_matches;
 use codec::Encode;
+use futures::Stream;
 use subxt::{
-    backend::rpc::RpcSubscription,
     backend::unstable::rpc_methods::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
@@ -273,10 +273,11 @@ async fn transaction_unstable_submit_and_watch() {
         .transaction_unstable_submit_and_watch(&tx_bytes)
         .await
         .unwrap();
-
+    println!("about to wait for tx progress");
     // Check that the messages we get back on the way to it finishing deserialize ok
     // (this will miss some cases).
     while let Some(_ev) = sub.next().await.transpose().unwrap() {
+        println!("tx progress happened");
         // This stream should end when it hits the relevant stopping event.
         // If the test continues forever then something isn't working.
         // If we hit an error then that's also an issue!
@@ -284,9 +285,14 @@ async fn transaction_unstable_submit_and_watch() {
 }
 
 /// Ignore block related events and obtain the next event related to an operation.
-async fn next_operation_event<T: serde::de::DeserializeOwned>(
-    sub: &mut RpcSubscription<FollowEvent<T>>,
+async fn next_operation_event<
+    T: serde::de::DeserializeOwned,
+    S: Unpin + Stream<Item = Result<FollowEvent<T>, subxt::Error>>,
+>(
+    sub: &mut S,
 ) -> FollowEvent<T> {
+    use futures::StreamExt;
+
     // At most 5 retries.
     for _ in 0..5 {
         let event = sub.next().await.unwrap().unwrap();

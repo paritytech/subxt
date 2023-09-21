@@ -7,6 +7,7 @@
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
+use crate::config::BlockHash;
 use crate::{Config, Error};
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -610,20 +611,18 @@ pub struct FollowSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash> std::ops::Deref for FollowSubscription<Hash> {
-    type Target = RpcSubscription<FollowEvent<Hash>>;
-    fn deref(&self) -> &Self::Target {
-        &self.sub
+impl <Hash: BlockHash> FollowSubscription<Hash> {
+    /// Fetch the next item in the stream.
+    pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
+        <Self as StreamExt>::next(self).await
+    }
+    /// Fetch the subscription ID for the stream.
+    pub fn subscription_id(&self) -> Option<&str> {
+        self.sub.subscription_id()
     }
 }
 
-impl<Hash> std::ops::DerefMut for FollowSubscription<Hash> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.sub
-    }
-}
-
-impl<Hash: serde::de::DeserializeOwned> Stream for FollowSubscription<Hash> {
+impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
     type Item = <RpcSubscription<FollowEvent<Hash>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -651,20 +650,14 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash> std::ops::Deref for TransactionSubscription<Hash> {
-    type Target = RpcSubscription<TransactionStatus<Hash>>;
-    fn deref(&self) -> &Self::Target {
-        &self.sub
+impl <Hash: BlockHash> TransactionSubscription<Hash> {
+    /// Fetch the next item in the stream.
+    pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
+        <Self as StreamExt>::next(self).await
     }
 }
 
-impl<Hash> std::ops::DerefMut for TransactionSubscription<Hash> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.sub
-    }
-}
-
-impl<Hash: serde::de::DeserializeOwned> Stream for TransactionSubscription<Hash> {
+impl<Hash: BlockHash> Stream for TransactionSubscription<Hash> {
     type Item = <RpcSubscription<TransactionStatus<Hash>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
