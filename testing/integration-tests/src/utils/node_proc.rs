@@ -165,6 +165,7 @@ async fn build_unstable_client<T: Config>(proc: &SubstrateNode) -> Result<Online
 
     // The unstable backend needs driving:
     tokio::spawn(async move {
+        use futures::StreamExt;
         while let Some(val) = driver.next().await {
             if let Err(e) = val {
                 eprintln!("Error driving unstable backend: {e}");
