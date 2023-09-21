@@ -611,7 +611,7 @@ pub struct FollowSubscription<Hash> {
     done: bool,
 }
 
-impl <Hash: BlockHash> FollowSubscription<Hash> {
+impl<Hash: BlockHash> FollowSubscription<Hash> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
         <Self as StreamExt>::next(self).await
@@ -650,7 +650,7 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl <Hash: BlockHash> TransactionSubscription<Hash> {
+impl<Hash: BlockHash> TransactionSubscription<Hash> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
         <Self as StreamExt>::next(self).await
