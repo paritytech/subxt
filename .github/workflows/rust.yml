@@ -165,7 +165,7 @@ jobs:
                   args: --doc
 
     tests:
-        name: "Test non-wasm"
+        name: "Test (Native)"
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
@@ -199,7 +199,7 @@ jobs:
                   args: run --workspace
 
     unstable_backend_tests:
-        name: "Test non-wasm"
+        name: "Test (Unstable Backend)"
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
@@ -233,7 +233,7 @@ jobs:
                   args: run --workspace --features unstable-backend-client
 
     light_client_tests:
-        name: "Test Light Client"
+        name: "Test (Light Client)"
         runs-on: ubuntu-latest-16-cores
         timeout-minutes: 25
         steps:
@@ -264,40 +264,8 @@ jobs:
                   command: test
                   args: --release --package integration-tests --features unstable-light-client
 
-    clippy:
-        name: Cargo clippy
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Download Substrate
-              run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  components: clippy
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
-
-            - name: Run clippy
-              uses: actions-rs/cargo@v1
-              with:
-                  command: clippy
-                  args: --all-targets -- -D warnings
-
     wasm_tests:
-        name: Test wasm
+        name: Test (WASM)
         runs-on: ubuntu-latest
 
         steps:
@@ -348,3 +316,35 @@ jobs:
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
               working-directory: signer/wasm-tests
+
+    clippy:
+        name: Cargo clippy
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Download Substrate
+              run: |
+                  curl $SUBSTRATE_URL --output substrate-node --location
+                  chmod +x substrate-node
+                  ./substrate-node --version
+                  mkdir -p ~/.local/bin
+                  mv substrate-node ~/.local/bin
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  components: clippy
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+
+            - name: Run clippy
+              uses: actions-rs/cargo@v1
+              with:
+                  command: clippy
+                  args: --all-targets -- -D warnings
