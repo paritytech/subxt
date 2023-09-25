@@ -408,9 +408,11 @@ fn generate_outer_error_enum_type(
 mod tests {
     use super::*;
     use codec::Decode;
-    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-    use scale_info::TypeDef;
-    use std::{fs, path::Path};
+    use frame_metadata::{
+        v14::ExtrinsicMetadata, v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed,
+    };
+    use scale_info::{meta_type, IntoPortable, TypeDef, TypeInfo};
+    use std::{fs, marker::PhantomData, path::Path};
 
     fn load_v15_metadata() -> RuntimeMetadataV15 {
         let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
@@ -596,6 +598,126 @@ mod tests {
                     .unwrap();
                 assert_eq!(ty, converted_ty);
             }
+        }
+    }
+
+    #[test]
+    fn test_missing_extrinsic_types() {
+        #[derive(TypeInfo)]
+        struct Runtime;
+
+        let generate_metadata = |extrinsic_ty| {
+            let mut registry = scale_info::Registry::new();
+
+            let ty = registry.register_type(&meta_type::<Runtime>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: extrinsic_ty,
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            }
+        };
+
+        let metadata = generate_metadata(meta_type::<()>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Address".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoCall<Address, Signature, Extra> {
+            _phantom: PhantomData<(Address, Signature, Extra)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoCall<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Call".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoSign<Call, Address, Extra> {
+            _phantom: PhantomData<(Call, Address, Extra)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoSign<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Signature".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoExtra<Call, Address, Signature> {
+            _phantom: PhantomData<(Call, Address, Signature)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoExtra<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Extra".into()));
+    }
+
+    #[test]
+    fn test_missing_outer_enum_types() {
+        #[derive(TypeInfo)]
+        struct Runtime;
+
+        #[derive(TypeInfo)]
+        enum RuntimeCall {}
+        #[derive(TypeInfo)]
+        enum RuntimeEvent {}
+
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Address, Call, Signature, Extra> {
+            pub signature: Option<(Address, Signature, Extra)>,
+            pub function: Call,
+        }
+
+        // Missing runtime call.
+        {
+            let mut registry = scale_info::Registry::new();
+            let ty = registry.register_type(&meta_type::<Runtime>());
+            registry.register_type(&meta_type::<RuntimeEvent>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: meta_type::<ExtrinsicType<(), (), (), ()>>(),
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            let metadata = v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            };
+
+            let err = v14_to_v15(metadata).unwrap_err();
+            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeCall".into()));
+        }
+
+        // Missing runtime event.
+        {
+            let mut registry = scale_info::Registry::new();
+            let ty = registry.register_type(&meta_type::<Runtime>());
+            registry.register_type(&meta_type::<RuntimeCall>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: meta_type::<ExtrinsicType<(), (), (), ()>>(),
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            let metadata = v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            };
+
+            let err = v14_to_v15(metadata).unwrap_err();
+            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeEvent".into()));
         }
     }
 }
