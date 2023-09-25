@@ -7,11 +7,11 @@ mod v15;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TryFromError {
     /// Type missing from type registry
-    #[error("Type {0} is expected but not found in the type registry")]
+    #[error("Type id {0} is expected but not found in the type registry")]
     TypeNotFound(u32),
     /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type, but is expected to be one")]
@@ -19,6 +19,12 @@ pub enum TryFromError {
     /// An unsupported metadata version was provided.
     #[error("Cannot convert v{0} metadata into Metadata type")]
     UnsupportedMetadataVersion(u32),
+    /// Type name missing from type registry
+    #[error("Type name {0} is expected but not found in the type registry")]
+    TypeNameNotFound(String),
+    /// Invalid type path.
+    #[error("Type has an invalid path {0}")]
+    InvalidTypePath(String),
 }
 
 impl From<crate::Metadata> for frame_metadata::RuntimeMetadataPrefixed {
