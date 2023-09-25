@@ -13,12 +13,10 @@ use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
 
-/// The type of event we're emitting here.
-type Ev<Hash> = FollowEvent<BlockRef<Hash>>;
-
-/// This subscribes to chainHead_follow, and as long as it's being
-/// polled it will receive pinned blocks, unpin them when appropriate
-/// and broadcast the results to any interested subscribers.
+/// A `Stream` which builds on `FollowStreamDriver`, and allows multiple subscribers to obtain events
+/// from the single underlying subscription (each being provided an `Initialized` message and all new
+/// blocks since then, as if they were each creating a unique `chainHead_follow` subscription). This
+/// is the "top" layer of our follow stream subscriptions, and the one that's interacted with elsewhere.
 #[derive(Debug)]
 pub struct FollowStreamDriver<Hash: BlockHash> {
     inner: FollowStreamUnpin<Hash>,
@@ -156,7 +154,9 @@ impl<Hash: BlockHash> Drop for FollowStreamDriverSubscription<Hash> {
     }
 }
 
-/// Locked shared state.
+/// Locked shared state. The driver stream will access this state to push
+/// events to any subscribers, and subscribers will access it to pull the
+/// events destined for themselves.
 #[derive(Debug, Clone)]
 struct Shared<Hash: BlockHash>(Arc<Mutex<SharedState<Hash>>>);
 
@@ -167,7 +167,7 @@ struct SharedState<Hash: BlockHash> {
     subscribers: HashMap<usize, SubscriberDetails<Hash>>,
     // Keep a buffer of all events from last finalized block so that new
     // subscriptions can be handed this info first.
-    block_events_from_last_finalized: VecDeque<Ev<Hash>>,
+    block_events_from_last_finalized: VecDeque<FollowEvent<BlockRef<Hash>>>,
     // Keep track of the subscription ID we send out on new subs.
     current_subscription_id: Option<String>,
     // Keep track of the init message we send out on new subs.

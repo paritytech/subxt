@@ -10,8 +10,9 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-/// This stream subscribes to `chainHead_follow` when polled, and
-/// resubscribes automatically if it's stopped.
+/// A `Stream` whose goal is to remain subscribed to `chainHead_follow`. It will re-subscribe if the subscription
+/// is ended for any reason, and it will return the current `subscription_id` as an event, along with the other
+/// follow events.
 pub struct FollowStream<Hash> {
     // Using this and not just keeping a copy of the RPC methods
     // around means that we can test this in isolation with dummy streams.
@@ -154,6 +155,8 @@ impl<Hash> Stream for FollowStream<Hash> {
                     }
                 }
                 InnerStreamState::Ready(stream) => {
+                    // We never set the Option to `None`; we just have an Option so
+                    // that we can take ownership of the contents easily here.
                     let (sub, sub_id) = stream.take().expect("should always be Some");
                     this.stream = InnerStreamState::ReceivingEvents(sub);
                     return Poll::Ready(Some(Ok(FollowStreamMsg::Ready(sub_id))));

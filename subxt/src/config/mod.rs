@@ -68,8 +68,7 @@ pub trait BlockHash:
     + DeserializeOwned
     + Encode
     + PartialEq
-    + std::cmp::Eq
-    + std::cmp::PartialEq
+    + Eq
     + std::hash::Hash
 {
 }
@@ -84,8 +83,7 @@ impl<T> BlockHash for T where
         + DeserializeOwned
         + Encode
         + PartialEq
-        + std::cmp::Eq
-        + std::cmp::PartialEq
+        + Eq
         + std::hash::Hash
 {
 }

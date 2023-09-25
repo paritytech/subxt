@@ -352,7 +352,6 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
 
             // We have some keys to hand back already, so do that.
             if let Some(key) = this.keys.pop_front() {
-                println!("Storage entry: {key:?}");
                 return Poll::Ready(Some(Ok(key)));
             }
 

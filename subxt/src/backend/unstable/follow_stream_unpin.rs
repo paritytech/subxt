@@ -19,10 +19,12 @@ use std::task::{Context, Poll, Waker};
 /// The type of stream item.
 pub use super::follow_stream::FollowStreamMsg;
 
-/// This subscribes to `chainHead_follow` when polled, and also
-/// keeps track of pinned blocks, unpinning anything that gets too
-/// old. When blocks that are handed out are dropped, they are also
-/// unpinned.
+/// A `Stream` which builds on `FollowStream`, and handles pinning. It replaces any block hash seen in
+/// the follow events with a `BlockRef` which, when all clones are dropped, will lead to an "unpin" call
+/// for that block hash being queued. It will also automatically unpin any blocks that exceed a given max
+/// age, to try and prevent the underlying stream from ending (and _all_ blocks from being unpinned as a
+/// result). Put simply, it tries to keep every block pinned as long as possible until the block is no longer
+/// used anywhere.
 #[derive(Debug)]
 pub struct FollowStreamUnpin<Hash: BlockHash> {
     // The underlying stream of events.

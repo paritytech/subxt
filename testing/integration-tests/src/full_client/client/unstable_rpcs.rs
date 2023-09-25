@@ -273,11 +273,10 @@ async fn transaction_unstable_submit_and_watch() {
         .transaction_unstable_submit_and_watch(&tx_bytes)
         .await
         .unwrap();
-    println!("about to wait for tx progress");
+
     // Check that the messages we get back on the way to it finishing deserialize ok
     // (this will miss some cases).
     while let Some(_ev) = sub.next().await.transpose().unwrap() {
-        println!("tx progress happened");
         // This stream should end when it hits the relevant stopping event.
         // If the test continues forever then something isn't working.
         // If we hit an error then that's also an issue!
