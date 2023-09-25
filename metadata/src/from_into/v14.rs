@@ -12,7 +12,7 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
     fn try_from(value: v14::RuntimeMetadataV14) -> Result<Self, Self::Error> {
         // Convert to v15 and then convert that into Metadata.
-        v14_to_v15(value).try_into()
+        v14_to_v15(value)?.try_into()
     }
 }
 
@@ -148,14 +148,15 @@ fn v15_to_v14(mut metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 
     }
 }
 
-fn v14_to_v15(mut metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
+fn v14_to_v15(
+    mut metadata: v14::RuntimeMetadataV14,
+) -> Result<v15::RuntimeMetadataV15, TryFromError> {
     // Find the extrinsic types.
-    let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)
-        .expect("Extrinsic types are always present on V14; qed");
+    let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)?;
 
     let outer_enums = generate_outer_enums(&mut metadata);
 
-    v15::RuntimeMetadataV15 {
+    Ok(v15::RuntimeMetadataV15 {
         types: metadata.types,
         pallets: metadata
             .pallets
@@ -245,7 +246,7 @@ fn v14_to_v15(mut metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 
         custom: v15::CustomMetadata {
             map: Default::default(),
         },
-    }
+    })
 }
 
 /// The type IDs extracted from the metadata that represent the
@@ -260,7 +261,7 @@ struct ExtrinsicPartTypeIds {
 
 impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
-    fn new(metadata: &v14::RuntimeMetadataV14) -> Result<Self, String> {
+    fn new(metadata: &v14::RuntimeMetadataV14) -> Result<Self, TryFromError> {
         const ADDRESS: &str = "Address";
         const CALL: &str = "Call";
         const SIGNATURE: &str = "Signature";
@@ -268,7 +269,7 @@ impl ExtrinsicPartTypeIds {
 
         let extrinsic_id = metadata.extrinsic.ty.id;
         let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
-            return Err("Missing extrinsic type".into());
+            return Err(TryFromError::TypeNotFound(extrinsic_id));
         };
 
         let params: HashMap<_, _> = extrinsic_ty
@@ -276,7 +277,7 @@ impl ExtrinsicPartTypeIds {
             .iter()
             .map(|ty_param| {
                 let Some(ty) = ty_param.ty else {
-                    return Err("Missing type param type from extrinsic".to_string());
+                    return Err(TryFromError::TypeNameNotFound(ty_param.name.clone()));
                 };
 
                 Ok((ty_param.name.as_str(), ty.id))
@@ -284,16 +285,16 @@ impl ExtrinsicPartTypeIds {
             .collect::<Result<_, _>>()?;
 
         let Some(address) = params.get(ADDRESS) else {
-            return Err("Missing address type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
         };
         let Some(call) = params.get(CALL) else {
-            return Err("Missing call type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(CALL.into()));
         };
         let Some(signature) = params.get(SIGNATURE) else {
-            return Err("Missing signature type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
         };
         let Some(extra) = params.get(EXTRA) else {
-            return Err("Missing extra type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(EXTRA.into()));
         };
 
         Ok(ExtrinsicPartTypeIds {
@@ -539,7 +540,7 @@ mod tests {
         assert_eq!(v15_sign, v14_sign);
 
         // Ensure we don't lose the information when converting back to v15.
-        let converted_v15 = v14_to_v15(v14);
+        let converted_v15 = v14_to_v15(v14).unwrap();
 
         let v15_addr = v15.types.resolve(v15.extrinsic.address_ty.id).unwrap();
         let converted_v15_addr = converted_v15
@@ -576,7 +577,7 @@ mod tests {
         let v14 = v15_to_v14(v15.clone());
 
         // Convert back to v15 and expect to have the enum types properly generated.
-        let converted_v15 = v14_to_v15(v14);
+        let converted_v15 = v14_to_v15(v14).unwrap();
 
         // RuntimeCall and RuntimeEvent were already present in the metadata v14.
         let v15_call = v15.types.resolve(v15.outer_enums.call_enum_ty.id).unwrap();
