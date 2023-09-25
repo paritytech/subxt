@@ -15,6 +15,7 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 [features]
 default = ["fetch-metadata"]
 fetch-metadata = ["dep:jsonrpsee", "dep:tokio", "dep:frame-metadata"]
+web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }

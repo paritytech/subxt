@@ -29,7 +29,7 @@ native = [
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
-web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js", "subxt-lightclient?/web"]
+web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js", "subxt-lightclient?/web", "subxt-macro/web"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
