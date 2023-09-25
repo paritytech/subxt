@@ -155,7 +155,7 @@ fn v14_to_v15(
     // Find the extrinsic types.
     let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)?;
 
-    let outer_enums = generate_outer_enums(&mut metadata);
+    let outer_enums = generate_outer_enums(&mut metadata)?;
 
     Ok(v15::RuntimeMetadataV15 {
         types: metadata.types,
@@ -309,7 +309,7 @@ impl ExtrinsicPartTypeIds {
 
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
-) -> v15::OuterEnums<scale_info::form::PortableForm> {
+) -> Result<v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
     let mut path = None;
 
     let mut find_type = |name: &str| {
@@ -336,84 +336,48 @@ fn generate_outer_enums(
         })
     };
 
-    let call_enum = find_type("RuntimeCall").or_else(|| find_type("Call"));
-    let event_enum = find_type("RuntimeEvent").or_else(|| find_type("Event"));
-    let error_enum = find_type("RuntimeError").or_else(|| find_type("Error"));
+    let Some(call_enum) = find_type("RuntimeCall") else {
+        return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
+    };
+
+    let Some(event_enum) = find_type("RuntimeEvent") else {
+        return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
+    };
+
+    let error_enum = find_type("RuntimeError");
 
     let path = path.unwrap_or_else(|| vec!["runtime_types".into()]);
-
-    let call_enum_ty = call_enum.unwrap_or_else(|| {
-        let mut segments = path.clone();
-        segments.push("RuntimeCall".into());
-        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Call)
-    });
-
-    let event_enum_ty = event_enum.unwrap_or_else(|| {
-        let mut segments = path.clone();
-        segments.push("RuntimeEvent".into());
-        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Event)
-    });
 
     let error_enum_ty = error_enum.unwrap_or_else(|| {
         let mut segments = path.clone();
         segments.push("RuntimeError".into());
-        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Error)
+        generate_outer_error_enum_type(metadata, segments)
     });
 
-    v15::OuterEnums {
-        call_enum_ty: call_enum_ty.into(),
-        event_enum_ty: event_enum_ty.into(),
+    Ok(v15::OuterEnums {
+        call_enum_ty: call_enum.into(),
+        event_enum_ty: event_enum.into(),
         error_enum_ty: error_enum_ty.into(),
-    }
+    })
 }
 
-/// The type for which the runtime outer enum is generated.
-enum GeneratedEnumType {
-    /// Generated for calls.
-    Call,
-    /// Generated for events.
-    Event,
-    /// Generated for errors.
-    Error,
-}
-
-/// Generates an outer enum type and adds it to the metadata.
-///
-/// This can be used to generate outer enums, such as `RuntimeError`, `RuntimeCall` and `RuntimeEvent`.
+/// Generates an outer `RuntimeError` enum type and adds it to the metadata.
 ///
 /// Returns the id of the generated type from the registry.
-fn generate_outer_enum_type(
+fn generate_outer_error_enum_type(
     metadata: &mut v14::RuntimeMetadataV14,
     path_segments: Vec<String>,
-    enum_ty: GeneratedEnumType,
 ) -> u32 {
     let variants: Vec<_> = metadata
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let (path, ty) = match enum_ty {
-                GeneratedEnumType::Call => {
-                    let Some(call) = &pallet.calls else {
-                        return None;
-                    };
-
-                    (format!("{}Call", pallet.name), call.ty.id.into())
-                }
-                GeneratedEnumType::Event => {
-                    let Some(event) = &pallet.event else {
-                        return None;
-                    };
-
-                    (format!("{}Event", pallet.name), event.ty.id.into())
-                }
-                GeneratedEnumType::Error => {
-                    let Some(error) = &pallet.error else {
-                        return None;
-                    };
-
-                    (format!("{}Error", pallet.name), error.ty.id.into())
-                }
+            let Some(error) = &pallet.error else {
+                return None;
             };
+
+            let path = format!("{}Error", pallet.name);
+            let ty = error.ty.id.into();
 
             Some(scale_info::Variant {
                 name: pallet.name.clone(),
