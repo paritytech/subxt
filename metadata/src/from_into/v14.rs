@@ -331,9 +331,9 @@ fn generate_outer_enums<'a>(
         })
     };
 
-    let call_enum = find_type("RuntimeCall");
-    let event_enum = find_type("RuntimeEvent");
-    let error_enum = find_type("RuntimeError");
+    let call_enum = find_type("RuntimeCall").or(find_type("Call"));
+    let event_enum = find_type("RuntimeEvent").or(find_type("Event"));
+    let error_enum = find_type("RuntimeError").or(find_type("Error"));
 
     let path = path.unwrap_or_else(|| vec!["runtime_types".into()]);
 
