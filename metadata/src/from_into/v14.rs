@@ -6,11 +6,7 @@ use std::collections::HashMap;
 
 use super::TryFromError;
 use crate::Metadata;
-use frame_metadata::{
-    v14::{self, PalletMetadata},
-    v15,
-};
-use scale_info::form::PortableForm;
+use frame_metadata::{v14, v15};
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
@@ -309,87 +305,125 @@ impl ExtrinsicPartTypeIds {
     }
 }
 
-fn generate_outer_enums(
-    metadata: &mut v14::RuntimeMetadataV14,
+fn generate_outer_enums<'a>(
+    metadata: &'a mut v14::RuntimeMetadataV14,
 ) -> v15::OuterEnums<scale_info::form::PortableForm> {
-    let call_enum = metadata
-        .types
-        .types
-        .iter()
-        .find(|ty| {
+    let mut path = None;
+
+    let mut find_type = |name: &str| {
+        metadata.types.types.iter().find_map(|ty| {
             let Some(ident) = ty.ty.path.ident() else {
-                return false;
+                return None;
             };
-            ident == "RuntimeCall"
+
+            if ident != name {
+                return None;
+            }
+
+            if path.is_none() {
+                let mut segments = ty.ty.path.segments.clone();
+                segments.pop();
+                path = Some(segments);
+            }
+
+            Some(ty.id)
         })
-        .expect("RuntimeCall exists in V14; qed");
+    };
 
-    let event_enum = metadata
-        .types
-        .types
-        .iter()
-        .find(|ty| {
-            let Some(ident) = ty.ty.path.ident() else {
-                return false;
-            };
-            ident == "RuntimeEvent"
-        })
-        .expect("RuntimeEvent exists in V14; qed");
+    let call_enum = find_type("RuntimeCall");
+    let event_enum = find_type("RuntimeEvent");
+    let error_enum = find_type("RuntimeError");
 
-    let call_ty = call_enum.id.into();
-    let event_ty = event_enum.id.into();
+    let path = path.unwrap_or_else(|| vec!["runtime_types".into()]);
 
-    let mut path_segments = call_enum.ty.path.segments.clone();
-    let last = path_segments
-        .last_mut()
-        .expect("Should have at least one segment checked above; qed");
-    *last = "RuntimeError".to_string();
+    let call_enum_ty = call_enum.unwrap_or_else(|| {
+        let mut segments = path.clone();
+        segments.push("RuntimeCall".into());
+        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Call);
+        id
+    });
 
-    let error_ty_id = generate_outer_enum_type(metadata, path_segments, |pallet| {
-        let Some(pallet_error) = &pallet.error else {
-            return None;
-        };
-        let path = format!("{}Error", pallet.name);
-        Some(scale_info::Variant {
-            name: pallet.name.clone(),
-            fields: vec![scale_info::Field {
-                name: None,
-                ty: pallet_error.ty.id.into(),
-                type_name: Some(path),
-                docs: vec![],
-            }],
-            index: pallet.index,
-            docs: vec![],
-        })
+    let event_enum_ty = event_enum.unwrap_or_else(|| {
+        let mut segments = path.clone();
+        segments.push("RuntimeEvent".into());
+        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Event);
+        id
+    });
+
+    let error_enum_ty = error_enum.unwrap_or_else(|| {
+        let mut segments = path.clone();
+        segments.push("RuntimeError".into());
+        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Error);
+        id
     });
 
     v15::OuterEnums {
-        call_enum_ty: call_ty,
-        event_enum_ty: event_ty,
-        error_enum_ty: error_ty_id.into(),
+        call_enum_ty: call_enum_ty.into(),
+        event_enum_ty: event_enum_ty.into(),
+        error_enum_ty: error_enum_ty.into(),
     }
+}
+
+/// The type for which the runtime outer enum is generated.
+enum GeneratedEnumType {
+    /// Generated for calls.
+    Call,
+    /// Generated for events.
+    Event,
+    /// Generated for errors.
+    Error,
 }
 
 /// Generates an outer enum type and adds it to the metadata.
 ///
-/// Takes in a path at which the outer enum is generated, and a filter of pallets which
-/// retains the enum variant of interest.
-///
 /// This can be used to generate outer enums, such as `RuntimeError`, `RuntimeCall` and `RuntimeEvent`.
 ///
 /// Returns the id of the generated type from the registry.
-fn generate_outer_enum_type<F>(
+fn generate_outer_enum_type(
     metadata: &mut v14::RuntimeMetadataV14,
     path_segments: Vec<String>,
-    mut pallet_variant_filter: F,
-) -> u32
-where
-    F: FnMut(&PalletMetadata<PortableForm>) -> Option<scale_info::Variant<PortableForm>>,
-{
+    enum_ty: GeneratedEnumType,
+) -> u32 {
     let variants: Vec<_> = metadata
         .pallets
         .iter()
-        .filter_map(|pallet| pallet_variant_filter(pallet))
+        .filter_map(|pallet| {
+            let (path, ty) = match enum_ty {
+                GeneratedEnumType::Call => {
+                    let Some(call) = &pallet.calls else {
+                        return None;
+                    };
+
+                    (format!("{}Call", pallet.name), call.ty.id.into())
+                }
+                GeneratedEnumType::Event => {
+                    let Some(event) = &pallet.event else {
+                        return None;
+                    };
+
+                    (format!("{}Event", pallet.name), event.ty.id.into())
+                }
+                GeneratedEnumType::Error => {
+                    let Some(error) = &pallet.error else {
+                        return None;
+                    };
+
+                    (format!("{}Error", pallet.name), error.ty.id.into())
+                }
+            };
+
+            Some(scale_info::Variant {
+                name: pallet.name.clone(),
+                fields: vec![scale_info::Field {
+                    name: None,
+                    ty,
+                    type_name: Some(path),
+                    docs: vec![],
+                }],
+                index: pallet.index,
+                docs: vec![],
+            })
+        })
         .collect();
 
     let enum_type = scale_info::Type {
