@@ -310,9 +310,7 @@ impl ExtrinsicPartTypeIds {
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
 ) -> Result<v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
-    let mut path = None;
-
-    let mut find_type = |name: &str| {
+    let find_type = |name: &str| {
         metadata.types.types.iter().find_map(|ty| {
             let Some(ident) = ty.ty.path.ident() else {
                 return None;
@@ -326,38 +324,32 @@ fn generate_outer_enums(
                 return None;
             };
 
-            if path.is_none() {
-                let mut segments = ty.ty.path.segments.clone();
-                segments.pop();
-                path = Some(segments);
-            }
-
-            Some(ty.id)
+            Some((ty.id, ty.ty.path.segments.clone()))
         })
     };
 
-    let Some(call_enum) = find_type("RuntimeCall") else {
+    let Some((call_enum, mut call_path)) = find_type("RuntimeCall") else {
         return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
     };
 
-    let Some(event_enum) = find_type("RuntimeEvent") else {
+    let Some((event_enum, _)) = find_type("RuntimeEvent") else {
         return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
     };
 
-    let error_enum = find_type("RuntimeError");
-
-    let path = path.unwrap_or_else(|| vec!["runtime_types".into()]);
-
-    let error_enum_ty = error_enum.unwrap_or_else(|| {
-        let mut segments = path.clone();
-        segments.push("RuntimeError".into());
-        generate_outer_error_enum_type(metadata, segments)
-    });
+    let error_enum = if let Some((error_enum, _)) = find_type("RuntimeError") {
+        error_enum
+    } else {
+        let Some(last) = call_path.last_mut() else {
+            return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
+        };
+        *last = "RuntimeError".to_string();
+        generate_outer_error_enum_type(metadata, call_path)
+    };
 
     Ok(v15::OuterEnums {
         call_enum_ty: call_enum.into(),
         event_enum_ty: event_enum.into(),
-        error_enum_ty: error_enum_ty.into(),
+        error_enum_ty: error_enum.into(),
     })
 }
 

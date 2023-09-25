@@ -22,6 +22,9 @@ pub enum TryFromError {
     /// Type name missing from type registry
     #[error("Type name {0} is expected but not found in the type registry")]
     TypeNameNotFound(String),
+    /// Invalid type path.
+    #[error("Type has an invalid path {0}")]
+    InvalidTypePath(String),
 }
 
 impl From<crate::Metadata> for frame_metadata::RuntimeMetadataPrefixed {
