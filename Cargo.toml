@@ -95,7 +95,7 @@ js-sys = "0.3.61"
 wasm-bindgen-futures = "0.4.19"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
-tokio-util = "0.7.8"
+tokio-util = "0.7.9"
 
 # Substrate crates:
 sp-core = { version = "21.0.0", default-features = false }
