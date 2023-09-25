@@ -307,8 +307,8 @@ impl ExtrinsicPartTypeIds {
     }
 }
 
-fn generate_outer_enums<'a>(
-    metadata: &'a mut v14::RuntimeMetadataV14,
+fn generate_outer_enums(
+    metadata: &mut v14::RuntimeMetadataV14,
 ) -> v15::OuterEnums<scale_info::form::PortableForm> {
     let mut path = None;
 
@@ -345,22 +345,19 @@ fn generate_outer_enums<'a>(
     let call_enum_ty = call_enum.unwrap_or_else(|| {
         let mut segments = path.clone();
         segments.push("RuntimeCall".into());
-        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Call);
-        id
+        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Call)
     });
 
     let event_enum_ty = event_enum.unwrap_or_else(|| {
         let mut segments = path.clone();
         segments.push("RuntimeEvent".into());
-        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Event);
-        id
+        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Event)
     });
 
     let error_enum_ty = error_enum.unwrap_or_else(|| {
         let mut segments = path.clone();
         segments.push("RuntimeError".into());
-        let id = generate_outer_enum_type(metadata, segments, GeneratedEnumType::Error);
-        id
+        generate_outer_enum_type(metadata, segments, GeneratedEnumType::Error)
     });
 
     v15::OuterEnums {
