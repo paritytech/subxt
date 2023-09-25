@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use super::TryFromError;
 use crate::Metadata;
 use frame_metadata::{v14, v15};
+use scale_info::TypeDef;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
@@ -320,6 +321,10 @@ fn generate_outer_enums<'a>(
             if ident != name {
                 return None;
             }
+
+            let TypeDef::Variant(_) = &ty.ty.type_def else {
+                return None;
+            };
 
             if path.is_none() {
                 let mut segments = ty.ty.path.segments.clone();
