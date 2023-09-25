@@ -6,7 +6,11 @@ use std::collections::HashMap;
 
 use super::TryFromError;
 use crate::Metadata;
-use frame_metadata::{v14, v15};
+use frame_metadata::{
+    v14::{self, PalletMetadata},
+    v15,
+};
+use scale_info::form::PortableForm;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
@@ -341,7 +345,23 @@ fn generate_outer_enums(
         .expect("Should have at least one segment checked above; qed");
     *last = "RuntimeError".to_string();
 
-    let error_ty_id = generate_runtime_error_type(metadata, path_segments);
+    let error_ty_id = generate_outer_enum_type(metadata, path_segments, |pallet| {
+        let Some(pallet_error) = &pallet.error else {
+            return None;
+        };
+        let path = format!("{}Error", pallet.name);
+        Some(scale_info::Variant {
+            name: pallet.name.clone(),
+            fields: vec![scale_info::Field {
+                name: None,
+                ty: pallet_error.ty.id.into(),
+                type_name: Some(path),
+                docs: vec![],
+            }],
+            index: pallet.index,
+            docs: vec![],
+        })
+    });
 
     v15::OuterEnums {
         call_enum_ty: call_ty,
@@ -350,37 +370,29 @@ fn generate_outer_enums(
     }
 }
 
-/// Generate the `RuntimeError` type and add it to the metadata.
+/// Generates an outer enum type and adds it to the metadata.
 ///
-/// Returns the `RuntimeError` Id from the registry.
-fn generate_runtime_error_type(
+/// Takes in a path at which the outer enum is generated, and a filter of pallets which
+/// retains the enum variant of interest.
+///
+/// This can be used to generate outer enums, such as `RuntimeError`, `RuntimeCall` and `RuntimeEvent`.
+///
+/// Returns the id of the generated type from the registry.
+fn generate_outer_enum_type<F>(
     metadata: &mut v14::RuntimeMetadataV14,
     path_segments: Vec<String>,
-) -> u32 {
+    mut pallet_variant_filter: F,
+) -> u32
+where
+    F: FnMut(&PalletMetadata<PortableForm>) -> Option<scale_info::Variant<PortableForm>>,
+{
     let variants: Vec<_> = metadata
         .pallets
         .iter()
-        .filter_map(|pallet| {
-            let Some(pallet_error) = &pallet.error else {
-                return None;
-            };
-            let path = format!("{}Error", pallet.name);
-
-            Some(scale_info::Variant {
-                name: pallet.name.clone(),
-                fields: vec![scale_info::Field {
-                    name: None,
-                    ty: pallet_error.ty.id.into(),
-                    type_name: Some(path),
-                    docs: vec![],
-                }],
-                index: pallet.index,
-                docs: vec![],
-            })
-        })
+        .filter_map(|pallet| pallet_variant_filter(pallet))
         .collect();
 
-    let error_type = scale_info::Type {
+    let enum_type = scale_info::Type {
         path: scale_info::Path {
             segments: path_segments,
         },
@@ -389,14 +401,14 @@ fn generate_runtime_error_type(
         docs: vec![],
     };
 
-    let error_type_id = metadata.types.types.len() as u32;
+    let enum_type_id = metadata.types.types.len() as u32;
 
     metadata.types.types.push(scale_info::PortableType {
-        id: error_type_id,
-        ty: error_type,
+        id: enum_type_id,
+        ty: enum_type,
     });
 
-    error_type_id
+    enum_type_id
 }
 
 #[cfg(test)]
