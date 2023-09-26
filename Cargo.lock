@@ -4255,6 +4255,7 @@ version = "0.31.0"
 dependencies = [
  "bitvec",
  "frame-metadata 16.0.0",
+ "getrandom 0.2.10",
  "heck",
  "hex",
  "jsonrpsee",

@@ -53,8 +53,8 @@ mod types;
 #[cfg(feature = "fetch-metadata")]
 pub mod utils;
 
-#[cfg(all(feature = "web", feature = "fetch-metadata"))]
-compile_error!("subxt-codegen: the features 'web' and 'fetch_metadata' cannot be used together.");
+#[cfg(feature = "web")]
+use getrandom as _;
 
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
