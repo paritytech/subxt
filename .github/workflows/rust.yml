@@ -29,19 +29,8 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download substrate-node binary
-              id: download-artifact
-              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
-              with:
-                workflow: build-substrate.yml
-                name: nightly-substrate-binary
-
-            - name: Prepare substrate-node binary
-              run: |
-                chmod u+x ./substrate-node
-                ./substrate-node --version
-                mkdir -p ~/.local/bin
-                cp ./substrate-node ~/.local/bin
+            - name: Use substrate-node binary
+              uses: ./use-substrate.yml
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
