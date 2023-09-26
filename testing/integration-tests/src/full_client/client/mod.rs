@@ -72,7 +72,7 @@ async fn transaction_validation() {
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.public_key().into(), 10_000);
+        .transfer_allow_death(bob.public_key().into(), 10_000);
 
     let signed_extrinsic = api
         .tx()
@@ -110,7 +110,7 @@ async fn validation_fails() {
     // The actual TX is not important; the account has no funds to pay for it.
     let tx = node_runtime::tx()
         .balances()
-        .transfer(to.public_key().into(), 1);
+        .transfer_allow_death(to.public_key().into(), 1);
 
     let signed_extrinsic = api
         .tx()
@@ -232,7 +232,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 
     let tx = node_runtime::tx()
         .balances()
-        .transfer(dev::alice().public_key().into(), 12345000000000000);
+        .transfer_allow_death(dev::alice().public_key().into(), 12345000000000000);
 
     let actual_tx = api.tx().create_unsigned(&tx).unwrap();
 
@@ -242,10 +242,10 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     // - start local substrate node.
     // - open polkadot.js UI in browser and point at local node.
     // - open dev console (may need to refresh page now) and find the WS connection.
-    // - create a balances.transfer to ALICE with 12345 and "submit unsigned".
+    // - create a balances.transferAllowDeath to ALICE (doesn't matter who from) with 12345 and "submit unsigned".
     // - find the submitAndWatchExtrinsic call in the WS connection to get these bytes:
     let expected_tx_bytes = hex::decode(
-        "b004060700d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0f0090c04bb6db2b"
+        "b004060000d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d0f0090c04bb6db2b"
     )
         .unwrap();
 
@@ -261,7 +261,7 @@ async fn extrinsic_hash_is_same_as_returned() {
 
     let payload = node_runtime::tx()
         .balances()
-        .transfer(dev::alice().public_key().into(), 12345000000000000);
+        .transfer_allow_death(dev::alice().public_key().into(), 12345000000000000);
 
     let tx = api
         .tx()
@@ -314,7 +314,7 @@ async fn partial_fee_estimate_correct() {
     let bob = dev::bob();
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob.public_key().into(), 1_000_000_000_000);
+        .transfer_allow_death(bob.public_key().into(), 1_000_000_000_000);
 
     let signed_extrinsic = api
         .tx()
@@ -326,7 +326,7 @@ async fn partial_fee_estimate_correct() {
     let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
 
     // Method II: TransactionPaymentApi_query_fee_details + calculations
-    let latest_block_ref = api.backend().latest_best_block_ref().await.unwrap();
+    let latest_block_ref = api.backend().latest_finalized_block_ref().await.unwrap();
     let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
     let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
     let InclusionFee {

@@ -19,6 +19,7 @@ use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+// Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
 
 /// The legacy backend.
@@ -125,15 +126,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         Ok(BlockRef::from_hash(hash))
     }
 
-    async fn latest_best_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let hash = self
-            .methods
-            .chain_get_block_hash(None)
-            .await?
-            .ok_or_else(|| Error::Other("Latest best block doesn't exist".into()))?;
-        Ok(BlockRef::from_hash(hash))
-    }
-
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
         let details = self.methods.state_get_runtime_version(None).await?;
         Ok(RuntimeVersion {
@@ -231,7 +223,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                             })
                         }
                         RpcTransactionStatus::InBlock(hash) => {
-                            Some(TransactionStatus::InBestBlock { hash })
+                            Some(TransactionStatus::InBestBlock {
+                                hash: BlockRef::from_hash(hash),
+                            })
                         }
                         // These 5 mean that the stream will very likely end:
                         RpcTransactionStatus::FinalityTimeout(_) => {
@@ -240,7 +234,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                             })
                         }
                         RpcTransactionStatus::Finalized(hash) => {
-                            Some(TransactionStatus::InFinalizedBlock { hash })
+                            Some(TransactionStatus::InFinalizedBlock {
+                                hash: BlockRef::from_hash(hash),
+                            })
                         }
                         RpcTransactionStatus::Usurped(_) => Some(TransactionStatus::Invalid {
                             message: "Transaction was usurped by another with the same nonce"

@@ -85,8 +85,8 @@ where
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // get the ref for the latest block and use that.
-            let block_ref = client.backend().latest_best_block_ref().await?;
+            // get the ref for the latest finalized block and use that.
+            let block_ref = client.backend().latest_finalized_block_ref().await?;
 
             Ok(Storage::new(client, block_ref))
         }

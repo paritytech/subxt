@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build a balance transfer extrinsic.
     let dest = dev::bob().public_key().into();
-    let tx = polkadot::tx().balances().transfer(dest, 10_000);
+    let tx = polkadot::tx().balances().transfer_allow_death(dest, 10_000);
 
     let latest_block = api.blocks().at_latest().await?;
 

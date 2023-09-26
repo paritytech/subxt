@@ -427,7 +427,6 @@ pub fn get_custom_value_hash(
 pub fn get_storage_hash(pallet: &PalletMetadata, entry_name: &str) -> Option<[u8; HASH_LEN]> {
     let storage = pallet.storage()?;
     let entry = storage.entry_by_name(entry_name)?;
-
     let hash = get_storage_entry_hash(pallet.types, entry, &mut HashMap::new());
     Some(hash)
 }

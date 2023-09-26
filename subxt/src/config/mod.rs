@@ -32,16 +32,7 @@ pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsi
 // rather than having to `unsafe impl` them ourselves.
 pub trait Config: Sized + Send + Sync + 'static {
     /// The output of the `Hasher` function.
-    type Hash: Debug
-        + Copy
-        + Send
-        + Sync
-        + Decode
-        + AsRef<[u8]>
-        + Serialize
-        + DeserializeOwned
-        + Encode
-        + PartialEq;
+    type Hash: BlockHash;
 
     /// The account ID type.
     type AccountId: Debug + Clone + Encode;
@@ -64,6 +55,38 @@ pub trait Config: Sized + Send + Sync + 'static {
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
 pub type OtherParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams;
+
+/// Block hashes must conform to a bunch of things to be used in Subxt.
+pub trait BlockHash:
+    Debug
+    + Copy
+    + Send
+    + Sync
+    + Decode
+    + AsRef<[u8]>
+    + Serialize
+    + DeserializeOwned
+    + Encode
+    + PartialEq
+    + Eq
+    + std::hash::Hash
+{
+}
+impl<T> BlockHash for T where
+    T: Debug
+        + Copy
+        + Send
+        + Sync
+        + Decode
+        + AsRef<[u8]>
+        + Serialize
+        + DeserializeOwned
+        + Encode
+        + PartialEq
+        + Eq
+        + std::hash::Hash
+{
+}
 
 /// This represents the hasher used by a node to hash things like block headers
 /// and extrinsics.

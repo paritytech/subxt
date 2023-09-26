@@ -106,7 +106,7 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it. Other details will be obtained from the chain.
     pub async fn from_backend<B: Backend<T>>(backend: Arc<B>) -> Result<OnlineClient<T>, Error> {
-        let latest_block = backend.latest_best_block_ref().await?;
+        let latest_block = backend.latest_finalized_block_ref().await?;
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
             backend.genesis_hash(),
@@ -437,7 +437,7 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let latest_block_ref = match self.client.backend().latest_best_block_ref().await {
+        let latest_block_ref = match self.client.backend().latest_finalized_block_ref().await {
             Ok(block_ref) => block_ref,
             Err(e) => return Some(Err(e)),
         };

@@ -65,10 +65,6 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error>;
 
-    /// Get the most recent best block hash.
-    /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
-    async fn latest_best_block_ref(&self) -> Result<BlockRef<T::Hash>, Error>;
-
     /// Get information about the current runtime.
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
 
@@ -314,15 +310,17 @@ pub enum TransactionStatus<Hash> {
         /// Number of peers it's been broadcast to.
         num_peers: u32,
     },
+    /// Transaciton is no longer in a best block.
+    NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.
     InBestBlock {
         /// Block hash the transaction is in.
-        hash: Hash,
+        hash: BlockRef<Hash>,
     },
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
     InFinalizedBlock {
         /// Block hash the transaction is in.
-        hash: Hash,
+        hash: BlockRef<Hash>,
     },
     /// Something went wrong in the node.
     Error {
