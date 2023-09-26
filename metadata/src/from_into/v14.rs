@@ -7,12 +7,13 @@ use std::collections::HashMap;
 use super::TryFromError;
 use crate::Metadata;
 use frame_metadata::{v14, v15};
+use scale_info::TypeDef;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
     fn try_from(value: v14::RuntimeMetadataV14) -> Result<Self, Self::Error> {
         // Convert to v15 and then convert that into Metadata.
-        v14_to_v15(value).try_into()
+        v14_to_v15(value)?.try_into()
     }
 }
 
@@ -148,14 +149,15 @@ fn v15_to_v14(mut metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 
     }
 }
 
-fn v14_to_v15(mut metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 {
+fn v14_to_v15(
+    mut metadata: v14::RuntimeMetadataV14,
+) -> Result<v15::RuntimeMetadataV15, TryFromError> {
     // Find the extrinsic types.
-    let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)
-        .expect("Extrinsic types are always present on V14; qed");
+    let extrinsic_parts = ExtrinsicPartTypeIds::new(&metadata)?;
 
-    let outer_enums = generate_outer_enums(&mut metadata);
+    let outer_enums = generate_outer_enums(&mut metadata)?;
 
-    v15::RuntimeMetadataV15 {
+    Ok(v15::RuntimeMetadataV15 {
         types: metadata.types,
         pallets: metadata
             .pallets
@@ -245,7 +247,7 @@ fn v14_to_v15(mut metadata: v14::RuntimeMetadataV14) -> v15::RuntimeMetadataV15 
         custom: v15::CustomMetadata {
             map: Default::default(),
         },
-    }
+    })
 }
 
 /// The type IDs extracted from the metadata that represent the
@@ -260,7 +262,7 @@ struct ExtrinsicPartTypeIds {
 
 impl ExtrinsicPartTypeIds {
     /// Extract the generic type parameters IDs from the extrinsic type.
-    fn new(metadata: &v14::RuntimeMetadataV14) -> Result<Self, String> {
+    fn new(metadata: &v14::RuntimeMetadataV14) -> Result<Self, TryFromError> {
         const ADDRESS: &str = "Address";
         const CALL: &str = "Call";
         const SIGNATURE: &str = "Signature";
@@ -268,7 +270,7 @@ impl ExtrinsicPartTypeIds {
 
         let extrinsic_id = metadata.extrinsic.ty.id;
         let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
-            return Err("Missing extrinsic type".into());
+            return Err(TryFromError::TypeNotFound(extrinsic_id));
         };
 
         let params: HashMap<_, _> = extrinsic_ty
@@ -276,7 +278,7 @@ impl ExtrinsicPartTypeIds {
             .iter()
             .map(|ty_param| {
                 let Some(ty) = ty_param.ty else {
-                    return Err("Missing type param type from extrinsic".to_string());
+                    return Err(TryFromError::TypeNameNotFound(ty_param.name.clone()));
                 };
 
                 Ok((ty_param.name.as_str(), ty.id))
@@ -284,16 +286,16 @@ impl ExtrinsicPartTypeIds {
             .collect::<Result<_, _>>()?;
 
         let Some(address) = params.get(ADDRESS) else {
-            return Err("Missing address type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
         };
         let Some(call) = params.get(CALL) else {
-            return Err("Missing call type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(CALL.into()));
         };
         let Some(signature) = params.get(SIGNATURE) else {
-            return Err("Missing signature type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
         };
         let Some(extra) = params.get(EXTRA) else {
-            return Err("Missing extra type from extrinsic".into());
+            return Err(TryFromError::TypeNameNotFound(EXTRA.into()));
         };
 
         Ok(ExtrinsicPartTypeIds {
@@ -307,53 +309,54 @@ impl ExtrinsicPartTypeIds {
 
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
-) -> v15::OuterEnums<scale_info::form::PortableForm> {
-    let call_enum = metadata
-        .types
-        .types
-        .iter()
-        .find(|ty| {
+) -> Result<v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
+    let find_type = |name: &str| {
+        metadata.types.types.iter().find_map(|ty| {
             let Some(ident) = ty.ty.path.ident() else {
-                return false;
+                return None;
             };
-            ident == "RuntimeCall"
-        })
-        .expect("RuntimeCall exists in V14; qed");
 
-    let event_enum = metadata
-        .types
-        .types
-        .iter()
-        .find(|ty| {
-            let Some(ident) = ty.ty.path.ident() else {
-                return false;
+            if ident != name {
+                return None;
+            }
+
+            let TypeDef::Variant(_) = &ty.ty.type_def else {
+                return None;
             };
-            ident == "RuntimeEvent"
+
+            Some((ty.id, ty.ty.path.segments.clone()))
         })
-        .expect("RuntimeEvent exists in V14; qed");
+    };
 
-    let call_ty = call_enum.id.into();
-    let event_ty = event_enum.id.into();
+    let Some((call_enum, mut call_path)) = find_type("RuntimeCall") else {
+        return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
+    };
 
-    let mut path_segments = call_enum.ty.path.segments.clone();
-    let last = path_segments
-        .last_mut()
-        .expect("Should have at least one segment checked above; qed");
-    *last = "RuntimeError".to_string();
+    let Some((event_enum, _)) = find_type("RuntimeEvent") else {
+        return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
+    };
 
-    let error_ty_id = generate_runtime_error_type(metadata, path_segments);
+    let error_enum = if let Some((error_enum, _)) = find_type("RuntimeError") {
+        error_enum
+    } else {
+        let Some(last) = call_path.last_mut() else {
+            return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
+        };
+        *last = "RuntimeError".to_string();
+        generate_outer_error_enum_type(metadata, call_path)
+    };
 
-    v15::OuterEnums {
-        call_enum_ty: call_ty,
-        event_enum_ty: event_ty,
-        error_enum_ty: error_ty_id.into(),
-    }
+    Ok(v15::OuterEnums {
+        call_enum_ty: call_enum.into(),
+        event_enum_ty: event_enum.into(),
+        error_enum_ty: error_enum.into(),
+    })
 }
 
-/// Generate the `RuntimeError` type and add it to the metadata.
+/// Generates an outer `RuntimeError` enum type and adds it to the metadata.
 ///
-/// Returns the `RuntimeError` Id from the registry.
-fn generate_runtime_error_type(
+/// Returns the id of the generated type from the registry.
+fn generate_outer_error_enum_type(
     metadata: &mut v14::RuntimeMetadataV14,
     path_segments: Vec<String>,
 ) -> u32 {
@@ -361,16 +364,18 @@ fn generate_runtime_error_type(
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let Some(pallet_error) = &pallet.error else {
+            let Some(error) = &pallet.error else {
                 return None;
             };
+
             let path = format!("{}Error", pallet.name);
+            let ty = error.ty.id.into();
 
             Some(scale_info::Variant {
                 name: pallet.name.clone(),
                 fields: vec![scale_info::Field {
                     name: None,
-                    ty: pallet_error.ty.id.into(),
+                    ty,
                     type_name: Some(path),
                     docs: vec![],
                 }],
@@ -380,7 +385,7 @@ fn generate_runtime_error_type(
         })
         .collect();
 
-    let error_type = scale_info::Type {
+    let enum_type = scale_info::Type {
         path: scale_info::Path {
             segments: path_segments,
         },
@@ -389,23 +394,25 @@ fn generate_runtime_error_type(
         docs: vec![],
     };
 
-    let error_type_id = metadata.types.types.len() as u32;
+    let enum_type_id = metadata.types.types.len() as u32;
 
     metadata.types.types.push(scale_info::PortableType {
-        id: error_type_id,
-        ty: error_type,
+        id: enum_type_id,
+        ty: enum_type,
     });
 
-    error_type_id
+    enum_type_id
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use codec::Decode;
-    use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
-    use scale_info::TypeDef;
-    use std::{fs, path::Path};
+    use frame_metadata::{
+        v14::ExtrinsicMetadata, v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed,
+    };
+    use scale_info::{meta_type, IntoPortable, TypeDef, TypeInfo};
+    use std::{fs, marker::PhantomData, path::Path};
 
     fn load_v15_metadata() -> RuntimeMetadataV15 {
         let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
@@ -493,7 +500,7 @@ mod tests {
         assert_eq!(v15_sign, v14_sign);
 
         // Ensure we don't lose the information when converting back to v15.
-        let converted_v15 = v14_to_v15(v14);
+        let converted_v15 = v14_to_v15(v14).unwrap();
 
         let v15_addr = v15.types.resolve(v15.extrinsic.address_ty.id).unwrap();
         let converted_v15_addr = converted_v15
@@ -530,7 +537,7 @@ mod tests {
         let v14 = v15_to_v14(v15.clone());
 
         // Convert back to v15 and expect to have the enum types properly generated.
-        let converted_v15 = v14_to_v15(v14);
+        let converted_v15 = v14_to_v15(v14).unwrap();
 
         // RuntimeCall and RuntimeEvent were already present in the metadata v14.
         let v15_call = v15.types.resolve(v15.outer_enums.call_enum_ty.id).unwrap();
@@ -591,6 +598,126 @@ mod tests {
                     .unwrap();
                 assert_eq!(ty, converted_ty);
             }
+        }
+    }
+
+    #[test]
+    fn test_missing_extrinsic_types() {
+        #[derive(TypeInfo)]
+        struct Runtime;
+
+        let generate_metadata = |extrinsic_ty| {
+            let mut registry = scale_info::Registry::new();
+
+            let ty = registry.register_type(&meta_type::<Runtime>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: extrinsic_ty,
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            }
+        };
+
+        let metadata = generate_metadata(meta_type::<()>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Address".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoCall<Address, Signature, Extra> {
+            _phantom: PhantomData<(Address, Signature, Extra)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoCall<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Call".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoSign<Call, Address, Extra> {
+            _phantom: PhantomData<(Call, Address, Extra)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoSign<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Signature".into()));
+
+        #[derive(TypeInfo)]
+        struct ExtrinsicNoExtra<Call, Address, Signature> {
+            _phantom: PhantomData<(Call, Address, Signature)>,
+        }
+        let metadata = generate_metadata(meta_type::<ExtrinsicNoExtra<(), (), ()>>());
+        let err = v14_to_v15(metadata).unwrap_err();
+        assert_eq!(err, TryFromError::TypeNameNotFound("Extra".into()));
+    }
+
+    #[test]
+    fn test_missing_outer_enum_types() {
+        #[derive(TypeInfo)]
+        struct Runtime;
+
+        #[derive(TypeInfo)]
+        enum RuntimeCall {}
+        #[derive(TypeInfo)]
+        enum RuntimeEvent {}
+
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct ExtrinsicType<Address, Call, Signature, Extra> {
+            pub signature: Option<(Address, Signature, Extra)>,
+            pub function: Call,
+        }
+
+        // Missing runtime call.
+        {
+            let mut registry = scale_info::Registry::new();
+            let ty = registry.register_type(&meta_type::<Runtime>());
+            registry.register_type(&meta_type::<RuntimeEvent>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: meta_type::<ExtrinsicType<(), (), (), ()>>(),
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            let metadata = v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            };
+
+            let err = v14_to_v15(metadata).unwrap_err();
+            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeCall".into()));
+        }
+
+        // Missing runtime event.
+        {
+            let mut registry = scale_info::Registry::new();
+            let ty = registry.register_type(&meta_type::<Runtime>());
+            registry.register_type(&meta_type::<RuntimeCall>());
+
+            let extrinsic = ExtrinsicMetadata {
+                ty: meta_type::<ExtrinsicType<(), (), (), ()>>(),
+                version: 0,
+                signed_extensions: vec![],
+            }
+            .into_portable(&mut registry);
+
+            let metadata = v14::RuntimeMetadataV14 {
+                types: registry.into(),
+                pallets: Vec::new(),
+                extrinsic,
+                ty,
+            };
+
+            let err = v14_to_v15(metadata).unwrap_err();
+            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeEvent".into()));
         }
     }
 }
