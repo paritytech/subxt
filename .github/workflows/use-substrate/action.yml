@@ -11,6 +11,7 @@ runs:
         name: nightly-substrate-binary
 
     - name: Prepare substrate-node binary
+      shell: bash
       run: |
         chmod u+x ./substrate-node
         ./substrate-node --version
