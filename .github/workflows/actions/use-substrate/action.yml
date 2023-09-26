@@ -1,0 +1,19 @@
+name: Use substrate binary
+description: Downloads and configures the substrate binary built with build-substrate
+runs:
+  using: composite
+  steps:
+    - name: Download substrate-node binary
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+      with:
+        workflow: build-substrate.yml
+        name: nightly-substrate-binary
+
+    - name: Prepare substrate-node binary
+      shell: bash
+      run: |
+        chmod u+x ./substrate-node
+        ./substrate-node --version
+        mkdir -p ~/.local/bin
+        cp ./substrate-node ~/.local/bin
