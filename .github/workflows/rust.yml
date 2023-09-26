@@ -18,8 +18,6 @@ concurrency:
 
 env:
     CARGO_TERM_COLOR: always
-    # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
     WASM_BINDGEN_TEST_TIMEOUT: 60
 
@@ -31,13 +29,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -137,13 +141,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -165,19 +175,25 @@ jobs:
                   args: --doc
 
     tests:
-        name: "Test non-wasm"
+        name: "Test (Native)"
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -198,21 +214,67 @@ jobs:
                   command: nextest
                   args: run --workspace
 
+    unstable_backend_tests:
+        name: "Test (Unstable Backend)"
+        runs-on: ubuntu-latest-16-cores
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v3
+
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
+              run: |
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2.6.2
+
+            - name: Install cargo-nextest
+              run: cargo install cargo-nextest
+
+            - name: Run tests
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: nextest
+                  args: run --workspace --features unstable-backend-client
+
     light_client_tests:
-        name: "Test Light Client"
+        name: "Test (Light Client)"
         runs-on: ubuntu-latest-16-cores
         timeout-minutes: 25
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -230,40 +292,8 @@ jobs:
                   command: test
                   args: --release --package integration-tests --features unstable-light-client
 
-    clippy:
-        name: Cargo clippy
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Download Substrate
-              run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  components: clippy
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
-
-            - name: Run clippy
-              uses: actions-rs/cargo@v1
-              with:
-                  command: clippy
-                  args: --all-targets -- -D warnings
-
     wasm_tests:
-        name: Test wasm
+        name: Test (WASM)
         runs-on: ubuntu-latest
 
         steps:
@@ -281,13 +311,19 @@ jobs:
             - name: Rust Cache
               uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Run subxt WASM tests
               run: |
@@ -314,3 +350,41 @@ jobs:
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
               working-directory: signer/wasm-tests
+
+    clippy:
+        name: Cargo clippy
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
+              run: |
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  components: clippy
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+
+            - name: Run clippy
+              uses: actions-rs/cargo@v1
+              with:
+                  command: clippy
+                  args: --all-targets -- -D warnings
