@@ -41,7 +41,9 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .fetch_or_default(&bob_account_addr)
         .await?;
 
-    let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address, 10_000);
 
     let events = api
         .tx()
@@ -118,7 +120,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let tx = subxt::dynamic::tx(
         "Balances",
-        "transfer",
+        "transfer_allow_death",
         vec![
             Value::unnamed_variant(
                 "Id",
@@ -206,14 +208,14 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
-async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error> {
+async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let bob_account_addr = node_runtime::storage()
+    let bob_account_info_addr = node_runtime::storage()
         .system()
         .account(bob.public_key().to_account_id());
 
@@ -221,19 +223,19 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&bob_account_addr)
+        .fetch_or_default(&bob_account_info_addr)
         .await?;
 
+    // Do a transfer several times. If this works, it indicates that the
+    // nonce is properly incremented each time.
     let tx = node_runtime::tx()
         .balances()
-        .transfer(bob_address.clone(), 10_000);
+        .transfer_allow_death(bob_address.clone(), 10_000);
     for _ in 0..3 {
         api.tx()
             .sign_and_submit_then_watch_default(&tx, &alice)
             .await?
-            .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
-            .await?
-            .wait_for_success()
+            .wait_for_finalized_success()
             .await?;
     }
 
@@ -241,7 +243,7 @@ async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error>
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&bob_account_addr)
+        .fetch_or_default(&bob_account_info_addr)
         .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
@@ -317,10 +319,10 @@ async fn transfer_error() {
 
     let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer(bob_address, 100_000_000_000_000_000);
+        .transfer_allow_death(bob_address, 100_000_000_000_000_000);
     let to_alice_tx = node_runtime::tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000);
+        .transfer_allow_death(alice_addr, 100_000_000_000_000_000);
 
     api.tx()
         .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
@@ -360,7 +362,7 @@ async fn transfer_implicit_subscription() {
 
     let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer(bob.clone().into(), 10_000);
+        .transfer_allow_death(bob.clone().into(), 10_000);
 
     let event = api
         .tx()

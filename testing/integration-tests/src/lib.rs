@@ -2,6 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+#[cfg(all(feature = "unstable-light-client", feature = "unstable-backend-client"))]
+compile_error!(
+    "The features 'unstable-light-client' and 'unstable-backend-client' cannot be used together"
+);
+
 #[cfg(test)]
 pub mod utils;
 

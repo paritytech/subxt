@@ -169,7 +169,7 @@ where
 {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
-        let block_ref = self.client.backend().latest_best_block_ref().await?;
+        let block_ref = self.client.backend().latest_finalized_block_ref().await?;
         let account_nonce_bytes = self
             .client
             .backend()
@@ -486,6 +486,7 @@ where
                 TransactionStatus::Validated
                 | TransactionStatus::Broadcasted { .. }
                 | TransactionStatus::InBestBlock { .. }
+                | TransactionStatus::NoLongerInBestBlock
                 | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
                 TransactionStatus::Error { message } => {
                     Err(Error::Other(format!("Transaction error: {message}")))
@@ -509,7 +510,7 @@ where
     ///
     /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
     pub async fn validate(&self) -> Result<ValidationResult, Error> {
-        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
+        let latest_block_ref = self.client.backend().latest_finalized_block_ref().await?;
         self.validate_at(latest_block_ref).await
     }
 
@@ -547,7 +548,7 @@ where
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
-        let latest_block_ref = self.client.backend().latest_best_block_ref().await?;
+        let latest_block_ref = self.client.backend().latest_finalized_block_ref().await?;
 
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}

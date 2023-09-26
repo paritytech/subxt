@@ -23,7 +23,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob().public_key().into();
 
-    let call = Call::Balances(BalancesCall::transfer {
+    let call = Call::Balances(BalancesCall::transfer_allow_death {
         dest: bob,
         value: 10_000,
     });
@@ -49,7 +49,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob().public_key().into();
 
-    let call = Call::Balances(BalancesCall::transfer {
+    let call = Call::Balances(BalancesCall::transfer_allow_death {
         dest: bob,
         value: 10_000,
     });

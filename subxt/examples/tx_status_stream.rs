@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build a balance transfer extrinsic.
     let dest = dev::bob().public_key().into();
-    let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
+    let balance_transfer_tx = polkadot::tx().balances().transfer_allow_death(dest, 10_000);
 
     // Submit the balance transfer extrinsic from Alice, and then monitor the
     // progress of it.

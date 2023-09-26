@@ -59,7 +59,9 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     let bob_address = bob.public_key().to_address();
 
     // Construct a tx from Alice to Bob.
-    let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address, 10_000);
 
     let signed_extrinsic = api
         .tx()

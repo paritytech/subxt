@@ -108,9 +108,20 @@ pub enum RpcError {
     /// Error related to the RPC client.
     #[error("RPC error: {0}")]
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
+    /// This error signals that the request was rejected for some reason.
+    /// The specific reason is provided.
+    #[error("RPC error: request rejected")]
+    RequestRejected(String),
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
+}
+
+impl RpcError {
+    /// Create a `RequestRejected` error from anything that can be turned into a string.
+    pub fn request_rejected<S: Into<String>>(s: S) -> RpcError {
+        RpcError::RequestRejected(s.into())
+    }
 }
 
 /// Block error

@@ -8,8 +8,8 @@
 use crate::{test_context, utils::node_runtime};
 use assert_matches::assert_matches;
 use codec::Encode;
+use futures::Stream;
 use subxt::{
-    backend::rpc::RpcSubscription,
     backend::unstable::rpc_methods::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
@@ -153,7 +153,7 @@ async fn chainhead_unstable_storage() {
         event,
         FollowEvent::OperationStorageItems(res) if res.operation_id == operation_id &&
             res.items.len() == 1 &&
-            res.items[0].key == format!("0x{}", hex::encode(addr_bytes))
+            res.items[0].key.0 == addr_bytes
     );
 
     let event = next_operation_event(&mut blocks).await;
@@ -218,8 +218,6 @@ async fn chainhead_unstable_unpin() {
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
@@ -232,22 +230,18 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let a = old_rpc.system_name().await.unwrap();
+    let a = old_rpc.system_chain().await.unwrap();
     let b = rpc.chainspec_v1_chain_name().await.unwrap();
 
     assert_eq!(a, b);
 }
 
-// Ignored until this is implemented in Substrate
-#[ignore]
 #[tokio::test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
@@ -290,9 +284,14 @@ async fn transaction_unstable_submit_and_watch() {
 }
 
 /// Ignore block related events and obtain the next event related to an operation.
-async fn next_operation_event<T: serde::de::DeserializeOwned>(
-    sub: &mut RpcSubscription<FollowEvent<T>>,
+async fn next_operation_event<
+    T: serde::de::DeserializeOwned,
+    S: Unpin + Stream<Item = Result<FollowEvent<T>, subxt::Error>>,
+>(
+    sub: &mut S,
 ) -> FollowEvent<T> {
+    use futures::StreamExt;
+
     // Number of events to wait for the next operation event.
     const NUM_EVENTS: usize = 10;
 

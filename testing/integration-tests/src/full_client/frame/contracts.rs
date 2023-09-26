@@ -203,7 +203,6 @@ async fn tx_call() {
     let info_addr = node_runtime::storage()
         .contracts()
         .contract_info_of(&contract);
-    let info_addr_iter = node_runtime::storage().contracts().contract_info_of_iter();
 
     let contract_info = cxt
         .client()
@@ -213,7 +212,13 @@ async fn tx_call() {
         .unwrap()
         .fetch(&info_addr)
         .await;
-    assert!(contract_info.is_ok());
+
+    assert!(
+        contract_info.is_ok(),
+        "Contract info is not ok, is: {contract_info:?}"
+    );
+
+    let info_addr_iter = node_runtime::storage().contracts().contract_info_of_iter();
 
     let keys_and_values = cxt
         .client()

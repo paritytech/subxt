@@ -58,10 +58,10 @@ where
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
-            // If a block ref isn't provided, we'll get the latest best block to use.
+            // If a block ref isn't provided, we'll get the latest finalized block to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client.backend().latest_best_block_ref().await?,
+                None => client.backend().latest_finalized_block_ref().await?,
             };
 
             let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;

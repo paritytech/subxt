@@ -18,6 +18,10 @@ default = []
 # Enable to run the tests with Light Client support.
 unstable-light-client = ["subxt/unstable-light-client"]
 
+# Enable this to use the unstable backend in tests _instead of_
+# the default one which relies on the "old" RPC methods.
+unstable-backend-client = []
+
 [dev-dependencies]
 assert_matches = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }

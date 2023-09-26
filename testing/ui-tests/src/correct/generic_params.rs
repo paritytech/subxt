@@ -103,33 +103,33 @@ fn main() {
     // We assume Polkadot's config of MultiAddress<AccountId32, ()> here
     let _ = node_runtime::tx()
         .balances()
-        .transfer(CustomAddress(1337), 123);
+        .transfer_allow_death(CustomAddress(1337), 123);
 
     let _ = node_runtime2::tx()
         .balances()
-        .transfer(Generic(AccountId32::from([0x01;32])), 123);
+        .transfer_allow_death(Generic(AccountId32::from([0x01;32])), 123);
 
     let _ = node_runtime3::tx()
         .balances()
-        .transfer(Generic(()), 123);
+        .transfer_allow_death(Generic(()), 123);
 
     let _ = node_runtime4::tx()
         .balances()
-        .transfer(Second((), AccountId32::from([0x01;32])), 123);
+        .transfer_allow_death(Second((), AccountId32::from([0x01;32])), 123);
 
     let _ = node_runtime5::tx()
         .balances()
-        .transfer(Second(true, vec![1u8, 2u8]), 123);
+        .transfer_allow_death(Second(true, vec![1u8, 2u8]), 123);
 
     let _ = node_runtime6::tx()
         .balances()
-        .transfer(Second((), 1234u16), 123);
+        .transfer_allow_death(Second((), 1234u16), 123);
 
     let _ = node_runtime7::tx()
         .balances()
-        .transfer(subxt::utils::Static(DoesntImplEncodeDecodeAsType(1337)), 123);
+        .transfer_allow_death(subxt::utils::Static(DoesntImplEncodeDecodeAsType(1337)), 123);
 
     let _ = node_runtime8::tx()
         .balances()
-        .transfer(subxt::utils::Static(Second(AccountId32::from([0x01;32]), ())), 123);
+        .transfer_allow_death(subxt::utils::Static(Second(AccountId32::from([0x01;32]), ())), 123);
 }

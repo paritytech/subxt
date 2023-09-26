@@ -12,7 +12,7 @@ mod offline_client;
 mod online_client;
 
 #[cfg(feature = "unstable-light-client")]
-mod lightclient;
+mod light_client;
 
 pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
@@ -20,4 +20,4 @@ pub use online_client::{
 };
 
 #[cfg(feature = "unstable-light-client")]
-pub use lightclient::{LightClient, LightClientBuilder, LightClientError};
+pub use light_client::{LightClient, LightClientBuilder, LightClientError};

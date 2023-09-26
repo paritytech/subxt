@@ -69,10 +69,10 @@ where
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         let client = self.client.clone();
         async move {
-            // If a block ref isn't provided, we'll get the latest best block to use.
+            // If a block ref isn't provided, we'll get the latest finalized ref to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client.backend().latest_best_block_ref().await?,
+                None => client.backend().latest_finalized_block_ref().await?,
             };
 
             let block_header = match client.backend().block_header(block_ref.hash()).await? {

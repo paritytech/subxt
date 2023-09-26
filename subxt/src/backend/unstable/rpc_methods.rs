@@ -7,10 +7,11 @@
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
+use crate::config::BlockHash;
 use crate::{Config, Error};
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::task::Poll;
 
 /// An interface to call the unstable RPC methods. This interface is instantiated with
@@ -64,8 +65,8 @@ impl<T: Config> UnstableRpcMethods<T> {
     pub async fn chainhead_unstable_follow(
         &self,
         with_runtime: bool,
-    ) -> Result<RpcSubscription<FollowEvent<T::Hash>>, Error> {
-        let subscription = self
+    ) -> Result<FollowSubscription<T::Hash>, Error> {
+        let sub = self
             .client
             .subscribe(
                 "chainHead_unstable_follow",
@@ -74,7 +75,7 @@ impl<T: Config> UnstableRpcMethods<T> {
             )
             .await?;
 
-        Ok(subscription)
+        Ok(FollowSubscription { sub, done: false })
     }
 
     /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
@@ -500,7 +501,7 @@ pub struct OperationBodyDone {
     /// The operation id of the event.
     pub operation_id: String,
     /// Array of hexadecimal-encoded scale-encoded extrinsics found in the block.
-    pub value: Vec<String>,
+    pub value: Vec<Bytes>,
 }
 
 /// The response of the `chainHead_call` method.
@@ -510,7 +511,7 @@ pub struct OperationCallDone {
     /// The operation id of the event.
     pub operation_id: String,
     /// Hexadecimal-encoded output of the runtime function call.
-    pub output: String,
+    pub output: Bytes,
 }
 
 /// The response of the `chainHead_call` method.
@@ -520,7 +521,7 @@ pub struct OperationStorageItems {
     /// The operation id of the event.
     pub operation_id: String,
     /// The resulting items.
-    pub items: Vec<StorageResult>,
+    pub items: VecDeque<StorageResult>,
 }
 
 /// Indicate a problem during the operation.
@@ -538,7 +539,7 @@ pub struct OperationError {
 #[serde(rename_all = "camelCase")]
 pub struct StorageResult {
     /// The hex-encoded key of the result.
-    pub key: String,
+    pub key: Bytes,
     /// The result of the query.
     #[serde(flatten)]
     pub result: StorageResultType,
@@ -549,11 +550,11 @@ pub struct StorageResult {
 #[serde(rename_all = "camelCase")]
 pub enum StorageResultType {
     /// Fetch the value of the provided key.
-    Value(String),
+    Value(Bytes),
     /// Fetch the hash of the value of the provided key.
-    Hash(String),
+    Hash(Bytes),
     /// Fetch the closest descendant merkle value.
-    ClosestDescendantMerkleValue(String),
+    ClosestDescendantMerkleValue(Bytes),
 }
 
 /// The method respose of `chainHead_body`, `chainHead_call` and `chainHead_storage`.
@@ -604,6 +605,44 @@ pub enum StorageQueryType {
     DescendantsHashes,
 }
 
+/// A subscription which returns follow events, and ends when a Stop event occurs.
+pub struct FollowSubscription<Hash> {
+    sub: RpcSubscription<FollowEvent<Hash>>,
+    done: bool,
+}
+
+impl<Hash: BlockHash> FollowSubscription<Hash> {
+    /// Fetch the next item in the stream.
+    pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
+        <Self as StreamExt>::next(self).await
+    }
+    /// Fetch the subscription ID for the stream.
+    pub fn subscription_id(&self) -> Option<&str> {
+        self.sub.subscription_id()
+    }
+}
+
+impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
+    type Item = <RpcSubscription<FollowEvent<Hash>> as Stream>::Item;
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        if self.done {
+            return Poll::Ready(None);
+        }
+
+        let res = self.sub.poll_next_unpin(cx);
+
+        if let Poll::Ready(Some(Ok(FollowEvent::Stop))) = &res {
+            // No more events will occur after this one.
+            self.done = true
+        }
+
+        res
+    }
+}
+
 /// A subscription which returns transaction status events, stopping
 /// when no more events will be sent.
 pub struct TransactionSubscription<Hash> {
@@ -611,14 +650,14 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash: serde::de::DeserializeOwned> TransactionSubscription<Hash> {
+impl<Hash: BlockHash> TransactionSubscription<Hash> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
-        StreamExt::next(self).await
+        <Self as StreamExt>::next(self).await
     }
 }
 
-impl<Hash: serde::de::DeserializeOwned> Stream for TransactionSubscription<Hash> {
+impl<Hash: BlockHash> Stream for TransactionSubscription<Hash> {
     type Item = <RpcSubscription<TransactionStatus<Hash>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -694,10 +733,10 @@ pub enum TransactionStatus<Hash> {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct TransactionBlockDetails<Hash> {
     /// The block hash.
-    hash: Hash,
+    pub hash: Hash,
     /// The index of the transaction in the block.
     #[serde(with = "unsigned_number_as_string")]
-    index: u64,
+    pub index: u64,
 }
 
 /// Hex-serialized shim for `Vec<u8>`.
