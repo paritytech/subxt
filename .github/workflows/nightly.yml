@@ -2,14 +2,12 @@ name: Daily compatibility check against latest substrate
 
 on:
   schedule:
-    # Run at 8am every day
+    # Run at 8am every day, well after the new binary is built
     - cron: "0 8 * * *"
 
 
 env:
   CARGO_TERM_COLOR: always
-  # Use latest substrate for nightly runs:
-  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
 
 jobs:
   tests:
@@ -19,13 +17,19 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Download Substrate
+      - name: Download substrate-node binary
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+        with:
+          workflow: build-substrate.yml
+          name: nightly-substrate-binary
+
+      - name: Prepare substrate-node binary
         run: |
-            curl $SUBSTRATE_URL --output substrate-node --location
-            chmod +x substrate-node
-            ./substrate-node --version
-            mkdir -p ~/.local/bin
-            mv substrate-node ~/.local/bin
+          chmod u+x ./substrate-node
+          ./substrate-node --version
+          mkdir -p ~/.local/bin
+          cp ./substrate-node ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1

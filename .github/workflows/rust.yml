@@ -18,8 +18,6 @@ concurrency:
 
 env:
     CARGO_TERM_COLOR: always
-    # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
-    SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:bullseye/latest/substrate/substrate
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
     WASM_BINDGEN_TEST_TIMEOUT: 60
 
@@ -31,13 +29,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -137,13 +141,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -171,13 +181,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -205,13 +221,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v3
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -240,13 +262,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
@@ -283,13 +311,19 @@ jobs:
             - name: Rust Cache
               uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Run subxt WASM tests
               run: |
@@ -324,13 +358,19 @@ jobs:
             - name: Checkout sources
               uses: actions/checkout@v4
 
-            - name: Download Substrate
+            - name: Download substrate-node binary
+              id: download-artifact
+              uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+              with:
+                workflow: build-substrate.yml
+                name: nightly-substrate-binary
+
+            - name: Prepare substrate-node binary
               run: |
-                  curl $SUBSTRATE_URL --output substrate-node --location
-                  chmod +x substrate-node
-                  ./substrate-node --version
-                  mkdir -p ~/.local/bin
-                  mv substrate-node ~/.local/bin
+                chmod u+x ./substrate-node
+                ./substrate-node --version
+                mkdir -p ~/.local/bin
+                cp ./substrate-node ~/.local/bin
 
             - name: Install Rust stable toolchain
               uses: actions-rs/toolchain@v1
