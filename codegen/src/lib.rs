@@ -53,6 +53,9 @@ mod types;
 #[cfg(feature = "fetch-metadata")]
 pub mod utils;
 
+#[cfg(feature = "web")]
+use getrandom as _;
+
 pub use self::{
     api::{GenerateRuntimeApi, RuntimeGenerator},
     error::{CodegenError, TypeSubstitutionError},
