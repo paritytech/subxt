@@ -197,7 +197,7 @@ That sums up the most significant changes. All of the key commits in this releas
 - chainHead: Propagate results on the `chainHead_follow` ([#1116](https://github.com/paritytech/subxt/pull/1116))
 
 
-## [0.32.0] - 2023-08-02
+## [0.31.0] - 2023-08-02
 
 This is a small release whose primary goal is to bump the versions of `scale-encode`, `scale-decode` and `scale-value` being used, to benefit from recent changes in those crates.
 
