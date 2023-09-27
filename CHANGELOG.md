@@ -4,7 +4,200 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.31.0] - 2023-08-02
+## [0.32.0] - 2023-09-27
+
+This is a big release that adds quite a lot, and also introduces some slightly larger breaking changes. Let's look at the main changes:
+
+### The `Backend` trait and the `UnstableBackend` and `LegacyBackend` impls.
+
+See [#1126](https://github.com/paritytech/subxt/pull/1126), [#1137](https://github.com/paritytech/subxt/pull/1137) and [#1161](https://github.com/paritytech/subxt/pull/1161) for more information.
+
+The overarching idea here is that we want Subxt to be able to continue to support talking to nodes/light-clients using the "legacy" RPC APIs that are currently available, but we _also_ want to be able to support using only [the new RPC APIs](https://paritytech.github.io/json-rpc-interface-spec/) once they are stabilized.
+
+Until now, the higher level APIs in Subxt all had access to the RPCs and could call whatever they needed. Now, we've abstracted away which RPCs are called (or even that RPCs are used at all) behind a `subxt::backend::Backend` trait. Higher level APIs no longer have access to RPC methods and instead have access to the current `Backend` implementation. We then added two `Backend` implementations:
+
+- `subxt::backend::legacy::LegacyBackend`: This uses the "legacy" RPCs, as we've done to date, to obtain the information we need. This is still the default backend that Subxt will use.
+- `subxt::backend::unstable::UnstableBackend`: This backend relies on the new (and currently still unstable) `chainHead` based RPC APIs to obtain the information we need. This could break at any time as the RPC methods update, until they are fully stabilized. One day, this will be the default backend.
+
+One of the significant differences between backends is that the `UnstableBackend` can only fetch further information about blocks that are "pinned", ie that we have signalled are still in use. To that end, the backend now hands back `BlockRef`s instead of plain block hashes. As long as a `BlockRef` exists for some block, the backend (and node) will attempt to keep it available. Thus, Subxt will keep hold of these internally as needed, and also allows you to obtain them from a `Block` with `block.reference()`, in case you need to try and hold on to any blocks for longer.
+
+One of the main breaking changes here is in how you can access and call RPC methods.
+
+Previously, you could access them directly from the Subxt client, since it exposed the RPC methods itself, eg:
+
+```rust
+let genesis_hash = client.rpc().genesis_hash().await?;
+```
+
+Now, the client only knows about a `Backend` (ie it has a `.backend()` method instead of `.rpc()`), and doesn't know about RPCs, but you can still manually create an `RpcClient` to call RPC methods like so:
+
+```rust
+use subxt::{
+    config::SubstrateConfig,
+    backend::rpc::RpcClient,
+    backend::legacy::LegacyRpcMethods,
+};
+
+// Instantiate an RPC client pointing at some URL.
+let rpc_client = RpcClient::from_url("ws://localhost:9944").await?;
+
+// We could also call unstable RPCs with `backend::unstable::UnstableRpcMethods`:
+let rpc_methods = LegacyRpcMethods::<SubstrateConfig>::new(rpc_client);
+
+// Use it to make RPC calls, here calling the legacy genesis_hash method.
+let genesis_hash = rpc_methods.genesis_hash().await?
+```
+
+If you'd like to share a single client for RPCs and Subxt usage, you can clone this RPC client and run `OnlineClient::<SubstrateConfig>::from_rpc_client(rpc_client)` to create a Subxt client using it.
+
+Another side effect of this change is that RPC related things have moved from `subxt::rpc::*` to `subxt::backend::rpc::*` and some renaming has happened along the way.
+
+A number of smaller breaking changes have also been made in order to expose details that are compatible with both sets of RPCs, and to generally move Subxt towards working well with the new APIs and exposing things in a consistent way:
+
+- The storage methods `fetch_keys` is renamed to `fetch_raw_keys` (this just for consistency with `fetch_raw`).
+- The storage method `iter` no longer accepts a `page_size` argument, and each item returned is now an `Option<Result<(key, val)>>` instead of a `Result<Option<(key, val)>>` (we now return a valid `Stream` implementation for storage entry iteration). See [this example](https://github.com/paritytech/subxt/blob/cd5060a5a08c9bd73477477cd2cadc16015e77bf/subxt/examples/storage_iterating.rs#L18).
+- The events returned when you manually watch a transaction have changed in order to be consistent with the new RPC APIs (the new events [can be seen here](https://github.com/paritytech/subxt/blob/cd5060a5a08c9bd73477477cd2cadc16015e77bf/subxt/src/tx/tx_progress.rs#L203)), and `next_item` => `next`. If you rely on higher level calls like `sign_and_submit_then_watch`, nothing has changed.
+- Previously, using `.at_latest()` in various places would mean that calls would run against the latest _best_ block. Now, all such calls will run against the latest _finalized_ block. The latest best block is subject to changing or being pruned entirely, and can differ between nodes.
+- `.at(block_hash)` should continue to work as-is, but can now also accept a `BlockRef`, to keep the relevant block around while you're using the associated APIs.
+- To fetch the extrinsics in a block, you used to call `block.body().await?.extrinsics()`. This has now been simplified to `block.extrinsics().await?`.
+
+### Making `ExtrinsicParams` more flexible with `SignedExtension`s.
+
+See [#1107](https://github.com/paritytech/subxt/pull/1107) for more information.
+
+When configuring Subxt to work against a given chain, you needed to configure the `ExtrinsicParams` associated type to encode exactly what was required by the chain when submitting transactions. This could be difficult to get right.
+
+Now, we have "upgraded" the `ExtrinsicParams` trait to give it access to metadata, so that it can be smarter about how to encode the correct values. We've also added a `subxt::config::SignedExtension` trait, and provided implementations of it for all of the "standard" signed extensions (though [we have a little work to do still](https://github.com/paritytech/subxt/issues/1162)).
+
+How can you use `SignedExtension`s? Well, `subxt::config::signed_extensions::AnyOf<T, Params>` is a type which can accept any tuple of `SignedExtension`s, and itself implements `ExtrinsicParams`. It's smart, and will use the metadata to know which of the signed extensions that you provided to actually use on a given chain. So, `AnyOf` makes it easy to compose whichever `SignedExtension`s you need to work with a chain.
+
+Finally, we expose `subxt::config::{ DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder }`; the former just uses `AnyOf` to automatically use any of the "standard" signed extensions as needed, and the latter provided a nice builder interface to configure any parameters for them. This is now the default type used in `SubstrateConfig` and `PolkadotConfig`, so long story short: those configurations (and particularly their `ExtrinsicParams`) are more likely to _Just Work_ now across default chains.
+
+[See this example](https://github.com/paritytech/subxt/blob/cd5060a5a08c9bd73477477cd2cadc16015e77bf/subxt/examples/setup_config_signed_extension.rs) for how to create and use custom signed extensions, or [this example](https://github.com/paritytech/subxt/blob/cd5060a5a08c9bd73477477cd2cadc16015e77bf/subxt/examples/setup_config_custom.rs) for how to implement custom `ExtrinsicParams` if you'd prefer to ignore `SignedExtension`s entirely.
+
+As a result of using the new `DefaultExtrinsicParams` in `SubstrateConfig` and `PolkadotConfig`, the interface to configure transactions has changed (and in fact been generally simplified). Configuring a mortal transaction with a small tip ƒor instance used to look like:
+
+```rust
+use subxt::config::polkadot::{Era, PlainTip, PolkadotExtrinsicParamsBuilder as Params};
+
+let tx_params = Params::new()
+    .tip(PlainTip::new(1_000))
+    .era(Era::mortal(32, latest_block.header().number()), latest_block.header().hash());
+
+let hash = api.tx().sign_and_submit(&tx, &from, tx_params).await?;
+```
+
+And now it will look like this:
+
+```rust
+use subxt::config::polkadot::PolkadotExtrinsicParamsBuilder as Params;
+
+let tx_params = Params::new()
+    .tip(1_000)
+    .mortal(latest_block.header(), 32)
+    .build();
+
+let hash = api.tx().sign_and_submit(&tx, &from, tx_params).await?;
+```
+
+Check the docs for `PolkadotExtrinsicParamsBuilder` and the `ExtrinsicParams` trait for more information.
+
+### Storage: Allow iterating storage entries at different depths
+
+See ([#1079](https://github.com/paritytech/subxt/pull/1079)) for more information.
+
+Previously, we could statically iterate over the root of some storage map using something like:
+
+```rust
+// Build a storage query to iterate over account information.
+let storage_query = polkadot::storage().system().account_root();
+
+// Get back an iterator of results (here, we are fetching 10 items at
+// a time from the node, but we always iterate over one at a time).
+let mut results = api.storage().at_latest().await?.iter(storage_query, 10).await?;
+```
+
+Now, the suffix `_root` has been renamed to `_iter`, and if the storage entry is for instance a double map (or greater depth), we'll also now generate `_iter2`, `iter3` and so on, each accepting the keys needed to access the map at that depth to iterate the remainder. The above example now becomes:
+
+```rust
+// Build a storage query to iterate over account information.
+let storage_query = polkadot::storage().system().account_iter();
+
+// Get back an iterator of results
+let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
+```
+
+Note also that the pagination size no longer needs to be provided; that's handled internally by the relevant `Backend`.
+
+### Custom values
+
+This is not a breaking change, but just a noteworthy addition; see [#1106](https://github.com/paritytech/subxt/pull/1106), [#1117](https://github.com/paritytech/subxt/pull/1117) and [#1147](https://github.com/paritytech/subxt/pull/1147) for more information.
+
+V15 metadata allows chains to insert arbitrary information into a new "custom values" hashmap ([see this](https://github.com/paritytech/frame-metadata/blob/0e90489c8588d48b55779f1c6b93216346ecc8a9/frame-metadata/src/v15.rs#L306)). Subxt has now added APIs to allow accessing these custom values a little like how constants can be accessed.
+
+Dynamically accessing custom values looks a bit like this:
+
+```rust
+// Obtain the raw bytes for some entry:
+let custom_value_bytes: Vec<u8> = client.custom_values().bytes_at("custom-value-name")?;
+
+// Obtain a representation of the value that we can attempt to decode:
+let custom_value = client.custom_values().at("custom-value-name")?;
+
+// Decode it into a runtime Value if possible:
+let value: Value = custom_value.to_value()?;
+// Or attempt to decode it into a specific type:
+let value: Foo = custom_value.as_type()?;
+```
+
+We can also use codegen to statically access values, which makes use of validation and returns a known type whenever possible, for the added compile time safety this brings:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "metadata.scale")]
+pub mod runtime {}
+
+// The generated interface also exposes any custom values with known types and sensible names:
+let value_addr = runtime::custom().custom_value_name();
+
+// We can use this address to access and decode the relevant value from metadata:
+let static_value = client.custom_values().at(&value_addr)?;
+// Or just ask for the bytes for it:
+let static_value_bytes = client.custom_values().bytes_at(&value_addr)?;
+```
+
+That sums up the most significant changes. All of the key commits in this release can be found here:
+
+### Added
+
+- `UnstableBackend`: Add a chainHead based backend implementation ([#1161](https://github.com/paritytech/subxt/pull/1161))
+- `UnstableBackend`: Expose the chainHead RPCs ([#1137](https://github.com/paritytech/subxt/pull/1137))
+- Introduce Backend trait to allow different RPC (or other) backends to be implemented ([#1126](https://github.com/paritytech/subxt/pull/1126))
+- Custom Values: Fixes and tests for "custom values" ([#1147](https://github.com/paritytech/subxt/pull/1147))
+- Custom Values: Add generated APIs to statically access custom values in metadata ([#1117](https://github.com/paritytech/subxt/pull/1117))
+- Custom Values: Support dynamically accessing custom values in metadata ([#1106](https://github.com/paritytech/subxt/pull/1106))
+- Add `storage_version()` and `runtime_wasm_code()` to storage ([#1111](https://github.com/paritytech/subxt/pull/1111))
+- Make ExtrinsicParams more flexible, and introduce signed extensions ([#1107](https://github.com/paritytech/subxt/pull/1107))
+
+### Changed
+
+- `subxt-codegen`: Add "web" feature for WASM compilation that works with `jsonrpsee` ([#1175](https://github.com/paritytech/subxt/pull/1175))
+- `subxt-codegen`: support compiling to WASM ([#1154](https://github.com/paritytech/subxt/pull/1154))
+- CI: Use composite action to avoid dupe use-substrate code ([#1177](https://github.com/paritytech/subxt/pull/1177))
+- Add custom `Debug` impl for `DispatchError` to avoid huge metadata output ([#1153](https://github.com/paritytech/subxt/pull/1153))
+- Remove unused start_key that new RPC API may not be able to support ([#1148](https://github.com/paritytech/subxt/pull/1148))
+- refactor(rpc): Use the default port if one isn't provided ([#1122](https://github.com/paritytech/subxt/pull/1122))
+- Storage: Support iterating over NMaps with partial keys ([#1079](https://github.com/paritytech/subxt/pull/1079))
+
+### Fixed
+
+- metadata: Generate runtime outer enums if not present in V14 ([#1174](https://github.com/paritytech/subxt/pull/1174))
+- Remove "std" feature from `sp-arithmetic` to help substrate compat. ([#1155](https://github.com/paritytech/subxt/pull/1155))
+- integration-tests: Increase the number of events we'll wait for ([#1152](https://github.com/paritytech/subxt/pull/1152))
+- allow 'latest' metadata to be returned from the fallback code ([#1127](https://github.com/paritytech/subxt/pull/1127))
+- chainHead: Propagate results on the `chainHead_follow` ([#1116](https://github.com/paritytech/subxt/pull/1116))
+
+
+## [0.32.0] - 2023-08-02
 
 This is a small release whose primary goal is to bump the versions of `scale-encode`, `scale-decode` and `scale-value` being used, to benefit from recent changes in those crates.
 
