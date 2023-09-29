@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 
-use crate::error::DecodeError;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
@@ -170,25 +169,7 @@ where
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
         let block_ref = self.client.backend().latest_finalized_block_ref().await?;
-        let account_nonce_bytes = self
-            .client
-            .backend()
-            .call(
-                "AccountNonceApi_account_nonce",
-                Some(&account_id.encode()),
-                block_ref.hash(),
-            )
-            .await?;
-
-        // custom decoding from a u16/u32/u64 into a u64, based on the number of bytes we got back.
-        let cursor = &mut &account_nonce_bytes[..];
-        let account_nonce: u64 = match account_nonce_bytes.len() {
-            2 => u16::decode(cursor)?.into(),
-            4 => u32::decode(cursor)?.into(),
-            8 => u64::decode(cursor)?,
-            _ => return Err(Error::Decode(DecodeError::custom_string(format!("state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)", account_nonce_bytes.len()))))
-        };
-        Ok(account_nonce)
+        crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await
     }
 
     /// Creates a partial signed extrinsic, without submitting it.
