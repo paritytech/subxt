@@ -186,7 +186,7 @@ jobs:
         runs-on: ubuntu-latest-16-cores
         steps:
             - name: Checkout sources
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Use substrate-node binary
               uses: ./.github/workflows/actions/use-substrate
