@@ -7,12 +7,13 @@ use crate::{
     blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Header},
-    error::{BlockError, Error},
+    error::{BlockError, DecodeError, Error},
     events,
     runtime_api::RuntimeApi,
     storage::Storage,
 };
 
+use codec::{Decode, Encode};
 use futures::lock::Mutex as AsyncMutex;
 use std::sync::Arc;
 
@@ -102,6 +103,11 @@ where
     pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
         Ok(RuntimeApi::new(self.client.clone(), self.block_ref.clone()))
     }
+
+    /// Get the account nonce for a given account ID at this block.
+    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
+        get_account_nonce(&self.client, account_id, self.hash()).await
+    }
 }
 
 // Return Events from the cache, or fetch from the node if needed.
@@ -128,4 +134,34 @@ where
     };
 
     Ok(events)
+}
+
+// Return the account nonce at some block hash for an account ID.
+pub(crate) async fn get_account_nonce<C, T>(
+    client: &C,
+    account_id: &T::AccountId,
+    block_hash: T::Hash,
+) -> Result<u64, Error>
+where
+    C: OnlineClientT<T>,
+    T: Config,
+{
+    let account_nonce_bytes = client
+        .backend()
+        .call(
+            "AccountNonceApi_account_nonce",
+            Some(&account_id.encode()),
+            block_hash,
+        )
+        .await?;
+
+    // custom decoding from a u16/u32/u64 into a u64, based on the number of bytes we got back.
+    let cursor = &mut &account_nonce_bytes[..];
+    let account_nonce: u64 = match account_nonce_bytes.len() {
+        2 => u16::decode(cursor)?.into(),
+        4 => u32::decode(cursor)?.into(),
+        8 => u64::decode(cursor)?,
+        _ => return Err(Error::Decode(DecodeError::custom_string(format!("state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)", account_nonce_bytes.len()))))
+    };
+    Ok(account_nonce)
 }

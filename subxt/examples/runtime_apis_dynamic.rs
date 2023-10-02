@@ -2,9 +2,6 @@ use subxt::dynamic::Value;
 use subxt::{config::PolkadotConfig, OnlineClient};
 use subxt_signer::sr25519::dev;
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
-pub mod polkadot {}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
