@@ -42,13 +42,13 @@ pub enum Error {
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
     /// Error working with metadata.
-    #[error("Metadata: {0}")]
+    #[error("Metadata error: {0}")]
     Metadata(#[from] MetadataError),
     /// Error decoding metadata.
-    #[error("Metadata: {0}")]
+    #[error("Metadata Decoding error: {0}")]
     MetadataDecoding(#[from] MetadataTryFromError),
     /// Runtime error.
-    #[error("Runtime error: {0:?}")]
+    #[error("Runtime error: {0}")]
     Runtime(#[from] DispatchError),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[error("Error decoding into dynamic value: {0}")]
@@ -60,7 +60,7 @@ pub enum Error {
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
     /// Error constructing the appropriate extrinsic params.
-    #[error("{0}")]
+    #[error("Extrinsic params error: {0}")]
     ExtrinsicParams(#[from] ExtrinsicParamsError),
     /// Block related error.
     #[error("Block error: {0}")]
@@ -73,7 +73,7 @@ pub enum Error {
     Unknown(Vec<u8>),
     /// Light client error.
     #[cfg(feature = "unstable-light-client")]
-    #[error("An error occurred but it could not be decoded: {0:?}")]
+    #[error("An error occurred but it could not be decoded: {0}")]
     LightClient(#[from] LightClientError),
     /// Other error.
     #[error("Other error: {0}")]
@@ -110,7 +110,7 @@ pub enum RpcError {
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
     /// This error signals that the request was rejected for some reason.
     /// The specific reason is provided.
-    #[error("RPC error: request rejected")]
+    #[error("RPC error: request rejected: {0}")]
     RequestRejected(String),
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
