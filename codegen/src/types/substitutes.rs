@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{error::TypeSubstitutionError, CratePath};
-use std::{borrow::Borrow, collections::HashMap};
+use std::{borrow::Borrow, collections::HashMap, collections::HashSet};
 use syn::{parse_quote, spanned::Spanned as _};
 
 use super::{TypePath, TypePathType};
@@ -13,6 +13,11 @@ use super::{TypePath, TypePathType};
 #[derive(Debug)]
 pub struct TypeSubstitutes {
     substitutes: HashMap<PathSegments, Substitute>,
+    /// In Subxt, we reexport some crates under subxt::ext::*.
+    /// Putting a `#path` into `subxt_ext_modules` causes all
+    /// descendants `#path::*` from this path to be replaced with `subxt::ext::#path::*`.
+    subxt_ext_modules: HashSet<PathSegments>,
+    subxt_crate_path: Option<CratePath>,
 }
 
 #[derive(Debug)]
@@ -48,6 +53,8 @@ impl TypeSubstitutes {
     pub fn new() -> Self {
         Self {
             substitutes: HashMap::new(),
+            subxt_ext_modules: HashSet::new(),
+            subxt_crate_path: None,
         }
     }
 
@@ -122,8 +129,12 @@ impl TypeSubstitutes {
             })
             .collect();
 
+        let subxt_ext_modules = [path_segments!(sp_arithmetic)].into_iter().collect();
+
         Self {
             substitutes: default_substitutes,
+            subxt_ext_modules,
+            subxt_crate_path: Some(crate_path.clone()),
         }
     }
 
@@ -317,9 +328,27 @@ impl TypeSubstitutes {
 
         let path = path.into();
 
-        self.substitutes
-            .get(&path)
-            .map(|sub| replace_params(sub.path.clone(), params, &sub.param_mapping))
+        // Check for a direct substitute
+        if let Some(sub) = self.substitutes.get(&path) {
+            let sub_with_params = replace_params(sub.path.clone(), params, &sub.param_mapping);
+            return Some(sub_with_params);
+        }
+
+        // Check if type is from a module exposed under `subxt::ext::*` such that we can redirect the path.
+        let crate_path = self.subxt_crate_path.as_ref()?;
+        if self.subxt_ext_modules.iter().any(|e| path.starts_with(e)) {
+            // Add subxt::ext before this path. E.g. sp_arithmetic::Perbill becomes subxt::ext::sp_arithmetic::Perbill.
+            let path_idents = path
+                .0
+                .iter()
+                .map(|seg| syn::Ident::new(seg, proc_macro2::Span::call_site()));
+            let subxt_ext_path: syn::Path = parse_quote!(#crate_path::ext::#(#path_idents)::*);
+            let sub_with_params =
+                replace_params(subxt_ext_path, params, &TypeParamMapping::PassThrough);
+            Some(sub_with_params)
+        } else {
+            None
+        }
     }
 }
 
@@ -329,6 +358,17 @@ impl TypeSubstitutes {
 /// `syn::TypePath` and `scale_info::ty::path::Path` types.
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub struct PathSegments(Vec<String>);
+
+impl PathSegments {
+    pub fn starts_with(&self, other: &PathSegments) -> bool {
+        other.0.iter().enumerate().all(|(i, other_seg)| {
+            self.0
+                .get(i)
+                .map(|self_seg| other_seg == self_seg)
+                .unwrap_or_default()
+        })
+    }
+}
 
 impl From<&syn::Path> for PathSegments {
     fn from(path: &syn::Path) -> Self {

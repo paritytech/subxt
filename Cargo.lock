@@ -4243,6 +4243,7 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
+ "sp-arithmetic",
  "sp-core",
  "sp-core-hashing",
  "sp-keyring",

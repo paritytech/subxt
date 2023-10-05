@@ -101,6 +101,7 @@ tokio-util = "0.7.9"
 sp-core = { version = "21.0.0", default-features = false }
 sp-core-hashing = { version = "9.0.0", default-features = false }
 sp-runtime = "24.0.0"
+sp-arithmetic = "16.0.0"
 sp-keyring = "24.0.0"
 
 # Subxt workspace crates:

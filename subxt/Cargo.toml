@@ -82,6 +82,7 @@ jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] 
 # Included if the "substrate-compat" feature is enabled.
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
+sp-arithmetic = { workspace = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }

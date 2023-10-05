@@ -358,6 +358,12 @@ impl From<syn::Path> for CratePath {
     }
 }
 
+impl From<CratePath> for syn::Path {
+    fn from(path: CratePath) -> syn::Path {
+        path.0
+    }
+}
+
 impl ToTokens for CratePath {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.0.to_tokens(tokens)
