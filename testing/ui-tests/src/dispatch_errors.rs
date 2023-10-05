@@ -11,13 +11,13 @@ use generate_custom_metadata::dispatch_error::{
 use frame_metadata::RuntimeMetadataPrefixed;
 
 pub fn metadata_array_dispatch_error() -> RuntimeMetadataPrefixed {
-    generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(vec![])
+    generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(vec![], vec![])
 }
 
 pub fn metadata_legacy_dispatch_error() -> RuntimeMetadataPrefixed {
-    generate_metadata_from_pallets_custom_dispatch_error::<LegacyDispatchError>(vec![])
+    generate_metadata_from_pallets_custom_dispatch_error::<LegacyDispatchError>(vec![], vec![])
 }
 
 pub fn metadata_named_field_dispatch_error() -> RuntimeMetadataPrefixed {
-    generate_metadata_from_pallets_custom_dispatch_error::<NamedFieldDispatchError>(vec![])
+    generate_metadata_from_pallets_custom_dispatch_error::<NamedFieldDispatchError>(vec![], vec![])
 }

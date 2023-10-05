@@ -13,6 +13,7 @@
 
 mod dispatch_errors;
 mod storage;
+mod runtime_apis;
 mod utils;
 
 use crate::utils::MetadataTestRunner;
@@ -32,6 +33,13 @@ fn ui_tests() {
         m.new_test_case()
             .name("storage_map_no_keys")
             .build(storage::metadata_storage_map_no_keys()),
+    );
+
+    // Check runtime APIs with _ in method names work
+    t.pass(
+        m.new_test_case()
+            .name("runtime_api_underscore_method_name")
+            .build(runtime_apis::metadata_runtime_api_underscore_method_name()),
     );
 
     // Test that the codegen can handle the different types of DispatchError.
