@@ -24,7 +24,7 @@ jobs:
         run: rustup target add wasm32-unknown-unknown
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2.6.2
+        uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
 
       - name: build substrate binary
         uses: actions-rs/cargo@v1

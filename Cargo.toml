@@ -42,7 +42,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.4", default-features = false }
-clap = { version = "4.4.4", features = ["derive", "cargo"] }
+clap = { version = "4.4.6", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -62,7 +62,7 @@ primitive-types = { version = "0.12.1", default-features = false, features = ["c
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.67"
 quote = "1.0.33"
-regex = "1.9.5"
+regex = "1.9.6"
 scale-info = "2.9.0"
 scale-value = "0.12.0"
 scale-bits = "0.4.0"

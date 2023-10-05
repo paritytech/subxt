@@ -36,8 +36,14 @@ fn generate_runtime_api(
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
-        let inputs: Vec<_> = method.inputs().map(|input| {
-            let name = format_ident!("{}", &input.name);
+        let inputs: Vec<_> = method.inputs().enumerate().map(|(idx, input)| {
+            // These are method names, which can just be '_', but struct field names can't
+            // just be an underscore, so fix any such names we find to work in structs.
+            let name = if input.name == "_" {
+                format_ident!("_{}", idx)
+            } else {
+                format_ident!("{}", &input.name)
+            };
             let ty = type_gen.resolve_type_path(input.ty);
 
             let param = quote!(#name: #ty);
