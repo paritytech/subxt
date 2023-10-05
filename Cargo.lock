@@ -1563,7 +1563,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -2040,7 +2040,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "assert_matches",
  "frame-metadata 16.0.0",
@@ -2364,7 +2364,7 @@ dependencies = [
 
 [[package]]
 name = "memory-db"
-version = "0.32.0"
+version = "0.32.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "808b50db46293432a45e63bc15ea51e0ab4c0a1647b8eb114e31a3e698dd6fbe"
 dependencies = [
@@ -4203,7 +4203,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.32.0"
+version = "0.32.1"
 
 [[package]]
 name = "subtle"
@@ -4219,7 +4219,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 
 [[package]]
 name = "subxt"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -4260,7 +4260,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "clap 4.4.6",
  "color-eyre",
@@ -4281,7 +4281,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "bitvec",
  "frame-metadata 16.0.0",
@@ -4302,7 +4302,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "either",
  "futures",
@@ -4328,7 +4328,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "darling 0.20.3",
  "proc-macro-error",
@@ -4338,7 +4338,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "assert_matches",
  "bitvec",
@@ -4352,7 +4352,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "bip39",
  "getrandom 0.2.10",
@@ -4418,7 +4418,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "hex",
  "impl-serde",
@@ -4812,7 +4812,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.32.0"
+version = "0.32.1"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
