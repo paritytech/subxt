@@ -12,8 +12,8 @@
 //! to automatically regenerate `stderr` files, but don't forget to check that new files make sense.
 
 mod dispatch_errors;
-mod storage;
 mod runtime_apis;
+mod storage;
 mod utils;
 
 use crate::utils::MetadataTestRunner;

@@ -16,18 +16,14 @@ pub fn metadata_runtime_api_underscore_method_name() -> RuntimeMetadataPrefixed 
     generate_metadata_from_runtime_apis(vec![RuntimeApiMetadata {
         name: "MyApi".to_owned(),
         docs: vec![],
-        methods: vec![
-            RuntimeApiMethodMetadata {
-                name: "my_method".to_owned(),
-                inputs: vec![
-                    RuntimeApiMethodParamMetadata {
-                        name: "_".to_owned(), // The important bit we're testing.
-                        ty: 0.into(), // we don't care what type this is.
-                    }
-                ],
-                output: 0.into(), // we don't care what type this is.
-                docs: vec![]
-            }
-        ]
+        methods: vec![RuntimeApiMethodMetadata {
+            name: "my_method".to_owned(),
+            inputs: vec![RuntimeApiMethodParamMetadata {
+                name: "_".to_owned(), // The important bit we're testing.
+                ty: 0.into(),         // we don't care what type this is.
+            }],
+            output: 0.into(), // we don't care what type this is.
+            docs: vec![],
+        }],
     }])
 }

@@ -7,12 +7,12 @@ mod metadata_test_runner;
 use frame_metadata::{
     v15::{
         CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletMetadata, PalletStorageMetadata,
-        RuntimeMetadataV15, StorageEntryMetadata, RuntimeApiMetadata,
+        RuntimeApiMetadata, RuntimeMetadataV15, StorageEntryMetadata,
     },
     RuntimeMetadataPrefixed,
 };
 use generate_custom_metadata::dispatch_error::ArrayDispatchError;
-use scale_info::{meta_type, IntoPortable, TypeInfo, form::PortableForm};
+use scale_info::{form::PortableForm, meta_type, IntoPortable, TypeInfo};
 
 pub use metadata_test_runner::MetadataTestRunner;
 
@@ -21,7 +21,7 @@ pub use metadata_test_runner::MetadataTestRunner;
 /// type matching the generic type param provided.
 pub fn generate_metadata_from_pallets_custom_dispatch_error<DispatchError: TypeInfo + 'static>(
     pallets: Vec<PalletMetadata>,
-    runtime_apis: Vec<RuntimeApiMetadata<PortableForm>>
+    runtime_apis: Vec<RuntimeApiMetadata<PortableForm>>,
 ) -> RuntimeMetadataPrefixed {
     // We don't care about the extrinsic type.
     let extrinsic = ExtrinsicMetadata {
@@ -85,7 +85,9 @@ pub fn generate_metadata_from_pallets(pallets: Vec<PalletMetadata>) -> RuntimeMe
 /// Given some runtime API metadata, generate a [`RuntimeMetadataPrefixed`] struct.
 /// We default to a useless extrinsic type, and register a fake `DispatchError`
 /// type so that codegen is happy with the metadata generated.
-pub fn generate_metadata_from_runtime_apis(runtime_apis: Vec<RuntimeApiMetadata<PortableForm>>) -> RuntimeMetadataPrefixed {
+pub fn generate_metadata_from_runtime_apis(
+    runtime_apis: Vec<RuntimeApiMetadata<PortableForm>>,
+) -> RuntimeMetadataPrefixed {
     generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(vec![], runtime_apis)
 }
 
