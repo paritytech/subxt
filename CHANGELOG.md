@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.32.1] - 2023-10-05
+
+This is a patch release, mainly to deploy the fix [#1191](https://github.com/paritytech/subxt/pull/1191), which resolves an issue around codegen when runtime API definitions have an argument name "_".
+
+We also expose an API, `api.blocks().at(block_hash).account_nonce(account_id)`, which allows one to obtain the account nonce for some account at any block hash, and not just at the latest finalized block hash as is possible via `api.tx().account_nonce(..)`.
+
+The main changes are:
+
+- fix for when runtime API field name is _  ([#1191](https://github.com/paritytech/subxt/pull/1191))
+- allow getting account nonce at arbitrary blocks, too  ([#1182](https://github.com/paritytech/subxt/pull/1182))
+- chore: improve some error messages  ([#1183](https://github.com/paritytech/subxt/pull/1183))
+
 ## [0.32.0] - 2023-09-27
 
 This is a big release that adds quite a lot, and also introduces some slightly larger breaking changes. Let's look at the main changes:
