@@ -211,7 +211,7 @@ async fn chainhead_unstable_unpin() {
     let sub_id = blocks.subscription_id().unwrap();
 
     assert!(rpc
-        .chainhead_unstable_unpin(sub_id.clone(), hash)
+        .chainhead_unstable_unpin(sub_id, hash)
         .await
         .is_ok());
     // The block was already unpinned.
