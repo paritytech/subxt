@@ -217,19 +217,19 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 
 /// The [`ChargeAssetTxPayment`] signed extension.
 #[derive(Debug)]
-pub struct ChargeAssetTxPayment {
+pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,
-    asset_id: Option<u32>,
+    asset_id: Option<T::AssetId>,
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
 #[derive(Default)]
-pub struct ChargeAssetTxPaymentParams {
+pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
-    asset_id: Option<u32>,
+    asset_id: Option<T::AssetId>,
 }
 
-impl ChargeAssetTxPaymentParams {
+impl<T: Config> ChargeAssetTxPaymentParams<T> {
     /// Don't provide a tip to the extrinsic author.
     pub fn no_tip() -> Self {
         ChargeAssetTxPaymentParams {
@@ -245,7 +245,7 @@ impl ChargeAssetTxPaymentParams {
         }
     }
     /// Tip the extrinsic author using the asset ID given.
-    pub fn tip_of(tip: u128, asset_id: u32) -> Self {
+    pub fn tip_of(tip: u128, asset_id: T::AssetId) -> Self {
         ChargeAssetTxPaymentParams {
             tip,
             asset_id: Some(asset_id),
@@ -253,8 +253,8 @@ impl ChargeAssetTxPaymentParams {
     }
 }
 
-impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment {
-    type OtherParams = ChargeAssetTxPaymentParams;
+impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
+    type OtherParams = ChargeAssetTxPaymentParams<T>;
     type Error = std::convert::Infallible;
 
     fn new<Client: OfflineClientT<T>>(
@@ -269,13 +269,13 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment {
     }
 }
 
-impl ExtrinsicParamsEncoder for ChargeAssetTxPayment {
+impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        (self.tip, self.asset_id).encode_to(v);
+        (self.tip, &self.asset_id).encode_to(v);
     }
 }
 
-impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment {
+impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
     const NAME: &'static str = "ChargeAssetTxPayment";
 }
 

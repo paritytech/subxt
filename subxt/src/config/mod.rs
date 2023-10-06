@@ -51,6 +51,9 @@ pub trait Config: Sized + Send + Sync + 'static {
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: ExtrinsicParams<Self>;
+
+    /// Asset Id
+    type AssetId: Encode;
 }
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
