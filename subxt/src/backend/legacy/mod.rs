@@ -78,7 +78,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             done: Default::default(),
             keys_fut: Default::default(),
             pagination_start_key: None,
-            page_size: Default::default()
+            page_size: Default::default(),
         };
 
         let keys = keys.flat_map(|keys| {
@@ -86,7 +86,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 Err(e) => {
                     // If there's an error, return that next:
                     Either::Left(stream::iter(std::iter::once(Err(e))))
-                },
+                }
                 Ok(keys) => {
                     // Or, stream each "ok" value:
                     Either::Right(stream::iter(keys.into_iter().map(|k| Ok(k))))
@@ -109,7 +109,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             done: Default::default(),
             keys_fut: Default::default(),
             pagination_start_key: None,
-            page_size: Default::default()
+            page_size: Default::default(),
         };
 
         Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
@@ -347,7 +347,7 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     // Set to true when we're done:
     done: bool,
     // Number of keys to fetch next time:
-    page_size: PageSize
+    page_size: PageSize,
 }
 
 impl<T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
@@ -357,7 +357,6 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
         loop {
-
             // We're already done.
             if this.done {
                 return Poll::Ready(None);
@@ -380,7 +379,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
                         // The last key is where we want to paginate from next time.
                         this.pagination_start_key = keys.last().cloned();
                         // return all of the keys from this run.
-                        return Poll::Ready(Some(Ok(keys)))
+                        return Poll::Ready(Some(Ok(keys)));
                     }
                     Err(e) => {
                         // Error getting keys? Return it.
@@ -415,10 +414,17 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
     // Stream of keys.
     keys: StorageFetchDescendantKeysStream<T>,
     // Then we track the future to get the values back for each key:
-    results_fut:
-        Option<Pin<Box<dyn Future<Output = Result<Option<VecDeque<(Vec<u8>, Vec<u8>)>>, Error>> + Send + 'static>>>,
+    results_fut: Option<
+        Pin<
+            Box<
+                dyn Future<Output = Result<Option<VecDeque<(Vec<u8>, Vec<u8>)>>, Error>>
+                    + Send
+                    + 'static,
+            >,
+        >,
+    >,
     // And finally we return each result back one at a time:
-    results: VecDeque<(Vec<u8>, Vec<u8>)>
+    results: VecDeque<(Vec<u8>, Vec<u8>)>,
 }
 
 impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
@@ -428,11 +434,8 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
         loop {
             // If we have results back, return them one by one
             if let Some((key, value)) = this.results.pop_front() {
-                let res = StorageResponse {
-                    key,
-                    value
-                };
-                return Poll::Ready(Some(Ok(res)))
+                let res = StorageResponse { key, value };
+                return Poll::Ready(Some(Ok(res)));
             }
 
             // If we're waiting on the next results then poll that future:
@@ -461,21 +464,24 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                     let results_fut = async move {
                         let keys = keys.iter().map(|k| &**k);
                         let values = methods.state_query_storage_at(keys, Some(at)).await?;
-                        let values: VecDeque<_> = values.into_iter().flat_map(|v| {
-                            v.changes.into_iter().filter_map(|(k, v)| {
-                                let v = v?;
-                                Some((k.0, v.0))
+                        let values: VecDeque<_> = values
+                            .into_iter()
+                            .flat_map(|v| {
+                                v.changes.into_iter().filter_map(|(k, v)| {
+                                    let v = v?;
+                                    Some((k.0, v.0))
+                                })
                             })
-                        }).collect();
+                            .collect();
                         Ok(Some(values))
                     };
 
                     this.results_fut = Some(Box::pin(results_fut));
                     continue;
-                },
+                }
                 Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                 Poll::Ready(None) => return Poll::Ready(None),
-                Poll::Pending => return Poll::Pending
+                Poll::Pending => return Poll::Pending,
             }
         }
     }
@@ -483,7 +489,7 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
 
 /// An iterator which returns the next page size to fetch each time.
 struct PageSize {
-    page_size: u8
+    page_size: u8,
 }
 
 impl Default for PageSize {
