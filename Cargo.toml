@@ -60,7 +60,7 @@ jsonrpsee = { version = "0.20" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.1", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.67"
+proc-macro2 = "1.0.68"
 quote = "1.0.33"
 regex = "1.9.6"
 scale-info = "2.9.0"
