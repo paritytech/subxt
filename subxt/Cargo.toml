@@ -22,10 +22,7 @@ default = ["jsonrpsee", "native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-native-tls",
-    "subxt-lightclient?/native"
-]
+    "jsonrpsee?/async-client", "jsonrpsee?/client-ws-transport-native-tls", "subxt-lightclient?/native"]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
@@ -103,7 +100,7 @@ sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 assert_matches = { workspace = true }
-subxt-signer = { path = "../signer" }
+subxt-signer = { path = "../signer", features = ["native"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with
