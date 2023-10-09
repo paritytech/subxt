@@ -39,5 +39,8 @@ pub use secrecy::{ExposeSecret, SecretString};
 // DeriveJunctions are the "path" part of these SecretUris.
 pub use crypto::{DeriveJunction, SecretUri, SecretUriError, DEV_PHRASE};
 
-#[cfg(not(any(feature = "web", feature = "native")))]
+#[cfg(any(
+    all(feature = "web", feature = "native"),
+    not(any(feature = "web", feature = "native"))
+))]
 compile_error!("subxt-signer: exactly one of the 'web' and 'native' features should be used.");
