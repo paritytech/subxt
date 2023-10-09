@@ -78,7 +78,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             done: Default::default(),
             keys_fut: Default::default(),
             pagination_start_key: None,
-            page_size: Default::default(),
         };
 
         let keys = keys.flat_map(|keys| {
@@ -109,7 +108,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             done: Default::default(),
             keys_fut: Default::default(),
             pagination_start_key: None,
-            page_size: Default::default(),
         };
 
         Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
@@ -334,6 +332,9 @@ where
     })
 }
 
+/// How many keys/values to fetch at once.
+const STORAGE_PAGE_SIZE: u32 = 32;
+
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
 pub struct StorageFetchDescendantKeysStream<T: Config> {
@@ -346,8 +347,6 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     keys_fut: Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
     // Set to true when we're done:
     done: bool,
-    // Number of keys to fetch next time:
-    page_size: PageSize,
 }
 
 impl<T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
@@ -393,12 +392,11 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             let key = this.key.clone();
             let at = this.at;
             let pagination_start_key = this.pagination_start_key.take();
-            let page_size = this.page_size.next();
             let keys_fut = async move {
                 methods
                     .state_get_keys_paged(
                         &key,
-                        page_size,
+                        STORAGE_PAGE_SIZE,
                         pagination_start_key.as_deref(),
                         Some(at),
                     )
@@ -484,26 +482,5 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                 Poll::Pending => return Poll::Pending,
             }
         }
-    }
-}
-
-/// An iterator which returns the next page size to fetch each time.
-struct PageSize {
-    page_size: u8,
-}
-
-impl Default for PageSize {
-    fn default() -> Self {
-        // Fetch a fairly small batch size to begin with.
-        Self { page_size: 8 }
-    }
-}
-
-impl PageSize {
-    fn next(&mut self) -> u32 {
-        let v = self.page_size;
-        // Double the batch size each time but don't exceed 128.
-        self.page_size = self.page_size.saturating_mul(2).min(128);
-        v as u32
     }
 }
