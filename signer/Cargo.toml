@@ -30,8 +30,8 @@ subxt = ["dep:subxt"]
 
 # The getrandom package is used via schnorrkel. We need to enable the JS
 # feature on it if compiling for the web.
-web = ["getrandom/js", "subxt?/web"]
-native = ["subxt?/native"]
+web = ["getrandom/js"]
+native = []
 
 [dependencies]
 subxt = { workspace = true, optional = true, default-features = false }
