@@ -65,8 +65,8 @@ jobs:
             - name: Cargo check subxt-signer
               run: |
                   cargo check -p subxt-signer
-                  cargo check -p subxt-signer --no-default-features --features sr25519
-                  cargo check -p subxt-signer --no-default-features --features ecdsa
+                  cargo check -p subxt-signer --no-default-features --features sr25519,native
+                  cargo check -p subxt-signer --no-default-features --features ecdsa,native
 
             # We can't enable web features here, so no cargo hack.
             - name: Cargo check subxt-lightclient
