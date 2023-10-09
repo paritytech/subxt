@@ -88,7 +88,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 }
                 Ok(keys) => {
                     // Or, stream each "ok" value:
-                    Either::Right(stream::iter(keys.into_iter().map(|k| Ok(k))))
+                    Either::Right(stream::iter(keys.into_iter().map(Ok)))
                 }
             }
         });
