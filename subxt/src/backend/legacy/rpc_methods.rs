@@ -73,7 +73,10 @@ impl<T: Config> LegacyRpcMethods<T> {
         Ok(data.into_iter().map(|b| b.0).collect())
     }
 
-    /// Query historical storage entries
+    /// Query historical storage entries in the range from the start block to the end block,
+    /// defaulting the end block to the current best block if it's not given. The first
+    /// [`StorageChangeSet`] returned has all of the values for each key, and subsequent ones
+    /// only contain values for any keys which have changed since the last.
     pub async fn state_query_storage(
         &self,
         keys: impl IntoIterator<Item = &[u8]>,
@@ -88,7 +91,9 @@ impl<T: Config> LegacyRpcMethods<T> {
             .map_err(Into::into)
     }
 
-    /// Query historical storage entries
+    /// Query storage entries at some block, using the best block if none is given.
+    /// This essentially provides a way to ask for a batch of values given a batch of keys,
+    /// despite the name of the [`StorageChangeSet`] type.
     pub async fn state_query_storage_at(
         &self,
         keys: impl IntoIterator<Item = &[u8]>,
