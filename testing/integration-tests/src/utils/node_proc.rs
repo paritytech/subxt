@@ -19,7 +19,7 @@ pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
     proc: SubstrateNode,
 
-    // Lazily construct these when asked for,
+    // Lazily construct these when asked for.
     unstable_client: RefCell<Option<OnlineClient<R>>>,
     legacy_client: RefCell<Option<OnlineClient<R>>>,
 
