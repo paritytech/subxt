@@ -33,6 +33,28 @@ pub struct Address<ReturnTy> {
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
+impl<ReturnTy> Clone for Address<ReturnTy> {
+    fn clone(&self) -> Self {
+        Self {
+            pallet_name: self.pallet_name.clone(),
+            constant_name: self.constant_name.clone(),
+            constant_hash: self.constant_hash,
+            _marker: self._marker,
+        }
+    }
+}
+
+impl<ReturnTy> std::fmt::Debug for Address<ReturnTy> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Address")
+            .field("pallet_name", &self.pallet_name)
+            .field("constant_name", &self.constant_name)
+            .field("constant_hash", &self.constant_hash)
+            .field("_marker", &self._marker)
+            .finish()
+    }
+}
+
 /// The type of address typically used to return dynamic constant values.
 pub type DynamicAddress = Address<DecodedValueThunk>;
 

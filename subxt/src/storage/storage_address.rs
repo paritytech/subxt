@@ -59,6 +59,34 @@ pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
+impl<StorageKey: Clone, ReturnTy, Fetchable, Defaultable, Iterable> Clone
+    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
+{
+    fn clone(&self) -> Self {
+        Self {
+            pallet_name: self.pallet_name.clone(),
+            entry_name: self.entry_name.clone(),
+            storage_entry_keys: self.storage_entry_keys.clone(),
+            validation_hash: self.validation_hash,
+            _marker: self._marker,
+        }
+    }
+}
+
+impl<StorageKey: std::fmt::Debug, ReturnTy, Fetchable, Defaultable, Iterable> std::fmt::Debug
+    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Address")
+            .field("pallet_name", &self.pallet_name)
+            .field("entry_name", &self.entry_name)
+            .field("storage_entry_keys", &self.storage_entry_keys)
+            .field("validation_hash", &self.validation_hash)
+            .field("_marker", &self._marker)
+            .finish()
+    }
+}
+
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
 pub type DynamicAddress<StorageKey> = Address<StorageKey, DecodedValueThunk, Yes, Yes, Yes>;

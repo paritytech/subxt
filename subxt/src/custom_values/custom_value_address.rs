@@ -42,6 +42,26 @@ pub struct StaticAddress<ReturnTy, IsDecodable> {
     phantom: PhantomData<(ReturnTy, IsDecodable)>,
 }
 
+impl<ReturnTy, IsDecodable> Clone for StaticAddress<ReturnTy, IsDecodable> {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name,
+            hash: self.hash,
+            phantom: self.phantom,
+        }
+    }
+}
+
+impl<ReturnTy, IsDecodable> std::fmt::Debug for StaticAddress<ReturnTy, IsDecodable> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("StaticAddress")
+            .field("name", &self.name)
+            .field("hash", &self.hash)
+            .field("phantom", &self.phantom)
+            .finish()
+    }
+}
+
 impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     #[doc(hidden)]
     /// Creates a new StaticAddress.

@@ -61,6 +61,46 @@ async fn storage_iter() {
 }
 
 #[tokio::test]
+async fn storage_child_values_same_across_backends() {
+    let ctx = test_context().await;
+
+    let unstable_client = ctx.unstable_client().await;
+    let legacy_client = ctx.legacy_client().await;
+
+    let addr = node_runtime::storage().system().account_iter();
+    let block_ref = legacy_client
+        .blocks()
+        .at_latest()
+        .await
+        .unwrap()
+        .reference();
+
+    let a: Vec<_> = unstable_client
+        .storage()
+        .at(block_ref.clone())
+        .iter(addr.clone())
+        .await
+        .unwrap()
+        .collect()
+        .await;
+    let b: Vec<_> = legacy_client
+        .storage()
+        .at(block_ref.clone())
+        .iter(addr)
+        .await
+        .unwrap()
+        .collect()
+        .await;
+
+    for (a, b) in a.into_iter().zip(b.into_iter()) {
+        let a = a.unwrap();
+        let b = b.unwrap();
+
+        assert_eq!(a, b);
+    }
+}
+
+#[tokio::test]
 async fn transaction_validation() {
     let ctx = test_context().await;
     let api = ctx.client();
