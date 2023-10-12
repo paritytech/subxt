@@ -14,12 +14,14 @@ use crate::{
 use std::marker::PhantomData;
 use std::ops::Range;
 
-use crate::dynamic::DecodedValueThunk;
+use crate::dynamic::{DecodedValue, DecodedValueThunk};
 use crate::metadata::DecodeWithMetadata;
 use crate::utils::strip_compact_prefix;
-use codec::Decode;
+use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
+use scale_info::form::PortableForm;
+use scale_info::{PortableRegistry, TypeDef};
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -374,16 +376,71 @@ where
     }
 
     /// Returns a reference to the signed extensions.
-    pub fn signed_extensions(&self) -> Option<()> {
-        let extra_bytes = self.extra_bytes()?;
-        let cursor: &mut &[u8] = &mut &extra_bytes[..];
-        let signed = self.signed.as_ref().unwrap();
-        let d = DecodedValueThunk::decode_with_metadata(cursor, signed.ids.extra, &self.metadata)
-            .expect("decoding err");
+    ///
+    /// Returns `None` if the extrinsic is not signed.
+    /// Returns `Some(Err(..))` if the extrinsic is singed but something went wrong decoding the signed extensions.
+    pub fn signed_extensions(&self) -> Option<Result<ExtrinsicSignedExtensions<T>, Error>> {
+        fn signed_extensions_or_err<'a, T: Config>(
+            extra_bytes: &'a [u8],
+            extra_ty_id: u32,
+            metadata: &'a Metadata,
+        ) -> Result<ExtrinsicSignedExtensions<'a, T>, Error> {
+            let extra_type = metadata
+                .types()
+                .resolve(extra_ty_id)
+                .ok_or(MetadataError::TypeNotFound(extra_ty_id))?;
+            // the type behind this is expected to be a tuple that holds all the individual signed extensions
+            let TypeDef::Tuple(extra_tuple_type_def) = &extra_type.type_def else {
+                return Err(Error::Other(
+                    "singed extra type def should be a tuple".into(),
+                ));
+            };
 
-        let val = d.to_value().expect("ok");
-        println!("{}", val.to_string());
-        Some(())
+            let mut signed_extensions: Vec<ExtrinsicSignedExtension<T>> = vec![];
+
+            let mut cursor: &mut &[u8] = &mut &extra_bytes[..];
+            let mut start_idx: usize = 0;
+            for field in extra_tuple_type_def.fields.iter() {
+                let ty_id = field.id;
+                let ty = metadata
+                    .types()
+                    .resolve(ty_id)
+                    .ok_or(MetadataError::TypeNotFound(ty_id))?;
+                let name = ty.path.segments.last().ok_or_else(|| Error::Other("signed extension path segments should contain the signed extension name as the last element".into()))?;
+                scale_decode::visitor::decode_with_visitor(
+                    cursor,
+                    ty_id,
+                    metadata.types(),
+                    scale_decode::visitor::IgnoreVisitor,
+                )
+                .map_err(|e| Error::Decode(e.into()))?;
+                let end_idx = extra_bytes.len() - cursor.len();
+                let bytes = &extra_bytes[start_idx..end_idx];
+                start_idx = end_idx;
+                signed_extensions.push(ExtrinsicSignedExtension {
+                    bytes,
+                    ty_id,
+                    name,
+                    metadata,
+                    phantom: PhantomData,
+                });
+            }
+
+            Ok(ExtrinsicSignedExtensions {
+                bytes: extra_bytes,
+                signed_extensions,
+                metadata,
+                phantom: PhantomData,
+            })
+        }
+
+        let signed = self.signed.as_ref()?;
+        let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
+        Some(signed_extensions_or_err(
+            extra_bytes,
+            signed.ids.extra,
+            &self.metadata,
+        ))
     }
 
     /// The index of the pallet that the extrinsic originated from.
@@ -614,44 +671,80 @@ impl<T: Config> ExtrinsicEvents<T> {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
+    signed_extensions: Vec<ExtrinsicSignedExtension<'a, T>>,
     bytes: &'a [u8],
+    metadata: &'a Metadata,
     phantom: PhantomData<T>,
 }
 
-pub struct ExtrinsicSignedExtension<T: Config> {
+#[derive(Debug, Clone)]
+pub struct ExtrinsicSignedExtension<'a, T: Config> {
+    bytes: &'a [u8],
+    ty_id: u32,
+    name: &'a str,
+    metadata: &'a Metadata,
     phantom: PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
+    /// Returns the slice of bytes
     pub fn bytes(&self) -> &[u8] {
-        &self.bytes
+        self.bytes
     }
 
-    pub fn find(&self, signed_extension: impl AsRef<str>) -> ExtrinsicSignedExtension<T> {
-        todo!()
+    /// Returns a slice of all signed extensions
+    pub fn signed_extensions(&self) -> &[ExtrinsicSignedExtension<T>] {
+        &self.signed_extensions
     }
 
-    pub fn tip() -> Option<u128> {
-        todo!()
+    /// Get a certain signed extension by its name.
+    pub fn find(&self, signed_extension: impl AsRef<str>) -> Option<&ExtrinsicSignedExtension<T>> {
+        self.signed_extensions
+            .iter()
+            .find(|e| e.name == signed_extension.as_ref())
     }
 
-    pub fn nonce() -> Option<u64> {
-        todo!()
+    /// The tip of an extrinsic, extracted from the ChargeTransactionPayment signed extension.
+    pub fn tip(&self) -> Option<u128> {
+        let tip = self.find("ChargeTransactionPayment")?;
+        let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
+        Some(tip)
+    }
+
+    /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
+    pub fn nonce(&self) -> Option<u64> {
+        let nonce = self.find("CheckNonce")?;
+        let nonce = Compact::<u64>::decode(&mut nonce.bytes()).ok()?.0;
+        Some(nonce)
     }
 }
 
-impl<T: Config> ExtrinsicSignedExtension<T> {
+impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     pub fn bytes(&self) -> &[u8] {
-        todo!()
+        self.bytes
+    }
+
+    pub fn name(&self) -> &str {
+        self.name
     }
 
     pub fn type_id(&self) -> u32 {
-        todo!()
+        self.ty_id
     }
 
-    pub fn value(&self) -> scale_value::Value {
-        todo!()
+    pub fn decoded(&self) -> Result<DecodedValueThunk, Error> {
+        let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
+            &mut &self.bytes[..],
+            self.ty_id,
+            self.metadata,
+        )?;
+        Ok(decoded_value_thunk)
+    }
+    pub fn value(&self) -> Result<DecodedValue, Error> {
+        let value = self.decoded()?.to_value()?;
+        Ok(value)
     }
 }
 

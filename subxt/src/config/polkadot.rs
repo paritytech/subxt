@@ -11,6 +11,7 @@ use crate::SubstrateConfig;
 pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.
+#[derive(Debug)]
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {
