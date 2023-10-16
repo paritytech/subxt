@@ -12,7 +12,6 @@ use crate::{
     Metadata,
 };
 use std::marker::PhantomData;
-use std::ops::Range;
 
 use crate::dynamic::{DecodedValue, DecodedValueThunk};
 use crate::metadata::DecodeWithMetadata;
@@ -20,8 +19,8 @@ use crate::utils::strip_compact_prefix;
 use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
-use scale_info::form::PortableForm;
-use scale_info::{PortableRegistry, TypeDef};
+
+use scale_info::TypeDef;
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -398,7 +397,7 @@ where
 
             let mut signed_extensions: Vec<ExtrinsicSignedExtension<T>> = vec![];
 
-            let mut cursor: &mut &[u8] = &mut &extra_bytes[..];
+            let cursor: &mut &[u8] = &mut &extra_bytes[..];
             let mut start_idx: usize = 0;
             for field in extra_tuple_type_def.fields.iter() {
                 let ty_id = field.id;
@@ -429,6 +428,7 @@ where
             Ok(ExtrinsicSignedExtensions {
                 bytes: extra_bytes,
                 signed_extensions,
+                ty_id: extra_ty_id,
                 metadata,
                 phantom: PhantomData,
             })
@@ -675,6 +675,7 @@ impl<T: Config> ExtrinsicEvents<T> {
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     signed_extensions: Vec<ExtrinsicSignedExtension<'a, T>>,
     bytes: &'a [u8],
+    ty_id: u32,
     metadata: &'a Metadata,
     phantom: PhantomData<T>,
 }
@@ -692,6 +693,17 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// Returns the slice of bytes
     pub fn bytes(&self) -> &[u8] {
         self.bytes
+    }
+
+    /// Returns a DecodedValueThunk of the signed extensions type.
+    /// Can be used to get all signed extensions as a scale value.
+    pub fn decoded(&self) -> Result<DecodedValueThunk, Error> {
+        let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
+            &mut &self.bytes[..],
+            self.ty_id,
+            self.metadata,
+        )?;
+        Ok(decoded_value_thunk)
     }
 
     /// Returns a slice of all signed extensions
@@ -722,18 +734,22 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
+    /// The extra bytes associated with the signed extension.
     pub fn bytes(&self) -> &[u8] {
         self.bytes
     }
 
+    /// The name of the signed extension.
     pub fn name(&self) -> &str {
         self.name
     }
 
+    /// The type id of the signed extension.
     pub fn type_id(&self) -> u32 {
         self.ty_id
     }
 
+    /// DecodedValueThunk representing the type of the extra of this signed extension.
     pub fn decoded(&self) -> Result<DecodedValueThunk, Error> {
         let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
             &mut &self.bytes[..],
@@ -742,6 +758,8 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         )?;
         Ok(decoded_value_thunk)
     }
+
+    /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
         let value = self.decoded()?.to_value()?;
         Ok(value)
