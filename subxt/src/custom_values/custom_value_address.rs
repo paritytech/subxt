@@ -1,3 +1,4 @@
+use derivative::Derivative;
 use std::marker::PhantomData;
 
 use crate::dynamic::DecodedValueThunk;
