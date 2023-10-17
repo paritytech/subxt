@@ -150,7 +150,7 @@ impl TestNodeProcessBuilder {
         // Spawn the node and retrieve a URL to it:
         let proc = node_builder.spawn().map_err(|e| e.to_string())?;
         let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
-        let rpc_client = build_rpc_client::<R>(&ws_url)
+        let rpc_client = build_rpc_client(&ws_url)
             .await
             .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
 
