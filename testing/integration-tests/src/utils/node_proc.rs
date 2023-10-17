@@ -161,7 +161,7 @@ impl TestNodeProcessBuilder {
         let mut legacy_client = None;
 
         #[cfg(feature = "unstable-light-client")]
-        let client = build_light_client(&proc).await;
+        let client = build_light_client(&proc).await?;
 
         #[cfg(feature = "unstable-backend-client")]
         let client = {
@@ -190,7 +190,7 @@ impl TestNodeProcessBuilder {
     }
 }
 
-async fn build_rpc_client<T: Config>(ws_url: &str) -> Result<rpc::RpcClient, String> {
+async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     let rpc_client = rpc::RpcClient::from_url(ws_url)
         .await
         .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
