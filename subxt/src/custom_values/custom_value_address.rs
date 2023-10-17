@@ -36,30 +36,12 @@ impl CustomValueAddress for str {
 pub struct Yes;
 
 /// A static address to a custom value.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,
     phantom: PhantomData<(ReturnTy, IsDecodable)>,
-}
-
-impl<ReturnTy, IsDecodable> Clone for StaticAddress<ReturnTy, IsDecodable> {
-    fn clone(&self) -> Self {
-        Self {
-            name: self.name,
-            hash: self.hash,
-            phantom: self.phantom,
-        }
-    }
-}
-
-impl<ReturnTy, IsDecodable> std::fmt::Debug for StaticAddress<ReturnTy, IsDecodable> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("StaticAddress")
-            .field("name", &self.name)
-            .field("hash", &self.hash)
-            .field("phantom", &self.phantom)
-            .finish()
-    }
 }
 
 impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {

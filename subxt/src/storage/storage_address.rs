@@ -8,6 +8,7 @@ use crate::{
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
+use derivative::Derivative;
 use scale_info::TypeDef;
 use std::borrow::Cow;
 use subxt_metadata::{StorageEntryType, StorageHasher};
@@ -51,40 +52,17 @@ pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
+#[derive(Derivative)]
+#[derivative(
+    Clone(bound = "StorageKey: Clone"),
+    Debug(bound = "StorageKey: std::fmt::Debug")
+)]
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
     storage_entry_keys: Vec<StorageKey>,
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
-}
-
-impl<StorageKey: Clone, ReturnTy, Fetchable, Defaultable, Iterable> Clone
-    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-{
-    fn clone(&self) -> Self {
-        Self {
-            pallet_name: self.pallet_name.clone(),
-            entry_name: self.entry_name.clone(),
-            storage_entry_keys: self.storage_entry_keys.clone(),
-            validation_hash: self.validation_hash,
-            _marker: self._marker,
-        }
-    }
-}
-
-impl<StorageKey: std::fmt::Debug, ReturnTy, Fetchable, Defaultable, Iterable> std::fmt::Debug
-    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Address")
-            .field("pallet_name", &self.pallet_name)
-            .field("entry_name", &self.entry_name)
-            .field("storage_entry_keys", &self.storage_entry_keys)
-            .field("validation_hash", &self.validation_hash)
-            .field("_marker", &self._marker)
-            .finish()
-    }
 }
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this

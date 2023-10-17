@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
+use derivative::Derivative;
 use std::borrow::Cow;
 
 /// This represents a constant address. Anything implementing this trait
@@ -26,33 +27,13 @@ pub trait ConstantAddress {
 }
 
 /// This represents the address of a constant.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<ReturnTy>,
-}
-
-impl<ReturnTy> Clone for Address<ReturnTy> {
-    fn clone(&self) -> Self {
-        Self {
-            pallet_name: self.pallet_name.clone(),
-            constant_name: self.constant_name.clone(),
-            constant_hash: self.constant_hash,
-            _marker: self._marker,
-        }
-    }
-}
-
-impl<ReturnTy> std::fmt::Debug for Address<ReturnTy> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Address")
-            .field("pallet_name", &self.pallet_name)
-            .field("constant_name", &self.constant_name)
-            .field("constant_hash", &self.constant_hash)
-            .field("_marker", &self._marker)
-            .finish()
-    }
 }
 
 /// The type of address typically used to return dynamic constant values.

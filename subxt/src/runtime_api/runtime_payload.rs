@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use core::marker::PhantomData;
+use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
 use std::borrow::Cow;
@@ -65,36 +66,17 @@ pub trait RuntimeApiPayload {
 ///
 /// This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
+#[derive(Derivative)]
+#[derivative(
+    Clone(bound = "ArgsData: Clone"),
+    Debug(bound = "ArgsData: std::fmt::Debug")
+)]
 pub struct Payload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,
     method_name: Cow<'static, str>,
     args_data: ArgsData,
     validation_hash: Option<[u8; 32]>,
     _marker: PhantomData<ReturnTy>,
-}
-
-impl<ArgsData: Clone, ReturnTy> Clone for Payload<ArgsData, ReturnTy> {
-    fn clone(&self) -> Self {
-        Self {
-            trait_name: self.trait_name.clone(),
-            method_name: self.method_name.clone(),
-            args_data: self.args_data.clone(),
-            validation_hash: self.validation_hash,
-            _marker: self._marker,
-        }
-    }
-}
-
-impl<ArgsData: std::fmt::Debug, ReturnTy> std::fmt::Debug for Payload<ArgsData, ReturnTy> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Payload")
-            .field("trait_name", &self.trait_name)
-            .field("method_name", &self.method_name)
-            .field("args_data", &self.args_data)
-            .field("validation_hash", &self.validation_hash)
-            .field("_marker", &self._marker)
-            .finish()
-    }
 }
 
 impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
