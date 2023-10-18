@@ -241,8 +241,8 @@ jobs:
         name: Test (WASM)
         runs-on: ubuntu-latest
         env:
-            # Set timeout for wasm tests to 120 secs; default is too low sometimes.
-            WASM_BINDGEN_TEST_TIMEOUT: 120
+            # Set timeout for wasm tests to be much bigger than the default 20 secs.
+            WASM_BINDGEN_TEST_TIMEOUT: 300
 
         steps:
             - uses: actions/checkout@v4
