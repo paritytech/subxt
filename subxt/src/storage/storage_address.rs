@@ -8,6 +8,7 @@ use crate::{
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
+use derivative::Derivative;
 use scale_info::TypeDef;
 use std::borrow::Cow;
 use subxt_metadata::{StorageEntryType, StorageHasher};
@@ -51,6 +52,11 @@ pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
+#[derive(Derivative)]
+#[derivative(
+    Clone(bound = "StorageKey: Clone"),
+    Debug(bound = "StorageKey: std::fmt::Debug")
+)]
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
