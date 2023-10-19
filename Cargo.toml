@@ -82,8 +82,8 @@ wasm-bindgen-test = "0.3.24"
 which = "4.4.2"
 
 # Light client support:
-smoldot = { version = "0.8.0", default-features = false }
-smoldot-light = { version = "0.6.0", default-features = false }
+smoldot = { version = "0.12.0", default-features = false }
+smoldot-light = { version = "0.10.0", default-features = false }
 tokio-stream = "0.1.14"
 futures-util = "0.3.28"
 
