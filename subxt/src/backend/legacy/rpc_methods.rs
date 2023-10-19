@@ -8,33 +8,18 @@ use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
+use derivative::Derivative;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct LegacyRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
-}
-
-impl<T> Clone for LegacyRpcMethods<T> {
-    fn clone(&self) -> Self {
-        Self {
-            client: self.client.clone(),
-            _marker: self._marker,
-        }
-    }
-}
-
-impl<T> std::fmt::Debug for LegacyRpcMethods<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("LegacyRpcMethods")
-            .field("client", &self.client)
-            .field("_marker", &self._marker)
-            .finish()
-    }
 }
 
 impl<T: Config> LegacyRpcMethods<T> {

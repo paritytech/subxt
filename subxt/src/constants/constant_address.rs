@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
+use derivative::Derivative;
 use std::borrow::Cow;
 
 /// This represents a constant address. Anything implementing this trait
@@ -26,6 +27,8 @@ pub trait ConstantAddress {
 }
 
 /// This represents the address of a constant.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,

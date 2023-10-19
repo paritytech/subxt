@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use core::marker::PhantomData;
+use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
 use std::borrow::Cow;
@@ -65,7 +66,11 @@ pub trait RuntimeApiPayload {
 ///
 /// This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
-#[derive(Clone, Debug)]
+#[derive(Derivative)]
+#[derivative(
+    Clone(bound = "ArgsData: Clone"),
+    Debug(bound = "ArgsData: std::fmt::Debug")
+)]
 pub struct Payload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,
     method_name: Cow<'static, str>,

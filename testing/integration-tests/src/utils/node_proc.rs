@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
 use substrate_runner::SubstrateNode;
@@ -17,6 +18,12 @@ use subxt::client::{LightClient, LightClientBuilder};
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
     proc: SubstrateNode,
+
+    // Lazily construct these when asked for.
+    unstable_client: RefCell<Option<OnlineClient<R>>>,
+    legacy_client: RefCell<Option<OnlineClient<R>>>,
+
+    rpc_client: rpc::RpcClient,
 
     #[cfg(not(feature = "unstable-light-client"))]
     client: OnlineClient<R>,
@@ -49,14 +56,42 @@ where
         unstable::UnstableRpcMethods::new(rpc_client)
     }
 
-    async fn rpc_client(&self) -> rpc::RpcClient {
+    /// Hand back an RPC client connected to the test node.
+    pub async fn rpc_client(&self) -> rpc::RpcClient {
         let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
         rpc::RpcClient::from_url(url)
             .await
             .expect("Unable to connect RPC client to test node")
     }
 
-    /// Returns the subxt client connected to the running node.
+    /// Always return a client using the unstable backend.
+    /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
+    /// which enables us to run each test against both backends.
+    pub async fn unstable_client(&self) -> OnlineClient<R> {
+        if self.unstable_client.borrow().is_none() {
+            let c = build_unstable_client(self.rpc_client.clone())
+                .await
+                .unwrap();
+            self.unstable_client.replace(Some(c));
+        }
+        self.unstable_client.borrow().as_ref().unwrap().clone()
+    }
+
+    /// Always return a client using the legacy backend.
+    /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
+    /// which enables us to run each test against both backends.
+    pub async fn legacy_client(&self) -> OnlineClient<R> {
+        if self.legacy_client.borrow().is_none() {
+            let c = build_legacy_client(self.rpc_client.clone()).await.unwrap();
+            self.legacy_client.replace(Some(c));
+        }
+        self.legacy_client.borrow().as_ref().unwrap().clone()
+    }
+
+    /// Returns the subxt client connected to the running node. This client
+    /// will use the legacy backend by default or the unstable backend if the
+    /// "unstable-backend-client" feature is enabled, so that we can run each
+    /// test against both.
     #[cfg(not(feature = "unstable-light-client"))]
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
@@ -115,36 +150,57 @@ impl TestNodeProcessBuilder {
         // Spawn the node and retrieve a URL to it:
         let proc = node_builder.spawn().map_err(|e| e.to_string())?;
         let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+        let rpc_client = build_rpc_client(&ws_url)
+            .await
+            .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
+
+        // Cache whatever client we build, and None for the other.
+        #[allow(unused_assignments, unused_mut)]
+        let mut unstable_client = None;
+        #[allow(unused_assignments, unused_mut)]
+        let mut legacy_client = None;
 
         #[cfg(feature = "unstable-light-client")]
-        let client = build_light_client(&proc).await;
+        let client = build_light_client(&proc).await?;
 
         #[cfg(feature = "unstable-backend-client")]
-        let client = build_unstable_client(&proc).await;
+        let client = {
+            let client = build_unstable_client(rpc_client.clone()).await?;
+            unstable_client = Some(client.clone());
+            client
+        };
 
         #[cfg(all(
             not(feature = "unstable-light-client"),
             not(feature = "unstable-backend-client")
         ))]
-        let client = build_legacy_client(&proc).await;
+        let client = {
+            let client = build_legacy_client(rpc_client.clone()).await?;
+            legacy_client = Some(client.clone());
+            client
+        };
 
-        match client {
-            Ok(client) => Ok(TestNodeProcess { proc, client }),
-            Err(err) => Err(format!("Failed to connect to node rpc at {ws_url}: {err}")),
-        }
+        Ok(TestNodeProcess {
+            proc,
+            client,
+            legacy_client: RefCell::new(legacy_client),
+            unstable_client: RefCell::new(unstable_client),
+            rpc_client,
+        })
     }
 }
 
-#[cfg(all(
-    not(feature = "unstable-light-client"),
-    not(feature = "unstable-backend-client")
-))]
-async fn build_legacy_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
-    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
-
+async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     let rpc_client = rpc::RpcClient::from_url(ws_url)
         .await
         .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+
+    Ok(rpc_client)
+}
+
+async fn build_legacy_client<T: Config>(
+    rpc_client: rpc::RpcClient,
+) -> Result<OnlineClient<T>, String> {
     let backend = legacy::LegacyBackend::new(rpc_client);
     let client = OnlineClient::from_backend(Arc::new(backend))
         .await
@@ -153,14 +209,9 @@ async fn build_legacy_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCl
     Ok(client)
 }
 
-#[cfg(feature = "unstable-backend-client")]
-async fn build_unstable_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
-    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
-
-    let rpc_client = rpc::RpcClient::from_url(ws_url)
-        .await
-        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
-
+async fn build_unstable_client<T: Config>(
+    rpc_client: rpc::RpcClient,
+) -> Result<OnlineClient<T>, String> {
     let (backend, mut driver) = unstable::UnstableBackend::builder().build(rpc_client);
 
     // The unstable backend needs driving:
