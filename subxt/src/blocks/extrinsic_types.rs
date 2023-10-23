@@ -11,7 +11,6 @@ use crate::{
     metadata::types::PalletMetadata,
     Metadata,
 };
-use std::marker::PhantomData;
 
 use crate::dynamic::{DecodedValue, DecodedValueThunk};
 use crate::metadata::DecodeWithMetadata;
@@ -20,7 +19,6 @@ use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 
-use scale_info::TypeDef;
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -161,7 +159,7 @@ pub struct ExtrinsicDetails<T: Config, C> {
     /// Extrinsic bytes.
     bytes: Arc<[u8]>,
     /// Some if the extrinsic payload is signed.
-    signed: Option<SignedExtrinsicDetails>,
+    signed_details: Option<SignedExtrinsicDetails>,
     /// The start index in the `bytes` from which the call is encoded.
     call_start_idx: usize,
     /// The pallet index.
@@ -189,8 +187,6 @@ pub struct SignedExtrinsicDetails {
     signature_end_idx: usize,
     /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the signature.
     extra_end_idx: usize,
-    /// Extrinsic part type ids (address, signature, extra)
-    ids: ExtrinsicPartTypeIds,
 }
 
 impl<T, C> ExtrinsicDetails<T, C>
@@ -232,46 +228,45 @@ where
         // Skip over the first byte which denotes the version and signing.
         let cursor = &mut &bytes[1..];
 
-        let signed = if !is_signed {
-            None
-        } else {
-            let address_start_idx = bytes.len() - cursor.len();
-            // Skip over the address, signature and extra fields.
-            scale_decode::visitor::decode_with_visitor(
-                cursor,
-                ids.address,
-                metadata.types(),
-                scale_decode::visitor::IgnoreVisitor,
-            )
-            .map_err(scale_decode::Error::from)?;
-            let address_end_idx = bytes.len() - cursor.len();
+        let signed_details = is_signed
+            .then(|| -> Result<SignedExtrinsicDetails, Error> {
+                let address_start_idx = bytes.len() - cursor.len();
+                // Skip over the address, signature and extra fields.
+                scale_decode::visitor::decode_with_visitor(
+                    cursor,
+                    ids.address,
+                    metadata.types(),
+                    scale_decode::visitor::IgnoreVisitor,
+                )
+                .map_err(scale_decode::Error::from)?;
+                let address_end_idx = bytes.len() - cursor.len();
 
-            scale_decode::visitor::decode_with_visitor(
-                cursor,
-                ids.signature,
-                metadata.types(),
-                scale_decode::visitor::IgnoreVisitor,
-            )
-            .map_err(scale_decode::Error::from)?;
-            let signature_end_idx = bytes.len() - cursor.len();
+                scale_decode::visitor::decode_with_visitor(
+                    cursor,
+                    ids.signature,
+                    metadata.types(),
+                    scale_decode::visitor::IgnoreVisitor,
+                )
+                .map_err(scale_decode::Error::from)?;
+                let signature_end_idx = bytes.len() - cursor.len();
 
-            scale_decode::visitor::decode_with_visitor(
-                cursor,
-                ids.extra,
-                metadata.types(),
-                scale_decode::visitor::IgnoreVisitor,
-            )
-            .map_err(scale_decode::Error::from)?;
-            let extra_end_idx = bytes.len() - cursor.len();
+                scale_decode::visitor::decode_with_visitor(
+                    cursor,
+                    ids.extra,
+                    metadata.types(),
+                    scale_decode::visitor::IgnoreVisitor,
+                )
+                .map_err(scale_decode::Error::from)?;
+                let extra_end_idx = bytes.len() - cursor.len();
 
-            Some(SignedExtrinsicDetails {
-                address_start_idx,
-                address_end_idx,
-                signature_end_idx,
-                extra_end_idx,
-                ids,
+                Ok(SignedExtrinsicDetails {
+                    address_start_idx,
+                    address_end_idx,
+                    signature_end_idx,
+                    extra_end_idx,
+                })
             })
-        };
+            .transpose()?;
 
         let call_start_idx = bytes.len() - cursor.len();
 
@@ -284,7 +279,7 @@ where
         Ok(ExtrinsicDetails {
             index,
             bytes,
-            signed,
+            signed_details,
             call_start_idx,
             pallet_index,
             variant_index,
@@ -298,7 +293,7 @@ where
 
     /// Is the extrinsic signed?
     pub fn is_signed(&self) -> bool {
-        self.signed.is_some()
+        self.signed_details.is_some()
     }
 
     /// The index of the extrinsic in the block.
@@ -347,7 +342,7 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     pub fn address_bytes(&self) -> Option<&[u8]> {
-        self.signed
+        self.signed_details
             .as_ref()
             .map(|e| &self.bytes[e.address_start_idx..e.address_end_idx])
     }
@@ -358,7 +353,7 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     pub fn signature_bytes(&self) -> Option<&[u8]> {
-        self.signed
+        self.signed_details
             .as_ref()
             .map(|e| &self.bytes[e.address_end_idx..e.signature_end_idx])
     }
@@ -369,7 +364,7 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     pub fn extra_bytes(&self) -> Option<&[u8]> {
-        self.signed
+        self.signed_details
             .as_ref()
             .map(|e| &self.bytes[e.signature_end_idx..e.extra_end_idx])
     }
@@ -378,29 +373,18 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     /// Returns `Some(Err(..))` if the extrinsic is singed but something went wrong decoding the signed extensions.
-    pub fn signed_extensions(&self) -> Option<Result<ExtrinsicSignedExtensions<T>, Error>> {
-        fn signed_extensions_or_err<'a, T: Config>(
+    pub fn signed_extensions(&self) -> Option<Result<ExtrinsicSignedExtensions, Error>> {
+        fn signed_extensions_or_err<'a>(
             extra_bytes: &'a [u8],
-            extra_ty_id: u32,
             metadata: &'a Metadata,
-        ) -> Result<ExtrinsicSignedExtensions<'a, T>, Error> {
-            let extra_type = metadata
-                .types()
-                .resolve(extra_ty_id)
-                .ok_or(MetadataError::TypeNotFound(extra_ty_id))?;
-            // the type behind this is expected to be a tuple that holds all the individual signed extensions
-            let TypeDef::Tuple(extra_tuple_type_def) = &extra_type.type_def else {
-                return Err(Error::Other(
-                    "singed extra type def should be a tuple".into(),
-                ));
-            };
-
-            let mut signed_extensions: Vec<ExtrinsicSignedExtension<T>> = vec![];
+        ) -> Result<ExtrinsicSignedExtensions<'a>, Error> {
+            let signed_extension_types = metadata.extrinsic().signed_extensions();
+            let mut signed_extensions: Vec<ExtrinsicSignedExtension> = vec![];
 
             let cursor: &mut &[u8] = &mut &extra_bytes[..];
             let mut start_idx: usize = 0;
-            for field in extra_tuple_type_def.fields.iter() {
-                let ty_id = field.id;
+            for signed_extension_type in signed_extension_types {
+                let ty_id = signed_extension_type.extra_ty();
                 let ty = metadata
                     .types()
                     .resolve(ty_id)
@@ -419,28 +403,20 @@ where
                 signed_extensions.push(ExtrinsicSignedExtension {
                     bytes,
                     ty_id,
-                    name,
-                    metadata,
-                    phantom: PhantomData,
+                    identifier: name,
+                    metadata: metadata.clone(),
                 });
             }
 
             Ok(ExtrinsicSignedExtensions {
                 bytes: extra_bytes,
-                signed_extensions,
-                ty_id: extra_ty_id,
-                metadata,
-                phantom: PhantomData,
+                metadata: metadata.clone(),
             })
         }
 
-        let signed = self.signed.as_ref()?;
+        let signed = self.signed_details.as_ref()?;
         let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
-        Some(signed_extensions_or_err(
-            extra_bytes,
-            signed.ids.extra,
-            &self.metadata,
-        ))
+        Some(signed_extensions_or_err(extra_bytes, &self.metadata))
     }
 
     /// The index of the pallet that the extrinsic originated from.
@@ -672,50 +648,63 @@ impl<T: Config> ExtrinsicEvents<T> {
 }
 
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtensions<'a, T: Config> {
-    signed_extensions: Vec<ExtrinsicSignedExtension<'a, T>>,
+pub struct ExtrinsicSignedExtensions<'a> {
     bytes: &'a [u8],
-    ty_id: u32,
-    metadata: &'a Metadata,
-    phantom: PhantomData<T>,
+    metadata: Metadata,
 }
 
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtension<'a, T: Config> {
+pub struct ExtrinsicSignedExtension<'a> {
     bytes: &'a [u8],
     ty_id: u32,
-    name: &'a str,
-    metadata: &'a Metadata,
-    phantom: PhantomData<T>,
+    identifier: &'a str,
+    metadata: Metadata,
 }
 
-impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
-    /// Returns the slice of bytes
-    pub fn bytes(&self) -> &[u8] {
-        self.bytes
-    }
-
-    /// Returns a DecodedValueThunk of the signed extensions type.
-    /// Can be used to get all signed extensions as a scale value.
-    pub fn decoded(&self) -> Result<DecodedValueThunk, Error> {
-        let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
-            &mut &self.bytes[..],
-            self.ty_id,
-            self.metadata,
-        )?;
-        Ok(decoded_value_thunk)
-    }
-
-    /// Returns a slice of all signed extensions
-    pub fn signed_extensions(&self) -> &[ExtrinsicSignedExtension<T>] {
-        &self.signed_extensions
-    }
-
+impl<'a> ExtrinsicSignedExtensions<'a> {
     /// Get a certain signed extension by its name.
-    pub fn find(&self, signed_extension: impl AsRef<str>) -> Option<&ExtrinsicSignedExtension<T>> {
-        self.signed_extensions
-            .iter()
-            .find(|e| e.name == signed_extension.as_ref())
+    pub fn find(&self, signed_extension: impl AsRef<str>) -> Option<ExtrinsicSignedExtension> {
+        self.iter()
+            .find_map(|e| e.ok().filter(|e| e.name() == signed_extension.as_ref()))
+    }
+
+    pub fn iter(&'a self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a>, Error>> {
+        let signed_extension_types = self.metadata.extrinsic().signed_extensions();
+        let num_signed_extensions = signed_extension_types.len();
+        let mut index = 0;
+        let mut byte_start_idx = 0;
+
+        std::iter::from_fn(move || {
+            if index == num_signed_extensions {
+                None
+            } else {
+                let extension = &signed_extension_types[index];
+                let ty_id = extension.extra_ty();
+                let cursor = &mut &self.bytes[byte_start_idx..];
+                if let Err(err) = scale_decode::visitor::decode_with_visitor(
+                    cursor,
+                    ty_id,
+                    self.metadata.types(),
+                    scale_decode::visitor::IgnoreVisitor,
+                )
+                .map_err(|e| Error::Decode(e.into()))
+                {
+                    index = num_signed_extensions; // (Such that None is returned in next iteration)
+                    return Some(Err(err));
+                }
+
+                let byte_end_idx = self.bytes.len() - cursor.len();
+                byte_start_idx = byte_end_idx;
+                index += 1;
+
+                Some(Ok(ExtrinsicSignedExtension {
+                    bytes: &self.bytes[byte_start_idx..byte_end_idx],
+                    ty_id,
+                    identifier: extension.identifier(),
+                    metadata: self.metadata.clone(),
+                }))
+            }
+        })
     }
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment signed extension.
@@ -733,7 +722,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     }
 }
 
-impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
+impl<'a> ExtrinsicSignedExtension<'a> {
     /// The extra bytes associated with the signed extension.
     pub fn bytes(&self) -> &[u8] {
         self.bytes
@@ -741,7 +730,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 
     /// The name of the signed extension.
     pub fn name(&self) -> &str {
-        self.name
+        self.identifier
     }
 
     /// The type id of the signed extension.
@@ -754,7 +743,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
             &mut &self.bytes[..],
             self.ty_id,
-            self.metadata,
+            &self.metadata,
         )?;
         Ok(decoded_value_thunk)
     }
