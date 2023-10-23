@@ -40,7 +40,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Install cargo-hack
               uses: baptiste0928/cargo-install@v2
@@ -92,7 +92,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
             - name: Cargo check WASM examples
@@ -115,7 +115,7 @@ jobs:
                   components: rustfmt
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Cargo fmt
               uses: actions-rs/cargo@v1.0.3
@@ -141,7 +141,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Check internal documentation links
               run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
@@ -170,7 +170,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Install cargo-nextest
               run: cargo install cargo-nextest
@@ -199,7 +199,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Install cargo-nextest
               run: cargo install cargo-nextest
@@ -229,7 +229,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Run tests
               uses: actions-rs/cargo@v1.0.3
@@ -257,7 +257,7 @@ jobs:
               uses: browser-actions/setup-chrome@latest
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Use substrate-node binary
               uses: ./.github/workflows/actions/use-substrate
@@ -307,7 +307,7 @@ jobs:
                   override: true
 
             - name: Rust Cache
-              uses: Swatinem/rust-cache@a95ba195448af2da9b00fb742d14ffaaf3c21f43 # v2.7.0
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
             - name: Run clippy
               uses: actions-rs/cargo@v1
