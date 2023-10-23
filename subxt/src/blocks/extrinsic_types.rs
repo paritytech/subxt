@@ -369,54 +369,14 @@ where
             .map(|e| &self.bytes[e.signature_end_idx..e.extra_end_idx])
     }
 
-    /// Returns a reference to the signed extensions.
-    ///
     /// Returns `None` if the extrinsic is not signed.
-    /// Returns `Some(Err(..))` if the extrinsic is singed but something went wrong decoding the signed extensions.
-    pub fn signed_extensions(&self) -> Option<Result<ExtrinsicSignedExtensions, Error>> {
-        fn signed_extensions_or_err<'a>(
-            extra_bytes: &'a [u8],
-            metadata: &'a Metadata,
-        ) -> Result<ExtrinsicSignedExtensions<'a>, Error> {
-            let signed_extension_types = metadata.extrinsic().signed_extensions();
-            let mut signed_extensions: Vec<ExtrinsicSignedExtension> = vec![];
-
-            let cursor: &mut &[u8] = &mut &extra_bytes[..];
-            let mut start_idx: usize = 0;
-            for signed_extension_type in signed_extension_types {
-                let ty_id = signed_extension_type.extra_ty();
-                let ty = metadata
-                    .types()
-                    .resolve(ty_id)
-                    .ok_or(MetadataError::TypeNotFound(ty_id))?;
-                let name = ty.path.segments.last().ok_or_else(|| Error::Other("signed extension path segments should contain the signed extension name as the last element".into()))?;
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ty_id,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor,
-                )
-                .map_err(|e| Error::Decode(e.into()))?;
-                let end_idx = extra_bytes.len() - cursor.len();
-                let bytes = &extra_bytes[start_idx..end_idx];
-                start_idx = end_idx;
-                signed_extensions.push(ExtrinsicSignedExtension {
-                    bytes,
-                    ty_id,
-                    identifier: name,
-                    metadata: metadata.clone(),
-                });
-            }
-
-            Ok(ExtrinsicSignedExtensions {
-                bytes: extra_bytes,
-                metadata: metadata.clone(),
-            })
-        }
-
+    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions> {
         let signed = self.signed_details.as_ref()?;
         let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
-        Some(signed_extensions_or_err(extra_bytes, &self.metadata))
+        Some(ExtrinsicSignedExtensions {
+            bytes: extra_bytes,
+            metadata: self.metadata.clone(),
+        })
     }
 
     /// The index of the pallet that the extrinsic originated from.
