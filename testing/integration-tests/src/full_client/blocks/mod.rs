@@ -227,3 +227,54 @@ async fn fetch_block_and_decode_extrinsic_details() {
     assert_eq!(ext.value, 10_000);
     assert!(tx.is_signed());
 }
+
+#[tokio::test]
+async fn decode_signed_extensions_from_blocks() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let alice = dev::alice();
+    let bob = dev::bob();
+
+    let submit_tranfer_extrinsic_and_get_it_back = || async {
+        let tx = node_runtime::tx()
+            .balances()
+            .transfer_allow_death(bob.public_key().into(), 10_000);
+
+        let signed_extrinsic = api
+            .tx()
+            .create_signed(&tx, &alice, Default::default())
+            .await
+            .unwrap();
+
+        let in_block = signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_in_block()
+            .await
+            .unwrap();
+
+        let block_hash = in_block.block_hash();
+        let block = api.blocks().at(block_hash).await.unwrap();
+        let extrinsics = block.extrinsics().await.unwrap();
+        let extrinsic_details = extrinsics.iter().next().unwrap().unwrap();
+        extrinsic_details
+    };
+
+    let first_transaction = submit_tranfer_extrinsic_and_get_it_back().await;
+    let first_transaction_nonce = first_transaction
+        .signed_extensions()
+        .unwrap()
+        .nonce()
+        .unwrap();
+
+    let second_transaction = submit_tranfer_extrinsic_and_get_it_back().await;
+    let second_transaction_nonce = first_transaction
+        .signed_extensions()
+        .unwrap()
+        .nonce()
+        .unwrap();
+
+    assert_eq!(first_transaction_nonce, 0);
+    assert_eq!(second_transaction_nonce, 1);
+}
