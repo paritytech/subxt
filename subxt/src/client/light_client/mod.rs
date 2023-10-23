@@ -115,6 +115,11 @@ impl<T: Config> LightClient<T> {
     pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         <Self as OfflineClientT<T>>::runtime_api(self)
     }
+
+    /// Expose the OnlineClient that the LightClient struct wraps.
+    pub fn inner_online_client(&self) -> &OnlineClient<T> {
+        &self.0
+    }
 }
 
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
