@@ -649,16 +649,15 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
                 )
                 .map_err(|e| Error::Decode(e.into()))
                 {
-                    index = num_signed_extensions; // (Such that None is returned in next iteration)
+                    index = num_signed_extensions; // (such that None is returned in next iteration)
                     return Some(Err(err));
                 }
-
                 let byte_end_idx = self.bytes.len() - cursor.len();
+                let bytes = &self.bytes[byte_start_idx..byte_end_idx];
                 byte_start_idx = byte_end_idx;
                 index += 1;
-
                 Some(Ok(ExtrinsicSignedExtension {
-                    bytes: &self.bytes[byte_start_idx..byte_end_idx],
+                    bytes,
                     ty_id,
                     identifier: extension.identifier(),
                     metadata: self.metadata.clone(),
