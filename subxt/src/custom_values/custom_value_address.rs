@@ -1,3 +1,4 @@
+use derivative::Derivative;
 use std::marker::PhantomData;
 
 use crate::dynamic::DecodedValueThunk;
@@ -36,6 +37,8 @@ impl CustomValueAddress for str {
 pub struct Yes;
 
 /// A static address to a custom value.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,

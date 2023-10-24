@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 subxt = { path = "../../subxt" }
-subxt-signer = { path = "../../signer", features = ["subxt"] }
+subxt-signer = { path = "../../signer" }
 futures = { version = "0.3.27", default-features = false, features = ["std"] }
 tokio = { version = "1.28", features = ["macros", "time", "rt-multi-thread"] }
 sp-core = "21.0.0"
