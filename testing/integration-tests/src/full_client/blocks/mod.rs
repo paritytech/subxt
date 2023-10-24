@@ -2,9 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::TestContext;
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
+use std::future::Future;
+use std::time::Duration;
+use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
@@ -235,46 +239,53 @@ async fn decode_signed_extensions_from_blocks() {
     let alice = dev::alice();
     let bob = dev::bob();
 
-    let submit_tranfer_extrinsic_and_get_it_back = || async {
-        let tx = node_runtime::tx()
-            .balances()
-            .transfer_allow_death(bob.public_key().into(), 10_000);
+    macro_rules! submit_transfer_extrinsic_and_get_it_back {
+        ($tip:expr) => {{
+            let tx = node_runtime::tx()
+                .balances()
+                .transfer_allow_death(bob.public_key().into(), 10_000);
 
-        let signed_extrinsic = api
-            .tx()
-            .create_signed(&tx, &alice, Default::default())
-            .await
-            .unwrap();
+            let signed_extrinsic = api
+                .tx()
+                .create_signed(
+                    &tx,
+                    &alice,
+                    DefaultExtrinsicParamsBuilder::new().tip($tip).build(),
+                )
+                .await
+                .unwrap();
 
-        let in_block = signed_extrinsic
-            .submit_and_watch()
-            .await
-            .unwrap()
-            .wait_for_in_block()
-            .await
-            .unwrap();
+            let in_block = signed_extrinsic
+                .submit_and_watch()
+                .await
+                .unwrap()
+                .wait_for_finalized()
+                .await
+                .unwrap();
 
-        let block_hash = in_block.block_hash();
-        let block = api.blocks().at(block_hash).await.unwrap();
-        let extrinsics = block.extrinsics().await.unwrap();
-        let extrinsic_details = extrinsics.iter().next().unwrap().unwrap();
-        extrinsic_details
-    };
+            let block_hash = in_block.block_hash();
+            let block = api.blocks().at(block_hash).await.unwrap();
+            let extrinsics = block.extrinsics().await.unwrap();
+            let extrinsic_details = extrinsics
+                .iter()
+                .find_map(|e| e.ok().filter(|e| e.is_signed()))
+                .unwrap();
+            extrinsic_details
+        }};
+    }
 
-    let first_transaction = submit_tranfer_extrinsic_and_get_it_back().await;
-    let first_transaction_nonce = first_transaction
-        .signed_extensions()
-        .unwrap()
-        .nonce()
-        .unwrap();
+    let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
+    let extensions1 = transaction1.signed_extensions().unwrap();
+    let nonce1 = extensions1.nonce().unwrap();
+    let tip1 = extensions1.tip().unwrap();
 
-    let second_transaction = submit_tranfer_extrinsic_and_get_it_back().await;
-    let second_transaction_nonce = first_transaction
-        .signed_extensions()
-        .unwrap()
-        .nonce()
-        .unwrap();
+    let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
+    let extensions2 = transaction2.signed_extensions().unwrap();
+    let nonce2 = extensions2.nonce().unwrap();
+    let tip2 = extensions2.tip().unwrap();
 
-    assert_eq!(first_transaction_nonce, 0);
-    assert_eq!(second_transaction_nonce, 1);
+    assert_eq!(nonce1, 0);
+    assert_eq!(tip1, 1234);
+    assert_eq!(nonce2, 1);
+    assert_eq!(tip2, 5678);
 }

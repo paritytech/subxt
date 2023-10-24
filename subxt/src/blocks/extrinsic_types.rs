@@ -668,7 +668,7 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment signed extension.
     pub fn tip(&self) -> Option<u128> {
-        let tip = self.find("ChargeTransactionPayment")?;
+        let tip = self.find("ChargeAssetTxPayment")?;
         let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
         Some(tip)
     }
