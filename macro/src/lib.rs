@@ -156,7 +156,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
             let generated_code = fetch_metadata_from_file_blocking(&path)
-                .map_err(|e| CodegenError::from(e))
+                .map_err(CodegenError::from)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .and_then(|m| codegen.generate(m).map_err(Into::into))
                 .unwrap_or_else(|e| e.into_compile_error());
@@ -174,7 +174,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             };
 
             let generated_code = fetch_metadata_from_url_blocking(url, version)
-                .map_err(|e| CodegenError::from(e))
+                .map_err(CodegenError::from)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .and_then(|m| codegen.generate(m).map_err(Into::into))
                 .unwrap_or_else(|e| e.into_compile_error());
