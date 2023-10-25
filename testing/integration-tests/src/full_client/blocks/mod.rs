@@ -272,6 +272,17 @@ async fn decode_signed_extensions_from_blocks() {
         }};
     }
 
+    let expected_signed_extensions = [
+        "CheckNonZeroSender",
+        "CheckSpecVersion",
+        "CheckTxVersion",
+        "CheckGenesis",
+        "CheckMortality",
+        "CheckNonce",
+        "CheckWeight",
+        "ChargeAssetTxPayment",
+    ];
+
     let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
     let extensions1 = transaction1.signed_extensions().unwrap();
     let nonce1 = extensions1.nonce().unwrap();
@@ -286,4 +297,13 @@ async fn decode_signed_extensions_from_blocks() {
     assert_eq!(tip1, 1234);
     assert_eq!(nonce2, 1);
     assert_eq!(tip2, 5678);
+
+    assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
+    for (e, expected_name) in extensions1.iter().zip(expected_signed_extensions.iter()) {
+        assert_eq!(e.unwrap().name(), *expected_name);
+    }
+    assert_eq!(extensions2.iter().count(), expected_signed_extensions.len());
+    for (e, expected_name) in extensions2.iter().zip(expected_signed_extensions.iter()) {
+        assert_eq!(e.unwrap().name(), *expected_name);
+    }
 }

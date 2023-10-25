@@ -358,12 +358,13 @@ where
             .map(|e| &self.bytes[e.address_end_idx..e.signature_end_idx])
     }
 
-    /// Return only the bytes of the extra fields for this signed extrinsic.
+    /// Returns the signed extension `extra` bytes of the extrinsic.
+    /// Each signed extension has an `extra` type (May be zero-sized).
+    /// These bytes are the scale encoded `extra` fields of each signed extension in order of the signed extensions.
+    /// They do *not* include the `additional` signed bytes that are used as part of the payload that is signed.
     ///
-    /// # Note
-    ///
-    /// Returns `None` if the extrinsic is not signed.
-    pub fn extra_bytes(&self) -> Option<&[u8]> {
+    /// Note: Returns `None` if the extrinsic is not signed.
+    pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
         self.signed_details
             .as_ref()
             .map(|e| &self.bytes[e.signature_end_idx..e.extra_end_idx])
@@ -607,12 +608,14 @@ impl<T: Config> ExtrinsicEvents<T> {
     }
 }
 
+/// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicSignedExtensions<'a> {
     bytes: &'a [u8],
     metadata: Metadata,
 }
 
+/// A single signed extension
 #[derive(Debug, Clone)]
 pub struct ExtrinsicSignedExtension<'a> {
     bytes: &'a [u8],
@@ -622,12 +625,8 @@ pub struct ExtrinsicSignedExtension<'a> {
 }
 
 impl<'a> ExtrinsicSignedExtensions<'a> {
-    /// Get a certain signed extension by its name.
-    pub fn find(&self, signed_extension: impl AsRef<str>) -> Option<ExtrinsicSignedExtension> {
-        self.iter()
-            .find_map(|e| e.ok().filter(|e| e.name() == signed_extension.as_ref()))
-    }
-
+    /// Returns an iterator ove all signed extensions, allowing access to their names, bytes and types.
+    /// If the decoding of any signed extension fails, an error item is yielded and the iterator stops.
     pub fn iter(&'a self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a>, Error>> {
         let signed_extension_types = self.metadata.extrinsic().signed_extensions();
         let num_signed_extensions = signed_extension_types.len();
@@ -636,41 +635,43 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
 
         std::iter::from_fn(move || {
             if index == num_signed_extensions {
-                None
-            } else {
-                let extension = &signed_extension_types[index];
-                let ty_id = extension.extra_ty();
-                let cursor = &mut &self.bytes[byte_start_idx..];
-                if let Err(err) = scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ty_id,
-                    self.metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor,
-                )
-                .map_err(|e| Error::Decode(e.into()))
-                {
-                    index = num_signed_extensions; // (such that None is returned in next iteration)
-                    return Some(Err(err));
-                }
-                let byte_end_idx = self.bytes.len() - cursor.len();
-                let bytes = &self.bytes[byte_start_idx..byte_end_idx];
-                byte_start_idx = byte_end_idx;
-                index += 1;
-                Some(Ok(ExtrinsicSignedExtension {
-                    bytes,
-                    ty_id,
-                    identifier: extension.identifier(),
-                    metadata: self.metadata.clone(),
-                }))
+                return None;
             }
+
+            let extension = &signed_extension_types[index];
+            let ty_id = extension.extra_ty();
+            let cursor = &mut &self.bytes[byte_start_idx..];
+            if let Err(err) = scale_decode::visitor::decode_with_visitor(
+                cursor,
+                ty_id,
+                self.metadata.types(),
+                scale_decode::visitor::IgnoreVisitor,
+            )
+            .map_err(|e| Error::Decode(e.into()))
+            {
+                index = num_signed_extensions; // (such that None is returned in next iteration)
+                return Some(Err(err));
+            }
+            let byte_end_idx = self.bytes.len() - cursor.len();
+            let bytes = &self.bytes[byte_start_idx..byte_end_idx];
+            byte_start_idx = byte_end_idx;
+            index += 1;
+            Some(Ok(ExtrinsicSignedExtension {
+                bytes,
+                ty_id,
+                identifier: extension.identifier(),
+                metadata: self.metadata.clone(),
+            }))
         })
     }
 
-    /// The tip of an extrinsic, extracted from the ChargeTransactionPayment signed extension.
+    /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment signed extension, depending on which is present.
     pub fn tip(&self) -> Option<u128> {
-        let tip = self
-            .find("ChargeTransactionPayment")
-            .or_else(|| self.find("ChargeAssetTxPayment"))?;
+        let tip = self.iter().find_map(|e| {
+            e.ok().filter(|e| {
+                e.name() == "ChargeTransactionPayment" || e.name() == "ChargeAssetTxPayment"
+            })
+        })?;
         // Note: ChargeAssetTxPayment might have addition information in it (asset_id).
         //       But both should start with a compact encoded u128, so this decoding is fine.
         let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
@@ -679,14 +680,16 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
     pub fn nonce(&self) -> Option<u64> {
-        let nonce = self.find("CheckNonce")?;
+        let nonce = self
+            .iter()
+            .find_map(|e| e.ok().filter(|e| e.name() == "CheckNonce"))?;
         let nonce = Compact::<u64>::decode(&mut nonce.bytes()).ok()?.0;
         Some(nonce)
     }
 }
 
 impl<'a> ExtrinsicSignedExtension<'a> {
-    /// The extra bytes associated with the signed extension.
+    /// The bytes representing this signed extension.
     pub fn bytes(&self) -> &[u8] {
         self.bytes
     }
@@ -702,7 +705,7 @@ impl<'a> ExtrinsicSignedExtension<'a> {
     }
 
     /// DecodedValueThunk representing the type of the extra of this signed extension.
-    pub fn decoded(&self) -> Result<DecodedValueThunk, Error> {
+    fn decoded(&self) -> Result<DecodedValueThunk, Error> {
         let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
             &mut &self.bytes[..],
             self.ty_id,
@@ -713,8 +716,11 @@ impl<'a> ExtrinsicSignedExtension<'a> {
 
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        let value = self.decoded()?.to_value()?;
-        Ok(value)
+        self.decoded()?.to_value()
+    }
+
+    pub fn as_type<T: DecodeAsType>(&self) -> Result<T, Error> {
+        self.decoded()?.as_type::<T>().map_err(Into::into)
     }
 }
 
