@@ -49,15 +49,16 @@ pub use syn;
 /// Generating an interface using all of the defaults:
 ///
 /// ```rust
-/// use subxt_codegen::CodegenBuilder;
+/// use codec::Decode;
+/// use subxt_codegen::{ Metadata, CodegenBuilder };
 ///
 /// // Get hold of and decode some metadata:
-/// let encoded = fs::read("../artifacts/polkadot_metadata_full.scale").unwrap();
+/// let encoded = std::fs::read("../artifacts/polkadot_metadata_full.scale").unwrap();
 /// let metadata = Metadata::decode(&mut &*encoded).unwrap();
 ///
 /// // Generate a TokenStream representing the code for the interface.
 /// // This can be converted to a string, displayed as-is or output from a macro.
-/// CodegenBuilder::new().generate(metadata)
+/// let token_stream = CodegenBuilder::new().generate(metadata);
 /// ````
 pub struct CodegenBuilder {
     crate_path: syn::Path,
