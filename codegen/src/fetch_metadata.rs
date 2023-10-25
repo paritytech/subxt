@@ -55,7 +55,7 @@ pub fn fetch_metadata_from_file_blocking(
 ) -> Result<Vec<u8>, FetchMetadataError> {
     use std::io::Read;
     let to_err = |err| FetchMetadataError::Io(path.to_string_lossy().into(), err);
-    let mut file = std::fs::File::open(&path).map_err(to_err)?;
+    let mut file = std::fs::File::open(path).map_err(to_err)?;
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes).map_err(to_err)?;
     Ok(bytes)

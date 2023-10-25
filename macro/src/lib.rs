@@ -159,7 +159,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 .map_err(|e| CodegenError::from(e))
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .and_then(|m| codegen.generate(m).map_err(Into::into))
-                .unwrap_or_else(|e| abort_call_site!("{}", e));
+                .unwrap_or_else(|e| e.into_compile_error());
 
             generated_code.into()
         }
@@ -177,7 +177,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 .map_err(|e| CodegenError::from(e))
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .and_then(|m| codegen.generate(m).map_err(Into::into))
-                .unwrap_or_else(|e| abort_call_site!("{}", e));
+                .unwrap_or_else(|e| e.into_compile_error());
 
             generated_code.into()
         }
