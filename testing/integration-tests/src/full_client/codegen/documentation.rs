@@ -138,18 +138,10 @@ fn check_root_attrs_preserved() {
         pub mod api {}
     );
 
-    // Generate a runtime interface from the provided metadata.
-    let generator = RuntimeGenerator::new(metadata);
-    let derives = DerivesRegistry::with_default_derives(&CratePath::default());
-    let type_substitutes = TypeSubstitutes::with_default_substitutes(&CratePath::default());
-    let generated_code = generator
-        .generate_runtime(
-            item_mod,
-            derives,
-            type_substitutes,
-            CratePath::default(),
-            true,
-        )
+    let mut codegen = CodegenBuilder::new();
+    codegen.set_target_module(item_mod);
+    let generated_code = codegen
+        .generate(metadata)
         .expect("API generation must be valid")
         .to_string();
 
