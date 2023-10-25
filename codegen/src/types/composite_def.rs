@@ -4,7 +4,7 @@
 
 use crate::error::CodegenError;
 
-use super::{CratePath, Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
+use super::{Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use scale_info::{form::PortableForm, Type, TypeDef, TypeDefPrimitive};
@@ -36,7 +36,7 @@ impl CompositeDef {
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
         docs: &[String],
-        crate_path: &CratePath,
+        crate_path: &syn::Path,
     ) -> Result<Self, CodegenError> {
         let mut derives = type_gen.type_derives(ty)?;
         let fields: Vec<_> = fields_def.field_types().collect();

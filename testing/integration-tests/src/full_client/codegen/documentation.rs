@@ -4,7 +4,7 @@
 
 use codec::Decode;
 use regex::Regex;
-use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
+use subxt_codegen::{ syn, CodegenBuilder };
 use subxt_metadata::Metadata;
 
 fn load_test_metadata() -> Metadata {
@@ -48,25 +48,18 @@ fn metadata_docs() -> Vec<String> {
     docs
 }
 
-fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> String {
+fn generate_runtime_interface(should_gen_docs: bool) -> String {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let metadata = load_test_metadata();
 
-    // Generate a runtime interface from the provided metadata.
-    let generator = RuntimeGenerator::new(metadata);
-    let item_mod = syn::parse_quote!(
-        pub mod api {}
-    );
-    let derives = DerivesRegistry::with_default_derives(&crate_path);
-    let type_substitutes = TypeSubstitutes::with_default_substitutes(&crate_path);
-    generator
-        .generate_runtime(
-            item_mod,
-            derives,
-            type_substitutes,
-            crate_path,
-            should_gen_docs,
-        )
+    let mut codegen = CodegenBuilder::new();
+
+    if !should_gen_docs {
+        codegen.no_docs();
+    }
+
+    codegen
+        .generate(metadata)
         .expect("API generation must be valid")
         .to_string()
 }
@@ -74,7 +67,7 @@ fn generate_runtime_interface(crate_path: CratePath, should_gen_docs: bool) -> S
 fn interface_docs(should_gen_docs: bool) -> Vec<String> {
     // Generate the runtime interface from the node's metadata.
     // Note: the API is generated on a single line.
-    let runtime_api = generate_runtime_interface(CratePath::default(), should_gen_docs);
+    let runtime_api = generate_runtime_interface(should_gen_docs);
 
     // Documentation lines have the following format:
     //    # [ doc = "Upward message is invalid XCM."]

@@ -3,10 +3,7 @@
 // see LICENSE for license details.
 
 use super::CodegenError;
-use crate::{
-    types::{CompositeDefFields, TypeGenerator},
-    CratePath,
-};
+use crate::types::{CompositeDefFields, TypeGenerator};
 use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -25,7 +22,7 @@ pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no calls.

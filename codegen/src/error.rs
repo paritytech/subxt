@@ -16,9 +16,6 @@ pub enum CodegenError {
     /// Cannot fetch the metadata bytes.
     #[error("Failed to fetch metadata, make sure that you're pointing at a node which is providing substrate-based metadata: {0}")]
     Fetch(#[from] FetchMetadataError),
-    /// Failed IO for the metadata file.
-    #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]
-    Io(String, std::io::Error),
     /// Cannot decode the metadata bytes.
     #[error("Could not decode metadata, only V14 and V15 metadata are supported: {0}")]
     Decode(#[from] codec::Error),
@@ -85,15 +82,23 @@ impl CodegenError {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum FetchMetadataError {
+    /// Error decoding from a hex value.
     #[error("Cannot decode hex value: {0}")]
     DecodeError(#[from] hex::FromHexError),
+    /// Some SCALE codec error.
     #[error("Cannot scale encode/decode value: {0}")]
     CodecError(#[from] codec::Error),
+    /// JSON-RPC error fetching metadata.
     #[cfg(feature = "fetch-metadata")]
     #[error("Request error: {0}")]
     RequestError(#[from] jsonrpsee::core::Error),
+    /// Failed IO when fetching from a file.
+    #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]
+    Io(String, std::io::Error),
+    /// URL scheme is not http, https, ws or wss.
     #[error("'{0}' not supported, supported URI schemes are http, https, ws or wss.")]
     InvalidScheme(String),
+    /// Some other error.
     #[error("Other error: {0}")]
     Other(String),
 }

@@ -41,7 +41,7 @@ pub struct TypeGenerator<'a> {
     /// Set of derives with which to annotate generated types.
     derives: DerivesRegistry,
     /// The `subxt` crate access path in the generated code.
-    crate_path: CratePath,
+    crate_path: syn::Path,
     /// True if codegen should generate the documentation for the API.
     should_gen_docs: bool,
 }
@@ -53,7 +53,7 @@ impl<'a> TypeGenerator<'a> {
         root_mod: &'static str,
         type_substitutes: TypeSubstitutes,
         derives: DerivesRegistry,
-        crate_path: CratePath,
+        crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
@@ -332,57 +332,5 @@ impl Module {
     /// Returns the root `mod` used for resolving type paths.
     pub fn root_mod(&self) -> &Ident {
         &self.root_mod
-    }
-}
-
-/// A newtype wrapper which stores the path to the Subxt crate.
-#[derive(Debug, Clone)]
-pub struct CratePath(syn::Path);
-
-impl CratePath {
-    /// Create a new `CratePath` from a `syn::Path`.
-    pub fn new(path: syn::Path) -> Self {
-        Self(path)
-    }
-}
-
-impl Default for CratePath {
-    fn default() -> Self {
-        Self(syn::parse_quote!(::subxt))
-    }
-}
-
-impl From<syn::Path> for CratePath {
-    fn from(path: syn::Path) -> Self {
-        CratePath::new(path)
-    }
-}
-
-impl ToTokens for CratePath {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.0.to_tokens(tokens)
-    }
-}
-
-impl From<&str> for CratePath {
-    fn from(crate_path: &str) -> Self {
-        Self(syn::parse_str(crate_path).unwrap_or_else(|err| {
-            panic!("failed converting {crate_path:?} to `syn::Path`: {err:?}");
-        }))
-    }
-}
-
-impl From<String> for CratePath {
-    fn from(crate_path: String) -> Self {
-        CratePath::from(crate_path.as_str())
-    }
-}
-
-impl From<Option<String>> for CratePath {
-    fn from(maybe_crate_path: Option<String>) -> Self {
-        match maybe_crate_path {
-            None => CratePath::default(),
-            Some(crate_path) => crate_path.into(),
-        }
     }
 }

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CratePath};
+use crate::types::TypeGenerator;
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
@@ -37,7 +37,7 @@ pub fn generate_constants(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
