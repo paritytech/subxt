@@ -69,14 +69,6 @@ pub fn fetch_metadata_from_url_blocking(
     tokio_block_on(fetch_metadata_from_url(url, version))
 }
 
-// /// Returns the raw, 0x prefixed metadata hex from the provided URL, blocking the current thread.
-// pub fn fetch_metadata_from_url_hex_blocking(
-//     url: Url,
-//     version: MetadataVersion,
-// ) -> Result<String, FetchMetadataError> {
-//     tokio_block_on(fetch_metadata_hex(url, version))
-// }
-
 // Block on some tokio runtime for sync contexts
 fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
     tokio::runtime::Builder::new_multi_thread()
@@ -99,16 +91,6 @@ pub async fn fetch_metadata_from_url(
 
     Ok(bytes)
 }
-
-// /// Returns the raw, 0x prefixed metadata hex from the provided URL.
-// pub async fn fetch_metadata_hex(
-//     url: Url,
-//     version: MetadataVersion,
-// ) -> Result<String, FetchMetadataError> {
-//     let bytes = fetch_metadata_bytes(url, version).await?;
-//     let hex_data = format!("0x{}", hex::encode(bytes));
-//     Ok(hex_data)
-// }
 
 async fn fetch_metadata_ws(
     url: Url,
