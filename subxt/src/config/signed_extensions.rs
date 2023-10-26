@@ -10,17 +10,43 @@
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
-use codec::{Compact, Encode};
+use codec::{Compact, Decode, Encode};
 use core::fmt::Debug;
+use scale_decode::DecodeAsType;
 use std::collections::HashMap;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
 /// additional data.
-pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
+pub trait SignedExtension<T: Config>: ExtrinsicParams<T> + SignedExtensionDecoder {
     /// The name of the signed extension. This is used to associate it
     /// with the signed extensions that the node is making use of.
     const NAME: &'static str;
+}
+
+/// Specifies the Extra and Additional data types of the signed extension.
+/// `ExtrinsicParamsEncoder` is implemented for all `SignedExtensionDecoder`s.
+pub trait SignedExtensionDecoder {
+    /// Signed Extra parameter of a Signed Extension.
+    /// Included in a signed extension behind the signature.
+    type Extra: Encode + DecodeAsType;
+    /// Additional Signed parameter of a Signed Extension.
+    /// Used as part of the payload for signing an extrinsic.
+    type Additional: Encode;
+    /// Retrieves the signed extra parameter.
+    fn extra(&self) -> &Self::Extra;
+    /// Retrieves the additional signed parameter.
+    fn additional(&self) -> &Self::Additional;
+}
+
+impl<S: SignedExtensionDecoder + 'static> ExtrinsicParamsEncoder for S {
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        self.extra().encode_to(v);
+    }
+
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        self.additional().encode_to(v);
+    }
 }
 
 /// The [`CheckSpecVersion`] signed extension.
@@ -40,9 +66,16 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckSpecVersion {
-    fn encode_additional_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
+impl SignedExtensionDecoder for CheckSpecVersion {
+    type Extra = ();
+    type Additional = u32;
+
+    fn extra(&self) -> &Self::Extra {
+        &()
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &self.0
     }
 }
 
@@ -67,9 +100,16 @@ impl<T: Config> ExtrinsicParams<T> for CheckNonce {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckNonce {
-    fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
+impl SignedExtensionDecoder for CheckNonce {
+    type Extra = Compact<u64>;
+    type Additional = ();
+
+    fn extra(&self) -> &Self::Extra {
+        &self.0
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &()
     }
 }
 
@@ -94,9 +134,16 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckTxVersion {
-    fn encode_additional_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
+impl SignedExtensionDecoder for CheckTxVersion {
+    type Extra = ();
+    type Additional = u32;
+
+    fn extra(&self) -> &Self::Extra {
+        &()
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &self.0
     }
 }
 
@@ -126,9 +173,16 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for CheckGenesis<T> {
-    fn encode_additional_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
+impl<T: Config> SignedExtensionDecoder for CheckGenesis<T> {
+    type Extra = ();
+    type Additional = T::Hash;
+
+    fn extra(&self) -> &Self::Extra {
+        &()
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &self.0
     }
 }
 
@@ -202,12 +256,16 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
-    fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.era.encode_to(v);
+impl<T: Config> SignedExtensionDecoder for CheckMortality<T> {
+    type Extra = Era;
+    type Additional = T::Hash;
+
+    fn extra(&self) -> &Self::Extra {
+        &self.era
     }
-    fn encode_additional_to(&self, v: &mut Vec<u8>) {
-        self.checkpoint.encode_to(v)
+
+    fn additional(&self) -> &Self::Additional {
+        &self.checkpoint
     }
 }
 
@@ -216,7 +274,7 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug)]
+#[derive(Debug, Encode, Decode, DecodeAsType)]
 pub struct ChargeAssetTxPayment {
     tip: Compact<u128>,
     asset_id: Option<u32>,
@@ -269,9 +327,16 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment {
     }
 }
 
-impl ExtrinsicParamsEncoder for ChargeAssetTxPayment {
-    fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        (self.tip, self.asset_id).encode_to(v);
+impl SignedExtensionDecoder for ChargeAssetTxPayment {
+    type Extra = Self;
+    type Additional = ();
+
+    fn extra(&self) -> &Self::Extra {
+        &self
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &()
     }
 }
 
@@ -280,7 +345,7 @@ impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment {
 }
 
 /// The [`ChargeTransactionPayment`] signed extension.
-#[derive(Debug)]
+#[derive(Debug, Encode, Decode, DecodeAsType)]
 pub struct ChargeTransactionPayment {
     tip: Compact<u128>,
 }
@@ -317,9 +382,16 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
     }
 }
 
-impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
-    fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.tip.encode_to(v);
+impl SignedExtensionDecoder for ChargeTransactionPayment {
+    type Extra = Self;
+    type Additional = ();
+
+    fn extra(&self) -> &Self::Extra {
+        &self
+    }
+
+    fn additional(&self) -> &Self::Additional {
+        &()
     }
 }
 

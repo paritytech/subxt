@@ -19,6 +19,8 @@ use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 
+use crate::config::signed_extensions::{ChargeAssetTxPayment, ChargeTransactionPayment};
+use crate::config::SignedExtension;
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -371,12 +373,13 @@ where
     }
 
     /// Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions> {
+    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
         let signed = self.signed_details.as_ref()?;
         let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
         Some(ExtrinsicSignedExtensions {
             bytes: extra_bytes,
             metadata: self.metadata.clone(),
+            _marker: std::marker::PhantomData,
         })
     }
 
@@ -610,24 +613,26 @@ impl<T: Config> ExtrinsicEvents<T> {
 
 /// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtensions<'a> {
+pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: Metadata,
+    _marker: std::marker::PhantomData<T>,
 }
 
 /// A single signed extension
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtension<'a> {
+pub struct ExtrinsicSignedExtension<'a, T: Config> {
     bytes: &'a [u8],
     ty_id: u32,
     identifier: &'a str,
     metadata: Metadata,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl<'a> ExtrinsicSignedExtensions<'a> {
+impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// Returns an iterator ove all signed extensions, allowing access to their names, bytes and types.
     /// If the decoding of any signed extension fails, an error item is yielded and the iterator stops.
-    pub fn iter(&'a self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a>, Error>> {
+    pub fn iter(&'a self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a, T>, Error>> {
         let signed_extension_types = self.metadata.extrinsic().signed_extensions();
         let num_signed_extensions = signed_extension_types.len();
         let mut index = 0;
@@ -661,17 +666,29 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
                 ty_id,
                 identifier: extension.identifier(),
                 metadata: self.metadata.clone(),
+                _marker: std::marker::PhantomData,
             }))
         })
     }
 
+    fn find_by_name(&self, name: impl AsRef<str>) -> Option<ExtrinsicSignedExtension<'_, T>> {
+        let signed_extension = self
+            .iter()
+            .find_map(|e| e.ok().filter(|e| e.name() == name.as_ref()))?;
+        Some(signed_extension)
+    }
+
+    pub fn find<S: SignedExtension<T>>(&self) -> Option<Result<S::Extra, Error>> {
+        let signed_extension = self.find_by_name(S::NAME)?;
+        Some(signed_extension.as_type().map_err(Into::into))
+    }
+
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment signed extension, depending on which is present.
     pub fn tip(&self) -> Option<u128> {
-        let tip = self.iter().find_map(|e| {
-            e.ok().filter(|e| {
-                e.name() == "ChargeTransactionPayment" || e.name() == "ChargeAssetTxPayment"
-            })
-        })?;
+        // Note: the overhead of iterating twice should be negligible.
+        let tip = self
+            .find_by_name(<ChargeTransactionPayment as SignedExtension<T>>::NAME)
+            .or_else(|| self.find_by_name(<ChargeAssetTxPayment as SignedExtension<T>>::NAME))?;
         // Note: ChargeAssetTxPayment might have addition information in it (asset_id).
         //       But both should start with a compact encoded u128, so this decoding is fine.
         let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
@@ -688,7 +705,7 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
     }
 }
 
-impl<'a> ExtrinsicSignedExtension<'a> {
+impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     /// The bytes representing this signed extension.
     pub fn bytes(&self) -> &[u8] {
         self.bytes
@@ -719,8 +736,8 @@ impl<'a> ExtrinsicSignedExtension<'a> {
         self.decoded()?.to_value()
     }
 
-    pub fn as_type<T: DecodeAsType>(&self) -> Result<T, Error> {
-        self.decoded()?.as_type::<T>().map_err(Into::into)
+    pub fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
+        self.decoded()?.as_type::<E>().map_err(Into::into)
     }
 }
 
