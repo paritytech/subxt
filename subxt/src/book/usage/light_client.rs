@@ -4,44 +4,42 @@
 
 //! # Light Client
 //!
-//! The Light Client aims to contribute to the decentralization of blockchains by providing connectivity
-//! to the P2P network and behaving similarly to a full node.
+//! The light client based interface uses _Smoldot_ to connect to a _chain_, rather than an individual
+//! node. This means that you don't have to trust a specific node when interacting with some chain.
 //!
-//! To enable this functionality, the unstable-light-client feature flag needs to be enabled.
-//! To enable light client for WASM environments, also enable the web feature flag.
+//! This feature is currently unstable. Use the `unstable-light-client` feature flag to enable it.
+//! To use this in WASM environments, also enable the `web` feature flag.
 //!
-//! To connect to a blockchain network, the Light Client requires a trusted sync state of the network, named "chain spec".
-//! This can be obtained by making a `sync_state_genSyncSpec` RPC call to a trusted node.
+//! To connect to a blockchain network, the Light Client requires a trusted sync state of the network,
+//! known as a _chain spec_. One way to obtain this is by making a `sync_state_genSyncSpec` RPC call to a
+//! trusted node belonging to the chain that you wish to interact with.
 //!
-//! The following is an example of fetching the chain spec from a local running onde on port 9933.
+//! The following is an example of fetching the chain spec from a local running node on port 9933:
 //!
 //! ```bash
 //! curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9933/ | jq .result > chain_spec.json
 //! ```
 //!
+//! Alternately, you can have the `LightClient` download the chain spec from a trusted node when it
+//! initializes, which is not recommended in production but is useful for examples and testing, as below.
+//!
 //! ## Example
 //!
-//! You can construct a Light Client from a trusted chain spec stored on disk.
-//! Similary, the Light Client can fetch the chain spec from a running node and
-//! overwrite the bootNodes section. The `jsonrpsee` feature flag exposes the
-//! `build_from_url` method.
+//! This example connects to a local chain and submits a transaction. To run this, you first need
+//! to have a local polkadot node running using the following command:
 //!
-//! ```rust,ignore
-//! let light_client = LightClientBuilder::new()
-//!     .bootnodes(
-//!         ["/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp"]
-//!     )
-//!     .build_from_url("ws://127.0.0.1:9944")
-//!     .await?;
+//! ```text
+//! polkadot --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001
 //! ```
 //!
-//! Here's an example which connects to a local chain and submits a transaction.
-//!
-//! You can run the example using the following command:
+//! Leave that running for a minute, and then you can run the example using the following command
+//! in the `subxt` crate:
 //!
 //! ```bash
-//! cargo run --example unstable_light_client_tx_basic --features="unstable-light-client jsonrpsee"
+//! cargo run --example unstable_light_client_tx_basic --features=unstable-light-client
 //! ```
+//!
+//! This is the code that will be executed:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/unstable_light_client_tx_basic.rs")]
