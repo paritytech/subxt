@@ -4312,6 +4312,7 @@ name = "subxt-macro"
 version = "0.32.1"
 dependencies = [
  "darling 0.20.3",
+ "parity-scale-codec",
  "proc-macro-error",
  "subxt-codegen",
  "syn 2.0.37",
