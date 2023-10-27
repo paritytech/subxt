@@ -1,5 +1,5 @@
 use subxt::{
-    Config, PolkadotConfig, SubstrateConfig,
+    config::{Config, PolkadotConfig, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder},
     utils::{AccountId32, MultiAddress},
     OnlineClient,
 };
@@ -18,9 +18,11 @@ impl Config for StatemintConfig {
     type Signature = <PolkadotConfig as Config>::Signature;
     type Hasher = <PolkadotConfig as Config>::Hasher;
     type Header = <PolkadotConfig as Config>::Header;
-    type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
+    type ExtrinsicParams = StatemintExtriniscParams<Self>;
 }
 
+pub type StatemintExtriniscParams<T> = DefaultExtrinsicParams<T>;
+pub type StatemintExtrinsicParamsBuilder<T> = DefaultExtrinsicParamsBuilder<T>;
 
 #[tokio::main]
 pub async fn main() {
