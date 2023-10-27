@@ -38,3 +38,9 @@ pub use secrecy::{ExposeSecret, SecretString};
 // SecretUri's can be parsed from strings and used to generate key pairs.
 // DeriveJunctions are the "path" part of these SecretUris.
 pub use crypto::{DeriveJunction, SecretUri, SecretUriError, DEV_PHRASE};
+
+#[cfg(any(
+    all(feature = "web", feature = "native"),
+    not(any(feature = "web", feature = "native"))
+))]
+compile_error!("subxt-signer: exactly one of the 'web' and 'native' features should be used.");

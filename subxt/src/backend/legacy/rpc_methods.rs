@@ -8,33 +8,18 @@ use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
+use derivative::Derivative;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct LegacyRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
-}
-
-impl<T> Clone for LegacyRpcMethods<T> {
-    fn clone(&self) -> Self {
-        Self {
-            client: self.client.clone(),
-            _marker: self._marker,
-        }
-    }
-}
-
-impl<T> std::fmt::Debug for LegacyRpcMethods<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("LegacyRpcMethods")
-            .field("client", &self.client)
-            .field("_marker", &self._marker)
-            .finish()
-    }
 }
 
 impl<T: Config> LegacyRpcMethods<T> {
@@ -73,7 +58,10 @@ impl<T: Config> LegacyRpcMethods<T> {
         Ok(data.into_iter().map(|b| b.0).collect())
     }
 
-    /// Query historical storage entries
+    /// Query historical storage entries in the range from the start block to the end block,
+    /// defaulting the end block to the current best block if it's not given. The first
+    /// [`StorageChangeSet`] returned has all of the values for each key, and subsequent ones
+    /// only contain values for any keys which have changed since the last.
     pub async fn state_query_storage(
         &self,
         keys: impl IntoIterator<Item = &[u8]>,
@@ -88,7 +76,9 @@ impl<T: Config> LegacyRpcMethods<T> {
             .map_err(Into::into)
     }
 
-    /// Query historical storage entries
+    /// Query storage entries at some block, using the best block if none is given.
+    /// This essentially provides a way to ask for a batch of values given a batch of keys,
+    /// despite the name of the [`StorageChangeSet`] type.
     pub async fn state_query_storage_at(
         &self,
         keys: impl IntoIterator<Item = &[u8]>,

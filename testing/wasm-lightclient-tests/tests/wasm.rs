@@ -1,7 +1,8 @@
 #![cfg(target_arch = "wasm32")]
 
-use subxt::{config::PolkadotConfig,
-    client::{LightClient, OfflineClientT, LightClientBuilder},
+use subxt::{
+    config::PolkadotConfig,
+    client::{LightClient, LightClientBuilder},
 };
 use futures_util::StreamExt;
 use wasm_bindgen_test::*;
