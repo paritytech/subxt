@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CodegenError, CratePath};
+use crate::{types::TypeGenerator, CodegenError};
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
 use subxt_metadata::{Metadata, RuntimeApiMetadata};
@@ -15,7 +15,7 @@ fn generate_runtime_api(
     api: RuntimeApiMetadata,
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
     // Trait name must remain as is (upper case) to identity the runtime call.
@@ -130,7 +130,7 @@ pub fn generate_runtime_apis(
     metadata: &Metadata,
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let runtime_fns: Vec<_> = metadata

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CratePath};
+use crate::types::TypeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use subxt_metadata::PalletMetadata;
@@ -42,7 +42,7 @@ pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.

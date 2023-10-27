@@ -4,7 +4,7 @@
 
 use std::collections::HashSet;
 
-use crate::{types::TypeGenerator, CratePath};
+use crate::types::TypeGenerator;
 use heck::ToSnakeCase as _;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
@@ -12,10 +12,10 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
-pub fn generate_custom_values<'a>(
-    metadata: &'a Metadata,
-    type_gen: &'a TypeGenerator,
-    crate_path: &'a CratePath,
+pub fn generate_custom_values(
+    metadata: &Metadata,
+    type_gen: &TypeGenerator,
+    crate_path: &syn::Path,
 ) -> TokenStream2 {
     let mut fn_names_taken = HashSet::new();
     let custom = metadata.custom();
@@ -37,7 +37,7 @@ pub fn generate_custom_values<'a>(
 fn generate_custom_value_fn(
     custom_value: CustomValueMetadata,
     type_gen: &TypeGenerator,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     fn_names_taken: &mut HashSet<String>,
 ) -> Option<TokenStream2> {
     // names are transformed to snake case to make for good function identifiers.
