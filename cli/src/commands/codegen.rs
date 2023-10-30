@@ -4,9 +4,9 @@
 
 use crate::utils::FileOrUrl;
 use clap::Parser as ClapParser;
-use color_eyre::eyre;
+use codec::Decode;
 use color_eyre::eyre::eyre;
-use subxt_codegen::{DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes, TypeSubstitutionError};
+use subxt_codegen::CodegenBuilder;
 
 /// Generate runtime API client code from metadata.
 ///
@@ -132,67 +132,77 @@ fn codegen(
     no_default_substitutions: bool,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
-    let item_mod = syn::parse_quote!(
-        pub mod api {}
-    );
+    let mut codegen = CodegenBuilder::new();
 
-    let universal_derives = raw_derives
+    // Use the provided crate path:
+    if let Some(crate_path) = crate_path {
+        let crate_path =
+            syn::parse_str(&crate_path).map_err(|e| eyre!("Cannot parse crate path: {e}"))?;
+        codegen.set_subxt_crate_path(crate_path);
+    }
+
+    // Respect the boolean flags:
+    if runtime_types_only {
+        codegen.runtime_types_only()
+    }
+    if no_default_derives {
+        codegen.disable_default_derives()
+    }
+    if no_default_substitutions {
+        codegen.disable_default_substitutes()
+    }
+    if no_docs {
+        codegen.no_docs()
+    }
+
+    // Configure derives:
+    let global_derives = raw_derives
         .iter()
         .map(|raw| syn::parse_str(raw))
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| eyre!("Cannot parse global derives: {e}"))?;
+    codegen.set_additional_global_derives(global_derives);
+
+    for (ty_str, derive) in derives_for_type {
+        let ty: syn::TypePath = syn::parse_str(&ty_str)
+            .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
+        let derive = syn::parse_str(&derive)
+            .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
+        codegen.add_derives_for_type(ty, std::iter::once(derive));
+    }
+
+    // Configure attribtues:
     let universal_attributes = raw_attributes
         .iter()
         .map(|raw| syn::parse_str(raw))
         .map(|attr: syn::Result<OuterAttribute>| attr.map(|attr| attr.0))
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| eyre!("Cannot parse global attributes: {e}"))?;
+    codegen.set_additional_global_attributes(universal_attributes);
 
-    let crate_path = crate_path.map(Into::into).unwrap_or_default();
-    let mut derives = if no_default_derives {
-        DerivesRegistry::new()
-    } else {
-        DerivesRegistry::with_default_derives(&crate_path)
-    };
-    derives.extend_for_all(universal_derives, universal_attributes);
-
-    for (ty, derive) in derives_for_type {
-        let ty = syn::parse_str(&ty)?;
-        let derive = syn::parse_str(&derive)?;
-        derives.extend_for_type(ty, std::iter::once(derive), vec![]);
-    }
-    for (ty, attr) in attributes_for_type {
-        let ty = syn::parse_str(&ty)?;
-        let attribute: OuterAttribute = syn::parse_str(&attr)?;
-        derives.extend_for_type(ty, vec![], std::iter::once(attribute.0));
+    for (ty_str, attr) in attributes_for_type {
+        let ty = syn::parse_str(&ty_str)
+            .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
+        let attribute: OuterAttribute = syn::parse_str(&attr)
+            .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
+        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0));
     }
 
-    let mut type_substitutes = if no_default_substitutions {
-        TypeSubstitutes::new()
-    } else {
-        TypeSubstitutes::with_default_substitutes(&crate_path)
-    };
-
+    // Insert type substitutions:
     for (from_str, to_str) in substitute_types {
-        let from: syn::Path = syn::parse_str(&from_str)?;
-        let to: syn::Path = syn::parse_str(&to_str)?;
-        let to = to.try_into().map_err(|e: TypeSubstitutionError| {
-            eyre::eyre!("Cannot parse substitute '{from_str}={to_str}': {e}")
-        })?;
-        type_substitutes
-            .insert(from, to)
-            .map_err(|e: TypeSubstitutionError| {
-                eyre::eyre!("Cannot parse substitute '{from_str}={to_str}': {e}")
-            })?;
+        let from: syn::Path = syn::parse_str(&from_str)
+            .map_err(|e| eyre!("Cannot parse type substitution for path {from_str}: {e}"))?;
+        let to: syn::Path = syn::parse_str(&to_str)
+            .map_err(|e| eyre!("Cannot parse type substitution for path {from_str}: {e}"))?;
+        codegen.set_type_substitute(from, to);
     }
 
-    let should_gen_docs = !no_docs;
+    let metadata = subxt_metadata::Metadata::decode(&mut &*metadata_bytes)
+        .map_err(|e| eyre!("Cannot decode the provided metadata: {e}"))?;
+    let code = codegen
+        .generate(metadata)
+        .map_err(|e| eyre!("Cannot generate code: {e}"))?;
 
-    let runtime_api = GenerateRuntimeApi::new(item_mod, crate_path)
-        .derives_registry(derives)
-        .type_substitutes(type_substitutes)
-        .generate_docs(should_gen_docs)
-        .runtime_types_only(runtime_types_only)
-        .generate_from_bytes(metadata_bytes)
-        .map_err(|code_gen_err| eyre!("{code_gen_err}"))?;
-    writeln!(output, "{runtime_api}")?;
+    writeln!(output, "{code}")?;
     Ok(())
 }

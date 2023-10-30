@@ -5,8 +5,7 @@
 use crate::error::CodegenError;
 
 use super::{
-    CompositeDef, CompositeDefFields, CratePath, Derives, TypeDefParameters, TypeGenerator,
-    TypeParameter,
+    CompositeDef, CompositeDefFields, Derives, TypeDefParameters, TypeGenerator, TypeParameter,
 };
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
@@ -34,7 +33,7 @@ impl TypeDefGen {
     pub fn from_type(
         ty: &Type<PortableForm>,
         type_gen: &TypeGenerator,
-        crate_path: &CratePath,
+        crate_path: &syn::Path,
         should_gen_docs: bool,
     ) -> Result<Self, CodegenError> {
         let derives = type_gen.type_derives(ty)?;

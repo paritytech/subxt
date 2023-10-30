@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::CratePath;
-
 use proc_macro2::{Ident, TokenStream};
 use quote::format_ident;
 use scale_info::{form::PortableForm, Path, TypeDefPrimitive};
@@ -121,12 +119,12 @@ pub enum TypePathType {
     Compact {
         inner: Box<TypePath>,
         is_field: bool,
-        crate_path: CratePath,
+        crate_path: syn::Path,
     },
     BitVec {
         bit_order_type: Box<TypePath>,
         bit_store_type: Box<TypePath>,
-        crate_path: CratePath,
+        crate_path: syn::Path,
     },
 }
 

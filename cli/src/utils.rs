@@ -8,7 +8,7 @@ use color_eyre::eyre;
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
 
-use subxt_codegen::utils::{MetadataVersion, Url};
+use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
 
 pub mod type_description;
 pub mod type_example;
@@ -57,18 +57,13 @@ impl FileOrUrl {
                 eyre::bail!("`--file` is incompatible with `--version`")
             }
             // Fetch from --url
-            (None, Some(uri), version) => Ok(subxt_codegen::utils::fetch_metadata_bytes(
-                uri.clone(),
-                version.unwrap_or_default(),
-            )
-            .await?),
+            (None, Some(uri), version) => {
+                Ok(fetch_metadata_from_url(uri.clone(), version.unwrap_or_default()).await?)
+            }
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let url = Url::parse("ws://localhost:9944").expect("Valid URL; qed");
-                Ok(
-                    subxt_codegen::utils::fetch_metadata_bytes(url, version.unwrap_or_default())
-                        .await?,
-                )
+                Ok(fetch_metadata_from_url(url, version.unwrap_or_default()).await?)
             }
         }
     }
