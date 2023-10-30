@@ -42,7 +42,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.4", default-features = false }
-clap = { version = "4.4.6", features = ["derive", "cargo"] }
+clap = { version = "4.4.7", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -95,7 +95,7 @@ js-sys = "0.3.61"
 wasm-bindgen-futures = "0.4.19"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
-tokio-util = "0.7.9"
+tokio-util = "0.7.10"
 
 # Substrate crates:
 sp-core = { version = "21.0.0", default-features = false }

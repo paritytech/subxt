@@ -7,7 +7,7 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
 };
 use scale_info::{meta_type, IntoPortable, PortableRegistry, Registry, TypeInfo};
-use subxt_codegen::{CratePath, DerivesRegistry, RuntimeGenerator, TypeSubstitutes};
+use subxt_codegen::CodegenBuilder;
 use syn::__private::quote;
 
 fn generate_runtime_interface_from_metadata(metadata: RuntimeMetadataPrefixed) -> String {
@@ -15,15 +15,10 @@ fn generate_runtime_interface_from_metadata(metadata: RuntimeMetadataPrefixed) -
     let metadata = metadata
         .try_into()
         .expect("frame_metadata should be convertible into Metadata");
-    let generator = RuntimeGenerator::new(metadata);
-    let item_mod = syn::parse_quote!(
-        pub mod api {}
-    );
-    let crate_path = CratePath::default();
-    let derives = DerivesRegistry::with_default_derives(&crate_path);
-    let type_substitutes = TypeSubstitutes::with_default_substitutes(&crate_path);
-    generator
-        .generate_runtime(item_mod, derives, type_substitutes, crate_path, false)
+
+    CodegenBuilder::new()
+        .no_docs()
+        .generate(metadata)
         .expect("API generation must be valid")
         .to_string()
 }

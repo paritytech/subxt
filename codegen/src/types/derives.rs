@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::CratePath;
 use syn::{parse_quote, Path};
 
 use std::collections::{HashMap, HashSet};
@@ -35,7 +34,7 @@ impl DerivesRegistry {
     ///
     /// The `crate_path` denotes the `subxt` crate access path in the
     /// generated code.
-    pub fn with_default_derives(crate_path: &CratePath) -> Self {
+    pub fn with_default_derives(crate_path: &syn::Path) -> Self {
         Self {
             default_derives: Derives::with_defaults(crate_path),
             specific_type_derives: Default::default(),
@@ -117,7 +116,7 @@ impl Derives {
 
     /// Creates a new instance of `Derives` with the `crate_path` prepended
     /// to the set of default derives that reside in `subxt`.
-    pub fn with_defaults(crate_path: &CratePath) -> Self {
+    pub fn with_defaults(crate_path: &syn::Path) -> Self {
         let mut derives = HashSet::new();
         let mut attributes = HashSet::new();
 
@@ -148,7 +147,7 @@ impl Derives {
     }
 
     /// Add `#crate_path::ext::codec::CompactAs` to the derives.
-    pub fn insert_codec_compact_as(&mut self, crate_path: &CratePath) {
+    pub fn insert_codec_compact_as(&mut self, crate_path: &syn::Path) {
         self.insert_derive(parse_quote!(#crate_path::ext::codec::CompactAs));
     }
 
