@@ -6,8 +6,9 @@ use subxt::config::{
 };
 use subxt_signer::sr25519::dev;
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 pub mod runtime {}
+use runtime::runtime_types::xcm::v2::multilocation::MultiLocation;
 
 // We don't need to construct this at runtime,
 // so an empty enum is appropriate:
@@ -30,12 +31,13 @@ impl Config for CustomConfig {
             signed_extensions::CheckNonce,
             signed_extensions::CheckGenesis<Self>,
             signed_extensions::CheckMortality<Self>,
-            signed_extensions::ChargeAssetTxPayment,
+            signed_extensions::ChargeAssetTxPayment<Self>,
             signed_extensions::ChargeTransactionPayment,
             // And add a new one of our own:
             CustomSignedExtension,
         ),
     >;
+    type AssetId = MultiLocation;
 }
 
 // Our custom signed extension doesn't do much:
