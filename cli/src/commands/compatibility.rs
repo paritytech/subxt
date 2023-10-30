@@ -8,7 +8,7 @@ use color_eyre::eyre::WrapErr;
 use jsonrpsee::client_transport::ws::Url;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use subxt_codegen::utils::MetadataVersion;
+use subxt_codegen::fetch_metadata::MetadataVersion;
 use subxt_metadata::Metadata;
 
 /// Verify metadata compatibility between substrate nodes.
@@ -128,7 +128,7 @@ async fn fetch_runtime_metadata(
     url: Url,
     version: MetadataVersion,
 ) -> color_eyre::Result<Metadata> {
-    let bytes = subxt_codegen::utils::fetch_metadata_bytes(url, version).await?;
+    let bytes = subxt_codegen::fetch_metadata::fetch_metadata_from_url(url, version).await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
     Ok(metadata)
 }

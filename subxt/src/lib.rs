@@ -309,7 +309,7 @@ pub mod ext {
 /// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely
 /// to be incompatible with Subxt.
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// #[subxt::subxt(
 ///     runtime_metadata_url = "wss://rpc.polkadot.io:443",
 ///     unstable_metadata

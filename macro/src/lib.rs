@@ -4,11 +4,15 @@
 
 extern crate proc_macro;
 
+use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
 use subxt_codegen::{
-    utils::Url, CodegenError, DerivesRegistry, GenerateRuntimeApi, TypeSubstitutes,
+    fetch_metadata::{
+        fetch_metadata_from_file_blocking, fetch_metadata_from_url_blocking, MetadataVersion, Url,
+    },
+    CodegenBuilder, CodegenError,
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
 
@@ -38,7 +42,7 @@ struct RuntimeMetadataArgs {
     #[darling(multiple)]
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
-    crate_path: Option<String>,
+    crate_path: Option<syn::Path>,
     #[darling(default)]
     generate_docs: darling::util::Flag,
     #[darling(default)]
@@ -85,61 +89,60 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         Err(e) => return TokenStream::from(e.write_errors()),
     };
 
-    let crate_path = match args.crate_path {
-        Some(crate_path) => crate_path.into(),
-        None => subxt_codegen::CratePath::default(),
-    };
-    let mut derives_registry = if args.no_default_derives {
-        DerivesRegistry::new()
-    } else {
-        DerivesRegistry::with_default_derives(&crate_path)
-    };
+    let mut codegen = CodegenBuilder::new();
 
-    let universal_derives = args.derive_for_all_types.unwrap_or_default();
-    let universal_attributes = args.attributes_for_all_types.unwrap_or_default();
-    derives_registry.extend_for_all(
-        universal_derives,
-        universal_attributes.iter().map(|a| a.0.clone()),
+    // Use the item module that the macro is on:
+    codegen.set_target_module(item_mod);
+
+    // Use the provided crate path:
+    if let Some(crate_path) = args.crate_path {
+        codegen.set_subxt_crate_path(crate_path)
+    }
+
+    // Respect the boolean flags:
+    if args.runtime_types_only {
+        codegen.runtime_types_only();
+    }
+    if args.no_default_derives {
+        codegen.disable_default_derives();
+    }
+    if args.no_default_substitutions {
+        codegen.disable_default_substitutes();
+    }
+    if !args.generate_docs.is_present() {
+        codegen.no_docs()
+    }
+
+    // Configure derives:
+    codegen.set_additional_global_derives(
+        args.derive_for_all_types
+            .unwrap_or_default()
+            .into_iter()
+            .collect(),
     );
-
-    for derives in &args.derive_for_type {
-        derives_registry.extend_for_type(
-            derives.path.clone(),
-            derives.derive.iter().cloned(),
-            vec![],
-        )
-    }
-    for attributes in &args.attributes_for_type {
-        derives_registry.extend_for_type(
-            attributes.path.clone(),
-            vec![],
-            attributes.attributes.iter().map(|a| a.0.clone()),
-        )
+    for d in args.derive_for_type {
+        codegen.add_derives_for_type(d.path, d.derive.into_iter());
     }
 
-    let mut type_substitutes = if args.no_default_substitutions {
-        TypeSubstitutes::new()
-    } else {
-        TypeSubstitutes::with_default_substitutes(&crate_path)
-    };
-    let substitute_args_res: Result<(), _> = args.substitute_type.into_iter().try_for_each(|sub| {
-        sub.with
-            .try_into()
-            .and_then(|with| type_substitutes.insert(sub.path, with))
-    });
-
-    if let Err(err) = substitute_args_res {
-        return CodegenError::from(err).into_compile_error().into();
+    // Configure attributes:
+    codegen.set_additional_global_attributes(
+        args.attributes_for_all_types
+            .unwrap_or_default()
+            .into_iter()
+            .map(|a| a.0)
+            .collect(),
+    );
+    for d in args.attributes_for_type {
+        codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0))
     }
 
-    let should_gen_docs = args.generate_docs.is_present();
+    // Insert type substitutions:
+    for sub in args.substitute_type.into_iter() {
+        codegen.set_type_substitute(sub.path, sub.with);
+    }
+
+    // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
-
-    let runtime_api_generator = GenerateRuntimeApi::new(item_mod, crate_path)
-        .derives_registry(derives_registry)
-        .type_substitutes(type_substitutes)
-        .generate_docs(should_gen_docs)
-        .runtime_types_only(args.runtime_types_only);
 
     match (args.runtime_metadata_path, args.runtime_metadata_url) {
         (Some(rest_of_path), None) => {
@@ -152,20 +155,31 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
+            let generated_code = fetch_metadata_from_file_blocking(&path)
+                .map_err(CodegenError::from)
+                .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
+                .and_then(|m| codegen.generate(m).map_err(Into::into))
+                .unwrap_or_else(|e| e.into_compile_error());
 
-            runtime_api_generator
-                .generate_from_path(path)
-                .map_or_else(|err| err.into_compile_error().into(), Into::into)
+            generated_code.into()
         }
         (None, Some(url_string)) => {
             let url = Url::parse(&url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
 
-            runtime_api_generator
-                .unstable_metadata(unstable_metadata)
-                .generate_from_url(url)
-                .map_or_else(|err| err.into_compile_error().into(), Into::into)
+            let version = match unstable_metadata {
+                true => MetadataVersion::Unstable,
+                false => MetadataVersion::Latest,
+            };
+
+            let generated_code = fetch_metadata_from_url_blocking(url, version)
+                .map_err(CodegenError::from)
+                .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
+                .and_then(|m| codegen.generate(m).map_err(Into::into))
+                .unwrap_or_else(|e| e.into_compile_error());
+
+            generated_code.into()
         }
         (None, None) => {
             abort_call_site!(

@@ -14,202 +14,18 @@ mod storage;
 
 use subxt_metadata::Metadata;
 
-use super::DerivesRegistry;
 use crate::api::custom_values::generate_custom_values;
 use crate::error::CodegenError;
+use crate::types::DerivesRegistry;
 use crate::{
     ir,
     types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-    CratePath,
 };
 
-use codec::Decode;
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use std::{fs, io::Read, path, string::ToString};
 use syn::parse_quote;
-
-/// Generate the runtime API for interacting with a substrate runtime.
-pub struct GenerateRuntimeApi {
-    item_mod: syn::ItemMod,
-    derives: DerivesRegistry,
-    type_substitutes: TypeSubstitutes,
-    crate_path: CratePath,
-    should_gen_docs: bool,
-    runtime_types_only: bool,
-    unstable_metadata: bool,
-}
-
-impl GenerateRuntimeApi {
-    /// Construct a new [`GenerateRuntimeApi`].
-    pub fn new(item_mod: syn::ItemMod, crate_path: CratePath) -> Self {
-        GenerateRuntimeApi {
-            item_mod,
-            derives: DerivesRegistry::new(),
-            type_substitutes: TypeSubstitutes::new(),
-            crate_path,
-            should_gen_docs: false,
-            runtime_types_only: false,
-            unstable_metadata: false,
-        }
-    }
-
-    /// Provide custom derives for the generated types.
-    ///
-    /// Default is no derives.
-    pub fn derives_registry(mut self, derives: DerivesRegistry) -> Self {
-        self.derives = derives;
-        self
-    }
-
-    /// Provide custom type substitutes.
-    ///
-    /// Default is no substitutes.
-    pub fn type_substitutes(mut self, type_substitutes: TypeSubstitutes) -> Self {
-        self.type_substitutes = type_substitutes;
-        self
-    }
-
-    /// True if the generated API contains the documentation from the metadata.
-    ///
-    /// Default: false.
-    pub fn generate_docs(mut self, should_gen_docs: bool) -> Self {
-        self.should_gen_docs = should_gen_docs;
-        self
-    }
-
-    /// Whether to limit code generation to only runtime types.
-    ///
-    /// Default: false.
-    pub fn runtime_types_only(mut self, runtime_types_only: bool) -> Self {
-        self.runtime_types_only = runtime_types_only;
-        self
-    }
-
-    /// Whether to fetch the unstable metadata first.
-    ///
-    /// # Note
-    ///
-    /// This takes effect only if the API is generated from URL.
-    ///
-    /// Default: false.
-    pub fn unstable_metadata(mut self, unstable_metadata: bool) -> Self {
-        self.unstable_metadata = unstable_metadata;
-        self
-    }
-
-    /// Generate the runtime API from path.
-    pub fn generate_from_path<P>(self, path: P) -> Result<TokenStream2, CodegenError>
-    where
-        P: AsRef<path::Path>,
-    {
-        let to_err = |err| CodegenError::Io(path.as_ref().to_string_lossy().into(), err);
-
-        let mut file = fs::File::open(&path).map_err(to_err)?;
-        let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes).map_err(to_err)?;
-
-        let metadata = Metadata::decode(&mut &bytes[..])?;
-
-        generate_runtime_api_with_metadata(
-            self.item_mod,
-            metadata,
-            self.derives,
-            self.type_substitutes,
-            self.crate_path,
-            self.should_gen_docs,
-            self.runtime_types_only,
-        )
-    }
-
-    /// Generate the runtime API from the provided metadata bytes.
-    pub fn generate_from_bytes(self, bytes: &[u8]) -> Result<TokenStream2, CodegenError> {
-        let metadata = Metadata::decode(&mut &bytes[..])?;
-
-        generate_runtime_api_with_metadata(
-            self.item_mod,
-            metadata,
-            self.derives,
-            self.type_substitutes,
-            self.crate_path,
-            self.should_gen_docs,
-            self.runtime_types_only,
-        )
-    }
-
-    /// Generate the runtime API from URL.
-    ///
-    /// The metadata will be downloaded from a node at the provided URL.
-    /// This function blocks while retrieving the metadata.
-    ///
-    /// # Warning
-    ///
-    /// Not recommended to be used in production environments.
-    #[cfg(feature = "fetch-metadata")]
-    pub fn generate_from_url(self, url: crate::utils::Url) -> Result<TokenStream2, CodegenError> {
-        use crate::utils::{fetch_metadata_bytes_blocking, MetadataVersion, Url};
-
-        fn fetch_metadata(url: Url, version: MetadataVersion) -> Result<Metadata, CodegenError> {
-            let bytes = fetch_metadata_bytes_blocking(url, version)?;
-            Ok(Metadata::decode(&mut &bytes[..])?)
-        }
-
-        let metadata = self
-            .unstable_metadata
-            .then(|| fetch_metadata(url.clone(), MetadataVersion::Unstable).ok())
-            .flatten();
-
-        let metadata = if let Some(unstable) = metadata {
-            unstable
-        } else {
-            match fetch_metadata(url.clone(), MetadataVersion::Version(15)) {
-                Ok(metadata) => metadata,
-                Err(_) => fetch_metadata(url, MetadataVersion::Version(14))?,
-            }
-        };
-
-        generate_runtime_api_with_metadata(
-            self.item_mod,
-            metadata,
-            self.derives,
-            self.type_substitutes,
-            self.crate_path,
-            self.should_gen_docs,
-            self.runtime_types_only,
-        )
-    }
-}
-
-/// Generates the API for interacting with a substrate runtime, using the `subxt::Metadata`.
-fn generate_runtime_api_with_metadata(
-    item_mod: syn::ItemMod,
-    metadata: Metadata,
-    derives: DerivesRegistry,
-    type_substitutes: TypeSubstitutes,
-    crate_path: CratePath,
-    should_gen_docs: bool,
-    runtime_types_only: bool,
-) -> Result<TokenStream2, CodegenError> {
-    let generator = RuntimeGenerator::new(metadata);
-    if runtime_types_only {
-        generator.generate_runtime_types(
-            item_mod,
-            derives,
-            type_substitutes,
-            crate_path,
-            should_gen_docs,
-        )
-    } else {
-        generator.generate_runtime(
-            item_mod,
-            derives,
-            type_substitutes,
-            crate_path,
-            should_gen_docs,
-        )
-    }
-}
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
@@ -246,7 +62,7 @@ impl RuntimeGenerator {
         item_mod: syn::ItemMod,
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
-        crate_path: CratePath,
+        crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
@@ -300,7 +116,7 @@ impl RuntimeGenerator {
         item_mod: syn::ItemMod,
         derives: DerivesRegistry,
         type_substitutes: TypeSubstitutes,
-        crate_path: CratePath,
+        crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
@@ -545,7 +361,7 @@ pub fn generate_structs_from_variants<F>(
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<Vec<(String, CompositeDef)>, CodegenError>
 where

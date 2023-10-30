@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{error::TypeSubstitutionError, CratePath};
+use crate::error::TypeSubstitutionError;
 use std::{borrow::Borrow, collections::HashMap};
 use syn::{parse_quote, spanned::Spanned as _};
 
@@ -55,7 +55,7 @@ impl TypeSubstitutes {
     ///
     /// The `crate_path` denotes the `subxt` crate access path in the
     /// generated code.
-    pub fn with_default_substitutes(crate_path: &CratePath) -> Self {
+    pub fn with_default_substitutes(crate_path: &syn::Path) -> Self {
         // Some hardcoded default type substitutes, can be overridden by user
         let defaults = [
             (
