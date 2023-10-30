@@ -37,7 +37,7 @@ documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
 
 [workspace.dependencies]
-async-trait = "0.1.73"
+async-trait = "0.1.74"
 assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
