@@ -1,5 +1,5 @@
 use subxt::{
-    config::{Config, PolkadotConfig, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder},
+    PolkadotConfig,
     utils::{AccountId32, MultiAddress},
     OnlineClient,
 };
@@ -8,21 +8,9 @@ use subxt_signer::sr25519::dev::{self};
 #[subxt::subxt(runtime_metadata_path = "statemint_metadata.scale")]
 pub mod statemint {}
 
-/// Custom config that works with Statemint:
-pub enum StatemintConfig {}
-
-impl Config for StatemintConfig {
-    type Hash = <PolkadotConfig as Config>::Hash;
-    type AccountId = <PolkadotConfig as Config>::AccountId;
-    type Address = <PolkadotConfig as Config>::Address;
-    type Signature = <PolkadotConfig as Config>::Signature;
-    type Hasher = <PolkadotConfig as Config>::Hasher;
-    type Header = <PolkadotConfig as Config>::Header;
-    type ExtrinsicParams = StatemintExtriniscParams<Self>;
-}
-
-pub type StatemintExtriniscParams<T> = DefaultExtrinsicParams<T>;
-pub type StatemintExtrinsicParamsBuilder<T> = DefaultExtrinsicParamsBuilder<T>;
+// PolkadotConfig or SubstrateConfig will suffice for this example at the moment,
+// but PolkadotConfig is a little more correct, having the right `Address` type.
+type StatemintConfig = PolkadotConfig;
 
 #[tokio::main]
 pub async fn main() {
