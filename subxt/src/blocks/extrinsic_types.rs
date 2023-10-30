@@ -346,11 +346,7 @@ where
             .map(|e| &self.bytes[e.address_start_idx..e.address_end_idx])
     }
 
-    /// Return only the bytes of the signature for this signed extrinsic.
-    ///
-    /// # Note
-    ///
-    /// Returns `None` if the extrinsic is not signed.
+    /// Returns Some(signature_bytes) if the extrinsic was signed otherwise None is returned.
     pub fn signature_bytes(&self) -> Option<&[u8]> {
         self.signed_details
             .as_ref()
@@ -657,8 +653,10 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
         })
     }
 
-    /// The tip of an extrinsic, extracted from the `ChargeTransactionPayment` or
-    /// `ChargeAssetTxPayment` signed extension, depending on which is present.
+    /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment
+    /// signed extension, depending on which is present.
+    ///
+    /// Returns `None` if  `tip` was not found or decoding failed.
     pub fn tip(&self) -> Option<u128> {
         let tip = self.iter().find_map(|e| {
             e.ok().filter(|e| {
@@ -672,8 +670,9 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
         Some(tip)
     }
 
-    /// The nonce of the account that submitted the extrinsic, extracted from the
-    /// CheckNonce signed extension.
+    /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
+    ///
+    /// Returns `None` if `nonce` was not found or decoding failed.
     pub fn nonce(&self) -> Option<u64> {
         let nonce = self
             .iter()
