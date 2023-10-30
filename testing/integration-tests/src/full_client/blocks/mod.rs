@@ -6,6 +6,7 @@ use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
 
+use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckNonce};
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
@@ -286,7 +287,9 @@ async fn decode_signed_extensions_from_blocks() {
     let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
     let extensions1 = transaction1.signed_extensions().unwrap();
     let nonce1 = extensions1.nonce().unwrap();
+    let nonce1_static = extensions1.find::<CheckNonce>().0;
     let tip1 = extensions1.tip().unwrap();
+    let tip1_static: u128 = extensions1.find::<ChargeAssetTxPayment>().tip.0;
 
     let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
     let extensions2 = transaction2.signed_extensions().unwrap();
@@ -294,9 +297,13 @@ async fn decode_signed_extensions_from_blocks() {
     let tip2 = extensions2.tip().unwrap();
 
     assert_eq!(nonce1, 0);
+    assert_eq!(nonce1, nonce1_static);
     assert_eq!(tip1, 1234);
+    assert_eq!(tip1, tip1_static);
     assert_eq!(nonce2, 1);
+    assert_eq!(nonce2, nonce2_static);
     assert_eq!(tip2, 5678);
+    assert_eq!(tip2, tip2_static);
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
     for (e, expected_name) in extensions1.iter().zip(expected_signed_extensions.iter()) {
