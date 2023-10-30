@@ -2,16 +2,21 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! Helper methods for fetching metadata from a file or URL.
+
 use crate::error::FetchMetadataError;
 use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
-    client_transport::ws::{Url, WsTransportClientBuilder},
+    client_transport::ws::WsTransportClientBuilder,
     core::{client::ClientT, Error},
     http_client::HttpClientBuilder,
     rpc_params,
 };
 use std::time::Duration;
+
+// Part of the public interface:
+pub use jsonrpsee::client_transport::ws::Url;
 
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]
@@ -44,20 +49,24 @@ impl std::str::FromStr for MetadataVersion {
     }
 }
 
+/// Fetch metadata from a file.
+pub fn fetch_metadata_from_file_blocking(
+    path: &std::path::Path,
+) -> Result<Vec<u8>, FetchMetadataError> {
+    use std::io::Read;
+    let to_err = |err| FetchMetadataError::Io(path.to_string_lossy().into(), err);
+    let mut file = std::fs::File::open(path).map_err(to_err)?;
+    let mut bytes = Vec::new();
+    file.read_to_end(&mut bytes).map_err(to_err)?;
+    Ok(bytes)
+}
+
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
-pub fn fetch_metadata_bytes_blocking(
+pub fn fetch_metadata_from_url_blocking(
     url: Url,
     version: MetadataVersion,
 ) -> Result<Vec<u8>, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_bytes(url, version))
-}
-
-/// Returns the raw, 0x prefixed metadata hex from the provided URL, blocking the current thread.
-pub fn fetch_metadata_hex_blocking(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<String, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_hex(url, version))
+    tokio_block_on(fetch_metadata_from_url(url, version))
 }
 
 // Block on some tokio runtime for sync contexts
@@ -70,7 +79,7 @@ fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
 }
 
 /// Returns the metadata bytes from the provided URL.
-pub async fn fetch_metadata_bytes(
+pub async fn fetch_metadata_from_url(
     url: Url,
     version: MetadataVersion,
 ) -> Result<Vec<u8>, FetchMetadataError> {
@@ -81,16 +90,6 @@ pub async fn fetch_metadata_bytes(
     }?;
 
     Ok(bytes)
-}
-
-/// Returns the raw, 0x prefixed metadata hex from the provided URL.
-pub async fn fetch_metadata_hex(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<String, FetchMetadataError> {
-    let bytes = fetch_metadata_bytes(url, version).await?;
-    let hex_data = format!("0x{}", hex::encode(bytes));
-    Ok(hex_data)
 }
 
 async fn fetch_metadata_ws(
