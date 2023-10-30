@@ -223,10 +223,18 @@ pub struct ChargeAssetTxPayment<T: Config> {
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
-#[derive(Default)]
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
+}
+
+impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
+    fn default() -> Self {
+        ChargeAssetTxPaymentParams {
+            tip: Default::default(),
+            asset_id: Default::default(),
+        }
+    }
 }
 
 impl<T: Config> ChargeAssetTxPaymentParams<T> {
