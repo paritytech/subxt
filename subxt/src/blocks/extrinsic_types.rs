@@ -20,6 +20,7 @@ use crate::utils::strip_compact_prefix;
 use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
+
 use std::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
@@ -737,7 +738,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        self.decoded()?.to_value()
+        self.decoded()?.to_value() metadata: Metadata,
     }
 
     /// Decodes the `extra` bytes of this Signed Extension into a static type.
