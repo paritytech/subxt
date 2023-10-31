@@ -58,7 +58,7 @@ pub enum FromSubxt {
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
     /// Smoldot light client implementation that leverages the exposed platform.
     client: smoldot_light::Client<TPlatform, TChain>,
-    /// Unique ID for RPC calls.
+    /// Unique ID for RPC calls shared between all chains.
     request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
     requests: HashMap<usize, oneshot::Sender<MethodResponse>>,
@@ -289,11 +289,11 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     pub async fn start_task(
         &mut self,
         from_subxt: mpsc::UnboundedReceiver<FromSubxt>,
-        from_node: smoldot_light::JsonRpcResponses,
+        from_node: Vec<smoldot_light::JsonRpcResponses>,
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
         let from_node_event = futures_util::stream::unfold(from_node, |mut from_node| async {
-            from_node.next().await.map(|result| (result, from_node))
+            from_node[0].next().await.map(|result| (result, from_node))
         });
 
         tokio::pin!(from_subxt_event, from_node_event);

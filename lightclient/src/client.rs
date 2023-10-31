@@ -55,7 +55,7 @@ impl LightClientRpc {
 
         let future = async move {
             let mut task = BackgroundTask::new(client);
-            task.start_task(backend, rpc_responses).await;
+            task.start_task(backend, vec![rpc_responses]).await;
         };
 
         #[cfg(feature = "native")]
@@ -67,6 +67,57 @@ impl LightClientRpc {
             to_backend,
             chain_id,
         })
+    }
+
+    /// Constructs a new [`LightClientRpc`] from the raw smoldot client.
+    ///
+    /// Receives a list of RPC objects as a result of calling `smoldot_light::Client::add_chain`.
+    /// This [`LightClientRpc`] makes requests to the provided `chain_id` parameter.
+    ///
+    /// ## Panics
+    ///
+    /// Panics if being called outside of `tokio` runtime context.
+    pub fn new_from_client<TPlat>(
+        client: smoldot_light::Client<TPlat>,
+        chains: impl Iterator<Item = smoldot_light::JsonRpcResponses>,
+        chain_id: smoldot_light::ChainId,
+    ) -> Result<LightClientRpc, LightClientRpcError>
+    where
+        TPlat: smoldot_light::platform::PlatformRef + Clone,
+    {
+        let (to_backend, backend) = mpsc::unbounded_channel();
+        let chains = chains.collect::<Vec<_>>();
+
+        let future = async move {
+            let mut task = BackgroundTask::new(client);
+            task.start_task(backend, chains).await;
+        };
+
+        #[cfg(feature = "native")]
+        tokio::spawn(future);
+        #[cfg(feature = "web")]
+        wasm_bindgen_futures::spawn_local(future);
+
+        Ok(LightClientRpc {
+            to_backend,
+            chain_id,
+        })
+    }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> smoldot_light::ChainId {
+        self.chain_id
+    }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    pub fn target_chain(&self, chain_id: smoldot_light::ChainId) -> Self {
+        Self {
+            to_backend: self.to_backend.clone(),
+            chain_id,
+        }
     }
 
     /// Submits an RPC method request to the light-client.
@@ -98,7 +149,6 @@ impl LightClientRpc {
         &self,
         method: String,
         params: String,
-        chain_id: smoldot_light::ChainId,
     ) -> Result<
         (
             oneshot::Receiver<MethodResponse>,
