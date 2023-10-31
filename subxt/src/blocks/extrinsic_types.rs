@@ -374,7 +374,7 @@ where
         let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
         Some(ExtrinsicSignedExtensions {
             bytes: extra_bytes,
-            metadata: self.metadata.clone(),
+            metadata: &self.metadata,
             _marker: std::marker::PhantomData,
         })
     }
@@ -611,19 +611,20 @@ impl<T: Config> ExtrinsicEvents<T> {
 #[derive(Debug, Clone)]
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
-    metadata: Metadata,
+    metadata: &'a Metadata,
     _marker: std::marker::PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     /// If the decoding of any signed extension fails, an error item is yielded and the iterator stops.
-    pub fn iter(&'a self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a, T>, Error>> {
+    pub fn iter(&self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<T>, Error>> {
         let signed_extension_types = self.metadata.extrinsic().signed_extensions();
         let num_signed_extensions = signed_extension_types.len();
         let bytes = self.bytes;
         let mut index = 0;
         let mut byte_start_idx = 0;
+        let metadata = &self.metadata;
 
         std::iter::from_fn(move || {
             if index == num_signed_extensions {
@@ -636,7 +637,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
             if let Err(err) = scale_decode::visitor::decode_with_visitor(
                 cursor,
                 ty_id,
-                self.metadata.types(),
+                metadata.types(),
                 scale_decode::visitor::IgnoreVisitor,
             )
             .map_err(|e| Error::Decode(e.into()))
@@ -652,16 +653,16 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                 bytes,
                 ty_id,
                 identifier: extension.identifier(),
-                metadata: self.metadata.clone(),
+                metadata,
                 _marker: std::marker::PhantomData,
             }))
         })
     }
 
-    fn find_by_name(&self, name: impl AsRef<str>) -> Option<ExtrinsicSignedExtension<'_, T>> {
+    fn find_by_name(&self, name: &str) -> Option<ExtrinsicSignedExtension<'_, T>> {
         let signed_extension = self
             .iter()
-            .find_map(|e| e.ok().filter(|e| e.name() == name.as_ref()))?;
+            .find_map(|e| e.ok().filter(|e| e.name() == name))?;
         Some(signed_extension)
     }
 
@@ -706,7 +707,7 @@ pub struct ExtrinsicSignedExtension<'a, T: Config> {
     bytes: &'a [u8],
     ty_id: u32,
     identifier: &'a str,
-    metadata: Metadata,
+    metadata: &'a Metadata,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -731,7 +732,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
             &mut &self.bytes[..],
             self.ty_id,
-            &self.metadata,
+            self.metadata,
         )?;
         Ok(decoded_value_thunk)
     }

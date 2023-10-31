@@ -34,24 +34,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let decoded_ext = ext.as_root_extrinsic::<polkadot::Call>();
 
             println!("    Extrinsic #{idx}:");
-            if let Some(signed_extensions) = ext.signed_extensions() {
-                println!("      Signed Extensions:");
-                for signed_extension in signed_extensions.iter() {
-                    let signed_extension = signed_extension?;
-                    let name = signed_extension.name();
-                    let value = signed_extension.value()?.to_string();
-                    println!("        {name}: {value}");
-                }
-            } else {
-                println!("      No Signed Extensions");
-            }
             println!("      Bytes: {bytes_hex}");
             println!("      Decoded: {decoded_ext:?}");
             println!("      Events:");
 
             for evt in events.iter() {
                 let evt = evt?;
-
+                
                 let pallet_name = evt.pallet_name();
                 let event_name = evt.variant_name();
                 let event_values = evt.field_values()?;

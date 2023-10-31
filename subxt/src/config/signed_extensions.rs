@@ -227,12 +227,22 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug, Encode, DecodeAsType)]
+#[derive(Debug, DecodeAsType)]
 pub struct ChargeAssetTxPayment {
-    /// Tip
-    pub tip: Compact<u128>,
-    /// Asset Id
-    pub asset_id: Option<u32>,
+    tip: Compact<u128>,
+    asset_id: Option<u32>,
+}
+
+impl ChargeAssetTxPayment {
+    /// Tip to the extrinsic author in the native chain token.
+    pub fn tip(&self) -> u128 {
+        self.tip.0
+    }
+
+    /// Tip to the extrinsic author using the asset ID given.
+    pub fn asset_id(&self) -> Option<u32> {
+        self.asset_id
+    }
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
@@ -284,7 +294,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment {
 
 impl ExtrinsicParamsEncoder for ChargeAssetTxPayment {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.encode_to(v);
+        (self.tip, self.asset_id).encode_to(v);
     }
 }
 
@@ -294,10 +304,16 @@ impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment {
 }
 
 /// The [`ChargeTransactionPayment`] signed extension.
-#[derive(Debug, Encode, DecodeAsType)]
+#[derive(Debug, DecodeAsType)]
 pub struct ChargeTransactionPayment {
-    /// Tip
-    pub tip: Compact<u128>,
+    tip: Compact<u128>,
+}
+
+impl ChargeTransactionPayment {
+    /// Tip to the extrinsic author in the native chain token.
+    pub fn tip(&self) -> u128 {
+        self.tip.0
+    }
 }
 
 /// Parameters to configure the [`ChargeTransactionPayment`] signed extension.
@@ -334,7 +350,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
 
 impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.encode_to(v);
+        self.tip.encode_to(v);
     }
 }
 
