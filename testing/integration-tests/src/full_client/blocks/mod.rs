@@ -287,14 +287,16 @@ async fn decode_signed_extensions_from_blocks() {
     let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
     let extensions1 = transaction1.signed_extensions().unwrap();
     let nonce1 = extensions1.nonce().unwrap();
-    let nonce1_static = extensions1.find::<CheckNonce>().0;
+    let nonce1_static = extensions1.find::<CheckNonce>().unwrap().unwrap().0;
     let tip1 = extensions1.tip().unwrap();
-    let tip1_static: u128 = extensions1.find::<ChargeAssetTxPayment>().tip.0;
+    let tip1_static: u128 = extensions1.find::<ChargeAssetTxPayment>().unwrap().unwrap().tip.0;
 
     let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
     let extensions2 = transaction2.signed_extensions().unwrap();
     let nonce2 = extensions2.nonce().unwrap();
+    let nonce2_static = extensions2.find::<CheckNonce>().unwrap().unwrap().0;
     let tip2 = extensions2.tip().unwrap();
+    let tip2_static: u128 = extensions2.find::<ChargeAssetTxPayment>().unwrap().unwrap().tip.0;
 
     assert_eq!(nonce1, 0);
     assert_eq!(nonce1, nonce1_static);

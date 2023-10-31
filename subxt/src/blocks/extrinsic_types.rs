@@ -738,7 +738,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        self.decoded()?.to_value() metadata: Metadata,
+        self.decoded()?.to_value()
     }
 
     /// Decodes the `extra` bytes of this Signed Extension into a static type.
