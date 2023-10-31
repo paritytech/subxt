@@ -6,6 +6,8 @@ use futures::stream::StreamExt;
 use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
+use smoldot_light::platform::PlatformRef;
+use std::sync::Arc;
 use std::{collections::HashMap, str::FromStr};
 use tokio::sync::{mpsc, oneshot};
 
@@ -53,9 +55,9 @@ pub enum FromSubxt {
 }
 
 /// Background task data.
-pub struct BackgroundTask {
+pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
     /// Smoldot light client implementation that leverages the exposed platform.
-    client: smoldot_light::Client<PlatformType>,
+    client: smoldot_light::Client<TPlatform, TChain>,
     /// Unique ID for RPC calls.
     request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
@@ -77,9 +79,11 @@ pub struct BackgroundTask {
     subscriptions: HashMap<usize, mpsc::UnboundedSender<Box<RawValue>>>,
 }
 
-impl BackgroundTask {
+impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     /// Constructs a new [`BackgroundTask`].
-    pub fn new(client: smoldot_light::Client<PlatformType>) -> BackgroundTask {
+    pub fn new(
+        client: smoldot_light::Client<TPlatform, TChain>,
+    ) -> BackgroundTask<TPlatform, TChain> {
         BackgroundTask {
             client,
             request_id: 1,
