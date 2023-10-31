@@ -182,7 +182,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .submit_and_watch()
         .await
         .unwrap()
-        .wait_for_in_block()
+        .wait_for_finalized()
         .await
         .unwrap();
 
