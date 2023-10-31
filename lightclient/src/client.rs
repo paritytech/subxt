@@ -51,7 +51,11 @@ impl LightClientRpc {
             .map_err(|err| LightClientRpcError::AddChainError(err.to_string()))?;
 
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
-        Self::new_from_client(client, iter::once(rpc_responses), chain_id)
+        Ok(Self::new_from_client(
+            client,
+            iter::once(rpc_responses),
+            chain_id,
+        ))
     }
 
     /// Constructs a new [`LightClientRpc`] from the raw smoldot client.
@@ -66,7 +70,7 @@ impl LightClientRpc {
         client: smoldot_light::Client<TPlat>,
         chains: impl Iterator<Item = smoldot_light::JsonRpcResponses>,
         chain_id: smoldot_light::ChainId,
-    ) -> Result<LightClientRpc, LightClientRpcError>
+    ) -> LightClientRpc
     where
         TPlat: smoldot_light::platform::PlatformRef + Clone,
     {
@@ -83,10 +87,10 @@ impl LightClientRpc {
         #[cfg(feature = "web")]
         wasm_bindgen_futures::spawn_local(future);
 
-        Ok(LightClientRpc {
+        LightClientRpc {
             to_backend,
             chain_id,
-        })
+        }
     }
 
     /// Returns the chain ID of the current light-client.
