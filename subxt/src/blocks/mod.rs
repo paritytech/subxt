@@ -13,7 +13,10 @@ pub use crate::backend::BlockRef;
 
 pub use block_types::Block;
 pub use blocks_client::BlocksClient;
-pub use extrinsic_types::{ExtrinsicDetails, ExtrinsicEvents, Extrinsics, StaticExtrinsic};
+pub use extrinsic_types::{
+    ExtrinsicDetails, ExtrinsicEvents, ExtrinsicSignedExtension, ExtrinsicSignedExtensions,
+    Extrinsics, StaticExtrinsic,
+};
 
 // We get account nonce info in tx_client, too, so re-use the logic:
 pub(crate) use block_types::get_account_nonce;
