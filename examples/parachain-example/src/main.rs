@@ -19,6 +19,7 @@ impl Config for StatemintConfig {
     type Hasher = <PolkadotConfig as Config>::Hasher;
     type Header = <PolkadotConfig as Config>::Header;
     type ExtrinsicParams = <SubstrateConfig as Config>::ExtrinsicParams;
+    type AssetId = u32;
 }
 
 
