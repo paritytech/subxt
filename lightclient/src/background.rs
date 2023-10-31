@@ -7,11 +7,9 @@ use futures_util::future::{self, Either};
 use serde::Deserialize;
 use serde_json::value::RawValue;
 use smoldot_light::platform::PlatformRef;
-use std::sync::Arc;
 use std::{collections::HashMap, str::FromStr};
 use tokio::sync::{mpsc, oneshot};
 
-use super::platform::PlatformType;
 use super::LightClientRpcError;
 use smoldot_light::ChainId;
 

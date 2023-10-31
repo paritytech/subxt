@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::iter;
+
 use super::{
     background::{BackgroundTask, FromSubxt, MethodResponse},
     LightClientRpcError,
@@ -48,25 +50,8 @@ impl LightClientRpc {
             .add_chain(config)
             .map_err(|err| LightClientRpcError::AddChainError(err.to_string()))?;
 
-        let (to_backend, backend) = mpsc::unbounded_channel();
-
-        // `json_rpc_responses` can only be `None` if we had passed `json_rpc: Disabled`.
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
-
-        let future = async move {
-            let mut task = BackgroundTask::new(client);
-            task.start_task(backend, vec![rpc_responses]).await;
-        };
-
-        #[cfg(feature = "native")]
-        tokio::spawn(future);
-        #[cfg(feature = "web")]
-        wasm_bindgen_futures::spawn_local(future);
-
-        Ok(LightClientRpc {
-            to_backend,
-            chain_id,
-        })
+        Self::new_from_client(client, iter::once(rpc_responses), chain_id)
     }
 
     /// Constructs a new [`LightClientRpc`] from the raw smoldot client.
@@ -113,6 +98,10 @@ impl LightClientRpc {
     ///
     /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
     /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`Self::new_from_client`].
     pub fn target_chain(&self, chain_id: smoldot_light::ChainId) -> Self {
         Self {
             to_backend: self.to_backend.clone(),
