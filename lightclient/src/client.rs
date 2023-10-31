@@ -19,6 +19,8 @@ pub struct LightClientRpc {
     /// Communicate with the backend task that multiplexes the responses
     /// back to the frontend.
     to_backend: mpsc::UnboundedSender<FromSubxt>,
+    /// The chain ID to target for requests.
+    chain_id: smoldot_light::ChainId,
 }
 
 impl LightClientRpc {
@@ -52,7 +54,7 @@ impl LightClientRpc {
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
 
         let future = async move {
-            let mut task = BackgroundTask::new(client, chain_id);
+            let mut task = BackgroundTask::new(client);
             task.start_task(backend, rpc_responses).await;
         };
 
@@ -61,7 +63,10 @@ impl LightClientRpc {
         #[cfg(feature = "web")]
         wasm_bindgen_futures::spawn_local(future);
 
-        Ok(LightClientRpc { to_backend })
+        Ok(LightClientRpc {
+            to_backend,
+            chain_id,
+        })
     }
 
     /// Submits an RPC method request to the light-client.
@@ -79,6 +84,7 @@ impl LightClientRpc {
             method,
             params,
             sender,
+            chain_id: self.chain_id,
         })?;
 
         Ok(receiver)
@@ -92,6 +98,7 @@ impl LightClientRpc {
         &self,
         method: String,
         params: String,
+        chain_id: smoldot_light::ChainId,
     ) -> Result<
         (
             oneshot::Receiver<MethodResponse>,
@@ -107,6 +114,7 @@ impl LightClientRpc {
             params,
             sub_id,
             sender,
+            chain_id: self.chain_id,
         })?;
 
         Ok((sub_id_rx, receiver))

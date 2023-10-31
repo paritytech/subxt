@@ -34,6 +34,8 @@ pub enum FromSubxt {
         params: String,
         /// Channel used to send back the result.
         sender: oneshot::Sender<MethodResponse>,
+        /// The ID of the chain used to identify the chain.
+        chain_id: ChainId,
     },
     /// The RPC subscription (pub/sub) request.
     Subscription {
@@ -45,6 +47,8 @@ pub enum FromSubxt {
         sub_id: oneshot::Sender<MethodResponse>,
         /// Channel used to send back the notifcations.
         sender: mpsc::UnboundedSender<Box<RawValue>>,
+        /// The ID of the chain used to identify the chain.
+        chain_id: ChainId,
     },
 }
 
@@ -52,11 +56,6 @@ pub enum FromSubxt {
 pub struct BackgroundTask {
     /// Smoldot light client implementation that leverages the exposed platform.
     client: smoldot_light::Client<PlatformType>,
-    /// The ID of the chain used to identify the chain protocol (ie. substrate).
-    ///
-    /// Note: A single chain is supported for a client. This aligns with the subxt's
-    /// vision of the Client.
-    chain_id: ChainId,
     /// Unique ID for RPC calls.
     request_id: usize,
     /// Map the request ID of a RPC method to the frontend `Sender`.
@@ -80,10 +79,9 @@ pub struct BackgroundTask {
 
 impl BackgroundTask {
     /// Constructs a new [`BackgroundTask`].
-    pub fn new(client: smoldot_light::Client<PlatformType>, chain_id: ChainId) -> BackgroundTask {
+    pub fn new(client: smoldot_light::Client<PlatformType>) -> BackgroundTask {
         BackgroundTask {
             client,
-            chain_id,
             request_id: 1,
             requests: Default::default(),
             id_to_subscription: Default::default(),
@@ -105,6 +103,7 @@ impl BackgroundTask {
                 method,
                 params,
                 sender,
+                chain_id,
             } => {
                 let id = self.next_id();
                 let request = format!(
@@ -114,7 +113,7 @@ impl BackgroundTask {
 
                 self.requests.insert(id, sender);
 
-                let result = self.client.json_rpc_request(request, self.chain_id);
+                let result = self.client.json_rpc_request(request, chain_id);
                 if let Err(err) = result {
                     tracing::warn!(
                         target: LOG_TARGET,
@@ -143,6 +142,7 @@ impl BackgroundTask {
                 params,
                 sub_id,
                 sender,
+                chain_id,
             } => {
                 // For subscriptions we need to make a plain RPC request to the subscription method.
                 // The server will return as a result the subscription ID.
@@ -154,7 +154,7 @@ impl BackgroundTask {
 
                 self.id_to_subscription.insert(id, (sub_id, sender));
 
-                let result = self.client.json_rpc_request(request, self.chain_id);
+                let result = self.client.json_rpc_request(request, chain_id);
                 if let Err(err) = result {
                     tracing::warn!(
                         target: LOG_TARGET,
