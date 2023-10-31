@@ -276,8 +276,10 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 /// The [`ChargeAssetTxPayment`] signed extension.
 #[derive(Debug, Encode, Decode, DecodeAsType)]
 pub struct ChargeAssetTxPayment {
-    tip: Compact<u128>,
-    asset_id: Option<u32>,
+    /// Tip
+    pub tip: Compact<u128>,
+    /// Asset Id
+    pub asset_id: Option<u32>,
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
@@ -347,6 +349,7 @@ impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment {
 /// The [`ChargeTransactionPayment`] signed extension.
 #[derive(Debug, Encode, Decode, DecodeAsType)]
 pub struct ChargeTransactionPayment {
+    /// Tip
     tip: Compact<u128>,
 }
 

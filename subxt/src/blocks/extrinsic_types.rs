@@ -674,6 +674,8 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
         Some(signed_extension)
     }
 
+    /// Searches through all signed extensions to find a specific one.
+    /// If the Signed Extension is found, but decoding failed, `Some(Err(err))` is returned.
     pub fn find<S: SignedExtension<T>>(&self) -> Option<Result<S::Extra, Error>> {
         let signed_extension = self.find_by_name(S::NAME)?;
         Some(signed_extension.as_type().map_err(Into::into))
@@ -734,6 +736,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         self.decoded()?.to_value()
     }
 
+    /// Decodes the Signed Extension into a static type.
     pub fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
         self.decoded()?.as_type::<E>().map_err(Into::into)
     }
