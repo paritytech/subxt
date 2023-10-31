@@ -349,11 +349,7 @@ where
             .map(|e| &self.bytes[e.address_start_idx..e.address_end_idx])
     }
 
-    /// Return only the bytes of the signature for this signed extrinsic.
-    ///
-    /// # Note
-    ///
-    /// Returns `None` if the extrinsic is not signed.
+    /// Returns Some(signature_bytes) if the extrinsic was signed otherwise None is returned.
     pub fn signature_bytes(&self) -> Option<&[u8]> {
         self.signed_details
             .as_ref()
@@ -696,6 +692,8 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     }
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
+    ///
+    /// Returns `None` if `nonce` was not found or decoding failed.
     pub fn nonce(&self) -> Option<u64> {
         let nonce = self
             .iter()
@@ -712,7 +710,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     /// The name of the signed extension.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         self.identifier
     }
 

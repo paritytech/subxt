@@ -185,7 +185,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .submit_and_watch()
         .await
         .unwrap()
-        .wait_for_in_block()
+        .wait_for_finalized()
         .await
         .unwrap();
 
@@ -306,7 +306,6 @@ async fn decode_signed_extensions_from_blocks() {
     assert_eq!(nonce2, nonce2_static);
     assert_eq!(tip2, 5678);
     assert_eq!(tip2, tip2_static);
-
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
     for (e, expected_name) in extensions1.iter().zip(expected_signed_extensions.iter()) {
         assert_eq!(e.unwrap().name(), *expected_name);

@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::types::TypeGenerator;
 use crate::types::TypePath;
-use crate::{types::TypeGenerator, CratePath};
 use heck::ToSnakeCase as _;
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
@@ -27,7 +27,7 @@ pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     types_mod_ident: &syn::Ident,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let Some(storage) = pallet.storage() else {
@@ -59,7 +59,7 @@ fn generate_storage_entry_fns(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     storage_entry: &StorageEntryMetadata,
-    crate_path: &CratePath,
+    crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let keys: Vec<(Ident, TypePath)> = match storage_entry.entry_type() {
@@ -269,7 +269,7 @@ mod tests {
                 item_mod,
                 Default::default(),
                 Default::default(),
-                "::subxt_path".into(),
+                syn::parse_str("::subxt_path").unwrap(),
                 false,
             )
             .expect("should be able to generate runtime");

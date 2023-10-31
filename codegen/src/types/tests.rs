@@ -34,7 +34,7 @@ fn generate_struct_with_primitives() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -86,7 +86,7 @@ fn generate_struct_with_a_struct_field() {
     registry.register_type(&meta_type::<Parent>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -140,7 +140,7 @@ fn generate_tuple_struct() {
     registry.register_type(&meta_type::<Parent>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -231,7 +231,7 @@ fn derive_compact_as_for_uint_wrapper_structs() {
     registry.register_type(&meta_type::<TSu128>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -328,7 +328,7 @@ fn generate_enum() {
     registry.register_type(&meta_type::<E>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -392,7 +392,7 @@ fn compact_fields() {
     registry.register_type(&meta_type::<E>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -460,7 +460,7 @@ fn compact_generic_parameter() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -507,7 +507,7 @@ fn generate_array_field() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -550,7 +550,7 @@ fn option_fields() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -596,7 +596,7 @@ fn box_fields_struct() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -642,7 +642,7 @@ fn box_fields_enum() {
     registry.register_type(&meta_type::<E>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -688,7 +688,7 @@ fn range_fields() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -738,7 +738,7 @@ fn generics() {
     registry.register_type(&meta_type::<Bar>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -795,7 +795,7 @@ fn generics_nested() {
     registry.register_type(&meta_type::<Bar<bool>>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -852,7 +852,7 @@ fn generate_bitvec() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -911,7 +911,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
     registry.register_type(&meta_type::<UnnamedFields<bool, bool>>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -982,7 +982,7 @@ fn modules() {
     registry.register_type(&meta_type::<m::c::Foo>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -1051,7 +1051,7 @@ fn dont_force_struct_names_camel_case() {
     registry.register_type(&meta_type::<AB>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
@@ -1094,7 +1094,7 @@ fn apply_user_defined_derives_for_all_types() {
     registry.register_type(&meta_type::<A>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     // configure derives
     let mut derives = DerivesRegistry::with_default_derives(&crate_path);
     derives.extend_for_all(
@@ -1156,7 +1156,7 @@ fn apply_user_defined_derives_for_specific_types() {
     registry.register_type(&meta_type::<A>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     // configure derives
     let mut derives = DerivesRegistry::with_default_derives(&crate_path);
     // for all types
@@ -1233,7 +1233,7 @@ fn opt_out_from_default_derives() {
     registry.register_type(&meta_type::<A>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     // configure derives
     let mut derives = DerivesRegistry::new();
     derives.extend_for_all(
@@ -1293,7 +1293,7 @@ fn opt_out_from_default_substitutes() {
     registry.register_type(&meta_type::<S>());
     let portable_types: PortableRegistry = registry.into();
 
-    let crate_path = "::subxt_path".into();
+    let crate_path = syn::parse_str("::subxt_path").unwrap();
     let type_gen = TypeGenerator::new(
         &portable_types,
         "root",
