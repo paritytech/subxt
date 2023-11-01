@@ -45,7 +45,7 @@ pub enum FromSubxt {
         params: String,
         /// Channel used to send back the subscription ID if successful.
         sub_id: oneshot::Sender<MethodResponse>,
-        /// Channel used to send back the notifcations.
+        /// Channel used to send back the notifications.
         sender: mpsc::UnboundedSender<Box<RawValue>>,
         /// The ID of the chain used to identify the chain.
         chain_id: ChainId,
@@ -290,9 +290,13 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
         from_node: Vec<smoldot_light::JsonRpcResponses>,
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
-        let from_node_event = futures_util::stream::unfold(from_node, |mut from_node| async {
-            from_node[0].next().await.map(|result| (result, from_node))
+
+        let iter_over_streams = from_node.into_iter().map(|rpc| {
+            futures_util::stream::unfold(rpc, |mut rpc| async {
+                rpc.next().await.map(|result| (result, rpc))
+            })
         });
+        let from_node_event = futures_util::stream::iter(iter_over_streams).flatten();
 
         tokio::pin!(from_subxt_event, from_node_event);
 
