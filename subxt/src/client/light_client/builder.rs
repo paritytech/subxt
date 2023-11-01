@@ -96,6 +96,26 @@ impl<T: Config> LightClientBuilder<T> {
         self.build_client(chain_spec).await
     }
 
+    /// Construct a [`LightClient`] from a raw smoldot instance.
+    ///
+    /// # Note
+    ///
+    /// This ignores all the configuration options provided by the builder
+    /// and uses the raw client entirely. If you are unsure about what you are doing,
+    /// please use [`Self::build`] instead.
+    pub async fn build_from_raw<TPlatform: subxt_lightclient::PlatformRef>(
+        client: subxt_lightclient::Client<TPlatform>,
+        chains: impl Iterator<Item = subxt_lightclient::JsonRpcResponses>,
+        chain_id: subxt_lightclient::ChainId,
+    ) -> Result<LightClient<T>, Error> {
+        // The raw subxt light client that spawns the smoldot background task.
+        let raw_rpc = subxt_lightclient::LightClientRpc::new_from_client(client, chains, chain_id);
+        // The crate implementation of `RpcClientT` over the raw subxt light client.
+        let raw_rpc = LightClientRpc::from_inner(raw_rpc);
+
+        Self::build_client_from_rpc(raw_rpc).await
+    }
+
     /// Build the light client from chain spec.
     ///
     /// The most important field of the configuration is the chain specification.
@@ -104,7 +124,7 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// The chain spec must be obtained from a trusted entity.
     ///
-    /// It can be fetched from a trused node with the following command:
+    /// It can be fetched from a trusted node with the following command:
     /// ```bash
     /// curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
     /// ```
@@ -147,9 +167,16 @@ impl<T: Config> LightClientBuilder<T> {
             user_data: (),
         };
 
-        let rpc_client = RpcClient::new(LightClientRpc::new(config)?);
-        let online_client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
-        Ok(LightClient(online_client))
+        let raw_rpc = LightClientRpc::new(config)?;
+        Self::build_client_from_rpc(raw_rpc).await
+    }
+
+    /// Build the light client from a raw rpc client.
+    async fn build_client_from_rpc(raw_rpc: LightClientRpc) -> Result<LightClient<T>, Error> {
+        let rpc_client = RpcClient::new(raw_rpc.clone());
+        let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
+
+        Ok(LightClient { client, raw_rpc })
     }
 }
 

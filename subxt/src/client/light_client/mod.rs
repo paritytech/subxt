@@ -8,6 +8,7 @@ mod builder;
 mod rpc;
 
 use crate::{
+    backend::rpc::RpcClient,
     blocks::BlocksClient,
     client::{OfflineClientT, OnlineClientT},
     config::Config,
@@ -54,7 +55,10 @@ pub enum LightClientError {
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct LightClient<T: Config>(OnlineClient<T>);
+pub struct LightClient<T: Config> {
+    client: OnlineClient<T>,
+    raw_rpc: rpc::LightClientRpc,
+}
 
 impl<T: Config> LightClient<T> {
     /// Construct a [`LightClient`] using its builder interface.
@@ -68,17 +72,17 @@ impl<T: Config> LightClient<T> {
 
     /// Return the [`crate::Metadata`] used in this client.
     fn metadata(&self) -> crate::Metadata {
-        self.0.metadata()
+        self.client.metadata()
     }
 
     /// Return the genesis hash.
     fn genesis_hash(&self) -> <T as Config>::Hash {
-        self.0.genesis_hash()
+        self.client.genesis_hash()
     }
 
     /// Return the runtime version.
     fn runtime_version(&self) -> crate::backend::RuntimeVersion {
-        self.0.runtime_version()
+        self.client.runtime_version()
     }
 
     /// Work with transactions.
@@ -115,11 +119,38 @@ impl<T: Config> LightClient<T> {
     pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         <Self as OfflineClientT<T>>::runtime_api(self)
     }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> subxt_lightclient::ChainId {
+        self.raw_rpc.chain_id()
+    }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`Self::new_from_client`].
+    pub fn target_chain(&self, chain_id: subxt_lightclient::ChainId) -> Result<Self, crate::Error> {
+        let raw_rpc = self.raw_rpc.target_chain(chain_id);
+        let rpc_client = RpcClient::new(raw_rpc.clone());
+
+        let client = OnlineClient::<T>::from_rpc_client_with(
+            self.genesis_hash(),
+            self.runtime_version(),
+            self.metadata(),
+            rpc_client,
+        )?;
+
+        Ok(LightClient { client, raw_rpc })
+    }
 }
 
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
     fn backend(&self) -> &dyn crate::backend::Backend<T> {
-        self.0.backend()
+        self.client.backend()
     }
 }
 

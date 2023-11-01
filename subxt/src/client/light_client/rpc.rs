@@ -37,6 +37,28 @@ impl LightClientRpc {
 
         Ok(LightClientRpc(rpc))
     }
+
+    /// Constructs a new [`LightClientRpc`] from a low level [`subxt_lightclient::LightClientRpc`].
+    pub fn from_inner(client: subxt_lightclient::LightClientRpc) -> LightClientRpc {
+        LightClientRpc(client)
+    }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> subxt_lightclient::ChainId {
+        self.0.chain_id()
+    }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`Self::new_from_client`].
+    pub fn target_chain(&self, chain_id: subxt_lightclient::ChainId) -> LightClientRpc {
+        Self(self.0.target_chain(chain_id))
+    }
 }
 
 impl RpcClientT for LightClientRpc {
