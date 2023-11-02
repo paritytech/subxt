@@ -13,7 +13,7 @@ use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 
 use super::platform::build_platform;
 
-pub const LOG_TARGET: &str = "light-client";
+pub const LOG_TARGET: &str = "subxt-light-client";
 
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
