@@ -35,7 +35,8 @@ pub use getrandom as _;
 
 pub use client::LightClientRpc;
 pub use smoldot_light::{
-    platform::PlatformRef, AddChainConfig, AddChainConfigJsonRpc, ChainId, Client, JsonRpcResponses,
+    platform::default::DefaultPlatform, platform::PlatformRef, AddChainConfig,
+    AddChainConfigJsonRpc, ChainId, Client, JsonRpcResponses,
 };
 
 /// Light client error.
