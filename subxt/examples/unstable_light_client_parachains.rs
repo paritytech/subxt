@@ -71,7 +71,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             client,
             // The smoldot client is configured with two json rpc objects, one for the relay chain
             // and one for the parachain.
-            [polkadot_json_rpc_responses, parachain_json_rpc_responses].into_iter(),
+            [
+                subxt_lightclient::AddedChain {
+                    chain_id: polkadot_chain_id,
+                    rpc_responses: polkadot_json_rpc_responses,
+                },
+                subxt_lightclient::AddedChain {
+                    chain_id: polkadot_chain_id,
+                    rpc_responses: parachain_json_rpc_responses,
+                },
+            ]
+            .into_iter(),
             // This client is responsible for talking with the relay chain.
             polkadot_chain_id,
         )
@@ -83,12 +93,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Step 6. Subscribe to the finalized blocks of the chains.
-    let mut polkadot_sub = polkadot_api
+    let polkadot_sub = polkadot_api
         .blocks()
         .subscribe_all()
         .await?
         .map(|block| ("Polkadot", block));
-    let mut parachain_sub = parachain_api
+    let parachain_sub = parachain_api
         .blocks()
         .subscribe_all()
         .await?

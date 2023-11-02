@@ -10,6 +10,8 @@ use smoldot_light::platform::PlatformRef;
 use std::{collections::HashMap, str::FromStr};
 use tokio::sync::{mpsc, oneshot};
 
+use crate::client::AddedChain;
+
 use super::LightClientRpcError;
 use smoldot_light::ChainId;
 
@@ -287,14 +289,14 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     pub async fn start_task(
         &mut self,
         from_subxt: mpsc::UnboundedReceiver<FromSubxt>,
-        from_node: Vec<smoldot_light::JsonRpcResponses>,
+        from_node: Vec<AddedChain>,
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
 
-        let from_node = from_node.into_iter().enumerate().map(|rpc| {
+        let from_node = from_node.into_iter().map(|rpc| {
             Box::pin(futures::stream::unfold(rpc, |mut rpc| async move {
-                let response = rpc.1.next().await;
-                Some(((response, rpc.0), rpc))
+                let response = rpc.rpc_responses.next().await;
+                Some(((response, rpc.chain_id), rpc))
             }))
         });
         let stream_combinator = futures::stream::select_all(from_node);
@@ -325,7 +327,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 }
                 // Message received from rpc handler: lightclient response.
                 Either::Right((node_message, previous_fut)) => {
-                    let Some((node_message, index)) = node_message else {
+                    let Some((node_message, chain)) = node_message else {
                         tracing::trace!(target: LOG_TARGET, "Smoldot closed all RPC channels");
                         break;
                     };
@@ -336,8 +338,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     };
                     tracing::trace!(
                         target: LOG_TARGET,
-                        "Received smoldot RPC index {:?} result {:?}",
-                        index, response
+                        "Received smoldot RPC chain {:?} result {:?}",
+                        chain, response
                     );
 
                     self.handle_rpc_response(response);

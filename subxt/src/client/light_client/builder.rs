@@ -106,7 +106,7 @@ impl<T: Config> LightClientBuilder<T> {
     pub async fn build_from_raw<TPlatform: subxt_lightclient::PlatformRef>(
         self,
         client: subxt_lightclient::Client<TPlatform>,
-        chains: impl Iterator<Item = subxt_lightclient::JsonRpcResponses>,
+        chains: impl Iterator<Item = subxt_lightclient::AddedChain>,
         chain_id: subxt_lightclient::ChainId,
     ) -> Result<LightClient<T>, Error> {
         // The raw subxt light client that spawns the smoldot background task.

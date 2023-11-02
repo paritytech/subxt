@@ -53,7 +53,10 @@ impl LightClientRpc {
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
         Ok(Self::new_from_client(
             client,
-            iter::once(rpc_responses),
+            iter::once(AddedChain {
+                chain_id,
+                rpc_responses,
+            }),
             chain_id,
         ))
     }
@@ -68,14 +71,14 @@ impl LightClientRpc {
     /// Panics if being called outside of `tokio` runtime context.
     pub fn new_from_client<TPlat>(
         client: smoldot_light::Client<TPlat>,
-        chains: impl Iterator<Item = smoldot_light::JsonRpcResponses>,
+        chains: impl Iterator<Item = AddedChain>,
         chain_id: smoldot_light::ChainId,
     ) -> LightClientRpc
     where
         TPlat: smoldot_light::platform::PlatformRef + Clone,
     {
         let (to_backend, backend) = mpsc::unbounded_channel();
-        let chains = chains.collect::<Vec<_>>();
+        let chains = chains.collect();
 
         let future = async move {
             let mut task = BackgroundTask::new(client);
@@ -162,4 +165,12 @@ impl LightClientRpc {
 
         Ok((sub_id_rx, receiver))
     }
+}
+
+/// The added chain of the light-client.
+pub struct AddedChain {
+    /// The id of the chain.
+    pub chain_id: smoldot_light::ChainId,
+    /// Producer of RPC responses for the chain.
+    pub rpc_responses: smoldot_light::JsonRpcResponses,
 }

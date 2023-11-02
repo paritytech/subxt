@@ -61,6 +61,7 @@ pub struct LightClient<T: Config> {
 }
 
 impl<T: Config> LightClient<T> {
+    // TODO: Add `raw_builder()`.
     /// Construct a [`LightClient`] using its builder interface.
     pub fn builder() -> LightClientBuilder<T> {
         LightClientBuilder::new()

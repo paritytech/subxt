@@ -33,7 +33,7 @@ mod platform;
 #[allow(unused_imports)]
 pub use getrandom as _;
 
-pub use client::LightClientRpc;
+pub use client::{AddedChain, LightClientRpc};
 pub use smoldot_light::{
     platform::default::DefaultPlatform, platform::PlatformRef, AddChainConfig,
     AddChainConfigJsonRpc, ChainId, Client, JsonRpcResponses,
