@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     rpc_responses: polkadot_json_rpc_responses,
                 },
                 subxt_lightclient::AddedChain {
-                    chain_id: polkadot_chain_id,
+                    chain_id: parachain_chain_id,
                     rpc_responses: parachain_json_rpc_responses,
                 },
             ]
@@ -95,12 +95,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Step 6. Subscribe to the finalized blocks of the chains.
     let polkadot_sub = polkadot_api
         .blocks()
-        .subscribe_all()
+        .subscribe_finalized()
         .await?
         .map(|block| ("Polkadot", block));
     let parachain_sub = parachain_api
         .blocks()
-        .subscribe_all()
+        .subscribe_finalized()
         .await?
         .map(|block| ("AssetHub", block));
     let mut stream_combinator = futures::stream::select(polkadot_sub, parachain_sub);
