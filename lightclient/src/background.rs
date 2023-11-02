@@ -469,16 +469,9 @@ impl std::str::FromStr for RpcResponse {
 }
 
 /// Generate unique IDs for RPC calls that are distinct for each chain.
+#[derive(Default)]
 struct UniqueChainID {
     inner: HashMap<smoldot_light::ChainId, usize>,
-}
-
-impl Default for UniqueChainID {
-    fn default() -> Self {
-        UniqueChainID {
-            inner: Default::default(),
-        }
-    }
 }
 
 impl UniqueChainID {
