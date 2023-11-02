@@ -669,7 +669,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// If the Signed Extension is found, but decoding failed, `Some(Err(err))` is returned.
     pub fn find<S: SignedExtension<T>>(&self) -> Option<Result<S::Decoded, Error>> {
         let signed_extension = self.find_by_name(S::NAME)?;
-        Some(signed_extension.as_type().map_err(Into::into))
+        signed_extension.as_signed_extra::<S>().transpose()
     }
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment
@@ -678,14 +678,13 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// Returns `None` if  `tip` was not found or decoding failed.
     pub fn tip(&self) -> Option<u128> {
         // Note: the overhead of iterating twice should be negligible.
-        let tip = self
-            .find_by_name(<ChargeTransactionPayment as SignedExtension<T>>::NAME)
-            .or_else(|| self.find_by_name(<ChargeAssetTxPayment as SignedExtension<T>>::NAME))?;
-
-        // Note: ChargeAssetTxPayment might have addition information in it (asset_id).
-        // But both should start with a compact encoded u128, so this decoding is fine.
-        let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
-        Some(tip)
+        self.find::<ChargeTransactionPayment>()
+            .map(|e| e.map(|e| e.tip()))
+            .or_else(|| {
+                self.find::<ChargeAssetTxPayment>()
+                    .map(|e| e.map(|e| e.tip()))
+            })?
+            .ok()
     }
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
@@ -732,9 +731,18 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     /// Decodes the `extra` bytes of this Signed Extension into a static type.
-    pub fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
+    fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
         let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
         Ok(value)
+    }
+
+    /// Decodes the `extra` bytes of this Signed Extension into its associated `Decoded` type.
+    /// Returns `Ok(None)` if the identitfier of this Signed Extension object does not line up with the `NAME` constant of the provided Signed Extension type.
+    pub fn as_signed_extra<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+        if self.identifier != S::NAME {
+            return Ok(None);
+        }
+        self.as_type::<S::Decoded>().map(Some)
     }
 }
 
