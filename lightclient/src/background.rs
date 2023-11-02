@@ -13,7 +13,7 @@ use tokio::sync::{mpsc, oneshot};
 use super::LightClientRpcError;
 use smoldot_light::ChainId;
 
-const LOG_TARGET: &str = "light-client-background";
+const LOG_TARGET: &str = "subxt-light-client-background";
 
 /// The response of an RPC method.
 pub type MethodResponse = Result<Box<RawValue>, LightClientRpcError>;
@@ -291,17 +291,18 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
 
-        let iter_over_streams = from_node.into_iter().map(|rpc| {
-            futures_util::stream::unfold(rpc, |mut rpc| async {
-                rpc.next().await.map(|result| (result, rpc))
-            })
+        let from_node = from_node.into_iter().enumerate().map(|rpc| {
+            Box::pin(futures::stream::unfold(rpc, |mut rpc| async move {
+                let response = rpc.1.next().await;
+                Some(((response, rpc.0), rpc))
+            }))
         });
-        let from_node_event = futures_util::stream::iter(iter_over_streams).flatten();
+        let stream_combinator = futures::stream::select_all(from_node);
 
-        tokio::pin!(from_subxt_event, from_node_event);
+        tokio::pin!(from_subxt_event, stream_combinator);
 
         let mut from_subxt_event_fut = from_subxt_event.next();
-        let mut from_node_event_fut = from_node_event.next();
+        let mut from_node_event_fut = stream_combinator.next();
 
         loop {
             match future::select(from_subxt_event_fut, from_node_event_fut).await {
@@ -324,6 +325,10 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 }
                 // Message received from rpc handler: lightclient response.
                 Either::Right((node_message, previous_fut)) => {
+                    let Some((node_message, index)) = node_message else {
+                        tracing::trace!(target: LOG_TARGET, "Smoldot closed all RPC channels");
+                        break;
+                    };
                     // Smoldot returns `None` if the chain has been removed (which subxt does not remove).
                     let Some(response) = node_message else {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
@@ -331,15 +336,15 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     };
                     tracing::trace!(
                         target: LOG_TARGET,
-                        "Received smoldot RPC result {:?}",
-                        response
+                        "Received smoldot RPC index {:?} result {:?}",
+                        index, response
                     );
 
                     self.handle_rpc_response(response);
 
                     // Advance backend, save frontend.
                     from_subxt_event_fut = previous_fut;
-                    from_node_event_fut = from_node_event.next();
+                    from_node_event_fut = stream_combinator.next();
                 }
             }
         }
