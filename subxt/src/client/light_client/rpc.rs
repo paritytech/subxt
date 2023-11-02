@@ -12,7 +12,7 @@ use serde_json::value::RawValue;
 use subxt_lightclient::{AddChainConfig, ChainId, LightClientRpcError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-pub const LOG_TARGET: &str = "light-client";
+pub const LOG_TARGET: &str = "subxt-rpc-light-client";
 
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
@@ -68,6 +68,7 @@ impl RpcClientT for LightClientRpc {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         let client = self.clone();
+        let chain_id = self.chain_id();
 
         Box::pin(async move {
             let params = match params {
@@ -88,7 +89,7 @@ impl RpcClientT for LightClientRpc {
                 .await
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
-            tracing::trace!(target: LOG_TARGET, "RPC response {:?}", response);
+            tracing::trace!(target: LOG_TARGET, "RPC response={:?} chain={:?}", response, chain_id);
 
             response.map_err(|err| RpcError::ClientError(Box::new(err)))
         })
@@ -101,13 +102,15 @@ impl RpcClientT for LightClientRpc {
         _unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         let client = self.clone();
+        let chain_id = self.chain_id();
 
         Box::pin(async move {
             tracing::trace!(
                 target: LOG_TARGET,
-                "Subscribe to {:?} with params {:?}",
+                "Subscribe to {:?} with params {:?} chain={:?}",
                 sub,
-                params
+                params,
+                chain_id,
             );
 
             let params = match params {
@@ -138,7 +141,7 @@ impl RpcClientT for LightClientRpc {
                 .trim_start_matches('"')
                 .trim_end_matches('"')
                 .to_string();
-            tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
+            tracing::trace!(target: LOG_TARGET, "Received subscription={} chain={:?}", sub_id, chain_id);
 
             let stream = UnboundedReceiverStream::new(notif);
 
