@@ -104,6 +104,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// and uses the raw client entirely. If you are unsure about what you are doing,
     /// please use [`Self::build`] instead.
     pub async fn build_from_raw<TPlatform: subxt_lightclient::PlatformRef>(
+        self,
         client: subxt_lightclient::Client<TPlatform>,
         chains: impl Iterator<Item = subxt_lightclient::JsonRpcResponses>,
         chain_id: subxt_lightclient::ChainId,

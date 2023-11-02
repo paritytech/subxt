@@ -133,16 +133,14 @@ impl<T: Config> LightClient<T> {
     /// # Note
     ///
     /// This uses the same underlying instance created by [`Self::new_from_client`].
-    pub fn target_chain(&self, chain_id: subxt_lightclient::ChainId) -> Result<Self, crate::Error> {
+    pub async fn target_chain<TChainConfig: Config>(
+        &self,
+        chain_id: subxt_lightclient::ChainId,
+    ) -> Result<LightClient<TChainConfig>, crate::Error> {
         let raw_rpc = self.raw_rpc.target_chain(chain_id);
         let rpc_client = RpcClient::new(raw_rpc.clone());
 
-        let client = OnlineClient::<T>::from_rpc_client_with(
-            self.genesis_hash(),
-            self.runtime_version(),
-            self.metadata(),
-            rpc_client,
-        )?;
+        let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
 
         Ok(LightClient { client, raw_rpc })
     }
