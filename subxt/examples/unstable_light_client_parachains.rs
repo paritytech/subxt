@@ -17,11 +17,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Connecting to a parachain is a multi step process.
 
-    // Step 1. Construct a new smoldot client.
+    // Step 1. Construct a new smoldot client and subxt builder.
     let mut client = subxt_lightclient::Client::new(subxt_lightclient::DefaultPlatform::new(
         "subxt-example-light-client".into(),
         "version-0".into(),
     ));
+    let mut builder = LightClient::raw_builder();
 
     // Step 2. Connect to the relay chain of the parachain. For this example, the Polkadot relay chain.
     let polkadot_connection = client
@@ -40,6 +41,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json_rpc_responses
         .expect("Light client configured with json rpc enabled; qed");
     let polkadot_chain_id = polkadot_connection.chain_id;
+
+    // Add the chain to the light client builder.
+    builder.add_chain(polkadot_chain_id, polkadot_json_rpc_responses);
 
     println!("Added Polkadot relay chain");
 
@@ -63,25 +67,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Light client configured with json rpc enabled; qed");
     let parachain_chain_id = assethub_connection.chain_id;
 
+    // Add the chain to the light client builder.
+    builder.add_chain(parachain_chain_id, parachain_json_rpc_responses);
+
     println!("Added AssetHub parachain");
 
-    // Step 4. Turn the smoldot client into a subxt light client.
-    let polkadot_api = LightClient::<PolkadotConfig>::builder()
-        .build_from_raw(
+    // Step 4. Turn the smoldot client into a subxt light client using the builder.
+    let polkadot_api = builder
+        .build(
             client,
-            // The smoldot client is configured with two json rpc objects, one for the relay chain
-            // and one for the parachain.
-            [
-                subxt_lightclient::AddedChain {
-                    chain_id: polkadot_chain_id,
-                    rpc_responses: polkadot_json_rpc_responses,
-                },
-                subxt_lightclient::AddedChain {
-                    chain_id: parachain_chain_id,
-                    rpc_responses: parachain_json_rpc_responses,
-                },
-            ]
-            .into_iter(),
             // This client is responsible for talking with the relay chain.
             polkadot_chain_id,
         )

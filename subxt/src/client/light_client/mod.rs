@@ -20,7 +20,7 @@ use crate::{
     tx::TxClient,
     OnlineClient,
 };
-pub use builder::LightClientBuilder;
+pub use builder::{LightClientBuilder, RawLightClientBuilder};
 use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;
 
@@ -65,6 +65,23 @@ impl<T: Config> LightClient<T> {
     /// Construct a [`LightClient`] using its builder interface.
     pub fn builder() -> LightClientBuilder<T> {
         LightClientBuilder::new()
+    }
+
+    /// Construct a [`LightClient`] using the raw builder interface.
+    ///
+    /// The raw builder is utilized for constructing light-clients from a low
+    /// level smoldot instance.
+    ///
+    /// This is especially useful when you want to gain access to the smoldot client instance.
+    /// For example, you may want to connect to multiple chains and/or parachains while reusing the
+    /// same smoldot instance under the hood. Or you may want to configure different values for
+    /// smoldot internal buffers, number of subscriptions and relay chains.
+    ///
+    /// # Note
+    ///
+    /// If you are unsure, please use [`LightClient::builder`] instead.
+    pub fn raw_builder() -> RawLightClientBuilder<T> {
+        RawLightClientBuilder::default()
     }
 
     // We add the below impls so that we don't need to

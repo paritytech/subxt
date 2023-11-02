@@ -96,27 +96,6 @@ impl<T: Config> LightClientBuilder<T> {
         self.build_client(chain_spec).await
     }
 
-    /// Construct a [`LightClient`] from a raw smoldot instance.
-    ///
-    /// # Note
-    ///
-    /// This ignores all the configuration options provided by the builder
-    /// and uses the raw client entirely. If you are unsure about what you are doing,
-    /// please use [`Self::build`] instead.
-    pub async fn build_from_raw<TPlatform: subxt_lightclient::PlatformRef>(
-        self,
-        client: subxt_lightclient::Client<TPlatform>,
-        chains: impl Iterator<Item = subxt_lightclient::AddedChain>,
-        chain_id: subxt_lightclient::ChainId,
-    ) -> Result<LightClient<T>, Error> {
-        // The raw subxt light client that spawns the smoldot background task.
-        let raw_rpc = subxt_lightclient::LightClientRpc::new_from_client(client, chains, chain_id);
-        // The crate implementation of `RpcClientT` over the raw subxt light client.
-        let raw_rpc = LightClientRpc::from_inner(raw_rpc);
-
-        Self::build_client_from_rpc(raw_rpc).await
-    }
-
     /// Build the light client from chain spec.
     ///
     /// The most important field of the configuration is the chain specification.
@@ -169,16 +148,73 @@ impl<T: Config> LightClientBuilder<T> {
         };
 
         let raw_rpc = LightClientRpc::new(config)?;
-        Self::build_client_from_rpc(raw_rpc).await
+        build_client_from_rpc(raw_rpc).await
+    }
+}
+
+/// Raw builder for [`LightClient`].
+pub struct RawLightClientBuilder<T: Config> {
+    chains: Vec<subxt_lightclient::AddedChain>,
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Config> Default for RawLightClientBuilder<T> {
+    fn default() -> Self {
+        Self {
+            chains: Vec::new(),
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<T: Config> RawLightClientBuilder<T> {
+    /// Create a new [`RawLightClientBuilder`].
+    pub fn new() -> RawLightClientBuilder<T> {
+        RawLightClientBuilder::default()
     }
 
-    /// Build the light client from a raw rpc client.
-    async fn build_client_from_rpc(raw_rpc: LightClientRpc) -> Result<LightClient<T>, Error> {
-        let rpc_client = RpcClient::new(raw_rpc.clone());
-        let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
-
-        Ok(LightClient { client, raw_rpc })
+    /// Adds a new chain to the list of chains synchronized by the light client.
+    pub fn add_chain(
+        &mut self,
+        chain_id: subxt_lightclient::ChainId,
+        rpc_responses: subxt_lightclient::JsonRpcResponses,
+    ) {
+        self.chains.push(subxt_lightclient::AddedChain {
+            chain_id,
+            rpc_responses,
+        });
     }
+
+    /// Construct a [`LightClient`] from a raw smoldot instance.
+    ///
+    /// The provided `chain_id` is the chain with which the current instance of light client will interact.
+    /// To target a different chain call the [`LightClient::target_chain`] method.
+    pub async fn build<TPlatform: subxt_lightclient::PlatformRef>(
+        self,
+        client: subxt_lightclient::Client<TPlatform>,
+        chain_id: subxt_lightclient::ChainId,
+    ) -> Result<LightClient<T>, Error> {
+        // The raw subxt light client that spawns the smoldot background task.
+        let raw_rpc = subxt_lightclient::LightClientRpc::new_from_client(
+            client,
+            self.chains.into_iter(),
+            chain_id,
+        );
+        // The crate implementation of `RpcClientT` over the raw subxt light client.
+        let raw_rpc = LightClientRpc::from_inner(raw_rpc);
+
+        build_client_from_rpc(raw_rpc).await
+    }
+}
+
+/// Build the light client from a raw rpc client.
+async fn build_client_from_rpc<T: Config>(
+    raw_rpc: LightClientRpc,
+) -> Result<LightClient<T>, Error> {
+    let rpc_client = RpcClient::new(raw_rpc.clone());
+    let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
+
+    Ok(LightClient { client, raw_rpc })
 }
 
 /// Fetch the chain spec from the URL.
