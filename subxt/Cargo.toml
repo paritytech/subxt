@@ -118,4 +118,4 @@ required-features = ["unstable-light-client", "jsonrpsee"]
 [[example]]
 name = "unstable_light_client_parachains"
 path = "examples/unstable_light_client_parachains.rs"
-required-features = ["unstable-light-client", "jsonrpsee"]
+required-features = ["unstable-light-client", "jsonrpsee", "native"]

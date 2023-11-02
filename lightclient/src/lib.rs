@@ -35,9 +35,11 @@ pub use getrandom as _;
 
 pub use client::{AddedChain, LightClientRpc};
 pub use smoldot_light::{
-    platform::default::DefaultPlatform, platform::PlatformRef, AddChainConfig,
-    AddChainConfigJsonRpc, ChainId, Client, JsonRpcResponses,
+    platform::PlatformRef, AddChainConfig, AddChainConfigJsonRpc, ChainId, Client, JsonRpcResponses,
 };
+
+#[cfg(feature = "native")]
+pub use smoldot_light::platform::default::DefaultPlatform;
 
 /// Light client error.
 #[derive(Debug, thiserror::Error)]
