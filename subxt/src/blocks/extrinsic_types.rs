@@ -14,8 +14,7 @@ use crate::{
 
 use crate::config::signed_extensions::{ChargeAssetTxPayment, ChargeTransactionPayment};
 use crate::config::SignedExtension;
-use crate::dynamic::{DecodedValue, DecodedValueThunk};
-use crate::metadata::DecodeWithMetadata;
+use crate::dynamic::DecodedValue;
 use crate::utils::strip_compact_prefix;
 use codec::{Compact, Decode};
 use derivative::Derivative;
@@ -727,24 +726,15 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         self.ty_id
     }
 
-    /// DecodedValueThunk representing the type of the extra of this signed extension.
-    fn decoded(&self) -> Result<DecodedValueThunk, Error> {
-        let decoded_value_thunk = DecodedValueThunk::decode_with_metadata(
-            &mut &self.bytes[..],
-            self.ty_id,
-            self.metadata,
-        )?;
-        Ok(decoded_value_thunk)
-    }
-
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        self.decoded()?.to_value()
+        self.as_type()
     }
 
     /// Decodes the `extra` bytes of this Signed Extension into a static type.
     pub fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
-        self.decoded()?.as_type::<E>().map_err(Into::into)
+        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
+        Ok(value)
     }
 }
 
