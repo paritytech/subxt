@@ -15,7 +15,7 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
         signed_extensions::CheckNonce,
         signed_extensions::CheckGenesis<T>,
         signed_extensions::CheckMortality<T>,
-        signed_extensions::ChargeAssetTxPayment,
+        signed_extensions::ChargeAssetTxPayment<T>,
         signed_extensions::ChargeTransactionPayment,
     ),
 >;
@@ -27,7 +27,7 @@ pub struct DefaultExtrinsicParamsBuilder<T: Config> {
     /// `None` means the tx will be immortal.
     mortality: Option<Mortality<T::Hash>>,
     /// `None` means we'll use the native token.
-    tip_of_asset_id: Option<u32>,
+    tip_of_asset_id: Option<T::AssetId>,
     tip: u128,
     tip_of: u128,
 }
@@ -103,7 +103,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     /// Provide a tip to the block auther using the token denominated by the `asset_id` provided. This
     /// is not applicable on chains which don't use the `ChargeAssetTxPayment` signed extension; in this
     /// case, no tip will be given.
-    pub fn tip_of(mut self, tip: u128, asset_id: u32) -> Self {
+    pub fn tip_of(mut self, tip: u128, asset_id: T::AssetId) -> Self {
         self.tip = 0;
         self.tip_of = tip;
         self.tip_of_asset_id = Some(asset_id);
