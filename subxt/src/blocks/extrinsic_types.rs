@@ -12,11 +12,13 @@ use crate::{
     Metadata,
 };
 
-use crate::config::signed_extensions::{ChargeAssetTxPayment, ChargeTransactionPayment};
+use crate::config::signed_extensions::{
+    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
+};
 use crate::config::SignedExtension;
 use crate::dynamic::DecodedValue;
 use crate::utils::strip_compact_prefix;
-use codec::{Compact, Decode};
+use codec::Decode;
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 
@@ -666,10 +668,16 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     }
 
     /// Searches through all signed extensions to find a specific one.
-    /// If the Signed Extension is found, but decoding failed, `Some(Err(err))` is returned.
-    pub fn find<S: SignedExtension<T>>(&self) -> Option<Result<S::Decoded, Error>> {
-        let signed_extension = self.find_by_name(S::NAME)?;
-        signed_extension.as_signed_extra::<S>().transpose()
+    /// If the Signed Extension is not found `Ok(None)` is returned.
+    /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
+    pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+        self.find_by_name(S::NAME)
+            .map(|s| {
+                s.as_signed_extra::<S>().map(|e| {
+                    e.expect("signed extra name is correct, because it was found before; qed.")
+                })
+            })
+            .transpose()
     }
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment
@@ -679,22 +687,22 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     pub fn tip(&self) -> Option<u128> {
         // Note: the overhead of iterating twice should be negligible.
         self.find::<ChargeTransactionPayment>()
-            .map(|e| e.map(|e| e.tip()))
+            .ok()
+            .flatten()
+            .map(|e| e.tip())
             .or_else(|| {
                 self.find::<ChargeAssetTxPayment>()
-                    .map(|e| e.map(|e| e.tip()))
-            })?
-            .ok()
+                    .ok()
+                    .flatten()
+                    .map(|e| e.tip())
+            })
     }
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
     ///
     /// Returns `None` if `nonce` was not found or decoding failed.
     pub fn nonce(&self) -> Option<u64> {
-        let nonce = self
-            .iter()
-            .find_map(|e| e.ok().filter(|e| e.name() == "CheckNonce"))?;
-        let nonce = Compact::<u64>::decode(&mut nonce.bytes()).ok()?.0;
+        let nonce = self.find::<CheckNonce>().ok()??.0;
         Some(nonce)
     }
 }
