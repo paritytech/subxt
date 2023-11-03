@@ -4258,7 +4258,6 @@ dependencies = [
  "instant",
  "js-sys",
  "pin-project",
- "rand 0.8.5",
  "send_wrapper 0.6.0",
  "serde",
  "serde_json",

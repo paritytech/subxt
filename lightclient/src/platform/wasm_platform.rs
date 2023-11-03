@@ -53,7 +53,10 @@ impl PlatformRef for SubxtPlatform {
     }
 
     fn fill_random_bytes(&self, buffer: &mut [u8]) {
-        rand::RngCore::fill_bytes(&mut rand::thread_rng(), buffer);
+        // This could fail if the system does not have access to a good source of entropy.
+        // Note: `rand::RngCore::fill_bytes` also panics on errors and `rand::OsCore` calls
+        // identically into `getrandom::getrandom`.
+        getrandom::getrandom(buffer).expect("Cannot fill random bytes");
     }
 
     fn sleep(&self, duration: Duration) -> Self::Delay {

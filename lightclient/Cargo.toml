@@ -42,7 +42,6 @@ web = [
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
     "instant/wasm-bindgen",
-    "rand",
     "pin-project",
 
     # For websocket.
@@ -74,7 +73,6 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 instant = { workspace = true, optional = true }
 tokio-util = { workspace = true, optional = true }
-rand = { workspace = true, optional = true }
 pin-project = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
