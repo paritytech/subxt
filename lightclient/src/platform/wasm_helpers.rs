@@ -84,19 +84,20 @@ pub mod with_buffers {
         read_write_wake_up_after: Option<Instant>,
     }
 
+    const BUFFER_CAPACITY: usize = 65536;
+    const WRITE_BYTES_QUEUEABLE: usize = 128 * 1024;
+
     impl<T> WithBuffers<T> {
         /// Initializes a new [`WithBuffers`] with the given socket.
         ///
         /// The socket must still be open in both directions.
         pub fn new(socket: T) -> Self {
-            let read_buffer_reasonable_capacity = 65536; // TODO: make configurable?
-
             WithBuffers {
                 socket,
                 error: None,
-                read_buffer: Vec::with_capacity(read_buffer_reasonable_capacity),
+                read_buffer: Vec::with_capacity(BUFFER_CAPACITY),
                 read_buffer_valid: 0,
-                read_buffer_reasonable_capacity,
+                read_buffer_reasonable_capacity: BUFFER_CAPACITY,
                 read_closed: false,
                 write_buffers: Vec::with_capacity(64),
                 write_closed: false,
@@ -145,8 +146,7 @@ pub mod with_buffers {
                     write_buffers: mem::take(this.write_buffers),
                     write_bytes_queueable: if !*this.write_closed {
                         // Limit outgoing buffer size to 128kiB.
-                        // TODO: make configurable?
-                        Some((128 * 1024usize).saturating_sub(write_bytes_queued))
+                        Some(WRITE_BYTES_QUEUEABLE.saturating_sub(write_bytes_queued))
                     } else {
                         None
                     },
