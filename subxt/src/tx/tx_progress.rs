@@ -71,37 +71,6 @@ where
         StreamExt::next(self).await
     }
 
-    /// Wait for the transaction to be in a block (but not necessarily finalized), and return
-    /// an [`TxInBlock`] instance when this happens, or an error if there was a problem
-    /// waiting for this to happen.
-    ///
-    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next()`] instead.
-    ///
-    /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
-    /// probability that the transaction will not make it into a block but there is no guarantee
-    /// that this is true. In those cases the stream is closed however, so you currently have no way to find
-    /// out if they finally made it into a block or not.
-    pub async fn wait_for_in_block(mut self) -> Result<TxInBlock<T, C>, Error> {
-        while let Some(status) = self.next().await {
-            match status? {
-                // Finalized or otherwise in a block! Return.
-                TxStatus::InBestBlock(s) | TxStatus::InFinalizedBlock(s) => return Ok(s),
-                // Error scenarios; return the error.
-                TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
-                TxStatus::Invalid { message } => {
-                    return Err(TransactionError::Invalid(message).into())
-                }
-                TxStatus::Dropped { message } => {
-                    return Err(TransactionError::Dropped(message).into())
-                }
-                // Ignore anything else and wait for next status event:
-                _ => continue,
-            }
-        }
-        Err(RpcError::SubscriptionDropped.into())
-    }
-
     /// Wait for the transaction to be finalized, and return a [`TxInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
