@@ -114,6 +114,8 @@ impl BackgroundTask {
 
                 self.requests.insert(id, sender);
 
+                tracing::trace!(target: LOG_TARGET, "Generated unique id={id} for request={request}");
+
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
                     tracing::warn!(
@@ -136,6 +138,8 @@ impl BackgroundTask {
                             "Cannot send RPC request error to id={id}",
                         );
                     }
+                } else {
+                    tracing::trace!(target: LOG_TARGET, "Submitted to smoldot request with id={id}");
                 }
             }
             FromSubxt::Subscription {
@@ -153,6 +157,8 @@ impl BackgroundTask {
                 );
 
                 self.id_to_subscription.insert(id, (sub_id, sender));
+
+                tracing::trace!(target: LOG_TARGET, "Generated unique id={id} for subscription request={request}");
 
                 let result = self.client.json_rpc_request(request, self.chain_id);
                 if let Err(err) = result {
@@ -176,6 +182,8 @@ impl BackgroundTask {
                             "Cannot send RPC request error to id={id}",
                         );
                     }
+                } else {
+                    tracing::trace!(target: LOG_TARGET, "Submitted to smoldot subscription request with id={id}");
                 }
             }
         };
@@ -183,6 +191,8 @@ impl BackgroundTask {
 
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, response: String) {
+        tracing::trace!(target: LOG_TARGET, "Received from smoldot response={:?}", response);
+
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
                 let Ok(id) = id.parse::<usize>() else {
