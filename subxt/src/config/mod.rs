@@ -51,6 +51,9 @@ pub trait Config: Sized + Send + Sync + 'static {
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: ExtrinsicParams<Self>;
+
+    /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
+    type AssetId: Debug + Encode;
 }
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
