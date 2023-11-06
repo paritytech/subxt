@@ -19,7 +19,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 //
 // ```bash
 // # Polkadot does not accept by default WebSocket connections to the P2P network.
-// # Ensure `--listen-addr` is provided with valid ws adddress endpoint.
+// # Ensure `--listen-addr` is provided with valid ws address endpoint.
 // # The `--node-key` provides a deterministic p2p address for the node.
 // ./polkadot --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws
 // ```

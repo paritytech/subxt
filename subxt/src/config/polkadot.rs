@@ -21,6 +21,7 @@ impl Config for PolkadotConfig {
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;
     type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
+    type AssetId = u32;
 }
 
 /// A struct representing the signed extra and additional parameters required

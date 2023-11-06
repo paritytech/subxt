@@ -24,6 +24,7 @@ impl Config for SubstrateConfig {
     type Hasher = BlakeTwo256;
     type Header = SubstrateHeader<u32, BlakeTwo256>;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
+    type AssetId = u32;
 }
 
 /// A struct representing the signed extra and additional parameters required

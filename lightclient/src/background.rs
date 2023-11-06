@@ -142,6 +142,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                             "Cannot send RPC request error to id={id}",
                         );
                     }
+                } else {
+                    tracing::trace!(target: LOG_TARGET, "Submitted to smoldot request with id={id}");
                 }
             }
             FromSubxt::Subscription {
@@ -185,6 +187,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                             "Cannot send RPC request error to id={id}",
                         );
                     }
+                } else {
+                    tracing::trace!(target: LOG_TARGET, "Submitted to smoldot subscription request with id={id}");
                 }
             }
         };
@@ -192,6 +196,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
 
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, chain_id: smoldot_light::ChainId, response: String) {
+        tracing::trace!(target: LOG_TARGET, "Received from smoldot response={response} chain={chain_id:?}");
+
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
                 let Ok(id) = id.parse::<usize>() else {

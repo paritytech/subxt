@@ -30,12 +30,13 @@ impl Config for CustomConfig {
             signed_extensions::CheckNonce,
             signed_extensions::CheckGenesis<Self>,
             signed_extensions::CheckMortality<Self>,
-            signed_extensions::ChargeAssetTxPayment,
+            signed_extensions::ChargeAssetTxPayment<Self>,
             signed_extensions::ChargeTransactionPayment,
             // And add a new one of our own:
             CustomSignedExtension,
         ),
     >;
+    type AssetId = u32;
 }
 
 // Our custom signed extension doesn't do much:
