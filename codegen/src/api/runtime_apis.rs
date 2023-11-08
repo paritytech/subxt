@@ -39,19 +39,36 @@ fn generate_runtime_api(
         let inputs: Vec<_> = method.inputs().enumerate().map(|(idx, input)| {
             // These are method names, which can just be '_', but struct field names can't
             // just be an underscore, so fix any such names we find to work in structs.
-            let name = if input.name == "_" {
-                format_ident!("_{}", idx)
+            let (alias_name, name) = if input.name == "_" {
+                (format_ident!("Param{}", idx), format_ident!("_{}", idx))
             } else {
-                format_ident!("{}", &input.name)
+                (format_ident!("{}", input.name.to_upper_camel_case()), format_ident!("{}", &input.name))
             };
             let ty = type_gen.resolve_type_path(input.ty);
 
-            let param = quote!(#name: #ty);
-            (param, name)
-        }).collect();
+            let aliased_param = quote!( pub type #alias_name = #ty; );
+            let ty_path = quote!( #method_name::#alias_name );
 
-        let params = inputs.iter().map(|(param, _)| param);
-        let param_names = inputs.iter().map(|(_, name)| name);
+            let param = quote!(#name: #ty_path);
+            (param, name, aliased_param)
+        }).collect();
+        let has_params = !inputs.is_empty();
+
+        let params = inputs.iter().map(|(param, _, _)| param);
+        let param_names = inputs.iter().map(|(_, name, _)| name);
+        let type_aliases = inputs.iter().map(|(_, _, aliased_param)| aliased_param);
+
+        let aliased_module = if has_params {
+            quote!(
+                pub mod #method_name {
+                    use super::#types_mod_ident;
+
+                    #( #type_aliases )*
+                }
+            )
+        } else {
+            quote!()
+        };
 
         // From the method metadata generate a structure that holds
         // all parameter types. This structure is used with metadata
@@ -64,6 +81,8 @@ fn generate_runtime_api(
             pub struct #struct_name {
                 #( pub #struct_params, )*
             }
+
+            #aliased_module
         );
 
         let output = type_gen.resolve_type_path(method.output_ty());
