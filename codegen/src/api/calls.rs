@@ -38,27 +38,48 @@ pub fn generate_calls(
         crate_path,
         should_gen_docs,
     )?;
-    let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
+
+    let result = struct_defs
         .iter_mut()
         .map(|(variant_name, struct_def)| {
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match struct_def.fields {
-                CompositeDefFields::Named(ref named_fields) => named_fields
-                    .iter()
-                    .map(|(name, field)| {
-                        let fn_arg_type = &field.type_path;
-                        let call_arg = if field.is_boxed() {
-                            quote! { #name: ::std::boxed::Box::new(#name) }
-                        } else {
-                            quote! { #name }
-                        };
-                        (quote!( #name: #fn_arg_type ), call_arg)
-                    })
-                    .unzip(),
-                CompositeDefFields::NoFields => Default::default(),
-                CompositeDefFields::Unnamed(_) => {
-                    return Err(CodegenError::InvalidCallVariant(call_ty))
-                }
-            };
+            let fn_name = format_ident!("{}", variant_name.to_snake_case());
+
+            let (call_fn_args, call_args, alias_args): (Vec<_>, Vec<_>, Vec<_>) =
+                match struct_def.fields {
+                    CompositeDefFields::Named(ref named_fields) => {
+                        let result = named_fields.iter().map(|(name, field)| {
+                            let fn_arg_type = &field.type_path;
+                            let call_arg = if field.is_boxed() {
+                                quote! { #name: ::std::boxed::Box::new(#name) }
+                            } else {
+                                quote! { #name }
+                            };
+                            // One downside of the type alias system is that we generate one alias per argument.
+                            // Multiple arguments could potentially have the same type (ie fn call(u32, u32, u32)).
+                            let alias_name =
+                                format_ident!("{}", name.to_string().to_upper_camel_case());
+
+                            (
+                                quote!( #name: alias_types::#fn_name::#alias_name ),
+                                call_arg,
+                                quote!( pub type #alias_name = #fn_arg_type; ),
+                            )
+                        });
+
+                        (
+                            result
+                                .clone()
+                                .map(|(call_fn_args, _, _)| call_fn_args)
+                                .collect(),
+                            result.clone().map(|(_, call_args, _)| call_args).collect(),
+                            result.map(|(_, _, alias_args)| alias_args).collect(),
+                        )
+                    }
+                    CompositeDefFields::NoFields => Default::default(),
+                    CompositeDefFields::Unnamed(_) => {
+                        return Err(CodegenError::InvalidCallVariant(call_ty))
+                    }
+                };
 
             let pallet_name = pallet.name();
             let call_name = &variant_name;
@@ -69,7 +90,7 @@ pub fn generate_calls(
                     call_name.to_string(),
                 ));
             };
-            let fn_name = format_ident!("{}", variant_name.to_snake_case());
+
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
             let docs = should_gen_docs.then_some(struct_def.docs.take()).flatten();
@@ -99,11 +120,21 @@ pub fn generate_calls(
                 }
             };
 
-            Ok((call_struct, client_fn))
+            let alias_module = quote! {
+                pub mod #fn_name {
+                    use super::#types_mod_ident;
+
+                    #(#alias_args)*
+                }
+            };
+
+            Ok((call_struct, client_fn, alias_module))
         })
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .unzip();
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let call_structs = result.iter().map(|(call_struct, _, _)| call_struct);
+    let call_fns = result.iter().map(|(_, client_fn, _)| client_fn);
+    let alias_modules = result.iter().map(|(_, _, alias_module)| alias_module);
 
     let call_type = type_gen.resolve_type_path(call_ty);
     let call_ty = type_gen.resolve_type(call_ty);
@@ -120,6 +151,12 @@ pub fn generate_calls(
             use super::#types_mod_ident;
 
             type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+
+            pub mod alias_types {
+                use super::#types_mod_ident;
+
+                #( #alias_modules )*
+            }
 
             pub mod types {
                 use super::#types_mod_ident;
