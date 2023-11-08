@@ -52,23 +52,20 @@ fn generate_runtime_api(
             let param = quote!(#name: #ty_path);
             (param, name, aliased_param)
         }).collect();
-        let has_params = !inputs.is_empty();
 
         let params = inputs.iter().map(|(param, _, _)| param);
         let param_names = inputs.iter().map(|(_, name, _)| name);
         let type_aliases = inputs.iter().map(|(_, _, aliased_param)| aliased_param);
 
-        let aliased_module = if has_params {
-            quote!(
-                pub mod #method_name {
-                    use super::#types_mod_ident;
+        let output = type_gen.resolve_type_path(method.output_ty());
+        let aliased_module = quote!(
+            pub mod #method_name {
+                use super::#types_mod_ident;
 
-                    #( #type_aliases )*
-                }
-            )
-        } else {
-            quote!()
-        };
+                #( #type_aliases )*
+                pub type Output = #output;
+            }
+        );
 
         // From the method metadata generate a structure that holds
         // all parameter types. This structure is used with metadata
@@ -85,8 +82,6 @@ fn generate_runtime_api(
             #aliased_module
         );
 
-        let output = type_gen.resolve_type_path(method.output_ty());
-
         let Some(call_hash) = api.method_hash(method.name()) else {
             return Err(CodegenError::MissingRuntimeApiMetadata(
                 trait_name_str.to_owned(),
@@ -96,7 +91,7 @@ fn generate_runtime_api(
 
         let method = quote!(
             #docs
-            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, #output> {
+            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::Output> {
                 #crate_path::runtime_api::Payload::new_static(
                     #trait_name_str,
                     #method_name_str,
