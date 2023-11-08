@@ -56,7 +56,7 @@ pub fn generate_storage(
         pub mod storage {
             use super::#types_mod_ident;
 
-            pub mod alias_types {
+            pub mod types {
                 use super::#types_mod_ident;
 
                 #( #alias_modules )*
@@ -118,7 +118,7 @@ fn generate_storage_entry_fns(
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
-    let alias_storage_path = quote!( alias_types::#alias_module_name::#alias_name );
+    let alias_storage_path = quote!( types::#alias_module_name::#alias_name );
 
     let docs = storage_entry.docs();
     let docs = should_gen_docs
