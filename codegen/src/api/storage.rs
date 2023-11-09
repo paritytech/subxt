@@ -217,6 +217,7 @@ fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
 mod tests {
     use crate::RuntimeGenerator;
     use frame_metadata::v15;
+    use heck::ToUpperCamelCase as _;
     use quote::{format_ident, quote};
     use scale_info::{meta_type, MetaType};
     use std::borrow::Cow;
@@ -326,10 +327,22 @@ mod tests {
             let expected_storage_constructor = quote!(
                 fn #name_ident(
                     &self,
-                    _0: impl ::std::borrow::Borrow<#expected_type>,
+                    _0: impl ::std::borrow::Borrow<types::#name_ident::Param0>,
                 )
             );
             assert!(generated_str.contains(&expected_storage_constructor.to_string()));
+
+            let alias_name = format_ident!("{}", name.to_upper_camel_case());
+            let expected_alias_module = quote!(
+                pub mod #name_ident {
+                    use super::runtime_types;
+
+                    pub type #alias_name = ::core::primitive::bool;
+                    pub type Param0 = #expected_type;
+                }
+            );
+
+            assert!(generated_str.contains(&expected_alias_module.to_string()));
         }
     }
 }
