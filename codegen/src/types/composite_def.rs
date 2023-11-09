@@ -171,8 +171,8 @@ impl quote::ToTokens for CompositeDef {
                 )
                 .then(|| quote!(;));
 
-                let has_fields =
-                    matches!(&self.fields, CompositeDefFields::Named(fields) if !fields.is_empty());
+                let has_fields = matches!(&self.fields, CompositeDefFields::Named(fields) if !fields.is_empty())
+                    || matches!(&self.fields, CompositeDefFields::Unnamed(fields) if !fields.is_empty());
 
                 let alias_module = if *generate_alias && has_fields {
                     let aliases = self
@@ -364,9 +364,21 @@ impl CompositeDefFields {
                 )
             }
             Self::Unnamed(ref fields) => {
-                let fields = fields.iter().map(|ty| {
+                let fields = fields.iter().enumerate().map(|(idx, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #compact_attr #visibility #ty }
+
+                    if generate_alias {
+                        let alias_name = format_ident!("Field{}", idx);
+
+                        let mut path = quote!( #alias_module_name::#alias_name);
+                        if ty.is_boxed() {
+                            path = quote!( ::std::boxed::Box<#path> );
+                        }
+
+                        quote! { #compact_attr #visibility #path }
+                    } else {
+                        quote! { #compact_attr #visibility #ty }
+                    }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
