@@ -11,6 +11,48 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 
 /// Generates runtime functions for the given API metadata.
+///
+/// # Note
+///
+/// The modules are structured as follows:
+///
+/// ```ignore
+/// // Extracted from the runtime API metadata.
+/// pub mod metadata {
+///
+///     // Structure that exposes the `Metadata` runtime APIs.
+///     struct Metadata;
+///     impl Metadata {
+///
+///         // Function that calls into the `Metadata_metadata_at_version` runtime API.
+///         pub fn metadata_at_version(
+///             version: types::metadata_at_version::Version,
+///         ) -> ::subxt::runtime_api::Payload<
+///             types::MetadataAtVersion,
+///             types::metadata_at_version::Output,
+///         > {
+///             // ..
+///         }
+///     }
+///
+///     // Contains the types of the metadata.
+///     pub mod types {
+///
+///         // This is the input of the runtime call.
+///         pub struct MetadataAtVersion {
+///             // Use the alias generated type.
+///             pub version: metadata_at_version::Version,
+///         }
+///
+///         // Type alias module for the `Metadata_metadata_at_version` runtime call.
+///         pub mod metadata_at_version {
+///             pub type Version = ::core::primitive::u32;
+///
+///             // This is the output of the runtime call.
+///             pub type Output = ::core::option::Option<runtime_types::sp_core::OpaqueMetadata>;
+///         }
+///     }
+/// ```
 fn generate_runtime_api(
     api: RuntimeApiMetadata,
     type_gen: &TypeGenerator,
@@ -44,18 +86,24 @@ fn generate_runtime_api(
             } else {
                 (format_ident!("{}", input.name.to_upper_camel_case()), format_ident!("{}", &input.name))
             };
+
+            // Generate alias for runtime type.
             let ty = type_gen.resolve_type_path(input.ty);
-
             let aliased_param = quote!( pub type #alias_name = #ty; );
-            let ty_path: TokenStream2 = quote!( types::#method_name::#alias_name );
 
-            let param = quote!(#name: #ty_path);
-            (param, name, aliased_param)
+            // Structures are placed on the same level as the alias module.
+            let struct_ty_path = quote!( #method_name::#alias_name );
+            let struct_param = quote!(#name: #struct_ty_path);
+
+            // Function parameters must be indented by `types`.
+            let fn_param = quote!(#name: types::#struct_ty_path);
+            (fn_param, struct_param, name, aliased_param)
         }).collect();
 
-        let params = inputs.iter().map(|(param, _, _)| param);
-        let param_names = inputs.iter().map(|(_, name, _)| name);
-        let type_aliases = inputs.iter().map(|(_, _, aliased_param)| aliased_param);
+        let fn_params = inputs.iter().map(|(fn_param, _, _, _)| fn_param);
+        let struct_params = inputs.iter().map(|(_, struct_param, _, _)| struct_param);
+        let param_names = inputs.iter().map(|(_, _, name, _,)| name);
+        let type_aliases = inputs.iter().map(|(_, _, _, aliased_param)| aliased_param);
 
         let output = type_gen.resolve_type_path(method.output_ty());
         let aliased_module = quote!(
@@ -72,7 +120,6 @@ fn generate_runtime_api(
         // to encode parameters to the call via `encode_as_fields_to`.
         let derives = type_gen.default_derives();
         let struct_name = format_ident!("{}", method.name().to_upper_camel_case());
-        let struct_params = params.clone();
         let struct_input = quote!(
             #derives
             pub struct #struct_name {
@@ -91,7 +138,7 @@ fn generate_runtime_api(
 
         let method = quote!(
             #docs
-            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::Output> {
+            pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::Output> {
                 #crate_path::runtime_api::Payload::new_static(
                     #trait_name_str,
                     #method_name_str,

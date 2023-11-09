@@ -237,14 +237,13 @@ impl RuntimeGenerator {
 
         let rust_items = item_mod_ir.rust_items();
 
-        // let apis_mod = runtime_apis::generate_runtime_apis(
-        //     &self.metadata,
-        //     &type_gen,
-        //     types_mod_ident,
-        //     &crate_path,
-        //     should_gen_docs,
-        // )?;
-        let apis_mod = quote!();
+        let apis_mod = runtime_apis::generate_runtime_apis(
+            &self.metadata,
+            &type_gen,
+            types_mod_ident,
+            &crate_path,
+            should_gen_docs,
+        )?;
 
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
