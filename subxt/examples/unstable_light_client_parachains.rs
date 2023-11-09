@@ -1,6 +1,9 @@
 use futures::StreamExt;
 use std::{iter, num::NonZeroU32};
-use subxt::{client::LightClient, PolkadotConfig};
+use subxt::{
+    client::{LightClient, RawLightClient},
+    PolkadotConfig,
+};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -17,12 +20,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Connecting to a parachain is a multi step process.
 
-    // Step 1. Construct a new smoldot client and subxt builder.
+    // Step 1. Construct a new smoldot client.
     let mut client = subxt_lightclient::Client::new(subxt_lightclient::DefaultPlatform::new(
         "subxt-example-light-client".into(),
         "version-0".into(),
     ));
-    let mut builder = LightClient::raw_builder();
 
     // Step 2. Connect to the relay chain of the parachain. For this example, the Polkadot relay chain.
     let polkadot_connection = client
@@ -41,11 +43,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .json_rpc_responses
         .expect("Light client configured with json rpc enabled; qed");
     let polkadot_chain_id = polkadot_connection.chain_id;
-
-    // Add the chain to the light client builder.
-    builder.add_chain(polkadot_chain_id, polkadot_json_rpc_responses);
-
-    println!("Added Polkadot relay chain");
 
     // Step 3. Connect to the parachain. For this example, the Asset hub parachain.
     let assethub_connection = client
@@ -67,24 +64,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Light client configured with json rpc enabled; qed");
     let parachain_chain_id = assethub_connection.chain_id;
 
-    // Add the chain to the light client builder.
-    builder.add_chain(parachain_chain_id, parachain_json_rpc_responses);
-
-    println!("Added AssetHub parachain");
-
-    // Step 4. Turn the smoldot client into a subxt light client using the builder.
-    let polkadot_api = builder
-        .build(
-            client,
-            // This client is responsible for talking with the relay chain.
-            polkadot_chain_id,
-        )
+    // Step 4. Turn the smoldot client into a raw client.
+    let raw_light_client = RawLightClient::builder()
+        .add_chain(polkadot_chain_id, polkadot_json_rpc_responses)
+        .add_chain(parachain_chain_id, parachain_json_rpc_responses)
+        .build(client)
         .await?;
 
     // Step 5. Obtain a client to target the parachain.
-    let parachain_api = polkadot_api
-        .target_chain::<PolkadotConfig>(parachain_chain_id)
-        .await?;
+    let polkadot_api: LightClient<PolkadotConfig> =
+        raw_light_client.for_chain(polkadot_chain_id).await?;
+
+    let parachain_api: LightClient<PolkadotConfig> =
+        raw_light_client.for_chain(parachain_chain_id).await?;
 
     // Step 6. Subscribe to the finalized blocks of the chains.
     let polkadot_sub = polkadot_api

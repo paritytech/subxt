@@ -4,6 +4,7 @@
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
+use crate::client::RawLightClient;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
@@ -152,58 +153,52 @@ impl<T: Config> LightClientBuilder<T> {
     }
 }
 
-/// Raw builder for [`LightClient`].
-pub struct RawLightClientBuilder<T: Config> {
+/// Raw builder for [`RawLightClient`].
+pub struct RawLightClientBuilder {
     chains: Vec<subxt_lightclient::AddedChain>,
-    _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> Default for RawLightClientBuilder<T> {
+impl Default for RawLightClientBuilder {
     fn default() -> Self {
-        Self {
-            chains: Vec::new(),
-            _marker: std::marker::PhantomData,
-        }
+        Self { chains: Vec::new() }
     }
 }
 
-impl<T: Config> RawLightClientBuilder<T> {
+impl RawLightClientBuilder {
     /// Create a new [`RawLightClientBuilder`].
-    pub fn new() -> RawLightClientBuilder<T> {
+    pub fn new() -> RawLightClientBuilder {
         RawLightClientBuilder::default()
     }
 
     /// Adds a new chain to the list of chains synchronized by the light client.
     pub fn add_chain(
-        &mut self,
+        mut self,
         chain_id: subxt_lightclient::ChainId,
         rpc_responses: subxt_lightclient::JsonRpcResponses,
-    ) {
+    ) -> Self {
         self.chains.push(subxt_lightclient::AddedChain {
             chain_id,
             rpc_responses,
         });
+        self
     }
 
-    /// Construct a [`LightClient`] from a raw smoldot instance.
+    /// Construct a [`RawLightClient`] from a raw smoldot instance.
     ///
     /// The provided `chain_id` is the chain with which the current instance of light client will interact.
     /// To target a different chain call the [`LightClient::target_chain`] method.
     pub async fn build<TPlatform: subxt_lightclient::PlatformRef>(
         self,
         client: subxt_lightclient::Client<TPlatform>,
-        chain_id: subxt_lightclient::ChainId,
-    ) -> Result<LightClient<T>, Error> {
+    ) -> Result<RawLightClient, Error> {
         // The raw subxt light client that spawns the smoldot background task.
-        let raw_rpc = subxt_lightclient::LightClientRpc::new_from_client(
-            client,
-            self.chains.into_iter(),
-            chain_id,
-        );
-        // The crate implementation of `RpcClientT` over the raw subxt light client.
-        let raw_rpc = LightClientRpc::from_inner(raw_rpc);
+        let raw_rpc: subxt_lightclient::RawLightClientRpc =
+            subxt_lightclient::LightClientRpc::new_from_client(client, self.chains.into_iter());
 
-        build_client_from_rpc(raw_rpc).await
+        // The crate implementation of `RpcClientT` over the raw subxt light client.
+        let raw_rpc = crate::client::light_client::rpc::RawLightClientRpc::from_inner(raw_rpc);
+
+        Ok(RawLightClient { raw_rpc })
     }
 }
 

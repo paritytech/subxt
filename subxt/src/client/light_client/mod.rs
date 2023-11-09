@@ -52,21 +52,14 @@ pub enum LightClientError {
     Handshake,
 }
 
-/// The light-client RPC implementation that is used to connect with the chain.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
-pub struct LightClient<T: Config> {
-    client: OnlineClient<T>,
-    raw_rpc: rpc::LightClientRpc,
+/// The raw light-client RPC implementation that is used to connect with the chain.
+#[derive(Clone)]
+pub struct RawLightClient {
+    raw_rpc: rpc::RawLightClientRpc,
 }
 
-impl<T: Config> LightClient<T> {
-    /// Construct a [`LightClient`] using its builder interface.
-    pub fn builder() -> LightClientBuilder<T> {
-        LightClientBuilder::new()
-    }
-
-    /// Construct a [`LightClient`] using the raw builder interface.
+impl RawLightClient {
+    /// Construct a [`RawLightClient`] using its builder interface.
     ///
     /// The raw builder is utilized for constructing light-clients from a low
     /// level smoldot instance.
@@ -79,8 +72,42 @@ impl<T: Config> LightClient<T> {
     /// # Note
     ///
     /// If you are unsure, please use [`LightClient::builder`] instead.
-    pub fn raw_builder() -> RawLightClientBuilder<T> {
+    pub fn builder() -> RawLightClientBuilder {
         RawLightClientBuilder::default()
+    }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`Self::new_from_client`].
+    pub async fn for_chain<TChainConfig: Config>(
+        &self,
+        chain_id: subxt_lightclient::ChainId,
+    ) -> Result<LightClient<TChainConfig>, crate::Error> {
+        let raw_rpc = self.raw_rpc.for_chain(chain_id);
+        let rpc_client = RpcClient::new(raw_rpc.clone());
+        let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
+
+        Ok(LightClient { client, raw_rpc })
+    }
+}
+
+/// The light-client RPC implementation that is used to connect with the chain.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""))]
+pub struct LightClient<T: Config> {
+    client: OnlineClient<T>,
+    raw_rpc: rpc::LightClientRpc,
+}
+
+impl<T: Config> LightClient<T> {
+    /// Construct a [`LightClient`] using its builder interface.
+    pub fn builder() -> LightClientBuilder<T> {
+        LightClientBuilder::new()
     }
 
     // We add the below impls so that we don't need to
@@ -140,26 +167,6 @@ impl<T: Config> LightClient<T> {
     /// Returns the chain ID of the current light-client.
     pub fn chain_id(&self) -> subxt_lightclient::ChainId {
         self.raw_rpc.chain_id()
-    }
-
-    /// Target a different chain identified by the provided chain ID for requests.
-    ///
-    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
-    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
-    ///
-    /// # Note
-    ///
-    /// This uses the same underlying instance created by [`Self::new_from_client`].
-    pub async fn target_chain<TChainConfig: Config>(
-        &self,
-        chain_id: subxt_lightclient::ChainId,
-    ) -> Result<LightClient<TChainConfig>, crate::Error> {
-        let raw_rpc = self.raw_rpc.target_chain(chain_id);
-        let rpc_client = RpcClient::new(raw_rpc.clone());
-
-        let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
-
-        Ok(LightClient { client, raw_rpc })
     }
 }
 

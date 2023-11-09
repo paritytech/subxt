@@ -15,6 +15,31 @@ use super::platform::build_platform;
 
 pub const LOG_TARGET: &str = "subxt-light-client";
 
+/// A raw light-client RPC implementation that can connect to multiple chains.
+#[derive(Clone)]
+pub struct RawLightClientRpc {
+    /// Communicate with the backend task that multiplexes the responses
+    /// back to the frontend.
+    to_backend: mpsc::UnboundedSender<FromSubxt>,
+}
+
+impl RawLightClientRpc {
+    /// Construct a [`LightClientRpc`] that can communicated with the provided chain.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`LightClientRpc::new_from_client`].
+    pub fn for_chain(&self, chain_id: smoldot_light::ChainId) -> LightClientRpc {
+        LightClientRpc {
+            to_backend: self.to_backend.clone(),
+            chain_id,
+        }
+    }
+}
+
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
 pub struct LightClientRpc {
@@ -51,20 +76,21 @@ impl LightClientRpc {
             .map_err(|err| LightClientRpcError::AddChainError(err.to_string()))?;
 
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
-        Ok(Self::new_from_client(
+
+        let raw_client = Self::new_from_client(
             client,
             iter::once(AddedChain {
                 chain_id,
                 rpc_responses,
             }),
-            chain_id,
-        ))
+        );
+        Ok(raw_client.for_chain(chain_id))
     }
 
-    /// Constructs a new [`LightClientRpc`] from the raw smoldot client.
+    /// Constructs a new [`RawLightClientRpc`] from the raw smoldot client.
     ///
     /// Receives a list of RPC objects as a result of calling `smoldot_light::Client::add_chain`.
-    /// This [`LightClientRpc`] makes requests to the provided `chain_id` parameter.
+    /// This [`RawLightClientRpc`] can target different chains using [`RawLightClientRpc::for_chain`] method.
     ///
     /// ## Panics
     ///
@@ -72,8 +98,7 @@ impl LightClientRpc {
     pub fn new_from_client<TPlat>(
         client: smoldot_light::Client<TPlat>,
         chains: impl Iterator<Item = AddedChain>,
-        chain_id: smoldot_light::ChainId,
-    ) -> LightClientRpc
+    ) -> RawLightClientRpc
     where
         TPlat: smoldot_light::platform::PlatformRef + Clone,
     {
@@ -90,30 +115,12 @@ impl LightClientRpc {
         #[cfg(feature = "web")]
         wasm_bindgen_futures::spawn_local(future);
 
-        LightClientRpc {
-            to_backend,
-            chain_id,
-        }
+        RawLightClientRpc { to_backend }
     }
 
     /// Returns the chain ID of the current light-client.
     pub fn chain_id(&self) -> smoldot_light::ChainId {
         self.chain_id
-    }
-
-    /// Target a different chain identified by the provided chain ID for requests.
-    ///
-    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
-    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
-    ///
-    /// # Note
-    ///
-    /// This uses the same underlying instance created by [`Self::new_from_client`].
-    pub fn target_chain(&self, chain_id: smoldot_light::ChainId) -> Self {
-        Self {
-            to_backend: self.to_backend.clone(),
-            chain_id,
-        }
     }
 
     /// Submits an RPC method request to the light-client.
