@@ -26,9 +26,6 @@ pub struct RawLightClientRpc {
 impl RawLightClientRpc {
     /// Construct a [`LightClientRpc`] that can communicated with the provided chain.
     ///
-    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
-    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
-    ///
     /// # Note
     ///
     /// This uses the same underlying instance created by [`LightClientRpc::new_from_client`].
