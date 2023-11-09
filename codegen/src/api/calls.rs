@@ -32,6 +32,7 @@ pub fn generate_calls(
 
     let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
+        types_mod_ident,
         call_ty,
         |name| name.to_upper_camel_case().into(),
         "Call",
@@ -44,11 +45,11 @@ pub fn generate_calls(
         .map(|(variant_name, struct_def)| {
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
 
-            let (call_fn_args, call_args, alias_args): (Vec<_>, Vec<_>, Vec<_>) =
-                match struct_def.fields {
-                    CompositeDefFields::Named(ref named_fields) => {
-                        let result = named_fields.iter().map(|(name, field)| {
-                            let fn_arg_type = &field.type_path;
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match struct_def.fields {
+                CompositeDefFields::Named(ref named_fields) => {
+                    named_fields
+                        .iter()
+                        .map(|(name, field)| {
                             let call_arg = if field.is_boxed() {
                                 quote! { #name: ::std::boxed::Box::new(#name) }
                             } else {
@@ -59,27 +60,15 @@ pub fn generate_calls(
                             let alias_name =
                                 format_ident!("{}", name.to_string().to_upper_camel_case());
 
-                            (
-                                quote!( #name: alias_types::#fn_name::#alias_name ),
-                                call_arg,
-                                quote!( pub type #alias_name = #fn_arg_type; ),
-                            )
-                        });
-
-                        (
-                            result
-                                .clone()
-                                .map(|(call_fn_args, _, _)| call_fn_args)
-                                .collect(),
-                            result.clone().map(|(_, call_args, _)| call_args).collect(),
-                            result.map(|(_, _, alias_args)| alias_args).collect(),
-                        )
-                    }
-                    CompositeDefFields::NoFields => Default::default(),
-                    CompositeDefFields::Unnamed(_) => {
-                        return Err(CodegenError::InvalidCallVariant(call_ty))
-                    }
-                };
+                            (quote!( #name: types::#fn_name::#alias_name ), call_arg)
+                        })
+                        .unzip()
+                }
+                CompositeDefFields::NoFields => Default::default(),
+                CompositeDefFields::Unnamed(_) => {
+                    return Err(CodegenError::InvalidCallVariant(call_ty))
+                }
+            };
 
             let pallet_name = pallet.name();
             let call_name = &variant_name;
@@ -120,21 +109,12 @@ pub fn generate_calls(
                 }
             };
 
-            let alias_module = quote! {
-                pub mod #fn_name {
-                    use super::#types_mod_ident;
-
-                    #(#alias_args)*
-                }
-            };
-
-            Ok((call_struct, client_fn, alias_module))
+            Ok((call_struct, client_fn))
         })
         .collect::<Result<Vec<_>, _>>()?;
 
-    let call_structs = result.iter().map(|(call_struct, _, _)| call_struct);
-    let call_fns = result.iter().map(|(_, client_fn, _)| client_fn);
-    let alias_modules = result.iter().map(|(_, _, alias_module)| alias_module);
+    let call_structs = result.iter().map(|(call_struct, _)| call_struct);
+    let call_fns = result.iter().map(|(_, client_fn)| client_fn);
 
     let call_type = type_gen.resolve_type_path(call_ty);
     let call_ty = type_gen.resolve_type(call_ty);
@@ -151,12 +131,6 @@ pub fn generate_calls(
             use super::#types_mod_ident;
 
             type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
-
-            pub mod alias_types {
-                use super::#types_mod_ident;
-
-                #( #alias_modules )*
-            }
 
             pub mod types {
                 use super::#types_mod_ident;

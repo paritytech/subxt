@@ -237,13 +237,14 @@ impl RuntimeGenerator {
 
         let rust_items = item_mod_ir.rust_items();
 
-        let apis_mod = runtime_apis::generate_runtime_apis(
-            &self.metadata,
-            &type_gen,
-            types_mod_ident,
-            &crate_path,
-            should_gen_docs,
-        )?;
+        // let apis_mod = runtime_apis::generate_runtime_apis(
+        //     &self.metadata,
+        //     &type_gen,
+        //     types_mod_ident,
+        //     &crate_path,
+        //     should_gen_docs,
+        // )?;
+        let apis_mod = quote!();
 
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
@@ -358,6 +359,7 @@ impl RuntimeGenerator {
 /// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<F>(
     type_gen: &TypeGenerator,
+    types_mod_ident: &syn::Ident,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
@@ -389,7 +391,9 @@ where
             let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
             let struct_def = CompositeDef::struct_def(
                 &ty,
+                types_mod_ident,
                 struct_name.as_ref(),
+                &var.name,
                 Default::default(),
                 fields,
                 Some(parse_quote!(pub)),

@@ -52,6 +52,7 @@ pub fn generate_events(
 
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
+        types_mod_ident,
         event_ty,
         |name| name.into(),
         "Event",

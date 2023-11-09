@@ -98,10 +98,9 @@ impl<'a> TypeGenerator<'a> {
                         .or_insert_with(|| Module::new(ident, root_mod_ident.clone()))
                 });
 
-            innermost_module.types.insert(
-                path.clone(),
-                TypeDefGen::from_type(&ty.ty, self, &self.crate_path, self.should_gen_docs)?,
-            );
+            innermost_module
+                .types
+                .insert(path.clone(), TypeDefGen::from_type(&ty.ty, self)?);
         }
 
         Ok(root_mod)
@@ -273,6 +272,21 @@ impl<'a> TypeGenerator<'a> {
         let ty_path: syn::TypePath = syn::parse_str(&joined_path)
             .map_err(|e| CodegenError::InvalidTypePath(joined_path, e))?;
         Ok(self.derives.resolve(&ty_path))
+    }
+
+    /// The name of the module which will contain the generated types.
+    pub fn types_mod_ident(&self) -> &Ident {
+        &self.types_mod_ident
+    }
+
+    /// The `subxt` crate access path in the generated code.
+    pub fn crate_path(&self) -> &syn::Path {
+        &self.crate_path
+    }
+
+    /// True if codegen should generate the documentation for the API.
+    pub fn should_gen_docs(&self) -> bool {
+        self.should_gen_docs
     }
 }
 

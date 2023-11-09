@@ -5,6 +5,7 @@
 use crate::error::CodegenError;
 
 use super::{Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
+use heck::{ToLowerCamelCase, ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use scale_info::{form::PortableForm, Type, TypeDef, TypeDefPrimitive};
@@ -30,7 +31,9 @@ impl CompositeDef {
     #[allow(clippy::too_many_arguments)]
     pub fn struct_def(
         ty: &Type<PortableForm>,
+        types_mod_ident: &syn::Ident,
         ident: &str,
+        variant_name: &str,
         type_params: TypeDefParameters,
         fields_def: CompositeDefFields,
         field_visibility: Option<syn::Visibility>,
@@ -67,6 +70,7 @@ impl CompositeDef {
         }
 
         let name = format_ident!("{}", ident);
+        let variant_name = format_ident!("{}", variant_name.to_snake_case());
         let docs_token = Some(quote! { #( #[doc = #docs ] )* });
 
         Ok(Self {
@@ -75,6 +79,8 @@ impl CompositeDef {
                 derives,
                 type_params,
                 field_visibility,
+                types_mod_ident: types_mod_ident.clone(),
+                variant_name,
             },
             fields: fields_def,
             docs: docs_token,
@@ -104,21 +110,50 @@ impl quote::ToTokens for CompositeDef {
                 derives,
                 type_params,
                 field_visibility,
+                types_mod_ident,
+                variant_name,
             } => {
                 let phantom_data = type_params.unused_params_phantom_data();
-                let fields = self
+                let aliases = self
                     .fields
-                    .to_struct_field_tokens(phantom_data, field_visibility.as_ref());
+                    .to_type_aliases_tokens(field_visibility.as_ref());
+                let fields = self.fields.to_struct_field_tokens(
+                    variant_name,
+                    phantom_data,
+                    field_visibility.as_ref(),
+                );
                 let trailing_semicolon = matches!(
                     self.fields,
                     CompositeDefFields::NoFields | CompositeDefFields::Unnamed(_)
                 )
                 .then(|| quote!(;));
 
+                let should_alias = matches!(
+                    &self.fields,
+                    CompositeDefFields::Named(struct_fields) if !struct_fields.is_empty()
+                ) || matches!(
+                    &self.fields,
+                    CompositeDefFields::Unnamed(struct_fields) if !struct_fields.is_empty()
+                );
+
+                let alias_module = if should_alias {
+                    quote! {
+                        pub mod #variant_name {
+                            use super::#types_mod_ident;
+
+                            #aliases
+                        }
+                    }
+                } else {
+                    quote!()
+                };
+
                 quote! {
                     #derives
                     #docs
                     pub struct #name #type_params #fields #trailing_semicolon
+
+                    #alias_module
                 }
             }
             CompositeDefKind::EnumVariant => {
@@ -143,6 +178,8 @@ pub enum CompositeDefKind {
         derives: Derives,
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
+        types_mod_ident: syn::Ident,
+        variant_name: syn::Ident,
     },
     /// Comprises a variant of a Rust `enum`.
     EnumVariant,
@@ -210,9 +247,34 @@ impl CompositeDefFields {
         }
     }
 
+    /// Generate the code for type aliases which will be used to construct the `struct` or `enum`.
+    pub fn to_type_aliases_tokens(&self, visibility: Option<&syn::Visibility>) -> TokenStream {
+        match self {
+            Self::NoFields => {
+                quote!()
+            }
+            Self::Named(ref fields) => {
+                let fields = fields.iter().map(|(name, ty)| {
+                    let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
+                    quote! ( #visibility type #alias_name = #ty; )
+                });
+                quote!( #( #fields )* )
+            }
+            Self::Unnamed(ref fields) => {
+                let fields = fields.iter().enumerate().map(|(idx, ty)| {
+                    let alias_name = format_ident!("Field{}", idx);
+                    quote! ( #visibility type #alias_name = #ty; )
+                });
+
+                quote!( #( #fields )* )
+            }
+        }
+    }
+
     /// Generate the code for fields which will compose a `struct`.
     pub fn to_struct_field_tokens(
         &self,
+        alias_module_name: &syn::Ident,
         phantom_data: Option<syn::TypePath>,
         visibility: Option<&syn::Visibility>,
     ) -> TokenStream {
@@ -227,7 +289,8 @@ impl CompositeDefFields {
             Self::Named(ref fields) => {
                 let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #compact_attr #visibility #name: #ty }
+                    let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
+                    quote! { #compact_attr #visibility #name: #alias_module_name::#alias_name }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
@@ -243,9 +306,10 @@ impl CompositeDefFields {
                 )
             }
             Self::Unnamed(ref fields) => {
-                let fields = fields.iter().map(|ty| {
+                let fields = fields.iter().enumerate().map(|(idx, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #compact_attr #visibility #ty }
+                    let alias_name = format_ident!("Field{}", idx);
+                    quote! { #compact_attr #visibility #alias_module_name::#alias_name }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(

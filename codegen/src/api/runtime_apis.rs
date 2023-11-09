@@ -47,7 +47,7 @@ fn generate_runtime_api(
             let ty = type_gen.resolve_type_path(input.ty);
 
             let aliased_param = quote!( pub type #alias_name = #ty; );
-            let ty_path = quote!( #method_name::#alias_name );
+            let ty_path: TokenStream2 = quote!( types::#method_name::#alias_name );
 
             let param = quote!(#name: #ty_path);
             (param, name, aliased_param)
