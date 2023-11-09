@@ -79,7 +79,28 @@ fn generate_storage_entry_fns(
     should_gen_docs: bool,
     types_mod_ident: &syn::Ident,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
-    let keys: Vec<(Ident, TypePath)> = match storage_entry.entry_type() {
+    let snake_case_name = storage_entry.name().to_snake_case();
+    let storage_entry_ty = storage_entry.entry_type().value_ty();
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty);
+
+    let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
+    let alias_module_name = format_ident!("{snake_case_name}");
+    let alias_storage_path = quote!( types::#alias_module_name::#alias_name );
+
+    let storage_entry_map = |idx, id| {
+        let ident: Ident = format_ident!("_{}", idx);
+        let ty_path = type_gen.resolve_type_path(id);
+
+        let alias_name = format_ident!("Param{}", idx);
+        let alias_type = primitive_type_alias(&ty_path);
+
+        let alias_type = quote!( pub type #alias_name = #alias_type; );
+        let path_to_alias = quote!( types::#alias_module_name::#alias_name );
+
+        (ident, alias_type, path_to_alias)
+    };
+
+    let keys: Vec<(Ident, TokenStream, TokenStream)> = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => vec![],
         StorageEntryType::Map { key_ty, .. } => {
             match &type_gen.resolve_type(*key_ty).type_def {
@@ -88,17 +109,11 @@ fn generate_storage_entry_fns(
                     .fields
                     .iter()
                     .enumerate()
-                    .map(|(i, f)| {
-                        let ident: Ident = format_ident!("_{}", syn::Index::from(i));
-                        let ty_path = type_gen.resolve_type_path(f.id);
-                        (ident, ty_path)
-                    })
+                    .map(|(idx, f)| storage_entry_map(idx, f.id))
                     .collect::<Vec<_>>(),
                 // A map with a single key; return the single key.
                 _ => {
-                    let ident = format_ident!("_0");
-                    let ty_path = type_gen.resolve_type_path(*key_ty);
-                    vec![(ident, ty_path)]
+                    vec![storage_entry_map(0, *key_ty)]
                 }
             }
         }
@@ -111,14 +126,6 @@ fn generate_storage_entry_fns(
             storage_name.into(),
         ));
     };
-
-    let snake_case_name = storage_entry.name().to_snake_case();
-    let storage_entry_ty = storage_entry.entry_type().value_ty();
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty);
-
-    let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
-    let alias_module_name = format_ident!("{snake_case_name}");
-    let alias_storage_path = quote!( types::#alias_module_name::#alias_name );
 
     let docs = storage_entry.docs();
     let docs = should_gen_docs
@@ -145,10 +152,9 @@ fn generate_storage_entry_fns(
         };
         let is_fetchable_type = is_fetchable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
         let is_iterable_type = is_iterable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let key_impls = keys_slice.iter().map(|(field_name, _)| quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) ));
-        let key_args = keys_slice.iter().map(|(field_name, field_type)| {
-            let field_ty = primitive_type_alias(field_type);
-            quote!( #field_name: impl ::std::borrow::Borrow<#field_ty> )
+        let key_impls = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) ));
+        let key_args = keys_slice.iter().map(|(field_name, _, path_to_alias )| {
+            quote!( #field_name: impl ::std::borrow::Borrow<#path_to_alias> )
         });
 
         quote!(
@@ -173,6 +179,8 @@ fn generate_storage_entry_fns(
         )
     });
 
+    let alias_types = keys.iter().map(|(_, alias_type, _)| alias_type);
+
     // Generate type alias for the return type only, since
     // the keys of the storage entry are not explicitly named.
     let alias_module = quote! {
@@ -180,6 +188,8 @@ fn generate_storage_entry_fns(
             use super::#types_mod_ident;
 
             pub type #alias_name = #storage_entry_value_ty;
+
+            #( #alias_types )*
         }
     };
 
