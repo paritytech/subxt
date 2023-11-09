@@ -138,6 +138,18 @@ impl<T: Config> LegacyRpcMethods<T> {
             .await
     }
 
+    /// Fetch next nonce for an Account
+    ///
+    /// Return account nonce adjusted for extrinsics currently in transaction pool
+    pub async fn system_account_next_index(&self, account_id: &T::AccountId) -> Result<u64, Error>
+    where
+        T::AccountId: Serialize,
+    {
+        self.client
+            .request("system_accountNextIndex", rpc_params![&account_id])
+            .await
+    }
+
     /// Get a header
     pub async fn chain_get_header(
         &self,
