@@ -38,3 +38,4 @@ getrandom = { workspace = true, optional = true }
 bitvec = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 pretty_assertions = { workspace = true }
+frame-metadata = { workspace = true }
