@@ -4162,6 +4162,7 @@ pub mod api {
                         ::core::primitive::u32,
                         runtime_types::pallet_balances::types::AccountData<::core::primitive::u128>,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod extrinsic_count {
                     use super::runtime_types;
@@ -4180,10 +4181,12 @@ pub mod api {
                 pub mod block_hash {
                     use super::runtime_types;
                     pub type BlockHash = ::subxt::utils::H256;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod extrinsic_data {
                     use super::runtime_types;
                     pub type ExtrinsicData = ::std::vec::Vec<::core::primitive::u8>;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod number {
                     use super::runtime_types;
@@ -4214,6 +4217,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type EventTopics =
                         ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>;
+                    pub type Param0 = ::subxt::utils::H256;
                 }
                 pub mod last_runtime_upgrade {
                     use super::runtime_types;
@@ -4259,7 +4263,7 @@ pub mod api {
                 #[doc = " The full account information for a particular account ID."]
                 pub fn account(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::account::Account,
@@ -4370,7 +4374,7 @@ pub mod api {
                 #[doc = " Map of block numbers to block hashes."]
                 pub fn block_hash(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::block_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::block_hash::BlockHash,
@@ -4416,7 +4420,7 @@ pub mod api {
                 #[doc = " Extrinsics data for the current block (maps an extrinsic's index to its data)."]
                 pub fn extrinsic_data(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::extrinsic_data::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::extrinsic_data::ExtrinsicData,
@@ -4591,7 +4595,7 @@ pub mod api {
                 #[doc = " no notification will be triggered thus the event might be lost."]
                 pub fn event_topics(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::event_topics::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::event_topics::EventTopics,
@@ -5013,6 +5017,7 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             [::core::primitive::u8; 32usize],
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod initialized {
                     use super::runtime_types;
@@ -5291,7 +5296,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay."]
                 pub fn under_construction(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::under_construction::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::under_construction::UnderConstruction,
@@ -6004,6 +6009,7 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::bool,
                     );
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -6033,7 +6039,7 @@ pub mod api {
                 #[doc = " The lookup from index to account."]
                 pub fn accounts(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::accounts::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::accounts::Accounts,
@@ -6914,6 +6920,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Account =
                         runtime_types::pallet_balances::types::AccountData<::core::primitive::u128>;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod locks {
                     use super::runtime_types;
@@ -6923,6 +6930,7 @@ pub mod api {
                                 ::core::primitive::u128,
                             >,
                         >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod reserves {
                     use super::runtime_types;
@@ -6932,6 +6940,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod holds {
                     use super::runtime_types;
@@ -6941,6 +6950,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod freezes {
                     use super::runtime_types;
@@ -6950,6 +6960,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -7067,7 +7078,7 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::account::Account,
@@ -7114,7 +7125,7 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
                 pub fn locks(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::locks::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::locks::Locks,
@@ -7159,7 +7170,7 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::reserves::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::reserves::Reserves,
@@ -7205,7 +7216,7 @@ pub mod api {
                 #[doc = " Holds on account balances."]
                 pub fn holds(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::holds::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::holds::Holds,
@@ -7251,7 +7262,7 @@ pub mod api {
                 #[doc = " Freeze locks on account balances."]
                 pub fn freezes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::freezes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::freezes::Freezes,
@@ -7575,10 +7586,13 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         (::subxt::utils::AccountId32, ()),
                     >;
+                    pub type Param0 = ::subxt::utils::H256;
                 }
                 pub mod concurrent_reports_index {
                     use super::runtime_types;
                     pub type ConcurrentReportsIndex = ::std::vec::Vec<::subxt::utils::H256>;
+                    pub type Param0 = [::core::primitive::u8; 16usize];
+                    pub type Param1 = [::core::primitive::u8];
                 }
             }
             pub struct StorageApi;
@@ -7608,7 +7622,7 @@ pub mod api {
                 #[doc = " The primary structure that holds all offence records keyed by report identifiers."]
                 pub fn reports(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::reports::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::reports::Reports,
@@ -7655,7 +7669,7 @@ pub mod api {
                 #[doc = " A vector of reports of the same kind that happened at the same time slot."]
                 pub fn concurrent_reports_index_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
+                    _0: impl ::std::borrow::Borrow<types::concurrent_reports_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::concurrent_reports_index::ConcurrentReportsIndex,
@@ -7680,8 +7694,8 @@ pub mod api {
                 #[doc = " A vector of reports of the same kind that happened at the same time slot."]
                 pub fn concurrent_reports_index(
                     &self,
-                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
-                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
+                    _0: impl ::std::borrow::Borrow<types::concurrent_reports_index::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::concurrent_reports_index::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::concurrent_reports_index::ConcurrentReportsIndex,
@@ -7892,6 +7906,7 @@ pub mod api {
                 pub mod set_id_session {
                     use super::runtime_types;
                     pub type SetIdSession = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u64;
                 }
                 pub mod genesis_block {
                     use super::runtime_types;
@@ -8006,7 +8021,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
                 pub fn set_id_session(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
+                    _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::set_id_session::SetIdSession,
@@ -8127,6 +8142,7 @@ pub mod api {
                 pub mod nodes {
                     use super::runtime_types;
                     pub type Nodes = ::subxt::utils::H256;
+                    pub type Param0 = ::core::primitive::u64;
                 }
             }
             pub struct StorageApi;
@@ -8203,7 +8219,7 @@ pub mod api {
                 #[doc = " are pruned and only stored in the Offchain DB."]
                 pub fn nodes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
+                    _0: impl ::std::borrow::Borrow<types::nodes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::nodes::Nodes,
@@ -8445,10 +8461,13 @@ pub mod api {
                 pub mod next_keys {
                     use super::runtime_types;
                     pub type NextKeys = runtime_types::rococo_runtime::SessionKeys;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod key_owner {
                     use super::runtime_types;
                     pub type KeyOwner = ::subxt::utils::AccountId32;
+                    pub type Param0 = runtime_types::sp_core::crypto::KeyTypeId;
+                    pub type Param1 = [::core::primitive::u8];
                 }
             }
             pub struct StorageApi;
@@ -8591,7 +8610,7 @@ pub mod api {
                 #[doc = " The next session keys for a validator."]
                 pub fn next_keys(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::next_keys::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::next_keys::NextKeys,
@@ -8637,7 +8656,7 @@ pub mod api {
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
                 pub fn key_owner_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<runtime_types::sp_core::crypto::KeyTypeId>,
+                    _0: impl ::std::borrow::Borrow<types::key_owner::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::key_owner::KeyOwner,
@@ -8662,8 +8681,8 @@ pub mod api {
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
                 pub fn key_owner(
                     &self,
-                    _0: impl ::std::borrow::Borrow<runtime_types::sp_core::crypto::KeyTypeId>,
-                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
+                    _0: impl ::std::borrow::Borrow<types::key_owner::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::key_owner::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::key_owner::KeyOwner,
@@ -8937,6 +8956,7 @@ pub mod api {
                 pub mod set_id_session {
                     use super::runtime_types;
                     pub type SetIdSession = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u64;
                 }
             }
             pub struct StorageApi;
@@ -9091,7 +9111,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SetId` is not under user control."]
                 pub fn set_id_session(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
+                    _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::set_id_session::SetIdSession,
@@ -9318,10 +9338,14 @@ pub mod api {
                 pub mod received_heartbeats {
                     use super::runtime_types;
                     pub type ReceivedHeartbeats = ::core::primitive::bool;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::core::primitive::u32;
                 }
                 pub mod authored_blocks {
                     use super::runtime_types;
                     pub type AuthoredBlocks = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -9403,7 +9427,7 @@ pub mod api {
                 #[doc = " For each session index, we keep a mapping of `SessionIndex` and `AuthIndex`."]
                 pub fn received_heartbeats_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::received_heartbeats::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::received_heartbeats::ReceivedHeartbeats,
@@ -9427,8 +9451,8 @@ pub mod api {
                 #[doc = " For each session index, we keep a mapping of `SessionIndex` and `AuthIndex`."]
                 pub fn received_heartbeats(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::received_heartbeats::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::received_heartbeats::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::received_heartbeats::ReceivedHeartbeats,
@@ -9477,7 +9501,7 @@ pub mod api {
                 #[doc = " number of blocks authored by the given authority."]
                 pub fn authored_blocks_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::authored_blocks::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::authored_blocks::AuthoredBlocks,
@@ -9503,8 +9527,8 @@ pub mod api {
                 #[doc = " number of blocks authored by the given authority."]
                 pub fn authored_blocks(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::authored_blocks::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::authored_blocks::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::authored_blocks::AuthoredBlocks,
@@ -10308,6 +10332,7 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u128,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod deactivated {
                     use super::runtime_types;
@@ -10333,6 +10358,7 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u64,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -10383,7 +10409,7 @@ pub mod api {
                 #[doc = " Proposals that have been made."]
                 pub fn proposals(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::proposals::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::proposals::Proposals,
@@ -10495,7 +10521,7 @@ pub mod api {
                 #[doc = " Spends that have been approved and being processed."]
                 pub fn spends(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::spends::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::spends::Spends,
@@ -10983,6 +11009,8 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = ::core::primitive::u16;
                 }
                 pub mod class_locks_for {
                     use super::runtime_types;
@@ -10991,6 +11019,7 @@ pub mod api {
                             ::core::primitive::u16,
                             ::core::primitive::u128,
                         )>;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -11021,7 +11050,7 @@ pub mod api {
                 #[doc = " number of votes that we have recorded."]
                 pub fn voting_for_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::voting_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::voting_for::VotingFor,
@@ -11046,8 +11075,8 @@ pub mod api {
                 #[doc = " number of votes that we have recorded."]
                 pub fn voting_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::voting_for::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::voting_for::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::voting_for::VotingFor,
@@ -11097,7 +11126,7 @@ pub mod api {
                 #[doc = " this list."]
                 pub fn class_locks_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::class_locks_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::class_locks_for::ClassLocksFor,
@@ -11975,6 +12004,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                             (::core::primitive::u32, ::core::primitive::u32),
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod track_queue {
                     use super::runtime_types;
@@ -11983,14 +12013,17 @@ pub mod api {
                             ::core::primitive::u32,
                             ::core::primitive::u128,
                         )>;
+                    pub type Param0 = ::core::primitive::u16;
                 }
                 pub mod deciding_count {
                     use super::runtime_types;
                     pub type DecidingCount = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u16;
                 }
                 pub mod metadata_of {
                     use super::runtime_types;
                     pub type MetadataOf = ::subxt::utils::H256;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -12041,7 +12074,7 @@ pub mod api {
                 #[doc = " Information concerning any given referendum."]
                 pub fn referendum_info_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::referendum_info_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::referendum_info_for::ReferendumInfoFor,
@@ -12092,7 +12125,7 @@ pub mod api {
                 #[doc = " This should be empty if `DecidingCount` is less than `TrackInfo::max_deciding`."]
                 pub fn track_queue(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::track_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::track_queue::TrackQueue,
@@ -12138,7 +12171,7 @@ pub mod api {
                 #[doc = " The number of referenda being decided currently."]
                 pub fn deciding_count(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::deciding_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::deciding_count::DecidingCount,
@@ -12195,7 +12228,7 @@ pub mod api {
                 #[doc = " large preimages."]
                 pub fn metadata_of(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::metadata_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::metadata_of::MetadataOf,
@@ -12673,22 +12706,30 @@ pub mod api {
                 pub mod member_count {
                     use super::runtime_types;
                     pub type MemberCount = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u16;
                 }
                 pub mod members {
                     use super::runtime_types;
                     pub type Members = runtime_types::pallet_ranked_collective::MemberRecord;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod id_to_index {
                     use super::runtime_types;
                     pub type IdToIndex = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u16;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
                 pub mod index_to_id {
                     use super::runtime_types;
                     pub type IndexToId = ::subxt::utils::AccountId32;
+                    pub type Param0 = ::core::primitive::u16;
+                    pub type Param1 = ::core::primitive::u32;
                 }
                 pub mod voting {
                     use super::runtime_types;
                     pub type Voting = runtime_types::pallet_ranked_collective::VoteRecord;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
                 pub mod voting_cleanup {
                     use super::runtime_types;
@@ -12696,6 +12737,7 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -12726,7 +12768,7 @@ pub mod api {
                 #[doc = " of the vec."]
                 pub fn member_count(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::member_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::member_count::MemberCount,
@@ -12772,7 +12814,7 @@ pub mod api {
                 #[doc = " The current members of the collective."]
                 pub fn members(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::members::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::members::Members,
@@ -12818,7 +12860,7 @@ pub mod api {
                 #[doc = " The index of each ranks's member into the group of members who have at least that rank."]
                 pub fn id_to_index_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::id_to_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::id_to_index::IdToIndex,
@@ -12842,8 +12884,8 @@ pub mod api {
                 #[doc = " The index of each ranks's member into the group of members who have at least that rank."]
                 pub fn id_to_index(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::id_to_index::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::id_to_index::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::id_to_index::IdToIndex,
@@ -12892,7 +12934,7 @@ pub mod api {
                 #[doc = " return `Some`, however a member's index is not guaranteed to remain unchanged over time."]
                 pub fn index_to_id_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::index_to_id::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::index_to_id::IndexToId,
@@ -12918,8 +12960,8 @@ pub mod api {
                 #[doc = " return `Some`, however a member's index is not guaranteed to remain unchanged over time."]
                 pub fn index_to_id(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::index_to_id::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::index_to_id::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::index_to_id::IndexToId,
@@ -12967,7 +13009,7 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::voting::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::voting::Voting,
@@ -12992,8 +13034,8 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::voting::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::voting::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::voting::Voting,
@@ -13038,7 +13080,7 @@ pub mod api {
                 }
                 pub fn voting_cleanup(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::voting_cleanup::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::voting_cleanup::VotingCleanup,
@@ -13868,6 +13910,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                             (::core::primitive::u32, ::core::primitive::u32),
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod track_queue {
                     use super::runtime_types;
@@ -13876,14 +13919,17 @@ pub mod api {
                             ::core::primitive::u32,
                             ::core::primitive::u32,
                         )>;
+                    pub type Param0 = ::core::primitive::u16;
                 }
                 pub mod deciding_count {
                     use super::runtime_types;
                     pub type DecidingCount = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u16;
                 }
                 pub mod metadata_of {
                     use super::runtime_types;
                     pub type MetadataOf = ::subxt::utils::H256;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -13934,7 +13980,7 @@ pub mod api {
                 #[doc = " Information concerning any given referendum."]
                 pub fn referendum_info_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::referendum_info_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::referendum_info_for::ReferendumInfoFor,
@@ -13986,7 +14032,7 @@ pub mod api {
                 #[doc = " This should be empty if `DecidingCount` is less than `TrackInfo::max_deciding`."]
                 pub fn track_queue(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::track_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::track_queue::TrackQueue,
@@ -14033,7 +14079,7 @@ pub mod api {
                 #[doc = " The number of referenda being decided currently."]
                 pub fn deciding_count(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u16>,
+                    _0: impl ::std::borrow::Borrow<types::deciding_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::deciding_count::DecidingCount,
@@ -14090,7 +14136,7 @@ pub mod api {
                 #[doc = " large preimages."]
                 pub fn metadata_of(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::metadata_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::metadata_of::MetadataOf,
@@ -14469,6 +14515,7 @@ pub mod api {
                 pub mod whitelisted_call {
                     use super::runtime_types;
                     pub type WhitelistedCall = ();
+                    pub type Param0 = ::subxt::utils::H256;
                 }
             }
             pub struct StorageApi;
@@ -14495,7 +14542,7 @@ pub mod api {
                 }
                 pub fn whitelisted_call(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::whitelisted_call::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::whitelisted_call::WhitelistedCall,
@@ -14812,6 +14859,8 @@ pub mod api {
                 pub mod claims {
                     use super::runtime_types;
                     pub type Claims = ::core::primitive::u128;
+                    pub type Param0 =
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress;
                 }
                 pub mod total {
                     use super::runtime_types;
@@ -14824,16 +14873,21 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     );
+                    pub type Param0 =
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress;
                 }
                 pub mod signing {
                     use super::runtime_types;
                     pub type Signing =
                         runtime_types::polkadot_runtime_common::claims::StatementKind;
+                    pub type Param0 =
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress;
                 }
                 pub mod preclaims {
                     use super::runtime_types;
                     pub type Preclaims =
                         runtime_types::polkadot_runtime_common::claims::EthereumAddress;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -14861,9 +14915,7 @@ pub mod api {
                 }
                 pub fn claims(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::claims::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::claims::Claims,
@@ -14937,9 +14989,7 @@ pub mod api {
                 #[doc = " The block number is when the vesting should start."]
                 pub fn vesting(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::vesting::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::vesting::Vesting,
@@ -14985,9 +15035,7 @@ pub mod api {
                 #[doc = " The statement kind that must be signed, if any."]
                 pub fn signing(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::signing::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::signing::Signing,
@@ -15033,7 +15081,7 @@ pub mod api {
                 #[doc = " Pre-claimed Ethereum accounts, by the Account ID that they are claimed to."]
                 pub fn preclaims(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::preclaims::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::preclaims::Preclaims,
@@ -16359,6 +16407,7 @@ pub mod api {
                         ::core::primitive::u128,
                         runtime_types::pallet_identity::legacy::IdentityInfo,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod super_of {
                     use super::runtime_types;
@@ -16366,6 +16415,7 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         runtime_types::pallet_identity::types::Data,
                     );
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod subs_of {
                     use super::runtime_types;
@@ -16375,6 +16425,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                         >,
                     );
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod registrars {
                     use super::runtime_types;
@@ -16420,7 +16471,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn identity_of(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::identity_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::identity_of::IdentityOf,
@@ -16467,7 +16518,7 @@ pub mod api {
                 #[doc = " context. If the account is not some other account's sub-identity, then just `None`."]
                 pub fn super_of(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::super_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::super_of::SuperOf,
@@ -16521,7 +16572,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn subs_of(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::subs_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::subs_of::SubsOf,
@@ -17843,6 +17894,7 @@ pub mod api {
                 pub mod members {
                     use super::runtime_types;
                     pub type Members = runtime_types::pallet_society::MemberRecord;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod payouts {
                     use super::runtime_types;
@@ -17853,6 +17905,7 @@ pub mod api {
                             ::core::primitive::u128,
                         )>,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod member_count {
                     use super::runtime_types;
@@ -17861,10 +17914,12 @@ pub mod api {
                 pub mod member_by_index {
                     use super::runtime_types;
                     pub type MemberByIndex = ::subxt::utils::AccountId32;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod suspended_members {
                     use super::runtime_types;
                     pub type SuspendedMembers = runtime_types::pallet_society::MemberRecord;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod round_count {
                     use super::runtime_types;
@@ -17885,6 +17940,7 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u128,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod skeptic {
                     use super::runtime_types;
@@ -17893,6 +17949,8 @@ pub mod api {
                 pub mod votes {
                     use super::runtime_types;
                     pub type Votes = runtime_types::pallet_society::Vote;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
                 pub mod vote_clear_cursor {
                     use super::runtime_types;
@@ -17900,6 +17958,7 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod next_head {
                     use super::runtime_types;
@@ -17923,6 +17982,8 @@ pub mod api {
                 pub mod defender_votes {
                     use super::runtime_types;
                     pub type DefenderVotes = runtime_types::pallet_society::Vote;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -18059,7 +18120,7 @@ pub mod api {
                 #[doc = " The current members and their rank. Doesn't include `SuspendedMembers`."]
                 pub fn members(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::members::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::members::Members,
@@ -18104,7 +18165,7 @@ pub mod api {
                 #[doc = " Information regarding rank-0 payouts, past and future."]
                 pub fn payouts(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::payouts::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::payouts::Payouts,
@@ -18174,7 +18235,7 @@ pub mod api {
                 #[doc = " `0..MemberCount` (does not include `MemberCount`)."]
                 pub fn member_by_index(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::member_by_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::member_by_index::MemberByIndex,
@@ -18221,7 +18282,7 @@ pub mod api {
                 #[doc = " The set of suspended members, with their old membership record."]
                 pub fn suspended_members(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::suspended_members::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::suspended_members::SuspendedMembers,
@@ -18308,7 +18369,7 @@ pub mod api {
                 }
                 pub fn candidates(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::candidates::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::candidates::Candidates,
@@ -18376,7 +18437,7 @@ pub mod api {
                 #[doc = " Double map from Candidate -> Voter -> (Maybe) Vote."]
                 pub fn votes_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::votes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::votes::Votes,
@@ -18401,8 +18462,8 @@ pub mod api {
                 #[doc = " Double map from Candidate -> Voter -> (Maybe) Vote."]
                 pub fn votes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::votes::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::votes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::votes::Votes,
@@ -18450,7 +18511,7 @@ pub mod api {
                 #[doc = " Clear-cursor for Vote, map from Candidate -> (Maybe) Cursor."]
                 pub fn vote_clear_cursor(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::vote_clear_cursor::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::vote_clear_cursor::VoteClearCursor,
@@ -18562,7 +18623,7 @@ pub mod api {
                 #[doc = " Votes for the defender, keyed by challenge round."]
                 pub fn defender_votes_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::defender_votes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::defender_votes::DefenderVotes,
@@ -18587,8 +18648,8 @@ pub mod api {
                 #[doc = " Votes for the defender, keyed by challenge round."]
                 pub fn defender_votes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::defender_votes::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::defender_votes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::defender_votes::DefenderVotes,
@@ -19280,6 +19341,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod active_recoveries {
                     use super::runtime_types;
@@ -19290,10 +19352,13 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
                 }
                 pub mod proxy {
                     use super::runtime_types;
                     pub type Proxy = ::subxt::utils::AccountId32;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -19322,7 +19387,7 @@ pub mod api {
                 #[doc = " The set of recoverable accounts and their recovery configuration."]
                 pub fn recoverable(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::recoverable::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::recoverable::Recoverable,
@@ -19374,7 +19439,7 @@ pub mod api {
                 #[doc = " is the user trying to recover the account."]
                 pub fn active_recoveries_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::active_recoveries::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::active_recoveries::ActiveRecoveries,
@@ -19402,8 +19467,8 @@ pub mod api {
                 #[doc = " is the user trying to recover the account."]
                 pub fn active_recoveries(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::active_recoveries::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::active_recoveries::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::active_recoveries::ActiveRecoveries,
@@ -19454,7 +19519,7 @@ pub mod api {
                 #[doc = " Map from the user who can access it to the recovered account."]
                 pub fn proxy(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::proxy::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::proxy::Proxy,
@@ -19885,6 +19950,7 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod storage_version {
                     use super::runtime_types;
@@ -19918,7 +19984,7 @@ pub mod api {
                 #[doc = " Information regarding the vesting of a given account."]
                 pub fn vesting(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::vesting::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::vesting::Vesting,
@@ -20488,10 +20554,12 @@ pub mod api {
                             >,
                         >,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod lookup {
                     use super::runtime_types;
                     pub type Lookup = (::core::primitive::u32, ::core::primitive::u32);
+                    pub type Param0 = [::core::primitive::u8; 32usize];
                 }
             }
             pub struct StorageApi;
@@ -20540,7 +20608,7 @@ pub mod api {
                 #[doc = " Items to be executed, indexed by the block number that they should be executed on."]
                 pub fn agenda(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::agenda::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::agenda::Agenda,
@@ -20591,7 +20659,7 @@ pub mod api {
                 #[doc = " identities."]
                 pub fn lookup(
                     &self,
-                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
+                    _0: impl ::std::borrow::Borrow<types::lookup::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::lookup::Lookup,
@@ -21287,6 +21355,7 @@ pub mod api {
                         >,
                         ::core::primitive::u128,
                     );
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod announcements {
                     use super::runtime_types;
@@ -21300,6 +21369,7 @@ pub mod api {
                         >,
                         ::core::primitive::u128,
                     );
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -21330,7 +21400,7 @@ pub mod api {
                 #[doc = " which are being delegated to, together with the amount held on deposit."]
                 pub fn proxies(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::proxies::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::proxies::Proxies,
@@ -21376,7 +21446,7 @@ pub mod api {
                 #[doc = " The announcements made by the proxy (key)."]
                 pub fn announcements(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::announcements::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::announcements::Announcements,
@@ -21863,6 +21933,8 @@ pub mod api {
                         ::core::primitive::u128,
                         ::subxt::utils::AccountId32,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = [::core::primitive::u8; 32usize];
                 }
             }
             pub struct StorageApi;
@@ -21891,7 +21963,7 @@ pub mod api {
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::multisigs::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::multisigs::Multisigs,
@@ -21915,8 +21987,8 @@ pub mod api {
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
+                    _0: impl ::std::borrow::Borrow<types::multisigs::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::multisigs::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::multisigs::Multisigs,
@@ -22282,6 +22354,7 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         ::core::primitive::u128,
                     >;
+                    pub type Param0 = ::subxt::utils::H256;
                 }
                 pub mod request_status_for {
                     use super::runtime_types;
@@ -22289,6 +22362,7 @@ pub mod api {
                         ::subxt::utils::AccountId32,
                         runtime_types::frame_support::traits::tokens::fungible::HoldConsideration,
                     >;
+                    pub type Param0 = ::subxt::utils::H256;
                 }
                 pub mod preimage_for {
                     use super::runtime_types;
@@ -22296,6 +22370,8 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
+                    pub type Param0 = ::subxt::utils::H256;
+                    pub type Param1 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -22325,7 +22401,7 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn status_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::status_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::status_for::StatusFor,
@@ -22371,7 +22447,7 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn request_status_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::request_status_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::request_status_for::RequestStatusFor,
@@ -22415,7 +22491,7 @@ pub mod api {
                 }
                 pub fn preimage_for_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::preimage_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::preimage_for::PreimageFor,
@@ -22439,8 +22515,8 @@ pub mod api {
                 }
                 pub fn preimage_for(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::preimage_for::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::preimage_for::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::preimage_for::PreimageFor,
@@ -22700,6 +22776,8 @@ pub mod api {
                     use super::runtime_types;
                     pub type ConversionRateToNative =
                         runtime_types::sp_arithmetic::fixed_point::FixedU128;
+                    pub type Param0 =
+                        runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset;
                 }
             }
             pub struct StorageApi;
@@ -22732,9 +22810,7 @@ pub mod api {
                 #[doc = " E.g. `native_amount = asset_amount * ConversionRateToNative::<T>::get(asset_kind)`"]
                 pub fn conversion_rate_to_native(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::conversion_rate_to_native::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::conversion_rate_to_native::ConversionRateToNative,
@@ -23428,6 +23504,7 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod bounty_descriptions {
                     use super::runtime_types;
@@ -23435,6 +23512,7 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod bounty_approvals {
                     use super::runtime_types;
@@ -23493,7 +23571,7 @@ pub mod api {
                 #[doc = " Bounties that have been made."]
                 pub fn bounties(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::bounties::Bounties,
@@ -23539,7 +23617,7 @@ pub mod api {
                 #[doc = " The description of each bounty."]
                 pub fn bounty_descriptions(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::bounty_descriptions::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::bounty_descriptions::BountyDescriptions,
@@ -24202,6 +24280,7 @@ pub mod api {
                 pub mod parent_child_bounties {
                     use super::runtime_types;
                     pub type ParentChildBounties = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod child_bounties {
                     use super::runtime_types;
@@ -24210,6 +24289,8 @@ pub mod api {
                         ::core::primitive::u128,
                         ::core::primitive::u32,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::core::primitive::u32;
                 }
                 pub mod child_bounty_descriptions {
                     use super::runtime_types;
@@ -24217,10 +24298,12 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod children_curator_fees {
                     use super::runtime_types;
                     pub type ChildrenCuratorFees = ::core::primitive::u128;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -24272,7 +24355,7 @@ pub mod api {
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub fn parent_child_bounties(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::parent_child_bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::parent_child_bounties::ParentChildBounties,
@@ -24318,7 +24401,7 @@ pub mod api {
                 #[doc = " Child bounties that have been added."]
                 pub fn child_bounties_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::child_bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::child_bounties::ChildBounties,
@@ -24343,8 +24426,8 @@ pub mod api {
                 #[doc = " Child bounties that have been added."]
                 pub fn child_bounties(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::child_bounties::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::child_bounties::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::child_bounties::ChildBounties,
@@ -24391,7 +24474,7 @@ pub mod api {
                 #[doc = " The description of each child-bounty."]
                 pub fn child_bounty_descriptions(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::child_bounty_descriptions::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::child_bounty_descriptions::ChildBountyDescriptions,
@@ -24436,7 +24519,7 @@ pub mod api {
                 #[doc = " The cumulative child-bounty curator fee for each parent bounty."]
                 pub fn children_curator_fees(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::children_curator_fees::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::children_curator_fees::ChildrenCuratorFees,
@@ -25000,6 +25083,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                         >,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod summary {
                     use super::runtime_types;
@@ -25015,6 +25099,7 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u128,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -25069,7 +25154,7 @@ pub mod api {
                 #[doc = " The queues of bids. Indexed by duration (in `Period`s)."]
                 pub fn queues(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::queues::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::queues::Queues,
@@ -25137,7 +25222,7 @@ pub mod api {
                 #[doc = " The currently outstanding receipts, indexed according to the order of creation."]
                 pub fn receipts(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::receipts::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::receipts::Receipts,
@@ -26167,6 +26252,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Account =
                         runtime_types::pallet_balances::types::AccountData<::core::primitive::u128>;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod locks {
                     use super::runtime_types;
@@ -26176,6 +26262,7 @@ pub mod api {
                                 ::core::primitive::u128,
                             >,
                         >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod reserves {
                     use super::runtime_types;
@@ -26185,6 +26272,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod holds {
                     use super::runtime_types;
@@ -26194,6 +26282,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod freezes {
                     use super::runtime_types;
@@ -26203,6 +26292,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     >;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
             }
             pub struct StorageApi;
@@ -26320,7 +26410,7 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::account::Account,
@@ -26367,7 +26457,7 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
                 pub fn locks(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::locks::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::locks::Locks,
@@ -26412,7 +26502,7 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::reserves::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::reserves::Reserves,
@@ -26458,7 +26548,7 @@ pub mod api {
                 #[doc = " Holds on account balances."]
                 pub fn holds(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::holds::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::holds::Holds,
@@ -26504,7 +26594,7 @@ pub mod api {
                 #[doc = " Freeze locks on account balances."]
                 pub fn freezes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::freezes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::freezes::Freezes,
@@ -28735,10 +28825,12 @@ pub mod api {
                 pub mod availability_bitfields {
                     use super::runtime_types;
                     pub type AvailabilityBitfields = runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > ;
+                    pub type Param0 = runtime_types::polkadot_primitives::v6::ValidatorIndex;
                 }
                 pub mod pending_availability {
                     use super::runtime_types;
                     pub type PendingAvailability = runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: utils :: H256 , :: core :: primitive :: u32 > ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod pending_availability_commitments {
                     use super::runtime_types;
@@ -28746,6 +28838,7 @@ pub mod api {
                         runtime_types::polkadot_primitives::v6::CandidateCommitments<
                             ::core::primitive::u32,
                         >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
             }
             pub struct StorageApi;
@@ -28774,9 +28867,7 @@ pub mod api {
                 #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]
                 pub fn availability_bitfields(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_primitives::v6::ValidatorIndex,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::availability_bitfields::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::availability_bitfields::AvailabilityBitfields,
@@ -28821,9 +28912,7 @@ pub mod api {
                 #[doc = " Candidates pending availability by `ParaId`."]
                 pub fn pending_availability(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::pending_availability::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pending_availability::PendingAvailability,
@@ -28868,9 +28957,7 @@ pub mod api {
                 #[doc = " The commitments of candidates pending availability, by `ParaId`."]
                 pub fn pending_availability_commitments(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::pending_availability_commitments::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pending_availability_commitments::PendingAvailabilityCommitments,
@@ -29746,6 +29833,7 @@ pub mod api {
                         runtime_types::polkadot_runtime_parachains::paras::PvfCheckActiveVoteState<
                             ::core::primitive::u32,
                         >;
+                    pub type Param0 = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
                 }
                 pub mod pvf_active_vote_list {
                     use super::runtime_types;
@@ -29761,23 +29849,29 @@ pub mod api {
                     use super::runtime_types;
                     pub type ParaLifecycles =
                         runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod heads {
                     use super::runtime_types;
                     pub type Heads =
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod most_recent_context {
                     use super::runtime_types;
                     pub type MostRecentContext = ::core::primitive::u32;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod current_code_hash {
                     use super::runtime_types;
                     pub type CurrentCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod past_code_hash {
                     use super::runtime_types;
                     pub type PastCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type Param1 = ::core::primitive::u32;
                 }
                 pub mod past_code_meta {
                     use super::runtime_types;
@@ -29785,6 +29879,7 @@ pub mod api {
                         runtime_types::polkadot_runtime_parachains::paras::ParaPastCodeMeta<
                             ::core::primitive::u32,
                         >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod past_code_pruning {
                     use super::runtime_types;
@@ -29796,20 +29891,24 @@ pub mod api {
                 pub mod future_code_upgrades {
                     use super::runtime_types;
                     pub type FutureCodeUpgrades = ::core::primitive::u32;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod future_code_hash {
                     use super::runtime_types;
                     pub type FutureCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_go_ahead_signal {
                     use super::runtime_types;
                     pub type UpgradeGoAheadSignal =
                         runtime_types::polkadot_primitives::v6::UpgradeGoAhead;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_restriction_signal {
                     use super::runtime_types;
                     pub type UpgradeRestrictionSignal =
                         runtime_types::polkadot_primitives::v6::UpgradeRestriction;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_cooldowns {
                     use super::runtime_types;
@@ -29830,20 +29929,24 @@ pub mod api {
                     pub type ActionsQueue = ::std::vec::Vec<
                         runtime_types::polkadot_parachain_primitives::primitives::Id,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod upcoming_paras_genesis {
                     use super::runtime_types;
                     pub type UpcomingParasGenesis =
                         runtime_types::polkadot_runtime_parachains::paras::ParaGenesisArgs;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod code_by_hash_refs {
                     use super::runtime_types;
                     pub type CodeByHashRefs = ::core::primitive::u32;
+                    pub type Param0 = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
                 }
                 pub mod code_by_hash {
                     use super::runtime_types;
                     pub type CodeByHash =
                         runtime_types::polkadot_parachain_primitives::primitives::ValidationCode;
+                    pub type Param0 = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
                 }
             }
             pub struct StorageApi;
@@ -29878,7 +29981,7 @@ pub mod api {
                 #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]
                 pub fn pvf_active_vote_map(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash >,
+                    _0: impl ::std::borrow::Borrow<types::pvf_active_vote_map::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pvf_active_vote_map::PvfActiveVoteMap,
@@ -29970,9 +30073,7 @@ pub mod api {
                 #[doc = " The current lifecycle of a all known Para IDs."]
                 pub fn para_lifecycles(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::para_lifecycles::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::para_lifecycles::ParaLifecycles,
@@ -30018,9 +30119,7 @@ pub mod api {
                 #[doc = " The head-data of every registered para."]
                 pub fn heads(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::heads::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::heads::Heads,
@@ -30065,9 +30164,7 @@ pub mod api {
                 #[doc = " The context (relay-chain block number) of the most recent parachain head."]
                 pub fn most_recent_context(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::most_recent_context::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::most_recent_context::MostRecentContext,
@@ -30117,9 +30214,7 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn current_code_hash(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::current_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::current_code_hash::CurrentCodeHash,
@@ -30171,9 +30266,7 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn past_code_hash_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::past_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::past_code_hash::PastCodeHash,
@@ -30200,10 +30293,8 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn past_code_hash(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::past_code_hash::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::past_code_hash::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::past_code_hash::PastCodeHash,
@@ -30253,9 +30344,7 @@ pub mod api {
                 #[doc = " to keep it available for approval checkers."]
                 pub fn past_code_meta(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::past_code_meta::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::past_code_meta::PastCodeMeta,
@@ -30330,9 +30419,7 @@ pub mod api {
                 #[doc = " in the context of a relay chain block with a number >= `expected_at`."]
                 pub fn future_code_upgrades(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::future_code_upgrades::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::future_code_upgrades::FutureCodeUpgrades,
@@ -30381,9 +30468,7 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn future_code_hash(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::future_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::future_code_hash::FutureCodeHash,
@@ -30447,9 +30532,7 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_go_ahead_signal(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::upgrade_go_ahead_signal::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::upgrade_go_ahead_signal::UpgradeGoAheadSignal,
@@ -30512,9 +30595,7 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_restriction_signal(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::upgrade_restriction_signal::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::upgrade_restriction_signal::UpgradeRestrictionSignal,
@@ -30608,7 +30689,7 @@ pub mod api {
                 #[doc = " The actions to perform during the start of a specific session index."]
                 pub fn actions_queue(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::actions_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::actions_queue::ActionsQueue,
@@ -30660,9 +30741,7 @@ pub mod api {
                 #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
                 pub fn upcoming_paras_genesis(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::upcoming_paras_genesis::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::upcoming_paras_genesis::UpcomingParasGenesis,
@@ -30709,7 +30788,7 @@ pub mod api {
                 #[doc = " The number of reference on the validation code in [`CodeByHash`] storage."]
                 pub fn code_by_hash_refs(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash >,
+                    _0: impl ::std::borrow::Borrow<types::code_by_hash_refs::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::code_by_hash_refs::CodeByHashRefs,
@@ -30761,7 +30840,7 @@ pub mod api {
                 #[doc = " [`PastCodeHash`]."]
                 pub fn code_by_hash(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash >,
+                    _0: impl ::std::borrow::Borrow<types::code_by_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::code_by_hash::CodeByHash,
@@ -30947,15 +31026,18 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod downward_message_queue_heads {
                     use super::runtime_types;
                     pub type DownwardMessageQueueHeads = ::subxt::utils::H256;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod delivery_fee_factor {
                     use super::runtime_types;
                     pub type DeliveryFeeFactor =
                         runtime_types::sp_arithmetic::fixed_point::FixedU128;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
             }
             pub struct StorageApi;
@@ -30985,9 +31067,7 @@ pub mod api {
                 #[doc = " The downward messages addressed for a certain para."]
                 pub fn downward_message_queues(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::downward_message_queues::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::downward_message_queues::DownwardMessageQueues,
@@ -31045,9 +31125,7 @@ pub mod api {
                 #[doc = " - `H(M)`: is the hash of the message being appended."]
                 pub fn downward_message_queue_heads(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::downward_message_queue_heads::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::downward_message_queue_heads::DownwardMessageQueueHeads,
@@ -31092,9 +31170,7 @@ pub mod api {
                 #[doc = " The factor to multiply the base delivery fee by."]
                 pub fn delivery_fee_factor(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::delivery_fee_factor::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::delivery_fee_factor::DeliveryFeeFactor,
@@ -31759,6 +31835,8 @@ pub mod api {
                     use super::runtime_types;
                     pub type HrmpOpenChannelRequests =
                         runtime_types::polkadot_runtime_parachains::hrmp::HrmpOpenChannelRequest;
+                    pub type Param0 =
+                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId;
                 }
                 pub mod hrmp_open_channel_requests_list {
                     use super::runtime_types;
@@ -31769,14 +31847,18 @@ pub mod api {
                 pub mod hrmp_open_channel_request_count {
                     use super::runtime_types;
                     pub type HrmpOpenChannelRequestCount = ::core::primitive::u32;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod hrmp_accepted_channel_request_count {
                     use super::runtime_types;
                     pub type HrmpAcceptedChannelRequestCount = ::core::primitive::u32;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod hrmp_close_channel_requests {
                     use super::runtime_types;
                     pub type HrmpCloseChannelRequests = ();
+                    pub type Param0 =
+                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId;
                 }
                 pub mod hrmp_close_channel_requests_list {
                     use super::runtime_types;
@@ -31787,23 +31869,28 @@ pub mod api {
                 pub mod hrmp_watermarks {
                     use super::runtime_types;
                     pub type HrmpWatermarks = ::core::primitive::u32;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod hrmp_channels {
                     use super::runtime_types;
                     pub type HrmpChannels =
                         runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel;
+                    pub type Param0 =
+                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId;
                 }
                 pub mod hrmp_ingress_channels_index {
                     use super::runtime_types;
                     pub type HrmpIngressChannelsIndex = ::std::vec::Vec<
                         runtime_types::polkadot_parachain_primitives::primitives::Id,
                     >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod hrmp_egress_channels_index {
                     use super::runtime_types;
                     pub type HrmpEgressChannelsIndex = ::std::vec::Vec<
                         runtime_types::polkadot_parachain_primitives::primitives::Id,
                     >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod hrmp_channel_contents {
                     use super::runtime_types;
@@ -31812,6 +31899,8 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     >;
+                    pub type Param0 =
+                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId;
                 }
                 pub mod hrmp_channel_digests {
                     use super::runtime_types;
@@ -31821,6 +31910,7 @@ pub mod api {
                             runtime_types::polkadot_parachain_primitives::primitives::Id,
                         >,
                     )>;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
             }
             pub struct StorageApi;
@@ -31860,9 +31950,7 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_open_channel_requests(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_open_channel_requests::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_open_channel_requests::HrmpOpenChannelRequests,
@@ -31934,9 +32022,7 @@ pub mod api {
                 #[doc = " `(X, _)` as the number of `HrmpOpenChannelRequestCount` for `X`."]
                 pub fn hrmp_open_channel_request_count(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_open_channel_request_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_open_channel_request_count::HrmpOpenChannelRequestCount,
@@ -31987,9 +32073,7 @@ pub mod api {
                 #[doc = " `confirmed` set to true, as the number of `HrmpAcceptedChannelRequestCount` for `X`."]
                 pub fn hrmp_accepted_channel_request_count(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_accepted_channel_request_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_accepted_channel_request_count::HrmpAcceptedChannelRequestCount,
@@ -32048,9 +32132,7 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_close_channel_requests(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_close_channel_requests::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_close_channel_requests::HrmpCloseChannelRequests,
@@ -32122,9 +32204,7 @@ pub mod api {
                 #[doc = "   session."]
                 pub fn hrmp_watermarks(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_watermarks::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_watermarks::HrmpWatermarks,
@@ -32174,9 +32254,7 @@ pub mod api {
                 #[doc = " - each participant in the channel should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_channels(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_channels::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_channels::HrmpChannels,
@@ -32247,9 +32325,7 @@ pub mod api {
                 #[doc = " - the vectors are sorted."]
                 pub fn hrmp_ingress_channels_index(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_ingress_channels_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_ingress_channels_index::HrmpIngressChannelsIndex,
@@ -32293,9 +32369,7 @@ pub mod api {
                 }
                 pub fn hrmp_egress_channels_index(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_egress_channels_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_egress_channels_index::HrmpEgressChannelsIndex,
@@ -32343,9 +32417,7 @@ pub mod api {
                 #[doc = " Invariant: cannot be non-empty if the corresponding channel in `HrmpChannels` is `None`."]
                 pub fn hrmp_channel_contents(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::HrmpChannelId,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_channel_contents::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_channel_contents::HrmpChannelContents,
@@ -32401,9 +32473,7 @@ pub mod api {
                 #[doc = "   same block number."]
                 pub fn hrmp_channel_digests(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::hrmp_channel_digests::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::hrmp_channel_digests::HrmpChannelDigests,
@@ -32447,15 +32517,18 @@ pub mod api {
                 pub mod sessions {
                     use super::runtime_types;
                     pub type Sessions = runtime_types::polkadot_primitives::v6::SessionInfo;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod account_keys {
                     use super::runtime_types;
                     pub type AccountKeys = ::std::vec::Vec<::subxt::utils::AccountId32>;
+                    pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod session_executor_params {
                     use super::runtime_types;
                     pub type SessionExecutorParams =
                         runtime_types::polkadot_primitives::v6::executor_params::ExecutorParams;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -32533,7 +32606,7 @@ pub mod api {
                 #[doc = " Does not have any entries before the session index in the first session change notification."]
                 pub fn sessions(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::sessions::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::sessions::Sessions,
@@ -32580,7 +32653,7 @@ pub mod api {
                 #[doc = " The validator account keys of the validators actively participating in parachain consensus."]
                 pub fn account_keys(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::account_keys::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::account_keys::AccountKeys,
@@ -32627,7 +32700,7 @@ pub mod api {
                 #[doc = " Executor parameter set for a given session index"]
                 pub fn session_executor_params(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::session_executor_params::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::session_executor_params::SessionExecutorParams,
@@ -32791,15 +32864,21 @@ pub mod api {
                     pub type Disputes = runtime_types::polkadot_primitives::v6::DisputeState<
                         ::core::primitive::u32,
                     >;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
                 pub mod backers_on_disputes {
                     use super::runtime_types;
                     pub type BackersOnDisputes =
                         ::std::vec::Vec<runtime_types::polkadot_primitives::v6::ValidatorIndex>;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
                 pub mod included {
                     use super::runtime_types;
                     pub type Included = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
                 pub mod frozen {
                     use super::runtime_types;
@@ -32856,7 +32935,7 @@ pub mod api {
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::disputes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::disputes::Disputes,
@@ -32881,10 +32960,8 @@ pub mod api {
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_core_primitives::CandidateHash,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::disputes::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::disputes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::disputes::Disputes,
@@ -32934,7 +33011,7 @@ pub mod api {
                 #[doc = " This storage is used for slashing."]
                 pub fn backers_on_disputes_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::backers_on_disputes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::backers_on_disputes::BackersOnDisputes,
@@ -32960,10 +33037,8 @@ pub mod api {
                 #[doc = " This storage is used for slashing."]
                 pub fn backers_on_disputes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_core_primitives::CandidateHash,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::backers_on_disputes::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::backers_on_disputes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::backers_on_disputes::BackersOnDisputes,
@@ -33013,7 +33088,7 @@ pub mod api {
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
                 pub fn included_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::included::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::included::Included,
@@ -33039,10 +33114,8 @@ pub mod api {
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
                 pub fn included(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_core_primitives::CandidateHash,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::included::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::included::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::included::Included,
@@ -33166,10 +33239,13 @@ pub mod api {
                     use super::runtime_types;
                     pub type UnappliedSlashes =
                         runtime_types::polkadot_primitives::v6::slashing::PendingSlashes;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
                 pub mod validator_set_counts {
                     use super::runtime_types;
                     pub type ValidatorSetCounts = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -33199,7 +33275,7 @@ pub mod api {
                 #[doc = " Validators pending dispute slashes."]
                 pub fn unapplied_slashes_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::unapplied_slashes::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::unapplied_slashes::UnappliedSlashes,
@@ -33224,10 +33300,8 @@ pub mod api {
                 #[doc = " Validators pending dispute slashes."]
                 pub fn unapplied_slashes(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_core_primitives::CandidateHash,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::unapplied_slashes::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::unapplied_slashes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::unapplied_slashes::UnappliedSlashes,
@@ -33274,7 +33348,7 @@ pub mod api {
                 #[doc = " `ValidatorSetCount` per session."]
                 pub fn validator_set_counts(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::validator_set_counts::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::validator_set_counts::ValidatorSetCounts,
@@ -33534,6 +33608,7 @@ pub mod api {
                 pub mod book_state_for {
                     use super::runtime_types;
                     pub type BookStateFor = runtime_types :: pallet_message_queue :: BookState < runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin > ;
+                    pub type Param0 = runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin ;
                 }
                 pub mod service_head {
                     use super::runtime_types;
@@ -33543,6 +33618,8 @@ pub mod api {
                     use super::runtime_types;
                     pub type Pages =
                         runtime_types::pallet_message_queue::Page<::core::primitive::u32>;
+                    pub type Param0 = runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin ;
+                    pub type Param1 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -33572,7 +33649,7 @@ pub mod api {
                 #[doc = " The index of the first and last (non-empty) pages."]
                 pub fn book_state_for(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin >,
+                    _0: impl ::std::borrow::Borrow<types::book_state_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::book_state_for::BookStateFor,
@@ -33641,7 +33718,7 @@ pub mod api {
                 #[doc = " The map of page indices to pages."]
                 pub fn pages_iter1(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin >,
+                    _0: impl ::std::borrow::Borrow<types::pages::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pages::Pages,
@@ -33666,8 +33743,8 @@ pub mod api {
                 #[doc = " The map of page indices to pages."]
                 pub fn pages(
                     &self,
-                    _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin >,
-                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::pages::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::pages::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pages::Pages,
@@ -33939,6 +34016,7 @@ pub mod api {
                 pub mod para_id_affinity {
                     use super::runtime_types;
                     pub type ParaIdAffinity = runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: CoreAffinityCount ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
             }
             pub struct StorageApi;
@@ -34016,9 +34094,7 @@ pub mod api {
                 #[doc = " `ParaId` on two or more `CoreIndex`es."]
                 pub fn para_id_affinity(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::para_id_affinity::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::para_id_affinity::ParaIdAffinity,
@@ -34560,6 +34636,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type PendingSwap =
                         runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod paras {
                     use super::runtime_types;
@@ -34568,6 +34645,7 @@ pub mod api {
                             ::subxt::utils::AccountId32,
                             ::core::primitive::u128,
                         >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod next_free_para_id {
                     use super::runtime_types;
@@ -34602,9 +34680,7 @@ pub mod api {
                 #[doc = " Pending swap operations."]
                 pub fn pending_swap(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::pending_swap::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::pending_swap::PendingSwap,
@@ -34656,9 +34732,7 @@ pub mod api {
                 #[doc = " only do so if it isn't yet registered. (After that, it's up to governance to do so.)"]
                 pub fn paras(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::paras::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::paras::Paras,
@@ -34959,6 +35033,7 @@ pub mod api {
                             ::core::primitive::u128,
                         )>,
                     >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
             }
             pub struct StorageApi;
@@ -35018,9 +35093,7 @@ pub mod api {
                 #[doc = " It is illegal for a `None` value to trail in the list."]
                 pub fn leases(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::leases::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::leases::Leases,
@@ -35432,6 +35505,8 @@ pub mod api {
                 pub mod reserved_amounts {
                     use super::runtime_types;
                     pub type ReservedAmounts = ::core::primitive::u128;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod winning {
                     use super::runtime_types;
@@ -35440,6 +35515,7 @@ pub mod api {
                         runtime_types::polkadot_parachain_primitives::primitives::Id,
                         ::core::primitive::u128,
                     )>; 36usize];
+                    pub type Param0 = ::core::primitive::u32;
                 }
             }
             pub struct StorageApi;
@@ -35517,7 +35593,7 @@ pub mod api {
                 #[doc = " (sub-)ranges."]
                 pub fn reserved_amounts_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::reserved_amounts::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::reserved_amounts::ReservedAmounts,
@@ -35543,10 +35619,8 @@ pub mod api {
                 #[doc = " (sub-)ranges."]
                 pub fn reserved_amounts(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _1: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::reserved_amounts::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::reserved_amounts::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::reserved_amounts::ReservedAmounts,
@@ -35597,7 +35671,7 @@ pub mod api {
                 #[doc = " first sample of the ending period is 0; the last is `Sample Size - 1`."]
                 pub fn winning(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::winning::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::winning::Winning,
@@ -36373,6 +36447,7 @@ pub mod api {
                         ::core::primitive::u32,
                         ::core::primitive::u32,
                     >;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod new_raise {
                     use super::runtime_types;
@@ -36416,9 +36491,7 @@ pub mod api {
                 #[doc = " Info on all of the funds."]
                 pub fn funds(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::funds::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::funds::Funds,
@@ -37719,10 +37792,12 @@ pub mod api {
                     use super::runtime_types;
                     pub type Queries =
                         runtime_types::pallet_xcm::pallet::QueryStatus<::core::primitive::u32>;
+                    pub type Param0 = ::core::primitive::u64;
                 }
                 pub mod asset_traps {
                     use super::runtime_types;
                     pub type AssetTraps = ::core::primitive::u32;
+                    pub type Param0 = ::subxt::utils::H256;
                 }
                 pub mod safe_xcm_version {
                     use super::runtime_types;
@@ -37731,10 +37806,14 @@ pub mod api {
                 pub mod supported_version {
                     use super::runtime_types;
                     pub type SupportedVersion = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::xcm::VersionedMultiLocation;
                 }
                 pub mod version_notifiers {
                     use super::runtime_types;
                     pub type VersionNotifiers = ::core::primitive::u64;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::xcm::VersionedMultiLocation;
                 }
                 pub mod version_notify_targets {
                     use super::runtime_types;
@@ -37743,6 +37822,8 @@ pub mod api {
                         runtime_types::sp_weights::weight_v2::Weight,
                         ::core::primitive::u32,
                     );
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = runtime_types::xcm::VersionedMultiLocation;
                 }
                 pub mod version_discovery_queue {
                     use super::runtime_types;
@@ -37761,6 +37842,9 @@ pub mod api {
                     use super::runtime_types;
                     pub type RemoteLockedFungibles =
                         runtime_types::pallet_xcm::pallet::RemoteLockedFungibleRecord<()>;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::subxt::utils::AccountId32;
+                    pub type Param2 = runtime_types::xcm::VersionedAssetId;
                 }
                 pub mod locked_fungibles {
                     use super::runtime_types;
@@ -37769,6 +37853,7 @@ pub mod api {
                             ::core::primitive::u128,
                             runtime_types::xcm::VersionedMultiLocation,
                         )>;
+                    pub type Param0 = ::subxt::utils::AccountId32;
                 }
                 pub mod xcm_execution_suspended {
                     use super::runtime_types;
@@ -37823,7 +37908,7 @@ pub mod api {
                 #[doc = " The ongoing queries."]
                 pub fn queries(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
+                    _0: impl ::std::borrow::Borrow<types::queries::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::queries::Queries,
@@ -37874,7 +37959,7 @@ pub mod api {
                 #[doc = " times this pair has been trapped (usually just 1 if it exists at all)."]
                 pub fn asset_traps(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::H256>,
+                    _0: impl ::std::borrow::Borrow<types::asset_traps::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::asset_traps::AssetTraps,
@@ -37942,7 +38027,7 @@ pub mod api {
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::supported_version::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::supported_version::SupportedVersion,
@@ -37966,8 +38051,8 @@ pub mod api {
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
+                    _0: impl ::std::borrow::Borrow<types::supported_version::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::supported_version::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::supported_version::SupportedVersion,
@@ -38013,7 +38098,7 @@ pub mod api {
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::version_notifiers::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::version_notifiers::VersionNotifiers,
@@ -38037,8 +38122,8 @@ pub mod api {
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
+                    _0: impl ::std::borrow::Borrow<types::version_notifiers::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::version_notifiers::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::version_notifiers::VersionNotifiers,
@@ -38087,7 +38172,7 @@ pub mod api {
                 #[doc = " of our versions we informed them of."]
                 pub fn version_notify_targets_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::version_notify_targets::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::version_notify_targets::VersionNotifyTargets,
@@ -38113,8 +38198,8 @@ pub mod api {
                 #[doc = " of our versions we informed them of."]
                 pub fn version_notify_targets(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
+                    _0: impl ::std::borrow::Borrow<types::version_notify_targets::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::version_notify_targets::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::version_notify_targets::VersionNotifyTargets,
@@ -38205,7 +38290,7 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on a remote chain."]
                 pub fn remote_locked_fungibles_iter1(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _0: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::remote_locked_fungibles::RemoteLockedFungibles,
@@ -38229,8 +38314,8 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on a remote chain."]
                 pub fn remote_locked_fungibles_iter2(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::remote_locked_fungibles::RemoteLockedFungibles,
@@ -38255,9 +38340,9 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on a remote chain."]
                 pub fn remote_locked_fungibles(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                    _1: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
-                    _2: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedAssetId>,
+                    _0: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param1>,
+                    _2: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param2>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::remote_locked_fungibles::RemoteLockedFungibles,
@@ -38305,7 +38390,7 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on this chain."]
                 pub fn locked_fungibles(
                     &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::utils::AccountId32>,
+                    _0: impl ::std::borrow::Borrow<types::locked_fungibles::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::locked_fungibles::LockedFungibles,
@@ -38932,6 +39017,7 @@ pub mod api {
                 pub mod permanent_slots {
                     use super::runtime_types;
                     pub type PermanentSlots = (::core::primitive::u32, ::core::primitive::u32);
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod permanent_slot_count {
                     use super::runtime_types;
@@ -38940,6 +39026,7 @@ pub mod api {
                 pub mod temporary_slots {
                     use super::runtime_types;
                     pub type TemporarySlots = runtime_types :: polkadot_runtime_common :: assigned_slots :: ParachainTemporarySlot < :: subxt :: utils :: AccountId32 , :: core :: primitive :: u32 > ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod temporary_slot_count {
                     use super::runtime_types;
@@ -38985,9 +39072,7 @@ pub mod api {
                 #[doc = " Assigned permanent slots, with their start lease period, and duration."]
                 pub fn permanent_slots(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::permanent_slots::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::permanent_slots::PermanentSlots,
@@ -39055,9 +39140,7 @@ pub mod api {
                 #[doc = " Assigned temporary slots."]
                 pub fn temporary_slots(
                     &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain_primitives::primitives::Id,
-                    >,
+                    _0: impl ::std::borrow::Borrow<types::temporary_slots::Param0>,
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageMapKey,
                     types::temporary_slots::TemporarySlots,
