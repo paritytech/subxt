@@ -2,28 +2,32 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{types::TypeGenerator, CodegenError};
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
+use scale_typegen::typegen::type_path_resolver;
+use scale_typegen::TypeGenerator;
 use subxt_metadata::{Metadata, RuntimeApiMetadata};
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 
+use crate::CodegenError;
+
 /// Generates runtime functions for the given API metadata.
 fn generate_runtime_api(
     api: RuntimeApiMetadata,
     type_gen: &TypeGenerator,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
+    let type_path_resolver = type_gen.type_path_resolver();
     // Trait name must remain as is (upper case) to identity the runtime call.
     let trait_name_str = api.name();
     // The snake case for the trait name.
     let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
     let docs = api.docs();
-    let docs: TokenStream2 = should_gen_docs
+    let docs: TokenStream2 = type_gen
+        .settings
+        .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
 
@@ -32,7 +36,7 @@ fn generate_runtime_api(
         let method_name_str = method.name();
 
         let docs = method.docs();
-        let docs: TokenStream2 = should_gen_docs
+        let docs: TokenStream2 = type_gen.settings.should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
@@ -44,7 +48,7 @@ fn generate_runtime_api(
             } else {
                 format_ident!("{}", &input.name)
             };
-            let ty = type_gen.resolve_type_path(input.ty);
+            let ty = type_path_resolver.resolve_type_path(input.ty).expect("lookup of type should not fail");
 
             let param = quote!(#name: #ty);
             (param, name)
@@ -66,7 +70,7 @@ fn generate_runtime_api(
             }
         );
 
-        let output = type_gen.resolve_type_path(method.output_ty());
+        let output = type_path_resolver.resolve_type_path(method.output_ty())?;
 
         let Some(call_hash) = api.method_hash(method.name()) else {
             return Err(CodegenError::MissingRuntimeApiMetadata(
@@ -94,6 +98,7 @@ fn generate_runtime_api(
 
     let structs = structs_and_methods.iter().map(|(struct_, _)| struct_);
     let methods = structs_and_methods.iter().map(|(_, method)| method);
+    let types_mod_ident = type_gen.types_mod_ident();
 
     let runtime_api = quote!(
         pub mod #trait_name_snake {
@@ -135,9 +140,7 @@ pub fn generate_runtime_apis(
 ) -> Result<TokenStream2, CodegenError> {
     let runtime_fns: Vec<_> = metadata
         .runtime_api_traits()
-        .map(|api| {
-            generate_runtime_api(api, type_gen, types_mod_ident, crate_path, should_gen_docs)
-        })
+        .map(|api| generate_runtime_api(api, type_gen, crate_path))
         .collect::<Result<_, _>>()?;
 
     let runtime_apis_def = runtime_fns.iter().map(|(apis, _)| apis);

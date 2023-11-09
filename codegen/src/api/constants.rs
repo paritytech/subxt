@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
@@ -36,9 +36,7 @@ use super::CodegenError;
 pub fn generate_constants(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no constants.
     if pallet.constants().len() == 0 {
@@ -58,9 +56,12 @@ pub fn generate_constants(
                 ));
             };
 
-            let return_ty = type_gen.resolve_type_path(constant.ty());
+            let type_path_resolver = type_gen.type_path_resolver();
+            let return_ty = type_path_resolver.resolve_type_path(constant.ty())?;
             let docs = constant.docs();
-            let docs = should_gen_docs
+            let docs = type_gen
+                .settings
+                .should_gen_docs
                 .then_some(quote! { #( #[doc = #docs ] )* })
                 .unwrap_or_default();
 
@@ -76,6 +77,8 @@ pub fn generate_constants(
             })
         })
         .collect::<Result<Vec<_>, _>>()?;
+
+    let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
         pub mod constants {

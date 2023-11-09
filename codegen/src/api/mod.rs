@@ -12,15 +12,13 @@ mod events;
 mod runtime_apis;
 mod storage;
 
+use scale_typegen::typegen::ir::type_ir::{CompositeIR, TypeIR, TypeIRKind};
+use scale_typegen::typegen::type_params::TypeParameters;
+use scale_typegen::{Derives, TypeGenerator, TypeGeneratorSettings, TypePathResolver};
 use subxt_metadata::Metadata;
 
-use crate::api::custom_values::generate_custom_values;
 use crate::error::CodegenError;
-use crate::types::DerivesRegistry;
-use crate::{
-    ir,
-    types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-};
+use crate::{api::custom_values::generate_custom_values, ir};
 
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -60,8 +58,8 @@ impl RuntimeGenerator {
     pub fn generate_runtime_types(
         &self,
         item_mod: syn::ItemMod,
-        derives: DerivesRegistry,
-        type_substitutes: TypeSubstitutes,
+        derives: scale_typegen::DerivesRegistry,
+        type_substitutes: scale_typegen::TypeSubstitutes,
         crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
@@ -71,35 +69,37 @@ impl RuntimeGenerator {
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
 
-        let type_gen = TypeGenerator::new(
-            self.metadata.types(),
-            "runtime_types",
-            type_substitutes,
-            derives,
-            crate_path,
-            should_gen_docs,
-        );
-        let types_mod = type_gen.generate_types_mod()?;
+        // let type_gen = TypeGenerator::new(
+        //     self.metadata.types(),
+        //     "runtime_types",
+        //     type_substitutes,
+        //     derives,
+        //     crate_path,
+        //     should_gen_docs,
+        // );
+        // let types_mod = type_gen.generate_types_mod()?;
 
-        Ok(quote! {
-            #( #item_mod_attrs )*
-            #[allow(dead_code, unused_imports, non_camel_case_types)]
-            #[allow(clippy::all)]
-            #[allow(rustdoc::broken_intra_doc_links)]
-            pub mod #mod_ident {
-                // Preserve any Rust items that were previously defined in the adorned module
-                #( #rust_items ) *
+        todo!()
 
-                // Make it easy to access the root items via `root_mod` at different levels
-                // without reaching out of this module.
-                #[allow(unused_imports)]
-                mod root_mod {
-                    pub use super::*;
-                }
+        // Ok(quote! {
+        //     #( #item_mod_attrs )*
+        //     #[allow(dead_code, unused_imports, non_camel_case_types)]
+        //     #[allow(clippy::all)]
+        //     #[allow(rustdoc::broken_intra_doc_links)]
+        //     pub mod #mod_ident {
+        //         // Preserve any Rust items that were previously defined in the adorned module
+        //         #( #rust_items ) *
 
-                #types_mod
-            }
-        })
+        //         // Make it easy to access the root items via `root_mod` at different levels
+        //         // without reaching out of this module.
+        //         #[allow(unused_imports)]
+        //         mod root_mod {
+        //             pub use super::*;
+        //         }
+
+        //         #types_mod
+        //     }
+        // })
     }
 
     /// Generate the API for interacting with a Substrate runtime.
@@ -114,24 +114,20 @@ impl RuntimeGenerator {
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: DerivesRegistry,
-        type_substitutes: TypeSubstitutes,
+        derives: scale_typegen::DerivesRegistry,
+        type_substitutes: scale_typegen::TypeSubstitutes,
         crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
 
-        let type_gen = TypeGenerator::new(
-            self.metadata.types(),
-            "runtime_types",
-            type_substitutes,
-            derives,
-            crate_path.clone(),
-            should_gen_docs,
-        );
+        let settings =
+            subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
+
+        let type_gen = TypeGenerator::new(self.metadata.types(), settings)?;
         let types_mod = type_gen.generate_types_mod()?;
-        let types_mod_ident = types_mod.ident();
+        let types_mod_ident = type_gen.types_mod_ident();
         let pallets_with_mod_names = self
             .metadata
             .pallets()
@@ -165,37 +161,13 @@ impl RuntimeGenerator {
         let modules = pallets_with_mod_names
             .iter()
             .map(|(pallet, mod_name)| {
-                let calls = calls::generate_calls(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let calls = calls::generate_calls(&type_gen, pallet, &crate_path)?;
 
-                let event = events::generate_events(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let event = events::generate_events(&type_gen, pallet, &crate_path)?;
 
-                let storage_mod = storage::generate_storage(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let storage_mod = storage::generate_storage(&type_gen, pallet, &crate_path)?;
 
-                let constants_mod = constants::generate_constants(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let constants_mod = constants::generate_constants(&type_gen, pallet, &crate_path)?;
 
                 let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
 
@@ -247,9 +219,14 @@ impl RuntimeGenerator {
 
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
-        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty());
-        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty());
-        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty());
+
+        let type_path_resolver = type_gen.type_path_resolver();
+        let call_path =
+            type_path_resolver.resolve_type_path(self.metadata.outer_enums().call_enum_ty())?;
+        let event_path =
+            type_path_resolver.resolve_type_path(self.metadata.outer_enums().event_enum_ty())?;
+        let error_path =
+            type_path_resolver.resolve_type_path(self.metadata.outer_enums().error_enum_ty())?;
 
         let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 
@@ -355,6 +332,20 @@ impl RuntimeGenerator {
     }
 }
 
+fn subxt_type_gen_settings(
+    derives: scale_typegen::DerivesRegistry,
+    type_substitutes: scale_typegen::TypeSubstitutes,
+    crate_path: &syn::Path,
+    should_gen_docs: bool,
+) -> TypeGeneratorSettings {
+    let mut settings = TypeGeneratorSettings::default()
+        .should_gen_docs(should_gen_docs)
+        .decoded_bits_type_path(parse_quote!(#crate_path::utils::bits::DecodedBits));
+    settings.derives = derives;
+    settings.substitutes = type_substitutes;
+    settings
+}
+
 /// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<F>(
     type_gen: &TypeGenerator,
@@ -362,12 +353,11 @@ pub fn generate_structs_from_variants<F>(
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
-) -> Result<Vec<(String, CompositeDef)>, CodegenError>
+) -> Result<Vec<(String, CompositeIR)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
-    let ty = type_gen.resolve_type(type_id);
+    let ty = type_gen.type_path_resolver().resolve_type(type_id)?;
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
         return Err(CodegenError::InvalidType(error_message_type_name.into()));
@@ -377,28 +367,36 @@ where
         .variants
         .iter()
         .map(|var| {
+            let mut type_params = TypeParameters::from_scale_info(&[]);
+            let composite_ir_kind =
+                type_gen.create_composite_ir_kind(&var.fields, &mut type_params)?;
+            // let fields = CompositeDefFields::from_scale_info_fields(
+            //     struct_name.as_ref(),
+            //     &var.fields,
+            //     &[],
+            //     type_gen,
+            // )?;
+
             let struct_name = variant_to_struct_name(&var.name);
+            let composite_ir = CompositeIR::new(
+                syn::parse_str(&struct_name).expect("enum variant name is valid ident"),
+                composite_ir_kind,
+                type_gen.docs_from_scale_info(&var.docs),
+            );
 
-            let fields = CompositeDefFields::from_scale_info_fields(
-                struct_name.as_ref(),
-                &var.fields,
-                &[],
-                type_gen,
-            )?;
+            // let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
+            // let struct_def = CompositeDef::struct_def(
+            //     &ty,
+            //     struct_name.as_ref(),
+            //     Default::default(),
+            //     fields,
+            //     Some(parse_quote!(pub)),
+            //     type_gen,
+            //     docs,
+            //     crate_path,
+            // )?;
 
-            let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
-            let struct_def = CompositeDef::struct_def(
-                &ty,
-                struct_name.as_ref(),
-                Default::default(),
-                fields,
-                Some(parse_quote!(pub)),
-                type_gen,
-                docs,
-                crate_path,
-            )?;
-
-            Ok((var.name.to_string(), struct_def))
+            Ok((var.name.to_string(), composite_ir))
         })
         .collect()
 }

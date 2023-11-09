@@ -2,12 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
-use crate::types::TypePath;
 use heck::ToSnakeCase as _;
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
 use scale_info::TypeDef;
+use scale_typegen::{typegen::type_path::TypePath, TypeGenerator};
 use subxt_metadata::{
     PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
 };
@@ -26,9 +25,7 @@ use super::CodegenError;
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let Some(storage) = pallet.storage() else {
         return Ok(quote!());
@@ -37,10 +34,10 @@ pub fn generate_storage(
     let storage_fns = storage
         .entries()
         .iter()
-        .map(|entry| {
-            generate_storage_entry_fns(type_gen, pallet, entry, crate_path, should_gen_docs)
-        })
+        .map(|entry| generate_storage_entry_fns(type_gen, pallet, entry, crate_path))
         .collect::<Result<Vec<_>, CodegenError>>()?;
+
+    let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
         pub mod storage {
@@ -60,12 +57,12 @@ fn generate_storage_entry_fns(
     pallet: &PalletMetadata,
     storage_entry: &StorageEntryMetadata,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
+    let type_path_resolver = type_gen.type_path_resolver();
     let keys: Vec<(Ident, TypePath)> = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => vec![],
         StorageEntryType::Map { key_ty, .. } => {
-            match &type_gen.resolve_type(*key_ty).type_def {
+            match &type_path_resolver.resolve_type(*key_ty)?.type_def {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => tuple
                     .fields
@@ -73,14 +70,16 @@ fn generate_storage_entry_fns(
                     .enumerate()
                     .map(|(i, f)| {
                         let ident: Ident = format_ident!("_{}", syn::Index::from(i));
-                        let ty_path = type_gen.resolve_type_path(f.id);
+                        let ty_path = type_path_resolver
+                            .resolve_type_path(f.id)
+                            .expect("resolving type should not fail");
                         (ident, ty_path)
                     })
                     .collect::<Vec<_>>(),
                 // A map with a single key; return the single key.
                 _ => {
                     let ident = format_ident!("_0");
-                    let ty_path = type_gen.resolve_type_path(*key_ty);
+                    let ty_path = type_path_resolver.resolve_type_path(*key_ty)?;
                     vec![(ident, ty_path)]
                 }
             }
@@ -97,9 +96,11 @@ fn generate_storage_entry_fns(
 
     let snake_case_name = storage_entry.name().to_snake_case();
     let storage_entry_ty = storage_entry.entry_type().value_ty();
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty);
+    let storage_entry_value_ty = type_path_resolver.resolve_type_path(storage_entry_ty)?;
     let docs = storage_entry.docs();
-    let docs = should_gen_docs
+    let docs = type_gen
+        .settings
+        .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
 
@@ -176,6 +177,7 @@ mod tests {
     use frame_metadata::v15;
     use quote::{format_ident, quote};
     use scale_info::{meta_type, MetaType};
+    use scale_typegen::DerivesRegistry;
     use std::borrow::Cow;
 
     use subxt_metadata::Metadata;

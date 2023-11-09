@@ -9,10 +9,8 @@
 #![deny(unused_crate_dependencies, missing_docs)]
 
 mod api;
-mod ir;
-mod types;
-
 pub mod error;
+mod ir;
 
 // These should probably be in a separate crate; they are used by the
 // macro and CLI tool, so they only live here because this is a common
@@ -25,14 +23,8 @@ use getrandom as _;
 
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
+use scale_typegen::{DerivesRegistry, TypeSubstitutes};
 use std::collections::HashMap;
-
-// We expose these only because they are currently needed in subxt-explorer.
-// Eventually we'll move the type generation stuff out into a separate crate.
-#[doc(hidden)]
-pub mod __private {
-    pub use crate::types::{DerivesRegistry, TypeDefGen, TypeGenerator, TypeSubstitutes};
-}
 
 // Part of the public interface, so expose:
 pub use error::CodegenError;
@@ -217,10 +209,12 @@ impl CodegenBuilder {
     pub fn generate(self, metadata: Metadata) -> Result<TokenStream2, CodegenError> {
         let crate_path = self.crate_path;
 
-        let mut derives_registry = if self.use_default_derives {
-            types::DerivesRegistry::with_default_derives(&crate_path)
+        let mut derives_registry: DerivesRegistry = if self.use_default_derives {
+            // types::DerivesRegistry::with_default_derives(&crate_path)
+            todo!()
         } else {
-            types::DerivesRegistry::new()
+            // types::DerivesRegistry::new()
+            todo!()
         };
 
         derives_registry.extend_for_all(self.extra_global_derives, self.extra_global_attributes);
@@ -232,16 +226,20 @@ impl CodegenBuilder {
             derives_registry.extend_for_type(ty, vec![], attributes);
         }
 
-        let mut type_substitutes = if self.use_default_substitutions {
-            types::TypeSubstitutes::with_default_substitutes(&crate_path)
+        let mut type_substitutes: TypeSubstitutes = if self.use_default_substitutions {
+            // types::TypeSubstitutes::with_default_substitutes(&crate_path)
+
+            todo!()
         } else {
-            types::TypeSubstitutes::new()
+            // types::TypeSubstitutes::new()
+            todo!()
         };
 
-        for (from, with) in self.type_substitutes {
-            let abs_path = with.try_into()?;
-            type_substitutes.insert(from, abs_path)?;
-        }
+        // for (from, with) in self.type_substitutes {
+        //     let abs_path = with.try_into()?;
+        //     type_substitutes.insert(from, abs_path)?;
+        // }
+        todo!();
 
         let item_mod = self.item_mod;
         let generator = RuntimeGenerator::new(metadata);

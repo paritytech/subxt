@@ -2,10 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::collections::HashSet;
-
-use crate::types::TypeGenerator;
 use heck::ToSnakeCase as _;
+use scale_typegen::TypeGenerator;
+use std::collections::HashSet;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
@@ -59,7 +58,9 @@ fn generate_custom_value_fn(
         .is_some();
     let (return_ty, decodable) = if type_is_valid {
         let return_ty = type_gen
+            .type_path_resolver()
             .resolve_type_path(custom_value.type_id())
+            .expect("expected to contain type id")
             .to_token_stream();
         let decodable = quote!(#crate_path::custom_values::Yes);
         (return_ty, decodable)

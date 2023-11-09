@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
+use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
@@ -41,9 +41,7 @@ use super::CodegenError;
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.
     let Some(event_ty) = pallet.event_ty_id() else {
@@ -56,29 +54,34 @@ pub fn generate_events(
         |name| name.into(),
         "Event",
         crate_path,
-        should_gen_docs,
     )?;
 
-    let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
+    let event_structs = struct_defs.into_iter().map(|(variant_name, composite)| {
         let pallet_name = pallet.name();
-        let event_struct = &struct_def.name;
+        let event_struct_name = &composite.name;
         let event_name = variant_name;
 
+        let struct_def = type_gen.upcast_composite(&composite);
         quote! {
             #struct_def
 
-            impl #crate_path::events::StaticEvent for #event_struct {
+            impl #crate_path::events::StaticEvent for #event_struct_name {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;
             }
         }
     });
-    let event_type = type_gen.resolve_type_path(event_ty);
-    let event_ty = type_gen.resolve_type(event_ty);
+
+    let type_path_resolver = type_gen.type_path_resolver();
+    let event_type = type_path_resolver.resolve_type_path(event_ty)?;
+    let event_ty = type_path_resolver.resolve_type(event_ty)?;
     let docs = &event_ty.docs;
-    let docs = should_gen_docs
+    let docs = type_gen
+        .settings
+        .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
+    let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
         #docs

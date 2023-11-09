@@ -5,6 +5,7 @@
 //! Errors that can be emitted from codegen.
 
 use proc_macro2::{Span, TokenStream as TokenStream2};
+use scale_typegen::TypeGenerationError;
 
 /// Error returned when the Codegen cannot generate the runtime API.
 #[derive(Debug, thiserror::Error)]
@@ -56,6 +57,9 @@ pub enum CodegenError {
         "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
     )]
     MissingCallType,
+    /// Cannot generate types.
+    #[error("Type Generation failed")]
+    TypeGeneration(#[from] TypeGenerationError),
 }
 
 impl CodegenError {
