@@ -691,7 +691,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
             .flatten()
             .map(|e| e.tip())
             .or_else(|| {
-                self.find::<ChargeAssetTxPayment>()
+                self.find::<ChargeAssetTxPayment<T>>()
                     .ok()
                     .flatten()
                     .map(|e| e.tip())

@@ -12,8 +12,13 @@ use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
+use scale_decode::visitor::types::Composite;
+use scale_decode::visitor::{DecodeAsTypeResult, TypeId};
 use scale_decode::DecodeAsType;
+use scale_info::PortableRegistry;
 use std::collections::HashMap;
+use std::fmt::Formatter;
+use std::marker::PhantomData;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
@@ -227,20 +232,21 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug)]
+#[derive(Debug, DecodeAsType)]
+#[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,
     asset_id: Option<T::AssetId>,
 }
 
-impl ChargeAssetTxPayment {
+impl<T: Config> ChargeAssetTxPayment<T> {
     /// Tip to the extrinsic author in the native chain token.
     pub fn tip(&self) -> u128 {
         self.tip.0
     }
 
     /// Tip to the extrinsic author using the asset ID given.
-    pub fn asset_id(&self) -> Option<u32> {
+    pub fn asset_id(&self) -> Option<T::AssetId> {
         self.asset_id
     }
 }
