@@ -85,7 +85,7 @@ which = "4.4.2"
 smoldot = { version = "0.12.0", default-features = false }
 smoldot-light = { version = "0.10.0", default-features = false }
 tokio-stream = "0.1.14"
-futures-util = "0.3.28"
+futures-util = "0.3.29"
 rand = "0.8.5"
 pin-project = "1.1.3"
 
