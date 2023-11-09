@@ -40,6 +40,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
         crate_path: &syn::Path,
+        generate_alias: bool,
     ) -> Result<Self, CodegenError> {
         let mut derives = type_gen.type_derives(ty)?;
         let fields: Vec<_> = fields_def.field_types().collect();
@@ -81,6 +82,7 @@ impl CompositeDef {
                 field_visibility,
                 types_mod_ident: types_mod_ident.clone(),
                 variant_name,
+                generate_alias,
             },
             fields: fields_def,
             docs: docs_token,
@@ -112,15 +114,15 @@ impl quote::ToTokens for CompositeDef {
                 field_visibility,
                 types_mod_ident,
                 variant_name,
+                generate_alias,
             } => {
                 let phantom_data = type_params.unused_params_phantom_data();
-                let aliases = self
-                    .fields
-                    .to_type_aliases_tokens(field_visibility.as_ref());
+
                 let fields = self.fields.to_struct_field_tokens(
                     variant_name,
                     phantom_data,
                     field_visibility.as_ref(),
+                    *generate_alias,
                 );
                 let trailing_semicolon = matches!(
                     self.fields,
@@ -128,15 +130,14 @@ impl quote::ToTokens for CompositeDef {
                 )
                 .then(|| quote!(;));
 
-                let should_alias = matches!(
-                    &self.fields,
-                    CompositeDefFields::Named(struct_fields) if !struct_fields.is_empty()
-                ) || matches!(
-                    &self.fields,
-                    CompositeDefFields::Unnamed(struct_fields) if !struct_fields.is_empty()
-                );
+                let has_fields =
+                    matches!(&self.fields, CompositeDefFields::Named(fields) if !fields.is_empty());
 
-                let alias_module = if should_alias {
+                let alias_module = if *generate_alias && has_fields {
+                    let aliases = self
+                        .fields
+                        .to_type_aliases_tokens(field_visibility.as_ref());
+
                     quote! {
                         pub mod #variant_name {
                             use super::#types_mod_ident;
@@ -180,6 +181,7 @@ pub enum CompositeDefKind {
         field_visibility: Option<syn::Visibility>,
         types_mod_ident: syn::Ident,
         variant_name: syn::Ident,
+        generate_alias: bool,
     },
     /// Comprises a variant of a Rust `enum`.
     EnumVariant,
@@ -256,7 +258,9 @@ impl CompositeDefFields {
             Self::Named(ref fields) => {
                 let fields = fields.iter().map(|(name, ty)| {
                     let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
-                    quote! ( #visibility type #alias_name = #ty; )
+                    // Alias without boxing to have a cleaner call interface.
+                    let ty_path = &ty.type_path;
+                    quote! ( #visibility type #alias_name = #ty_path; )
                 });
                 quote!( #( #fields )* )
             }
@@ -277,6 +281,7 @@ impl CompositeDefFields {
         alias_module_name: &syn::Ident,
         phantom_data: Option<syn::TypePath>,
         visibility: Option<&syn::Visibility>,
+        generate_alias: bool,
     ) -> TokenStream {
         match self {
             Self::NoFields => {
@@ -289,8 +294,20 @@ impl CompositeDefFields {
             Self::Named(ref fields) => {
                 let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
-                    let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
-                    quote! { #compact_attr #visibility #name: #alias_module_name::#alias_name }
+
+                    if generate_alias {
+                        let alias_name =
+                            format_ident!("{}", name.to_string().to_upper_camel_case());
+
+                        let mut path = quote!( #alias_module_name::#alias_name);
+                        if ty.is_boxed() {
+                            path = quote!( ::std::boxed::Box<#path> );
+                        }
+
+                        quote! { #compact_attr #visibility #name: #path }
+                    } else {
+                        quote! { #compact_attr #visibility #name: #ty }
+                    }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
@@ -306,10 +323,9 @@ impl CompositeDefFields {
                 )
             }
             Self::Unnamed(ref fields) => {
-                let fields = fields.iter().enumerate().map(|(idx, ty)| {
+                let fields = fields.iter().map(|ty| {
                     let compact_attr = ty.compact_attr();
-                    let alias_name = format_ident!("Field{}", idx);
-                    quote! { #compact_attr #visibility #alias_module_name::#alias_name }
+                    quote! { #compact_attr #visibility #ty }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(

@@ -400,6 +400,7 @@ where
                 type_gen,
                 docs,
                 crate_path,
+                true,
             )?;
 
             Ok((var.name.to_string(), struct_def))

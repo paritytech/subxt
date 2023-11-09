@@ -80,6 +80,7 @@ impl TypeDefGen {
                     type_gen,
                     docs,
                     crate_path,
+                    false,
                 )?;
                 TypeDefGenKind::Struct(composite_def)
             }

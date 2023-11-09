@@ -45,7 +45,7 @@ pub fn generate_calls(
         .map(|(variant_name, struct_def)| {
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
 
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match struct_def.fields {
+            let result: Vec<_> = match struct_def.fields {
                 CompositeDefFields::Named(ref named_fields) => {
                     named_fields
                         .iter()
@@ -60,15 +60,28 @@ pub fn generate_calls(
                             let alias_name =
                                 format_ident!("{}", name.to_string().to_upper_camel_case());
 
-                            (quote!( #name: types::#fn_name::#alias_name ), call_arg)
+                            let fn_arg_type = &field.type_path;
+                            let alias_type = quote! {
+                                pub type #alias_name = #fn_arg_type;
+                            };
+
+                            (
+                                quote!( #name: types::#fn_name::#alias_name ),
+                                call_arg,
+                                alias_type,
+                            )
                         })
-                        .unzip()
+                        .collect()
                 }
                 CompositeDefFields::NoFields => Default::default(),
                 CompositeDefFields::Unnamed(_) => {
                     return Err(CodegenError::InvalidCallVariant(call_ty))
                 }
             };
+
+            let call_fn_args = result.iter().map(|(call_fn_arg, _, _)| call_fn_arg);
+            let call_args = result.iter().map(|(_, call_arg, _)| call_arg);
+            let alias_types = result.iter().map(|(_, _, alias_type)| alias_type);
 
             let pallet_name = pallet.name();
             let call_name = &variant_name;
