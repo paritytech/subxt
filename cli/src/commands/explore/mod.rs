@@ -180,7 +180,7 @@ pub mod tests {
     async fn test_commands() {
         // show pallets:
         let output = simulate_run("").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    ParaInherent\n    Staking\n    System\n    Timestamp\n");
+        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    ParaInherent\n    System\n    Timestamp\n");
         // if incorrect pallet, error:
         let output = simulate_run("abc123").await;
         assert!(output.is_err());
@@ -198,19 +198,20 @@ pub mod tests {
         let output = simulate_run("Balances abc123").await;
         assert!(output.is_err());
         // check that we can explore a certain call:
-        let output = simulate_run("Balances calls transfer").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls transfer <SCALE_VALUE>\n        construct the call by providing a valid argument\n\nThe call expect expects a <SCALE_VALUE> with this shape:\n    {\n        dest: enum MultiAddress"));
+        let output = simulate_run("Balances calls transfer_allow_death").await;
+        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls transfer_allow_death <SCALE_VALUE>\n        construct the call by providing a valid argument\n\nThe call expect expects a <SCALE_VALUE> with this shape:\n    {\n        dest: enum MultiAddress"));
         // check that unsigned extrinsic can be constructed:
-        let output =
-            simulate_run("Balances calls transfer {\"dest\":v\"Raw\"((255,255, 255)),\"value\":0}")
-                .await;
+        let output = simulate_run(
+            "Balances calls transfer_allow_death {\"dest\":v\"Raw\"((255,255, 255)),\"value\":0}",
+        )
+        .await;
         assert_eq!(
             output.unwrap(),
-            "Encoded call data:\n    0x24040507020cffffff00\n"
+            "Encoded call data:\n    0x24040400020cffffff00\n"
         );
         // check that we can explore a certain constant:
         let output = simulate_run("Balances constants ExistentialDeposit").await;
-        assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    10000000000\n");
+        assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    33333333\n");
         // check that we can explore a certain storage entry:
         let output = simulate_run("System storage Account").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore System storage Account <KEY_VALUE>\n\nDescription:\n    The full account information for a particular account ID."));
