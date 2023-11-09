@@ -10940,10 +10940,12 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An account has delegated their vote to another account. \\[who, target\\]"]
-            pub struct Delegated(
-                pub ::subxt::utils::AccountId32,
-                pub ::subxt::utils::AccountId32,
-            );
+            pub struct Delegated(pub delegated::Field0, pub delegated::Field1);
+            pub mod delegated {
+                use super::runtime_types;
+                pub type Field0 = ::subxt::utils::AccountId32;
+                pub type Field1 = ::subxt::utils::AccountId32;
+            }
             impl ::subxt::events::StaticEvent for Delegated {
                 const PALLET: &'static str = "ConvictionVoting";
                 const EVENT: &'static str = "Delegated";
@@ -10959,7 +10961,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
-            pub struct Undelegated(pub ::subxt::utils::AccountId32);
+            pub struct Undelegated(pub undelegated::Field0);
+            pub mod undelegated {
+                use super::runtime_types;
+                pub type Field0 = ::subxt::utils::AccountId32;
+            }
             impl ::subxt::events::StaticEvent for Undelegated {
                 const PALLET: &'static str = "ConvictionVoting";
                 const EVENT: &'static str = "Undelegated";
@@ -28621,11 +28627,20 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate was backed. `[candidate, head_data]`"]
             pub struct CandidateBacked(
-                pub runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>,
-                pub runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                pub runtime_types::polkadot_primitives::v6::CoreIndex,
-                pub runtime_types::polkadot_primitives::v6::GroupIndex,
+                pub candidate_backed::Field0,
+                pub candidate_backed::Field1,
+                pub candidate_backed::Field2,
+                pub candidate_backed::Field3,
             );
+            pub mod candidate_backed {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>;
+                pub type Field1 =
+                    runtime_types::polkadot_parachain_primitives::primitives::HeadData;
+                pub type Field2 = runtime_types::polkadot_primitives::v6::CoreIndex;
+                pub type Field3 = runtime_types::polkadot_primitives::v6::GroupIndex;
+            }
             impl ::subxt::events::StaticEvent for CandidateBacked {
                 const PALLET: &'static str = "ParaInclusion";
                 const EVENT: &'static str = "CandidateBacked";
@@ -28642,11 +28657,20 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate was included. `[candidate, head_data]`"]
             pub struct CandidateIncluded(
-                pub runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>,
-                pub runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                pub runtime_types::polkadot_primitives::v6::CoreIndex,
-                pub runtime_types::polkadot_primitives::v6::GroupIndex,
+                pub candidate_included::Field0,
+                pub candidate_included::Field1,
+                pub candidate_included::Field2,
+                pub candidate_included::Field3,
             );
+            pub mod candidate_included {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>;
+                pub type Field1 =
+                    runtime_types::polkadot_parachain_primitives::primitives::HeadData;
+                pub type Field2 = runtime_types::polkadot_primitives::v6::CoreIndex;
+                pub type Field3 = runtime_types::polkadot_primitives::v6::GroupIndex;
+            }
             impl ::subxt::events::StaticEvent for CandidateIncluded {
                 const PALLET: &'static str = "ParaInclusion";
                 const EVENT: &'static str = "CandidateIncluded";
@@ -28663,10 +28687,18 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A candidate timed out. `[candidate, head_data]`"]
             pub struct CandidateTimedOut(
-                pub runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>,
-                pub runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                pub runtime_types::polkadot_primitives::v6::CoreIndex,
+                pub candidate_timed_out::Field0,
+                pub candidate_timed_out::Field1,
+                pub candidate_timed_out::Field2,
             );
+            pub mod candidate_timed_out {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_primitives::v6::CandidateReceipt<::subxt::utils::H256>;
+                pub type Field1 =
+                    runtime_types::polkadot_parachain_primitives::primitives::HeadData;
+                pub type Field2 = runtime_types::polkadot_primitives::v6::CoreIndex;
+            }
             impl ::subxt::events::StaticEvent for CandidateTimedOut {
                 const PALLET: &'static str = "ParaInclusion";
                 const EVENT: &'static str = "CandidateTimedOut";
@@ -29535,9 +29567,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current code has been updated for a Para. `para_id`"]
-            pub struct CurrentCodeUpdated(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct CurrentCodeUpdated(pub current_code_updated::Field0);
+            pub mod current_code_updated {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for CurrentCodeUpdated {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "CurrentCodeUpdated";
@@ -29553,9 +29587,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Current head has been updated for a Para. `para_id`"]
-            pub struct CurrentHeadUpdated(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct CurrentHeadUpdated(pub current_head_updated::Field0);
+            pub mod current_head_updated {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for CurrentHeadUpdated {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "CurrentHeadUpdated";
@@ -29571,9 +29607,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A code upgrade has been scheduled for a Para. `para_id`"]
-            pub struct CodeUpgradeScheduled(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct CodeUpgradeScheduled(pub code_upgrade_scheduled::Field0);
+            pub mod code_upgrade_scheduled {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for CodeUpgradeScheduled {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "CodeUpgradeScheduled";
@@ -29589,9 +29627,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A new head has been noted for a Para. `para_id`"]
-            pub struct NewHeadNoted(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct NewHeadNoted(pub new_head_noted::Field0);
+            pub mod new_head_noted {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for NewHeadNoted {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "NewHeadNoted";
@@ -29607,10 +29647,12 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A para has been queued to execute pending actions. `para_id`"]
-            pub struct ActionQueued(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-                pub ::core::primitive::u32,
-            );
+            pub struct ActionQueued(pub action_queued::Field0, pub action_queued::Field1);
+            pub mod action_queued {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                pub type Field1 = ::core::primitive::u32;
+            }
             impl ::subxt::events::StaticEvent for ActionQueued {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "ActionQueued";
@@ -29628,9 +29670,15 @@ pub mod api {
             #[doc = "The given para either initiated or subscribed to a PVF check for the given validation"]
             #[doc = "code. `code_hash` `para_id`"]
             pub struct PvfCheckStarted(
-                pub runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash,
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
+                pub pvf_check_started::Field0,
+                pub pvf_check_started::Field1,
             );
+            pub mod pvf_check_started {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash;
+                pub type Field1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for PvfCheckStarted {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "PvfCheckStarted";
@@ -29648,9 +29696,15 @@ pub mod api {
             #[doc = "The given validation code was accepted by the PVF pre-checking vote."]
             #[doc = "`code_hash` `para_id`"]
             pub struct PvfCheckAccepted(
-                pub runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash,
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
+                pub pvf_check_accepted::Field0,
+                pub pvf_check_accepted::Field1,
             );
+            pub mod pvf_check_accepted {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash;
+                pub type Field1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for PvfCheckAccepted {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "PvfCheckAccepted";
@@ -29668,9 +29722,15 @@ pub mod api {
             #[doc = "The given validation code was rejected by the PVF pre-checking vote."]
             #[doc = "`code_hash` `para_id`"]
             pub struct PvfCheckRejected(
-                pub runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash,
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
+                pub pvf_check_rejected::Field0,
+                pub pvf_check_rejected::Field1,
             );
+            pub mod pvf_check_rejected {
+                use super::runtime_types;
+                pub type Field0 =
+                    runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash;
+                pub type Field1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for PvfCheckRejected {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "PvfCheckRejected";
@@ -32654,9 +32714,15 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A dispute has been initiated. \\[candidate hash, dispute location\\]"]
             pub struct DisputeInitiated(
-                pub runtime_types::polkadot_core_primitives::CandidateHash,
-                pub runtime_types::polkadot_runtime_parachains::disputes::DisputeLocation,
+                pub dispute_initiated::Field0,
+                pub dispute_initiated::Field1,
             );
+            pub mod dispute_initiated {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_core_primitives::CandidateHash;
+                pub type Field1 =
+                    runtime_types::polkadot_runtime_parachains::disputes::DisputeLocation;
+            }
             impl ::subxt::events::StaticEvent for DisputeInitiated {
                 const PALLET: &'static str = "ParasDisputes";
                 const EVENT: &'static str = "DisputeInitiated";
@@ -32674,9 +32740,15 @@ pub mod api {
             #[doc = "A dispute has concluded for or against a candidate."]
             #[doc = "`\\[para id, candidate hash, dispute result\\]`"]
             pub struct DisputeConcluded(
-                pub runtime_types::polkadot_core_primitives::CandidateHash,
-                pub runtime_types::polkadot_runtime_parachains::disputes::DisputeResult,
+                pub dispute_concluded::Field0,
+                pub dispute_concluded::Field1,
             );
+            pub mod dispute_concluded {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_core_primitives::CandidateHash;
+                pub type Field1 =
+                    runtime_types::polkadot_runtime_parachains::disputes::DisputeResult;
+            }
             impl ::subxt::events::StaticEvent for DisputeConcluded {
                 const PALLET: &'static str = "ParasDisputes";
                 const EVENT: &'static str = "DisputeConcluded";
@@ -32696,7 +32768,11 @@ pub mod api {
             #[doc = "Block authors should no longer build on top of this head and should"]
             #[doc = "instead revert the block at the given height. This should be the"]
             #[doc = "number of the child of the last known valid block in the chain."]
-            pub struct Revert(pub ::core::primitive::u32);
+            pub struct Revert(pub revert::Field0);
+            pub mod revert {
+                use super::runtime_types;
+                pub type Field0 = ::core::primitive::u32;
+            }
             impl ::subxt::events::StaticEvent for Revert {
                 const PALLET: &'static str = "ParasDisputes";
                 const EVENT: &'static str = "Revert";
@@ -38773,9 +38849,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A parachain was assigned a permanent parachain slot"]
-            pub struct PermanentSlotAssigned(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct PermanentSlotAssigned(pub permanent_slot_assigned::Field0);
+            pub mod permanent_slot_assigned {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for PermanentSlotAssigned {
                 const PALLET: &'static str = "AssignedSlots";
                 const EVENT: &'static str = "PermanentSlotAssigned";
@@ -38791,9 +38869,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "A parachain was assigned a temporary parachain slot"]
-            pub struct TemporarySlotAssigned(
-                pub runtime_types::polkadot_parachain_primitives::primitives::Id,
-            );
+            pub struct TemporarySlotAssigned(pub temporary_slot_assigned::Field0);
+            pub mod temporary_slot_assigned {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
             impl ::subxt::events::StaticEvent for TemporarySlotAssigned {
                 const PALLET: &'static str = "AssignedSlots";
                 const EVENT: &'static str = "TemporarySlotAssigned";
@@ -39247,7 +39327,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "New validators were added to the set."]
-            pub struct ValidatorsRegistered(pub ::std::vec::Vec<::subxt::utils::AccountId32>);
+            pub struct ValidatorsRegistered(pub validators_registered::Field0);
+            pub mod validators_registered {
+                use super::runtime_types;
+                pub type Field0 = ::std::vec::Vec<::subxt::utils::AccountId32>;
+            }
             impl ::subxt::events::StaticEvent for ValidatorsRegistered {
                 const PALLET: &'static str = "ValidatorManager";
                 const EVENT: &'static str = "ValidatorsRegistered";
@@ -39263,7 +39347,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Validators were removed from the set."]
-            pub struct ValidatorsDeregistered(pub ::std::vec::Vec<::subxt::utils::AccountId32>);
+            pub struct ValidatorsDeregistered(pub validators_deregistered::Field0);
+            pub mod validators_deregistered {
+                use super::runtime_types;
+                pub type Field0 = ::std::vec::Vec<::subxt::utils::AccountId32>;
+            }
             impl ::subxt::events::StaticEvent for ValidatorsDeregistered {
                 const PALLET: &'static str = "ValidatorManager";
                 const EVENT: &'static str = "ValidatorsDeregistered";
