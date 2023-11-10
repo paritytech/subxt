@@ -12,6 +12,9 @@ use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
+
+use scale_decode::DecodeAsType;
+
 use std::collections::HashMap;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
@@ -21,6 +24,11 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     /// The name of the signed extension. This is used to associate it
     /// with the signed extensions that the node is making use of.
     const NAME: &'static str;
+
+    /// The type representing the `extra` bytes of a signed extension.
+    /// Decoding from this type should be symmetrical to the respective
+    /// `ExtrinsicParamsEncoder::encode_extra_to()` implementation of this signed extension.
+    type Decoded: DecodeAsType;
 }
 
 /// The [`CheckSpecVersion`] signed extension.
@@ -48,6 +56,7 @@ impl ExtrinsicParamsEncoder for CheckSpecVersion {
 
 impl<T: Config> SignedExtension<T> for CheckSpecVersion {
     const NAME: &'static str = "CheckSpecVersion";
+    type Decoded = ();
 }
 
 /// The [`CheckNonce`] signed extension.
@@ -75,6 +84,7 @@ impl ExtrinsicParamsEncoder for CheckNonce {
 
 impl<T: Config> SignedExtension<T> for CheckNonce {
     const NAME: &'static str = "CheckNonce";
+    type Decoded = Compact<u64>;
 }
 
 /// The [`CheckTxVersion`] signed extension.
@@ -102,6 +112,7 @@ impl ExtrinsicParamsEncoder for CheckTxVersion {
 
 impl<T: Config> SignedExtension<T> for CheckTxVersion {
     const NAME: &'static str = "CheckTxVersion";
+    type Decoded = ();
 }
 
 /// The [`CheckGenesis`] signed extension.
@@ -134,6 +145,7 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckGenesis<T> {
 
 impl<T: Config> SignedExtension<T> for CheckGenesis<T> {
     const NAME: &'static str = "CheckGenesis";
+    type Decoded = ();
 }
 
 /// The [`CheckMortality`] signed extension.
@@ -213,13 +225,27 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
 
 impl<T: Config> SignedExtension<T> for CheckMortality<T> {
     const NAME: &'static str = "CheckMortality";
+    type Decoded = Era;
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug)]
+#[derive(Debug, DecodeAsType)]
+#[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,
     asset_id: Option<T::AssetId>,
+}
+
+impl<T: Config> ChargeAssetTxPayment<T> {
+    /// Tip to the extrinsic author in the native chain token.
+    pub fn tip(&self) -> u128 {
+        self.tip.0
+    }
+
+    /// Tip to the extrinsic author using the asset ID given.
+    pub fn asset_id(&self) -> Option<&T::AssetId> {
+        self.asset_id.as_ref()
+    }
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
@@ -285,12 +311,20 @@ impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
 
 impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
     const NAME: &'static str = "ChargeAssetTxPayment";
+    type Decoded = Self;
 }
 
 /// The [`ChargeTransactionPayment`] signed extension.
-#[derive(Debug)]
+#[derive(Debug, DecodeAsType)]
 pub struct ChargeTransactionPayment {
     tip: Compact<u128>,
+}
+
+impl ChargeTransactionPayment {
+    /// Tip to the extrinsic author in the native chain token.
+    pub fn tip(&self) -> u128 {
+        self.tip.0
+    }
 }
 
 /// Parameters to configure the [`ChargeTransactionPayment`] signed extension.
@@ -333,6 +367,7 @@ impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
 
 impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
     const NAME: &'static str = "ChargeTransactionPayment";
+    type Decoded = Self;
 }
 
 /// This accepts a tuple of [`SignedExtension`]s, and will dynamically make use of whichever
