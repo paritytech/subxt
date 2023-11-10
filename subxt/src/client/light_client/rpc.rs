@@ -44,7 +44,14 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// ### Native
+    ///
+    /// Panics when called outside of `tokio` runtime context for native context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
         config: AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
     ) -> Result<LightClientRpc, Error> {

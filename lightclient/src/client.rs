@@ -57,7 +57,14 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// ### Native
+    ///
+    /// Panics when called outside of `tokio` runtime context for native context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
         config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = smoldot_light::ChainId>>,
     ) -> Result<LightClientRpc, LightClientRpcError> {
@@ -91,7 +98,14 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// ### Native
+    ///
+    /// Panics when called outside of `tokio` runtime context for native context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new_from_client<TPlat>(
         client: smoldot_light::Client<TPlat>,
         chains: impl Iterator<Item = AddedChain>,

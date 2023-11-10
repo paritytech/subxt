@@ -89,7 +89,14 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// ### Native
+    ///
+    /// Panics when called outside of `tokio` runtime context for native context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         let chain_spec = fetch_url(url.as_ref()).await?;
@@ -117,7 +124,14 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// ### Native
+    ///
+    /// Panics when called outside of `tokio` runtime context for native context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub async fn build(self, chain_spec: &str) -> Result<LightClient<T>, Error> {
         let chain_spec = serde_json::from_str(chain_spec)
             .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
