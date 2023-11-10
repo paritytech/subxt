@@ -24,6 +24,9 @@ pub use builder::{LightClientBuilder, RawLightClientBuilder};
 use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;
 
+// Re-export smoldot related objects.
+pub use subxt_lightclient::smoldot;
+
 /// Light client error.
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
@@ -86,7 +89,7 @@ impl RawLightClient {
     /// This uses the same underlying instance spawned by the builder.
     pub async fn for_chain<TChainConfig: Config>(
         &self,
-        chain_id: subxt_lightclient::ChainId,
+        chain_id: smoldot::ChainId,
     ) -> Result<LightClient<TChainConfig>, crate::Error> {
         let raw_rpc = self.raw_rpc.for_chain(chain_id);
         let rpc_client = RpcClient::new(raw_rpc.clone());
@@ -101,7 +104,7 @@ impl RawLightClient {
 #[derivative(Clone(bound = ""))]
 pub struct LightClient<T: Config> {
     client: OnlineClient<T>,
-    chain_id: subxt_lightclient::ChainId,
+    chain_id: smoldot::ChainId,
 }
 
 impl<T: Config> LightClient<T> {
@@ -165,7 +168,7 @@ impl<T: Config> LightClient<T> {
     }
 
     /// Returns the chain ID of the current light-client.
-    pub fn chain_id(&self) -> subxt_lightclient::ChainId {
+    pub fn chain_id(&self) -> smoldot::ChainId {
         self.chain_id
     }
 }

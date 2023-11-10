@@ -2,14 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::LightClientError;
+use super::{smoldot, LightClientError};
 use crate::{
     backend::rpc::{RawRpcFuture, RawRpcSubscription, RpcClientT},
     error::{Error, RpcError},
 };
 use futures::StreamExt;
 use serde_json::value::RawValue;
-use subxt_lightclient::{AddChainConfig, ChainId, LightClientRpcError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 pub const LOG_TARGET: &str = "subxt-rpc-light-client";
@@ -25,7 +24,7 @@ impl RawLightClientRpc {
     }
 
     /// Constructs a new [`LightClientRpc`] that communicates with the provided chain.
-    pub fn for_chain(&self, chain_id: subxt_lightclient::ChainId) -> LightClientRpc {
+    pub fn for_chain(&self, chain_id: smoldot::ChainId) -> LightClientRpc {
         LightClientRpc(self.0.for_chain(chain_id))
     }
 }
@@ -55,7 +54,7 @@ impl LightClientRpc {
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
-        config: AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
+        config: smoldot::AddChainConfig<'_, (), impl Iterator<Item = smoldot::ChainId>>,
     ) -> Result<LightClientRpc, Error> {
         let rpc = subxt_lightclient::LightClientRpc::new(config)
             .map_err(|err| LightClientError::Rpc(err))?;
@@ -64,7 +63,7 @@ impl LightClientRpc {
     }
 
     /// Returns the chain ID of the current light-client.
-    pub fn chain_id(&self) -> subxt_lightclient::ChainId {
+    pub fn chain_id(&self) -> smoldot::ChainId {
         self.0.chain_id()
     }
 }
@@ -140,7 +139,7 @@ impl RpcClientT for LightClientRpc {
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?
                 .map_err(|err| {
                     RpcError::ClientError(Box::new(LightClientError::Rpc(
-                        LightClientRpcError::Request(err.to_string()),
+                        subxt_lightclient::LightClientRpcError::Request(err.to_string()),
                     )))
                 })?;
 

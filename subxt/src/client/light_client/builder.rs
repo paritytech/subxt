@@ -7,7 +7,7 @@ use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
-use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
+use subxt_lightclient::{smoldot, AddedChain};
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
@@ -15,7 +15,7 @@ pub struct LightClientBuilder<T: Config> {
     max_pending_requests: NonZeroU32,
     max_subscriptions: u32,
     bootnodes: Option<Vec<serde_json::Value>>,
-    potential_relay_chains: Option<Vec<ChainId>>,
+    potential_relay_chains: Option<Vec<smoldot::ChainId>>,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -78,7 +78,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// be wrong to connect to the "Kusama" created by user A.
     pub fn potential_relay_chains(
         mut self,
-        potential_relay_chains: impl IntoIterator<Item = ChainId>,
+        potential_relay_chains: impl IntoIterator<Item = smoldot::ChainId>,
     ) -> Self {
         self.potential_relay_chains = Some(potential_relay_chains.into_iter().collect());
         self
@@ -155,9 +155,9 @@ impl<T: Config> LightClientBuilder<T> {
             }
         }
 
-        let config = AddChainConfig {
+        let config = smoldot::AddChainConfig {
             specification: &chain_spec.to_string(),
-            json_rpc: AddChainConfigJsonRpc::Enabled {
+            json_rpc: smoldot::AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: self.max_pending_requests,
                 max_subscriptions: self.max_subscriptions,
             },
@@ -173,7 +173,7 @@ impl<T: Config> LightClientBuilder<T> {
 
 /// Raw builder for [`RawLightClient`].
 pub struct RawLightClientBuilder {
-    chains: Vec<subxt_lightclient::AddedChain>,
+    chains: Vec<AddedChain>,
 }
 
 impl Default for RawLightClientBuilder {
@@ -191,10 +191,10 @@ impl RawLightClientBuilder {
     /// Adds a new chain to the list of chains synchronized by the light client.
     pub fn add_chain(
         mut self,
-        chain_id: subxt_lightclient::ChainId,
-        rpc_responses: subxt_lightclient::JsonRpcResponses,
+        chain_id: smoldot::ChainId,
+        rpc_responses: smoldot::JsonRpcResponses,
     ) -> Self {
-        self.chains.push(subxt_lightclient::AddedChain {
+        self.chains.push(AddedChain {
             chain_id,
             rpc_responses,
         });
@@ -205,9 +205,9 @@ impl RawLightClientBuilder {
     ///
     /// The provided `chain_id` is the chain with which the current instance of light client will interact.
     /// To target a different chain call the [`LightClient::target_chain`] method.
-    pub async fn build<TPlatform: subxt_lightclient::PlatformRef>(
+    pub async fn build<TPlatform: smoldot::PlatformRef>(
         self,
-        client: subxt_lightclient::Client<TPlatform>,
+        client: smoldot::Client<TPlatform>,
     ) -> Result<RawLightClient, Error> {
         // The raw subxt light client that spawns the smoldot background task.
         let raw_rpc: subxt_lightclient::RawLightClientRpc =
@@ -224,10 +224,11 @@ impl RawLightClientBuilder {
 async fn build_client_from_rpc<T: Config>(
     raw_rpc: LightClientRpc,
 ) -> Result<LightClient<T>, Error> {
-    let rpc_client = RpcClient::new(raw_rpc.clone());
+    let chain_id = raw_rpc.chain_id();
+    let rpc_client = RpcClient::new(raw_rpc);
     let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
 
-    Ok(LightClient { client, raw_rpc })
+    Ok(LightClient { client, chain_id })
 }
 
 /// Fetch the chain spec from the URL.

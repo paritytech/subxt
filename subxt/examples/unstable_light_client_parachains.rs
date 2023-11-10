@@ -21,16 +21,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Connecting to a parachain is a multi step process.
 
     // Step 1. Construct a new smoldot client.
-    let mut client = subxt_lightclient::Client::new(subxt_lightclient::DefaultPlatform::new(
-        "subxt-example-light-client".into(),
-        "version-0".into(),
-    ));
+    let mut client =
+        subxt_lightclient::smoldot::Client::new(subxt_lightclient::smoldot::DefaultPlatform::new(
+            "subxt-example-light-client".into(),
+            "version-0".into(),
+        ));
 
     // Step 2. Connect to the relay chain of the parachain. For this example, the Polkadot relay chain.
     let polkadot_connection = client
-        .add_chain(subxt_lightclient::AddChainConfig {
+        .add_chain(subxt_lightclient::smoldot::AddChainConfig {
             specification: POLKADOT_SPEC,
-            json_rpc: subxt_lightclient::AddChainConfigJsonRpc::Enabled {
+            json_rpc: subxt_lightclient::smoldot::AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: NonZeroU32::new(128).unwrap(),
                 max_subscriptions: 1024,
             },
@@ -46,9 +47,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Step 3. Connect to the parachain. For this example, the Asset hub parachain.
     let assethub_connection = client
-        .add_chain(subxt_lightclient::AddChainConfig {
+        .add_chain(subxt_lightclient::smoldot::AddChainConfig {
             specification: ASSET_HUB_SPEC,
-            json_rpc: subxt_lightclient::AddChainConfigJsonRpc::Enabled {
+            json_rpc: subxt_lightclient::smoldot::AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: NonZeroU32::new(128).unwrap(),
                 max_subscriptions: 1024,
             },
