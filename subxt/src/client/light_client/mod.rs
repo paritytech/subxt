@@ -79,11 +79,11 @@ impl RawLightClient {
     /// Target a different chain identified by the provided chain ID for requests.
     ///
     /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
-    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`Self::new_from_client`].
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`RawLightClientBuilder::add_chain`].
     ///
     /// # Note
     ///
-    /// This uses the same underlying instance created by [`Self::new_from_client`].
+    /// This uses the same underlying instance spawned by the builder.
     pub async fn for_chain<TChainConfig: Config>(
         &self,
         chain_id: subxt_lightclient::ChainId,
