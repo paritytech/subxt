@@ -58,7 +58,7 @@ pub enum FromSubxt {
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
     /// Smoldot light client implementation that leverages the exposed platform.
     client: smoldot_light::Client<TPlatform, TChain>,
-    /// Generates an unique monotonically increasing ID for each chian.
+    /// Generates an unique monotonically increasing ID for each chain.
     request_id_per_chain: HashMap<smoldot_light::ChainId, usize>,
     /// Map the request ID of a RPC method to the frontend `Sender`.
     requests: HashMap<(usize, smoldot_light::ChainId), oneshot::Sender<MethodResponse>>,
