@@ -68,11 +68,23 @@ impl LightClientRpc {
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
-        config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = smoldot_light::ChainId>>,
+        config: smoldot_light::AddChainConfig<
+            '_,
+            (),
+            impl IntoIterator<Item = smoldot_light::ChainId>,
+        >,
     ) -> Result<LightClientRpc, LightClientRpcError> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
         let mut client = smoldot_light::Client::new(build_platform());
+
+        let config = smoldot_light::AddChainConfig {
+            specification: config.specification,
+            json_rpc: config.json_rpc,
+            database_content: config.database_content,
+            potential_relay_chains: config.potential_relay_chains.into_iter(),
+            user_data: config.user_data,
+        };
 
         let smoldot_light::AddChainSuccess {
             chain_id,
@@ -112,13 +124,13 @@ impl LightClientRpc {
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new_from_client<TPlat>(
         client: smoldot_light::Client<TPlat>,
-        chains: impl Iterator<Item = AddedChain>,
+        chains: impl IntoIterator<Item = AddedChain>,
     ) -> RawLightClientRpc
     where
         TPlat: smoldot_light::platform::PlatformRef + Clone,
     {
         let (to_backend, backend) = mpsc::unbounded_channel();
-        let chains = chains.collect();
+        let chains = chains.into_iter().collect();
 
         let future = async move {
             let mut task = BackgroundTask::new(client);
