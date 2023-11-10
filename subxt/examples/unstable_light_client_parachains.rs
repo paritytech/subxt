@@ -71,10 +71,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build(client)
         .await?;
 
-    // Step 5. Obtain a client to target the parachain.
+    // Step 5. Obtain a client to target the relay chain and the parachain.
     let polkadot_api: LightClient<PolkadotConfig> =
         raw_light_client.for_chain(polkadot_chain_id).await?;
-
     let parachain_api: LightClient<PolkadotConfig> =
         raw_light_client.for_chain(parachain_chain_id).await?;
 
