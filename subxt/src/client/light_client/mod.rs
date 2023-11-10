@@ -92,7 +92,7 @@ impl RawLightClient {
         let rpc_client = RpcClient::new(raw_rpc.clone());
         let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
 
-        Ok(LightClient { client, raw_rpc })
+        Ok(LightClient { client, chain_id })
     }
 }
 
@@ -101,7 +101,7 @@ impl RawLightClient {
 #[derivative(Clone(bound = ""))]
 pub struct LightClient<T: Config> {
     client: OnlineClient<T>,
-    raw_rpc: rpc::LightClientRpc,
+    chain_id: subxt_lightclient::ChainId,
 }
 
 impl<T: Config> LightClient<T> {
@@ -166,7 +166,7 @@ impl<T: Config> LightClient<T> {
 
     /// Returns the chain ID of the current light-client.
     pub fn chain_id(&self) -> subxt_lightclient::ChainId {
-        self.raw_rpc.chain_id()
+        self.chain_id
     }
 }
 
