@@ -13,12 +13,9 @@ use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
 
-
 use scale_decode::DecodeAsType;
 
 use std::collections::HashMap;
-
-
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
