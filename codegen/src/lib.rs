@@ -23,8 +23,13 @@ use getrandom as _;
 
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
-use scale_typegen::{DerivesRegistry, TypeSubstitutes};
+use scale_typegen::{
+    path_segments,
+    typegen::settings::substitutes::{absolute_path, PathSegments, Substitute},
+    DerivesRegistry, TypeGenerationError, TypeSubstitutes,
+};
 use std::collections::HashMap;
+use syn::parse_quote;
 
 // Part of the public interface, so expose:
 pub use error::CodegenError;
@@ -210,11 +215,9 @@ impl CodegenBuilder {
         let crate_path = self.crate_path;
 
         let mut derives_registry: DerivesRegistry = if self.use_default_derives {
-            // types::DerivesRegistry::with_default_derives(&crate_path)
-            todo!()
+            default_derives(&crate_path)
         } else {
-            // types::DerivesRegistry::new()
-            todo!()
+            DerivesRegistry::new()
         };
 
         derives_registry.extend_for_all(self.extra_global_derives, self.extra_global_attributes);
@@ -227,19 +230,18 @@ impl CodegenBuilder {
         }
 
         let mut type_substitutes: TypeSubstitutes = if self.use_default_substitutions {
-            // types::TypeSubstitutes::with_default_substitutes(&crate_path)
-
-            todo!()
+            default_substitutes(&crate_path)
         } else {
-            // types::TypeSubstitutes::new()
-            todo!()
+            TypeSubstitutes::new()
         };
 
-        // for (from, with) in self.type_substitutes {
-        //     let abs_path = with.try_into()?;
-        //     type_substitutes.insert(from, abs_path)?;
-        // }
-        todo!();
+        for (from, with) in self.type_substitutes {
+            let abs_path =
+                absolute_path(with).expect("todo: use better error handling in scale-typegen");
+            type_substitutes
+                .insert(from, abs_path)
+                .expect("todo: use better error handling in scale-typegen");
+        }
 
         let item_mod = self.item_mod;
         let generator = RuntimeGenerator::new(metadata);
@@ -263,4 +265,94 @@ impl CodegenBuilder {
             )
         }
     }
+}
+
+fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
+    let encode_crate_path = quote::quote! { #crate_path::ext::scale_encode }.to_string();
+    let decode_crate_path = quote::quote! { #crate_path::ext::scale_decode }.to_string();
+
+    let derives: [syn::Path; 5] = [
+        parse_quote!(#crate_path::ext::scale_encode::EncodeAsType),
+        parse_quote!(#crate_path::ext::scale_decode::DecodeAsType),
+        parse_quote!(#crate_path::ext::codec::Encode),
+        parse_quote!(#crate_path::ext::codec::Decode),
+        parse_quote!(Debug),
+    ];
+
+    let attributes: [syn::Attribute; 3] = [
+        parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
+        parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
+        parse_quote!(#[codec(crate = #crate_path::ext::codec)]),
+    ];
+
+    let mut derives_registry = DerivesRegistry::new();
+    derives_registry.extend_for_all(derives, attributes);
+    derives_registry
+}
+
+fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
+    let mut type_substitutes = TypeSubstitutes::new();
+
+    let defaults: [(syn::Path, syn::Path); 11] = [
+        (
+            parse_quote!(bitvec::order::Lsb0),
+            parse_quote!(#crate_path::utils::bits::Lsb0),
+        ),
+        (
+            parse_quote!(bitvec::order::Msb0),
+            parse_quote!(#crate_path::utils::bits::Msb0),
+        ),
+        (
+            parse_quote!(sp_core::crypto::AccountId32),
+            parse_quote!(#crate_path::utils::AccountId32),
+        ),
+        (
+            parse_quote!(sp_runtime::multiaddress::MultiAddress),
+            parse_quote!(#crate_path::utils::MultiAddress),
+        ),
+        (
+            parse_quote!(primitive_types::H160),
+            parse_quote!(#crate_path::utils::H160),
+        ),
+        (
+            parse_quote!(primitive_types::H256),
+            parse_quote!(#crate_path::utils::H256),
+        ),
+        (
+            parse_quote!(primitive_types::H512),
+            parse_quote!(#crate_path::utils::H512),
+        ),
+        (
+            parse_quote!(frame_support::traits::misc::WrapperKeepOpaque),
+            parse_quote!(#crate_path::utils::WrapperKeepOpaque),
+        ),
+        // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
+        // can cause an issue with generated code that doesn't impl `Ord` by default.
+        // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
+        // suitable type params) avoids these issues.
+        (
+            parse_quote!(BTreeMap),
+            parse_quote!(#crate_path::utils::KeyedVec),
+        ),
+        (parse_quote!(BTreeSet), parse_quote!(::std::vec::Vec)),
+        // The `UncheckedExtrinsic(pub Vec<u8>)` is part of the runtime API calls.
+        // The inner bytes represent the encoded extrinsic, however when deriving the
+        // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes
+        // being altered by adding the length prefix in front of them.
+        (
+            parse_quote!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
+            parse_quote!(#crate_path::utils::UncheckedExtrinsic),
+        ),
+    ];
+
+    let defaults = defaults.into_iter().map(|(from, to)| {
+        (
+            from,
+            absolute_path(to).expect("default substitutes should be all absolute paths"),
+        )
+    });
+    type_substitutes
+        .extend(defaults)
+        .expect("default substitutes should never error");
+    type_substitutes
 }
