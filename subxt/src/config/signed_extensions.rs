@@ -12,13 +12,13 @@ use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
-use scale_decode::visitor::types::Composite;
-use scale_decode::visitor::{DecodeAsTypeResult, TypeId};
+
+
 use scale_decode::DecodeAsType;
-use scale_info::PortableRegistry;
+
 use std::collections::HashMap;
-use std::fmt::Formatter;
-use std::marker::PhantomData;
+
+
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
@@ -246,8 +246,8 @@ impl<T: Config> ChargeAssetTxPayment<T> {
     }
 
     /// Tip to the extrinsic author using the asset ID given.
-    pub fn asset_id(&self) -> Option<T::AssetId> {
-        self.asset_id
+    pub fn asset_id(&self) -> Option<&T::AssetId> {
+        self.asset_id.as_ref()
     }
 }
 

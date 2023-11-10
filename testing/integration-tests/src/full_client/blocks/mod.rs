@@ -280,7 +280,7 @@ async fn decode_signed_extensions_from_blocks() {
     let nonce1_static = extensions1.find::<CheckNonce>().unwrap().unwrap().0;
     let tip1 = extensions1.tip().unwrap();
     let tip1_static: u128 = extensions1
-        .find::<ChargeAssetTxPayment>()
+        .find::<ChargeAssetTxPayment<SubstrateConfig>>()
         .unwrap()
         .unwrap()
         .tip();
@@ -291,7 +291,7 @@ async fn decode_signed_extensions_from_blocks() {
     let nonce2_static = extensions2.find::<CheckNonce>().unwrap().unwrap().0;
     let tip2 = extensions2.tip().unwrap();
     let tip2_static: u128 = extensions2
-        .find::<ChargeAssetTxPayment>()
+        .find::<ChargeAssetTxPayment<SubstrateConfig>>()
         .unwrap()
         .unwrap()
         .tip();
