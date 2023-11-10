@@ -57,9 +57,11 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
+    /// The panic behaviour depends on the feature flag being used:
+    ///
     /// ### Native
     ///
-    /// Panics when called outside of `tokio` runtime context for native context.
+    /// Panics when called outside of a `tokio` runtime context.
     ///
     /// ### Web
     ///
@@ -98,9 +100,11 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
+    /// The panic behaviour depends on the feature flag being used:
+    ///
     /// ### Native
     ///
-    /// Panics when called outside of `tokio` runtime context for native context.
+    /// Panics when called outside of a `tokio` runtime context.
     ///
     /// ### Web
     ///
