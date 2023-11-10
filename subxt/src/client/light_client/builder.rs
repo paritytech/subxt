@@ -201,7 +201,7 @@ impl RawLightClientBuilder {
         self
     }
 
-    /// Construct a [`RawLightClient`] from a raw smoldot instance.
+    /// Construct a [`RawLightClient`] from a raw smoldot client.
     ///
     /// The provided `chain_id` is the chain with which the current instance of light client will interact.
     /// To target a different chain call the [`LightClient::target_chain`] method.

@@ -62,11 +62,11 @@ impl RawLightClient {
     /// Construct a [`RawLightClient`] using its builder interface.
     ///
     /// The raw builder is utilized for constructing light-clients from a low
-    /// level smoldot instance.
+    /// level smoldot client.
     ///
-    /// This is especially useful when you want to gain access to the smoldot client instance.
+    /// This is especially useful when you want to gain access to the smoldot client.
     /// For example, you may want to connect to multiple chains and/or parachains while reusing the
-    /// same smoldot instance under the hood. Or you may want to configure different values for
+    /// same smoldot client under the hood. Or you may want to configure different values for
     /// smoldot internal buffers, number of subscriptions and relay chains.
     ///
     /// # Note
