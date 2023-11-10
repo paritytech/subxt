@@ -58,8 +58,8 @@ pub enum FromSubxt {
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
     /// Smoldot light client implementation that leverages the exposed platform.
     client: smoldot_light::Client<TPlatform, TChain>,
-    /// Unique IDs for RPC calls.
-    rpc_chain_id: UniqueChainID,
+    /// Generates an unique monotonically increasing ID for each chian.
+    request_id_per_chain: HashMap<smoldot_light::ChainId, usize>,
     /// Map the request ID of a RPC method to the frontend `Sender`.
     requests: HashMap<(usize, smoldot_light::ChainId), oneshot::Sender<MethodResponse>>,
     /// Subscription calls first need to make a plain RPC method
@@ -89,7 +89,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     ) -> BackgroundTask<TPlatform, TChain> {
         BackgroundTask {
             client,
-            rpc_chain_id: Default::default(),
+            request_id_per_chain: Default::default(),
             requests: Default::default(),
             id_to_subscription: Default::default(),
             subscriptions: Default::default(),
@@ -98,7 +98,10 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
 
     /// Fetch and increment the request ID.
     fn next_id(&mut self, chain_id: smoldot_light::ChainId) -> usize {
-        self.rpc_chain_id.next_id(chain_id)
+        let next = self.request_id_per_chain.entry(chain_id).or_insert(1);
+        let id = *next;
+        *next = next.wrapping_add(1);
+        id
     }
 
     /// Handle the registration messages received from the user.
@@ -471,25 +474,5 @@ impl std::str::FromStr for RpcResponse {
             id: error.id,
             error: error.error,
         })
-    }
-}
-
-/// Generate unique IDs for RPC calls that are distinct for each chain.
-#[derive(Default)]
-struct UniqueChainID {
-    inner: HashMap<smoldot_light::ChainId, usize>,
-}
-
-impl UniqueChainID {
-    /// Fetch and increment the request ID of the chain.
-    ///
-    /// # Note
-    ///
-    /// Requests start from the ID 1.
-    pub fn next_id(&mut self, chain_id: smoldot_light::ChainId) -> usize {
-        let next = self.inner.entry(chain_id).or_insert(1);
-        let id = *next;
-        *next = next.wrapping_add(1);
-        id
     }
 }
