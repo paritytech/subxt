@@ -3236,6 +3236,7 @@ dependencies = [
 [[package]]
 name = "scale-typegen"
 version = "0.0.1"
+source = "git+https://github.com/paritytech/scale-typegen?branch=master#1d5f4e7ba3b93fdc390ae32cc1d140266dbbc31c"
 dependencies = [
  "anyhow",
  "parity-scale-codec",

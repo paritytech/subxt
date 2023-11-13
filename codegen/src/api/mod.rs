@@ -12,9 +12,9 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use scale_typegen::typegen::ir::type_ir::{CompositeIR, TypeIR, TypeIRKind};
+use scale_typegen::typegen::ir::type_ir::CompositeIR;
 use scale_typegen::typegen::type_params::TypeParameters;
-use scale_typegen::{Derives, TypeGenerator, TypeGeneratorSettings, TypePathResolver};
+use scale_typegen::{TypeGenerator, TypeGeneratorSettings};
 use subxt_metadata::Metadata;
 
 use crate::error::CodegenError;
@@ -327,16 +327,20 @@ impl RuntimeGenerator {
 
 fn subxt_type_gen_settings(
     derives: scale_typegen::DerivesRegistry,
-    type_substitutes: scale_typegen::TypeSubstitutes,
+    substitutes: scale_typegen::TypeSubstitutes,
     crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> TypeGeneratorSettings {
-    let mut settings = TypeGeneratorSettings::default()
-        .should_gen_docs(should_gen_docs)
-        .decoded_bits_type_path(parse_quote!(#crate_path::utils::bits::DecodedBits));
-    settings.derives = derives;
-    settings.substitutes = type_substitutes;
-    settings
+    TypeGeneratorSettings {
+        type_mod_name: "runtime_types".into(),
+        should_gen_docs,
+        derives,
+        substitutes,
+        decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
+        compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
+        compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
+        insert_codec_attributes: true,
+    }
 }
 
 /// Return a vector of tuples of variant names and corresponding struct definitions.
@@ -345,7 +349,7 @@ pub fn generate_structs_from_variants<F>(
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-    crate_path: &syn::Path,
+    _crate_path: &syn::Path,
 ) -> Result<Vec<(String, CompositeIR)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,

@@ -4,7 +4,7 @@
 
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
-use scale_typegen::typegen::type_path_resolver;
+
 use scale_typegen::TypeGenerator;
 use subxt_metadata::{Metadata, RuntimeApiMetadata};
 
@@ -136,7 +136,7 @@ pub fn generate_runtime_apis(
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
+    _should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let runtime_fns: Vec<_> = metadata
         .runtime_api_traits()

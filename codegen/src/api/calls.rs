@@ -28,7 +28,7 @@ pub fn generate_calls(
         return Ok(quote!());
     };
 
-    let mut struct_defs = super::generate_structs_from_variants(
+    let struct_defs = super::generate_structs_from_variants(
         type_gen,
         call_ty,
         |name| name.to_upper_camel_case().into(),

@@ -40,7 +40,7 @@ jsonrpsee = { workspace = true, features = [
 hex = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 thiserror = { workspace = true }
-scale-typegen = { path = "../../scale-typegen" }
+scale-typegen = { git = "https://github.com/paritytech/scale-typegen", branch = "master" }
 
 
 # Included if "web" feature is enabled, to enable its js feature.

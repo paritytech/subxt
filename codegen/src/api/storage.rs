@@ -177,7 +177,7 @@ mod tests {
     use frame_metadata::v15;
     use quote::{format_ident, quote};
     use scale_info::{meta_type, MetaType};
-    use scale_typegen::DerivesRegistry;
+
     use std::borrow::Cow;
 
     use subxt_metadata::Metadata;

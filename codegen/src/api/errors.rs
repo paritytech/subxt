@@ -4,7 +4,7 @@
 
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use scale_typegen::{typegen::type_path_resolver, TypeGenerator};
+use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
