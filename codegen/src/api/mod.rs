@@ -64,42 +64,35 @@ impl RuntimeGenerator {
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
-
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
+
+        let settings =
+            subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
+
+        let type_gen = TypeGenerator::new(self.metadata.types(), settings)?;
+        let types_mod = type_gen.generate_types_mod()?;
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
 
-        // let type_gen = TypeGenerator::new(
-        //     self.metadata.types(),
-        //     "runtime_types",
-        //     type_substitutes,
-        //     derives,
-        //     crate_path,
-        //     should_gen_docs,
-        // );
-        // let types_mod = type_gen.generate_types_mod()?;
+        Ok(quote! {
+            #( #item_mod_attrs )*
+            #[allow(dead_code, unused_imports, non_camel_case_types)]
+            #[allow(clippy::all)]
+            #[allow(rustdoc::broken_intra_doc_links)]
+            pub mod #mod_ident {
+                // Preserve any Rust items that were previously defined in the adorned module
+                #( #rust_items ) *
 
-        todo!()
+                // Make it easy to access the root items via `root_mod` at different levels
+                // without reaching out of this module.
+                #[allow(unused_imports)]
+                mod root_mod {
+                    pub use super::*;
+                }
 
-        // Ok(quote! {
-        //     #( #item_mod_attrs )*
-        //     #[allow(dead_code, unused_imports, non_camel_case_types)]
-        //     #[allow(clippy::all)]
-        //     #[allow(rustdoc::broken_intra_doc_links)]
-        //     pub mod #mod_ident {
-        //         // Preserve any Rust items that were previously defined in the adorned module
-        //         #( #rust_items ) *
-
-        //         // Make it easy to access the root items via `root_mod` at different levels
-        //         // without reaching out of this module.
-        //         #[allow(unused_imports)]
-        //         mod root_mod {
-        //             pub use super::*;
-        //         }
-
-        //         #types_mod
-        //     }
-        // })
+                #types_mod
+            }
+        })
     }
 
     /// Generate the API for interacting with a Substrate runtime.
