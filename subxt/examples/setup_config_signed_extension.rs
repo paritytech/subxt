@@ -46,6 +46,7 @@ pub struct CustomSignedExtension;
 // up in the chain metadata in order to know when and if to use it.
 impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension {
     const NAME: &'static str = "CustomSignedExtension";
+    type Decoded = ();
 }
 
 // Gather together any params we need for our signed extension, here none.

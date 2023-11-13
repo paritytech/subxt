@@ -12,9 +12,13 @@ use crate::{
     Metadata,
 };
 
+use crate::config::signed_extensions::{
+    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
+};
+use crate::config::SignedExtension;
 use crate::dynamic::DecodedValue;
 use crate::utils::strip_compact_prefix;
-use codec::{Compact, Decode};
+use codec::Decode;
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 
@@ -366,12 +370,13 @@ where
     }
 
     /// Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_>> {
+    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
         let signed = self.signed_details.as_ref()?;
         let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
         Some(ExtrinsicSignedExtensions {
             bytes: extra_bytes,
             metadata: &self.metadata,
+            _marker: std::marker::PhantomData,
         })
     }
 
@@ -605,21 +610,22 @@ impl<T: Config> ExtrinsicEvents<T> {
 
 /// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtensions<'a> {
+pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl<'a> ExtrinsicSignedExtensions<'a> {
+impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     /// If the decoding of any signed extension fails, an error item is yielded and the iterator stops.
-    pub fn iter(&self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<'a>, Error>> {
+    pub fn iter(&self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<T>, Error>> {
         let signed_extension_types = self.metadata.extrinsic().signed_extensions();
         let num_signed_extensions = signed_extension_types.len();
         let bytes = self.bytes;
-        let metadata = self.metadata;
         let mut index = 0;
         let mut byte_start_idx = 0;
+        let metadata = &self.metadata;
 
         std::iter::from_fn(move || {
             if index == num_signed_extensions {
@@ -649,8 +655,29 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
                 ty_id,
                 identifier: extension.identifier(),
                 metadata,
+                _marker: std::marker::PhantomData,
             }))
         })
+    }
+
+    fn find_by_name(&self, name: &str) -> Option<ExtrinsicSignedExtension<'_, T>> {
+        let signed_extension = self
+            .iter()
+            .find_map(|e| e.ok().filter(|e| e.name() == name))?;
+        Some(signed_extension)
+    }
+
+    /// Searches through all signed extensions to find a specific one.
+    /// If the Signed Extension is not found `Ok(None)` is returned.
+    /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
+    pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+        self.find_by_name(S::NAME)
+            .map(|s| {
+                s.as_signed_extra::<S>().map(|e| {
+                    e.expect("signed extra name is correct, because it was found before; qed.")
+                })
+            })
+            .transpose()
     }
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment
@@ -658,40 +685,39 @@ impl<'a> ExtrinsicSignedExtensions<'a> {
     ///
     /// Returns `None` if  `tip` was not found or decoding failed.
     pub fn tip(&self) -> Option<u128> {
-        let tip = self.iter().find_map(|e| {
-            e.ok().filter(|e| {
-                e.name() == "ChargeTransactionPayment" || e.name() == "ChargeAssetTxPayment"
+        // Note: the overhead of iterating twice should be negligible.
+        self.find::<ChargeTransactionPayment>()
+            .ok()
+            .flatten()
+            .map(|e| e.tip())
+            .or_else(|| {
+                self.find::<ChargeAssetTxPayment<T>>()
+                    .ok()
+                    .flatten()
+                    .map(|e| e.tip())
             })
-        })?;
-
-        // Note: ChargeAssetTxPayment might have addition information in it (asset_id).
-        // But both should start with a compact encoded u128, so this decoding is fine.
-        let tip = Compact::<u128>::decode(&mut tip.bytes()).ok()?.0;
-        Some(tip)
     }
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
     ///
     /// Returns `None` if `nonce` was not found or decoding failed.
     pub fn nonce(&self) -> Option<u64> {
-        let nonce = self
-            .iter()
-            .find_map(|e| e.ok().filter(|e| e.name() == "CheckNonce"))?;
-        let nonce = Compact::<u64>::decode(&mut nonce.bytes()).ok()?.0;
+        let nonce = self.find::<CheckNonce>().ok()??.0;
         Some(nonce)
     }
 }
 
 /// A single signed extension
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtension<'a> {
+pub struct ExtrinsicSignedExtension<'a, T: Config> {
     bytes: &'a [u8],
     ty_id: u32,
     identifier: &'a str,
     metadata: &'a Metadata,
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl<'a> ExtrinsicSignedExtension<'a> {
+impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     /// The bytes representing this signed extension.
     pub fn bytes(&self) -> &'a [u8] {
         self.bytes
@@ -709,10 +735,22 @@ impl<'a> ExtrinsicSignedExtension<'a> {
 
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        let value =
-            DecodedValue::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
+        self.as_type()
+    }
 
+    /// Decodes the `extra` bytes of this Signed Extension into a static type.
+    fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
         Ok(value)
+    }
+
+    /// Decodes the `extra` bytes of this Signed Extension into its associated `Decoded` type.
+    /// Returns `Ok(None)` if the identitfier of this Signed Extension object does not line up with the `NAME` constant of the provided Signed Extension type.
+    pub fn as_signed_extra<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+        if self.identifier != S::NAME {
+            return Ok(None);
+        }
+        self.as_type::<S::Decoded>().map(Some)
     }
 }
 
