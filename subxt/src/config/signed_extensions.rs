@@ -370,6 +370,32 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
     type Decoded = Self;
 }
 
+/// The [`SkipCheckIfFeeless`] signed extension.
+#[derive(Debug, DecodeAsType)]
+pub struct SkipCheckIfFeeless;
+
+impl<T: Config> ExtrinsicParams<T> for SkipCheckIfFeeless {
+    type OtherParams = ();
+    type Error = std::convert::Infallible;
+
+    fn new<Client: OfflineClientT<T>>(
+        _nonce: u64,
+        _client: Client,
+        _other_params: Self::OtherParams,
+    ) -> Result<Self, Self::Error> {
+        Ok(SkipCheckIfFeeless)
+    }
+}
+
+impl ExtrinsicParamsEncoder for SkipCheckIfFeeless {
+    fn encode_extra_to(&self, _v: &mut Vec<u8>) {}
+}
+
+impl<T: Config> SignedExtension<T> for SkipCheckIfFeeless {
+    const NAME: &'static str = "SkipCheckIfFeeless";
+    type Decoded = Self;
+}
+
 /// This accepts a tuple of [`SignedExtension`]s, and will dynamically make use of whichever
 /// ones are actually required for the chain in the correct order, ignoring the rest. This
 /// is a sensible default, and allows for a single configuration to work across multiple chains.
