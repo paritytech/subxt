@@ -81,8 +81,8 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::OtherParams {
-    let (a, b, c, d, e, f, g) = params.build();
-    (a, b, c, d, e, f, g, ())
+    let (a, b, c, d, e, f, g, h) = params.build();
+    (a, b, c, d, e, f, g, (), ())
 }
 
 #[tokio::main]
