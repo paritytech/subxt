@@ -90,7 +90,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
         // Sleep less than block time, but long enough to ensure
         // not all transactions end up in the same block.
-        tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+    }
+
+    for _ in 0..20 {
+        tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+        let account_nonce = api.tx().account_nonce(&alice).await?;
+        let system_next = rpc.system_account_next_index(&alice).await?;
+
+        println!(
+            "AccountNonce: {account_nonce:?} System.account_next_index: {system_next:?} Finalized: {:?}",
+            rpc.chain_get_finalized_head().await?
+        );
+        if account_nonce == system_next {
+            return Ok(());
+        }
     }
     Ok(())
 }
