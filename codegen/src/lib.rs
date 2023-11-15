@@ -24,7 +24,7 @@ use getrandom as _;
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use scale_typegen::{
-    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeSubstitutes,
+    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeSubstitutes, TypegenError,
 };
 use std::collections::HashMap;
 use syn::parse_quote;
@@ -234,11 +234,10 @@ impl CodegenBuilder {
         };
 
         for (from, with) in self.type_substitutes {
-            let abs_path =
-                absolute_path(with).expect("todo: use better error handling in scale-typegen");
+            let abs_path = absolute_path(with).map_err(TypegenError::from)?;
             type_substitutes
                 .insert(from, abs_path)
-                .expect("todo: use better error handling in scale-typegen");
+                .map_err(TypegenError::from)?;
         }
 
         let item_mod = self.item_mod;
