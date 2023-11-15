@@ -1,4 +1,5 @@
 use codec::Encode;
+use scale_encode::EncodeAsType;
 use subxt::client::OfflineClientT;
 use subxt::config::signed_extensions;
 use subxt::config::{
@@ -11,6 +12,7 @@ pub mod runtime {}
 
 // We don't need to construct this at runtime,
 // so an empty enum is appropriate:
+#[derive(EncodeAsType)]
 pub enum CustomConfig {}
 
 impl Config for CustomConfig {
@@ -31,9 +33,10 @@ impl Config for CustomConfig {
             signed_extensions::CheckGenesis<Self>,
             signed_extensions::CheckMortality<Self>,
             signed_extensions::ChargeAssetTxPayment<Self>,
+            signed_extensions::ChargeTransactionPayment,
             signed_extensions::SkipCheckIfFeeless<
                 Self,
-                signed_extensions::ChargeTransactionPayment,
+                signed_extensions::ChargeAssetTxPayment<Self>,
             >,
             // And add a new one of our own:
             CustomSignedExtension,
@@ -84,8 +87,8 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::OtherParams {
-    let (a, b, c, d, e, f, g) = params.build();
-    (a, b, c, d, e, f, g, ())
+    let (a, b, c, d, e, f, g, h) = params.build();
+    (a, b, c, d, e, f, g, h, ())
 }
 
 #[tokio::main]

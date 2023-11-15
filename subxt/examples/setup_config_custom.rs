@@ -3,7 +3,19 @@ use subxt::client::OfflineClientT;
 use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
 use subxt_signer::sr25519::dev;
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
+#[subxt::subxt(
+    runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
+    derive_for_type(path = "xcm::v2::multilocation::MultiLocation", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::multilocation::Junctions", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::junction::Junction", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::NetworkId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyPart", derive = "Clone"),
+    derive_for_type(
+        path = "bounded_collections::weak_bounded_vec::WeakBoundedVec",
+        derive = "Clone"
+    )
+)]
 pub mod runtime {}
 use runtime::runtime_types::xcm::v2::multilocation::MultiLocation;
 
