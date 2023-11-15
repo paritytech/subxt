@@ -383,15 +383,16 @@ impl<T: Config, S: SignedExtension<T>> SkipCheckIfFeeless<T, S> {
 }
 
 impl<T: Config, S: SignedExtension<T>> ExtrinsicParams<T> for SkipCheckIfFeeless<T, S> {
-    type OtherParams = S;
-    type Error = std::convert::Infallible;
+    type OtherParams = SkipCheckIfFeelessParams<T, S>;
+    type Error = <S as ExtrinsicParams<T>>::Error;
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        _client: Client,
+        nonce: u64,
+        client: Client,
         other_params: Self::OtherParams,
     ) -> Result<Self, Self::Error> {
-        Ok(SkipCheckIfFeeless(other_params, PhantomData))
+        let inner_extension = S::new(nonce, client, other_params.0)?;
+        Ok(SkipCheckIfFeeless(inner_extension, PhantomData))
     }
 }
 
@@ -404,6 +405,18 @@ impl<T: Config, S: SignedExtension<T>> ExtrinsicParamsEncoder for SkipCheckIfFee
 impl<T: Config, S: SignedExtension<T>> SignedExtension<T> for SkipCheckIfFeeless<T, S> {
     const NAME: &'static str = "SkipCheckIfFeeless";
     type Decoded = S::Decoded;
+}
+
+/// Parameters to configure the [`SkipCheckIfFeeless`] signed extension.
+pub struct SkipCheckIfFeelessParams<T: Config, S: SignedExtension<T>>(
+    <S as ExtrinsicParams<T>>::OtherParams,
+);
+
+impl<T: Config, S: SignedExtension<T>> SkipCheckIfFeelessParams<T, S> {
+    /// Skip the check if the transaction is feeless.
+    pub fn from(extrinsic_params: <S as ExtrinsicParams<T>>::OtherParams) -> Self {
+        SkipCheckIfFeelessParams(extrinsic_params)
+    }
 }
 
 /// This accepts a tuple of [`SignedExtension`]s, and will dynamically make use of whichever
