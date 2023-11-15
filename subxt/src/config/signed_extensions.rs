@@ -12,6 +12,7 @@ use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
+use std::marker::PhantomData;
 
 use scale_decode::DecodeAsType;
 
@@ -372,28 +373,37 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 
 /// The [`SkipCheckIfFeeless`] signed extension.
 #[derive(Debug, DecodeAsType)]
-pub struct SkipCheckIfFeeless;
+pub struct SkipCheckIfFeeless<T: Config, S: SignedExtension<T>>(S, PhantomData<T>);
 
-impl<T: Config> ExtrinsicParams<T> for SkipCheckIfFeeless {
-    type OtherParams = ();
+impl<T: Config, S: SignedExtension<T>> SkipCheckIfFeeless<T, S> {
+    /// The inner signed extension.
+    pub fn inner(&self) -> &S {
+        &self.0
+    }
+}
+
+impl<T: Config, S: SignedExtension<T>> ExtrinsicParams<T> for SkipCheckIfFeeless<T, S> {
+    type OtherParams = S;
     type Error = std::convert::Infallible;
 
     fn new<Client: OfflineClientT<T>>(
         _nonce: u64,
         _client: Client,
-        _other_params: Self::OtherParams,
+        other_params: Self::OtherParams,
     ) -> Result<Self, Self::Error> {
-        Ok(SkipCheckIfFeeless)
+        Ok(SkipCheckIfFeeless(other_params, PhantomData))
     }
 }
 
-impl ExtrinsicParamsEncoder for SkipCheckIfFeeless {
-    fn encode_extra_to(&self, _v: &mut Vec<u8>) {}
+impl<T: Config, S: SignedExtension<T>> ExtrinsicParamsEncoder for SkipCheckIfFeeless<T, S> {
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        self.0.encode_extra_to(v);
+    }
 }
 
-impl<T: Config> SignedExtension<T> for SkipCheckIfFeeless {
+impl<T: Config, S: SignedExtension<T>> SignedExtension<T> for SkipCheckIfFeeless<T, S> {
     const NAME: &'static str = "SkipCheckIfFeeless";
-    type Decoded = Self;
+    type Decoded = S::Decoded;
 }
 
 /// This accepts a tuple of [`SignedExtension`]s, and will dynamically make use of whichever
