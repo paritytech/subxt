@@ -9,12 +9,12 @@
 
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use crate::utils::Era;
-use crate::{client::OfflineClientT, Config};
+use crate::{client::OfflineClientT, Config, Metadata};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
-use std::marker::PhantomData;
-
 use scale_decode::DecodeAsType;
+use scale_encode::EncodeAsType;
+use std::marker::PhantomData;
 
 use std::collections::HashMap;
 
@@ -230,8 +230,9 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug, DecodeAsType)]
+#[derive(Debug, DecodeAsType, EncodeAsType, Clone)]
 #[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
+#[encode_as_type(trait_bounds = "T::AssetId: EncodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,
     asset_id: Option<T::AssetId>,
@@ -253,6 +254,16 @@ impl<T: Config> ChargeAssetTxPayment<T> {
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
+}
+
+// Dev note: `#[derive(Clone)]` implies `T: Clone` instead of `T::AssetId: Clone`.
+impl<T: Config> Clone for ChargeAssetTxPaymentParams<T> {
+    fn clone(&self) -> Self {
+        Self {
+            tip: self.tip.clone(),
+            asset_id: self.asset_id.clone(),
+        }
+    }
 }
 
 impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
@@ -316,7 +327,7 @@ impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
 }
 
 /// The [`ChargeTransactionPayment`] signed extension.
-#[derive(Debug, DecodeAsType)]
+#[derive(Debug, DecodeAsType, EncodeAsType)]
 pub struct ChargeTransactionPayment {
     tip: Compact<u128>,
 }
@@ -372,16 +383,16 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 }
 
 /// The [`SkipCheckIfFeeless`] signed extension.
-#[derive(Debug, DecodeAsType)]
-pub struct SkipCheckIfFeeless<T, S>(S, PhantomData<T>)
+#[derive(Debug)]
+pub struct SkipCheckIfFeeless<T, S>(S, Metadata, u32, PhantomData<T>)
 where
     T: Config,
-    S: SignedExtension<T>;
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType;
 
 impl<T, S> SkipCheckIfFeeless<T, S>
 where
     T: Config,
-    S: SignedExtension<T>,
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType,
 {
     /// The inner signed extension.
     pub fn inner(&self) -> &S {
@@ -392,11 +403,11 @@ where
 impl<T, S> ExtrinsicParams<T> for SkipCheckIfFeeless<T, S>
 where
     T: Config,
-    S: SignedExtension<T>,
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType,
     <S as ExtrinsicParams<T>>::OtherParams: Default,
 {
     type OtherParams = SkipCheckIfFeelessParams<T, S>;
-    type Error = <S as ExtrinsicParams<T>>::Error;
+    type Error = ExtrinsicParamsError;
 
     fn new<Client: OfflineClientT<T>>(
         nonce: u64,
@@ -408,25 +419,93 @@ where
             None => <S as ExtrinsicParams<T>>::OtherParams::default(),
         };
 
-        let inner_extension = S::new(nonce, client, other_params)?;
-        Ok(SkipCheckIfFeeless(inner_extension, PhantomData))
+        let metadata = client.metadata();
+        let skip_check_type_id = metadata
+            .extrinsic()
+            .signed_extensions()
+            .iter()
+            .find_map(|ext| {
+                if ext.identifier() == Self::NAME {
+                    Some(ext.extra_ty())
+                } else {
+                    None
+                }
+            });
+        let Some(skip_check_type_id) = skip_check_type_id else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(
+                S::NAME.to_owned(),
+            ));
+        };
+
+        // Ensure that the `SkipCheckIfFeeless` type has the same inner signed extension as provided.
+        let Some(skip_check_ty) = metadata.types().resolve(skip_check_type_id) else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
+                "Cannot find type of the {} in metadata",
+                S::NAME.to_owned()
+            )));
+        };
+
+        // The substrate's `SkipCheckIfFeeless` contains 2 types: the inner signed extension and a phantom data.
+        // Phantom data does not have a type associated, so we need to find the inner signed extension.
+        let Some(inner_type_id) = skip_check_ty
+            .type_params
+            .iter()
+            .find_map(|param| param.ty.map(|ty| ty.id))
+        else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
+                "Cannot find inner type of the {} in metadata",
+                S::NAME.to_owned()
+            )));
+        };
+
+        // Get the inner type of the `SkipCheckIfFeeless` extension to check if the naming matches the provided parameters.
+        let Some(inner_extension_ty) = metadata.types().resolve(inner_type_id) else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
+                "Cannot find type of the {} in metadata",
+                S::NAME.to_owned()
+            )));
+        };
+
+        let Some(inner_extension_name) = inner_extension_ty.path.segments.last() else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
+                "Inner type of the extension {} must be named in the metadata",
+                S::NAME.to_owned()
+            )));
+        };
+
+        if inner_extension_name != S::NAME {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
+                "Provided wrong singed extension {}, the metadata expects {}",
+                S::NAME,
+                inner_extension_name,
+            )));
+        }
+
+        let inner_extension = S::new(nonce, client, other_params).map_err(Into::into)?;
+
+        Ok(SkipCheckIfFeeless(
+            inner_extension,
+            metadata,
+            inner_type_id,
+            PhantomData,
+        ))
     }
 }
 
 impl<T, S> ExtrinsicParamsEncoder for SkipCheckIfFeeless<T, S>
 where
     T: Config,
-    S: SignedExtension<T>,
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType,
 {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_extra_to(v);
+        let _ = self.0.encode_as_type_to(self.2, &self.1.types(), v);
     }
 }
 
 impl<T, S> SignedExtension<T> for SkipCheckIfFeeless<T, S>
 where
     T: Config,
-    S: SignedExtension<T>,
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType,
     <S as ExtrinsicParams<T>>::OtherParams: Default,
 {
     const NAME: &'static str = "SkipCheckIfFeeless";
