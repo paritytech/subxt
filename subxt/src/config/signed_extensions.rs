@@ -373,16 +373,28 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 
 /// The [`SkipCheckIfFeeless`] signed extension.
 #[derive(Debug, DecodeAsType)]
-pub struct SkipCheckIfFeeless<T: Config, S: SignedExtension<T>>(S, PhantomData<T>);
+pub struct SkipCheckIfFeeless<T, S>(S, PhantomData<T>)
+where
+    T: Config,
+    S: SignedExtension<T>;
 
-impl<T: Config, S: SignedExtension<T>> SkipCheckIfFeeless<T, S> {
+impl<T, S> SkipCheckIfFeeless<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+{
     /// The inner signed extension.
     pub fn inner(&self) -> &S {
         &self.0
     }
 }
 
-impl<T: Config, S: SignedExtension<T>> ExtrinsicParams<T> for SkipCheckIfFeeless<T, S> {
+impl<T, S> ExtrinsicParams<T> for SkipCheckIfFeeless<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+    <S as ExtrinsicParams<T>>::OtherParams: Default,
+{
     type OtherParams = SkipCheckIfFeelessParams<T, S>;
     type Error = <S as ExtrinsicParams<T>>::Error;
 
@@ -391,31 +403,60 @@ impl<T: Config, S: SignedExtension<T>> ExtrinsicParams<T> for SkipCheckIfFeeless
         client: Client,
         other_params: Self::OtherParams,
     ) -> Result<Self, Self::Error> {
-        let inner_extension = S::new(nonce, client, other_params.0)?;
+        let other_params = match other_params.0 {
+            Some(other_params) => other_params,
+            None => <S as ExtrinsicParams<T>>::OtherParams::default(),
+        };
+
+        let inner_extension = S::new(nonce, client, other_params)?;
         Ok(SkipCheckIfFeeless(inner_extension, PhantomData))
     }
 }
 
-impl<T: Config, S: SignedExtension<T>> ExtrinsicParamsEncoder for SkipCheckIfFeeless<T, S> {
+impl<T, S> ExtrinsicParamsEncoder for SkipCheckIfFeeless<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+{
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
         self.0.encode_extra_to(v);
     }
 }
 
-impl<T: Config, S: SignedExtension<T>> SignedExtension<T> for SkipCheckIfFeeless<T, S> {
+impl<T, S> SignedExtension<T> for SkipCheckIfFeeless<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+    <S as ExtrinsicParams<T>>::OtherParams: Default,
+{
     const NAME: &'static str = "SkipCheckIfFeeless";
     type Decoded = S::Decoded;
 }
 
 /// Parameters to configure the [`SkipCheckIfFeeless`] signed extension.
-pub struct SkipCheckIfFeelessParams<T: Config, S: SignedExtension<T>>(
-    <S as ExtrinsicParams<T>>::OtherParams,
-);
+pub struct SkipCheckIfFeelessParams<T, S>(Option<<S as ExtrinsicParams<T>>::OtherParams>)
+where
+    T: Config,
+    S: SignedExtension<T>;
 
-impl<T: Config, S: SignedExtension<T>> SkipCheckIfFeelessParams<T, S> {
+impl<T: Config, S: SignedExtension<T>> Default for SkipCheckIfFeelessParams<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+{
+    fn default() -> Self {
+        SkipCheckIfFeelessParams(None)
+    }
+}
+
+impl<T, S> SkipCheckIfFeelessParams<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+{
     /// Skip the check if the transaction is feeless.
     pub fn from(extrinsic_params: <S as ExtrinsicParams<T>>::OtherParams) -> Self {
-        SkipCheckIfFeelessParams(extrinsic_params)
+        SkipCheckIfFeelessParams(Some(extrinsic_params))
     }
 }
 
