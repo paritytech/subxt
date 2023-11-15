@@ -31,7 +31,10 @@ impl Config for CustomConfig {
             signed_extensions::CheckGenesis<Self>,
             signed_extensions::CheckMortality<Self>,
             signed_extensions::ChargeAssetTxPayment<Self>,
-            signed_extensions::ChargeTransactionPayment,
+            signed_extensions::SkipCheckIfFeeless<
+                Self,
+                signed_extensions::ChargeTransactionPayment,
+            >,
             // And add a new one of our own:
             CustomSignedExtension,
         ),
@@ -82,7 +85,7 @@ pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::OtherParams {
     let (a, b, c, d, e, f, g) = params.build();
-    (a, b, c, d, e, f, g)
+    (a, b, c, d, e, f, g, ())
 }
 
 #[tokio::main]
