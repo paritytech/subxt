@@ -383,8 +383,14 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 }
 
 /// The [`SkipCheckIfFeeless`] signed extension.
-#[derive(Debug)]
-pub struct SkipCheckIfFeeless<T, S>(S, Metadata, u32, PhantomData<T>)
+#[derive(Debug, DecodeAsType)]
+#[decode_as_type(trait_bounds = "S: DecodeAsType")]
+pub struct SkipCheckIfFeeless<T, S>(
+    S,
+    #[decode_as_type(skip)] Option<Metadata>,
+    #[decode_as_type(skip)] u32,
+    #[decode_as_type(skip)] PhantomData<T>,
+)
 where
     T: Config,
     S: SignedExtension<T> + DecodeAsType + EncodeAsType;
@@ -395,7 +401,7 @@ where
     S: SignedExtension<T> + DecodeAsType + EncodeAsType,
 {
     /// The inner signed extension.
-    pub fn inner(&self) -> &S {
+    pub fn inner_signed_extension(&self) -> &S {
         &self.0
     }
 }
@@ -485,7 +491,7 @@ where
 
         Ok(SkipCheckIfFeeless(
             inner_extension,
-            metadata,
+            Some(metadata),
             inner_type_id,
             PhantomData,
         ))
@@ -498,7 +504,12 @@ where
     S: SignedExtension<T> + DecodeAsType + EncodeAsType,
 {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        let _ = self.0.encode_as_type_to(self.2, &self.1.types(), v);
+        let metadata = self
+            .1
+            .as_ref()
+            .expect("Metadata is populated while constructing the object; qed");
+
+        let _ = self.0.encode_as_type_to(self.2, metadata.types(), v);
     }
 }
 
@@ -509,7 +520,7 @@ where
     <S as ExtrinsicParams<T>>::OtherParams: Default,
 {
     const NAME: &'static str = "SkipCheckIfFeeless";
-    type Decoded = S::Decoded;
+    type Decoded = Self;
 }
 
 /// Parameters to configure the [`SkipCheckIfFeeless`] signed extension.
