@@ -10,6 +10,7 @@ pub mod legacy;
 pub mod rpc;
 pub mod unstable;
 
+use crate::backend::rpc::RpcClientT;
 use crate::error::Error;
 use crate::metadata::Metadata;
 use crate::Config;
@@ -29,6 +30,9 @@ pub(crate) mod sealed {
 /// a backend. Its goal is to be as minimal as possible.
 #[async_trait]
 pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
+    /// Return the underline rpc client of backend.
+    fn rpc_client(&self) -> &dyn RpcClientT;
+
     /// Fetch values from storage.
     async fn storage_fetch_values(
         &self,

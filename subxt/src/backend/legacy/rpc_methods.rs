@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct LegacyRpcMethods<T> {
-    client: RpcClient,
+    pub(crate) client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 

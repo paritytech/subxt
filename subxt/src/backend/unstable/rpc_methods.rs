@@ -21,7 +21,7 @@ use std::task::Poll;
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct UnstableRpcMethods<T> {
-    client: RpcClient,
+    pub(crate) client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 

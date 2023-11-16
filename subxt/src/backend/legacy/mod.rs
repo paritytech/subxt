@@ -9,8 +9,8 @@ pub mod rpc_methods;
 
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus,
+    rpc::RpcClient, Backend, BlockRef, RpcClientT, RuntimeVersion, StorageResponse, StreamOf,
+    StreamOfResults, TransactionStatus,
 };
 use crate::{config::Header, Config, Error};
 use async_trait::async_trait;
@@ -41,6 +41,10 @@ impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
+    fn rpc_client(&self) -> &dyn RpcClientT {
+        &*self.methods.client
+    }
+
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
