@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::iter;
+
 use super::{
     background::{BackgroundTask, FromSubxt, MethodResponse},
     LightClientRpcError,
@@ -11,7 +13,29 @@ use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 
 use super::platform::build_platform;
 
-pub const LOG_TARGET: &str = "light-client";
+pub const LOG_TARGET: &str = "subxt-light-client";
+
+/// A raw light-client RPC implementation that can connect to multiple chains.
+#[derive(Clone)]
+pub struct RawLightClientRpc {
+    /// Communicate with the backend task that multiplexes the responses
+    /// back to the frontend.
+    to_backend: mpsc::UnboundedSender<FromSubxt>,
+}
+
+impl RawLightClientRpc {
+    /// Construct a [`LightClientRpc`] that can communicated with the provided chain.
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance created by [`LightClientRpc::new_from_client`].
+    pub fn for_chain(&self, chain_id: smoldot_light::ChainId) -> LightClientRpc {
+        LightClientRpc {
+            to_backend: self.to_backend.clone(),
+            chain_id,
+        }
+    }
+}
 
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
@@ -19,6 +43,8 @@ pub struct LightClientRpc {
     /// Communicate with the backend task that multiplexes the responses
     /// back to the frontend.
     to_backend: mpsc::UnboundedSender<FromSubxt>,
+    /// The chain ID to target for requests.
+    chain_id: smoldot_light::ChainId,
 }
 
 impl LightClientRpc {
@@ -31,13 +57,34 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// The panic behaviour depends on the feature flag being used:
+    ///
+    /// ### Native
+    ///
+    /// Panics when called outside of a `tokio` runtime context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
-        config: smoldot_light::AddChainConfig<'_, (), impl Iterator<Item = smoldot_light::ChainId>>,
+        config: smoldot_light::AddChainConfig<
+            '_,
+            (),
+            impl IntoIterator<Item = smoldot_light::ChainId>,
+        >,
     ) -> Result<LightClientRpc, LightClientRpcError> {
         tracing::trace!(target: LOG_TARGET, "Create light client");
 
         let mut client = smoldot_light::Client::new(build_platform());
+
+        let config = smoldot_light::AddChainConfig {
+            specification: config.specification,
+            json_rpc: config.json_rpc,
+            database_content: config.database_content,
+            potential_relay_chains: config.potential_relay_chains.into_iter(),
+            user_data: config.user_data,
+        };
 
         let smoldot_light::AddChainSuccess {
             chain_id,
@@ -46,14 +93,48 @@ impl LightClientRpc {
             .add_chain(config)
             .map_err(|err| LightClientRpcError::AddChainError(err.to_string()))?;
 
-        let (to_backend, backend) = mpsc::unbounded_channel();
-
-        // `json_rpc_responses` can only be `None` if we had passed `json_rpc: Disabled`.
         let rpc_responses = json_rpc_responses.expect("Light client RPC configured; qed");
 
+        let raw_client = Self::new_from_client(
+            client,
+            iter::once(AddedChain {
+                chain_id,
+                rpc_responses,
+            }),
+        );
+        Ok(raw_client.for_chain(chain_id))
+    }
+
+    /// Constructs a new [`RawLightClientRpc`] from the raw smoldot client.
+    ///
+    /// Receives a list of RPC objects as a result of calling `smoldot_light::Client::add_chain`.
+    /// This [`RawLightClientRpc`] can target different chains using [`RawLightClientRpc::for_chain`] method.
+    ///
+    /// ## Panics
+    ///
+    /// The panic behaviour depends on the feature flag being used:
+    ///
+    /// ### Native
+    ///
+    /// Panics when called outside of a `tokio` runtime context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
+    pub fn new_from_client<TPlat>(
+        client: smoldot_light::Client<TPlat>,
+        chains: impl IntoIterator<Item = AddedChain>,
+    ) -> RawLightClientRpc
+    where
+        TPlat: smoldot_light::platform::PlatformRef + Clone,
+    {
+        let (to_backend, backend) = mpsc::unbounded_channel();
+        let chains = chains.into_iter().collect();
+
         let future = async move {
-            let mut task = BackgroundTask::new(client, chain_id);
-            task.start_task(backend, rpc_responses).await;
+            let mut task = BackgroundTask::new(client);
+            task.start_task(backend, chains).await;
         };
 
         #[cfg(feature = "native")]
@@ -61,7 +142,12 @@ impl LightClientRpc {
         #[cfg(feature = "web")]
         wasm_bindgen_futures::spawn_local(future);
 
-        Ok(LightClientRpc { to_backend })
+        RawLightClientRpc { to_backend }
+    }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> smoldot_light::ChainId {
+        self.chain_id
     }
 
     /// Submits an RPC method request to the light-client.
@@ -79,6 +165,7 @@ impl LightClientRpc {
             method,
             params,
             sender,
+            chain_id: self.chain_id,
         })?;
 
         Ok(receiver)
@@ -107,8 +194,17 @@ impl LightClientRpc {
             params,
             sub_id,
             sender,
+            chain_id: self.chain_id,
         })?;
 
         Ok((sub_id_rx, receiver))
     }
+}
+
+/// The added chain of the light-client.
+pub struct AddedChain {
+    /// The id of the chain.
+    pub chain_id: smoldot_light::ChainId,
+    /// Producer of RPC responses for the chain.
+    pub rpc_responses: smoldot_light::JsonRpcResponses,
 }

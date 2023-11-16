@@ -114,3 +114,8 @@ tracing-subscriber = { workspace = true }
 name = "unstable_light_client_tx_basic"
 path = "examples/unstable_light_client_tx_basic.rs"
 required-features = ["unstable-light-client", "jsonrpsee"]
+
+[[example]]
+name = "unstable_light_client_parachains"
+path = "examples/unstable_light_client_parachains.rs"
+required-features = ["unstable-light-client", "jsonrpsee", "native"]

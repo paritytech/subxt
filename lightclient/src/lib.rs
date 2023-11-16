@@ -33,8 +33,18 @@ mod platform;
 #[allow(unused_imports)]
 pub use getrandom as _;
 
-pub use client::LightClientRpc;
-pub use smoldot_light::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
+pub use client::{AddedChain, LightClientRpc, RawLightClientRpc};
+
+/// Re-exports of the smoldot related objects.
+pub mod smoldot {
+    pub use smoldot_light::{
+        platform::PlatformRef, AddChainConfig, AddChainConfigJsonRpc, ChainId, Client,
+        JsonRpcResponses,
+    };
+
+    #[cfg(feature = "native")]
+    pub use smoldot_light::platform::default::DefaultPlatform;
+}
 
 /// Light client error.
 #[derive(Debug, thiserror::Error)]
