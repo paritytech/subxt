@@ -518,10 +518,7 @@ where
         client: Client,
         other_params: Self::OtherParams,
     ) -> Result<Self, Self::Error> {
-        let other_params = match other_params.0 {
-            Some(other_params) => other_params,
-            None => <S as ExtrinsicParams<T>>::OtherParams::default(),
-        };
+        let other_params = other_params.0.unwrap_or_default();
 
         let metadata = client.metadata();
         let encoding_data = SkipCheckIfFeelessEncodingData::new(metadata, Self::NAME, S::NAME)?;
