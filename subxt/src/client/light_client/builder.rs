@@ -4,9 +4,10 @@
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
+use crate::client::RawLightClient;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
-use subxt_lightclient::{AddChainConfig, AddChainConfigJsonRpc, ChainId};
+use subxt_lightclient::{smoldot, AddedChain};
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
@@ -14,7 +15,7 @@ pub struct LightClientBuilder<T: Config> {
     max_pending_requests: NonZeroU32,
     max_subscriptions: u32,
     bootnodes: Option<Vec<serde_json::Value>>,
-    potential_relay_chains: Option<Vec<ChainId>>,
+    potential_relay_chains: Option<Vec<smoldot::ChainId>>,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -77,7 +78,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// be wrong to connect to the "Kusama" created by user A.
     pub fn potential_relay_chains(
         mut self,
-        potential_relay_chains: impl IntoIterator<Item = ChainId>,
+        potential_relay_chains: impl IntoIterator<Item = smoldot::ChainId>,
     ) -> Self {
         self.potential_relay_chains = Some(potential_relay_chains.into_iter().collect());
         self
@@ -88,7 +89,16 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// The panic behaviour depends on the feature flag being used:
+    ///
+    /// ### Native
+    ///
+    /// Panics when called outside of a `tokio` runtime context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         let chain_spec = fetch_url(url.as_ref()).await?;
@@ -104,7 +114,7 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// The chain spec must be obtained from a trusted entity.
     ///
-    /// It can be fetched from a trused node with the following command:
+    /// It can be fetched from a trusted node with the following command:
     /// ```bash
     /// curl -H "Content-Type: application/json" -d '{"id":1, "jsonrpc":"2.0", "method": "sync_state_genSyncSpec", "params":[true]}' http://localhost:9944/ | jq .result > res.spec
     /// ```
@@ -116,7 +126,16 @@ impl<T: Config> LightClientBuilder<T> {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// The panic behaviour depends on the feature flag being used:
+    ///
+    /// ### Native
+    ///
+    /// Panics when called outside of a `tokio` runtime context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub async fn build(self, chain_spec: &str) -> Result<LightClient<T>, Error> {
         let chain_spec = serde_json::from_str(chain_spec)
             .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
@@ -136,9 +155,9 @@ impl<T: Config> LightClientBuilder<T> {
             }
         }
 
-        let config = AddChainConfig {
+        let config = smoldot::AddChainConfig {
             specification: &chain_spec.to_string(),
-            json_rpc: AddChainConfigJsonRpc::Enabled {
+            json_rpc: smoldot::AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: self.max_pending_requests,
                 max_subscriptions: self.max_subscriptions,
             },
@@ -147,10 +166,69 @@ impl<T: Config> LightClientBuilder<T> {
             user_data: (),
         };
 
-        let rpc_client = RpcClient::new(LightClientRpc::new(config)?);
-        let online_client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
-        Ok(LightClient(online_client))
+        let raw_rpc = LightClientRpc::new(config)?;
+        build_client_from_rpc(raw_rpc).await
     }
+}
+
+/// Raw builder for [`RawLightClient`].
+pub struct RawLightClientBuilder {
+    chains: Vec<AddedChain>,
+}
+
+impl Default for RawLightClientBuilder {
+    fn default() -> Self {
+        Self { chains: Vec::new() }
+    }
+}
+
+impl RawLightClientBuilder {
+    /// Create a new [`RawLightClientBuilder`].
+    pub fn new() -> RawLightClientBuilder {
+        RawLightClientBuilder::default()
+    }
+
+    /// Adds a new chain to the list of chains synchronized by the light client.
+    pub fn add_chain(
+        mut self,
+        chain_id: smoldot::ChainId,
+        rpc_responses: smoldot::JsonRpcResponses,
+    ) -> Self {
+        self.chains.push(AddedChain {
+            chain_id,
+            rpc_responses,
+        });
+        self
+    }
+
+    /// Construct a [`RawLightClient`] from a raw smoldot client.
+    ///
+    /// The provided `chain_id` is the chain with which the current instance of light client will interact.
+    /// To target a different chain call the [`LightClient::target_chain`] method.
+    pub async fn build<TPlatform: smoldot::PlatformRef>(
+        self,
+        client: smoldot::Client<TPlatform>,
+    ) -> Result<RawLightClient, Error> {
+        // The raw subxt light client that spawns the smoldot background task.
+        let raw_rpc: subxt_lightclient::RawLightClientRpc =
+            subxt_lightclient::LightClientRpc::new_from_client(client, self.chains.into_iter());
+
+        // The crate implementation of `RpcClientT` over the raw subxt light client.
+        let raw_rpc = crate::client::light_client::rpc::RawLightClientRpc::from_inner(raw_rpc);
+
+        Ok(RawLightClient { raw_rpc })
+    }
+}
+
+/// Build the light client from a raw rpc client.
+async fn build_client_from_rpc<T: Config>(
+    raw_rpc: LightClientRpc,
+) -> Result<LightClient<T>, Error> {
+    let chain_id = raw_rpc.chain_id();
+    let rpc_client = RpcClient::new(raw_rpc);
+    let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
+
+    Ok(LightClient { client, chain_id })
 }
 
 /// Fetch the chain spec from the URL.

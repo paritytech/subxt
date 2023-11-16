@@ -8,6 +8,7 @@ mod builder;
 mod rpc;
 
 use crate::{
+    backend::rpc::RpcClient,
     blocks::BlocksClient,
     client::{OfflineClientT, OnlineClientT},
     config::Config,
@@ -19,9 +20,12 @@ use crate::{
     tx::TxClient,
     OnlineClient,
 };
-pub use builder::LightClientBuilder;
+pub use builder::{LightClientBuilder, RawLightClientBuilder};
 use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;
+
+// Re-export smoldot related objects.
+pub use subxt_lightclient::smoldot;
 
 /// Light client error.
 #[derive(Debug, thiserror::Error)]
@@ -51,10 +55,57 @@ pub enum LightClientError {
     Handshake,
 }
 
+/// The raw light-client RPC implementation that is used to connect with the chain.
+#[derive(Clone)]
+pub struct RawLightClient {
+    raw_rpc: rpc::RawLightClientRpc,
+}
+
+impl RawLightClient {
+    /// Construct a [`RawLightClient`] using its builder interface.
+    ///
+    /// The raw builder is utilized for constructing light-clients from a low
+    /// level smoldot client.
+    ///
+    /// This is especially useful when you want to gain access to the smoldot client.
+    /// For example, you may want to connect to multiple chains and/or parachains while reusing the
+    /// same smoldot client under the hood. Or you may want to configure different values for
+    /// smoldot internal buffers, number of subscriptions and relay chains.
+    ///
+    /// # Note
+    ///
+    /// If you are unsure, please use [`LightClient::builder`] instead.
+    pub fn builder() -> RawLightClientBuilder {
+        RawLightClientBuilder::default()
+    }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    ///
+    /// The provided chain ID is provided by the `smoldot_light::Client::add_chain` and it must
+    /// match one of the `smoldot_light::JsonRpcResponses` provided in [`RawLightClientBuilder::add_chain`].
+    ///
+    /// # Note
+    ///
+    /// This uses the same underlying instance spawned by the builder.
+    pub async fn for_chain<TChainConfig: Config>(
+        &self,
+        chain_id: smoldot::ChainId,
+    ) -> Result<LightClient<TChainConfig>, crate::Error> {
+        let raw_rpc = self.raw_rpc.for_chain(chain_id);
+        let rpc_client = RpcClient::new(raw_rpc.clone());
+        let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
+
+        Ok(LightClient { client, chain_id })
+    }
+}
+
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct LightClient<T: Config>(OnlineClient<T>);
+pub struct LightClient<T: Config> {
+    client: OnlineClient<T>,
+    chain_id: smoldot::ChainId,
+}
 
 impl<T: Config> LightClient<T> {
     /// Construct a [`LightClient`] using its builder interface.
@@ -68,17 +119,17 @@ impl<T: Config> LightClient<T> {
 
     /// Return the [`crate::Metadata`] used in this client.
     fn metadata(&self) -> crate::Metadata {
-        self.0.metadata()
+        self.client.metadata()
     }
 
     /// Return the genesis hash.
     fn genesis_hash(&self) -> <T as Config>::Hash {
-        self.0.genesis_hash()
+        self.client.genesis_hash()
     }
 
     /// Return the runtime version.
     fn runtime_version(&self) -> crate::backend::RuntimeVersion {
-        self.0.runtime_version()
+        self.client.runtime_version()
     }
 
     /// Work with transactions.
@@ -115,11 +166,16 @@ impl<T: Config> LightClient<T> {
     pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         <Self as OfflineClientT<T>>::runtime_api(self)
     }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> smoldot::ChainId {
+        self.chain_id
+    }
 }
 
 impl<T: Config> OnlineClientT<T> for LightClient<T> {
     fn backend(&self) -> &dyn crate::backend::Backend<T> {
-        self.0.backend()
+        self.client.backend()
     }
 }
 
