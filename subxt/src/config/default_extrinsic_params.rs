@@ -17,6 +17,7 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
         signed_extensions::CheckMortality<T>,
         signed_extensions::ChargeAssetTxPayment<T>,
         signed_extensions::ChargeTransactionPayment,
+        signed_extensions::SkipCheckIfFeeless<T, signed_extensions::ChargeAssetTxPayment<T>>,
     ),
 >;
 
@@ -131,6 +132,9 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         let charge_transaction_params =
             signed_extensions::ChargeTransactionPaymentParams::tip(self.tip);
 
+        let skip_check_params =
+            signed_extensions::SkipCheckIfFeelessParams::from(charge_asset_tx_params.clone());
+
         (
             (),
             (),
@@ -139,6 +143,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             check_mortality_params,
             charge_asset_tx_params,
             charge_transaction_params,
+            skip_check_params,
         )
     }
 }
