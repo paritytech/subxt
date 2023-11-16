@@ -2,17 +2,32 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::LightClientError;
+use super::{smoldot, LightClientError};
 use crate::{
     backend::rpc::{RawRpcFuture, RawRpcSubscription, RpcClientT},
     error::{Error, RpcError},
 };
 use futures::StreamExt;
 use serde_json::value::RawValue;
-use subxt_lightclient::{AddChainConfig, ChainId, LightClientRpcError};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-pub const LOG_TARGET: &str = "light-client";
+pub const LOG_TARGET: &str = "subxt-rpc-light-client";
+
+/// The raw light-client RPC implementation that is used to connect with the chain.
+#[derive(Clone)]
+pub struct RawLightClientRpc(subxt_lightclient::RawLightClientRpc);
+
+impl RawLightClientRpc {
+    /// Constructs a new [`RawLightClientRpc`] from a low level [`subxt_lightclient::RawLightClientRpc`].
+    pub fn from_inner(client: subxt_lightclient::RawLightClientRpc) -> RawLightClientRpc {
+        RawLightClientRpc(client)
+    }
+
+    /// Constructs a new [`LightClientRpc`] that communicates with the provided chain.
+    pub fn for_chain(&self, chain_id: smoldot::ChainId) -> LightClientRpc {
+        LightClientRpc(self.0.for_chain(chain_id))
+    }
+}
 
 /// The light-client RPC implementation that is used to connect with the chain.
 #[derive(Clone)]
@@ -28,14 +43,28 @@ impl LightClientRpc {
     ///
     /// ## Panics
     ///
-    /// Panics if being called outside of `tokio` runtime context.
+    /// The panic behaviour depends on the feature flag being used:
+    ///
+    /// ### Native
+    ///
+    /// Panics when called outside of a `tokio` runtime context.
+    ///
+    /// ### Web
+    ///
+    /// If smoldot panics, then the promise created will be leaked. For more details, see
+    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new(
-        config: AddChainConfig<'_, (), impl Iterator<Item = ChainId>>,
+        config: smoldot::AddChainConfig<'_, (), impl Iterator<Item = smoldot::ChainId>>,
     ) -> Result<LightClientRpc, Error> {
         let rpc = subxt_lightclient::LightClientRpc::new(config)
             .map_err(|err| LightClientError::Rpc(err))?;
 
         Ok(LightClientRpc(rpc))
+    }
+
+    /// Returns the chain ID of the current light-client.
+    pub fn chain_id(&self) -> smoldot::ChainId {
+        self.0.chain_id()
     }
 }
 
@@ -46,6 +75,7 @@ impl RpcClientT for LightClientRpc {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         let client = self.clone();
+        let chain_id = self.chain_id();
 
         Box::pin(async move {
             let params = match params {
@@ -66,7 +96,7 @@ impl RpcClientT for LightClientRpc {
                 .await
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
-            tracing::trace!(target: LOG_TARGET, "RPC response {:?}", response);
+            tracing::trace!(target: LOG_TARGET, "RPC response={:?} chain={:?}", response, chain_id);
 
             response.map_err(|err| RpcError::ClientError(Box::new(err)))
         })
@@ -79,13 +109,15 @@ impl RpcClientT for LightClientRpc {
         _unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         let client = self.clone();
+        let chain_id = self.chain_id();
 
         Box::pin(async move {
             tracing::trace!(
                 target: LOG_TARGET,
-                "Subscribe to {:?} with params {:?}",
+                "Subscribe to {:?} with params {:?} chain={:?}",
                 sub,
-                params
+                params,
+                chain_id,
             );
 
             let params = match params {
@@ -107,7 +139,7 @@ impl RpcClientT for LightClientRpc {
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?
                 .map_err(|err| {
                     RpcError::ClientError(Box::new(LightClientError::Rpc(
-                        LightClientRpcError::Request(err.to_string()),
+                        subxt_lightclient::LightClientRpcError::Request(err.to_string()),
                     )))
                 })?;
 
@@ -116,7 +148,7 @@ impl RpcClientT for LightClientRpc {
                 .trim_start_matches('"')
                 .trim_end_matches('"')
                 .to_string();
-            tracing::trace!(target: LOG_TARGET, "Received subscription ID: {}", sub_id);
+            tracing::trace!(target: LOG_TARGET, "Received subscription={} chain={:?}", sub_id, chain_id);
 
             let stream = UnboundedReceiverStream::new(notif);
 
