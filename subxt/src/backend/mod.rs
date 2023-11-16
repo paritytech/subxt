@@ -30,7 +30,7 @@ pub(crate) mod sealed {
 /// a backend. Its goal is to be as minimal as possible.
 #[async_trait]
 pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
-    /// Return the underline rpc client of backend.
+    /// Return the rpc client of backend.
     fn rpc_client(&self) -> &dyn RpcClientT;
 
     /// Fetch values from storage.
