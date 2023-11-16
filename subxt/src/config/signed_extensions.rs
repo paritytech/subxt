@@ -33,7 +33,7 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
 }
 
 /// The [`CheckSpecVersion`] signed extension.
-#[derive(Debug)]
+#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckSpecVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
@@ -61,7 +61,7 @@ impl<T: Config> SignedExtension<T> for CheckSpecVersion {
 }
 
 /// The [`CheckNonce`] signed extension.
-#[derive(Debug)]
+#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckNonce(Compact<u64>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
@@ -89,7 +89,7 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
 }
 
 /// The [`CheckTxVersion`] signed extension.
-#[derive(Debug)]
+#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckTxVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
@@ -117,6 +117,9 @@ impl<T: Config> SignedExtension<T> for CheckTxVersion {
 }
 
 /// The [`CheckGenesis`] signed extension.
+#[derive(Clone, EncodeAsType, DecodeAsType)]
+#[decode_as_type(trait_bounds = "T::Hash: DecodeAsType")]
+#[encode_as_type(trait_bounds = "T::Hash: EncodeAsType")]
 pub struct CheckGenesis<T: Config>(T::Hash);
 
 impl<T: Config> std::fmt::Debug for CheckGenesis<T> {
@@ -150,12 +153,16 @@ impl<T: Config> SignedExtension<T> for CheckGenesis<T> {
 }
 
 /// The [`CheckMortality`] signed extension.
+#[derive(Clone, EncodeAsType, DecodeAsType)]
+#[decode_as_type(trait_bounds = "T::Hash: DecodeAsType")]
+#[encode_as_type(trait_bounds = "T::Hash: EncodeAsType")]
 pub struct CheckMortality<T: Config> {
     era: Era,
     checkpoint: T::Hash,
 }
 
 /// Parameters to configure the [`CheckMortality`] signed extension.
+#[derive(Clone, Debug)]
 pub struct CheckMortalityParams<T: Config> {
     era: Era,
     checkpoint: Option<T::Hash>,
@@ -230,7 +237,7 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug, DecodeAsType, EncodeAsType, Clone)]
+#[derive(Clone, Debug, DecodeAsType, EncodeAsType)]
 #[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
 #[encode_as_type(trait_bounds = "T::AssetId: EncodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
@@ -251,6 +258,7 @@ impl<T: Config> ChargeAssetTxPayment<T> {
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
+#[derive(Debug)]
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
@@ -260,7 +268,7 @@ pub struct ChargeAssetTxPaymentParams<T: Config> {
 impl<T: Config> Clone for ChargeAssetTxPaymentParams<T> {
     fn clone(&self) -> Self {
         Self {
-            tip: self.tip.clone(),
+            tip: self.tip,
             asset_id: self.asset_id.clone(),
         }
     }
@@ -327,7 +335,7 @@ impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
 }
 
 /// The [`ChargeTransactionPayment`] signed extension.
-#[derive(Debug, DecodeAsType, EncodeAsType)]
+#[derive(Clone, Debug, DecodeAsType, EncodeAsType)]
 pub struct ChargeTransactionPayment {
     tip: Compact<u128>,
 }
@@ -463,8 +471,9 @@ impl SkipCheckIfFeelessEncodingData {
 }
 
 /// The [`SkipCheckIfFeeless`] signed extension.
-#[derive(Debug, DecodeAsType)]
+#[derive(Debug, DecodeAsType, EncodeAsType)]
 #[decode_as_type(trait_bounds = "S: DecodeAsType")]
+#[encode_as_type(trait_bounds = "S: EncodeAsType")]
 pub struct SkipCheckIfFeeless<T, S>
 where
     T: Config,
@@ -477,8 +486,10 @@ where
     // [`ExtrinsicParams`] (ie, when subxt submits extrinsics). However, it is not
     // populated when decoding signed extensions from the node.
     #[decode_as_type(skip)]
+    #[encode_as_type(skip)]
     encoding_data: Option<SkipCheckIfFeelessEncodingData>,
     #[decode_as_type(skip)]
+    #[encode_as_type(skip)]
     _phantom: PhantomData<T>,
 }
 
@@ -555,6 +566,16 @@ pub struct SkipCheckIfFeelessParams<T, S>(Option<<S as ExtrinsicParams<T>>::Othe
 where
     T: Config,
     S: SignedExtension<T>;
+
+impl<T, S> std::fmt::Debug for SkipCheckIfFeelessParams<T, S>
+where
+    T: Config,
+    S: SignedExtension<T>,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_tuple("SkipCheckIfFeelessParams").finish()
+    }
+}
 
 impl<T: Config, S: SignedExtension<T>> Default for SkipCheckIfFeelessParams<T, S>
 where
