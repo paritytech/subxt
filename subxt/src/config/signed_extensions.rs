@@ -382,18 +382,105 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
     type Decoded = Self;
 }
 
+/// Information needed to encode the [`SkipCheckIfFeeless`] signed extension.
+#[derive(Debug)]
+struct SkipCheckIfFeelessEncodingData {
+    metadata: Metadata,
+    type_id: u32,
+}
+
+impl SkipCheckIfFeelessEncodingData {
+    /// Construct [`SkipCheckIfFeelessEncodingData`].
+    fn new(
+        metadata: Metadata,
+        extension: &str,
+        inner_extension: &str,
+    ) -> Result<Self, ExtrinsicParamsError> {
+        let skip_check_type_id = metadata
+            .extrinsic()
+            .signed_extensions()
+            .iter()
+            .find_map(|ext| {
+                if ext.identifier() == extension {
+                    Some(ext.extra_ty())
+                } else {
+                    None
+                }
+            });
+        let Some(skip_check_type_id) = skip_check_type_id else {
+            return Err(ExtrinsicParamsError::UnknownSignedExtension(
+                inner_extension.to_owned(),
+            ));
+        };
+
+        // Ensure that the `SkipCheckIfFeeless` type has the same inner signed extension as provided.
+        let Some(skip_check_ty) = metadata.types().resolve(skip_check_type_id) else {
+            return Err(ExtrinsicParamsError::MissingTypeId(
+                inner_extension.to_owned(),
+                skip_check_type_id,
+            ));
+        };
+
+        // The substrate's `SkipCheckIfFeeless` contains 2 types: the inner signed extension and a phantom data.
+        // Phantom data does not have a type associated, so we need to find the inner signed extension.
+        let Some(inner_type_id) = skip_check_ty
+            .type_params
+            .iter()
+            .find_map(|param| param.ty.map(|ty| ty.id))
+        else {
+            return Err(ExtrinsicParamsError::MissingInnerSignedExtension(
+                inner_extension.to_owned(),
+            ));
+        };
+
+        // Get the inner type of the `SkipCheckIfFeeless` extension to check if the naming matches the provided parameters.
+        let Some(inner_extension_ty) = metadata.types().resolve(inner_type_id) else {
+            return Err(ExtrinsicParamsError::MissingTypeId(
+                inner_extension.to_owned(),
+                inner_type_id,
+            ));
+        };
+
+        let Some(inner_extension_name) = inner_extension_ty.path.segments.last() else {
+            return Err(ExtrinsicParamsError::ExpectedNamedTypeId(
+                inner_extension.to_owned(),
+                inner_type_id,
+            ));
+        };
+
+        if inner_extension_name != inner_extension {
+            return Err(ExtrinsicParamsError::ExpectedAnotherExtension(
+                inner_extension.to_owned(),
+                inner_extension_name.to_owned(),
+            ));
+        }
+
+        Ok(SkipCheckIfFeelessEncodingData {
+            metadata,
+            type_id: inner_type_id,
+        })
+    }
+}
+
 /// The [`SkipCheckIfFeeless`] signed extension.
 #[derive(Debug, DecodeAsType)]
 #[decode_as_type(trait_bounds = "S: DecodeAsType")]
-pub struct SkipCheckIfFeeless<T, S>(
-    S,
-    #[decode_as_type(skip)] Option<Metadata>,
-    #[decode_as_type(skip)] u32,
-    #[decode_as_type(skip)] PhantomData<T>,
-)
+pub struct SkipCheckIfFeeless<T, S>
 where
     T: Config,
-    S: SignedExtension<T> + DecodeAsType + EncodeAsType;
+    S: SignedExtension<T> + DecodeAsType + EncodeAsType,
+{
+    inner: S,
+    // Dev note: This is `Option` because `#[derive(DecodeAsType)]` requires the
+    // `Default` bound on skipped parameters.
+    // This field is populated when the [`SkipCheckIfFeeless`] is constructed from
+    // [`ExtrinsicParams`] (ie, when subxt submits extrinsics). However, it is not
+    // populated when decoding signed extensions from the node.
+    #[decode_as_type(skip)]
+    encoding_data: Option<SkipCheckIfFeelessEncodingData>,
+    #[decode_as_type(skip)]
+    _phantom: PhantomData<T>,
+}
 
 impl<T, S> SkipCheckIfFeeless<T, S>
 where
@@ -402,7 +489,7 @@ where
 {
     /// The inner signed extension.
     pub fn inner_signed_extension(&self) -> &S {
-        &self.0
+        &self.inner
     }
 }
 
@@ -426,75 +513,14 @@ where
         };
 
         let metadata = client.metadata();
-        let skip_check_type_id = metadata
-            .extrinsic()
-            .signed_extensions()
-            .iter()
-            .find_map(|ext| {
-                if ext.identifier() == Self::NAME {
-                    Some(ext.extra_ty())
-                } else {
-                    None
-                }
-            });
-        let Some(skip_check_type_id) = skip_check_type_id else {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(
-                S::NAME.to_owned(),
-            ));
-        };
-
-        // Ensure that the `SkipCheckIfFeeless` type has the same inner signed extension as provided.
-        let Some(skip_check_ty) = metadata.types().resolve(skip_check_type_id) else {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
-                "Cannot find type of the {} in metadata",
-                S::NAME.to_owned()
-            )));
-        };
-
-        // The substrate's `SkipCheckIfFeeless` contains 2 types: the inner signed extension and a phantom data.
-        // Phantom data does not have a type associated, so we need to find the inner signed extension.
-        let Some(inner_type_id) = skip_check_ty
-            .type_params
-            .iter()
-            .find_map(|param| param.ty.map(|ty| ty.id))
-        else {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
-                "Cannot find inner type of the {} in metadata",
-                S::NAME.to_owned()
-            )));
-        };
-
-        // Get the inner type of the `SkipCheckIfFeeless` extension to check if the naming matches the provided parameters.
-        let Some(inner_extension_ty) = metadata.types().resolve(inner_type_id) else {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
-                "Cannot find type of the {} in metadata",
-                S::NAME.to_owned()
-            )));
-        };
-
-        let Some(inner_extension_name) = inner_extension_ty.path.segments.last() else {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
-                "Inner type of the extension {} must be named in the metadata",
-                S::NAME.to_owned()
-            )));
-        };
-
-        if inner_extension_name != S::NAME {
-            return Err(ExtrinsicParamsError::UnknownSignedExtension(format!(
-                "Provided wrong singed extension {}, the metadata expects {}",
-                S::NAME,
-                inner_extension_name,
-            )));
-        }
-
+        let encoding_data = SkipCheckIfFeelessEncodingData::new(metadata, Self::NAME, S::NAME)?;
         let inner_extension = S::new(nonce, client, other_params).map_err(Into::into)?;
 
-        Ok(SkipCheckIfFeeless(
-            inner_extension,
-            Some(metadata),
-            inner_type_id,
-            PhantomData,
-        ))
+        Ok(SkipCheckIfFeeless {
+            inner: inner_extension,
+            encoding_data: Some(encoding_data),
+            _phantom: PhantomData,
+        })
     }
 }
 
@@ -504,12 +530,13 @@ where
     S: SignedExtension<T> + DecodeAsType + EncodeAsType,
 {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
-        let metadata = self
-            .1
-            .as_ref()
-            .expect("Metadata is populated while constructing the object; qed");
-
-        let _ = self.0.encode_as_type_to(self.2, metadata.types(), v);
+        if let Some(encoding_data) = &self.encoding_data {
+            let _ = self.inner.encode_as_type_to(
+                encoding_data.type_id,
+                encoding_data.metadata.types(),
+                v,
+            );
+        }
     }
 }
 
