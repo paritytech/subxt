@@ -40,7 +40,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             for evt in events.iter() {
                 let evt = evt?;
-
                 let pallet_name = evt.pallet_name();
                 let event_name = evt.variant_name();
                 let event_values = evt.field_values()?;

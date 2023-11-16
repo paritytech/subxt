@@ -2,9 +2,23 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use scale_decode::DecodeAsType;
+use scale_encode::EncodeAsType;
+
 // Dev note: This and related bits taken from `sp_runtime::generic::Era`
 /// An era to describe the longevity of a transaction.
-#[derive(PartialEq, Default, Eq, Clone, Copy, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(
+    PartialEq,
+    Default,
+    Eq,
+    Clone,
+    Copy,
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    DecodeAsType,
+    EncodeAsType,
+)]
 pub enum Era {
     /// The transaction is valid forever. The genesis hash must be present in the signed content.
     #[default]
