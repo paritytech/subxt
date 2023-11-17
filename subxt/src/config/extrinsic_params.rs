@@ -18,7 +18,19 @@ pub enum ExtrinsicParamsError {
     /// A signed extension was encountered that we don't know about.
     #[error("Error constructing extrinsic parameters: Unknown signed extension '{0}'")]
     UnknownSignedExtension(String),
-    /// Some custom error.
+    /// Cannot find the type id of a signed extension in the metadata.
+    #[error("Cannot find extension's '{0}' type id '{1} in the metadata")]
+    MissingTypeId(String, u32),
+    /// User provided a different signed extension than the one expected.
+    #[error("Provided a different signed extension for '{0}', the metadata expect '{1}'")]
+    ExpectedAnotherExtension(String, String),
+    /// The inner type of a signed extension is not present in the metadata.
+    #[error("The inner type of the signed extension '{0}' is not present in the metadata")]
+    MissingInnerSignedExtension(String),
+    /// The inner type of the signed extension is not named.
+    #[error("The signed extension's '{0}' type id '{1}' does not have a name in the metadata")]
+    ExpectedNamedTypeId(String, u32),
+    /// Some custom error.s
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(CustomError),
 }

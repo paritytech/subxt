@@ -20,4 +20,6 @@ pub use online_client::{
 };
 
 #[cfg(feature = "unstable-light-client")]
-pub use light_client::{LightClient, LightClientBuilder, LightClientError};
+pub use light_client::{
+    LightClient, LightClientBuilder, LightClientError, RawLightClient, RawLightClientBuilder,
+};

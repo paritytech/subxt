@@ -13,7 +13,7 @@ use crate::{
 };
 
 use crate::config::signed_extensions::{
-    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
+    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce, SkipCheckIfFeeless,
 };
 use crate::config::SignedExtension;
 use crate::dynamic::DecodedValue;
@@ -685,7 +685,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     ///
     /// Returns `None` if  `tip` was not found or decoding failed.
     pub fn tip(&self) -> Option<u128> {
-        // Note: the overhead of iterating twice should be negligible.
+        // Note: the overhead of iterating multiple time should be negligible.
         self.find::<ChargeTransactionPayment>()
             .ok()
             .flatten()
@@ -695,6 +695,12 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                     .ok()
                     .flatten()
                     .map(|e| e.tip())
+            })
+            .or_else(|| {
+                self.find::<SkipCheckIfFeeless<T, ChargeAssetTxPayment<T>>>()
+                    .ok()
+                    .flatten()
+                    .map(|skip_check| skip_check.inner_signed_extension().tip())
             })
     }
 
