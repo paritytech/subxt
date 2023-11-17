@@ -203,3 +203,106 @@ pub fn generate_runtime_apis(
         }
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::RuntimeGenerator;
+    use frame_metadata::v15::{
+        self, RuntimeApiMetadata, RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata,
+    };
+    use quote::quote;
+    use scale_info::meta_type;
+    use subxt_metadata::Metadata;
+
+    fn metadata_with_runtime_apis(runtime_apis: Vec<RuntimeApiMetadata>) -> Metadata {
+        let extrinsic_metadata = v15::ExtrinsicMetadata {
+            version: 0,
+            signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<()>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
+        };
+
+        let metadata: Metadata = v15::RuntimeMetadataV15::new(
+            vec![],
+            extrinsic_metadata,
+            meta_type::<()>(),
+            runtime_apis,
+            v15::OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            v15::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata");
+        metadata
+    }
+
+    fn generate_code(runtime_apis: Vec<RuntimeApiMetadata>) -> String {
+        let metadata = metadata_with_runtime_apis(runtime_apis);
+        let item_mod = syn::parse_quote!(
+            pub mod api {}
+        );
+        let generator = RuntimeGenerator::new(metadata);
+        let generated = generator
+            .generate_runtime(
+                item_mod,
+                Default::default(),
+                Default::default(),
+                syn::parse_str("::subxt_path").unwrap(),
+                false,
+            )
+            .expect("should be able to generate runtime");
+        generated.to_string()
+    }
+
+    #[test]
+    fn unique_param_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "foo",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "bar",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub foo: test::Foo,
+                pub bar: test::Bar,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type Foo = ::core::primitive::bool;
+                pub type Bar = ::core::primitive::bool;
+                pub mod output {
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
+}
