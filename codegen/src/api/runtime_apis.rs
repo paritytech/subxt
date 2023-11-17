@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashSet;
+
 use crate::{types::TypeGenerator, CodegenError};
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
@@ -36,14 +38,32 @@ fn generate_runtime_api(
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
+        let mut unique_names = HashSet::new();
+        let mut unique_aliases = HashSet::new();
+
         let inputs: Vec<_> = method.inputs().enumerate().map(|(idx, input)| {
             // These are method names, which can just be '_', but struct field names can't
             // just be an underscore, so fix any such names we find to work in structs.
-            let (alias_name, name) = if input.name == "_" {
-                (format_ident!("Param{}", idx), format_ident!("_{}", idx))
-            } else {
-                (format_ident!("{}", input.name.to_upper_camel_case()), format_ident!("{}", &input.name))
-            };
+
+            let mut name = input.name.trim_start_matches("_").to_string();
+            if name.is_empty() {
+                name = format!("_{}", idx);
+            }
+            while !unique_names.insert(name.clone()) {
+                // Name is already used, append the index until it is unique.
+                name = format!("{}_param{}", name, idx);
+            }
+
+            let mut alias = name.to_upper_camel_case();
+            // Note: name is not empty.
+            if alias.as_bytes()[0].is_ascii_digit() {
+                alias = format!("Param{}", alias);
+            }
+            while !unique_aliases.insert(alias.clone()) {
+                alias = format!("{}Param{}", alias, idx);
+            }
+
+            let (alias_name, name) = (format_ident!("{alias}"), format_ident!("{name}"));
 
             // Generate alias for runtime type.
             let ty = type_gen.resolve_type_path(input.ty);
@@ -69,7 +89,11 @@ fn generate_runtime_api(
                 use super::#types_mod_ident;
 
                 #( #type_aliases )*
-                pub type Output = #output;
+
+                // Guard the `Output` name against collisions by placing it in a dedicated module.
+                pub mod output {
+                    pub type Output = #output;
+                }
             }
         );
 
@@ -79,12 +103,12 @@ fn generate_runtime_api(
         let derives = type_gen.default_derives();
         let struct_name = format_ident!("{}", method.name().to_upper_camel_case());
         let struct_input = quote!(
+            #aliased_module
+
             #derives
             pub struct #struct_name {
                 #( pub #struct_params, )*
             }
-
-            #aliased_module
         );
 
         let Some(call_hash) = api.method_hash(method.name()) else {
@@ -96,7 +120,7 @@ fn generate_runtime_api(
 
         let method = quote!(
             #docs
-            pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::Output> {
+            pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::output::Output> {
                 #crate_path::runtime_api::Payload::new_static(
                     #trait_name_str,
                     #method_name_str,
