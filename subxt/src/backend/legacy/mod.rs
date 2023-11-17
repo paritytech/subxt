@@ -42,7 +42,7 @@ impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     fn rpc_client(&self) -> &dyn RpcClientT {
-        &*self.methods.client
+        &*self.methods.rpc_client()
     }
 
     async fn storage_fetch_values(

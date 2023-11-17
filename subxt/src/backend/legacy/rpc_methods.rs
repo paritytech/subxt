@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct LegacyRpcMethods<T> {
-    pub(crate) client: RpcClient,
+    client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -30,6 +30,12 @@ impl<T: Config> LegacyRpcMethods<T> {
             _marker: std::marker::PhantomData,
         }
     }
+
+    /// Return the internal [`RpcClient`].
+    pub fn rpc_client(&self) -> &RpcClient {
+        &self.client
+    }
+
 
     /// Fetch the raw bytes for a given storage key
     pub async fn state_get_storage(

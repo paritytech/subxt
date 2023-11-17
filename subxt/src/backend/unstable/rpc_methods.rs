@@ -21,7 +21,7 @@ use std::task::Poll;
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct UnstableRpcMethods<T> {
-    pub(crate) client: RpcClient,
+    client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -32,6 +32,11 @@ impl<T: Config> UnstableRpcMethods<T> {
             client,
             _marker: std::marker::PhantomData,
         }
+    }
+
+    /// Return the internal [`RpcClient`].
+    pub fn rpc_client(&self) -> &RpcClient {
+        &self.client
     }
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
