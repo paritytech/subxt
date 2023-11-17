@@ -5,8 +5,12 @@
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
-
+use subxt::config::signed_extensions::{
+    ChargeAssetTxPayment, CheckMortality, CheckNonce, SkipCheckIfFeeless,
+};
 use subxt::config::DefaultExtrinsicParamsBuilder;
+use subxt::config::SubstrateConfig;
+use subxt::utils::Era;
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
@@ -272,6 +276,40 @@ async fn decode_signed_extensions_from_blocks() {
         }};
     }
 
+    let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
+    let extensions1 = transaction1.signed_extensions().unwrap();
+
+    let nonce1 = extensions1.nonce().unwrap();
+    let nonce1_static = extensions1.find::<CheckNonce>().unwrap().unwrap().0;
+    let tip1 = extensions1.tip().unwrap();
+    let tip1_static: u128 = extensions1
+        .find::<SkipCheckIfFeeless<SubstrateConfig, ChargeAssetTxPayment<SubstrateConfig>>>()
+        .unwrap()
+        .unwrap()
+        .inner_signed_extension()
+        .tip();
+
+    let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
+    let extensions2 = transaction2.signed_extensions().unwrap();
+    let nonce2 = extensions2.nonce().unwrap();
+    let nonce2_static = extensions2.find::<CheckNonce>().unwrap().unwrap().0;
+    let tip2 = extensions2.tip().unwrap();
+    let tip2_static: u128 = extensions2
+        .find::<SkipCheckIfFeeless<SubstrateConfig, ChargeAssetTxPayment<SubstrateConfig>>>()
+        .unwrap()
+        .unwrap()
+        .inner_signed_extension()
+        .tip();
+
+    assert_eq!(nonce1, 0);
+    assert_eq!(nonce1, nonce1_static);
+    assert_eq!(tip1, 1234);
+    assert_eq!(tip1, tip1_static);
+    assert_eq!(nonce2, 1);
+    assert_eq!(nonce2, nonce2_static);
+    assert_eq!(tip2, 5678);
+    assert_eq!(tip2, tip2_static);
+
     let expected_signed_extensions = [
         "CheckNonZeroSender",
         "CheckSpecVersion",
@@ -280,30 +318,25 @@ async fn decode_signed_extensions_from_blocks() {
         "CheckMortality",
         "CheckNonce",
         "CheckWeight",
-        "ChargeAssetTxPayment",
+        "SkipCheckIfFeeless",
     ];
-
-    let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
-    let extensions1 = transaction1.signed_extensions().unwrap();
-    let nonce1 = extensions1.nonce().unwrap();
-    let tip1 = extensions1.tip().unwrap();
-
-    let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
-    let extensions2 = transaction2.signed_extensions().unwrap();
-    let nonce2 = extensions2.nonce().unwrap();
-    let tip2 = extensions2.tip().unwrap();
-
-    assert_eq!(nonce1, 0);
-    assert_eq!(tip1, 1234);
-    assert_eq!(nonce2, 1);
-    assert_eq!(tip2, 5678);
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
     for (e, expected_name) in extensions1.iter().zip(expected_signed_extensions.iter()) {
         assert_eq!(e.unwrap().name(), *expected_name);
     }
+
     assert_eq!(extensions2.iter().count(), expected_signed_extensions.len());
     for (e, expected_name) in extensions2.iter().zip(expected_signed_extensions.iter()) {
         assert_eq!(e.unwrap().name(), *expected_name);
+    }
+
+    // check that era decodes:
+    for extensions in [&extensions1, &extensions2] {
+        let era: Era = extensions
+            .find::<CheckMortality<SubstrateConfig>>()
+            .unwrap()
+            .unwrap();
+        assert_eq!(era, Era::Immortal)
     }
 }
