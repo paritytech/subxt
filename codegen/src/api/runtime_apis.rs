@@ -92,6 +92,7 @@ fn generate_runtime_api(
 
                 // Guard the `Output` name against collisions by placing it in a dedicated module.
                 pub mod output {
+                    use super::#types_mod_ident;
                     pub type Output = #output;
                 }
             }
@@ -298,6 +299,7 @@ mod tests {
                 pub type Foo = ::core::primitive::bool;
                 pub type Bar = ::core::primitive::bool;
                 pub mod output {
+                    use super::runtime_types;
                     pub type Output = ::core::primitive::bool;
                 }
             }
@@ -349,6 +351,72 @@ mod tests {
                 pub type AParam1 = ::core::primitive::bool;
                 pub type AParam2 = ::core::primitive::bool;
                 pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
+
+    #[test]
+    fn duplicate_param_and_alias_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "_",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "_a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "_param_0",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "__",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "___param_0_param_2",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub _0: test::Param0,
+                pub a: test::A,
+                pub param_0: test::Param0Param2,
+                pub _3: test::Param3,
+                pub param_0_param_2: test::Param0Param2Param4,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type Param0 = ::core::primitive::bool;
+                pub type A = ::core::primitive::bool;
+                pub type Param0Param2 = ::core::primitive::bool;
+                pub type Param3 = ::core::primitive::bool;
+                pub type Param0Param2Param4 = ::core::primitive::bool;
+                pub mod output {
+                    use super::runtime_types;
                     pub type Output = ::core::primitive::bool;
                 }
             }
