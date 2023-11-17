@@ -11,48 +11,6 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 
 /// Generates runtime functions for the given API metadata.
-///
-/// # Note
-///
-/// The modules are structured as follows:
-///
-/// ```ignore
-/// // Extracted from the runtime API metadata.
-/// pub mod metadata {
-///
-///     // Structure that exposes the `Metadata` runtime APIs.
-///     struct Metadata;
-///     impl Metadata {
-///
-///         // Function that calls into the `Metadata_metadata_at_version` runtime API.
-///         pub fn metadata_at_version(
-///             version: types::metadata_at_version::Version,
-///         ) -> ::subxt::runtime_api::Payload<
-///             types::MetadataAtVersion,
-///             types::metadata_at_version::Output,
-///         > {
-///             // ..
-///         }
-///     }
-///
-///     // Contains the types of the metadata.
-///     pub mod types {
-///
-///         // This is the input of the runtime call.
-///         pub struct MetadataAtVersion {
-///             // Use the alias generated type.
-///             pub version: metadata_at_version::Version,
-///         }
-///
-///         // Type alias module for the `Metadata_metadata_at_version` runtime call.
-///         pub mod metadata_at_version {
-///             pub type Version = ::core::primitive::u32;
-///
-///             // This is the output of the runtime call.
-///             pub type Output = ::core::option::Option<runtime_types::sp_core::OpaqueMetadata>;
-///         }
-///     }
-/// ```
 fn generate_runtime_api(
     api: RuntimeApiMetadata,
     type_gen: &TypeGenerator,

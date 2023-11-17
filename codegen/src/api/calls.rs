@@ -46,24 +46,21 @@ pub fn generate_calls(
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
 
             let result: Vec<_> = match struct_def.fields {
-                CompositeDefFields::Named(ref named_fields) => {
-                    named_fields
-                        .iter()
-                        .map(|(name, field)| {
-                            let call_arg = if field.is_boxed() {
-                                quote! { #name: ::std::boxed::Box::new(#name) }
-                            } else {
-                                quote! { #name }
-                            };
-                            // One downside of the type alias system is that we generate one alias per argument.
-                            // Multiple arguments could potentially have the same type (ie fn call(u32, u32, u32)).
-                            let alias_name =
-                                format_ident!("{}", name.to_string().to_upper_camel_case());
+                CompositeDefFields::Named(ref named_fields) => named_fields
+                    .iter()
+                    .map(|(name, field)| {
+                        let call_arg = if field.is_boxed() {
+                            quote! { #name: ::std::boxed::Box::new(#name) }
+                        } else {
+                            quote! { #name }
+                        };
 
-                            (quote!( #name: types::#fn_name::#alias_name ), call_arg)
-                        })
-                        .collect()
-                }
+                        let alias_name =
+                            format_ident!("{}", name.to_string().to_upper_camel_case());
+
+                        (quote!( #name: types::#fn_name::#alias_name ), call_arg)
+                    })
+                    .collect(),
                 CompositeDefFields::NoFields => Default::default(),
                 CompositeDefFields::Unnamed(_) => {
                     return Err(CodegenError::InvalidCallVariant(call_ty))
