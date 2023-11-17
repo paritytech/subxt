@@ -4222,6 +4222,7 @@ dependencies = [
  "subxt-codegen",
  "subxt-metadata",
  "syn 2.0.37",
+ "thiserror",
  "tokio",
 ]
 

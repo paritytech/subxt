@@ -18,6 +18,7 @@ enum Command {
     Diff(commands::diff::Opts),
     Version(commands::version::Opts),
     Explore(commands::explore::Opts),
+    ChainSpec(commands::chain_spec::Opts),
 }
 
 #[tokio::main]
@@ -32,5 +33,6 @@ async fn main() -> color_eyre::Result<()> {
         Command::Diff(opts) => commands::diff::run(opts, &mut output).await,
         Command::Version(opts) => commands::version::run(opts, &mut output),
         Command::Explore(opts) => commands::explore::run(opts, &mut output).await,
+        Command::ChainSpec(opts) => commands::chain_spec::run(opts, &mut output).await,
     }
 }
