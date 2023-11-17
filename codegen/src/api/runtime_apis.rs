@@ -305,4 +305,56 @@ mod tests {
         assert!(code.contains(&structure.to_string()));
         assert!(code.contains(&expected_alias.to_string()));
     }
+
+    #[test]
+    fn duplicate_param_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "_a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "__a",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub a: test::A,
+                pub a_param1: test::AParam1,
+                pub a_param2: test::AParam2,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type A = ::core::primitive::bool;
+                pub type AParam1 = ::core::primitive::bool;
+                pub type AParam2 = ::core::primitive::bool;
+                pub mod output {
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
 }
