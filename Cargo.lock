@@ -42,7 +42,7 @@ version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcb51a0695d8f838b1ee009b3fbf66bda078cd64590202a864a8f3e8c4315c47"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "once_cell",
  "version_check",
 ]
@@ -54,7 +54,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
 dependencies = [
  "cfg-if",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "once_cell",
  "version_check",
 ]
@@ -1548,9 +1548,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
+checksum = "fe9006bed769170c11f845cf00c7c1e9092aeb3f268e007c3e760ac68008070f"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2893,7 +2893,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
 ]
 
 [[package]]
@@ -4176,7 +4176,7 @@ dependencies = [
  "either",
  "frame-metadata 16.0.0",
  "futures",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "hex",
  "impl-serde",
  "jsonrpsee",
@@ -4231,7 +4231,7 @@ version = "0.32.1"
 dependencies = [
  "bitvec",
  "frame-metadata 16.0.0",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "heck",
  "hex",
  "jsonrpsee",
@@ -4254,7 +4254,7 @@ dependencies = [
  "futures",
  "futures-timer",
  "futures-util",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "instant",
  "js-sys",
  "pin-project",
@@ -4303,7 +4303,7 @@ name = "subxt-signer"
 version = "0.32.1"
 dependencies = [
  "bip39",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "hex",
  "hmac 0.12.1",
  "parity-scale-codec",
