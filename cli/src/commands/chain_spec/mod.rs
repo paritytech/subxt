@@ -24,6 +24,13 @@ pub struct Opts {
     /// Defaults to `false`.
     #[clap(long)]
     state_root_hash: bool,
+    /// Remove the `codeSubstitutes` entry from the chain spec.
+    /// This is useful when wanting to store a smaller chain spec.
+    /// At this moment, the light client does not utilize this object.
+    ///
+    /// Defaults to `false`.
+    #[clap(long)]
+    remove_substitutes: bool,
 }
 
 /// Error attempting to fetch chainSpec.
@@ -100,6 +107,14 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
 
             object.insert("stateRootHash".to_string(), Value::String(state_root_hash));
         }
+    }
+
+    if opts.remove_substitutes {
+        let object = spec
+            .as_object_mut()
+            .ok_or_else(|| ChainSpecError::Other("The chain spec must be an object".to_string()))?;
+
+        object.remove("codeSubstitutes");
     }
 
     let json = serde_json::to_string_pretty(&spec)?;
