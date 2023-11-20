@@ -14,8 +14,8 @@ pub struct ConstantsSubcommand {
 
 pub fn explore_constants(
     command: ConstantsSubcommand,
-    metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    metadata: &Metadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();

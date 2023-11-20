@@ -25,9 +25,9 @@ pub struct StorageSubcommand {
 
 pub async fn explore_storage(
     command: StorageSubcommand,
-    metadata: &Metadata,
     pallet_metadata: PalletMetadata<'_>,
-    custom_online_client_url: Option<String>,
+    metadata: &Metadata,
+    custom_url: Option<String>,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
@@ -140,7 +140,7 @@ pub async fn explore_storage(
 
     // construct and submit the storage entry request if either no key is needed or som key was provided as a scale value
     if key_ty_id.is_none() || !key_scale_values.is_empty() {
-        let online_client = match custom_online_client_url {
+        let online_client = match custom_url {
             None => OnlineClient::<SubstrateConfig>::new().await?,
             Some(url) => OnlineClient::<SubstrateConfig>::from_url(url).await?,
         };

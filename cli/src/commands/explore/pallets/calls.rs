@@ -26,8 +26,8 @@ pub struct CallsSubcommand {
 
 pub fn explore_calls(
     command: CallsSubcommand,
-    metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    metadata: &Metadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
@@ -82,8 +82,11 @@ pub fn explore_calls(
     }
 
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
+    
+    dbg!(&trailing_args);
     let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
     let value_as_composite = value_into_composite(value);
+    dbg!(&value_as_composite);
     let offline_client = mocked_offline_client(metadata.clone());
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;

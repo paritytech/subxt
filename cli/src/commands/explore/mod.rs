@@ -1,5 +1,6 @@
 use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
-use clap::{Parser as ClapParser, Subcommand};
+use clap::{command, Parser, Subcommand};
+use subxt_metadata::{PalletMetadata, RuntimeApiMetadata};
 
 use std::fmt::Write;
 use std::write;
@@ -7,15 +8,13 @@ use std::write;
 use codec::Decode;
 use color_eyre::eyre::eyre;
 
-use crate::commands::explore::calls::{explore_calls, CallsSubcommand};
-use crate::commands::explore::constants::{explore_constants, ConstantsSubcommand};
-use crate::commands::explore::storage::{explore_storage, StorageSubcommand};
-
 use subxt::Metadata;
 
-mod calls;
-mod constants;
-mod storage;
+use self::pallets::PalletOpts;
+use self::runtime_apis::RuntimeApiOpts;
+
+mod pallets;
+mod runtime_apis;
 
 /// Explore pallets, calls, call parameters, storage entries and constants. Also allows for creating (unsigned) extrinsics.
 ///
@@ -64,95 +63,135 @@ mod storage;
 /// subxt explore Alliance storage Announcements [KEY_SCALE_VALUE]
 /// ```
 ///
-#[derive(Debug, ClapParser)]
+#[derive(Debug, Parser)]
 pub struct Opts {
     #[command(flatten)]
     file_or_url: FileOrUrl,
-    pallet: Option<String>,
     #[command(subcommand)]
-    pallet_subcommand: Option<PalletSubcommand>,
+    subcommand: Option<PalletOrRuntimeApi>,
 }
 
-#[derive(Debug, Clone, Subcommand)]
-pub enum PalletSubcommand {
-    Calls(CallsSubcommand),
-    Constants(ConstantsSubcommand),
-    Storage(StorageSubcommand),
+#[derive(Debug, Subcommand)]
+pub enum PalletOrRuntimeApi {
+    Pallet(PalletOpts),
+    Api(RuntimeApiOpts),
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     // get the metadata
-    let bytes = opts.file_or_url.fetch().await?;
+    let file_or_url = opts.file_or_url;
+    let bytes = file_or_url.fetch().await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
 
-    // if no pallet specified, show user the pallets to choose from:
-    let Some(pallet_name) = opts.pallet else {
-        let available_pallets = print_available_pallets(&metadata);
+    // if no pallet/runtime_api specified, show user the pallets/runtime_apis to choose from:
+    let Some(pallet_or_runtime_api) = opts.subcommand else {
         writeln!(output, "Usage:",)?;
-        writeln!(output, "    subxt explore <PALLET>",)?;
+        writeln!(output, "    subxt explore pallet <PALLET>",)?;
         writeln!(output, "        explore a specific pallet",)?;
-        writeln!(output, "\n{available_pallets}",)?;
+        writeln!(output, "    subxt explore api <RUNTIME_API>",)?;
+        writeln!(output, "        explore a specific runtime api trait",)?;
+        writeln!(output, "\n{}", pallets_as_string(&metadata))?;
+        writeln!(output, "\n{}", runtime_apis_as_string(&metadata))?;
         return Ok(());
     };
 
-    // if specified pallet is wrong, show user the pallets to choose from (but this time as an error):
-    let Some(pallet_metadata) = metadata
-        .pallets()
-        .find(|pallet| pallet.name().to_lowercase() == pallet_name.to_lowercase())
-    else {
-        return Err(eyre!(
-            "pallet \"{}\" not found in metadata!\n{}",
-            pallet_name,
-            print_available_pallets(&metadata)
-        ));
-    };
-
-    // if correct pallet was specified but no subcommand, instruct the user how to proceed:
-    let Some(pallet_subcomand) = opts.pallet_subcommand else {
-        let docs_string = print_first_paragraph_with_indent(pallet_metadata.docs(), 4);
-        if !docs_string.is_empty() {
-            writeln!(output, "Description:\n{docs_string}")?;
+    match pallet_or_runtime_api {
+        PalletOrRuntimeApi::Pallet(opts) => {
+            let name_lower_case = opts.name.to_lowercase();
+            if let Some(pallet) = metadata
+                .pallets()
+                .find(|e| e.name().to_lowercase() == name_lower_case)
+            {
+                pallets::run(opts, pallet, &metadata, file_or_url, output).await
+            } else {
+                Err(eyre!(
+                    "pallet \"{}\" not found in metadata!\n{}",
+                    opts.name,
+                    pallets_as_string(&metadata),
+                ))
+            }
         }
-        writeln!(output, "Usage:")?;
-        writeln!(output, "    subxt explore {pallet_name} calls")?;
-        writeln!(
-            output,
-            "        explore the calls that can be made into this pallet"
-        )?;
-        writeln!(output, "    subxt explore {pallet_name} constants")?;
-        writeln!(output, "        explore the constants held in this pallet")?;
-        writeln!(output, "    subxt explore {pallet_name} storage")?;
-        writeln!(
-            output,
-            "        explore the storage values held in this pallet"
-        )?;
-        return Ok(());
-    };
-
-    match pallet_subcomand {
-        PalletSubcommand::Calls(command) => {
-            explore_calls(command, &metadata, pallet_metadata, output)
-        }
-        PalletSubcommand::Constants(command) => {
-            explore_constants(command, &metadata, pallet_metadata, output)
-        }
-        PalletSubcommand::Storage(command) => {
-            // if the metadata came from some url, we use that same url to make storage calls against.
-            let node_url = opts.file_or_url.url.map(|url| url.to_string());
-            explore_storage(command, &metadata, pallet_metadata, node_url, output).await
+        PalletOrRuntimeApi::Api(opts) => {
+            let name_lower_case = opts.name.to_lowercase();
+            if let Some(runtime_api) = metadata
+                .runtime_api_traits()
+                .find(|e| e.name().to_lowercase() == name_lower_case)
+            {
+                runtime_apis::run(opts, runtime_api, &metadata, file_or_url, output).await
+            } else {
+                Err(eyre!(
+                    "runtime api \"{}\" not found in metadata!\n{}",
+                    opts.name,
+                    runtime_apis_as_string(&metadata),
+                ))
+            }
         }
     }
+
+    // let e = metadata.runtime_api_traits().find(|e| true).unwrap();
+
+    // // if specified pallet is wrong, show user the pallets to choose from (but this time as an error):
+
+    // // if correct pallet was specified but no subcommand, instruct the user how to proceed:
+    // let Some(subcommand) = opts.subcommand else {
+    //     let docs_string = print_first_paragraph_with_indent(pallet_metadata.docs(), 4);
+    //     if !docs_string.is_empty() {
+    //         writeln!(output, "Description:\n{docs_string}")?;
+    //     }
+    //     writeln!(output, "Usage:")?;
+    //     writeln!(output, "    subxt explore {pallet_name} calls")?;
+    //     writeln!(
+    //         output,
+    //         "        explore the calls that can be made into this pallet"
+    //     )?;
+    //     writeln!(output, "    subxt explore {pallet_name} constants")?;
+    //     writeln!(output, "        explore the constants held in this pallet")?;
+    //     writeln!(output, "    subxt explore {pallet_name} storage")?;
+    //     writeln!(
+    //         output,
+    //         "        explore the storage values held in this pallet"
+    //     )?;
+    //     return Ok(());
+    // };
+
+    // match subcommand {
+    //     PalletSubcommand::Calls(command) => {
+    //         explore_calls(command, &metadata, pallet_metadata, output)
+    //     }
+    //     PalletSubcommand::Constants(command) => {
+    //         explore_constants(command, &metadata, pallet_metadata, output)
+    //     }
+    //     PalletSubcommand::Storage(command) => {
+    //         // if the metadata came from some url, we use that same url to make storage calls against.
+    //         let node_url = opts.file_or_url.url.map(|url| url.to_string());
+    //         explore_storage(command, &metadata, pallet_metadata, node_url, output).await
+    //     }
+    // }
 }
 
-fn print_available_pallets(metadata: &Metadata) -> String {
+fn pallets_as_string(metadata: &Metadata) -> String {
     if metadata.pallets().len() == 0 {
-        "There are no <PALLET> values available.".to_string()
+        "There are no <PALLET>'s available.".to_string()
     } else {
-        let mut output = "Available <PALLET> values are:".to_string();
+        let mut output = "Available <PALLET>'s are:".to_string();
         let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
             write!(output, "\n    {}", pallet).unwrap();
+        }
+        output
+    }
+}
+
+pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
+    if metadata.runtime_api_traits().len() == 0 {
+        "There are no <RUNTIME_API>'s available.".to_string()
+    } else {
+        let mut output = "Available <RUNTIME_API>'s are:".to_string();
+        let mut strings: Vec<_> = metadata.runtime_api_traits().map(|p| p.name()).collect();
+        strings.sort();
+        for api in strings {
+            write!(output, "\n    {}", api).unwrap();
         }
         output
     }
