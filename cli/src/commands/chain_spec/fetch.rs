@@ -42,12 +42,8 @@ pub async fn fetch_chain_spec(url: Url) -> Result<serde_json::Value, FetchSpecEr
     }
 
     let spec = match url.scheme() {
-        "http" | "https" => fetch_http(url)
-            .await
-            .map_err(FetchSpecError::RequestError),
-        "ws" | "wss" => fetch_ws(url)
-            .await
-            .map_err(FetchSpecError::RequestError),
+        "http" | "https" => fetch_http(url).await.map_err(FetchSpecError::RequestError),
+        "ws" | "wss" => fetch_ws(url).await.map_err(FetchSpecError::RequestError),
         invalid_scheme => Err(FetchSpecError::InvalidScheme(invalid_scheme.to_owned())),
     }?;
 
