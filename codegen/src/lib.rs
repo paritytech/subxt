@@ -336,6 +336,8 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         // The inner bytes represent the encoded extrinsic, however when deriving the
         // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes
         // being altered by adding the length prefix in front of them.
+
+        // Note: Not sure if this is appropriate or not. The most recent polkadot.rs file does not have these.
         (
             parse_quote!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
             parse_quote!(#crate_path::utils::UncheckedExtrinsic),

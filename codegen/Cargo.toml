@@ -36,6 +36,4 @@ scale-typegen = { git = "https://github.com/paritytech/scale-typegen", branch = 
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
-bitvec = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
-pretty_assertions = { workspace = true }
