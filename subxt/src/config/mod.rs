@@ -17,6 +17,8 @@ pub mod substrate;
 
 use codec::{Decode, Encode};
 use core::fmt::Debug;
+use scale_decode::DecodeAsType;
+use scale_encode::EncodeAsType;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
@@ -53,7 +55,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type ExtrinsicParams: ExtrinsicParams<Self>;
 
     /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
-    type AssetId: Debug + Encode;
+    type AssetId: Debug + Clone + Encode + DecodeAsType + EncodeAsType;
 }
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
