@@ -63,3 +63,41 @@ pub struct RawRpcSubscription {
     /// The ID associated with the subscription.
     pub id: Option<String>,
 }
+
+impl<T: RpcClientT> RpcClientT for std::sync::Arc<T> {
+    fn request_raw<'a>(
+        &'a self,
+        method: &'a str,
+        params: Option<Box<RawValue>>,
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
+        (**self).request_raw(method, params)
+    }
+
+    fn subscribe_raw<'a>(
+        &'a self,
+        sub: &'a str,
+        params: Option<Box<RawValue>>,
+        unsub: &'a str,
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
+        (**self).subscribe_raw(sub, params, unsub)
+    }
+}
+
+impl<T: RpcClientT> RpcClientT for Box<T> {
+    fn request_raw<'a>(
+        &'a self,
+        method: &'a str,
+        params: Option<Box<RawValue>>,
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
+        (**self).request_raw(method, params)
+    }
+
+    fn subscribe_raw<'a>(
+        &'a self,
+        sub: &'a str,
+        params: Option<Box<RawValue>>,
+        unsub: &'a str,
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
+        (**self).subscribe_raw(sub, params, unsub)
+    }
+}
