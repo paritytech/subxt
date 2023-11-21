@@ -3331,13 +3331,14 @@ dependencies = [
 [[package]]
 name = "scale-typegen"
 version = "0.0.1"
-source = "git+https://github.com/paritytech/scale-typegen?branch=master#6b790af4e5c857b34e4610fa441688176b6753d2"
+source = "git+https://github.com/paritytech/scale-typegen?branch=master#4daf2776a8a903e322c0ab60801e6b596746e653"
 dependencies = [
  "parity-scale-codec",
  "proc-macro2",
  "quote",
  "scale-bits",
  "scale-info",
+ "smallvec",
  "syn 2.0.39",
  "thiserror",
 ]

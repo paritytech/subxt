@@ -72,12 +72,11 @@ pub fn generate_events(
         }
     });
 
-    let type_path_resolver = type_gen.type_path_resolver();
-    let event_type = type_path_resolver.resolve_type_path(event_ty)?;
-    let event_ty = type_path_resolver.resolve_type(event_ty)?;
+    let event_type = type_gen.resolve_type_path(event_ty)?;
+    let event_ty = type_gen.resolve_type(event_ty)?;
     let docs = &event_ty.docs;
     let docs = type_gen
-        .settings
+        .settings()
         .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();

@@ -19,14 +19,13 @@ fn generate_runtime_api(
     type_gen: &TypeGenerator,
     crate_path: &syn::Path,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
-    let type_path_resolver = type_gen.type_path_resolver();
     // Trait name must remain as is (upper case) to identity the runtime call.
     let trait_name_str = api.name();
     // The snake case for the trait name.
     let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
     let docs = api.docs();
     let docs: TokenStream2 = type_gen
-        .settings
+        .settings()
         .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
@@ -36,7 +35,7 @@ fn generate_runtime_api(
         let method_name_str = method.name();
 
         let docs = method.docs();
-        let docs: TokenStream2 = type_gen.settings.should_gen_docs
+        let docs: TokenStream2 = type_gen.settings().should_gen_docs
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
@@ -48,7 +47,7 @@ fn generate_runtime_api(
             } else {
                 format_ident!("{}", &input.name)
             };
-            let ty = type_path_resolver.resolve_type_path(input.ty).expect("lookup of type should not fail");
+            let ty = type_gen.resolve_type_path(input.ty).expect("lookup of type should not fail");
 
             let param = quote!(#name: #ty);
             (param, name)
@@ -70,7 +69,7 @@ fn generate_runtime_api(
             }
         );
 
-        let output = type_path_resolver.resolve_type_path(method.output_ty())?;
+        let output = type_gen.resolve_type_path(method.output_ty())?;
 
         let Some(call_hash) = api.method_hash(method.name()) else {
             return Err(CodegenError::MissingRuntimeApiMetadata(

@@ -58,11 +58,10 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata,
     crate_path: &syn::Path,
 ) -> Result<TokenStream2, CodegenError> {
-    let type_path_resolver = type_gen.type_path_resolver();
     let keys: Vec<(Ident, TypePath)> = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => vec![],
         StorageEntryType::Map { key_ty, .. } => {
-            match &type_path_resolver.resolve_type(*key_ty)?.type_def {
+            match &type_gen.resolve_type(*key_ty)?.type_def {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => tuple
                     .fields
@@ -70,7 +69,7 @@ fn generate_storage_entry_fns(
                     .enumerate()
                     .map(|(i, f)| {
                         let ident: Ident = format_ident!("_{}", syn::Index::from(i));
-                        let ty_path = type_path_resolver
+                        let ty_path = type_gen
                             .resolve_type_path(f.id)
                             .expect("resolving type should not fail");
                         (ident, ty_path)
@@ -79,7 +78,7 @@ fn generate_storage_entry_fns(
                 // A map with a single key; return the single key.
                 _ => {
                     let ident = format_ident!("_0");
-                    let ty_path = type_path_resolver.resolve_type_path(*key_ty)?;
+                    let ty_path = type_gen.resolve_type_path(*key_ty)?;
                     vec![(ident, ty_path)]
                 }
             }
@@ -96,10 +95,10 @@ fn generate_storage_entry_fns(
 
     let snake_case_name = storage_entry.name().to_snake_case();
     let storage_entry_ty = storage_entry.entry_type().value_ty();
-    let storage_entry_value_ty = type_path_resolver.resolve_type_path(storage_entry_ty)?;
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty)?;
     let docs = storage_entry.docs();
     let docs = type_gen
-        .settings
+        .settings()
         .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();

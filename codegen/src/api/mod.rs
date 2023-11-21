@@ -69,7 +69,7 @@ impl RuntimeGenerator {
         let settings =
             subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
 
-        let type_gen = TypeGenerator::new(self.metadata.types(), settings)?;
+        let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
         let types_mod = type_gen.generate_types_mod()?;
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
@@ -118,7 +118,7 @@ impl RuntimeGenerator {
         let settings =
             subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
 
-        let type_gen = TypeGenerator::new(self.metadata.types(), settings)?;
+        let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
         let types_mod = type_gen.generate_types_mod()?;
         let types_mod_ident = type_gen.types_mod_ident();
         let pallets_with_mod_names = self
@@ -213,13 +213,9 @@ impl RuntimeGenerator {
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
 
-        let type_path_resolver = type_gen.type_path_resolver();
-        let call_path =
-            type_path_resolver.resolve_type_path(self.metadata.outer_enums().call_enum_ty())?;
-        let event_path =
-            type_path_resolver.resolve_type_path(self.metadata.outer_enums().event_enum_ty())?;
-        let error_path =
-            type_path_resolver.resolve_type_path(self.metadata.outer_enums().error_enum_ty())?;
+        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty())?;
+        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty())?;
+        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty())?;
 
         let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 
@@ -332,7 +328,7 @@ fn subxt_type_gen_settings(
     should_gen_docs: bool,
 ) -> TypeGeneratorSettings {
     TypeGeneratorSettings {
-        type_mod_name: "runtime_types".into(),
+        types_mod_ident: parse_quote!(runtime_types),
         should_gen_docs,
         derives,
         substitutes,
@@ -354,7 +350,7 @@ pub fn generate_structs_from_variants<F>(
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
-    let ty = type_gen.type_path_resolver().resolve_type(type_id)?;
+    let ty = type_gen.resolve_type(type_id)?;
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
         return Err(CodegenError::InvalidType(error_message_type_name.into()));

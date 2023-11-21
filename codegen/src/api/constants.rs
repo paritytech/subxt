@@ -56,11 +56,10 @@ pub fn generate_constants(
                 ));
             };
 
-            let type_path_resolver = type_gen.type_path_resolver();
-            let return_ty = type_path_resolver.resolve_type_path(constant.ty())?;
+            let return_ty = type_gen.resolve_type_path(constant.ty())?;
             let docs = constant.docs();
             let docs = type_gen
-                .settings
+                .settings()
                 .should_gen_docs
                 .then_some(quote! { #( #[doc = #docs ] )* })
                 .unwrap_or_default();

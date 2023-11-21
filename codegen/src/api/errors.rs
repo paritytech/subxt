@@ -19,9 +19,8 @@ pub fn generate_error_type_alias(
         return Ok(quote!());
     };
 
-    let type_path_resolver = type_gen.type_path_resolver();
-    let error_type = type_path_resolver.resolve_type_path(error_ty)?;
-    let error_ty = type_path_resolver.resolve_type(error_ty)?;
+    let error_type = type_gen.resolve_type_path(error_ty)?;
+    let error_ty = type_gen.resolve_type(error_ty)?;
     let docs = &error_ty.docs;
     let docs = should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })

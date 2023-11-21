@@ -104,9 +104,8 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
-    let type_path_resolver = type_gen.type_path_resolver();
-    let call_type = type_path_resolver.resolve_type_path(call_ty)?;
-    let call_ty = type_path_resolver.resolve_type(call_ty)?;
+    let call_type = type_gen.resolve_type_path(call_ty)?;
+    let call_ty = type_gen.resolve_type(call_ty)?;
     let docs = type_gen.docs_from_scale_info(&call_ty.docs);
 
     let types_mod_ident = type_gen.types_mod_ident();
