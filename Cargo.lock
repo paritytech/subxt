@@ -42,7 +42,7 @@ version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fcb51a0695d8f838b1ee009b3fbf66bda078cd64590202a864a8f3e8c4315c47"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "once_cell",
  "version_check",
 ]
@@ -54,7 +54,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
 dependencies = [
  "cfg-if",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "once_cell",
  "version_check",
 ]
@@ -1393,9 +1393,9 @@ checksum = "e6d5a32815ae3f33302d95fdcb2ce17862f8c65363dcfd29360480ba1001fc9c"
 
 [[package]]
 name = "futures"
-version = "0.3.28"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23342abe12aba583913b2e62f22225ff9c950774065e4bfb61a19cd9770fec40"
+checksum = "da0290714b38af9b4a7b094b8a37086d1b4e61f2df9122c3cad2577669145335"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -1424,9 +1424,9 @@ checksum = "eb1d22c66e66d9d72e1758f0bd7d4fd0bee04cad842ee34587d68c07e45d088c"
 
 [[package]]
 name = "futures-executor"
-version = "0.3.28"
+version = "0.3.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ccecee823288125bd88b4d7f565c9e58e41858e47ab72e8ea2d64e93624386e0"
+checksum = "0f4fb8693db0cf099eadcca0efe2a5a22e4550f98ed16aba6c48700da29597bc"
 dependencies = [
  "futures-core",
  "futures-task",
@@ -1548,9 +1548,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.10"
+version = "0.2.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
+checksum = "fe9006bed769170c11f845cf00c7c1e9092aeb3f268e007c3e760ac68008070f"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2006,7 +2006,7 @@ dependencies = [
  "test-runtime",
  "tokio",
  "tracing",
- "tracing-subscriber 0.3.17",
+ "tracing-subscriber 0.3.18",
  "wabt",
 ]
 
@@ -2893,7 +2893,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
 ]
 
 [[package]]
@@ -4176,7 +4176,7 @@ dependencies = [
  "either",
  "frame-metadata 16.0.0",
  "futures",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "hex",
  "impl-serde",
  "jsonrpsee",
@@ -4201,7 +4201,7 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tracing",
- "tracing-subscriber 0.3.17",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -4233,7 +4233,7 @@ version = "0.32.1"
 dependencies = [
  "bitvec",
  "frame-metadata 16.0.0",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "heck",
  "hex",
  "jsonrpsee",
@@ -4256,7 +4256,7 @@ dependencies = [
  "futures",
  "futures-timer",
  "futures-util",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "instant",
  "js-sys",
  "pin-project",
@@ -4305,7 +4305,7 @@ name = "subxt-signer"
 version = "0.32.1"
 dependencies = [
  "bip39",
- "getrandom 0.2.10",
+ "getrandom 0.2.11",
  "hex",
  "hmac 0.12.1",
  "parity-scale-codec",
@@ -4629,7 +4629,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d686ec1c0f384b1277f097b2f279a2ecc11afe8c133c1aabf036a27cb4cd206e"
 dependencies = [
  "tracing",
- "tracing-subscriber 0.3.17",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
@@ -4640,6 +4640,17 @@ checksum = "78ddad33d2d10b1ed7eb9d1f518a5674713876e97e5bb9b7345a7984fbb4f922"
 dependencies = [
  "lazy_static",
  "log",
+ "tracing-core",
+]
+
+[[package]]
+name = "tracing-log"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee855f1f400bd0e5c02d150ae5de3840039a3f54b025156404e34c23c03f47c3"
+dependencies = [
+ "log",
+ "once_cell",
  "tracing-core",
 ]
 
@@ -4671,22 +4682,22 @@ dependencies = [
  "thread_local",
  "tracing",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.1.3",
  "tracing-serde",
 ]
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.3.17"
+version = "0.3.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30a651bc37f915e81f087d86e62a18eec5f79550c7faff886f7090b4ea757c77"
+checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
 dependencies = [
  "nu-ansi-term",
  "sharded-slab",
  "smallvec",
  "thread_local",
  "tracing-core",
- "tracing-log",
+ "tracing-log 0.2.0",
 ]
 
 [[package]]
@@ -5394,9 +5405,9 @@ checksum = "ff4524214bc4629eba08d78ceb1d6507070cc0bcbbed23af74e19e6e924a24cf"
 
 [[package]]
 name = "zeroize"
-version = "1.6.0"
+version = "1.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2a0956f1ba7c7909bfb66c2e9e4124ab6f6482560f6628b5aaeba39207c9aad9"
+checksum = "525b4ec142c6b68a2d10f01f7bbf6755599ca3f81ea53b8431b7dd348f5fdb2d"
 dependencies = [
  "zeroize_derive",
 ]
