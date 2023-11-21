@@ -93,7 +93,7 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
     };
 
     if opts.state_root_hash {
-        let state_root_hash = compute_state_root_hash(&mut spec)?;
+        let state_root_hash = compute_state_root_hash(&spec)?;
         let state_root_hash = format!("0x{}", hex::encode(state_root_hash));
 
         if let Some(genesis) = spec.get_mut("genesis") {
