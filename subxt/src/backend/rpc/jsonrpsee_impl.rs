@@ -67,3 +67,22 @@ impl RpcClientT for Client {
         })
     }
 }
+
+impl RpcClientT for std::sync::Arc<Client> {
+    fn request_raw<'a>(
+        &'a self,
+        method: &'a str,
+        params: Option<Box<RawValue>>,
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
+        (**self).request_raw(method, params)
+    }
+
+    fn subscribe_raw<'a>(
+        &'a self,
+        sub: &'a str,
+        params: Option<Box<RawValue>>,
+        unsub: &'a str,
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
+        (**self).subscribe_raw(sub, params, unsub)
+    }
+}
