@@ -21,7 +21,7 @@ pub mod constants;
 pub mod custom_values;
 pub mod events;
 pub mod light_client;
+pub mod rpc;
 pub mod runtime_apis;
 pub mod storage;
 pub mod transactions;
-pub mod rpc;
