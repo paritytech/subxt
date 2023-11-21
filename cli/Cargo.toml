@@ -32,3 +32,5 @@ scale-value = { workspace = true }
 syn = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
+scale-typegen-description = { path = "../../scale-typegen/description" }
+heck = { workspace = true }

@@ -1,0 +1,14 @@
+struct transfer_all  {
+     dest: enum MultiAddress {
+        Id(
+            AccountId32([u8; 32])
+        ),
+        Index(
+            Compact<()>
+        ),
+        Raw(Vec<u8>),
+        Address32([u8; 32]),
+        Address20([u8; 20])
+    },
+     keep_alive: bool 
+}

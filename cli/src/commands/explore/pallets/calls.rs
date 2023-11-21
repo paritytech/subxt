@@ -13,9 +13,7 @@ use subxt::{
     OfflineClient,
 };
 
-use crate::utils::type_description::print_type_description;
-use crate::utils::type_example::print_type_examples;
-use crate::utils::with_indent;
+use crate::utils::{fields_composite_example, fields_description, type_example, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -61,10 +59,9 @@ pub fn explore_calls(
 
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
-        let mut type_description = print_type_description(&call.fields, metadata.types())?;
-        type_description = with_indent(type_description, 4);
-        let mut type_examples = print_type_examples(&call.fields, metadata.types(), "SCALE_VALUE")?;
-        type_examples = with_indent(type_examples, 4);
+        let type_description =
+            fields_description(&call.fields, &call.name, metadata.types()).indent(4);
+        let fields_example = fields_composite_example(&call.fields, metadata.types()).indent(4);
         writeln!(output, "Usage:")?;
         writeln!(
             output,
@@ -76,13 +73,17 @@ pub fn explore_calls(
         )?;
         writeln!(
             output,
-            "The call expect expects a <SCALE_VALUE> with this shape:\n{type_description}\n\n{}\n\nYou may need to surround the value in single quotes when providing it as an argument."
-            , &type_examples[4..])?;
+            "The call expects a <SCALE_VALUE> with this shape:\n{type_description}\n"
+        )?;
+        writeln!(
+            output,
+            "For example you could provide this <SCALE_VALUE>:\n{fields_example}"
+        )?;
         return Ok(());
     }
 
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
-    
+
     dbg!(&trailing_args);
     let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
     let value_as_composite = value_into_composite(value);

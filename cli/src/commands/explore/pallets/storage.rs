@@ -1,5 +1,6 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use scale_typegen_description::type_description;
 use std::fmt::Write;
 use std::write;
 
@@ -12,9 +13,7 @@ use subxt::{
     },
 };
 
-use crate::utils::type_description::print_type_description;
-use crate::utils::type_example::print_type_examples;
-use crate::utils::{print_first_paragraph_with_indent, with_indent};
+use crate::utils::{print_first_paragraph_with_indent, type_example, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
@@ -83,28 +82,28 @@ pub async fn explore_storage(
 
     // inform user about shape of key if it can be provided:
     if let Some(key_ty_id) = key_ty_id {
-        let mut key_ty_description = print_type_description(&key_ty_id, metadata.types())?;
-        key_ty_description = with_indent(key_ty_description, 4);
-        let mut key_ty_examples = print_type_examples(&key_ty_id, metadata.types(), "<KEY_VALUE>")?;
-        key_ty_examples = with_indent(key_ty_examples, 4);
+        let key_ty_description = type_description(key_ty_id, metadata.types(), true)
+            .expect("No type Description")
+            .indent(4);
+
+        let key_ty_example = type_example(key_ty_id, metadata.types()).indent(4);
+
         writeln!(
             output,
             "\nThe <KEY_VALUE> has the following shape:\n    {key_ty_description}\n"
         )?;
-        writeln!(output, "{}", &key_ty_examples[4..])?;
+        writeln!(output, "{}", &key_ty_example[4..])?;
     } else {
         writeln!(
             output,
-            "The constant can be accessed without providing a key."
+            "The storage entry can be accessed without providing a key."
         )?;
     }
 
-    let mut return_ty_description = print_type_description(&return_ty_id, metadata.types())?;
-    return_ty_description = if return_ty_description.contains('\n') {
-        format!("\n{}", with_indent(return_ty_description, 4))
-    } else {
-        return_ty_description
-    };
+    let return_ty_description = type_description(return_ty_id, metadata.types(), true)
+        .expect("No type Description")
+        .indent(4);
+
     writeln!(
         output,
         "\nThe storage entry has the following shape: {}",
@@ -119,7 +118,7 @@ pub async fn explore_storage(
         writeln!(
             output,
             "\n\nYou submitted the following value as a key:\n{}",
-            with_indent(scale_value::stringify::to_string(&key_scale_value), 4)
+            key_scale_value.indent(4)
         )?;
         let mut key_bytes: Vec<u8> = Vec::new();
         scale_value::scale::encode_as_type(
@@ -155,13 +154,8 @@ pub async fn explore_storage(
         let decoded_value_thunk =
             decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
 
-        let value = decoded_value_thunk.to_value()?;
-        let mut value_string = scale_value::stringify::to_string(&value);
-        value_string = with_indent(value_string, 4);
-        writeln!(
-            output,
-            "\nThe value of the storage entry is:\n{value_string}"
-        )?;
+        let value = decoded_value_thunk.to_value()?.indent(4);
+        writeln!(output, "\nThe value of the storage entry is:\n{value}")?;
     }
 
     Ok(())

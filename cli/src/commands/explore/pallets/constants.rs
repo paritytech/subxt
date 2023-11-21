@@ -1,11 +1,11 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use scale_typegen_description::type_description;
 use std::fmt::Write;
 
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
-use crate::utils::type_description::print_type_description;
-use crate::utils::{print_first_paragraph_with_indent, with_indent};
+use crate::utils::{format_scale_value, print_first_paragraph_with_indent, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct ConstantsSubcommand {
@@ -61,21 +61,19 @@ pub fn explore_constants(
     }
 
     // shape
-    let mut type_description = print_type_description(&constant.ty(), metadata.types())?;
-    type_description = with_indent(type_description, 4);
+    let type_description = type_description(constant.ty(), metadata.types(), true)
+        .expect("No Type Description")
+        .indent(4);
     writeln!(
         output,
         "\nThe constant has the following shape:\n{type_description}"
     )?;
 
     // value
-    let scale_val =
+    let value =
         scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
-    writeln!(
-        output,
-        "\nThe value of the constant is:\n    {}",
-        scale_value::stringify::to_string(&scale_val)
-    )?;
+    let value = format_scale_value(&value);
+    writeln!(output, "\nThe value of the constant is:\n    {value}",)?;
     Ok(())
 }
 

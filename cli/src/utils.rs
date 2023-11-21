@@ -4,14 +4,20 @@
 
 use clap::Args;
 use color_eyre::eyre;
+use heck::ToUpperCamelCase;
+use scale_info::form::PortableForm;
+use scale_info::PortableRegistry;
+use scale_typegen_description::{format_type_description, type_description};
 
+use std::fmt::Display;
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
 
+use scale_value::Value;
 use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
 
-pub mod type_description;
-pub mod type_example;
+// pub mod type_description;
+// pub mod type_example;
 
 /// The source of the metadata.
 #[derive(Debug, Args, Clone)]
@@ -69,6 +75,70 @@ impl FileOrUrl {
     }
 }
 
+/// creates an example value for each of the fields and
+/// packages all of them into one unnamed composite value.
+pub fn fields_composite_example(
+    fields: &[scale_info::Field<PortableForm>],
+    types: &PortableRegistry,
+) -> Value {
+    let examples: Vec<Value> = fields
+        .iter()
+        .map(|e| type_example(e.ty.id, types))
+        .collect();
+    Value::unnamed_composite(examples)
+}
+
+/// Returns a field description that is already formatted.
+pub fn fields_description(
+    fields: &[scale_info::Field<PortableForm>],
+    name: &str,
+    types: &PortableRegistry,
+) -> String {
+    if fields.is_empty() {
+        return format!("Zero Sized Type, no fields.");
+    }
+    let all_named = fields.iter().all(|f| f.name.is_some());
+
+    let fields = fields
+        .iter()
+        .map(|field| {
+            let field_description =
+                type_description(field.ty.id, types, false).expect("No Description.");
+            if all_named {
+                let field_name = field.name.as_ref().unwrap();
+                format!("{field_name}: {field_description}")
+            } else {
+                format!("{field_description}")
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(",");
+
+    let name = name.to_upper_camel_case();
+    let end_result = if all_named {
+        format!("struct {name} {{{fields}}}")
+    } else {
+        format!("struct {name} ({fields})")
+    };
+    // end_result
+    format_type_description(&end_result)
+}
+
+pub fn format_scale_value<T>(value: &Value<T>) -> String {
+    scale_typegen_description::format_type_description(&value.to_string())
+}
+
+pub fn type_example(type_id: u32, types: &PortableRegistry) -> Value {
+    scale_typegen_description::scale_value_from_seed(type_id, types, time_based_seed()).expect("")
+}
+
+fn time_based_seed() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("We should always live in the future.")
+        .subsec_millis() as u64
+}
+
 pub fn print_first_paragraph_with_indent(docs: &[String], indent: usize) -> String {
     // take at most the first paragraph of documentation, such that it does not get too long.
     let docs_str = docs
@@ -77,16 +147,21 @@ pub fn print_first_paragraph_with_indent(docs: &[String], indent: usize) -> Stri
         .take_while(|e| !e.is_empty())
         .collect::<Vec<_>>()
         .join("\n");
-    with_indent(docs_str, indent)
+    docs_str.indent(indent)
 }
 
-pub fn with_indent(s: String, indent: usize) -> String {
-    let indent_str = " ".repeat(indent);
-    s.lines()
-        .map(|line| format!("{indent_str}{line}"))
-        .collect::<Vec<_>>()
-        .join("\n")
+pub trait Indent: ToString {
+    fn indent(&self, indent: usize) -> String {
+        let indent_str = " ".repeat(indent);
+        self.to_string()
+            .lines()
+            .map(|line| format!("{indent_str}{line}"))
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
 }
+
+impl<T: Display> Indent for T {}
 
 impl FromStr for FileOrUrl {
     type Err = &'static str;
