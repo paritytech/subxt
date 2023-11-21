@@ -132,7 +132,7 @@ mod substrate_impls {
 
     impl<T: sp_runtime::traits::Header> Header for T
     where
-        u64: From<<T as sp_runtime::traits::Header>::Number>,
+        <T as sp_runtime::traits::Header>::Number: Into<u64>,
     {
         type Number = T::Number;
         type Hasher = T::Hashing;
