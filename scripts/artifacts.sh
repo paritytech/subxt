@@ -21,3 +21,6 @@ cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --p
 cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "" > artifacts/polkadot_metadata_tiny.scale
 # generate a metadata file that only contains some custom metadata
 cargo run --bin generate-custom-metadata > artifacts/metadata_with_custom_values.scale 
+
+# Generate the polkadot chain spec.
+cargo run -- chain-spec --url wss://rpc.polkadot.io:443 --output-file artifacts/demo_chain_specs/polkadot.json --state-root-hash --remove-substitutes
