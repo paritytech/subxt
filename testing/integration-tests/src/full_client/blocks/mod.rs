@@ -5,9 +5,7 @@
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
-use subxt::config::signed_extensions::{
-    ChargeAssetTxPayment, CheckMortality, CheckNonce,
-};
+use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce};
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::config::SubstrateConfig;
 use subxt::utils::Era;
@@ -279,9 +277,9 @@ async fn decode_signed_extensions_from_blocks() {
     let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
     let extensions1 = transaction1.signed_extensions().unwrap();
 
-    let nonce1 = extensions1.nonce().unwrap();
+    let nonce1 = extensions1.nonce().unwrap().unwrap();
     let nonce1_static = extensions1.find::<CheckNonce>().unwrap().unwrap();
-    let tip1 = extensions1.tip().unwrap();
+    let tip1 = extensions1.tip().unwrap().unwrap();
     let tip1_static: u128 = extensions1
         .find::<ChargeAssetTxPayment<SubstrateConfig>>()
         .unwrap()
@@ -316,7 +314,7 @@ async fn decode_signed_extensions_from_blocks() {
         "CheckMortality",
         "CheckNonce",
         "CheckWeight",
-        "SkipCheckIfFeeless",
+        "ChargeAssetTxPayment",
     ];
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());

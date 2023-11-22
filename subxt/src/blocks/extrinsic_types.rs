@@ -672,7 +672,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                 // No error, but no match either; next!
                 Ok(None) => continue,
                 // Error? return it
-                Err(e) => return Err(e),
+                Err(e) => return Err(e.into()),
             }
         }
         Ok(None)
