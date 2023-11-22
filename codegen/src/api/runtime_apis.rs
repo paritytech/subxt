@@ -45,7 +45,7 @@ fn generate_runtime_api(
             // These are method names, which can just be '_', but struct field names can't
             // just be an underscore, so fix any such names we find to work in structs.
 
-            let mut name = input.name.trim_start_matches("_").to_string();
+            let mut name = input.name.trim_start_matches('_').to_string();
             if name.is_empty() {
                 name = format!("_{}", idx);
             }
