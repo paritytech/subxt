@@ -739,7 +739,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     /// Returns `Ok(None)` if the data we have doesn't match the Signed Extension we're asking to
     /// decode with.
     pub fn as_signed_extension<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
-        if !S::matches(self.identifier, self.ty_id, self.metadata.types())? {
+        if !S::matches(self.identifier, self.ty_id, self.metadata.types()) {
             return Ok(None);
         }
         self.as_type::<S::Decoded>().map(Some)

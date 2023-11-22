@@ -50,12 +50,8 @@ pub struct CustomSignedExtension;
 // up in the chain metadata in order to know when and if to use it.
 impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension {
     type Decoded = ();
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CustomSignedExtension")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CustomSignedExtension"
     }
 }
 

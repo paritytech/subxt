@@ -34,11 +34,7 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     /// The first match that returns true will be the entry that this signed extension
     /// is used to encode values for. This takes `&mut self`, allowing the extension to
     /// cache values if it likes when it finds the type it'll be encoding for.
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError>;
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
 }
 
 /// The [`CheckSpecVersion`] signed extension.
@@ -64,12 +60,8 @@ impl ExtrinsicParamsEncoder for CheckSpecVersion {
 
 impl<T: Config> SignedExtension<T> for CheckSpecVersion {
     type Decoded = ();
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CheckSpecVersion")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckSpecVersion"
     }
 }
 
@@ -96,12 +88,8 @@ impl ExtrinsicParamsEncoder for CheckNonce {
 
 impl<T: Config> SignedExtension<T> for CheckNonce {
     type Decoded = u64;
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CheckNonce")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckNonce"
     }
 }
 
@@ -128,12 +116,8 @@ impl ExtrinsicParamsEncoder for CheckTxVersion {
 
 impl<T: Config> SignedExtension<T> for CheckTxVersion {
     type Decoded = ();
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CheckTxVersion")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckTxVersion"
     }
 }
 
@@ -160,12 +144,8 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckGenesis<T> {
 
 impl<T: Config> SignedExtension<T> for CheckGenesis<T> {
     type Decoded = ();
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CheckGenesis")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckGenesis"
     }
 }
 
@@ -236,12 +216,8 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
 
 impl<T: Config> SignedExtension<T> for CheckMortality<T> {
     type Decoded = Era;
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "CheckMortality")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckMortality"
     }
 }
 
@@ -328,12 +304,8 @@ impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
 
 impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
     type Decoded = Self;
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "ChargeAssetTxPayment")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "ChargeAssetTxPayment"
     }
 }
 
@@ -389,12 +361,8 @@ impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
 
 impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
     type Decoded = Self;
-    fn matches(
-        identifier: &str,
-        _type_id: u32,
-        _types: &PortableRegistry,
-    ) -> Result<bool, ExtrinsicParamsError> {
-        Ok(identifier == "ChargeTransactionPayment")
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "ChargeTransactionPayment"
     }
 }
 
@@ -436,7 +404,7 @@ macro_rules! impl_tuples {
                             continue
                         }
                         // Break and record as soon as we find a match:
-                        if $ident::matches(e.identifier(), e.extra_ty(), types)? {
+                        if $ident::matches(e.identifier(), e.extra_ty(), types) {
                             let ext = $ident::new(nonce, client.clone(), other_params.$index)?;
                             let boxed_ext: Box<dyn ExtrinsicParamsEncoder> = Box::new(ext);
                             exts_by_index.insert(idx, boxed_ext);
