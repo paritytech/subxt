@@ -36,8 +36,8 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     /// cache values if it likes when it finds the type it'll be encoding for.
     fn matches(
         identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError>;
 }
 
@@ -65,11 +65,11 @@ impl ExtrinsicParamsEncoder for CheckSpecVersion {
 impl<T: Config> SignedExtension<T> for CheckSpecVersion {
     type Decoded = ();
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "CheckSpecVersion")
+        Ok(identifier == "CheckSpecVersion")
     }
 }
 
@@ -97,11 +97,11 @@ impl ExtrinsicParamsEncoder for CheckNonce {
 impl<T: Config> SignedExtension<T> for CheckNonce {
     type Decoded = u64;
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "CheckNonce")
+        Ok(identifier == "CheckNonce")
     }
 }
 
@@ -129,11 +129,11 @@ impl ExtrinsicParamsEncoder for CheckTxVersion {
 impl<T: Config> SignedExtension<T> for CheckTxVersion {
     type Decoded = ();
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "CheckTxVersion")
+        Ok(identifier == "CheckTxVersion")
     }
 }
 
@@ -161,11 +161,11 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckGenesis<T> {
 impl<T: Config> SignedExtension<T> for CheckGenesis<T> {
     type Decoded = ();
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "CheckGenesis")
+        Ok(identifier == "CheckGenesis")
     }
 }
 
@@ -237,11 +237,11 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
 impl<T: Config> SignedExtension<T> for CheckMortality<T> {
     type Decoded = Era;
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "CheckMortality")
+        Ok(identifier == "CheckMortality")
     }
 }
 
@@ -329,11 +329,11 @@ impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
 impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
     type Decoded = Self;
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "ChargeAssetTxPayment")
+        Ok(identifier == "ChargeAssetTxPayment")
     }
 }
 
@@ -390,11 +390,11 @@ impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
 impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
     type Decoded = Self;
     fn matches(
-        _identifier: &str,
-        type_id: u32,
-        types: &PortableRegistry,
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
     ) -> Result<bool, ExtrinsicParamsError> {
-        type_id_matches_ext_name(type_id, types, "ChargeTransactionPayment")
+        Ok(identifier == "ChargeTransactionPayment")
     }
 }
 
@@ -528,41 +528,5 @@ fn is_type_empty(type_id: u32, types: &scale_info::PortableRegistry) -> bool {
         | TypeDef::Sequence(_)
         | TypeDef::Compact(_)
         | TypeDef::Primitive(_) => false,
-    }
-}
-
-/// Resolve a type ID and check that its path equals the extension name provided.
-/// As an exception; if the name of the extension is the transparent "SkipCheckIfFeeless"
-/// signed extension, then we look at the inner type of that to determine whether it's a match.
-fn type_id_matches_ext_name(
-    type_id: u32,
-    types: &PortableRegistry,
-    ext_name: &'static str,
-) -> Result<bool, ExtrinsicParamsError> {
-    let Some(ty) = types.resolve(type_id) else {
-        return Err(ExtrinsicParamsError::MissingTypeId {
-            type_id,
-            context: ext_name,
-        });
-    };
-    let Some(name) = ty.path.segments.last() else {
-        return Ok(false);
-    };
-    if name == "SkipCheckIfFeeless" {
-        // SkipCheckIfFeeless is a transparent wrapper that can be applied around any signed extension.
-        // It should have 2 generic types: the inner signed extension and a phantom data type. Phantom data does
-        // not have a type associated, so we find the type that does to find the inner signed extension.
-        // If this doesn't pan out, don't error, just don't match.
-        let Some(inner_type_id) = ty
-            .type_params
-            .iter()
-            .find_map(|param| param.ty.map(|ty| ty.id))
-        else {
-            return Ok(false);
-        };
-
-        type_id_matches_ext_name(inner_type_id, types, ext_name)
-    } else {
-        Ok(name == ext_name)
     }
 }
