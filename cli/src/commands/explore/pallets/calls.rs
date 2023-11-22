@@ -1,5 +1,6 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use indoc::{formatdoc, writedoc};
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
@@ -34,10 +35,20 @@ pub fn explore_calls(
     let (calls_enum_type_def, _calls_enum_type) =
         get_calls_enum_type(pallet_metadata, metadata.types())?;
 
+    let usage = || {
+        let available_calls = available_calls_string(calls_enum_type_def, pallet_name);
+        formatdoc! {"
+        Usage:
+            subxt explore pallet {pallet_name} calls <CALL>
+                explore a specific call of this pallet
+        
+        {available_calls}
+        "}
+    };
+
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
-        let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        writeln!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
+        writeln!(output, "{}", usage())?;
         return Ok(());
     };
 
@@ -47,10 +58,9 @@ pub fn explore_calls(
         .iter()
         .find(|variant| variant.name.to_lowercase() == call_name.to_lowercase())
     else {
-        let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        let description = format!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", );
         return Err(eyre!(
-            "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{description}"
+            "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{}",
+            usage()
         ));
     };
 
@@ -62,23 +72,18 @@ pub fn explore_calls(
         let type_description =
             fields_description(&call.fields, &call.name, metadata.types()).indent(4);
         let fields_example = fields_composite_example(&call.fields, metadata.types()).indent(4);
-        writeln!(output, "Usage:")?;
-        writeln!(
-            output,
-            "    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>"
-        )?;
-        writeln!(
-            output,
-            "        construct the call by providing a valid argument\n"
-        )?;
-        writeln!(
-            output,
-            "The call expects a <SCALE_VALUE> with this shape:\n{type_description}\n"
-        )?;
-        writeln!(
-            output,
-            "For example you could provide this <SCALE_VALUE>:\n{fields_example}"
-        )?;
+        writedoc! {output,"
+        Usage:
+            subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>
+                construct the call by providing a valid argument
+
+        The call expects a <SCALE_VALUE> with this shape:
+        {type_description}
+
+        For example you could provide this <SCALE_VALUE>:
+        
+        {fields_example}
+        "}?;
         return Ok(());
     }
 
@@ -96,7 +101,10 @@ pub fn explore_calls(
     Ok(())
 }
 
-fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
+fn available_calls_string(
+    pallet_calls: &TypeDefVariant<PortableForm>,
+    pallet_name: &str,
+) -> String {
     if pallet_calls.variants.is_empty() {
         return format!("No <CALL>'s available in the \"{pallet_name}\" pallet.");
     }

@@ -5,7 +5,7 @@ use std::fmt::Write;
 
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
-use crate::utils::{format_scale_value, print_first_paragraph_with_indent, Indent};
+use crate::utils::{first_paragraph_of_docs, format_scale_value, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct ConstantsSubcommand {
@@ -55,7 +55,7 @@ pub fn explore_constants(
     };
 
     // docs
-    let doc_string = print_first_paragraph_with_indent(constant.docs(), 4);
+    let doc_string = first_paragraph_of_docs(constant.docs()).indent(4);
     if !doc_string.is_empty() {
         writeln!(output, "Description:\n{doc_string}")?;
     }

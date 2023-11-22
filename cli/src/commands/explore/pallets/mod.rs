@@ -3,7 +3,7 @@ use clap::{command, Parser, Subcommand};
 use subxt::Metadata;
 use subxt_metadata::PalletMetadata;
 
-use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
+use crate::utils::{first_paragraph_of_docs, FileOrUrl, Indent};
 
 use self::{calls::CallsSubcommand, constants::ConstantsSubcommand, storage::StorageSubcommand};
 
@@ -38,7 +38,7 @@ pub async fn run<'a>(
 ) -> color_eyre::Result<()> {
     let pallet_name = opts.name;
     let Some(subcommand) = opts.subcommand else {
-        let docs_string = print_first_paragraph_with_indent(pallet_metadata.docs(), 4);
+        let docs_string = first_paragraph_of_docs(pallet_metadata.docs()).indent(4);
         if !docs_string.is_empty() {
             writeln!(output, "Description:\n{docs_string}")?;
         }

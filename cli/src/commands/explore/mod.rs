@@ -1,4 +1,4 @@
-use crate::utils::{print_first_paragraph_with_indent, FileOrUrl};
+use crate::utils::{first_paragraph_of_docs, FileOrUrl};
 use clap::{command, Parser, Subcommand};
 use subxt_metadata::{PalletMetadata, RuntimeApiMetadata};
 

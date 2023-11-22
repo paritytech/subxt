@@ -34,3 +34,4 @@ jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { path = "../../scale-typegen/description" }
 heck = { workspace = true }
+indoc = "2"

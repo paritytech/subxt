@@ -13,7 +13,7 @@ use subxt::{
     },
 };
 
-use crate::utils::{print_first_paragraph_with_indent, type_example, Indent};
+use crate::utils::{first_paragraph_of_docs, type_example, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
@@ -75,7 +75,7 @@ pub async fn explore_storage(
         )?;
     }
 
-    let docs_string = print_first_paragraph_with_indent(storage.docs(), 4);
+    let docs_string = first_paragraph_of_docs(storage.docs()).indent(4);
     if !docs_string.is_empty() {
         writeln!(output, "Description:\n{docs_string}")?;
     }
@@ -90,9 +90,12 @@ pub async fn explore_storage(
 
         writeln!(
             output,
-            "\nThe <KEY_VALUE> has the following shape:\n    {key_ty_description}\n"
+            "\nThe <KEY_VALUE> has the following shape:\n{key_ty_description}\n"
         )?;
-        writeln!(output, "{}", &key_ty_example[4..])?;
+        writeln!(
+            output,
+            "For example you could provide this <KEY_VALUE>:\n{key_ty_example}"
+        )?;
     } else {
         writeln!(
             output,
@@ -106,7 +109,7 @@ pub async fn explore_storage(
 
     writeln!(
         output,
-        "\nThe storage entry has the following shape: {}",
+        "\nThe storage entry has the following shape:\n{}",
         return_ty_description
     )?;
 

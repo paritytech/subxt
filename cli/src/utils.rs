@@ -139,7 +139,7 @@ fn time_based_seed() -> u64 {
         .subsec_millis() as u64
 }
 
-pub fn print_first_paragraph_with_indent(docs: &[String], indent: usize) -> String {
+pub fn first_paragraph_of_docs(docs: &[String]) -> String {
     // take at most the first paragraph of documentation, such that it does not get too long.
     let docs_str = docs
         .iter()
@@ -147,7 +147,7 @@ pub fn print_first_paragraph_with_indent(docs: &[String], indent: usize) -> Stri
         .take_while(|e| !e.is_empty())
         .collect::<Vec<_>>()
         .join("\n");
-    docs_str.indent(indent)
+    docs_str
 }
 
 pub trait Indent: ToString {
