@@ -1,9 +1,11 @@
 use codec::Encode;
 use scale_encode::EncodeAsType;
+use scale_info::PortableRegistry;
 use subxt::client::OfflineClientT;
 use subxt::config::signed_extensions;
 use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
+    ExtrinsicParamsError,
 };
 use subxt_signer::sr25519::dev;
 
@@ -34,10 +36,6 @@ impl Config for CustomConfig {
             signed_extensions::CheckMortality<Self>,
             signed_extensions::ChargeAssetTxPayment<Self>,
             signed_extensions::ChargeTransactionPayment,
-            signed_extensions::SkipCheckIfFeeless<
-                Self,
-                signed_extensions::ChargeAssetTxPayment<Self>,
-            >,
             // And add a new one of our own:
             CustomSignedExtension,
         ),
@@ -51,20 +49,25 @@ pub struct CustomSignedExtension;
 // Give the extension a name; this allows `AnyOf` to look it
 // up in the chain metadata in order to know when and if to use it.
 impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension {
-    const NAME: &'static str = "CustomSignedExtension";
     type Decoded = ();
+    fn matches(
+        identifier: &str,
+        _type_id: u32,
+        _types: &PortableRegistry,
+    ) -> Result<bool, ExtrinsicParamsError> {
+        Ok(identifier == "CustomSignedExtension")
+    }
 }
 
 // Gather together any params we need for our signed extension, here none.
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type OtherParams = ();
-    type Error = std::convert::Infallible;
 
     fn new<Client: OfflineClientT<T>>(
         _nonce: u64,
         _client: Client,
         _other_params: Self::OtherParams,
-    ) -> Result<Self, Self::Error> {
+    ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }
 }
@@ -87,8 +90,8 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::OtherParams {
-    let (a, b, c, d, e, f, g, h) = params.build();
-    (a, b, c, d, e, f, g, h, ())
+    let (a, b, c, d, e, f, g) = params.build();
+    (a, b, c, d, e, f, g, ())
 }
 
 #[tokio::main]

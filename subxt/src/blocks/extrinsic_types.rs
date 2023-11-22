@@ -13,7 +13,7 @@ use crate::{
 };
 
 use crate::config::signed_extensions::{
-    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce, SkipCheckIfFeeless,
+    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::config::SignedExtension;
 use crate::dynamic::DecodedValue;
@@ -660,24 +660,22 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
         })
     }
 
-    fn find_by_name(&self, name: &str) -> Option<ExtrinsicSignedExtension<'_, T>> {
-        let signed_extension = self
-            .iter()
-            .find_map(|e| e.ok().filter(|e| e.name() == name))?;
-        Some(signed_extension)
-    }
-
     /// Searches through all signed extensions to find a specific one.
     /// If the Signed Extension is not found `Ok(None)` is returned.
     /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
     pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
-        self.find_by_name(S::NAME)
-            .map(|s| {
-                s.as_signed_extra::<S>().map(|e| {
-                    e.expect("signed extra name is correct, because it was found before; qed.")
-                })
-            })
-            .transpose()
+        for ext in self.iter() {
+            let Ok(ext) = ext else { continue };
+            match ext.as_signed_extension::<S>() {
+                // We found a match; return it:
+                Ok(Some(e)) => return Ok(Some(e)),
+                // No error, but no match either; next!
+                Ok(None) => continue,
+                // Error? return it
+                Err(e) => return Err(e),
+            }
+        }
+        Ok(None)
     }
 
     /// The tip of an extrinsic, extracted from the ChargeTransactionPayment or ChargeAssetTxPayment
@@ -696,20 +694,13 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                     .flatten()
                     .map(|e| e.tip())
             })
-            .or_else(|| {
-                self.find::<SkipCheckIfFeeless<T, ChargeAssetTxPayment<T>>>()
-                    .ok()
-                    .flatten()
-                    .map(|skip_check| skip_check.inner_signed_extension().tip())
-            })
     }
 
     /// The nonce of the account that submitted the extrinsic, extracted from the CheckNonce signed extension.
     ///
     /// Returns `None` if `nonce` was not found or decoding failed.
     pub fn nonce(&self) -> Option<u64> {
-        let nonce = self.find::<CheckNonce>().ok()??.0;
-        Some(nonce)
+        self.find::<CheckNonce>().ok()?
     }
 }
 
@@ -744,19 +735,19 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
         self.as_type()
     }
 
-    /// Decodes the `extra` bytes of this Signed Extension into a static type.
-    fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
-        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
-        Ok(value)
-    }
-
-    /// Decodes the `extra` bytes of this Signed Extension into its associated `Decoded` type.
-    /// Returns `Ok(None)` if the identitfier of this Signed Extension object does not line up with the `NAME` constant of the provided Signed Extension type.
-    pub fn as_signed_extra<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
-        if self.identifier != S::NAME {
+    /// Decodes the bytes of this Signed Extension into its associated `Decoded` type.
+    /// Returns `Ok(None)` if the data we have doesn't match the Signed Extension we're asking to
+    /// decode with.
+    pub fn as_signed_extension<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+        if !S::matches(self.identifier, self.ty_id, self.metadata.types())? {
             return Ok(None);
         }
         self.as_type::<S::Decoded>().map(Some)
+    }
+
+    fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
+        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
+        Ok(value)
     }
 }
 

@@ -1,6 +1,6 @@
 use codec::Encode;
 use subxt::client::OfflineClientT;
-use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
+use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(
@@ -66,14 +66,13 @@ impl CustomExtrinsicParamsBuilder {
 // Describe how to fetch and then encode the params:
 impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     type OtherParams = CustomExtrinsicParamsBuilder;
-    type Error = std::convert::Infallible;
 
     // Gather together all of the params we will need to encode:
     fn new<Client: OfflineClientT<T>>(
         _nonce: u64,
         client: Client,
         other_params: Self::OtherParams,
-    ) -> Result<Self, Self::Error> {
+    ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
             genesis_hash: client.genesis_hash(),
             tip: other_params.tip,
