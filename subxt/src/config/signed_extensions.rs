@@ -12,8 +12,8 @@ use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
 use core::fmt::Debug;
+use derivative::Derivative;
 use scale_decode::DecodeAsType;
-use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
 
 use std::collections::HashMap;
@@ -42,7 +42,6 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
 }
 
 /// The [`CheckSpecVersion`] signed extension.
-#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckSpecVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
@@ -75,7 +74,6 @@ impl<T: Config> SignedExtension<T> for CheckSpecVersion {
 }
 
 /// The [`CheckNonce`] signed extension.
-#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckNonce(Compact<u64>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
@@ -108,7 +106,6 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
 }
 
 /// The [`CheckTxVersion`] signed extension.
-#[derive(Clone, Debug, EncodeAsType, DecodeAsType)]
 pub struct CheckTxVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
@@ -141,16 +138,7 @@ impl<T: Config> SignedExtension<T> for CheckTxVersion {
 }
 
 /// The [`CheckGenesis`] signed extension.
-#[derive(Clone, EncodeAsType, DecodeAsType)]
-#[decode_as_type(trait_bounds = "T::Hash: DecodeAsType")]
-#[encode_as_type(trait_bounds = "T::Hash: EncodeAsType")]
 pub struct CheckGenesis<T: Config>(T::Hash);
-
-impl<T: Config> std::fmt::Debug for CheckGenesis<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_tuple("CheckGenesis").field(&self.0).finish()
-    }
-}
 
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     type OtherParams = ();
@@ -182,16 +170,12 @@ impl<T: Config> SignedExtension<T> for CheckGenesis<T> {
 }
 
 /// The [`CheckMortality`] signed extension.
-#[derive(Clone, EncodeAsType, DecodeAsType)]
-#[decode_as_type(trait_bounds = "T::Hash: DecodeAsType")]
-#[encode_as_type(trait_bounds = "T::Hash: EncodeAsType")]
 pub struct CheckMortality<T: Config> {
     era: Era,
     checkpoint: T::Hash,
 }
 
 /// Parameters to configure the [`CheckMortality`] signed extension.
-#[derive(Clone, Debug)]
 pub struct CheckMortalityParams<T: Config> {
     era: Era,
     checkpoint: Option<T::Hash>,
@@ -223,15 +207,6 @@ impl<T: Config> CheckMortalityParams<T> {
             era: Era::Immortal,
             checkpoint: None,
         }
-    }
-}
-
-impl<T: Config> std::fmt::Debug for CheckMortality<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("CheckMortality")
-            .field("era", &self.era)
-            .field("checkpoint", &self.checkpoint)
-            .finish()
     }
 }
 
@@ -271,7 +246,8 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Clone, Debug, DecodeAsType)]
+#[derive(Derivative, DecodeAsType)]
+#[derivative(Clone(bound = "T::AssetId: Clone"), Debug(bound = "T::AssetId: Debug"))]
 #[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,
@@ -291,20 +267,9 @@ impl<T: Config> ChargeAssetTxPayment<T> {
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] signed extension.
-#[derive(Debug)]
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
-}
-
-// Dev note: `#[derive(Clone)]` implies `T: Clone` instead of `T::AssetId: Clone`.
-impl<T: Config> Clone for ChargeAssetTxPaymentParams<T> {
-    fn clone(&self) -> Self {
-        Self {
-            tip: self.tip,
-            asset_id: self.asset_id.clone(),
-        }
-    }
 }
 
 impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
