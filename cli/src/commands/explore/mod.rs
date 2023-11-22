@@ -1,5 +1,6 @@
 use crate::utils::{first_paragraph_of_docs, FileOrUrl};
 use clap::{command, Parser, Subcommand};
+use indoc::writedoc;
 use subxt_metadata::{PalletMetadata, RuntimeApiMetadata};
 
 use std::fmt::Write;
@@ -10,8 +11,7 @@ use color_eyre::eyre::eyre;
 
 use subxt::Metadata;
 
-use self::pallets::PalletOpts;
-use self::runtime_apis::RuntimeApiOpts;
+use self::pallets::PalletSubcommand;
 
 mod pallets;
 mod runtime_apis;
@@ -77,6 +77,22 @@ pub enum PalletOrRuntimeApi {
     Api(RuntimeApiOpts),
 }
 
+#[derive(Debug, Parser)]
+pub struct PalletOpts {
+    pub name: Option<String>,
+    #[command(subcommand)]
+    pub subcommand: Option<PalletSubcommand>,
+}
+
+#[derive(Debug, Parser)]
+pub struct RuntimeApiOpts {
+    pub name: Option<String>,
+    #[clap(required = false)]
+    pub method: Option<String>,
+    #[clap(required = false)]
+    trailing_args: Vec<String>,
+}
+
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
     // get the metadata
     let file_or_url = opts.file_or_url;
@@ -85,43 +101,79 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
 
     // if no pallet/runtime_api specified, show user the pallets/runtime_apis to choose from:
     let Some(pallet_or_runtime_api) = opts.subcommand else {
-        writeln!(output, "Usage:",)?;
-        writeln!(output, "    subxt explore pallet <PALLET>",)?;
-        writeln!(output, "        explore a specific pallet",)?;
-        writeln!(output, "    subxt explore api <RUNTIME_API>",)?;
-        writeln!(output, "        explore a specific runtime api trait",)?;
-        writeln!(output, "\n{}", pallets_as_string(&metadata))?;
-        writeln!(output, "\n{}", runtime_apis_as_string(&metadata))?;
+        let pallets = pallets_as_string(&metadata);
+        let runtime_apis = runtime_apis_as_string(&metadata);
+        writedoc! {output, "
+        Usage:
+            subxt explore pallet <PALLET>
+                explore a specific pallet
+            subxt explore api <RUNTIME_API>
+                explore a specific runtime api trait
+
+        {pallets}
+
+        {runtime_apis}
+        "}?;
         return Ok(());
     };
 
     match pallet_or_runtime_api {
         PalletOrRuntimeApi::Pallet(opts) => {
-            let name_lower_case = opts.name.to_lowercase();
+            let Some(name) = opts.name else {
+                let pallets = pallets_as_string(&metadata);
+                writedoc! {output, "
+                Usage:
+                    subxt explore pallet <PALLET>
+                        explore a specific pallet
+    
+                {pallets}
+                "}?;
+                return Ok(());
+            };
+
+            let name_lower_case = name.to_lowercase();
             if let Some(pallet) = metadata
                 .pallets()
                 .find(|e| e.name().to_lowercase() == name_lower_case)
             {
-                pallets::run(opts, pallet, &metadata, file_or_url, output).await
+                pallets::run(opts.subcommand, pallet, &metadata, file_or_url, output).await
             } else {
                 Err(eyre!(
-                    "pallet \"{}\" not found in metadata!\n{}",
-                    opts.name,
+                    "pallet \"{name}\" not found in metadata!\n{}",
                     pallets_as_string(&metadata),
                 ))
             }
         }
         PalletOrRuntimeApi::Api(opts) => {
-            let name_lower_case = opts.name.to_lowercase();
+            let Some(name) = opts.name else {
+                let runtime_apis = runtime_apis_as_string(&metadata);
+                writedoc! {output, "
+                Usage:
+                    subxt explore api <RUNTIME_API>
+                        explore a specific runtime api trait
+
+                {runtime_apis}
+                "}?;
+                return Ok(());
+            };
+
+            let name_lower_case = name.to_lowercase();
             if let Some(runtime_api) = metadata
                 .runtime_api_traits()
                 .find(|e| e.name().to_lowercase() == name_lower_case)
             {
-                runtime_apis::run(opts, runtime_api, &metadata, file_or_url, output).await
+                runtime_apis::run(
+                    opts.method,
+                    opts.trailing_args,
+                    runtime_api,
+                    &metadata,
+                    file_or_url,
+                    output,
+                )
+                .await
             } else {
                 Err(eyre!(
-                    "runtime api \"{}\" not found in metadata!\n{}",
-                    opts.name,
+                    "runtime api \"{name}\" not found in metadata!\n{}",
                     runtime_apis_as_string(&metadata),
                 ))
             }

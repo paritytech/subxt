@@ -15,12 +15,6 @@ mod calls;
 mod constants;
 mod events;
 mod storage;
-#[derive(Debug, Parser)]
-pub struct PalletOpts {
-    pub name: String,
-    #[command(subcommand)]
-    pub subcommand: Option<PalletSubcommand>,
-}
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum PalletSubcommand {
@@ -30,14 +24,14 @@ pub enum PalletSubcommand {
 }
 
 pub async fn run<'a>(
-    opts: PalletOpts,
+    subcommand: Option<PalletSubcommand>,
     pallet_metadata: PalletMetadata<'a>,
     metadata: &'a Metadata,
     file_or_url: FileOrUrl,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
-    let pallet_name = opts.name;
-    let Some(subcommand) = opts.subcommand else {
+    let pallet_name = pallet_metadata.name();
+    let Some(subcommand) = subcommand else {
         let docs_string = first_paragraph_of_docs(pallet_metadata.docs()).indent(4);
         if !docs_string.is_empty() {
             writeln!(output, "Description:\n{docs_string}")?;

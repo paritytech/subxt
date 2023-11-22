@@ -1,8 +1,8 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use std::fmt::Write;
-
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
 use crate::utils::{first_paragraph_of_docs, format_scale_value, Indent};
@@ -19,17 +19,20 @@ pub fn explore_constants(
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
+
+    let usage = || {
+        let available_constants = available_constants_string(pallet_metadata, pallet_name);
+        formatdoc! {"
+        Usage:
+            subxt explore pallet {pallet_name} constants <CONSTANT>
+                explore a specific constant of this pallet
+        
+        {available_constants}
+        "}
+    };
+
     let Some(constant_name) = command.constant else {
-        let available_constants = print_available_constants(pallet_metadata, pallet_name);
-        writeln!(output, "Usage:")?;
-        writeln!(
-            output,
-            "    subxt explore {pallet_name} constants <CONSTANT>"
-        )?;
-        writeln!(
-            output,
-            "        explore a specific call within this pallet\n\n{available_constants}"
-        )?;
+        writeln!(output, "{}", usage())?;
         return Ok(());
     };
 
@@ -38,18 +41,9 @@ pub fn explore_constants(
         .constants()
         .find(|constant| constant.name().to_lowercase() == constant_name.to_lowercase())
     else {
-        let available_constants = print_available_constants(pallet_metadata, pallet_name);
-        let mut description = "Usage:".to_string();
-        writeln!(
-            description,
-            "    subxt explore {pallet_name} constants <CONSTANT>"
-        )?;
-        writeln!(
-            description,
-            "        explore a specific call within this pallet\n\n{available_constants}"
-        )?;
         let err = eyre!(
-            "constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}"
+            "constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",
+            usage()
         );
         return Err(err);
     };
@@ -64,20 +58,27 @@ pub fn explore_constants(
     let type_description = type_description(constant.ty(), metadata.types(), true)
         .expect("No Type Description")
         .indent(4);
-    writeln!(
-        output,
-        "\nThe constant has the following shape:\n{type_description}"
-    )?;
 
     // value
     let value =
         scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
-    let value = format_scale_value(&value);
-    writeln!(output, "\nThe value of the constant is:\n    {value}",)?;
+    let value = format_scale_value(&value).indent(4);
+
+    writedoc!(
+        output,
+        "
+
+        The constant has the following shape:
+        {type_description}
+
+        The value of the constant is:
+        {value}
+        "
+    )?;
     Ok(())
 }
 
-fn print_available_constants(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
+fn available_constants_string(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
     if pallet_metadata.constants().len() == 0 {
         return format!("No <CONSTANT>'s available in the \"{pallet_name}\" pallet.");
     }

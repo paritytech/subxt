@@ -72,7 +72,7 @@ pub fn explore_calls(
         let type_description =
             fields_description(&call.fields, &call.name, metadata.types()).indent(4);
         let fields_example = fields_composite_example(&call.fields, metadata.types()).indent(4);
-        writedoc! {output,"
+        writedoc! {output, "
         Usage:
             subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>
                 construct the call by providing a valid argument
@@ -81,7 +81,6 @@ pub fn explore_calls(
         {type_description}
 
         For example you could provide this <SCALE_VALUE>:
-        
         {fields_example}
         "}?;
         return Ok(());

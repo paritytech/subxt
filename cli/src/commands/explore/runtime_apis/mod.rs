@@ -7,17 +7,9 @@ use subxt_metadata::RuntimeApiMetadata;
 
 mod methods;
 
-#[derive(Debug, Parser)]
-pub struct RuntimeApiOpts {
-    pub name: String,
-    #[clap(required = false)]
-    pub method: Option<String>,
-    #[clap(required = false)]
-    trailing_args: Vec<String>,
-}
-
 pub async fn run<'a>(
-    opts: RuntimeApiOpts,
+    method: Option<String>,
+    trailing_args: Vec<String>,
     runtime_api_metadata: RuntimeApiMetadata<'a>,
     metadata: &'a Metadata,
     file_or_url: FileOrUrl,
@@ -36,7 +28,7 @@ pub async fn run<'a>(
         "}
     };
 
-    let Some(method_name) = opts.method else {
+    let Some(method_name) = method else {
         let docs_string = first_paragraph_of_docs(runtime_api_metadata.docs()).indent(4);
         if !docs_string.is_empty() {
             writeln!(output, "Description:\n{docs_string}\n")?;
@@ -55,7 +47,7 @@ pub async fn run<'a>(
         ));
     };
 
-    let trailing_args = opts.trailing_args.join(" ");
+    let trailing_args = trailing_args.join(" ");
 
     if trailing_args.is_empty() {}
 
