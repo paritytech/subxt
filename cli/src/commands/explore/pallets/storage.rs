@@ -7,13 +7,9 @@ use scale_value::Value;
 use std::fmt::Write;
 use std::write;
 
-use subxt::OnlineClient;
-use subxt::{
-    config::SubstrateConfig,
-    metadata::{
-        types::{PalletMetadata, StorageEntryType, StorageMetadata},
-        Metadata,
-    },
+use subxt::metadata::{
+    types::{PalletMetadata, StorageEntryType, StorageMetadata},
+    Metadata,
 };
 
 use crate::utils::{
@@ -153,7 +149,7 @@ pub async fn explore_storage(
         }
         (true, None) => vec![],
         (false, Some(type_id)) => {
-            let value = parse_string_into_scale_value(&trailing_args)?;
+            let value = parse_string_into_scale_value(trailing_args)?;
             let value_str = value.indent(4);
             writedoc! {output, "
     
@@ -162,7 +158,7 @@ pub async fn explore_storage(
             "}?;
 
             let key_bytes = encode_scale_value_as_bytes(&value, type_id, metadata.types())?;
-            let bytes_composite = Value::from_bytes(&key_bytes);
+            let bytes_composite = Value::from_bytes(key_bytes);
             vec![bytes_composite]
         }
     };

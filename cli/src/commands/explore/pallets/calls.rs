@@ -38,7 +38,6 @@ pub fn explore_calls(
 
     let usage = || {
         let available_calls = available_calls_string(calls_enum_type_def, pallet_name);
-        #[allow(non_snake_case)]
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} calls <CALL>
@@ -74,7 +73,7 @@ pub fn explore_calls(
         let fields: Vec<(Option<&str>, u32)> = call
             .fields
             .iter()
-            .map(|f| (f.name.as_ref().map(|s| s.as_str()), f.ty.id))
+            .map(|f| (f.name.as_deref(), f.ty.id))
             .collect();
         let type_description = fields_description(&fields, &call.name, metadata.types()).indent(4);
         let fields_example =

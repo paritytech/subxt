@@ -1,4 +1,4 @@
-use clap::{command, Parser, Subcommand};
+use clap::{Subcommand};
 
 use indoc::writedoc;
 use subxt::Metadata;

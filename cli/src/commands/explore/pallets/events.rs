@@ -60,7 +60,7 @@ pub fn explore_events(
     let fields: Vec<(Option<&str>, u32)> = event
         .fields
         .iter()
-        .map(|f| (f.name.as_ref().map(|s| s.as_str()), f.ty.id))
+        .map(|f| (f.name.as_deref(), f.ty.id))
         .collect();
     let type_description = fields_description(&fields, &event.name, metadata.types()).indent(4);
     writedoc!(
@@ -74,7 +74,7 @@ pub fn explore_events(
 }
 
 fn available_events_string(event_variants: &[Variant<PortableForm>], pallet_name: &str) -> String {
-    if event_variants.len() == 0 {
+    if event_variants.is_empty() {
         return format!("No <EVENTS>'s available in the \"{pallet_name}\" pallet.");
     }
     let mut output = format!("Available <EVENTS>'s in the \"{pallet_name}\" pallet:");

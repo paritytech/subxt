@@ -2,12 +2,12 @@ use crate::utils::{
     create_client, encode_scale_value_as_bytes, fields_composite_example, fields_description,
     first_paragraph_of_docs, parse_string_into_scale_value, FileOrUrl, Indent, SyntaxHighlight,
 };
-use clap::{Args, Parser};
+
 use color_eyre::{
     eyre::{bail, eyre},
     owo_colors::OwoColorize,
 };
-use colored::ColoredString;
+
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use scale_value::Value;
@@ -160,7 +160,7 @@ pub async fn run<'a>(
             "}?;
 
             let bytes = encode_scale_value_as_bytes(&value, ty.ty, metadata.types())?;
-            let bytes_composite = Value::from_bytes(&bytes);
+            let bytes_composite = Value::from_bytes(bytes);
             Ok(bytes_composite)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;

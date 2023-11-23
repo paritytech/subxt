@@ -93,7 +93,7 @@ pub fn fields_description(
     types: &PortableRegistry,
 ) -> String {
     if fields.is_empty() {
-        return format!("Zero Sized Type, no fields.");
+        return "Zero Sized Type, no fields.".to_string();
     }
     let all_named = fields.iter().all(|f| f.0.is_some());
 
@@ -106,7 +106,7 @@ pub fn fields_description(
                 let field_name = field.0.unwrap();
                 format!("{field_name}: {field_description}")
             } else {
-                format!("{field_description}")
+                field_description.to_string()
             }
         })
         .collect::<Vec<String>>()
@@ -195,7 +195,7 @@ pub async fn create_client(
 }
 
 pub fn parse_string_into_scale_value(trailing_args: &str) -> color_eyre::Result<Value> {
-    let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| {
+    let value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| {
         eyre!(
             "scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{trailing_args}\"\n\n{err}",
         )
@@ -219,7 +219,7 @@ pub trait SyntaxHighlight {
 
 impl<T: AsRef<str>> SyntaxHighlight for T {
     fn highlight(&self) -> String {
-        let e = 323.0;
+        let _e = 323.0;
         let mut output: String = String::new();
         let mut word: String = String::new();
 

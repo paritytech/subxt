@@ -2,7 +2,6 @@ use clap::Args;
 use color_eyre::eyre::eyre;
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
-use std::fmt::Write;
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
 use crate::utils::{first_paragraph_of_docs, format_scale_value, Indent, SyntaxHighlight};

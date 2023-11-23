@@ -1,8 +1,7 @@
-use crate::utils::{first_paragraph_of_docs, FileOrUrl};
+use crate::utils::FileOrUrl;
 use clap::{command, Parser, Subcommand};
 use colored::Colorize;
 use indoc::writedoc;
-use subxt_metadata::{PalletMetadata, RuntimeApiMetadata};
 
 use std::fmt::Write;
 use std::write;
