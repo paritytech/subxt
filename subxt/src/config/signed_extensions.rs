@@ -30,10 +30,6 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     /// This should return true if the signed extension matches the details given.
     /// Often, this will involve just checking that the identifier given matches that of the
     /// extension in question.
-    ///
-    /// The first match that returns true will be the entry that this signed extension
-    /// is used to encode values for. This takes `&mut self`, allowing the extension to
-    /// cache values if it likes when it finds the type it'll be encoding for.
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
 }
 
