@@ -32,11 +32,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 async fn light_client_works() {
-    // Use a polkadot trusted DNS.
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
-        .bootnodes(
-            ["/dns/polkadot-connect-0.parity.io/tcp/443/wss/p2p/12D3KooWEPmjoRpDSUuiTjvyNDd8fejZ9eNWH5bE965nyBMDrB4o"]
-        )
         .build_from_url("wss://rpc.polkadot.io:443")
         .await
         .expect("Cannot construct light client");
