@@ -665,7 +665,9 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
     pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
         for ext in self.iter() {
-            let Ok(ext) = ext else { continue };
+            // If we encounter an error while iterating, we won't get any more results
+            // back, so just return that error as we won't find the signed ext anyway.
+            let ext = ext?;
             match ext.as_signed_extension::<S>() {
                 // We found a match; return it:
                 Ok(Some(e)) => return Ok(Some(e)),
