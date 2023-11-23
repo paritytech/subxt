@@ -1,7 +1,9 @@
 use clap::Args;
-use color_eyre::eyre::eyre;
+use color_eyre::eyre::{bail, eyre};
+use colored::Colorize;
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
+use scale_value::Value;
 use std::fmt::Write;
 use std::write;
 
@@ -14,7 +16,10 @@ use subxt::{
     },
 };
 
-use crate::utils::{first_paragraph_of_docs, type_example, Indent};
+use crate::utils::{
+    create_client, encode_scale_value_as_bytes, first_paragraph_of_docs,
+    parse_string_into_scale_value, type_example, FileOrUrl, Indent, SyntaxHighlight,
+};
 
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
@@ -27,7 +32,7 @@ pub async fn explore_storage(
     command: StorageSubcommand,
     pallet_metadata: PalletMetadata<'_>,
     metadata: &Metadata,
-    custom_url: Option<String>,
+    file_or_url: FileOrUrl,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
@@ -65,10 +70,10 @@ pub async fn explore_storage(
         .iter()
         .find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase())
     else {
-        return Err(eyre!(
+        bail!(
             "Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",
             usage()
-        ));
+        );
     };
 
     let (return_ty_id, key_ty_id) = match storage.entry_type() {
@@ -78,11 +83,14 @@ pub async fn explore_storage(
         } => (*value_ty, Some(*key_ty)),
     };
 
+    #[allow(non_snake_case)]
+    let KEY_VALUE: String = "<KEY_VALUE>".blue().to_string();
+
     // only inform user about usage if a key can be provided:
     if key_ty_id.is_some() && trailing_args.is_empty() {
         writedoc! {output, "
         Usage:
-            subxt explore pallet {pallet_name} storage {entry_name} <KEY_VALUE>
+            subxt explore pallet {pallet_name} storage {entry_name} {KEY_VALUE}
                 retrieve a value from storage
         "}?;
     }
@@ -91,101 +99,94 @@ pub async fn explore_storage(
     if !docs_string.is_empty() {
         writedoc! {output, "
 
-        Storage Entry Docs:
+        Description:
         {docs_string}
         "}?;
     }
 
-    // inform user about shape of key if it can be provided:
-    if let Some(key_ty_id) = key_ty_id {
-        let key_ty_description = type_description(key_ty_id, metadata.types(), true)
-            .expect("No type Description")
-            .indent(4);
-
-        let key_ty_example = type_example(key_ty_id, metadata.types()).indent(4);
-
-        writedoc! {output, "
-
-        The <KEY_VALUE> has the following shape:
-        {key_ty_description}
-
-        For example you could provide this <KEY_VALUE>:
-        {key_ty_example}
-        "}?;
-    } else {
-        writeln!(
-            output,
-            "The storage entry can be accessed without providing a key."
-        )?;
-    }
-
     let return_ty_description = type_description(return_ty_id, metadata.types(), true)
         .expect("No type Description")
-        .indent(4);
+        .indent(4)
+        .highlight();
 
     writedoc! {output, "
-    
+
     The storage entry has the following shape:
     {return_ty_description}
     "}?;
 
-    // construct the vector of scale_values that should be used as a key to the storage (often empty)
+    // inform user about shape of the key if it can be provided:
+    if let Some(key_ty_id) = key_ty_id {
+        let key_ty_description = type_description(key_ty_id, metadata.types(), true)
+            .expect("No type Description")
+            .indent(4)
+            .highlight();
 
-    let key_scale_values = if let Some(key_ty_id) = key_ty_id.filter(|_| !trailing_args.is_empty())
-    {
-        let key_scale_value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
-        let key_scale_value_str = key_scale_value.indent(4);
+        let key_ty_example = type_example(key_ty_id, metadata.types())
+            .indent(4)
+            .highlight();
+
         writedoc! {output, "
 
-        You submitted the following value as a key:
-        {key_scale_value_str}
-        "}?;
+        The {KEY_VALUE} has the following shape:
+        {key_ty_description}
 
-        let mut key_bytes: Vec<u8> = Vec::new();
-        scale_value::scale::encode_as_type(
-            &key_scale_value,
-            key_ty_id,
-            metadata.types(),
-            &mut key_bytes,
-        )?;
-        let bytes_composite = scale_value::Value::from_bytes(&key_bytes);
-        vec![bytes_composite]
+        For example you could provide this {KEY_VALUE}:
+        {key_ty_example}
+        "}?;
     } else {
-        Vec::new()
+        writedoc! {output,"
+        
+        The storage entry can be accessed without providing a key.
+        "}?;
+    }
+
+    let storage_entry_keys: Vec<Value> = match (trailing_args.is_empty(), key_ty_id) {
+        (false, None) => {
+            let warning = "Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key.".yellow();
+            writeln!(output, "{warning}")?;
+            return Ok(());
+        }
+        (true, Some(_)) => {
+            // just return. The user was instructed above how to provide a value if they want to.
+            return Ok(());
+        }
+        (true, None) => vec![],
+        (false, Some(type_id)) => {
+            let value = parse_string_into_scale_value(&trailing_args)?;
+            let value_str = value.indent(4);
+            writedoc! {output, "
+    
+            You submitted the following {KEY_VALUE}:
+            {value_str}
+            "}?;
+
+            let key_bytes = encode_scale_value_as_bytes(&value, type_id, metadata.types())?;
+            let bytes_composite = Value::from_bytes(&key_bytes);
+            vec![bytes_composite]
+        }
     };
 
-    if key_ty_id.is_none() && !trailing_args.is_empty() {
-        writedoc! {output, "
+    // construct the client:
+    let client = create_client(&file_or_url).await?;
 
-        Warning: You submitted the following value as a key, but it will be ignored, 
-        because the storage entry does not require a key: \"{trailing_args}\"
-        "}?;
-    }
+    let storage_query = subxt::dynamic::storage(pallet_name, storage.name(), storage_entry_keys);
+    let decoded_value_thunk_or_none = client
+        .storage()
+        .at_latest()
+        .await?
+        .fetch(&storage_query)
+        .await?;
 
-    // construct and submit the storage entry request if either no key is needed or som key was provided as a scale value
-    if key_ty_id.is_none() || !key_scale_values.is_empty() {
-        let online_client = match custom_url {
-            None => OnlineClient::<SubstrateConfig>::new().await?,
-            Some(url) => OnlineClient::<SubstrateConfig>::from_url(url).await?,
-        };
-        let storage_query = subxt::dynamic::storage(pallet_name, entry_name, key_scale_values);
-        let decoded_value_thunk_or_none = online_client
-            .storage()
-            .at_latest()
-            .await?
-            .fetch(&storage_query)
-            .await?;
+    let decoded_value_thunk =
+        decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
 
-        let decoded_value_thunk =
-            decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
-
-        let value = decoded_value_thunk.to_value()?.indent(4);
-        writedoc! {output, "
-        
-        The value of the storage entry is:
-        {value}
-        "}?;
-    }
+    let value = decoded_value_thunk.to_value()?.indent(4);
+    writedoc! {output, "
+    
+    The value of the storage entry is:
+    {value}
+    "}?;
 
     Ok(())
 }

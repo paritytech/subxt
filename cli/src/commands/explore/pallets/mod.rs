@@ -71,8 +71,7 @@ pub async fn run<'a>(
         }
         PalletSubcommand::Storage(command) => {
             // if the metadata came from some url, we use that same url to make storage calls against.
-            let custom_url = file_or_url.url.map(|url| url.to_string());
-            explore_storage(command, pallet_metadata, metadata, custom_url, output).await
+            explore_storage(command, pallet_metadata, metadata, file_or_url, output).await
         }
         PalletSubcommand::Events(command) => {
             explore_events(command, pallet_metadata, metadata, output)

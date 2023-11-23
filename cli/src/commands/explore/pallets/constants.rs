@@ -5,7 +5,7 @@ use scale_typegen_description::type_description;
 use std::fmt::Write;
 use subxt::metadata::{types::PalletMetadata, Metadata};
 
-use crate::utils::{first_paragraph_of_docs, format_scale_value, Indent};
+use crate::utils::{first_paragraph_of_docs, format_scale_value, Indent, SyntaxHighlight};
 
 #[derive(Debug, Clone, Args)]
 pub struct ConstantsSubcommand {
@@ -52,7 +52,7 @@ pub fn explore_constants(
     let doc_string = first_paragraph_of_docs(constant.docs()).indent(4);
     if !doc_string.is_empty() {
         writedoc! {output, "
-        Constant Docs:
+        Description:
         {doc_string}
         
         "}?;
@@ -61,7 +61,8 @@ pub fn explore_constants(
     // shape
     let type_description = type_description(constant.ty(), metadata.types(), true)
         .expect("No Type Description")
-        .indent(4);
+        .indent(4)
+        .highlight();
 
     // value
     let value =

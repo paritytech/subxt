@@ -3,16 +3,16 @@
 // see LICENSE for license details.
 
 use clap::Args;
-use color_eyre::eyre;
+use color_eyre::eyre::{bail, eyre};
+use colored::{Color, Colorize};
 use heck::ToUpperCamelCase;
-use scale_info::form::PortableForm;
 use scale_info::PortableRegistry;
 use scale_typegen_description::{format_type_description, type_description};
-use syn::Item;
-
 use std::fmt::Display;
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
+use subxt::ext::scale_encode::EncodeAsType;
+use subxt::{OnlineClient, PolkadotConfig};
 
 use scale_value::Value;
 use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
@@ -46,7 +46,7 @@ impl FileOrUrl {
         match (&self.file, &self.url, self.version) {
             // Can't provide both --file and --url
             (Some(_), Some(_), _) => {
-                eyre::bail!("specify one of `--url` or `--file` but not both")
+                bail!("specify one of `--url` or `--file` but not both")
             }
             // Load from --file path
             (Some(path), None, None) => {
@@ -61,7 +61,7 @@ impl FileOrUrl {
                 // but that would be involved because we'd need to convert
                 // from each metadata to the latest one and from the
                 // latest one to each metadata version. For now, disable the conversion.
-                eyre::bail!("`--file` is incompatible with `--version`")
+                bail!("`--file` is incompatible with `--version`")
             }
             // Fetch from --url
             (None, Some(uri), version) => {
@@ -114,16 +114,16 @@ pub fn fields_description(
 
     let name = name.to_upper_camel_case();
     let end_result = if all_named {
-        format!("struct {name} {{{fields}}}")
+        format!("{name} {{{fields}}}")
     } else {
-        format!("struct {name} ({fields})")
+        format!("{name} ({fields})")
     };
     // end_result
-    format_type_description(&end_result)
+    format_type_description(&end_result).highlight()
 }
 
 pub fn format_scale_value<T>(value: &Value<T>) -> String {
-    scale_typegen_description::format_type_description(&value.to_string())
+    scale_typegen_description::format_type_description(&value.to_string()).highlight()
 }
 
 pub fn type_example(type_id: u32, types: &PortableRegistry) -> Value {
@@ -180,6 +180,120 @@ impl FromStr for FileOrUrl {
                     file: None,
                     version: None,
                 })
+        }
+    }
+}
+
+pub async fn create_client(
+    file_or_url: &FileOrUrl,
+) -> color_eyre::Result<OnlineClient<PolkadotConfig>> {
+    let client = match &file_or_url.url {
+        Some(url) => OnlineClient::<PolkadotConfig>::from_url(url).await?,
+        None => OnlineClient::<PolkadotConfig>::new().await?,
+    };
+    Ok(client)
+}
+
+pub fn parse_string_into_scale_value(trailing_args: &str) -> color_eyre::Result<Value> {
+    let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| {
+        eyre!(
+            "scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{trailing_args}\"\n\n{err}",
+        )
+    })?;
+    Ok(value)
+}
+
+pub fn encode_scale_value_as_bytes(
+    scale_value: &Value,
+    type_id: u32,
+    types: &PortableRegistry,
+) -> color_eyre::Result<Vec<u8>> {
+    let mut out: Vec<u8> = Vec::new();
+    scale_value.encode_as_type_to(type_id, types, &mut out)?;
+    Ok(out)
+}
+
+pub trait SyntaxHighlight {
+    fn highlight(&self) -> String;
+}
+
+impl<T: AsRef<str>> SyntaxHighlight for T {
+    fn highlight(&self) -> String {
+        let e = 323.0;
+        let mut output: String = String::new();
+        let mut word: String = String::new();
+
+        let mut in_word: Option<InWord> = None;
+
+        for c in self.as_ref().chars() {
+            match c {
+                '{' | '}' | ',' | '(' | ')' | ':' | '<' | '>' | ' ' | '\n' | '[' | ']' | ';' => {
+                    // flush the current word:
+                    if let Some(is_word) = in_word {
+                        let color = if word == "enum" {
+                            Color::Blue
+                        } else {
+                            is_word.color()
+                        };
+                        output.push_str(&word.color(color).to_string());
+                    }
+
+                    in_word = None;
+                    word.clear();
+                    // push the symbol itself:
+                    output.push(c);
+                }
+                l => {
+                    if in_word.is_none() {
+                        in_word = Some(InWord::from_first_char(l))
+                    }
+                    word.push(l);
+                }
+            }
+        }
+        // flush if ending on a word:
+        if let Some(is_word) = in_word {
+            output.push_str(&word.color(is_word.color()).to_string());
+        }
+
+        return output;
+
+        enum InWord {
+            Lower,
+            Upper,
+            Number,
+        }
+
+        impl InWord {
+            fn color(&self) -> Color {
+                match self {
+                    InWord::Lower => Color::TrueColor {
+                        r: 156,
+                        g: 220,
+                        b: 254,
+                    },
+                    InWord::Upper => Color::TrueColor {
+                        r: 78,
+                        g: 201,
+                        b: 176,
+                    },
+                    InWord::Number => Color::TrueColor {
+                        r: 181,
+                        g: 206,
+                        b: 168,
+                    },
+                }
+            }
+
+            fn from_first_char(c: char) -> Self {
+                if c.is_numeric() {
+                    Self::Number
+                } else if c.is_uppercase() {
+                    Self::Upper
+                } else {
+                    Self::Lower
+                }
+            }
         }
     }
 }

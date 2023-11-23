@@ -1,5 +1,6 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use color_eyre::owo_colors::OwoColorize;
 use indoc::{formatdoc, writedoc};
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
@@ -14,7 +15,7 @@ use subxt::{
     OfflineClient,
 };
 
-use crate::utils::{fields_composite_example, fields_description, Indent};
+use crate::utils::{fields_composite_example, fields_description, Indent, SyntaxHighlight};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -37,6 +38,7 @@ pub fn explore_calls(
 
     let usage = || {
         let available_calls = available_calls_string(calls_enum_type_def, pallet_name);
+        #[allow(non_snake_case)]
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} calls <CALL>
@@ -77,16 +79,21 @@ pub fn explore_calls(
         let type_description = fields_description(&fields, &call.name, metadata.types()).indent(4);
         let fields_example =
             fields_composite_example(call.fields.iter().map(|e| e.ty.id), metadata.types())
-                .indent(4);
+                .indent(4)
+                .highlight();
+
+        #[allow(non_snake_case)]
+        let SCALE_VALUE = "<SCALE_VALUE>".blue();
+
         writedoc! {output, "
         Usage:
-            subxt explore pallet {pallet_name} calls {call_name} <SCALE_VALUE>
+            subxt explore pallet {pallet_name} calls {call_name} {SCALE_VALUE}
                 construct the call by providing a valid argument
 
-        The call expects a <SCALE_VALUE> with this shape:
+        The call expects a {SCALE_VALUE} with this shape:
         {type_description}
 
-        For example you could provide this <SCALE_VALUE>:
+        For example you could provide this {SCALE_VALUE}:
         {fields_example}
         "}?;
         return Ok(());

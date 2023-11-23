@@ -35,3 +35,4 @@ tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { path = "../../scale-typegen/description" }
 heck = { workspace = true }
 indoc = "2"
+colored = "2.0.4"

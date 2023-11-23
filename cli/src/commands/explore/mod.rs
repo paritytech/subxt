@@ -1,5 +1,6 @@
 use crate::utils::{first_paragraph_of_docs, FileOrUrl};
 use clap::{command, Parser, Subcommand};
+use colored::Colorize;
 use indoc::writedoc;
 use subxt_metadata::{PalletMetadata, RuntimeApiMetadata};
 
@@ -101,15 +102,20 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     let bytes = file_or_url.fetch().await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
 
+    #[allow(non_snake_case)]
+    let PALLET: String = "<PALLET>".blue().to_string();
+    #[allow(non_snake_case)]
+    let RUNTIME_API: String = "<RUNTIME_API>".blue().to_string();
+
     // if no pallet/runtime_api specified, show user the pallets/runtime_apis to choose from:
     let Some(pallet_or_runtime_api) = opts.subcommand else {
         let pallets = pallets_as_string(&metadata);
         let runtime_apis = runtime_apis_as_string(&metadata);
         writedoc! {output, "
         Usage:
-            subxt explore pallet <PALLET>
+            subxt explore pallet {PALLET}
                 explore a specific pallet
-            subxt explore api <RUNTIME_API>
+            subxt explore api {RUNTIME_API}
                 explore a specific runtime api trait
 
         {pallets}
@@ -125,7 +131,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 let pallets = pallets_as_string(&metadata);
                 writedoc! {output, "
                 Usage:
-                    subxt explore pallet <PALLET>
+                    subxt explore pallet {PALLET}
                         explore a specific pallet
     
                 {pallets}
@@ -151,7 +157,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 let runtime_apis = runtime_apis_as_string(&metadata);
                 writedoc! {output, "
                 Usage:
-                    subxt explore api <RUNTIME_API>
+                    subxt explore api {RUNTIME_API}
                         explore a specific runtime api trait
 
                 {runtime_apis}
@@ -185,10 +191,12 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
 }
 
 fn pallets_as_string(metadata: &Metadata) -> String {
+    #[allow(non_snake_case)]
+    let PALLET: String = "<PALLET>".blue().to_string();
     if metadata.pallets().len() == 0 {
-        "There are no <PALLET>'s available.".to_string()
+        format!("There are no {PALLET}'s available.")
     } else {
-        let mut output = "Available <PALLET>'s are:".to_string();
+        let mut output = format!("Available {PALLET}'s are:");
         let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
@@ -199,10 +207,12 @@ fn pallets_as_string(metadata: &Metadata) -> String {
 }
 
 pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
+    #[allow(non_snake_case)]
+    let RUNTIME_API: String = "<RUNTIME_API>".blue().to_string();
     if metadata.runtime_api_traits().len() == 0 {
-        "There are no <RUNTIME_API>'s available.".to_string()
+        format!("There are no {RUNTIME_API}'s available.")
     } else {
-        let mut output = "Available <RUNTIME_API>'s are:".to_string();
+        let mut output = format!("Available {RUNTIME_API}'s are:");
         let mut strings: Vec<_> = metadata.runtime_api_traits().map(|p| p.name()).collect();
         strings.sort();
         for api in strings {
