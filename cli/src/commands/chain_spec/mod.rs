@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use clap::Parser as ClapParser;
+#[cfg(feature = "chain-spec")]
 use serde_json::Value;
 use std::{io::Write, path::PathBuf};
 use subxt_codegen::fetch_metadata::Url;
@@ -21,7 +22,10 @@ pub struct Opts {
     /// Replaced the genesis raw entry with a stateRootHash to optimize
     /// the spec size and avoid the need to calculate the genesis storage.
     ///
+    /// This option is enabled with the `chain-spec-root-hash` feature.
+    ///
     /// Defaults to `false`.
+    #[cfg(feature = "chain-spec")]
     #[clap(long)]
     state_root_hash: bool,
     /// Remove the `codeSubstitutes` entry from the chain spec.
@@ -41,10 +45,12 @@ pub enum ChainSpecError {
     #[error("Failed to fetch the chain spec: {0}")]
     FetchError(#[from] fetch::FetchSpecError),
 
+    #[cfg(feature = "chain-spec")]
     /// The provided chain spec is invalid.
     #[error("Error while parsing the chain spec: {0})")]
     ParseError(String),
 
+    #[cfg(feature = "chain-spec")]
     /// Cannot compute the state root hash.
     #[error("Error computing state root hash: {0})")]
     ComputeError(String),
@@ -54,6 +60,7 @@ pub enum ChainSpecError {
     Other(String),
 }
 
+#[cfg(feature = "chain-spec")]
 fn compute_state_root_hash(spec: &Value) -> Result<[u8; 32], ChainSpecError> {
     let chain_spec = smoldot::chain_spec::ChainSpec::from_json_bytes(spec.to_string().as_bytes())
         .map_err(|err| ChainSpecError::ParseError(err.to_string()))?;
@@ -92,6 +99,7 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
         None => Box::new(output),
     };
 
+    #[cfg(feature = "chain-spec")]
     if opts.state_root_hash {
         let state_root_hash = compute_state_root_hash(&spec)?;
         let state_root_hash = format!("0x{}", hex::encode(state_root_hash));

@@ -16,6 +16,12 @@ description = "Command line utilities for working with subxt codegen"
 name = "subxt"
 path = "src/main.rs"
 
+[features]
+# Compute the state root hash from the genesis entry.
+# Enable this to create a smaller chain spec file.
+chain-spec = ["smoldot"]
+
+
 [dependencies]
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 subxt-metadata = { workspace = true }
@@ -33,4 +39,4 @@ syn = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 thiserror = { workspace = true }
-smoldot = { workspace = true }
+smoldot = { workspace = true, optional = true}
