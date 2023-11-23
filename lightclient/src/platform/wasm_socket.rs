@@ -230,7 +230,7 @@ impl Drop for WasmSocket {
     fn drop(&mut self) {
         let inner = self.inner.lock().expect("Mutex is poised; qed");
 
-        if inner.state == ConnectionState::Opened {
+        if inner.state == ConnectionState::Opened || inner.state == ConnectionState::Connecting {
             let _ = self.socket.close();
         }
     }
