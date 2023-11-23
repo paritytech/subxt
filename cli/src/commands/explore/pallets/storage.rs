@@ -82,7 +82,7 @@ pub async fn explore_storage(
     if key_ty_id.is_some() && trailing_args.is_empty() {
         writedoc! {output, "
         Usage:
-            subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>
+            subxt explore pallet {pallet_name} storage {entry_name} <KEY_VALUE>
                 retrieve a value from storage
         "}?;
     }
@@ -91,7 +91,7 @@ pub async fn explore_storage(
     if !docs_string.is_empty() {
         writedoc! {output, "
 
-        Description:
+        Storage Entry Docs:
         {docs_string}
         "}?;
     }
@@ -105,7 +105,7 @@ pub async fn explore_storage(
         let key_ty_example = type_example(key_ty_id, metadata.types()).indent(4);
 
         writedoc! {output, "
-        
+
         The <KEY_VALUE> has the following shape:
         {key_ty_description}
 

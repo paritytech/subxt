@@ -57,8 +57,12 @@ pub fn explore_events(
         "}?;
     }
 
-    let type_description =
-        fields_description(&event.fields, &event.name, metadata.types()).indent(4);
+    let fields: Vec<(Option<&str>, u32)> = event
+        .fields
+        .iter()
+        .map(|f| (f.name.as_ref().map(|s| s.as_str()), f.ty.id))
+        .collect();
+    let type_description = fields_description(&fields, &event.name, metadata.types()).indent(4);
     writedoc!(
         output,
         "

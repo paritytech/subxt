@@ -89,6 +89,8 @@ pub struct RuntimeApiOpts {
     pub name: Option<String>,
     #[clap(required = false)]
     pub method: Option<String>,
+    #[clap(long, short, action)]
+    pub execute: bool,
     #[clap(required = false)]
     trailing_args: Vec<String>,
 }
@@ -164,6 +166,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
             {
                 runtime_apis::run(
                     opts.method,
+                    opts.execute,
                     opts.trailing_args,
                     runtime_api,
                     &metadata,
@@ -179,46 +182,6 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
             }
         }
     }
-
-    // let e = metadata.runtime_api_traits().find(|e| true).unwrap();
-
-    // // if specified pallet is wrong, show user the pallets to choose from (but this time as an error):
-
-    // // if correct pallet was specified but no subcommand, instruct the user how to proceed:
-    // let Some(subcommand) = opts.subcommand else {
-    //     let docs_string = print_first_paragraph_with_indent(pallet_metadata.docs(), 4);
-    //     if !docs_string.is_empty() {
-    //         writeln!(output, "Description:\n{docs_string}")?;
-    //     }
-    //     writeln!(output, "Usage:")?;
-    //     writeln!(output, "    subxt explore {pallet_name} calls")?;
-    //     writeln!(
-    //         output,
-    //         "        explore the calls that can be made into this pallet"
-    //     )?;
-    //     writeln!(output, "    subxt explore {pallet_name} constants")?;
-    //     writeln!(output, "        explore the constants held in this pallet")?;
-    //     writeln!(output, "    subxt explore {pallet_name} storage")?;
-    //     writeln!(
-    //         output,
-    //         "        explore the storage values held in this pallet"
-    //     )?;
-    //     return Ok(());
-    // };
-
-    // match subcommand {
-    //     PalletSubcommand::Calls(command) => {
-    //         explore_calls(command, &metadata, pallet_metadata, output)
-    //     }
-    //     PalletSubcommand::Constants(command) => {
-    //         explore_constants(command, &metadata, pallet_metadata, output)
-    //     }
-    //     PalletSubcommand::Storage(command) => {
-    //         // if the metadata came from some url, we use that same url to make storage calls against.
-    //         let node_url = opts.file_or_url.url.map(|url| url.to_string());
-    //         explore_storage(command, &metadata, pallet_metadata, node_url, output).await
-    //     }
-    // }
 }
 
 fn pallets_as_string(metadata: &Metadata) -> String {

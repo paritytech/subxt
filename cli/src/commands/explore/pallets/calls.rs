@@ -69,12 +69,18 @@ pub fn explore_calls(
 
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
-        let type_description =
-            fields_description(&call.fields, &call.name, metadata.types()).indent(4);
-        let fields_example = fields_composite_example(&call.fields, metadata.types()).indent(4);
+        let fields: Vec<(Option<&str>, u32)> = call
+            .fields
+            .iter()
+            .map(|f| (f.name.as_ref().map(|s| s.as_str()), f.ty.id))
+            .collect();
+        let type_description = fields_description(&fields, &call.name, metadata.types()).indent(4);
+        let fields_example =
+            fields_composite_example(call.fields.iter().map(|e| e.ty.id), metadata.types())
+                .indent(4);
         writedoc! {output, "
         Usage:
-            subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>
+            subxt explore pallet {pallet_name} calls {call_name} <SCALE_VALUE>
                 construct the call by providing a valid argument
 
         The call expects a <SCALE_VALUE> with this shape:

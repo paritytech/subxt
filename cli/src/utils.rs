@@ -8,6 +8,7 @@ use heck::ToUpperCamelCase;
 use scale_info::form::PortableForm;
 use scale_info::PortableRegistry;
 use scale_typegen_description::{format_type_description, type_description};
+use syn::Item;
 
 use std::fmt::Display;
 use std::str::FromStr;
@@ -78,34 +79,31 @@ impl FileOrUrl {
 /// creates an example value for each of the fields and
 /// packages all of them into one unnamed composite value.
 pub fn fields_composite_example(
-    fields: &[scale_info::Field<PortableForm>],
+    fields: impl Iterator<Item = u32>,
     types: &PortableRegistry,
 ) -> Value {
-    let examples: Vec<Value> = fields
-        .iter()
-        .map(|e| type_example(e.ty.id, types))
-        .collect();
+    let examples: Vec<Value> = fields.map(|e| type_example(e, types)).collect();
     Value::unnamed_composite(examples)
 }
 
 /// Returns a field description that is already formatted.
 pub fn fields_description(
-    fields: &[scale_info::Field<PortableForm>],
+    fields: &[(Option<&str>, u32)],
     name: &str,
     types: &PortableRegistry,
 ) -> String {
     if fields.is_empty() {
         return format!("Zero Sized Type, no fields.");
     }
-    let all_named = fields.iter().all(|f| f.name.is_some());
+    let all_named = fields.iter().all(|f| f.0.is_some());
 
     let fields = fields
         .iter()
         .map(|field| {
             let field_description =
-                type_description(field.ty.id, types, false).expect("No Description.");
+                type_description(field.1, types, false).expect("No Description.");
             if all_named {
-                let field_name = field.name.as_ref().unwrap();
+                let field_name = field.0.unwrap();
                 format!("{field_name}: {field_description}")
             } else {
                 format!("{field_description}")

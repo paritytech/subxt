@@ -1,14 +1,16 @@
-use crate::utils::{first_paragraph_of_docs, FileOrUrl, Indent};
+use crate::utils::{
+    fields_composite_example, fields_description, first_paragraph_of_docs, FileOrUrl, Indent,
+};
 use clap::{Args, Parser};
 use color_eyre::eyre::eyre;
-use indoc::formatdoc;
+use indoc::{formatdoc, writedoc};
+use scale_typegen_description::type_description;
 use subxt::Metadata;
 use subxt_metadata::RuntimeApiMetadata;
 
-mod methods;
-
 pub async fn run<'a>(
     method: Option<String>,
+    execute: bool,
     trailing_args: Vec<String>,
     runtime_api_metadata: RuntimeApiMetadata<'a>,
     metadata: &'a Metadata,
@@ -29,11 +31,15 @@ pub async fn run<'a>(
     };
 
     let Some(method_name) = method else {
-        let docs_string = first_paragraph_of_docs(runtime_api_metadata.docs()).indent(4);
-        if !docs_string.is_empty() {
-            writeln!(output, "Description:\n{docs_string}\n")?;
+        // show docs for runtime api
+        let doc_string = first_paragraph_of_docs(runtime_api_metadata.docs()).indent(4);
+        if !doc_string.is_empty() {
+            writedoc! {output, "
+            Description:
+            {doc_string}
+    
+            "}?;
         }
-
         writeln!(output, "{}", usage())?;
         return Ok(());
     };
@@ -47,9 +53,54 @@ pub async fn run<'a>(
         ));
     };
 
+    // show docs for method:
+    let doc_string = first_paragraph_of_docs(method.docs()).indent(4);
+    if !doc_string.is_empty() {
+        writedoc! {output, "
+    Method Docs:
+    {doc_string}
+
+    "}?;
+    }
+
+    let output_type_description = type_description(method.output_ty(), metadata.types(), true)
+        .expect("No Type Description")
+        .indent(4);
+
+    writedoc! {output, "
+    Output Type:
+    {output_type_description}
+
+    "}?;
+
+    let accepts_input_values = method.inputs().len() > 0;
+
     let trailing_args = trailing_args.join(" ");
 
-    if trailing_args.is_empty() {}
+    if trailing_args.is_empty() && accepts_input_values {
+        let fields: Vec<(Option<&str>, u32)> = method
+            .inputs()
+            .map(|f| (Some(f.name.as_str()), f.ty))
+            .collect();
+        let fields_description =
+            fields_description(&fields, method.name(), metadata.types()).indent(4);
+
+        let fields_example =
+            fields_composite_example(method.inputs().map(|e| e.ty), metadata.types()).indent(4);
+
+        writedoc! {output, "
+        Usage:
+            subxt explore api {api_name} {method_name} <INPUT_VALUE>
+                make a runtime api request
+
+        The method expects an <INPUT_VALUE> with this shape:
+        {fields_description}
+
+        For example you could provide this <INPUT_VALUE>:
+        {fields_example}
+        "}?;
+        return Ok(());
+    }
 
     Ok(())
 }

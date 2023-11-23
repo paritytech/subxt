@@ -51,7 +51,11 @@ pub fn explore_constants(
     // docs
     let doc_string = first_paragraph_of_docs(constant.docs()).indent(4);
     if !doc_string.is_empty() {
-        writeln!(output, "Description:\n{doc_string}")?;
+        writedoc! {output, "
+        Constant Docs:
+        {doc_string}
+        
+        "}?;
     }
 
     // shape
@@ -67,7 +71,6 @@ pub fn explore_constants(
     writedoc!(
         output,
         "
-
         The constant has the following shape:
         {type_description}
 
