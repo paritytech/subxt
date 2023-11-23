@@ -1,11 +1,17 @@
 use clap::{command, Parser, Subcommand};
 
+use indoc::writedoc;
 use subxt::Metadata;
 use subxt_metadata::PalletMetadata;
 
 use crate::utils::{first_paragraph_of_docs, FileOrUrl, Indent};
 
-use self::{calls::CallsSubcommand, constants::ConstantsSubcommand, storage::StorageSubcommand};
+use self::{
+    calls::CallsSubcommand,
+    constants::ConstantsSubcommand,
+    events::{explore_events, EventsSubcommand},
+    storage::StorageSubcommand,
+};
 
 use calls::explore_calls;
 use constants::explore_constants;
@@ -21,6 +27,7 @@ pub enum PalletSubcommand {
     Calls(CallsSubcommand),
     Constants(ConstantsSubcommand),
     Storage(StorageSubcommand),
+    Events(EventsSubcommand),
 }
 
 pub async fn run<'a>(
@@ -34,21 +41,24 @@ pub async fn run<'a>(
     let Some(subcommand) = subcommand else {
         let docs_string = first_paragraph_of_docs(pallet_metadata.docs()).indent(4);
         if !docs_string.is_empty() {
-            writeln!(output, "Description:\n{docs_string}")?;
+            writedoc! {output, "
+            Description:
+            {docs_string}
+
+            "}?;
         }
-        writeln!(output, "Usage:")?;
-        writeln!(output, "    subxt explore pallet {pallet_name} calls")?;
-        writeln!(
-            output,
-            "        explore the calls that can be made into this pallet"
-        )?;
-        writeln!(output, "    subxt explore pallet {pallet_name} constants")?;
-        writeln!(output, "        explore the constants held in this pallet")?;
-        writeln!(output, "    subxt explore pallet {pallet_name} storage")?;
-        writeln!(
-            output,
-            "        explore the storage values held in this pallet"
-        )?;
+
+        writedoc! {output, "
+        Usage:
+            subxt explore pallet {pallet_name} calls
+                explore the calls that can be made into this pallet
+            subxt explore pallet {pallet_name} constants
+                explore the constants of this pallet
+            subxt explore pallet {pallet_name} storage
+                explore the storage values of this pallet
+            subxt explore pallet {pallet_name} events
+                explore the events of this pallet
+        "}?;
         return Ok(());
     };
 
@@ -63,6 +73,9 @@ pub async fn run<'a>(
             // if the metadata came from some url, we use that same url to make storage calls against.
             let custom_url = file_or_url.url.map(|url| url.to_string());
             explore_storage(command, pallet_metadata, metadata, custom_url, output).await
+        }
+        PalletSubcommand::Events(command) => {
+            explore_events(command, pallet_metadata, metadata, output)
         }
     }
 }

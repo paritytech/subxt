@@ -14,7 +14,7 @@ use subxt::{
     OfflineClient,
 };
 
-use crate::utils::{fields_composite_example, fields_description, type_example, Indent};
+use crate::utils::{fields_composite_example, fields_description, Indent};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {

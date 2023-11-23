@@ -1,5 +1,6 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use std::fmt::Write;
 use std::write;
@@ -41,10 +42,20 @@ pub async fn explore_storage(
         return Ok(());
     };
 
+    let usage = || {
+        let storage_entries = storage_entries_string(storage_metadata, pallet_name);
+        formatdoc! {"
+        Usage:
+            subxt explore pallet {pallet_name} storage <STORAGE_ENTRY>
+                view details for a specific storage entry
+        
+        {storage_entries}
+        "}
+    };
+
     // if no storage entry specified, show user the calls to choose from:
     let Some(entry_name) = command.storage_entry else {
-        let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
-        writeln!(output, "Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}")?;
+        writeln!(output, "{}", usage())?;
         return Ok(());
     };
 
@@ -54,9 +65,10 @@ pub async fn explore_storage(
         .iter()
         .find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase())
     else {
-        let storage_entries = print_available_storage_entries(storage_metadata, pallet_name);
-        let description = format!("Usage:\n    subxt explore {pallet_name} storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\n{storage_entries}");
-        return Err(eyre!("Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{description}"));
+        return Err(eyre!(
+            "Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",
+            usage()
+        ));
     };
 
     let (return_ty_id, key_ty_id) = match storage.entry_type() {
@@ -68,16 +80,20 @@ pub async fn explore_storage(
 
     // only inform user about usage if a key can be provided:
     if key_ty_id.is_some() && trailing_args.is_empty() {
-        writeln!(output, "Usage:")?;
-        writeln!(
-            output,
-            "    subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>\n"
-        )?;
+        writedoc! {output, "
+        Usage:
+            subxt explore {pallet_name} storage {entry_name} <KEY_VALUE>
+                retrieve a value from storage
+        "}?;
     }
 
     let docs_string = first_paragraph_of_docs(storage.docs()).indent(4);
     if !docs_string.is_empty() {
-        writeln!(output, "Description:\n{docs_string}")?;
+        writedoc! {output, "
+
+        Description:
+        {docs_string}
+        "}?;
     }
 
     // inform user about shape of key if it can be provided:
@@ -88,14 +104,14 @@ pub async fn explore_storage(
 
         let key_ty_example = type_example(key_ty_id, metadata.types()).indent(4);
 
-        writeln!(
-            output,
-            "\nThe <KEY_VALUE> has the following shape:\n{key_ty_description}\n"
-        )?;
-        writeln!(
-            output,
-            "For example you could provide this <KEY_VALUE>:\n{key_ty_example}"
-        )?;
+        writedoc! {output, "
+        
+        The <KEY_VALUE> has the following shape:
+        {key_ty_description}
+
+        For example you could provide this <KEY_VALUE>:
+        {key_ty_example}
+        "}?;
     } else {
         writeln!(
             output,
@@ -107,22 +123,24 @@ pub async fn explore_storage(
         .expect("No type Description")
         .indent(4);
 
-    writeln!(
-        output,
-        "\nThe storage entry has the following shape:\n{}",
-        return_ty_description
-    )?;
+    writedoc! {output, "
+    
+    The storage entry has the following shape:
+    {return_ty_description}
+    "}?;
 
     // construct the vector of scale_values that should be used as a key to the storage (often empty)
 
     let key_scale_values = if let Some(key_ty_id) = key_ty_id.filter(|_| !trailing_args.is_empty())
     {
         let key_scale_value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
-        writeln!(
-            output,
-            "\n\nYou submitted the following value as a key:\n{}",
-            key_scale_value.indent(4)
-        )?;
+        let key_scale_value_str = key_scale_value.indent(4);
+        writedoc! {output, "
+
+        You submitted the following value as a key:
+        {key_scale_value_str}
+        "}?;
+
         let mut key_bytes: Vec<u8> = Vec::new();
         scale_value::scale::encode_as_type(
             &key_scale_value,
@@ -137,7 +155,11 @@ pub async fn explore_storage(
     };
 
     if key_ty_id.is_none() && !trailing_args.is_empty() {
-        writeln!(output, "\n\nWarning: You submitted the following value as a key, but it will be ignored, because the storage entry does not require a key: \"{}\"", trailing_args)?;
+        writedoc! {output, "
+
+        Warning: You submitted the following value as a key, but it will be ignored, 
+        because the storage entry does not require a key: \"{trailing_args}\"
+        "}?;
     }
 
     // construct and submit the storage entry request if either no key is needed or som key was provided as a scale value
@@ -158,16 +180,17 @@ pub async fn explore_storage(
             decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
 
         let value = decoded_value_thunk.to_value()?.indent(4);
-        writeln!(output, "\nThe value of the storage entry is:\n{value}")?;
+        writedoc! {output, "
+        
+        The value of the storage entry is:
+        {value}
+        "}?;
     }
 
     Ok(())
 }
 
-fn print_available_storage_entries(
-    storage_metadata: &StorageMetadata,
-    pallet_name: &str,
-) -> String {
+fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str) -> String {
     if storage_metadata.entries().is_empty() {
         format!("No <STORAGE_ENTRY>'s available in the \"{pallet_name}\" pallet.")
     } else {
