@@ -171,7 +171,7 @@ impl AsyncRead for WasmSocket {
         let mut inner = self.inner.lock().expect("Mutex is poised; qed");
         inner.waker = Some(cx.waker().clone());
 
-        if self.socket.ready_state() == web_sys::WebSocket::Connecting {
+        if self.socket.ready_state() == web_sys::WebSocket::CONNECTING {
             return Poll::Pending;
         }
 
@@ -225,8 +225,18 @@ impl AsyncWrite for WasmSocket {
         Poll::Ready(Ok(()))
     }
 
-    fn poll_close(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
-        Poll::Ready(Ok(()))
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
+        if self.socket.ready_state() == web_sys::WebSocket::CLOSED {
+            return Poll::Ready(Ok(()));
+        }
+
+        if self.socket.ready_state() != web_sys::WebSocket::CLOSING {
+            let _ = self.socket.close();
+        }
+
+        let mut inner = self.inner.lock().expect("Mutex is poised; qed");
+        inner.waker = Some(cx.waker().clone());
+        Poll::Pending
     }
 }
 
