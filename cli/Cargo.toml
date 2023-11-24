@@ -35,4 +35,7 @@ tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { path = "../../scale-typegen/description" }
 heck = { workspace = true }
 indoc = "2"
-colored = "2.0.4"
+
+[dev-dependencies]
+strip-ansi-escapes = "0.2.0"
+pretty_assertions = { workspace = true }

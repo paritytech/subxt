@@ -1,4 +1,4 @@
-use clap::{Subcommand};
+use clap::Subcommand;
 
 use indoc::writedoc;
 use subxt::Metadata;
@@ -51,13 +51,13 @@ pub async fn run<'a>(
         writedoc! {output, "
         Usage:
             subxt explore pallet {pallet_name} calls
-                explore the calls that can be made into this pallet
+                explore the calls that can be made into a pallet
             subxt explore pallet {pallet_name} constants
-                explore the constants of this pallet
+                explore the constants of a pallet
             subxt explore pallet {pallet_name} storage
-                explore the storage values of this pallet
+                explore the storage values of a pallet
             subxt explore pallet {pallet_name} events
-                explore the events of this pallet
+                explore the events of a pallet
         "}?;
         return Ok(());
     };

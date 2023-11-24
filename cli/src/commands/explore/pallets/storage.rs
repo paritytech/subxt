@@ -1,6 +1,8 @@
 use clap::Args;
-use color_eyre::eyre::{bail, eyre};
-use colored::Colorize;
+use color_eyre::{
+    eyre::{bail, eyre},
+    owo_colors::OwoColorize,
+};
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use scale_value::Value;
@@ -48,7 +50,7 @@ pub async fn explore_storage(
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} storage <STORAGE_ENTRY>
-                view details for a specific storage entry
+                explore a specific storage entry of this pallet
         
         {storage_entries}
         "}

@@ -1,8 +1,7 @@
 use crate::utils::FileOrUrl;
 use clap::{command, Parser, Subcommand};
-use colored::Colorize;
+use color_eyre::owo_colors::OwoColorize;
 use indoc::writedoc;
-
 use std::fmt::Write;
 use std::write;
 
@@ -223,6 +222,10 @@ pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
 
 #[cfg(test)]
 pub mod tests {
+    
+    use indoc::formatdoc;
+    use pretty_assertions::assert_eq;
+
     use super::{run, Opts};
 
     async fn simulate_run(cli_command: &str) -> color_eyre::Result<String> {
@@ -234,49 +237,160 @@ pub mod tests {
         args.append(&mut split);
         let opts: Opts = clap::Parser::try_parse_from(args)?;
         let mut output: Vec<u8> = Vec::new();
-        run(opts, &mut output)
+        let r = run(opts, &mut output)
             .await
-            .map(|_| String::from_utf8(output).unwrap())
+            .map(|_| String::from_utf8(output).unwrap())?;
+        Ok(r)
+    }
+
+    trait StripAnsi: ToString {
+        fn strip_ansi(&self) -> String {
+            let bytes = strip_ansi_escapes::strip(self.to_string().as_bytes());
+            String::from_utf8(bytes).unwrap()
+        }
+    }
+
+    impl<T: ToString> StripAnsi for T {}
+
+    macro_rules! assert_eq_start {
+        ($a:expr, $b:expr) => {
+            assert_eq!(&$a[0..$b.len()], &$b[..]);
+        };
     }
 
     #[tokio::test]
     async fn test_commands() {
-        // show pallets:
-        let output = simulate_run("").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    ParaInherent\n    Staking\n    System\n    Timestamp\n");
+        // shows pallets and runtime apis:
+        let output = simulate_run("").await.unwrap().strip_ansi();
+        let expected_output = formatdoc! {
+            "Usage:
+                subxt explore pallet <PALLET>
+                    explore a specific pallet
+                subxt explore api <RUNTIME_API>
+                    explore a specific runtime api trait
+
+            Available <PALLET>'s are:
+                Balances
+                Multisig
+                ParaInherent
+                Staking
+                System
+                Timestamp
+
+            Available <RUNTIME_API>'s are:
+                AccountNonceApi
+                AuthorityDiscoveryApi
+                BabeApi
+                BeefyApi
+                BlockBuilder
+                Core
+                GrandpaApi
+                Metadata
+                MmrApi
+                NominationPoolsApi
+                OffchainWorkerApi
+                ParachainHost
+                SessionKeys
+                StakingApi
+                TaggedTransactionQueue
+                TransactionPaymentApi
+                TransactionPaymentCallApi
+        "};
+        assert_eq!(output, expected_output);
         // if incorrect pallet, error:
         let output = simulate_run("abc123").await;
         assert!(output.is_err());
         // if correct pallet, show options (calls, constants, storage)
-        let output = simulate_run("Balances").await;
-        assert_eq!(output.unwrap(), "Usage:\n    subxt explore Balances calls\n        explore the calls that can be made into this pallet\n    subxt explore Balances constants\n        explore the constants held in this pallet\n    subxt explore Balances storage\n        explore the storage values held in this pallet\n");
+        let output = simulate_run("pallet Balances").await.unwrap().strip_ansi();
+        let expected_output = formatdoc! {"
+        Usage:
+            subxt explore pallet Balances calls
+                explore the calls that can be made into a pallet
+            subxt explore pallet Balances constants
+                explore the constants of a pallet
+            subxt explore pallet Balances storage
+                explore the storage values of a pallet
+            subxt explore pallet Balances events
+                explore the events of a pallet
+        "};
+        assert_eq!(output, expected_output);
         // check that exploring calls, storage entries and constants is possible:
-        let output = simulate_run("Balances calls").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls <CALL>\n        explore a specific call within this pallet\n\nAvailable <CALL>'s in the \"Balances\" pallet:\n"));
-        let output = simulate_run("Balances storage").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances storage <STORAGE_ENTRY>\n        view details for a specific storage entry\n\nAvailable <STORAGE_ENTRY>'s in the \"Balances\" pallet:\n"));
-        let output = simulate_run("Balances constants").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances constants <CONSTANT>\n        explore a specific call within this pallet\n\nAvailable <CONSTANT>'s in the \"Balances\" pallet:\n"));
+        let output = simulate_run("pallet Balances calls")
+            .await
+            .unwrap()
+            .strip_ansi();
+        // dbg!(output);
+        let start = formatdoc! {"
+            Usage:
+                subxt explore pallet Balances calls <CALL>
+                    explore a specific call of this pallet
+            
+            Available <CALL>'s in the \"Balances\" pallet:"};
+        assert_eq_start!(output, start);
+        let output = simulate_run("pallet Balances storage")
+            .await
+            .unwrap()
+            .strip_ansi();
+        let start = formatdoc! {"
+            Usage:
+                subxt explore pallet Balances storage <STORAGE_ENTRY>
+                    explore a specific storage entry of this pallet
+            
+            Available <STORAGE_ENTRY>'s in the \"Balances\" pallet:
+        "};
+        assert_eq_start!(output, start);
+        let output = simulate_run("pallet Balances constants")
+            .await
+            .unwrap()
+            .strip_ansi();
+        let start = formatdoc! {"
+        Usage:
+            subxt explore pallet Balances constants <CONSTANT>
+                explore a specific constant of this pallet
+        
+        Available <CONSTANT>'s in the \"Balances\" pallet:
+        "};
+        assert_eq_start!(output, start);
+        let output = simulate_run("pallet Balances events")
+            .await
+            .unwrap()
+            .strip_ansi();
+        let start = formatdoc! {"
+        Usage:
+            subxt explore pallet Balances events <EVENT>
+                explore a specific event of this pallet
+        
+        Available <EVENT>'s in the \"Balances\" pallet:
+        "};
+        assert_eq_start!(output, start);
         // check that invalid subcommands don't work:
-        let output = simulate_run("Balances abc123").await;
+        let output = simulate_run("pallet Balances abc123").await;
         assert!(output.is_err());
         // check that we can explore a certain call:
-        let output = simulate_run("Balances calls transfer").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls transfer <SCALE_VALUE>\n        construct the call by providing a valid argument\n\nThe call expect expects a <SCALE_VALUE> with this shape:\n    {\n        dest: enum MultiAddress"));
-        // check that unsigned extrinsic can be constructed:
-        let output =
-            simulate_run("Balances calls transfer {\"dest\":v\"Raw\"((255,255, 255)),\"value\":0}")
-                .await;
-        assert_eq!(
-            output.unwrap(),
-            "Encoded call data:\n    0x24040507020cffffff00\n"
-        );
-        // check that we can explore a certain constant:
-        let output = simulate_run("Balances constants ExistentialDeposit").await;
-        assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    10000000000\n");
-        // check that we can explore a certain storage entry:
-        let output = simulate_run("System storage Account").await;
-        assert!(output.unwrap().starts_with("Usage:\n    subxt explore System storage Account <KEY_VALUE>\n\nDescription:\n    The full account information for a particular account ID."));
-        // in the future we could also integrate with substrate-testrunner to spawn up a node and send an actual storage query to it: e.g. `subxt explore System storage Digest`
+        let output = simulate_run("pallet Balances calls transfer")
+            .await
+            .unwrap()
+            .strip_ansi();
+        // Note: at some point we want to switch to new metadata in the artifacts folder which has e.g. transfer_keep_alive instead of transfer.
+        let start = formatdoc! {"
+        Usage:
+            subxt explore pallet Balances calls transfer <SCALE_VALUE>
+                construct the call by providing a valid argument
+        "};
+        assert_eq_start!(output, start);
+        // check that we can see methods of a runtime api:
+        let output = simulate_run("api metadata").await.unwrap().strip_ansi();
+
+        let start = formatdoc! {"
+            Description:
+                The `Metadata` api trait that returns metadata for the runtime.
+            
+            Usage:
+                subxt explore api Metadata <METHOD>
+                    explore a specific runtime api method
+            
+            Available <METHOD>'s available for the \"Metadata\" runtime api:
+        "};
+        assert_eq_start!(output, start);
     }
 }

@@ -77,6 +77,8 @@ pub async fn run<'a>(
             usage()
         ));
     };
+    // redeclare to not use the wrong capitalization of the input from here on:
+    let method_name = method.name();
 
     // Method is valid. Show method docs + output type description
     let doc_string = first_paragraph_of_docs(method.docs()).indent(4);

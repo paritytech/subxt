@@ -75,9 +75,9 @@ pub fn explore_events(
 
 fn available_events_string(event_variants: &[Variant<PortableForm>], pallet_name: &str) -> String {
     if event_variants.is_empty() {
-        return format!("No <EVENTS>'s available in the \"{pallet_name}\" pallet.");
+        return format!("No <EVENT>'s available in the \"{pallet_name}\" pallet.");
     }
-    let mut output = format!("Available <EVENTS>'s in the \"{pallet_name}\" pallet:");
+    let mut output = format!("Available <EVENT>'s in the \"{pallet_name}\" pallet:");
     let mut strings: Vec<_> = event_variants.iter().map(|c| &c.name).collect();
     strings.sort();
     for event in strings {

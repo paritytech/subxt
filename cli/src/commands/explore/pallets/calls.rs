@@ -15,7 +15,10 @@ use subxt::{
     OfflineClient,
 };
 
-use crate::utils::{fields_composite_example, fields_description, Indent, SyntaxHighlight};
+use crate::utils::{
+    fields_composite_example, fields_description, parse_string_into_scale_value, Indent,
+    SyntaxHighlight,
+};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -99,16 +102,17 @@ pub fn explore_calls(
     }
 
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
-
-    dbg!(&trailing_args);
-    let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
+    let value = parse_string_into_scale_value(&trailing_args)?;
     let value_as_composite = value_into_composite(value);
-    dbg!(&value_as_composite);
     let offline_client = mocked_offline_client(metadata.clone());
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
-    writeln!(output, "Encoded call data:\n    {hex_bytes}")?;
+    writedoc! {output, "
+    Encoded call data:
+        {hex_bytes}
+    "}?;
+
     Ok(())
 }
 

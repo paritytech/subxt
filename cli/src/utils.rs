@@ -4,7 +4,7 @@
 
 use clap::Args;
 use color_eyre::eyre::{bail, eyre};
-use colored::{Color, Colorize};
+use color_eyre::owo_colors::OwoColorize;
 use heck::ToUpperCamelCase;
 use scale_info::PortableRegistry;
 use scale_typegen_description::{format_type_description, type_description};
@@ -16,9 +16,6 @@ use subxt::{OnlineClient, PolkadotConfig};
 
 use scale_value::Value;
 use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
-
-// pub mod type_description;
-// pub mod type_example;
 
 /// The source of the metadata.
 #[derive(Debug, Args, Clone)]
@@ -194,10 +191,10 @@ pub async fn create_client(
     Ok(client)
 }
 
-pub fn parse_string_into_scale_value(trailing_args: &str) -> color_eyre::Result<Value> {
-    let value = scale_value::stringify::from_str(trailing_args).0.map_err(|err| {
+pub fn parse_string_into_scale_value(str: &str) -> color_eyre::Result<Value> {
+    let value = scale_value::stringify::from_str(str).0.map_err(|err| {
         eyre!(
-            "scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{trailing_args}\"\n\n{err}",
+            "scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{str}\"\n\n{err}",
         )
     })?;
     Ok(value)
@@ -230,12 +227,12 @@ impl<T: AsRef<str>> SyntaxHighlight for T {
                 '{' | '}' | ',' | '(' | ')' | ':' | '<' | '>' | ' ' | '\n' | '[' | ']' | ';' => {
                     // flush the current word:
                     if let Some(is_word) = in_word {
-                        let color = if word == "enum" {
-                            Color::Blue
+                        let word = if word == "enum" {
+                            word.blue().to_string()
                         } else {
-                            is_word.color()
+                            is_word.colorize(&word)
                         };
-                        output.push_str(&word.color(color).to_string());
+                        output.push_str(&word);
                     }
 
                     in_word = None;
@@ -252,8 +249,8 @@ impl<T: AsRef<str>> SyntaxHighlight for T {
             }
         }
         // flush if ending on a word:
-        if let Some(is_word) = in_word {
-            output.push_str(&word.color(is_word.color()).to_string());
+        if let Some(word_kind) = in_word {
+            output.push_str(&word_kind.colorize(&word));
         }
 
         return output;
@@ -265,24 +262,13 @@ impl<T: AsRef<str>> SyntaxHighlight for T {
         }
 
         impl InWord {
-            fn color(&self) -> Color {
-                match self {
-                    InWord::Lower => Color::TrueColor {
-                        r: 156,
-                        g: 220,
-                        b: 254,
-                    },
-                    InWord::Upper => Color::TrueColor {
-                        r: 78,
-                        g: 201,
-                        b: 176,
-                    },
-                    InWord::Number => Color::TrueColor {
-                        r: 181,
-                        g: 206,
-                        b: 168,
-                    },
-                }
+            fn colorize(&self, str: &str) -> String {
+                let color = match self {
+                    InWord::Lower => (156, 220, 254),
+                    InWord::Upper => (78, 201, 176),
+                    InWord::Number => (181, 206, 168),
+                };
+                str.truecolor(color.0, color.1, color.2).to_string()
             }
 
             fn from_first_char(c: char) -> Self {
