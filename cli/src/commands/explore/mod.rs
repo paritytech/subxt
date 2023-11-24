@@ -19,49 +19,67 @@ mod runtime_apis;
 ///
 /// # Example
 ///
-/// ## Pallets
-///
-/// Show the pallets that are available:
+/// Show the pallets and runtime apis that are available:
 /// ```text
 /// subxt explore --file=polkadot_metadata.scale
 /// ```
 ///
-/// ## Calls
+/// ## Pallets
+///
+/// each pallet has `calls`, `constants`, `storage` and `events` that can be explored.
+///
+/// ### Calls
 ///
 /// Show the calls in a pallet:
 /// ```text
-/// subxt explore Balances calls
+/// subxt explore pallet Balances calls
 /// ```
 /// Show the call parameters a call expects:
 /// ```text
-/// subxt explore Balances calls transfer
+/// subxt explore pallet Balances calls transfer
 /// ```
 /// Create an unsigned extrinsic from a scale value, validate it and output its hex representation
 /// ```text
-/// subxt explore Grandpa calls note_stalled { "delay": 5, "best_finalized_block_number": 5 }
+/// subxt explore pallet Grandpa calls note_stalled { "delay": 5, "best_finalized_block_number": 5 }
 /// # Encoded call data:
 /// # 0x2c0411020500000005000000
-/// subxt explore Balances calls transfer  "{ \"dest\": v\"Raw\"((255, 255, 255)), \"value\": 0 }"
+/// subxt explore pallet Balances calls transfer  "{ \"dest\": v\"Raw\"((255, 255, 255)), \"value\": 0 }"
 /// # Encoded call data:
 /// # 0x24040607020cffffff00
 /// ```
-/// ## Constants
+/// ### Constants
 ///
 /// Show the constants in a pallet:
 /// ```text
-/// subxt explore Balances constants
+/// subxt explore pallet Balances constants
 /// ```
-/// ## Storage
+/// ### Storage
 ///
 /// Show the storage entries in a pallet
 /// ```text
-/// subxt explore Alliance storage
+/// subxt explore pallet Alliance storage
 /// ```
 /// Show the types and value of a specific storage entry
 /// ```text
-/// subxt explore Alliance storage Announcements [KEY_SCALE_VALUE]
+/// subxt explore pallet Alliance storage Announcements [KEY_SCALE_VALUE]
 /// ```
-///
+/// ### Events
+/// ```text
+/// subxt explore pallet Balances events
+/// ```
+/// Show the type of a specific event
+/// ```text
+/// subxt explore pallet Balances events frozen
+/// ```
+/// ## Runtime APIs
+/// Show the input and output types of a runtime api:
+/// ```text
+/// subxt explore api core version
+/// ```
+/// Execute a runtime API call with the `--execute` (`-e`) flag, to see the return value:
+/// ```text
+/// subxt explore api core version --execute
+/// ```
 #[derive(Debug, Parser)]
 pub struct Opts {
     #[command(flatten)]
