@@ -171,6 +171,10 @@ impl AsyncRead for WasmSocket {
         let mut inner = self.inner.lock().expect("Mutex is poised; qed");
         inner.waker = Some(cx.waker().clone());
 
+        if self.socket.ready_state() == web_sys::WebSocket::Connecting {
+            return Poll::Pending;
+        }
+
         match inner.state {
             ConnectionState::Error => {
                 Poll::Ready(Err(io::Error::new(io::ErrorKind::Other, "Socket error")))
