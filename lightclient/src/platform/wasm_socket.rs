@@ -253,9 +253,7 @@ impl AsyncWrite for WasmSocket {
 
 impl Drop for WasmSocket {
     fn drop(&mut self) {
-        let inner = self.inner.lock().expect("Mutex is poised; qed");
-
-        if inner.state == ConnectionState::Opened || inner.state == ConnectionState::Connecting {
+        if self.socket.ready_state() == web_sys::WebSocket::OPEN {
             let _ = self.socket.close();
         }
     }
