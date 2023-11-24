@@ -63,10 +63,10 @@ struct InnerWasmSocket {
 ///
 /// These need to be kept around until the socket is dropped.
 type Callbacks = (
-    Closure<dyn FnMut()>,
+    JsValue,
     Closure<dyn FnMut(web_sys::MessageEvent)>,
-    Closure<dyn FnMut(web_sys::Event)>,
-    Closure<dyn FnMut(web_sys::CloseEvent)>,
+    JsValue,
+    JsValue,
 );
 
 impl WasmSocket {
@@ -89,7 +89,7 @@ impl WasmSocket {
             waker: None,
         }));
 
-        let open_callback = Closure::<dyn FnMut()>::new({
+        let open_callback = Closure::once_into_js({
             let inner = inner.clone();
             move || {
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
@@ -120,9 +120,9 @@ impl WasmSocket {
         });
         socket.set_onmessage(Some(message_callback.as_ref().unchecked_ref()));
 
-        let error_callback = Closure::<dyn FnMut(_)>::new({
+        let error_callback = Closure::once_into_js({
             let inner = inner.clone();
-            move |_| {
+            move |_event: web_sys::Event| {
                 // Callback does not provide useful information, signal it back to the stream.
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Error;
@@ -134,9 +134,9 @@ impl WasmSocket {
         });
         socket.set_onerror(Some(error_callback.as_ref().unchecked_ref()));
 
-        let close_callback = Closure::<dyn FnMut(_)>::new({
+        let close_callback = Closure::once_into_js({
             let inner = inner.clone();
-            move |_| {
+            move |_event: web_sys::CloseEvent| {
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Closed;
 
