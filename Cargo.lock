@@ -3264,6 +3264,7 @@ dependencies = [
 [[package]]
 name = "scale-typegen"
 version = "0.0.1"
+source = "git+https://github.com/paritytech/scale-typegen?branch=recursive-derives#390cd150fbf270722e95d13019976e64c42cec8a"
 dependencies = [
  "parity-scale-codec",
  "proc-macro2",
@@ -3278,6 +3279,7 @@ dependencies = [
 [[package]]
 name = "scale-typegen-description"
 version = "0.0.1"
+source = "git+https://github.com/paritytech/scale-typegen?branch=recursive-derives#390cd150fbf270722e95d13019976e64c42cec8a"
 dependencies = [
  "anyhow",
  "peekmore",

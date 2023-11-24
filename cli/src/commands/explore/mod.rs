@@ -222,7 +222,7 @@ pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
 
 #[cfg(test)]
 pub mod tests {
-    
+
     use indoc::formatdoc;
     use pretty_assertions::assert_eq;
 

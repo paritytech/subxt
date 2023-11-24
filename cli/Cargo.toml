@@ -32,7 +32,7 @@ scale-value = { workspace = true }
 syn = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
-scale-typegen-description = { path = "../../scale-typegen/description" }
+scale-typegen-description = { git = "https://github.com/paritytech/scale-typegen", branch = "recursive-derives" }
 heck = { workspace = true }
 indoc = "2"
 
