@@ -92,6 +92,8 @@
 //!   reading the extrinsics, events and storage at these blocks.
 //! - [Runtime APIs](usage::runtime_apis): Subxt can make calls into pallet runtime APIs to retrieve
 //!   data.
+//! - [Custom values](usage::custom_values): Subxt can access "custom values" stored in the metadata.
+//! - [Raw RPC calls](usage::rpc): Subxt can be used to make raw RPC requests to compatible nodes.
 //!
 //! ## Examples
 //!

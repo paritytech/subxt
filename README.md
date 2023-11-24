@@ -35,7 +35,7 @@ substrate node per test. It requires an up-to-date `substrate` executable on you
 This can be installed from source via cargo:
 
 ```bash
-cargo install --git https://github.com/paritytech/substrate node-cli --force
+cargo install --git https://github.com/paritytech/polkadot-sdk staging-node-cli --force
 ```
 
 ## Real world usage

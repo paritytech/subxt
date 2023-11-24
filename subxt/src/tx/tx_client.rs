@@ -124,8 +124,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             account_nonce,
             self.client.clone(),
             other_params,
-        )
-        .map_err(Into::into)?;
+        )?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(PartialExtrinsic {
