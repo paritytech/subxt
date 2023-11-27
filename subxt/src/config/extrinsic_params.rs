@@ -10,37 +10,39 @@
 use crate::{client::OfflineClientT, Config};
 use core::fmt::Debug;
 
-/// An error that can be emitted when trying to construct
-/// an instance of [`ExtrinsicParams`].
+/// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
+/// encode data from the instance, or match on signed extensions.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum ExtrinsicParamsError {
-    /// A signed extension was encountered that we don't know about.
-    #[error("Error constructing extrinsic parameters: Unknown signed extension '{0}'")]
+    /// Cannot find a type id in the metadata. The context provides some additional
+    /// information about the source of the error (eg the signed extension name).
+    #[error("Cannot find type id '{type_id} in the metadata (context: {context})")]
+    MissingTypeId {
+        /// Type ID.
+        type_id: u32,
+        /// Some arbitrary context to help narrow the source of the error.
+        context: &'static str,
+    },
+    /// A signed extension in use on some chain was not provided.
+    #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
     UnknownSignedExtension(String),
-    /// Cannot find the type id of a signed extension in the metadata.
-    #[error("Cannot find extension's '{0}' type id '{1} in the metadata")]
-    MissingTypeId(String, u32),
-    /// User provided a different signed extension than the one expected.
-    #[error("Provided a different signed extension for '{0}', the metadata expect '{1}'")]
-    ExpectedAnotherExtension(String, String),
-    /// The inner type of a signed extension is not present in the metadata.
-    #[error("The inner type of the signed extension '{0}' is not present in the metadata")]
-    MissingInnerSignedExtension(String),
-    /// The inner type of the signed extension is not named.
-    #[error("The signed extension's '{0}' type id '{1}' does not have a name in the metadata")]
-    ExpectedNamedTypeId(String, u32),
-    /// Some custom error.s
+    /// Some custom error.
     #[error("Error constructing extrinsic parameters: {0}")]
-    Custom(CustomError),
+    Custom(CustomExtrinsicParamsError),
 }
 
 /// A custom error.
-type CustomError = Box<dyn std::error::Error + Send + Sync + 'static>;
+pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
 impl From<std::convert::Infallible> for ExtrinsicParamsError {
     fn from(value: std::convert::Infallible) -> Self {
         match value {}
+    }
+}
+impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
+    fn from(value: CustomExtrinsicParamsError) -> Self {
+        ExtrinsicParamsError::Custom(value)
     }
 }
 
@@ -53,15 +55,12 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// help construct your [`ExtrinsicParams`] object.
     type OtherParams;
 
-    /// The type of error returned from [`ExtrinsicParams::new()`].
-    type Error: Into<ExtrinsicParamsError>;
-
-    /// Construct a new instance of our [`ExtrinsicParams`]
+    /// Construct a new instance of our [`ExtrinsicParams`].
     fn new<Client: OfflineClientT<T>>(
         nonce: u64,
         client: Client,
         other_params: Self::OtherParams,
-    ) -> Result<Self, Self::Error>;
+    ) -> Result<Self, ExtrinsicParamsError>;
 }
 
 /// This trait is expected to be implemented for any [`ExtrinsicParams`], and

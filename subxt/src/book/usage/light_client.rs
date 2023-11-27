@@ -23,7 +23,9 @@
 //! Alternately, you can have the `LightClient` download the chain spec from a trusted node when it
 //! initializes, which is not recommended in production but is useful for examples and testing, as below.
 //!
-//! ## Example
+//! ## Examples
+//!
+//! ### Basic Example
 //!
 //! This example connects to a local chain and submits a transaction. To run this, you first need
 //! to have a local polkadot node running using the following command:
@@ -36,12 +38,19 @@
 //! in the `subxt` crate:
 //!
 //! ```bash
-//! cargo run --example unstable_light_client_tx_basic --features=unstable-light-client
+//! cargo run --example light_client_tx_basic --features=unstable-light-client
 //! ```
 //!
 //! This is the code that will be executed:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../../../examples/unstable_light_client_tx_basic.rs")]
+#![doc = include_str!("../../../examples/light_client_tx_basic.rs")]
 //! ```
 //!
+//! ### Connecting to a parachain
+//!
+//! This example connects to a parachain using the light client. Currently, it's quite verbose to do this.
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../examples/light_client_parachains.rs")]
+//! ```
