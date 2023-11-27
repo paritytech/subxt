@@ -242,9 +242,7 @@ impl AsyncWrite for WasmSocket {
 
 impl Drop for WasmSocket {
     fn drop(&mut self) {
-        if self.socket.ready_state() == web_sys::WebSocket::OPEN
-            || self.socket.ready_state() == web_sys::WebSocket::CONNECTING
-        {
+        if self.socket.ready_state() != web_sys::WebSocket::CLOSING {
             let _ = self.socket.close();
         }
 
