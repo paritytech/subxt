@@ -63,10 +63,10 @@ struct InnerWasmSocket {
 ///
 /// These need to be kept around until the socket is dropped.
 type Callbacks = (
-    JsValue,
+    Closure<dyn FnMut()>,
     Closure<dyn FnMut(web_sys::MessageEvent)>,
-    JsValue,
-    JsValue,
+    Closure<dyn FnMut(web_sys::Event)>,
+    Closure<dyn FnMut(web_sys::CloseEvent)>,
 );
 
 impl WasmSocket {
@@ -89,7 +89,7 @@ impl WasmSocket {
             waker: None,
         }));
 
-        let open_callback = Closure::once_into_js({
+        let open_callback = Closure::<dyn FnMut()>::new({
             let inner = inner.clone();
             move || {
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
@@ -120,7 +120,7 @@ impl WasmSocket {
         });
         socket.set_onmessage(Some(message_callback.as_ref().unchecked_ref()));
 
-        let error_callback = Closure::once_into_js({
+        let error_callback = Closure::<dyn FnMut(_)>::new({
             let inner = inner.clone();
             move |_event: web_sys::Event| {
                 // Callback does not provide useful information, signal it back to the stream.
@@ -134,7 +134,7 @@ impl WasmSocket {
         });
         socket.set_onerror(Some(error_callback.as_ref().unchecked_ref()));
 
-        let close_callback = Closure::once_into_js({
+        let close_callback = Closure::<dyn FnMut(_)>::new({
             let inner = inner.clone();
             move |_event: web_sys::CloseEvent| {
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
@@ -242,8 +242,15 @@ impl AsyncWrite for WasmSocket {
 
 impl Drop for WasmSocket {
     fn drop(&mut self) {
-        if self.socket.ready_state() == web_sys::WebSocket::OPEN {
+        if self.socket.ready_state() == web_sys::WebSocket::OPEN
+            || self.socket.ready_state() == web_sys::WebSocket::CONNECTING
+        {
             let _ = self.socket.close();
         }
+
+        self.socket.set_onopen(None);
+        self.socket.set_onmessage(None);
+        self.socket.set_onerror(None);
+        self.socket.set_onclose(None);
     }
 }
