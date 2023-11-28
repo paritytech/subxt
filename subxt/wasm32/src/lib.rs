@@ -28,7 +28,12 @@
 // bash-5.1$ 
 
 
-#[subxt::subxt(runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale")]
+#[subxt::subxt(
+    runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale", 
+     runtime_types_only,
+     no_default_derives,
+     derive_for_all_types="codec::Encode, codec::Decode",
+)]
 pub mod polkadot {}
 
 #[no_mangle]
@@ -54,8 +59,9 @@ mod test {
         //let dest = bob.public_key().into();
         let dest =
             subxt::utils::MultiAddress::<subxt::utils::AccountId32, ()>::Address32([0u8; 32]);
-        let _ = crate::polkadot::tx()
-            .balances()
-            .transfer_allow_death(dest, 10_000);
+
+        // let _ = crate::polkadot::apis()
+        //     .balances()
+        //     .transfer_allow_death(dest, 10_000);
     }
 }
