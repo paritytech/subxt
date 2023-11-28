@@ -19,8 +19,7 @@ path = "src/main.rs"
 [features]
 # Compute the state root hash from the genesis entry.
 # Enable this to create a smaller chain spec file.
-chain-spec = ["smoldot"]
-
+chain-spec-pruning = ["smoldot"]
 
 [dependencies]
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
