@@ -67,6 +67,8 @@ pub struct CodegenBuilder {
     type_substitutes: HashMap<syn::Path, syn::Path>,
     derives_for_type: HashMap<syn::TypePath, Vec<syn::Path>>,
     attributes_for_type: HashMap<syn::TypePath, Vec<syn::Attribute>>,
+    derives_for_type_recursive: HashMap<syn::TypePath, Vec<syn::Path>>,
+    attributes_for_type_recursive: HashMap<syn::TypePath, Vec<syn::Attribute>>,
 }
 
 impl Default for CodegenBuilder {
@@ -85,6 +87,8 @@ impl Default for CodegenBuilder {
             type_substitutes: HashMap::new(),
             derives_for_type: HashMap::new(),
             attributes_for_type: HashMap::new(),
+            derives_for_type_recursive: HashMap::new(),
+            attributes_for_type_recursive: HashMap::new(),
         }
     }
 }
@@ -162,8 +166,16 @@ impl CodegenBuilder {
         &mut self,
         ty: syn::TypePath,
         derives: impl IntoIterator<Item = syn::Path>,
+        recursive: bool,
     ) {
-        self.derives_for_type.entry(ty).or_default().extend(derives);
+        if recursive {
+            self.derives_for_type_recursive
+                .entry(ty)
+                .or_default()
+                .extend(derives);
+        } else {
+            self.derives_for_type.entry(ty).or_default().extend(derives);
+        }
     }
 
     /// Set additional attributes for a specific type at the path given.
@@ -176,11 +188,19 @@ impl CodegenBuilder {
         &mut self,
         ty: syn::TypePath,
         attributes: impl IntoIterator<Item = syn::Attribute>,
+        recursive: bool,
     ) {
-        self.attributes_for_type
-            .entry(ty)
-            .or_default()
-            .extend(attributes);
+        if recursive {
+            self.attributes_for_type_recursive
+                .entry(ty)
+                .or_default()
+                .extend(attributes);
+        } else {
+            self.attributes_for_type
+                .entry(ty)
+                .or_default()
+                .extend(attributes);
+        }
     }
 
     /// Substitute a type at the given path with some type at the second path. During codegen,
@@ -221,10 +241,16 @@ impl CodegenBuilder {
         derives_registry.extend_for_all(self.extra_global_derives, self.extra_global_attributes);
 
         for (ty, derives) in self.derives_for_type {
-            derives_registry.extend_for_type(ty, derives, vec![]);
+            derives_registry.extend_for_type(ty, derives, vec![], false);
+        }
+        for (ty, derives) in self.derives_for_type_recursive {
+            derives_registry.extend_for_type(ty, derives, vec![], true);
         }
         for (ty, attributes) in self.attributes_for_type {
-            derives_registry.extend_for_type(ty, vec![], attributes);
+            derives_registry.extend_for_type(ty, vec![], attributes, false);
+        }
+        for (ty, attributes) in self.attributes_for_type_recursive {
+            derives_registry.extend_for_type(ty, vec![], attributes, true);
         }
 
         let mut type_substitutes: TypeSubstitutes = if self.use_default_substitutions {

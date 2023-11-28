@@ -168,7 +168,8 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
         let derive = syn::parse_str(&derive)
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
-        codegen.add_derives_for_type(ty, std::iter::once(derive));
+        // Note: recursive derives and attributes not supported in the CLI => recursive: false
+        codegen.add_derives_for_type(ty, std::iter::once(derive), false);
     }
 
     // Configure attribtues:
@@ -185,7 +186,8 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
         let attribute: OuterAttribute = syn::parse_str(&attr)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
-        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0));
+        // Note: recursive derives and attributes not supported in the CLI => recursive: false
+        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0), false);
     }
 
     // Insert type substitutions:

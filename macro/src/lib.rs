@@ -59,12 +59,16 @@ struct RuntimeMetadataArgs {
 struct DeriveForType {
     path: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
+    #[darling(default)]
+    recursive: bool,
 }
 
 #[derive(Debug, FromMeta)]
 struct AttributesForType {
     path: syn::TypePath,
     attributes: Punctuated<OuterAttribute, syn::Token![,]>,
+    #[darling(default)]
+    recursive: bool,
 }
 
 #[derive(Debug, FromMeta)]
@@ -121,7 +125,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.derive_for_type {
-        codegen.add_derives_for_type(d.path, d.derive.into_iter());
+        codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
     }
 
     // Configure attributes:
@@ -133,7 +137,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.attributes_for_type {
-        codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0))
+        codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0), d.recursive)
     }
 
     // Insert type substitutions:
