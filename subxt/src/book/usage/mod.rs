@@ -12,6 +12,7 @@
 //! - [Runtime APIs](runtime_apis)
 //! - [Unstable Light Client](light_client)
 //! - [Custom Values](custom_values)
+//! - [RPC calls](rpc)
 //!
 //! Alternately, [go back](super).
 
@@ -20,6 +21,7 @@ pub mod constants;
 pub mod custom_values;
 pub mod events;
 pub mod light_client;
+pub mod rpc;
 pub mod runtime_apis;
 pub mod storage;
 pub mod transactions;
