@@ -129,51 +129,24 @@ pub trait Header: Sized + Encode + Decode {
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
     use super::*;
-    use primitive_types::{H256, U256};
 
-    impl<N, H> Header for sp_runtime::generic::Header<N, H>
+    impl<T: sp_runtime::traits::Header> Header for T
     where
-        Self: Encode + Decode,
-        N: Copy + Into<U256> + Into<u64> + TryFrom<U256>,
-        H: sp_runtime::traits::Hash + Hasher,
+        <T as sp_runtime::traits::Header>::Number: Into<u64>,
     {
-        type Number = N;
-        type Hasher = H;
+        type Number = T::Number;
+        type Hasher = T::Hashing;
 
         fn number(&self) -> Self::Number {
-            self.number
+            *self.number()
         }
     }
 
-    impl Hasher for sp_core::Blake2Hasher {
-        type Output = H256;
+    impl<T: sp_runtime::traits::Hash> Hasher for T {
+        type Output = T::Output;
 
         fn hash(s: &[u8]) -> Self::Output {
-            <Self as sp_core::Hasher>::hash(s)
-        }
-    }
-
-    impl Hasher for sp_runtime::traits::BlakeTwo256 {
-        type Output = H256;
-
-        fn hash(s: &[u8]) -> Self::Output {
-            <Self as sp_core::Hasher>::hash(s)
-        }
-    }
-
-    impl Hasher for sp_core::KeccakHasher {
-        type Output = H256;
-
-        fn hash(s: &[u8]) -> Self::Output {
-            <Self as sp_core::Hasher>::hash(s)
-        }
-    }
-
-    impl Hasher for sp_runtime::traits::Keccak256 {
-        type Output = H256;
-
-        fn hash(s: &[u8]) -> Self::Output {
-            <Self as sp_core::Hasher>::hash(s)
+            <T as sp_runtime::traits::Hash>::hash(s)
         }
     }
 }
