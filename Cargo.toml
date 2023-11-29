@@ -11,19 +11,13 @@ members = [
     "macro",
     "metadata",
     "signer",
-    "subxt"
+    "subxt",
 ]
 
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = [
-    "testing/wasm-rpc-tests",
-    "testing/wasm-lightclient-tests",
-    "signer/wasm-tests",
-    "examples/wasm-example",
-    "examples/parachain-example"
-]
+exclude = ["testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
 resolver = "2"
 
 [workspace.package]
@@ -80,6 +74,7 @@ trybuild = "1.0.85"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "4.4.2"
+scale-typegen = { git = "https://github.com/paritytech/scale-typegen", branch = "recursive-derives" }
 
 # Light client support:
 smoldot = { version = "0.12.0", default-features = false }
