@@ -122,7 +122,7 @@ impl WasmSocket {
 
         let error_callback = Closure::<dyn FnMut(_)>::new({
             let inner = inner.clone();
-            move |_| {
+            move |_event: web_sys::Event| {
                 // Callback does not provide useful information, signal it back to the stream.
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Error;
@@ -136,7 +136,7 @@ impl WasmSocket {
 
         let close_callback = Closure::<dyn FnMut(_)>::new({
             let inner = inner.clone();
-            move |_| {
+            move |_event: web_sys::CloseEvent| {
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
                 inner.state = ConnectionState::Closed;
 
@@ -170,6 +170,10 @@ impl AsyncRead for WasmSocket {
     ) -> Poll<Result<usize, io::Error>> {
         let mut inner = self.inner.lock().expect("Mutex is poised; qed");
         inner.waker = Some(cx.waker().clone());
+
+        if self.socket.ready_state() == web_sys::WebSocket::CONNECTING {
+            return Poll::Pending;
+        }
 
         match inner.state {
             ConnectionState::Error => {
@@ -221,17 +225,30 @@ impl AsyncWrite for WasmSocket {
         Poll::Ready(Ok(()))
     }
 
-    fn poll_close(self: Pin<&mut Self>, _: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
-        Poll::Ready(Ok(()))
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
+        if self.socket.ready_state() == web_sys::WebSocket::CLOSED {
+            return Poll::Ready(Ok(()));
+        }
+
+        if self.socket.ready_state() != web_sys::WebSocket::CLOSING {
+            let _ = self.socket.close();
+        }
+
+        let mut inner = self.inner.lock().expect("Mutex is poised; qed");
+        inner.waker = Some(cx.waker().clone());
+        Poll::Pending
     }
 }
 
 impl Drop for WasmSocket {
     fn drop(&mut self) {
-        let inner = self.inner.lock().expect("Mutex is poised; qed");
-
-        if inner.state == ConnectionState::Opened {
+        if self.socket.ready_state() != web_sys::WebSocket::CLOSING {
             let _ = self.socket.close();
         }
+
+        self.socket.set_onopen(None);
+        self.socket.set_onmessage(None);
+        self.socket.set_onerror(None);
+        self.socket.set_onclose(None);
     }
 }
