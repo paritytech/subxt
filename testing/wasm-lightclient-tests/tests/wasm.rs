@@ -32,6 +32,8 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 async fn light_client_works() {
+    console_error_panic_hook::set_once();
+
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .build_from_url("wss://rpc.polkadot.io:443")
         .await
