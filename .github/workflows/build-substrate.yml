@@ -23,6 +23,9 @@ jobs:
       - name: Install WASM toolchain
         run: rustup target add wasm32-unknown-unknown
 
+      - name: Install WASM toolchain
+        run: rustup component add rust-src
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
