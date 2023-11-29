@@ -16,6 +16,11 @@ description = "Command line utilities for working with subxt codegen"
 name = "subxt"
 path = "src/main.rs"
 
+[features]
+# Compute the state root hash from the genesis entry.
+# Enable this to create a smaller chain spec file.
+chain-spec-pruning = ["smoldot"]
+
 [dependencies]
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 subxt-metadata = { workspace = true }
@@ -35,6 +40,8 @@ tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { workspace = true }
 heck = { workspace = true }
 indoc = "2"
+thiserror = { workspace = true }
+smoldot = { workspace = true, optional = true }
 
 [dev-dependencies]
 strip-ansi-escapes = "0.2.0"
