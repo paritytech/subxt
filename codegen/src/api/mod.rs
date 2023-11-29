@@ -14,16 +14,16 @@ mod storage;
 
 use scale_typegen::typegen::ir::type_ir::CompositeIR;
 use scale_typegen::typegen::type_params::TypeParameters;
-use scale_typegen::{TypeGenerator, TypeGeneratorSettings};
+use scale_typegen::TypeGenerator;
 use subxt_metadata::Metadata;
 
 use crate::error::CodegenError;
+use crate::subxt_type_gen_settings;
 use crate::{api::custom_values::generate_custom_values, ir};
 
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use syn::parse_quote;
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
@@ -318,24 +318,6 @@ impl RuntimeGenerator {
                 #types_mod
             }
         })
-    }
-}
-
-fn subxt_type_gen_settings(
-    derives: scale_typegen::DerivesRegistry,
-    substitutes: scale_typegen::TypeSubstitutes,
-    crate_path: &syn::Path,
-    should_gen_docs: bool,
-) -> TypeGeneratorSettings {
-    TypeGeneratorSettings {
-        types_mod_ident: parse_quote!(runtime_types),
-        should_gen_docs,
-        derives,
-        substitutes,
-        decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
-        compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
-        compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
-        insert_codec_attributes: true,
     }
 }
 

@@ -24,7 +24,8 @@ use getrandom as _;
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use scale_typegen::{
-    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeSubstitutes, TypegenError,
+    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeGeneratorSettings,
+    TypeSubstitutes, TypegenError,
 };
 use std::collections::HashMap;
 use syn::parse_quote;
@@ -287,6 +288,33 @@ impl CodegenBuilder {
                 should_gen_docs,
             )
         }
+    }
+}
+
+/// The default [`scale_typegen::TypeGeneratorSettings`], subxt is using for generating code.
+/// Useful for emulating subxt's code generation settings from e.g. subxt-explorer.
+pub fn default_subxt_type_gen_settings() -> TypeGeneratorSettings {
+    let crate_path: syn::Path = parse_quote!(::subxt);
+    let derives = default_derives(&crate_path);
+    let substitutes = default_substitutes(&crate_path);
+    subxt_type_gen_settings(derives, substitutes, &crate_path, true)
+}
+
+fn subxt_type_gen_settings(
+    derives: scale_typegen::DerivesRegistry,
+    substitutes: scale_typegen::TypeSubstitutes,
+    crate_path: &syn::Path,
+    should_gen_docs: bool,
+) -> TypeGeneratorSettings {
+    TypeGeneratorSettings {
+        types_mod_ident: parse_quote!(runtime_types),
+        should_gen_docs,
+        derives,
+        substitutes,
+        decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
+        compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
+        compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
+        insert_codec_attributes: true,
     }
 }
 
