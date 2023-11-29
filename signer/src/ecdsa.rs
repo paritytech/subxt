@@ -38,7 +38,7 @@ impl AsRef<[u8]> for PublicKey {
 
 /// An ecdsa keypair implementation.
 #[derive(Debug, Clone)]
-pub struct Keypair(pub secp256k1::KeyPair);
+pub struct Keypair(pub secp256k1::Keypair);
 
 impl Keypair {
     /// Create an ecdsa keypair from a [`SecretUri`]. See the [`SecretUri`] docs for more.
@@ -108,7 +108,7 @@ impl Keypair {
     /// This will only be secure if the seed is secure!
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
-        Ok(Self(secp256k1::KeyPair::from_secret_key(
+        Ok(Self(secp256k1::Keypair::from_secret_key(
             SECP256K1, &secret,
         )))
     }
@@ -159,7 +159,7 @@ impl Keypair {
         // From sp_core::ecdsa::sign:
         let message_hash = sp_core_hashing::blake2_256(message);
         // From sp_core::ecdsa::sign_prehashed:
-        let wrapped = Message::from_slice(&message_hash).expect("Message is 32 bytes; qed");
+        let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         let recsig: RecoverableSignature =
             SECP256K1.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
         // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
@@ -191,7 +191,7 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
         return false;
     };
     let message_hash = sp_core_hashing::blake2_256(message.as_ref());
-    let wrapped = Message::from_slice(&message_hash).expect("Message is 32 bytes; qed");
+    let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
     signature.verify(&wrapped, &public).is_ok()
 }
 
