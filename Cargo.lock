@@ -4218,10 +4218,12 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
+ "smoldot",
  "subxt",
  "subxt-codegen",
  "subxt-metadata",
  "syn 2.0.37",
+ "thiserror",
  "tokio",
 ]
 
