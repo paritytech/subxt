@@ -22,6 +22,7 @@ use codec::{Decode, Encode};
     Debug,
     scale_encode::EncodeAsType,
     scale_decode::DecodeAsType,
+    scale_info::TypeInfo,
 )]
 pub enum MultiAddress<AccountId, AccountIndex> {
     /// It's an account ID (pubkey).
