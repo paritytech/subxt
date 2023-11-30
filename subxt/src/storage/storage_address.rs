@@ -190,7 +190,7 @@ where
                     }
                     hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
-                } else if hashers.len() == type_ids.len() {
+                } else if hashers.len() >= type_ids.len() {
                     let iter = self.storage_entry_keys.iter().zip(type_ids).zip(hashers);
                     // A hasher per field; encode and hash each field independently.
                     for ((key, type_id), hasher) in iter {
@@ -200,7 +200,7 @@ where
                     }
                     Ok(())
                 } else {
-                    // Mismatch; wrong number of hashers/fields.
+                    // Provided more fields than hashers.
                     Err(StorageAddressError::WrongNumberOfHashers {
                         hashers: hashers.len(),
                         fields: type_ids.len(),
