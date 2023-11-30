@@ -181,6 +181,15 @@ where
                     _other => either::Either::Right(std::iter::once(*key_ty)),
                 };
 
+                if type_ids.len() < self.storage_entry_keys.len() {
+                    // Provided more keys than fields.
+                    return Err(StorageAddressError::WrongNumberOfKeys {
+                        expected: type_ids.len(),
+                        actual: self.storage_entry_keys.len(),
+                    }
+                    .into());
+                }
+
                 if hashers.len() == 1 {
                     // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
                     let mut input = Vec::new();
