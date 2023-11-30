@@ -203,10 +203,6 @@ fn codegen(
         .map_err(|e| eyre!("Cannot decode the provided metadata: {e}"))?;
     let code = codegen
         .generate(metadata)
-        .map_err(|e| {
-            dbg!(&e);
-            e
-        })
         .map_err(|e| eyre!("Cannot generate code: {e}"))?;
 
     writeln!(output, "{code}")?;

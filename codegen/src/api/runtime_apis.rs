@@ -135,7 +135,6 @@ pub fn generate_runtime_apis(
     type_gen: &TypeGenerator,
     types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    _should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     let runtime_fns: Vec<_> = metadata
         .runtime_api_traits()

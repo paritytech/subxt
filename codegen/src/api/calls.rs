@@ -33,7 +33,6 @@ pub fn generate_calls(
         call_ty,
         |name| name.to_upper_camel_case().into(),
         "Call",
-        crate_path,
     )?;
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .into_iter()

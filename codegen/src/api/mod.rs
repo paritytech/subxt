@@ -207,7 +207,6 @@ impl RuntimeGenerator {
             &type_gen,
             types_mod_ident,
             &crate_path,
-            should_gen_docs,
         )?;
 
         // Fetch the paths of the outer enums.
@@ -327,7 +326,6 @@ pub fn generate_structs_from_variants<F>(
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-    _crate_path: &syn::Path,
 ) -> Result<Vec<(String, CompositeIR)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
@@ -345,32 +343,12 @@ where
             let mut type_params = TypeParameters::from_scale_info(&[]);
             let composite_ir_kind =
                 type_gen.create_composite_ir_kind(&var.fields, &mut type_params)?;
-            // let fields = CompositeDefFields::from_scale_info_fields(
-            //     struct_name.as_ref(),
-            //     &var.fields,
-            //     &[],
-            //     type_gen,
-            // )?;
-
             let struct_name = variant_to_struct_name(&var.name);
             let composite_ir = CompositeIR::new(
                 syn::parse_str(&struct_name).expect("enum variant name is valid ident"),
                 composite_ir_kind,
                 type_gen.docs_from_scale_info(&var.docs),
             );
-
-            // let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
-            // let struct_def = CompositeDef::struct_def(
-            //     &ty,
-            //     struct_name.as_ref(),
-            //     Default::default(),
-            //     fields,
-            //     Some(parse_quote!(pub)),
-            //     type_gen,
-            //     docs,
-            //     crate_path,
-            // )?;
-
             Ok((var.name.to_string(), composite_ir))
         })
         .collect()

@@ -48,13 +48,8 @@ pub fn generate_events(
         return Ok(quote!());
     };
 
-    let struct_defs = super::generate_structs_from_variants(
-        type_gen,
-        event_ty,
-        |name| name.into(),
-        "Event",
-        crate_path,
-    )?;
+    let struct_defs =
+        super::generate_structs_from_variants(type_gen, event_ty, |name| name.into(), "Event")?;
 
     let event_structs = struct_defs.into_iter().map(|(variant_name, composite)| {
         let pallet_name = pallet.name();
