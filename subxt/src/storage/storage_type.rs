@@ -229,7 +229,7 @@ where
             let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
 
             // The root pallet/entry bytes for this storage entry:
-            let address_root_bytes = super::utils::storage_address_root_bytes(&address);
+            let address_root_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
 
             let s = client
                 .backend()
