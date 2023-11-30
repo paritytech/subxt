@@ -18,6 +18,7 @@ use scale_encode::EncodeAsType;
     serde::Deserialize,
     DecodeAsType,
     EncodeAsType,
+    scale_info::TypeInfo,
 )]
 pub enum Era {
     /// The transaction is valid forever. The genesis hash must be present in the signed content.
