@@ -228,12 +228,12 @@ where
             // in the iterator.
             let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
 
-            // The root pallet/entry bytes for this storage entry:
-            let address_root_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
+            // The address bytes of this entry:
+            let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
 
             let s = client
                 .backend()
-                .storage_fetch_descendant_values(address_root_bytes, block_ref.hash())
+                .storage_fetch_descendant_values(address_bytes, block_ref.hash())
                 .await?
                 .map(move |kv| {
                     let kv = match kv {
