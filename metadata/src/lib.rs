@@ -14,6 +14,8 @@
 //! 2. Obtaining [`frame_metadata::RuntimeMetadataPrefixed`], and then
 //!    using `.try_into()` to convert it into [`Metadata`].
 
+#![deny(missing_docs)]
+
 mod from_into;
 mod utils;
 

@@ -1,7 +1,6 @@
 // Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
-
 use std::iter;
 
 use super::{
@@ -14,6 +13,12 @@ use tokio::sync::{mpsc, mpsc::error::SendError, oneshot};
 use super::platform::build_platform;
 
 pub const LOG_TARGET: &str = "subxt-light-client";
+
+/// The successful result of a subscription request.
+pub type SubscriptionRequest = (
+    oneshot::Receiver<MethodResponse>,
+    mpsc::UnboundedReceiver<Box<RawValue>>,
+);
 
 /// A raw light-client RPC implementation that can connect to multiple chains.
 #[derive(Clone)]
@@ -179,13 +184,7 @@ impl LightClientRpc {
         &self,
         method: String,
         params: String,
-    ) -> Result<
-        (
-            oneshot::Receiver<MethodResponse>,
-            mpsc::UnboundedReceiver<Box<RawValue>>,
-        ),
-        SendError<FromSubxt>,
-    > {
+    ) -> Result<SubscriptionRequest, SendError<FromSubxt>> {
         let (sub_id, sub_id_rx) = oneshot::channel();
         let (sender, receiver) = mpsc::unbounded_channel();
 
