@@ -172,6 +172,12 @@ where
                     .resolve(*key_ty)
                     .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
+                // If the provided keys are empty, the storage address must be
+                // equal to the storage root address.
+                if self.storage_entry_keys.is_empty() {
+                    return Ok(());
+                }
+
                 // If the key is a tuple, we encode each value to the corresponding tuple type.
                 // If the key is not a tuple, encode a single value to the key type.
                 let type_ids = match &ty.type_def {
