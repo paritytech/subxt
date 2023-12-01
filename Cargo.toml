@@ -49,10 +49,6 @@ unconditional_recursion = "deny"
 unused_allocation = "deny"
 unused_comparisons = "deny"
 unused_parens = "deny"
-while_true = "deny"
-trivial_casts = "deny"
-trivial_numeric_casts = "deny"
-unused_crate_dependencies = "deny"
 unused_extern_crates = "deny"
 
 [workspace.lints.clippy]

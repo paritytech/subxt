@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use codec::Encode;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;

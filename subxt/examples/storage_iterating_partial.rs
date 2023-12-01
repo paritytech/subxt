@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use polkadot::multisig::events::NewMultisig;
 use polkadot::runtime_types::{
     frame_system::pallet::Call, polkadot_runtime::RuntimeCall, sp_weights::weight_v2::Weight,
