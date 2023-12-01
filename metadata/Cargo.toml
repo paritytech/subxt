@@ -17,7 +17,7 @@ description = "Command line utilities for checking metadata compatibility betwee
 workspace = true
 
 [dependencies]
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { workspace = true, features = ["derive"] }
 frame-metadata = { workspace = true }
 scale-info = { workspace = true }
 sp-core-hashing = { workspace = true }

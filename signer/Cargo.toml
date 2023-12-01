@@ -37,7 +37,7 @@ native = ["subxt?/native"]
 subxt = { workspace = true, optional = true, default-features = false }
 regex = { workspace = true }
 hex = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { workspace = true, features = ["derive"] }
 sp-core-hashing = { workspace = true }
 thiserror = { workspace = true }
 pbkdf2 = { workspace = true }

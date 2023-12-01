@@ -54,7 +54,7 @@ unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 
 [dependencies]
 async-trait = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { workspace = true, features = ["derive"] }
 scale-info = { workspace = true }
 scale-value = { workspace = true }
 scale-bits = { workspace = true }
