@@ -341,7 +341,7 @@ jobs:
             - name: Install cargo-machete
               run: cargo install cargo-machete
 
-            - name: Run tests
+            - name: Check unused dependencies
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: machete
