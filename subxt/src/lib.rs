@@ -19,8 +19,6 @@
     overflowing_literals,
     path_statements,
     patterns_in_fns_without_body,
-    private_interfaces,
-    private_bounds,
     unconditional_recursion,
     unused_allocation,
     unused_comparisons,
