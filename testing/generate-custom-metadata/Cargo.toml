@@ -15,4 +15,4 @@ homepage.workspace = true
 subxt = { workspace = true, features = ["native"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 frame-metadata = { workspace = true }
-codec = { workspace = true, features = ["derive", "bit-vec"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }

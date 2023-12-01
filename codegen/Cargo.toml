@@ -21,7 +21,7 @@ fetch-metadata = ["dep:jsonrpsee", "dep:tokio", "dep:frame-metadata"]
 web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js"]
 
 [dependencies]
-codec = { workspace = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 frame-metadata = { workspace = true, optional = true }
 heck = { workspace = true }
 proc-macro2 = { workspace = true }
