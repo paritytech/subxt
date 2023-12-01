@@ -45,6 +45,9 @@ async fn storage_iter() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_iter();
+    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
+    assert_eq!(addr_bytes, addr.to_root_bytes());
+
     let len = api
         .storage()
         .at_latest()
