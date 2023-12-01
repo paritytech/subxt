@@ -12,8 +12,6 @@ documentation = "https://docs.rs/subxt-codegen"
 homepage.workspace = true
 description = "Generate an API for interacting with a substrate node from FRAME metadata"
 
-[lints]
-workspace = true
 
 [features]
 default = []

@@ -4,6 +4,8 @@
 
 //! Subxt macro for generating Substrate runtime interfaces.
 
+extern crate proc_macro;
+
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
@@ -74,7 +76,6 @@ struct SubstituteType {
 }
 
 // Note: docs for this are in the subxt library; don't add further docs here as they will be appended.
-/// The subxt macro.
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {

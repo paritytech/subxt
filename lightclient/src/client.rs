@@ -14,12 +14,6 @@ use super::platform::build_platform;
 
 pub const LOG_TARGET: &str = "subxt-light-client";
 
-/// The successful result of a subscription request.
-pub type SubscriptionRequest = (
-    oneshot::Receiver<MethodResponse>,
-    mpsc::UnboundedReceiver<Box<RawValue>>,
-);
-
 /// A raw light-client RPC implementation that can connect to multiple chains.
 #[derive(Clone)]
 pub struct RawLightClientRpc {
@@ -180,11 +174,18 @@ impl LightClientRpc {
     ///
     /// This method sends a request to the light-client to establish an RPC subscription with the provided parameters.
     /// The parameters are parsed into a valid JSON object in the background.
+    #[allow(clippy::type_complexity)]
     pub fn subscription_request(
         &self,
         method: String,
         params: String,
-    ) -> Result<SubscriptionRequest, SendError<FromSubxt>> {
+    ) -> Result<
+        (
+            oneshot::Receiver<MethodResponse>,
+            mpsc::UnboundedReceiver<Box<RawValue>>,
+        ),
+        SendError<FromSubxt>,
+    > {
         let (sub_id, sub_id_rx) = oneshot::channel();
         let (sender, receiver) = mpsc::unbounded_channel();
 
