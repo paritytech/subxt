@@ -147,3 +147,12 @@ secp256k1 = "0.28.0"
 secrecy = "0.8.0"
 sha2 = "0.10.8"
 zeroize = { version = "1", default-features = false }
+
+[profile.dev.package.smoldot-light]
+opt-level = 2
+[profile.test.package.smoldot-light]
+opt-level = 2
+[profile.dev.package.smoldot]
+opt-level = 2
+[profile.test.package.smoldot]
+opt-level = 2

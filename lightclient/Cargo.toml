@@ -80,12 +80,3 @@ pin-project = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
-
-[profile.dev.package.smoldot-light]
-opt-level = 2
-[profile.test.package.smoldot-light]
-opt-level = 2
-[profile.dev.package.smoldot]
-opt-level = 2
-[profile.test.package.smoldot]
-opt-level = 2
