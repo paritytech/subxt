@@ -242,8 +242,10 @@ pub fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
+    initial_cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, CachedHash>::new();
+    let empty = &mut HashMap::new();
+    let mut cache = initial_cache.unwrap_or_else(|| empty);
 
     // Get the hashes of the extrinsic type.
     let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut cache);
@@ -275,31 +277,55 @@ fn get_outer_enums_hash(
     registry: &PortableRegistry,
     enums: &OuterEnumsMetadata,
     only_these_variants: Option<&[&str]>,
+    cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
     /// Hash the provided enum type.
     fn get_enum_hash(
         registry: &PortableRegistry,
         id: u32,
         only_these_variants: Option<&[&str]>,
+        cache: &mut HashMap<u32, CachedHash>,
     ) -> [u8; HASH_LEN] {
-        let ty = registry
+        let ty: &scale_info::PortableType = registry
             .types
             .get(id as usize)
             .expect("Metadata should contain enum type in registry");
 
         if let TypeDef::Variant(variant) = &ty.ty.type_def {
-            get_type_def_variant_hash(registry, variant, only_these_variants, &mut HashMap::new())
+            // Note: The hash here depends on the `only_these_variants` argument.
+            // Inserting the hash here back into the cache is important,
+            // because later when we encounter this type again (e.g. event enum)
+            // we want to directly get the cached hash value that respected `only_these_variants`.
+            let modified_variant_hash =
+                get_type_def_variant_hash(registry, variant, only_these_variants, cache);
+            cache.insert(id, CachedHash::Hash(modified_variant_hash));
+            modified_variant_hash
         } else {
-            get_type_hash(registry, id, &mut HashMap::new())
+            get_type_hash(registry, id, cache)
         }
     }
 
-    let call_hash = get_enum_hash(registry, enums.call_enum_ty, only_these_variants);
+    let empty = &mut HashMap::new();
+    let mut cache = cache.unwrap_or_else(|| empty);
 
-    let event_hash = get_enum_hash(registry, enums.event_enum_ty, only_these_variants);
-
-    let error_hash = get_enum_hash(registry, enums.error_enum_ty, only_these_variants);
-
+    let call_hash = get_enum_hash(
+        registry,
+        enums.call_enum_ty,
+        only_these_variants,
+        &mut cache,
+    );
+    let event_hash = get_enum_hash(
+        registry,
+        enums.event_enum_ty,
+        only_these_variants,
+        &mut cache,
+    );
+    let error_hash = get_enum_hash(
+        registry,
+        enums.error_enum_ty,
+        only_these_variants,
+        &mut cache,
+    );
     concat_and_hash3(&call_hash, &event_hash, &error_hash)
 }
 
@@ -371,8 +397,16 @@ fn get_runtime_method_hash(
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::new();
+///
+/// If `cache` is Some(..), an existing map of type ids to hashes is used.
+/// Otherwise a new cache is built at the start of this function and discarded at the end of it.
+pub fn get_runtime_trait_hash(
+    trait_metadata: RuntimeApiMetadata,
+    cache: Option<&mut HashMap<u32, CachedHash>>,
+) -> [u8; HASH_LEN] {
+    let empty = &mut HashMap::new();
+    let mut cache = cache.unwrap_or_else(|| empty);
+
     let trait_name = &*trait_metadata.inner.name;
     let method_bytes = trait_metadata
         .methods()
@@ -395,8 +429,17 @@ pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_L
     concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
 }
 
-pub fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::new();
+/// Obtain a hash of the custom metadata.
+///
+/// If `cache` is Some(..), an existing map of type ids to hashes is used.
+/// Otherwise a new cache is built at the start of this function and discarded at the end of it.
+pub fn get_custom_metadata_hash(
+    custom_metadata: &CustomMetadata,
+    cache: Option<&mut HashMap<u32, CachedHash>>,
+) -> [u8; HASH_LEN] {
+    let empty = &mut HashMap::new();
+    let mut cache = cache.unwrap_or_else(|| empty);
+
     custom_metadata
         .iter()
         .fold([0u8; HASH_LEN], |bytes, custom_value| {
@@ -466,8 +509,16 @@ pub fn get_runtime_api_hash(
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
-pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, CachedHash>::new();
+///
+/// If `cache` is Some(..), an existing map of type ids to hashes is used.
+/// Otherwise a new cache is built at the start of this function and discarded at the end of it.
+pub fn get_pallet_hash(
+    pallet: PalletMetadata,
+    cache: Option<&mut HashMap<u32, CachedHash>>,
+) -> [u8; HASH_LEN] {
+    let empty = &mut HashMap::new();
+    let mut cache = cache.unwrap_or_else(|| empty);
+
     let registry = pallet.types;
 
     let call_bytes = match pallet.call_ty_id() {
@@ -562,6 +613,20 @@ impl<'a> MetadataHasher<'a> {
     /// Hash the given metadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
         let metadata = self.metadata;
+        let mut cache: HashMap<u32, CachedHash> = HashMap::new();
+
+        // Note: Calculate the hashes for the outer enums first, because the type ids of them might appear later in types of pallets.
+        // E.g Pallet "System" -> Storage Entry "Events" has type `Vec<Event>` where Event is the same type as the outer enum.
+        // This Event type needs to be trimmed to `self.specific_pallets` first:
+        let outer_enums_hash = get_outer_enums_hash(
+            &metadata.types,
+            &metadata.outer_enums(),
+            self.specific_pallets.as_deref(),
+            Some(&mut cache),
+        );
+        let extrinsic_hash =
+            get_extrinsic_hash(&metadata.types, &metadata.extrinsic, Some(&mut cache));
+        let runtime_hash = get_type_hash(&metadata.types, metadata.runtime_ty(), &mut cache);
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
             // If specific pallets are given, only include this pallet if it is in the specific pallets.
@@ -573,7 +638,7 @@ impl<'a> MetadataHasher<'a> {
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
             if should_hash {
-                xor(bytes, get_pallet_hash(pallet))
+                xor(bytes, get_pallet_hash(pallet, Some(&mut cache)))
             } else {
                 bytes
             }
@@ -591,24 +656,15 @@ impl<'a> MetadataHasher<'a> {
                 // We don't care what order the runtime APIs are seen in, so XOR their
                 // hashes together to be order independent.
                 if should_hash {
-                    xor(bytes, get_runtime_trait_hash(api))
+                    xor(bytes, get_runtime_trait_hash(api, Some(&mut cache)))
                 } else {
                     bytes
                 }
             });
 
-        let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
-        let runtime_hash =
-            get_type_hash(&metadata.types, metadata.runtime_ty(), &mut HashMap::new());
-        let outer_enums_hash = get_outer_enums_hash(
-            &metadata.types,
-            &metadata.outer_enums(),
-            self.specific_pallets.as_deref(),
-        );
-
         let custom_values_hash = self
             .include_custom_values
-            .then(|| get_custom_metadata_hash(&metadata.custom()))
+            .then(|| get_custom_metadata_hash(&metadata.custom(), Some(&mut cache)))
             .unwrap_or_default();
 
         concat_and_hash6(

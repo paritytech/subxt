@@ -324,7 +324,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_pallet_hash(*self)
+        crate::utils::validation::get_pallet_hash(*self, None)
     }
 }
 
@@ -643,7 +643,7 @@ impl<'a> RuntimeApiMetadata<'a> {
 
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_trait_hash(*self)
+        crate::utils::validation::get_runtime_trait_hash(*self, None)
     }
 }
 
