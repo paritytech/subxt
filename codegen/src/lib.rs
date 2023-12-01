@@ -6,8 +6,6 @@
 //! This is used by the `#[subxt]` macro and `subxt codegen` CLI command, but can also
 //! be used directly if preferable.
 
-#![deny(unused_crate_dependencies, missing_docs)]
-
 mod api;
 mod ir;
 mod types;

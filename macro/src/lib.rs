@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-extern crate proc_macro;
+//! Subxt macro for generating Substrate runtime interfaces.
 
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
@@ -73,7 +73,8 @@ struct SubstituteType {
     with: syn::Path,
 }
 
-// Note: docs for this are in the subxt library; don't add any here as they will be appended.
+// Note: docs for this are in the subxt library; don't add further docs here as they will be appended.
+/// The subxt macro.
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {

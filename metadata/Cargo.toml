@@ -13,6 +13,9 @@ documentation.workspace = true
 homepage.workspace = true
 description = "Command line utilities for checking metadata compatibility between nodes."
 
+[lints]
+workspace = true
+
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 frame-metadata = { workspace = true }

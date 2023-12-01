@@ -36,6 +36,29 @@ repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
 
+[workspace.lints.rust]
+bad_style = "deny"
+improper_ctypes = "deny"
+missing_docs = "deny"
+non_shorthand_field_patterns = "deny"
+no_mangle_generic_items = "deny"
+overflowing_literals = "deny"
+path_statements = "deny"
+patterns_in_fns_without_body = "deny"
+unconditional_recursion = "deny"
+unused_allocation = "deny"
+unused_comparisons = "deny"
+unused_parens = "deny"
+while_true = "deny"
+trivial_casts = "deny"
+trivial_numeric_casts = "deny"
+unused_crate_dependencies = "deny"
+unused_extern_crates = "deny"
+
+[workspace.lints.clippy]
+type_complexity = "allow"
+all = "deny"
+
 [workspace.dependencies]
 async-trait = "0.1.74"
 assert_matches = "1.5.0"

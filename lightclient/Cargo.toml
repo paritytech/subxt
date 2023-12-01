@@ -14,6 +14,9 @@ homepage.workspace = true
 description = "Light Client for chain interaction"
 keywords = ["parity", "substrate", "blockchain"]
 
+[lints]
+workspace = true
+
 [features]
 default = ["native"]
 
