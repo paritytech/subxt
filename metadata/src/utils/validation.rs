@@ -245,13 +245,13 @@ fn get_extrinsic_hash(
     initial_cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
     let empty = &mut HashMap::new();
-    let mut cache = initial_cache.unwrap_or_else(|| empty);
+    let cache = initial_cache.unwrap_or(empty);
 
     // Get the hashes of the extrinsic type.
-    let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut cache);
+    let address_hash = get_type_hash(registry, extrinsic.address_ty, cache);
     // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
-    let signature_hash = get_type_hash(registry, extrinsic.signature_ty, &mut cache);
-    let extra_hash = get_type_hash(registry, extrinsic.extra_ty, &mut cache);
+    let signature_hash = get_type_hash(registry, extrinsic.signature_ty, cache);
+    let extra_hash = get_type_hash(registry, extrinsic.extra_ty, cache);
 
     let mut bytes = concat_and_hash4(
         &address_hash,
@@ -264,8 +264,8 @@ fn get_extrinsic_hash(
         bytes = concat_and_hash4(
             &bytes,
             &hash(signed_extension.identifier.as_bytes()),
-            &get_type_hash(registry, signed_extension.extra_ty, &mut cache),
-            &get_type_hash(registry, signed_extension.additional_ty, &mut cache),
+            &get_type_hash(registry, signed_extension.extra_ty, cache),
+            &get_type_hash(registry, signed_extension.additional_ty, cache),
         )
     }
     bytes
@@ -305,26 +305,11 @@ fn get_outer_enums_hash(
     }
 
     let empty = &mut HashMap::new();
-    let mut cache = cache.unwrap_or_else(|| empty);
+    let cache = cache.unwrap_or(empty);
 
-    let call_hash = get_enum_hash(
-        registry,
-        enums.call_enum_ty,
-        only_these_variants,
-        &mut cache,
-    );
-    let event_hash = get_enum_hash(
-        registry,
-        enums.event_enum_ty,
-        only_these_variants,
-        &mut cache,
-    );
-    let error_hash = get_enum_hash(
-        registry,
-        enums.error_enum_ty,
-        only_these_variants,
-        &mut cache,
-    );
+    let call_hash = get_enum_hash(registry, enums.call_enum_ty, only_these_variants, cache);
+    let event_hash = get_enum_hash(registry, enums.event_enum_ty, only_these_variants, cache);
+    let error_hash = get_enum_hash(registry, enums.error_enum_ty, only_these_variants, cache);
     concat_and_hash3(&call_hash, &event_hash, &error_hash)
 }
 
@@ -404,7 +389,7 @@ pub fn get_runtime_trait_hash(
     cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
     let empty = &mut HashMap::new();
-    let mut cache = cache.unwrap_or_else(|| empty);
+    let cache = cache.unwrap_or(empty);
 
     let trait_name = &*trait_metadata.inner.name;
     let method_bytes = trait_metadata
@@ -416,12 +401,7 @@ pub fn get_runtime_trait_hash(
             // so long as each individual method is the same.
             xor(
                 bytes,
-                get_runtime_method_hash(
-                    trait_metadata.types,
-                    trait_name,
-                    method_metadata,
-                    &mut cache,
-                ),
+                get_runtime_method_hash(trait_metadata.types, trait_name, method_metadata, cache),
             )
         });
 
@@ -437,12 +417,12 @@ pub fn get_custom_metadata_hash(
     cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
     let empty = &mut HashMap::new();
-    let mut cache = cache.unwrap_or_else(|| empty);
+    let cache = cache.unwrap_or(empty);
 
     custom_metadata
         .iter()
         .fold([0u8; HASH_LEN], |bytes, custom_value| {
-            xor(bytes, get_custom_value_hash(&custom_value, &mut cache))
+            xor(bytes, get_custom_value_hash(&custom_value, cache))
         })
 }
 
@@ -516,23 +496,20 @@ pub fn get_pallet_hash(
     cache: Option<&mut HashMap<u32, CachedHash>>,
 ) -> [u8; HASH_LEN] {
     let empty = &mut HashMap::new();
-    let mut cache = cache.unwrap_or_else(|| empty);
+    let cache = cache.unwrap_or(empty);
 
     let registry = pallet.types;
 
     let call_bytes = match pallet.call_ty_id() {
-        Some(calls) => {
-            get_type_hash(registry, calls, &mut cache)
-
-        },
+        Some(calls) => get_type_hash(registry, calls, cache),
         None => [0u8; HASH_LEN],
     };
     let event_bytes = match pallet.event_ty_id() {
-        Some(event) => get_type_hash(registry, event, &mut cache),
+        Some(event) => get_type_hash(registry, event, cache),
         None => [0u8; HASH_LEN],
     };
     let error_bytes = match pallet.error_ty_id() {
-        Some(error) => get_type_hash(registry, error, &mut cache),
+        Some(error) => get_type_hash(registry, error, cache),
         None => [0u8; HASH_LEN],
     };
     let constant_bytes = pallet.constants().fold([0u8; HASH_LEN], |bytes, constant| {
@@ -540,7 +517,7 @@ pub fn get_pallet_hash(
         // of (constantName, constantType) to make the order we see them irrelevant.
         let constant_hash = concat_and_hash2(
             &hash(constant.name.as_bytes()),
-            &get_type_hash(registry, constant.ty(), &mut cache),
+            &get_type_hash(registry, constant.ty(), cache),
         );
         xor(bytes, constant_hash)
     });
@@ -553,7 +530,7 @@ pub fn get_pallet_hash(
                 .fold([0u8; HASH_LEN], |bytes, entry| {
                     // We don't care what order the storage entries occur in, so XOR them together
                     // to make the order irrelevant.
-                    xor(bytes, get_storage_entry_hash(registry, entry, &mut cache))
+                    xor(bytes, get_storage_entry_hash(registry, entry, cache))
                 });
             concat_and_hash2(&prefix_hash, &entries_hash)
         }
@@ -1272,8 +1249,7 @@ mod tests {
         let hash = MetadataHasher::new(&metadata)
             .only_these_pallets(&["First"])
             .hash();
-        let hash_trimmed = MetadataHasher::new(&trimmed_metadata)
-            .hash();
+        let hash_trimmed = MetadataHasher::new(&trimmed_metadata).hash();
 
         assert_eq!(hash, hash_trimmed);
     }
