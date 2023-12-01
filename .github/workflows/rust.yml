@@ -318,3 +318,30 @@ jobs:
               with:
                   command: clippy
                   args: --all-targets -- -D warnings
+    machete:
+        name: "Cargo machete"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+            - name: Install cargo-machete
+              run: cargo install cargo-machete
+
+            - name: Run tests
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: machete
