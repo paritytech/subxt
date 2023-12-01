@@ -127,6 +127,79 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
+async fn storage_partial_lookup() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Boilerplate; we create a new asset class with ID 99, and then
+    // we "approveTransfer" of some of this asset class. This gives us an
+    // entry in the `Approvals` StorageNMap that we can try to look up.
+    let signer = dev::alice();
+    let alice: AccountId32 = dev::alice().public_key().into();
+    let bob: AccountId32 = dev::bob().public_key().into();
+
+    // Create two assets; one with ID 99 and one with ID 100.
+    let assets = [
+        (99, alice.clone(), bob.clone(), 123),
+        (100, bob.clone(), alice.clone(), 124),
+    ];
+    for (asset_id, admin, delegate, amount) in assets.clone() {
+        let tx1 = node_runtime::tx()
+            .assets()
+            .create(asset_id, admin.into(), 1);
+        let tx2 = node_runtime::tx()
+            .assets()
+            .approve_transfer(asset_id, delegate.into(), amount);
+        api.tx()
+            .sign_and_submit_then_watch_default(&tx1, &signer)
+            .await?
+            .wait_for_finalized_success()
+            .await?;
+        api.tx()
+            .sign_and_submit_then_watch_default(&tx2, &signer)
+            .await?
+            .wait_for_finalized_success()
+            .await?;
+    }
+
+    // Check all approvals.
+    let addr = node_runtime::storage().assets().approvals_iter();
+    let addr_bytes = api.storage().address_bytes(&addr)?;
+    let mut results = api.storage().at_latest().await?.iter(addr).await?;
+    let mut approvals = Vec::new();
+    while let Some(Ok((key, value))) = results.next().await {
+        assert!(key.starts_with(&addr_bytes));
+        approvals.push(value);
+    }
+    assert_eq!(approvals.len(), assets.len());
+    let mut amounts = approvals.iter().map(|a| a.amount).collect::<Vec<_>>();
+    amounts.sort();
+    let mut expected = assets.iter().map(|a| a.3).collect::<Vec<_>>();
+    expected.sort();
+    assert_eq!(amounts, expected);
+
+    // Check all assets starting with ID 99.
+    for (asset_id, _, _, amount) in assets.clone() {
+        let addr = node_runtime::storage().assets().approvals_iter1(asset_id);
+        let second_addr_bytes = api.storage().address_bytes(&addr)?;
+        // Keys must be different, since we are adding to the root key.
+        assert_ne!(addr_bytes, second_addr_bytes);
+
+        let mut results = api.storage().at_latest().await?.iter(addr).await?;
+
+        let mut approvals = Vec::new();
+        while let Some(Ok((key, value))) = results.next().await {
+            assert!(key.starts_with(&addr_bytes));
+            approvals.push(value);
+        }
+        assert_eq!(approvals.len(), 1);
+        assert_eq!(approvals[0].amount, amount);
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
