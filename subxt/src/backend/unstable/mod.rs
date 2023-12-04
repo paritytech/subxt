@@ -486,6 +486,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
                         SeenBlock::New(block_ref) => {
+                            // Optimization: once we have a `finalized_hash`, we only care about finalized
+                            // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
                                 seen_blocks
                                     .insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
