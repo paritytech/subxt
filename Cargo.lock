@@ -1660,7 +1660,6 @@ dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
  "scale-info",
- "subxt",
 ]
 
 [[package]]
@@ -4438,7 +4437,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tokio-stream",
- "tokio-util",
  "tracing",
  "wasm-bindgen",
  "wasm-bindgen-futures",

@@ -55,6 +55,7 @@ pub enum FromSubxt {
 }
 
 /// Background task data.
+#[allow(clippy::type_complexity)]
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
     /// Smoldot light client implementation that leverages the exposed platform.
     client: smoldot_light::Client<TPlatform, TChain>,

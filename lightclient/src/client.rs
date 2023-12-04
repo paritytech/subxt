@@ -1,7 +1,6 @@
 // Copyright 2019-2023 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
-
 use std::iter;
 
 use super::{
@@ -175,6 +174,7 @@ impl LightClientRpc {
     ///
     /// This method sends a request to the light-client to establish an RPC subscription with the provided parameters.
     /// The parameters are parsed into a valid JSON object in the background.
+    #[allow(clippy::type_complexity)]
     pub fn subscription_request(
         &self,
         method: String,
