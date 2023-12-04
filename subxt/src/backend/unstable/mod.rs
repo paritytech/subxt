@@ -437,9 +437,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
-        enum SeenBlock {
-            New(BlockRef<T::Hash>),
-            Finalized(Vec<BlockRef<T::Hash>>),
+        enum SeenBlock<Ref> {
+            New(Ref),
+            Finalized(Vec<Ref>),
         }
         enum SeenBlockMarker {
             New,
@@ -455,7 +455,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
             std::future::ready(match ev {
                 FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
-                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_blocks)),
+                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
                 _ => None,
             })
         });
@@ -549,8 +549,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         // block that likely isn't accessible. We have no guarantee that a best
                         // block on the node a tx was sent to will ever be known about on the
                         // chainHead_follow subscription.
-                        let block_ref = match seen_blocks.get(&block.hash).cloned() {
-                            Some((_, block_ref)) => block_ref.into(),
+                        let block_ref = match seen_blocks.get(&block.hash) {
+                            Some((_, block_ref)) => block_ref.clone().into(),
                             None => BlockRef::from_hash(block.hash),
                         };
                         TransactionStatus::InBestBlock { hash: block_ref }
