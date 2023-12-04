@@ -160,11 +160,7 @@ impl Metadata {
     /// Get type hash for a type in the registry
     pub fn type_hash(&self, id: u32) -> Option<[u8; HASH_LEN]> {
         self.types.resolve(id)?;
-        Some(crate::utils::validation::get_type_hash(
-            &self.types,
-            id,
-            &mut HashMap::new(),
-        ))
+        Some(crate::utils::validation::get_type_hash(&self.types, id))
     }
 
     /// Ensure that every unique type we'll be generating or referring to also has a
@@ -324,7 +320,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_pallet_hash(*self)
+        crate::utils::validation::get_pallet_hash(*self, &HashMap::new())
     }
 }
 
@@ -643,7 +639,7 @@ impl<'a> RuntimeApiMetadata<'a> {
 
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_trait_hash(*self)
+        crate::utils::validation::get_runtime_trait_hash(*self, &HashMap::new())
     }
 }
 
@@ -766,8 +762,7 @@ impl<'a> CustomValueMetadata<'a> {
 
     /// Calculates the hash for the CustomValueMetadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        let mut cache = HashMap::new();
-        get_custom_value_hash(self, &mut cache)
+        get_custom_value_hash(self, &HashMap::new())
     }
 }
 

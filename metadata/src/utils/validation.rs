@@ -75,6 +75,7 @@ fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
     cache: &mut HashMap<u32, CachedHash>,
+    precomputed: Option<&HashMap<u32, [u8; HASH_LEN]>>,
 ) -> [u8; HASH_LEN] {
     let field_name_bytes = match &field.name {
         Some(name) => hash(name.as_bytes()),
@@ -83,7 +84,7 @@ fn get_field_hash(
 
     concat_and_hash2(
         &field_name_bytes,
-        &get_type_hash(registry, field.ty.id, cache),
+        &get_type_hash_recurse(registry, field.ty.id, cache, precomputed),
     )
 }
 
@@ -92,12 +93,13 @@ fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
     cache: &mut HashMap<u32, CachedHash>,
+    precomputed: Option<&HashMap<u32, [u8; HASH_LEN]>>,
 ) -> [u8; HASH_LEN] {
     let variant_name_bytes = hash(var.name.as_bytes());
     let variant_field_bytes = var.fields.iter().fold([0u8; HASH_LEN], |bytes, field| {
         // EncodeAsType and DecodeAsType don't care about variant field ordering,
         // so XOR the fields to ensure that it doesn't matter.
-        xor(bytes, get_field_hash(registry, field, cache))
+        xor(bytes, get_field_hash(registry, field, cache, precomputed))
     });
 
     concat_and_hash2(&variant_name_bytes, &variant_field_bytes)
@@ -108,6 +110,7 @@ fn get_type_def_variant_hash(
     variant: &TypeDefVariant<PortableForm>,
     only_these_variants: Option<&[&str]>,
     cache: &mut HashMap<u32, CachedHash>,
+    precomputed: Option<&HashMap<u32, [u8; HASH_LEN]>>,
 ) -> [u8; HASH_LEN] {
     let variant_id_bytes = [TypeBeingHashed::Variant as u8; HASH_LEN];
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
@@ -117,9 +120,8 @@ fn get_type_def_variant_hash(
             .as_ref()
             .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
             .unwrap_or(true);
-
         if should_hash {
-            xor(bytes, get_variant_hash(registry, var, cache))
+            xor(bytes, get_variant_hash(registry, var, cache, precomputed))
         } else {
             bytes
         }
@@ -132,6 +134,7 @@ fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
     cache: &mut HashMap<u32, CachedHash>,
+    precomputed: Option<&HashMap<u32, [u8; HASH_LEN]>>,
 ) -> [u8; HASH_LEN] {
     match ty_def {
         TypeDef::Composite(composite) => {
@@ -143,14 +146,16 @@ fn get_type_def_hash(
                     .fold([0u8; HASH_LEN], |bytes, field| {
                         // With EncodeAsType and DecodeAsType we no longer care which order the fields are in,
                         // as long as all of the names+types are there. XOR to not care about ordering.
-                        xor(bytes, get_field_hash(registry, field, cache))
+                        xor(bytes, get_field_hash(registry, field, cache, precomputed))
                     });
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
-        TypeDef::Variant(variant) => get_type_def_variant_hash(registry, variant, None, cache),
+        TypeDef::Variant(variant) => {
+            get_type_def_variant_hash(registry, variant, None, cache, precomputed)
+        }
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
-            &get_type_hash(registry, sequence.type_param.id, cache),
+            &get_type_hash_recurse(registry, sequence.type_param.id, cache, precomputed),
         ),
         TypeDef::Array(array) => {
             // Take length into account too; different length must lead to different hash.
@@ -162,13 +167,16 @@ fn get_type_def_hash(
             };
             concat_and_hash2(
                 &array_id_bytes,
-                &get_type_hash(registry, array.type_param.id, cache),
+                &get_type_hash_recurse(registry, array.type_param.id, cache, precomputed),
             )
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
             for field in &tuple.fields {
-                bytes = concat_and_hash2(&bytes, &get_type_hash(registry, field.id, cache));
+                bytes = concat_and_hash2(
+                    &bytes,
+                    &get_type_hash_recurse(registry, field.id, cache, precomputed),
+                );
             }
             bytes
         }
@@ -178,12 +186,12 @@ fn get_type_def_hash(
         }
         TypeDef::Compact(compact) => concat_and_hash2(
             &[TypeBeingHashed::Compact as u8; HASH_LEN],
-            &get_type_hash(registry, compact.type_param.id, cache),
+            &get_type_hash_recurse(registry, compact.type_param.id, cache, precomputed),
         ),
         TypeDef::BitSequence(bitseq) => concat_and_hash3(
             &[TypeBeingHashed::BitSequence as u8; HASH_LEN],
-            &get_type_hash(registry, bitseq.bit_order_type.id, cache),
-            &get_type_hash(registry, bitseq.bit_store_type.id, cache),
+            &get_type_hash_recurse(registry, bitseq.bit_order_type.id, cache, precomputed),
+            &get_type_hash_recurse(registry, bitseq.bit_store_type.id, cache, precomputed),
         ),
     }
 }
@@ -207,11 +215,35 @@ impl CachedHash {
 }
 
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
-pub fn get_type_hash(
+pub fn get_type_hash(registry: &PortableRegistry, id: u32) -> [u8; HASH_LEN] {
+    // Dev-Note: If you have trimmed metadata and want to propagate the hashes of the outer enums,
+    // prefer to use `get_type_hash_with_precomputed` instead.
+    get_type_hash_recurse(registry, id, &mut HashMap::new(), None)
+}
+
+/// Similar to `get_type_hash`, but when types in `precomputed` are encountered, the precomputed hash is returned instead.
+fn get_type_hash_with_precomputed(
+    registry: &PortableRegistry,
+    id: u32,
+    precomputed: &HashMap<u32, [u8; HASH_LEN]>,
+) -> [u8; HASH_LEN] {
+    get_type_hash_recurse(registry, id, &mut HashMap::new(), Some(precomputed))
+}
+
+/// Obtain the hash representation of a `scale_info::Type` identified by id.
+fn get_type_hash_recurse(
     registry: &PortableRegistry,
     id: u32,
     cache: &mut HashMap<u32, CachedHash>,
+    precomputed: Option<&HashMap<u32, [u8; HASH_LEN]>>,
 ) -> [u8; HASH_LEN] {
+    // If the type is part of `precomputed` hashes, return the precomputed hash instead:
+    if let Some(precomputed) = precomputed {
+        if let Some(hash) = precomputed.get(&id) {
+            return *hash;
+        }
+    }
+
     // Guard against recursive types, with a 2 step caching approach:
     //    if the cache has an entry for the id, just return a hash derived from it.
     //    if the type has not been seen yet, mark it with `CachedHash::Recursive` in the cache and proceed to `get_type_def_hash()`.
@@ -225,7 +257,6 @@ pub fn get_type_hash(
     // type_id ->  not contained           = We haven't seen the type yet.
     //         -> `CachedHash::Recursive`  = We have seen the type but hash calculation for it hasn't finished yet.
     //         -> `CachedHash::Hash(hash)` = Hash calculation for the type was completed.
-
     if let Some(cached_hash) = cache.get(&id) {
         return cached_hash.hash();
     }
@@ -233,7 +264,7 @@ pub fn get_type_hash(
     let ty = registry
         .resolve(id)
         .expect("Type ID provided by the metadata is registered; qed");
-    let type_hash = get_type_def_hash(registry, &ty.type_def, cache);
+    let type_hash = get_type_def_hash(registry, &ty.type_def, cache, precomputed);
     cache.insert(id, CachedHash::Hash(type_hash));
     type_hash
 }
@@ -242,14 +273,16 @@ pub fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
 ) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, CachedHash>::new();
-
     // Get the hashes of the extrinsic type.
-    let address_hash = get_type_hash(registry, extrinsic.address_ty, &mut cache);
+    let address_hash =
+        get_type_hash_with_precomputed(registry, extrinsic.address_ty, outer_enums_hashes);
     // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
-    let signature_hash = get_type_hash(registry, extrinsic.signature_ty, &mut cache);
-    let extra_hash = get_type_hash(registry, extrinsic.extra_ty, &mut cache);
+    let signature_hash =
+        get_type_hash_with_precomputed(registry, extrinsic.signature_ty, outer_enums_hashes);
+    let extra_hash =
+        get_type_hash_with_precomputed(registry, extrinsic.extra_ty, outer_enums_hashes);
 
     let mut bytes = concat_and_hash4(
         &address_hash,
@@ -262,8 +295,16 @@ fn get_extrinsic_hash(
         bytes = concat_and_hash4(
             &bytes,
             &hash(signed_extension.identifier.as_bytes()),
-            &get_type_hash(registry, signed_extension.extra_ty, &mut cache),
-            &get_type_hash(registry, signed_extension.additional_ty, &mut cache),
+            &get_type_hash_with_precomputed(
+                registry,
+                signed_extension.extra_ty,
+                outer_enums_hashes,
+            ),
+            &get_type_hash_with_precomputed(
+                registry,
+                signed_extension.additional_ty,
+                outer_enums_hashes,
+            ),
         )
     }
 
@@ -271,11 +312,12 @@ fn get_extrinsic_hash(
 }
 
 /// Obtain the hash representation of the `frame_metadata::v15::OuterEnums`.
+/// Also returns a HashMap containing the individual hashes of the 3 otuer enums.
 fn get_outer_enums_hash(
     registry: &PortableRegistry,
     enums: &OuterEnumsMetadata,
     only_these_variants: Option<&[&str]>,
-) -> [u8; HASH_LEN] {
+) -> ([u8; HASH_LEN], HashMap<u32, [u8; HASH_LEN]>) {
     /// Hash the provided enum type.
     fn get_enum_hash(
         registry: &PortableRegistry,
@@ -288,9 +330,15 @@ fn get_outer_enums_hash(
             .expect("Metadata should contain enum type in registry");
 
         if let TypeDef::Variant(variant) = &ty.ty.type_def {
-            get_type_def_variant_hash(registry, variant, only_these_variants, &mut HashMap::new())
+            get_type_def_variant_hash(
+                registry,
+                variant,
+                only_these_variants,
+                &mut HashMap::new(),
+                None,
+            )
         } else {
-            get_type_hash(registry, id, &mut HashMap::new())
+            get_type_hash(registry, id)
         }
     }
 
@@ -300,14 +348,21 @@ fn get_outer_enums_hash(
 
     let error_hash = get_enum_hash(registry, enums.error_enum_ty, only_these_variants);
 
-    concat_and_hash3(&call_hash, &event_hash, &error_hash)
+    let outer_enums_hash = concat_and_hash3(&call_hash, &event_hash, &error_hash);
+
+    let mut call_event_error = HashMap::new();
+    call_event_error.insert(enums.call_enum_ty, call_hash);
+    call_event_error.insert(enums.event_enum_ty, event_hash);
+    call_event_error.insert(enums.error_enum_ty, error_hash);
+
+    (outer_enums_hash, call_event_error)
 }
 
 /// Get the hash corresponding to a single storage entry.
 fn get_storage_entry_hash(
     registry: &PortableRegistry,
     entry: &StorageEntryMetadata,
-    cache: &mut HashMap<u32, CachedHash>,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
 ) -> [u8; HASH_LEN] {
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
@@ -317,9 +372,10 @@ fn get_storage_entry_hash(
     );
 
     match &entry.entry_type {
-        StorageEntryType::Plain(ty) => {
-            concat_and_hash2(&bytes, &get_type_hash(registry, *ty, cache))
-        }
+        StorageEntryType::Plain(ty) => concat_and_hash2(
+            &bytes,
+            &get_type_hash_with_precomputed(registry, *ty, outer_enums_hashes),
+        ),
         StorageEntryType::Map {
             hashers,
             key_ty,
@@ -331,8 +387,8 @@ fn get_storage_entry_hash(
             }
             concat_and_hash3(
                 &bytes,
-                &get_type_hash(registry, *key_ty, cache),
-                &get_type_hash(registry, *value_ty, cache),
+                &get_type_hash_with_precomputed(registry, *key_ty, outer_enums_hashes),
+                &get_type_hash_with_precomputed(registry, *value_ty, outer_enums_hashes),
             )
         }
     }
@@ -343,7 +399,7 @@ fn get_runtime_method_hash(
     registry: &PortableRegistry,
     trait_name: &str,
     method_metadata: &RuntimeApiMethodMetadata,
-    cache: &mut HashMap<u32, CachedHash>,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
 ) -> [u8; HASH_LEN] {
     // The trait name is part of the runtime API call that is being
     // generated for this method. Therefore the trait name is strongly
@@ -358,21 +414,23 @@ fn get_runtime_method_hash(
         bytes = concat_and_hash3(
             &bytes,
             &hash(input.name.as_bytes()),
-            &get_type_hash(registry, input.ty, cache),
+            &get_type_hash_with_precomputed(registry, input.ty, outer_enums_hashes),
         );
     }
 
     bytes = concat_and_hash2(
         &bytes,
-        &get_type_hash(registry, method_metadata.output_ty, cache),
+        &get_type_hash_with_precomputed(registry, method_metadata.output_ty, outer_enums_hashes),
     );
 
     bytes
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::new();
+pub fn get_runtime_trait_hash(
+    trait_metadata: RuntimeApiMetadata,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
+) -> [u8; HASH_LEN] {
     let trait_name = &*trait_metadata.inner.name;
     let method_bytes = trait_metadata
         .methods()
@@ -387,7 +445,7 @@ pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_L
                     trait_metadata.types,
                     trait_name,
                     method_metadata,
-                    &mut cache,
+                    outer_enums_hashes,
                 ),
             )
         });
@@ -395,12 +453,17 @@ pub fn get_runtime_trait_hash(trait_metadata: RuntimeApiMetadata) -> [u8; HASH_L
     concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
 }
 
-pub fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::new();
+fn get_custom_metadata_hash(
+    custom_metadata: &CustomMetadata,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
+) -> [u8; HASH_LEN] {
     custom_metadata
         .iter()
         .fold([0u8; HASH_LEN], |bytes, custom_value| {
-            xor(bytes, get_custom_value_hash(&custom_value, &mut cache))
+            xor(
+                bytes,
+                get_custom_value_hash(&custom_value, outer_enums_hashes),
+            )
         })
 }
 
@@ -410,7 +473,7 @@ pub fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> [u8; HASH_L
 /// only the name and bytes are used for hashing.
 pub fn get_custom_value_hash(
     custom_value: &CustomValueMetadata,
-    cache: &mut HashMap<u32, CachedHash>,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
 ) -> [u8; HASH_LEN] {
     let name_hash = hash(custom_value.name.as_bytes());
     if custom_value.types.resolve(custom_value.type_id()).is_none() {
@@ -418,7 +481,11 @@ pub fn get_custom_value_hash(
     } else {
         concat_and_hash2(
             &name_hash,
-            &get_type_hash(custom_value.types, custom_value.type_id(), cache),
+            &get_type_hash_with_precomputed(
+                custom_value.types,
+                custom_value.type_id(),
+                outer_enums_hashes,
+            ),
         )
     }
 }
@@ -427,7 +494,7 @@ pub fn get_custom_value_hash(
 pub fn get_storage_hash(pallet: &PalletMetadata, entry_name: &str) -> Option<[u8; HASH_LEN]> {
     let storage = pallet.storage()?;
     let entry = storage.entry_by_name(entry_name)?;
-    let hash = get_storage_entry_hash(pallet.types, entry, &mut HashMap::new());
+    let hash = get_storage_entry_hash(pallet.types, entry, &HashMap::new());
     Some(hash)
 }
 
@@ -436,7 +503,7 @@ pub fn get_constant_hash(pallet: &PalletMetadata, constant_name: &str) -> Option
     let constant = pallet.constant_by_name(constant_name)?;
 
     // We only need to check that the type of the constant asked for matches.
-    let bytes = get_type_hash(pallet.types, constant.ty, &mut HashMap::new());
+    let bytes = get_type_hash(pallet.types, constant.ty);
     Some(bytes)
 }
 
@@ -445,7 +512,7 @@ pub fn get_call_hash(pallet: &PalletMetadata, call_name: &str) -> Option<[u8; HA
     let call_variant = pallet.call_variant_by_name(call_name)?;
 
     // hash the specific variant representing the call we are interested in.
-    let hash = get_variant_hash(pallet.types, call_variant, &mut HashMap::new());
+    let hash = get_variant_hash(pallet.types, call_variant, &mut HashMap::new(), None);
     Some(hash)
 }
 
@@ -461,25 +528,27 @@ pub fn get_runtime_api_hash(
         runtime_apis.types,
         trait_name,
         method_metadata,
-        &mut HashMap::new(),
+        &HashMap::new(),
     ))
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
-pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
-    let mut cache = HashMap::<u32, CachedHash>::new();
+pub fn get_pallet_hash(
+    pallet: PalletMetadata,
+    outer_enums_hashes: &HashMap<u32, [u8; HASH_LEN]>,
+) -> [u8; HASH_LEN] {
     let registry = pallet.types;
 
     let call_bytes = match pallet.call_ty_id() {
-        Some(calls) => get_type_hash(registry, calls, &mut cache),
+        Some(calls) => get_type_hash_with_precomputed(registry, calls, outer_enums_hashes),
         None => [0u8; HASH_LEN],
     };
     let event_bytes = match pallet.event_ty_id() {
-        Some(event) => get_type_hash(registry, event, &mut cache),
+        Some(event) => get_type_hash_with_precomputed(registry, event, outer_enums_hashes),
         None => [0u8; HASH_LEN],
     };
     let error_bytes = match pallet.error_ty_id() {
-        Some(error) => get_type_hash(registry, error, &mut cache),
+        Some(error) => get_type_hash_with_precomputed(registry, error, outer_enums_hashes),
         None => [0u8; HASH_LEN],
     };
     let constant_bytes = pallet.constants().fold([0u8; HASH_LEN], |bytes, constant| {
@@ -487,7 +556,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
         // of (constantName, constantType) to make the order we see them irrelevant.
         let constant_hash = concat_and_hash2(
             &hash(constant.name.as_bytes()),
-            &get_type_hash(registry, constant.ty(), &mut cache),
+            &get_type_hash_with_precomputed(registry, constant.ty(), outer_enums_hashes),
         );
         xor(bytes, constant_hash)
     });
@@ -500,7 +569,10 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> [u8; HASH_LEN] {
                 .fold([0u8; HASH_LEN], |bytes, entry| {
                     // We don't care what order the storage entries occur in, so XOR them together
                     // to make the order irrelevant.
-                    xor(bytes, get_storage_entry_hash(registry, entry, &mut cache))
+                    xor(
+                        bytes,
+                        get_storage_entry_hash(registry, entry, outer_enums_hashes),
+                    )
                 });
             concat_and_hash2(&prefix_hash, &entries_hash)
         }
@@ -563,6 +635,14 @@ impl<'a> MetadataHasher<'a> {
     pub fn hash(&self) -> [u8; HASH_LEN] {
         let metadata = self.metadata;
 
+        // get the hash of outer enums, considering only `specific_pallets` (if any are set).
+        // if any of the typed that represent outer enums are encountered later, hashes from `outer_enum_hashes` can be substituted.
+        let (outer_enums_hash, outer_enum_hashes) = get_outer_enums_hash(
+            &metadata.types,
+            &metadata.outer_enums(),
+            self.specific_pallets.as_deref(),
+        );
+
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
             // If specific pallets are given, only include this pallet if it is in the specific pallets.
             let should_hash = self
@@ -573,7 +653,7 @@ impl<'a> MetadataHasher<'a> {
             // We don't care what order the pallets are seen in, so XOR their
             // hashes together to be order independent.
             if should_hash {
-                xor(bytes, get_pallet_hash(pallet))
+                xor(bytes, get_pallet_hash(pallet, &outer_enum_hashes))
             } else {
                 bytes
             }
@@ -591,24 +671,22 @@ impl<'a> MetadataHasher<'a> {
                 // We don't care what order the runtime APIs are seen in, so XOR their
                 // hashes together to be order independent.
                 if should_hash {
-                    xor(bytes, get_runtime_trait_hash(api))
+                    xor(bytes, get_runtime_trait_hash(api, &outer_enum_hashes))
                 } else {
                     bytes
                 }
             });
 
-        let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
-        let runtime_hash =
-            get_type_hash(&metadata.types, metadata.runtime_ty(), &mut HashMap::new());
-        let outer_enums_hash = get_outer_enums_hash(
+        let extrinsic_hash =
+            get_extrinsic_hash(&metadata.types, &metadata.extrinsic, &outer_enum_hashes);
+        let runtime_hash = get_type_hash_with_precomputed(
             &metadata.types,
-            &metadata.outer_enums(),
-            self.specific_pallets.as_deref(),
+            metadata.runtime_ty(),
+            &outer_enum_hashes,
         );
-
         let custom_values_hash = self
             .include_custom_values
-            .then(|| get_custom_metadata_hash(&metadata.custom()))
+            .then(|| get_custom_metadata_hash(&metadata.custom(), &outer_enum_hashes))
             .unwrap_or_default();
 
         concat_and_hash6(
@@ -850,9 +928,9 @@ mod tests {
 
         let mut cache = HashMap::new();
 
-        let a_hash = get_type_hash(&registry, a_type_id, &mut cache);
-        let a_hash2 = get_type_hash(&registry, a_type_id, &mut cache);
-        let b_hash = get_type_hash(&registry, b_type_id, &mut cache);
+        let a_hash = get_type_hash_recurse(&registry, a_type_id, &mut cache, None);
+        let a_hash2 = get_type_hash_recurse(&registry, a_type_id, &mut cache, None);
+        let b_hash = get_type_hash_recurse(&registry, b_type_id, &mut cache, None);
 
         let CachedHash::Hash(a_cache_hash) = cache[&a_type_id] else {
             panic!()
@@ -1079,5 +1157,145 @@ mod tests {
             to_hash(meta_type::<StructE1>()),
             to_hash(meta_type::<StructE2>())
         );
+    }
+
+    use frame_metadata::v15::{
+        PalletEventMetadata, PalletStorageMetadata, StorageEntryMetadata, StorageEntryModifier,
+    };
+
+    fn metadata_with_pallet_events() -> Metadata {
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct FirstEvent {
+            s: String,
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct SecondEvent {
+            n: u8,
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Events {
+            First(FirstEvent),
+            Second(SecondEvent),
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Errors {
+            First(DispatchError),
+            Second(DispatchError),
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Calls {
+            First(u8),
+            Second(u8),
+        }
+
+        #[allow(dead_code)]
+        enum DispatchError {
+            A,
+            B,
+            C,
+        }
+
+        impl scale_info::TypeInfo for DispatchError {
+            type Identity = DispatchError;
+
+            fn type_info() -> scale_info::Type {
+                scale_info::Type {
+                    path: scale_info::Path {
+                        segments: vec!["sp_runtime", "DispatchError"],
+                    },
+                    type_params: vec![],
+                    type_def: TypeDef::Variant(TypeDefVariant { variants: vec![] }),
+                    docs: vec![],
+                }
+            }
+        }
+
+        let pallets = vec![
+            v15::PalletMetadata {
+                name: "First",
+                index: 0,
+                calls: Some(v15::PalletCallMetadata {
+                    ty: meta_type::<u8>(),
+                }),
+                storage: Some(PalletStorageMetadata {
+                    prefix: "___",
+                    entries: vec![StorageEntryMetadata {
+                        name: "Hello",
+                        modifier: StorageEntryModifier::Optional,
+                        // Note: This is the important part here:
+                        // The Events type will be trimmed down and this trimming needs to be reflected
+                        // when the hash of this storage item is computed.
+                        ty: frame_metadata::v14::StorageEntryType::Plain(meta_type::<Vec<Events>>()),
+                        default: vec![],
+                        docs: vec![],
+                    }],
+                }),
+                event: Some(PalletEventMetadata {
+                    ty: meta_type::<FirstEvent>(),
+                }),
+                constants: vec![],
+                error: None,
+                docs: vec![],
+            },
+            v15::PalletMetadata {
+                name: "Second",
+                index: 1,
+                calls: Some(v15::PalletCallMetadata {
+                    ty: meta_type::<u64>(),
+                }),
+                storage: None,
+                event: Some(PalletEventMetadata {
+                    ty: meta_type::<SecondEvent>(),
+                }),
+                constants: vec![],
+                error: None,
+                docs: vec![],
+            },
+        ];
+
+        v15::RuntimeMetadataV15::new(
+            pallets,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+            vec![],
+            v15::OuterEnums {
+                call_enum_ty: meta_type::<Calls>(),
+                event_enum_ty: meta_type::<Events>(),
+                error_enum_ty: meta_type::<Errors>(),
+            },
+            v15::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata")
+    }
+
+    #[test]
+    fn hash_comparison_trimmed_metadata() {
+        // trim the metadata:
+        let metadata = metadata_with_pallet_events();
+        let trimmed_metadata = {
+            let mut m = metadata.clone();
+            m.retain(|e| e == "First", |_| true);
+            m
+        };
+
+        // test that the hashes are the same:
+        let hash = MetadataHasher::new(&metadata)
+            .only_these_pallets(&["First"])
+            .hash();
+        let hash_trimmed = MetadataHasher::new(&trimmed_metadata).hash();
+
+        assert_eq!(hash, hash_trimmed);
     }
 }
