@@ -337,6 +337,7 @@ const STORAGE_PAGE_SIZE: u32 = 32;
 
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
+#[allow(clippy::type_complexity)]
 pub struct StorageFetchDescendantKeysStream<T: Config> {
     methods: LegacyRpcMethods<T>,
     key: Vec<u8>,
@@ -408,6 +409,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
 }
 
 /// This provides a stream of values given some stream of keys.
+#[allow(clippy::type_complexity)]
 pub struct StorageFetchDescendantValuesStream<T: Config> {
     // Stream of keys.
     keys: StorageFetchDescendantKeysStream<T>,

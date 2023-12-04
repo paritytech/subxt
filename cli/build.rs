@@ -1,3 +1,5 @@
+//! Build script for the CLI.
+
 use std::{borrow::Cow, process::Command};
 
 fn main() {

@@ -16,3 +16,6 @@ which = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls"] }
 hex = { workspace = true }
 codec = { workspace = true }
+
+[package.metadata.cargo-machete]
+ignored = ["subxt"]

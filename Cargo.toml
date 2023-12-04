@@ -30,11 +30,30 @@ resolver = "2"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 version = "0.32.1"
-rust-version = "1.70.0"
+rust-version = "1.74.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
+
+[workspace.lints.rust]
+bad_style = "deny"
+improper_ctypes = "deny"
+missing_docs = "deny"
+non_shorthand_field_patterns = "deny"
+no_mangle_generic_items = "deny"
+overflowing_literals = "deny"
+path_statements = "deny"
+patterns_in_fns_without_body = "deny"
+unconditional_recursion = "deny"
+unused_allocation = "deny"
+unused_comparisons = "deny"
+unused_parens = "deny"
+unused_extern_crates = "deny"
+
+[workspace.lints.clippy]
+type_complexity = "allow"
+all = "deny"
 
 [workspace.dependencies]
 async-trait = "0.1.74"
@@ -124,3 +143,12 @@ secp256k1 = "0.28.0"
 secrecy = "0.8.0"
 sha2 = "0.10.8"
 zeroize = { version = "1", default-features = false }
+
+[profile.dev.package.smoldot-light]
+opt-level = 2
+[profile.test.package.smoldot-light]
+opt-level = 2
+[profile.dev.package.smoldot]
+opt-level = 2
+[profile.test.package.smoldot]
+opt-level = 2

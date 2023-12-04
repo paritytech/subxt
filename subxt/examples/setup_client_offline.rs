@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::ext::codec::Decode;
 use subxt::metadata::Metadata;
 use subxt::utils::H256;

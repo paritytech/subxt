@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::backend::{legacy::LegacyRpcMethods, rpc::RpcClient};
 use subxt::config::DefaultExtrinsicParamsBuilder as Params;
 use subxt::{OnlineClient, PolkadotConfig};

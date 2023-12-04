@@ -10,14 +10,6 @@
 //!
 //! This leverages the smoldot crate to connect to the chain.
 
-#![deny(
-    missing_docs,
-    unused_crate_dependencies,
-    unused_extern_crates,
-    clippy::all
-)]
-#![allow(clippy::type_complexity)]
-
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
