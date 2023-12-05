@@ -9,7 +9,6 @@ use super::wasm_socket::WasmSocket;
 
 use core::time::Duration;
 use futures_util::{future, FutureExt};
-use smoldot::libp2p::with_buffers;
 
 pub fn now_from_unix_epoch() -> Duration {
     instant::SystemTime::now()
@@ -33,4 +32,11 @@ pub fn sleep(duration: Duration) -> Delay {
 
 /// Implementation detail of a stream from the `SubxtPlatform`.
 #[pin_project::pin_project]
-pub struct Stream(#[pin] pub with_buffers::WithBuffers<WasmSocket>);
+pub struct Stream(
+    #[pin]
+    pub  smoldot::libp2p::with_buffers::WithBuffers<
+        future::BoxFuture<'static, Result<WasmSocket, std::io::Error>>,
+        WasmSocket,
+        Instant,
+    >,
+);
