@@ -23,7 +23,7 @@ use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use std::collections::HashMap;
 use std::sync::Arc;
 use utils::variant_index::VariantIndex;
-use utils::{ordered_map::OrderedMap, validation::OuterEnumHashes};
+use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
 
 type ArcStr = Arc<str>;
 
