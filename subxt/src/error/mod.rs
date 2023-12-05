@@ -115,6 +115,9 @@ pub enum RpcError {
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
+    /// The requested URL is insecure.
+    #[error("RPC error: insecure URL: {0}")]
+    InsecureUrl(String),
 }
 
 impl RpcError {

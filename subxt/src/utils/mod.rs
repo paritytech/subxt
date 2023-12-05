@@ -18,6 +18,7 @@ use derivative::Derivative;
 
 pub use account_id::AccountId32;
 pub use era::Era;
+use jsonrpsee::client_transport::ws::Url;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
@@ -27,6 +28,8 @@ pub use wrapper_opaque::WrapperKeepOpaque;
 // Used in codegen
 #[doc(hidden)]
 pub use primitive_types::{H160, H256, H512};
+
+use crate::{error::RpcError, Error};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
@@ -45,6 +48,21 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
     let cursor = &mut &*bytes;
     let val = <Compact<u64>>::decode(cursor)?;
     Ok((val.0, *cursor))
+}
+
+/// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
+///
+/// Returns an error if the the string could not be parsed into a URL.
+pub fn url_is_secure(url: &str) -> Result<bool, Error> {
+    let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
+
+    let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
+    let is_localhost = url
+        .host_str()
+        .map(|host| host == "localhost" || host == "127.0.0.1")
+        .unwrap_or(false);
+
+    Ok(secure_scheme || is_localhost)
 }
 
 /// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine

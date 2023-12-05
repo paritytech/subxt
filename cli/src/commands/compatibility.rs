@@ -11,6 +11,8 @@ use std::collections::HashMap;
 use subxt_codegen::fetch_metadata::MetadataVersion;
 use subxt_metadata::Metadata;
 
+use crate::utils::validate_url_security;
+
 /// Verify metadata compatibility between substrate nodes.
 #[derive(Debug, ClapParser)]
 pub struct Opts {
@@ -36,9 +38,16 @@ pub struct Opts {
     /// Defaults to latest.
     #[clap(long = "version", default_value = "latest")]
     version: MetadataVersion,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
+    for file_or_url in opts.nodes.iter() {
+        validate_url_security(Some(file_or_url), opts.allow_insecure)?;
+    }
+
     match opts.pallet {
         Some(pallet) => {
             handle_pallet_metadata(opts.nodes.as_slice(), pallet.as_str(), opts.version, output)

@@ -5,7 +5,7 @@ use frame_metadata::RuntimeMetadataPrefixed;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::utils::FileOrUrl;
+use crate::utils::{validate_url_security, FileOrUrl};
 use color_eyre::owo_colors::OwoColorize;
 
 use scale_info::form::PortableForm;
@@ -29,9 +29,15 @@ pub struct Opts {
     metadata_or_url_1: FileOrUrl,
     /// metadata file or node URL
     metadata_or_url_2: FileOrUrl,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
+    validate_url_security(opts.metadata_or_url_1.url.as_ref(), opts.allow_insecure)?;
+    validate_url_security(opts.metadata_or_url_2.url.as_ref(), opts.allow_insecure)?;
+
     let (entry_1_metadata, entry_2_metadata) = get_metadata(&opts).await?;
 
     let metadata_diff = MetadataDiff::construct(&entry_1_metadata, &entry_2_metadata);

@@ -4,6 +4,8 @@
 
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
+use crate::error::RpcError;
+use crate::utils::url_is_secure;
 use crate::{
     backend::{
         legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
@@ -66,6 +68,15 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+        if !url_is_secure(url.as_ref())? {
+            return Err(Error::Rpc(RpcError::InsecureUrl(url.as_ref().into())));
+        }
+        OnlineClient::from_insecure_url(url).await
+    }
+
+    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    pub async fn from_insecure_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
         let client = RpcClient::from_url(url).await?;
         let backend = LegacyBackend::new(client);
         OnlineClient::from_backend(Arc::new(backend)).await
