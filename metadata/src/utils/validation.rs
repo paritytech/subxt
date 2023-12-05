@@ -660,7 +660,7 @@ impl<'a> MetadataHasher<'a> {
 
         // Get the hashes of outer enums, considering only `specific_pallets` (if any are set).
         // If any of the typed that represent outer enums are encountered later, hashes from `top_level_enum_hashes` can be substituted.
-        let outer_enum_hashes = OuterEnumHashes::new(&metadata, self.specific_pallets.as_deref());
+        let outer_enum_hashes = OuterEnumHashes::new(metadata, self.specific_pallets.as_deref());
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
             // If specific pallets are given, only include this pallet if it is in the specific pallets.
