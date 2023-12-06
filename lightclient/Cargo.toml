@@ -36,6 +36,7 @@ web = [
     "getrandom/js",
 
     "smoldot",
+    "smoldot/std",
     "smoldot-light",
     "tokio-stream",
     "tokio/sync",
