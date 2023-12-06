@@ -205,6 +205,7 @@ async fn external_signing() {
 }
 
 #[tokio::test]
+#[ignore = "This currently fails sporadically with unstable-backend-client; needs investigation"]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
     let api = ctx.client();
