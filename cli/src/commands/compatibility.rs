@@ -44,8 +44,8 @@ pub struct Opts {
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
-    for file_or_url in opts.nodes.iter() {
-        validate_url_security(Some(file_or_url), opts.allow_insecure)?;
+    for url in opts.nodes.iter() {
+        validate_url_security(Some(url), opts.allow_insecure)?;
     }
 
     match opts.pallet {

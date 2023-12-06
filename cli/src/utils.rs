@@ -111,11 +111,8 @@ impl FromStr for FileOrUrl {
     }
 }
 
-pub fn validate_url_security(
-    file_or_url: Option<&Url>,
-    allow_insecure: bool,
-) -> color_eyre::Result<()> {
-    let Some(url) = file_or_url else {
+pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_eyre::Result<()> {
+    let Some(url) = url else {
         return Ok(());
     };
     match subxt::utils::url_is_secure(url.as_str()) {
