@@ -204,8 +204,9 @@ async fn external_signing() {
         .unwrap();
 }
 
+// TODO: Investigate and fix this test failure when using the UnstableBackend.
+#[cfg(not(feature = "unstable-backend-client"))]
 #[tokio::test]
-#[ignore = "This currently fails sporadically with unstable-backend-client; needs investigation"]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
     let api = ctx.client();
