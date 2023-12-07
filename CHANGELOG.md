@@ -6,11 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.33.0] - 2023-12-06
 
-This release makes a bunch of small QoL improvements and changes. let's look at the main ones.
+This release makes a bunch of small QoL improvements and changes. Let's look at the main ones.
 
 ### Add support for configuring multiple chains ([#1238](https://github.com/paritytech/subxt/pull/1238))
 
-The light client support previously provided a high level interface for connecting to single chains (ie relay chains). This PR exposes a "low level" interface which allows Smoldot (the light client implementation we use) to be configured somewhat more arbitrarily, and then converted into a valid subxt `OnlineClient` to be used.
+The light client support previously provided a high level interface for connecting to single chains (ie relay chains). This PR exposes a "low level" interface which allows smoldot (the light client implementation we use) to be configured somewhat more arbitrarily, and then converted into a valid subxt `OnlineClient` to be used.
 
 See [this example](https://github.com/paritytech/subxt/blob/418c3afc923cacd17501f374fdee0d8f588e14fd/subxt/examples/light_client_parachains.rs) for more on how to do this.
 
@@ -74,7 +74,7 @@ See the API docs for more.
 
 Still on the topic of signed extensions, the `ChargeAssetTxPayment` extension was previously not able to be used with a generic AssetId, which prohibited it from being used on the Asset Hub (which uses a `MultiLocation` instead). To address this, we added an `AssetId` type to our `subxt::Config`, which can now be configured.
 
-One example of doing that [is here](https://github.com/paritytech/subxt/blob/master/subxt/examples/setup_config_custom.rs).
+One example of doing that [can be found here](https://github.com/paritytech/subxt/blob/master/subxt/examples/setup_config_custom.rs).
 
 This example uses a generated `MultiLocation` type to be used as the `AssetId`. Currently it requires a rather hideous set of manual clones like so:
 
@@ -137,7 +137,7 @@ tx.wait_for_in_block()
   .await?;
 ```
 
-The reason for this is that the block announced in the transaction status may not have been "pinned" yet in the new APIs. In the old APIs, errors would occasionally be encountered because the block announced may have been pruned by the time we ask for details for it. Overall; having an "unrealiable" higher level API felt like a potential foot gun.
+The reason for this is that the block announced in the transaction status may not have been "pinned" yet in the new APIs. In the old APIs, errors would occasionally be encountered because the block announced may have been pruned by the time we ask for details for it. Overall; having an "unreliable" higher level API felt like a potential foot gun.
 
 That said, you can still achieve the same via the lower level APIs like so:
 
