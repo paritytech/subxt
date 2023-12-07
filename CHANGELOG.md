@@ -178,6 +178,7 @@ That sums up the most significant changes. A summary of all of the relevant chan
 
 - CLI: Add command to fetch chainSpec and optimize its size ([#1278](https://github.com/paritytech/subxt/pull/1278))
 - Add legacy RPC usage example ([#1279](https://github.com/paritytech/subxt/pull/1279))
+- impl RpcClientT for `Arc<T>` and `Box<T>` ([#1277](https://github.com/paritytech/subxt/pull/1277))
 - RPC: Implement legacy RPC system_account_next_index ([#1250](https://github.com/paritytech/subxt/pull/1250))
 - Lightclient: Add support for configuring multiple chains ([#1238](https://github.com/paritytech/subxt/pull/1238))
 - Extrinsics: Allow static decoding of signed extensions ([#1235](https://github.com/paritytech/subxt/pull/1235))
@@ -190,10 +191,8 @@ That sums up the most significant changes. A summary of all of the relevant chan
 - Lightclient: Update smoldot to `0.14.0` and smoldot-light to `0.12.0` ([#1307](https://github.com/paritytech/subxt/pull/1307))
 - Cargo: Switch to workspace lints ([#1299](https://github.com/paritytech/subxt/pull/1299))
 - Update substrate-* and signer-related dependencies ([#1297](https://github.com/paritytech/subxt/pull/1297))
-- Fix lightclient WASM tests ([#1287](https://github.com/paritytech/subxt/pull/1287))
 - Change SignedExtension matching logic and remove SkipCheckIfFeeless bits ([#1283](https://github.com/paritytech/subxt/pull/1283))
 - Update the README with the new location of node-cli ([#1282](https://github.com/paritytech/subxt/pull/1282))
-- impl RpcClientT for `Arc<T>` and `Box<T>` ([#1277](https://github.com/paritytech/subxt/pull/1277))
 - Generalize `substrate-compat` impls to accept any valid hasher/header impl ([#1265](https://github.com/paritytech/subxt/pull/1265))
 - Extrinsics: Remove `wait_for_in_block` helper method ([#1237](https://github.com/paritytech/subxt/pull/1237))
 - Subxt-codegen: Tidy crate interface ([#1225](https://github.com/paritytech/subxt/pull/1225))
@@ -207,9 +206,7 @@ That sums up the most significant changes. A summary of all of the relevant chan
 - Trimmed metadata hash comparison fails in `is_codegen_valid_for`  ([#1306](https://github.com/paritytech/subxt/pull/1306))
 - Sync tx submission with chainHead_follow ([#1305](https://github.com/paritytech/subxt/pull/1305))
 - Storage: Fix partial key storage iteration ([#1298](https://github.com/paritytech/subxt/pull/1298))
-- CI: Install rustup component for building substrate ([#1295](https://github.com/paritytech/subxt/pull/1295))
 - Lightclient: Fix wasm socket closure called after being dropped ([#1289](https://github.com/paritytech/subxt/pull/1289))
-- Tests: Wait for transaction to be in a finalized block ([#1236](https://github.com/paritytech/subxt/pull/1236))
 - Fix parachain example ([#1228](https://github.com/paritytech/subxt/pull/1228))
 
 ## [0.33.0] - 2023-10-05
