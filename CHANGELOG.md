@@ -209,7 +209,7 @@ That sums up the most significant changes. A summary of all of the relevant chan
 - Lightclient: Fix wasm socket closure called after being dropped ([#1289](https://github.com/paritytech/subxt/pull/1289))
 - Fix parachain example ([#1228](https://github.com/paritytech/subxt/pull/1228))
 
-## [0.33.0] - 2023-10-05
+## [0.32.1] - 2023-10-05
 
 This is a patch release, mainly to deploy the fix [#1191](https://github.com/paritytech/subxt/pull/1191), which resolves an issue around codegen when runtime API definitions have an argument name "_".
 
