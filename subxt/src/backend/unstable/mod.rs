@@ -494,6 +494,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                             }
                         }
                         SeenBlock::Finalized(block_refs) => {
+            println!("Finalized blocks: {:?}", block_refs);
                             for block_ref in block_refs {
                                 seen_blocks.insert(
                                     block_ref.hash(),
@@ -517,6 +518,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         };
                         return Poll::Ready(Some(Ok(ev)));
                     } else {
+            println!("Tx not seen in finalized blocks; clearing");
                         // Keep waiting for more finalized blocks until we find it (get rid of any other block refs
                         // now, since none of them were what we were looking for anyway).
                         seen_blocks.clear();
@@ -534,13 +536,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
-
+println!("Tx event: {ev:?}");
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
                     rpc_methods::TransactionStatus::Finalized { block } => {
                         // We'll wait until we have seen this hash, to try to guarantee
                         // that when we return this event, the corresponding block is
                         // pinned and accessible.
+                        println!("tx finalised in block {:?}", block.hash);
                         finalized_hash = Some(block.hash);
                         continue;
                     }
