@@ -1412,7 +1412,7 @@ dependencies = [
 
 [[package]]
 name = "object"
-version = "0.32.1"
+version = "0.33.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9cf5f9dd3933bd50a9e1f149ec995f39ae2c496d31fd772c1fd45ebc27e902b0"
 dependencies = [
@@ -2230,7 +2230,7 @@ checksum = "734676eb262c623cec13c3155096e08d1f8f29adce39ba17948b18dad1e54142"
 
 [[package]]
 name = "subxt"
-version = "0.32.1"
+version = "0.33.0"
 dependencies = [
  "async-trait",
  "base58",
@@ -2263,7 +2263,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.32.1"
+version = "0.33.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -2282,7 +2282,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.32.1"
+version = "0.33.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2307,7 +2307,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.32.1"
+version = "0.33.0"
 dependencies = [
  "darling 0.20.3",
  "parity-scale-codec",
@@ -2318,7 +2318,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.32.1"
+version = "0.33.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",

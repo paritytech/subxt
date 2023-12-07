@@ -18,10 +18,10 @@ members = [
 # exclusive feature flags and thus can't compile with the
 # workspace:
 exclude = [
-    "testing/wasm-rpc-tests", 
-    "testing/wasm-lightclient-tests", 
-    "signer/wasm-tests", 
-    "examples/wasm-example", 
+    "testing/wasm-rpc-tests",
+    "testing/wasm-lightclient-tests",
+    "signer/wasm-tests",
+    "examples/wasm-example",
     "examples/parachain-example"
 ]
 resolver = "2"
@@ -29,7 +29,7 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-version = "0.32.1"
+version = "0.33.0"
 rust-version = "1.74.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
@@ -125,12 +125,12 @@ sp-runtime = "29.0.0"
 sp-keyring = "29.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.32.1", path = "subxt", default-features = false }
-subxt-macro = { version = "0.32.1", path = "macro" }
-subxt-metadata = { version = "0.32.1", path = "metadata" }
-subxt-codegen = { version = "0.32.1", path = "codegen" }
-subxt-signer = { version = "0.32.1", path = "signer" }
-subxt-lightclient = { version = "0.32.1", path = "lightclient", default-features = false }
+subxt = { version = "0.33.0", path = "subxt", default-features = false }
+subxt-macro = { version = "0.33.0", path = "macro" }
+subxt-metadata = { version = "0.33.0", path = "metadata" }
+subxt-codegen = { version = "0.33.0", path = "codegen" }
+subxt-signer = { version = "0.33.0", path = "signer" }
+subxt-lightclient = { version = "0.33.0", path = "lightclient", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 
