@@ -35,7 +35,6 @@ impl TypeDefGen {
         type_gen: &TypeGenerator,
     ) -> Result<Self, CodegenError> {
         let derives = type_gen.type_derives(ty)?;
-        let types_mod_ident = type_gen.types_mod_ident();
         let crate_path = type_gen.crate_path();
         let should_gen_docs = type_gen.should_gen_docs();
 
@@ -71,8 +70,6 @@ impl TypeDefGen {
                 let docs = should_gen_docs.then_some(&*ty.docs).unwrap_or_default();
                 let composite_def = CompositeDef::struct_def(
                     ty,
-                    types_mod_ident,
-                    &type_name,
                     &type_name,
                     type_params.clone(),
                     fields,
@@ -80,7 +77,7 @@ impl TypeDefGen {
                     type_gen,
                     docs,
                     crate_path,
-                    false,
+                    None,
                 )?;
                 TypeDefGenKind::Struct(composite_def)
             }

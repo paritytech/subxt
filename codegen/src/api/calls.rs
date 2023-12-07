@@ -42,7 +42,7 @@ pub fn generate_calls(
 
     let result = struct_defs
         .iter_mut()
-        .map(|(variant_name, struct_def)| {
+        .map(|(variant_name, struct_def, aliases)| {
             let fn_name = format_ident!("{}", variant_name.to_snake_case());
 
             let result: Vec<_> = match struct_def.fields {
@@ -87,6 +87,8 @@ pub fn generate_calls(
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
+
+                #aliases
 
                 impl #crate_path::blocks::StaticExtrinsic for #struct_name {
                     const PALLET: &'static str = #pallet_name;
