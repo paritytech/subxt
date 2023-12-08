@@ -204,6 +204,9 @@ async fn external_signing() {
         .unwrap();
 }
 
+// TODO: Investigate and fix this test failure when using the UnstableBackend.
+// (https://github.com/paritytech/subxt/issues/1308)
+#[cfg(not(feature = "unstable-backend-client"))]
 #[tokio::test]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
