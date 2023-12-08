@@ -31,44 +31,6 @@ impl CompositeDef {
     ///
     /// This is useful for generating structures from call and enum metadata variants;
     /// and from all the runtime types of the metadata.
-    ///
-    /// # Note
-    ///
-    /// ## Alias Generation
-    ///
-    /// This method will generate alias types for each field of the struct when the
-    /// `generate_alias` parameter is true and the structure has any fields.
-    ///
-    /// The runtime types that are placed under `pub mod runtime_types` may contain
-    /// generics that are not resolved yet. Therefore, this field should be disabled
-    /// for runtime types.
-    ///
-    /// ### Example with alias generation
-    ///
-    /// This is extracted from the `system::calls` module.
-    ///
-    /// ```ignore
-    /// pub struct RemarkWithEvent {
-    ///     // Note that this type is aliased.
-    ///     pub remark: remark_with_event::Remark,
-    /// }
-    ///
-    /// pub mod remark_with_event {
-    ///     use super::runtime_types;
-    ///     pub type Remark = ::std::vec::Vec<::core::primitive::u8>;
-    /// }
-    /// ```
-    ///
-    /// ### Example without alias generation
-    ///
-    /// This is extracted from `runtime_types::pallet_referenda` module.
-    ///
-    /// ```ignore
-    /// pub struct DecidingStatus<_0> {
-    ///     pub since: _0,
-    ///     pub confirming: ::core::option::Option<_0>,
-    /// }
-    /// ```
     #[allow(clippy::too_many_arguments)]
     pub fn struct_def(
         ty: &Type<PortableForm>,
