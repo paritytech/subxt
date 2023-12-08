@@ -59,7 +59,7 @@ fn generate_runtime_api(
         // From the method metadata generate a structure that holds
         // all parameter types. This structure is used with metadata
         // to encode parameters to the call via `encode_as_fields_to`.
-        let derives = type_gen.default_derives();
+        let derives = type_gen.settings().derives.default_derives();
         let struct_name = format_ident!("{}", method.name().to_upper_camel_case());
         let struct_params = params.clone();
         let struct_input = quote!(

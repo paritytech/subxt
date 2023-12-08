@@ -3502,12 +3502,11 @@ dependencies = [
 [[package]]
 name = "scale-typegen"
 version = "0.0.1"
-source = "git+https://github.com/paritytech/scale-typegen?branch=recursive-derives#361fa5b6cb65904cdd7d6c85dfbd9e19aeae2e2e"
+source = "git+https://github.com/paritytech/scale-typegen?branch=tadeohepperle/validate-codegen#1233641f15851087978518572bc3e1b05d19a047"
 dependencies = [
  "proc-macro2",
  "quote",
  "scale-info",
- "smallvec",
  "syn 2.0.39",
  "thiserror",
 ]

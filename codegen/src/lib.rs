@@ -239,19 +239,20 @@ impl CodegenBuilder {
             DerivesRegistry::new()
         };
 
-        derives_registry.extend_for_all(self.extra_global_derives, self.extra_global_attributes);
+        derives_registry.add_derives_for_all(self.extra_global_derives);
+        derives_registry.add_attributes_for_all(self.extra_global_attributes);
 
         for (ty, derives) in self.derives_for_type {
-            derives_registry.extend_for_type(ty, derives, vec![], false);
+            derives_registry.add_derives_for(ty, derives, false);
         }
         for (ty, derives) in self.derives_for_type_recursive {
-            derives_registry.extend_for_type(ty, derives, vec![], true);
+            derives_registry.add_derives_for(ty, derives, true);
         }
         for (ty, attributes) in self.attributes_for_type {
-            derives_registry.extend_for_type(ty, vec![], attributes, false);
+            derives_registry.add_attributes_for(ty, attributes, false);
         }
         for (ty, attributes) in self.attributes_for_type_recursive {
-            derives_registry.extend_for_type(ty, vec![], attributes, true);
+            derives_registry.add_attributes_for(ty, attributes, true);
         }
 
         let mut type_substitutes: TypeSubstitutes = if self.use_default_substitutions {
@@ -337,7 +338,8 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
     ];
 
     let mut derives_registry = DerivesRegistry::new();
-    derives_registry.extend_for_all(derives, attributes);
+    derives_registry.add_derives_for_all(derives);
+    derives_registry.add_attributes_for_all(attributes);
     derives_registry
 }
 
