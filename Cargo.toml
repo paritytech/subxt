@@ -75,7 +75,7 @@ trybuild = "1.0.85"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "4.4.2"
-scale-typegen-description = { git = "https://github.com/paritytech/scale-typegen", branch = "recursive-derives" }
+scale-typegen-description = { git = "https://github.com/paritytech/scale-typegen", branch = "tadeohepperle/validate-codegen" }
 
 # Light client support:
 smoldot = { version = "0.12.0", default-features = false }
