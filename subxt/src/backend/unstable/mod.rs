@@ -474,9 +474,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // with chainHead_follow.
         let mut finalized_hash: Option<T::Hash> = None;
 
+        let now = std::time::Instant::now();
+        let mut mem_log = vec![];
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
+                if now.elapsed().as_secs() > 120 {
+                    println!("Log stream: {:?}", mem_log);
+                    panic!("{:?}", mem_log);
+                }
+
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
                 if done {
                     return Poll::Ready(None);
@@ -534,6 +542,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
+
+                mem_log.push((now.elapsed(), ev.clone()));
 
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
