@@ -49,4 +49,4 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: nextest
-                  args: run --workspace --features unstable-backend-client
+                  args: run --workspace --features unstable-backend-client --no-capture
