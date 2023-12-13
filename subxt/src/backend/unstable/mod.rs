@@ -476,13 +476,15 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         let now = std::time::Instant::now();
         let mut mem_log = vec![];
+        let mut seen_mem_log = vec![];
 
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
                 if now.elapsed().as_secs() > 120 {
-                    println!("Log stream: {:?}", mem_log);
-                    panic!("{:?}", mem_log);
+                    println!("MemLog: {:#?}", mem_log);
+                    println!("SeenBlocksLog: {:#?}", seen_mem_log);
+                    panic!("{:#?} {:#?}", mem_log, seen_mem_log);
                 }
 
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
@@ -492,6 +494,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
                 // Make a note of new or finalized blocks that have come in since we started the TX.
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
+                    let when = now.elapsed();
+                    let mut blocks = vec![];
+                    match &seen_block {
+                        SeenBlock::New(block_ref) => {
+                            blocks.push((block_ref.hash(), "new"));
+                        }
+                        SeenBlock::Finalized(block_refs) => {
+                            for block_ref in block_refs {
+                                blocks.push((block_ref.hash(), "finalized"));
+                            }
+                        }
+                    };
+                    seen_mem_log.push((when, finalized_hash, blocks));
+
                     match seen_block {
                         SeenBlock::New(block_ref) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
