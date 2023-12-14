@@ -437,10 +437,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
+        #[derive(Debug)]
         enum SeenBlock<Ref> {
             New(Ref),
             Finalized(Vec<Ref>),
         }
+        #[derive(Debug)]
         enum SeenBlockMarker {
             New,
             Finalized,
