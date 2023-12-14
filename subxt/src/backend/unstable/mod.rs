@@ -451,6 +451,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         static mut FIN_BLOCK: Option<String> = None;
         unsafe { FIN_BLOCK = None };
 
+        static mut PRUNED: Option<String> = None;
+        unsafe { PRUNED = None };
+
         // First, subscribe to all new and finalized block refs.
         // - we subscribe to new refs so that when we see `BestChainBlockIncluded`, we
         //   can try to return a block ref for the best block.
@@ -466,7 +469,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     None
                 }
                 FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
-                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
+                FollowEvent::Finalized(ev) => {
+                    unsafe {
+                        PRUNED = Some(format!(" pruned {:?} {:?}", PRUNED, ev.pruned_block_hashes));
+                    }
+
+                    Some(SeenBlock::Finalized(ev.finalized_block_hashes))
+                }
                 _ => None,
             })
         });
@@ -493,6 +502,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             loop {
                 if now.elapsed().as_secs() > 120 {
                     println!("Fin block {:?}", unsafe { &FIN_BLOCK });
+                    println!("Pruned block {:?}", unsafe { &PRUNED });
                     println!("MemLog: {:#?}", mem_log);
                     println!("SeenBlocksLog: {:#?}", seen_blocks);
 
