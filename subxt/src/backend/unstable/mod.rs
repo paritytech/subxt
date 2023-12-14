@@ -448,6 +448,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             Finalized,
         }
 
+        static mut FIN_BLOCK: Option<String> = None;
+        unsafe { FIN_BLOCK = None };
+
         // First, subscribe to all new and finalized block refs.
         // - we subscribe to new refs so that when we see `BestChainBlockIncluded`, we
         //   can try to return a block ref for the best block.
@@ -456,6 +459,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         //   reported from chainHead_follow already.
         let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
             std::future::ready(match ev {
+                FollowEvent::Initialized(ev) => {
+                    unsafe {
+                        FIN_BLOCK = Some(format!("{:?}", ev.finalized_block_hash));
+                    }
+                    None
+                }
                 FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
                 FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
                 _ => None,
@@ -483,8 +492,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
                 if now.elapsed().as_secs() > 120 {
+                    println!("Fin block {:?}", unsafe { &FIN_BLOCK });
                     println!("MemLog: {:#?}", mem_log);
                     println!("SeenBlocksLog: {:#?}", seen_blocks);
+
                     panic!("{:#?} {:#?}", mem_log, seen_blocks);
                 }
 
