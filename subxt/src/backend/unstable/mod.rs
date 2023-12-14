@@ -530,7 +530,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     } else {
                         // Keep waiting for more finalized blocks until we find it (get rid of any other block refs
                         // now, since none of them were what we were looking for anyway).
-                        seen_blocks.clear();
+                        // seen_blocks.clear();
                         continue;
                     }
                 }
