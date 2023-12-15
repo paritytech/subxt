@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
+use crate::config::Header;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{
@@ -437,17 +438,13 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let latest_block_ref = match self.client.backend().latest_finalized_block_ref().await {
-            Ok(block_ref) => block_ref,
-            Err(e) => return Some(Err(e)),
+        let at = match wait_for_runtime_upgrade(&self.client, &runtime_version).await {
+            Some(Ok(at)) => at,
+            Some(Err(err)) => return Some(Err(err)),
+            None => return None,
         };
 
-        let metadata = match OnlineClient::fetch_metadata(
-            self.client.backend(),
-            latest_block_ref.hash(),
-        )
-        .await
-        {
+        let metadata = match OnlineClient::fetch_metadata(self.client.backend(), at.hash()).await {
             Ok(metadata) => metadata,
             Err(err) => return Some(Err(err)),
         };
@@ -483,4 +480,50 @@ impl Update {
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
     }
+}
+
+/// Helper to wait until the runtime upgrade is applied on at finalized block.
+async fn wait_for_runtime_upgrade<T: Config>(
+    client: &OnlineClient<T>,
+    runtime_version: &RuntimeVersion,
+) -> Option<Result<T::Header, Error>> {
+    use scale_value::At;
+
+    let mut block_sub = match client.backend().stream_finalized_block_headers().await {
+        Ok(s) => s,
+        Err(err) => return Some(Err(err)),
+    };
+
+    let head = loop {
+        let (block, block_ref) = match block_sub.next().await? {
+            Ok(n) => n,
+            Err(err) => return Some(Err(err)),
+        };
+
+        let key: Vec<scale_value::Value> = vec![];
+        let addr = crate::dynamic::storage("System", "LastRuntimeUpgrade", key);
+
+        let chunk = match client.storage().at(block_ref).fetch(&addr).await {
+            Ok(Some(v)) => v,
+            Ok(None) => continue,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let scale_val = match chunk.to_value() {
+            Ok(v) => v,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let spec_version = scale_val
+            .at("spec_version")
+            .and_then(|v| v.as_u128())
+            .expect("specVersion should exist on RuntimeVersion; qed")
+            as u32;
+
+        if spec_version >= runtime_version.spec_version {
+            break block;
+        }
+    };
+
+    Some(Ok(head))
 }
