@@ -36,7 +36,7 @@ jobs:
           args: --release --manifest-path substrate/bin/node/cli/Cargo.toml
 
       - name: upload substrate binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: nightly-substrate-binary
           path: target/release/substrate-node
