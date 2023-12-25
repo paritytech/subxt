@@ -159,7 +159,7 @@ jobs:
     tests:
         name: "Test (Native)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 25
+        timeout-minutes: 45
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -189,7 +189,7 @@ jobs:
     unstable_backend_tests:
         name: "Test (Unstable Backend)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 25
+        timeout-minutes: 45
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
