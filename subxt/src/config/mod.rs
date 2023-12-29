@@ -127,6 +127,7 @@ pub trait Header: Sized + Encode + Decode {
 
 /// implement subxt's Hasher and Header traits for some substrate structs
 #[cfg(feature = "substrate-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
 mod substrate_impls {
     use super::*;
 

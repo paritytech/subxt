@@ -58,3 +58,11 @@ sp-keyring = { workspace = true }
 
 [package.metadata.cargo-machete]
 ignored = ["getrandom"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+all-features = true
+

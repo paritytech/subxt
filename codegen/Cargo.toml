@@ -40,3 +40,10 @@ bitvec = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 pretty_assertions = { workspace = true }
 frame-metadata = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+all-features = true

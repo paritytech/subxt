@@ -122,3 +122,10 @@ required-features = ["unstable-light-client", "jsonrpsee"]
 name = "light_client_parachains"
 path = "examples/light_client_parachains.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+all-features = true

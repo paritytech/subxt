@@ -10,6 +10,8 @@
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
@@ -74,8 +76,10 @@ pub mod ext {
     pub use scale_encode;
     pub use scale_value;
     #[cfg(feature = "substrate-compat")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
     pub use sp_core;
     #[cfg(feature = "substrate-compat")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
     pub use sp_runtime;
 }
 

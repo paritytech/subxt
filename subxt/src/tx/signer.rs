@@ -25,6 +25,7 @@ pub trait Signer<T: Config> {
 }
 
 #[cfg(feature = "substrate-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
 pub use pair_signer::PairSigner;
 
 // A signer suitable for substrate based chains. This provides compatibility with Substrate

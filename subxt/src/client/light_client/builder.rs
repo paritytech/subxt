@@ -100,6 +100,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         let chain_spec = fetch_url(url.as_ref()).await?;
 
@@ -245,6 +246,7 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
 }
 
 #[cfg(all(feature = "jsonrpsee", feature = "native"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "jsonrpsee", feature = "native"))))]
 mod jsonrpsee_helpers {
     use crate::error::{Error, LightClientError};
     pub use jsonrpsee::{

@@ -19,6 +19,7 @@ pub struct RpcClient {
 
 impl RpcClient {
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
     pub async fn from_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
         let client = jsonrpsee_helpers::client(url.as_ref())

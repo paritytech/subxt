@@ -57,6 +57,7 @@
 #![allow(clippy::module_inception)]
 
 #[cfg(feature = "jsonrpsee")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
 mod jsonrpsee_impl;
 
 mod rpc_client;
