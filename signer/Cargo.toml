@@ -65,4 +65,3 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 all-features = true
-
