@@ -291,7 +291,6 @@ pub mod tests {
                 Balances
                 Multisig
                 ParaInherent
-                Staking
                 System
                 Timestamp
 
@@ -300,19 +299,18 @@ pub mod tests {
                 AuthorityDiscoveryApi
                 BabeApi
                 BeefyApi
+                BeefyMmrApi
                 BlockBuilder
                 Core
+                GenesisBuilder
                 GrandpaApi
                 Metadata
                 MmrApi
-                NominationPoolsApi
                 OffchainWorkerApi
                 ParachainHost
                 SessionKeys
-                StakingApi
                 TaggedTransactionQueue
                 TransactionPaymentApi
-                TransactionPaymentCallApi
         "};
         assert_eq!(output, expected_output);
         // if incorrect pallet, error:
@@ -385,14 +383,14 @@ pub mod tests {
         let output = simulate_run("pallet Balances abc123").await;
         assert!(output.is_err());
         // check that we can explore a certain call:
-        let output = simulate_run("pallet Balances calls transfer")
+        let output = simulate_run("pallet Balances calls transfer_keep_alive")
             .await
             .unwrap()
             .strip_ansi();
         // Note: at some point we want to switch to new metadata in the artifacts folder which has e.g. transfer_keep_alive instead of transfer.
         let start = formatdoc! {"
         Usage:
-            subxt explore pallet Balances calls transfer <SCALE_VALUE>
+            subxt explore pallet Balances calls transfer_keep_alive <SCALE_VALUE>
                 construct the call by providing a valid argument
         "};
         assert_eq_start!(output, start);

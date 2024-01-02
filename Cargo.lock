@@ -3518,8 +3518,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.0.1"
-source = "git+https://github.com/paritytech/scale-typegen?branch=tadeohepperle/validate-codegen#1233641f15851087978518572bc3e1b05d19a047"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c99a8ba597db382b1245aa098732e95f35fd835070c61eef0583a1d1e7fcc8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3530,8 +3531,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.0.1"
-source = "git+https://github.com/paritytech/scale-typegen?branch=tadeohepperle/validate-codegen#1233641f15851087978518572bc3e1b05d19a047"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae69c1dfd81e9859a5fb42c1b560369e6ed82d2c5b5cb4cac3bba1962a73f017"
 dependencies = [
  "anyhow",
  "peekmore",
@@ -5127,6 +5129,26 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "vte"
+version = "0.11.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5022b5fbf9407086c180e9557be968742d839e68346af7792b8592489732197"
+dependencies = [
+ "utf8parse",
+ "vte_generate_state_changes",
+]
+
+[[package]]
+name = "vte_generate_state_changes"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d257817081c7dffcdbab24b9e62d2def62e2ff7d00b1c20062551e6cccc145ff"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
 
 [[package]]
 name = "w3f-bls"
