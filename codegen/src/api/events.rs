@@ -60,7 +60,7 @@ pub fn generate_events(
         quote! {
             #struct_def
             #alias_mod
-            
+
             impl #crate_path::events::StaticEvent for #event_struct_name {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;
