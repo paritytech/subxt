@@ -3501,8 +3501,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.0.1"
-source = "git+https://github.com/paritytech/scale-typegen?branch=tadeohepperle/validate-codegen#1233641f15851087978518572bc3e1b05d19a047"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b0c99a8ba597db382b1245aa098732e95f35fd835070c61eef0583a1d1e7fcc8"
 dependencies = [
  "proc-macro2",
  "quote",
