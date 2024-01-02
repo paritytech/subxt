@@ -52,6 +52,7 @@ pub fn generate_events(
 
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
+        types_mod_ident,
         event_ty,
         |name| name.into(),
         "Event",
@@ -59,20 +60,24 @@ pub fn generate_events(
         should_gen_docs,
     )?;
 
-    let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
-        let pallet_name = pallet.name();
-        let event_struct = &struct_def.name;
-        let event_name = variant_name;
+    let event_structs = struct_defs
+        .iter()
+        .map(|(variant_name, struct_def, aliases)| {
+            let pallet_name = pallet.name();
+            let event_struct = &struct_def.name;
+            let event_name = variant_name;
 
-        quote! {
-            #struct_def
+            quote! {
+                #struct_def
 
-            impl #crate_path::events::StaticEvent for #event_struct {
-                const PALLET: &'static str = #pallet_name;
-                const EVENT: &'static str = #event_name;
+                #aliases
+
+                impl #crate_path::events::StaticEvent for #event_struct {
+                    const PALLET: &'static str = #pallet_name;
+                    const EVENT: &'static str = #event_name;
+                }
             }
-        }
-    });
+        });
     let event_type = type_gen.resolve_type_path(event_ty);
     let event_ty = type_gen.resolve_type(event_ty);
     let docs = &event_ty.docs;

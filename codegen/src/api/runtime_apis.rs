@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashSet;
+
 use crate::{types::TypeGenerator, CodegenError};
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
@@ -36,37 +38,79 @@ fn generate_runtime_api(
             .then_some(quote! { #( #[doc = #docs ] )* })
             .unwrap_or_default();
 
+        let mut unique_names = HashSet::new();
+        let mut unique_aliases = HashSet::new();
+
         let inputs: Vec<_> = method.inputs().enumerate().map(|(idx, input)| {
             // These are method names, which can just be '_', but struct field names can't
             // just be an underscore, so fix any such names we find to work in structs.
-            let name = if input.name == "_" {
-                format_ident!("_{}", idx)
-            } else {
-                format_ident!("{}", &input.name)
-            };
-            let ty = type_gen.resolve_type_path(input.ty);
 
-            let param = quote!(#name: #ty);
-            (param, name)
+            let mut name = input.name.trim_start_matches('_').to_string();
+            if name.is_empty() {
+                name = format!("_{}", idx);
+            }
+            while !unique_names.insert(name.clone()) {
+                // Name is already used, append the index until it is unique.
+                name = format!("{}_param{}", name, idx);
+            }
+
+            let mut alias = name.to_upper_camel_case();
+            // Note: name is not empty.
+            if alias.as_bytes()[0].is_ascii_digit() {
+                alias = format!("Param{}", alias);
+            }
+            while !unique_aliases.insert(alias.clone()) {
+                alias = format!("{}Param{}", alias, idx);
+            }
+
+            let (alias_name, name) = (format_ident!("{alias}"), format_ident!("{name}"));
+
+            // Generate alias for runtime type.
+            let ty = type_gen.resolve_type_path(input.ty);
+            let aliased_param = quote!( pub type #alias_name = #ty; );
+
+            // Structures are placed on the same level as the alias module.
+            let struct_ty_path = quote!( #method_name::#alias_name );
+            let struct_param = quote!(#name: #struct_ty_path);
+
+            // Function parameters must be indented by `types`.
+            let fn_param = quote!(#name: types::#struct_ty_path);
+            (fn_param, struct_param, name, aliased_param)
         }).collect();
 
-        let params = inputs.iter().map(|(param, _)| param);
-        let param_names = inputs.iter().map(|(_, name)| name);
+        let fn_params = inputs.iter().map(|(fn_param, _, _, _)| fn_param);
+        let struct_params = inputs.iter().map(|(_, struct_param, _, _)| struct_param);
+        let param_names = inputs.iter().map(|(_, _, name, _,)| name);
+        let type_aliases = inputs.iter().map(|(_, _, _, aliased_param)| aliased_param);
+
+        let output = type_gen.resolve_type_path(method.output_ty());
+        let aliased_module = quote!(
+            pub mod #method_name {
+                use super::#types_mod_ident;
+
+                #( #type_aliases )*
+
+                // Guard the `Output` name against collisions by placing it in a dedicated module.
+                pub mod output {
+                    use super::#types_mod_ident;
+                    pub type Output = #output;
+                }
+            }
+        );
 
         // From the method metadata generate a structure that holds
         // all parameter types. This structure is used with metadata
         // to encode parameters to the call via `encode_as_fields_to`.
         let derives = type_gen.default_derives();
         let struct_name = format_ident!("{}", method.name().to_upper_camel_case());
-        let struct_params = params.clone();
         let struct_input = quote!(
+            #aliased_module
+
             #derives
             pub struct #struct_name {
                 #( pub #struct_params, )*
             }
         );
-
-        let output = type_gen.resolve_type_path(method.output_ty());
 
         let Some(call_hash) = api.method_hash(method.name()) else {
             return Err(CodegenError::MissingRuntimeApiMetadata(
@@ -77,7 +121,7 @@ fn generate_runtime_api(
 
         let method = quote!(
             #docs
-            pub fn #method_name(&self, #( #params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, #output> {
+            pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::output::Output> {
                 #crate_path::runtime_api::Payload::new_static(
                     #trait_name_str,
                     #method_name_str,
@@ -159,4 +203,226 @@ pub fn generate_runtime_apis(
             #( #runtime_apis_def )*
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::RuntimeGenerator;
+    use frame_metadata::v15::{
+        self, RuntimeApiMetadata, RuntimeApiMethodMetadata, RuntimeApiMethodParamMetadata,
+    };
+    use quote::quote;
+    use scale_info::meta_type;
+    use subxt_metadata::Metadata;
+
+    fn metadata_with_runtime_apis(runtime_apis: Vec<RuntimeApiMetadata>) -> Metadata {
+        let extrinsic_metadata = v15::ExtrinsicMetadata {
+            version: 0,
+            signed_extensions: vec![],
+            address_ty: meta_type::<()>(),
+            call_ty: meta_type::<()>(),
+            signature_ty: meta_type::<()>(),
+            extra_ty: meta_type::<()>(),
+        };
+
+        let metadata: Metadata = v15::RuntimeMetadataV15::new(
+            vec![],
+            extrinsic_metadata,
+            meta_type::<()>(),
+            runtime_apis,
+            v15::OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            v15::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata");
+        metadata
+    }
+
+    fn generate_code(runtime_apis: Vec<RuntimeApiMetadata>) -> String {
+        let metadata = metadata_with_runtime_apis(runtime_apis);
+        let item_mod = syn::parse_quote!(
+            pub mod api {}
+        );
+        let generator = RuntimeGenerator::new(metadata);
+        let generated = generator
+            .generate_runtime(
+                item_mod,
+                Default::default(),
+                Default::default(),
+                syn::parse_str("::subxt_path").unwrap(),
+                false,
+            )
+            .expect("should be able to generate runtime");
+        generated.to_string()
+    }
+
+    #[test]
+    fn unique_param_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "foo",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "bar",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub foo: test::Foo,
+                pub bar: test::Bar,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type Foo = ::core::primitive::bool;
+                pub type Bar = ::core::primitive::bool;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
+
+    #[test]
+    fn duplicate_param_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "_a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "__a",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub a: test::A,
+                pub a_param1: test::AParam1,
+                pub a_param2: test::AParam2,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type A = ::core::primitive::bool;
+                pub type AParam1 = ::core::primitive::bool;
+                pub type AParam2 = ::core::primitive::bool;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
+
+    #[test]
+    fn duplicate_param_and_alias_names() {
+        let runtime_apis = vec![RuntimeApiMetadata {
+            name: "Test",
+            methods: vec![RuntimeApiMethodMetadata {
+                name: "test",
+                inputs: vec![
+                    RuntimeApiMethodParamMetadata {
+                        name: "_",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "_a",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "_param_0",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "__",
+                        ty: meta_type::<bool>(),
+                    },
+                    RuntimeApiMethodParamMetadata {
+                        name: "___param_0_param_2",
+                        ty: meta_type::<bool>(),
+                    },
+                ],
+                output: meta_type::<bool>(),
+                docs: vec![],
+            }],
+
+            docs: vec![],
+        }];
+
+        let code = generate_code(runtime_apis);
+
+        let structure = quote! {
+            pub struct Test {
+                pub _0: test::Param0,
+                pub a: test::A,
+                pub param_0: test::Param0Param2,
+                pub _3: test::Param3,
+                pub param_0_param_2: test::Param0Param2Param4,
+            }
+        };
+        let expected_alias = quote!(
+            pub mod test {
+                use super::runtime_types;
+                pub type Param0 = ::core::primitive::bool;
+                pub type A = ::core::primitive::bool;
+                pub type Param0Param2 = ::core::primitive::bool;
+                pub type Param3 = ::core::primitive::bool;
+                pub type Param0Param2Param4 = ::core::primitive::bool;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::core::primitive::bool;
+                }
+            }
+        );
+
+        assert!(code.contains(&structure.to_string()));
+        assert!(code.contains(&expected_alias.to_string()));
+    }
 }

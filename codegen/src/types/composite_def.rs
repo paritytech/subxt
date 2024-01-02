@@ -5,6 +5,7 @@
 use crate::error::CodegenError;
 
 use super::{Derives, Field, TypeDefParameters, TypeGenerator, TypeParameter, TypePath};
+use heck::ToUpperCamelCase as _;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use scale_info::{form::PortableForm, Type, TypeDef, TypeDefPrimitive};
@@ -27,6 +28,9 @@ pub struct CompositeDef {
 
 impl CompositeDef {
     /// Construct a definition which will generate code for a standalone `struct`.
+    ///
+    /// This is useful for generating structures from call and enum metadata variants;
+    /// and from all the runtime types of the metadata.
     #[allow(clippy::too_many_arguments)]
     pub fn struct_def(
         ty: &Type<PortableForm>,
@@ -37,6 +41,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
         crate_path: &syn::Path,
+        alias_module_name: Option<syn::Ident>,
     ) -> Result<Self, CodegenError> {
         let mut derives = type_gen.type_derives(ty)?;
         let fields: Vec<_> = fields_def.field_types().collect();
@@ -75,6 +80,7 @@ impl CompositeDef {
                 derives,
                 type_params,
                 field_visibility,
+                alias_module_name,
             },
             fields: fields_def,
             docs: docs_token,
@@ -104,11 +110,15 @@ impl quote::ToTokens for CompositeDef {
                 derives,
                 type_params,
                 field_visibility,
+                alias_module_name,
             } => {
                 let phantom_data = type_params.unused_params_phantom_data();
-                let fields = self
-                    .fields
-                    .to_struct_field_tokens(phantom_data, field_visibility.as_ref());
+
+                let fields: TokenStream = self.fields.to_struct_field_tokens(
+                    phantom_data,
+                    field_visibility.as_ref(),
+                    alias_module_name.as_ref(),
+                );
                 let trailing_semicolon = matches!(
                     self.fields,
                     CompositeDefFields::NoFields | CompositeDefFields::Unnamed(_)
@@ -143,6 +153,7 @@ pub enum CompositeDefKind {
         derives: Derives,
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
+        alias_module_name: Option<syn::Ident>,
     },
     /// Comprises a variant of a Rust `enum`.
     EnumVariant,
@@ -150,7 +161,7 @@ pub enum CompositeDefKind {
 
 /// Encapsulates the composite fields, keeping the invariant that all fields are either named or
 /// unnamed.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CompositeDefFields {
     NoFields,
     Named(Vec<(syn::Ident, CompositeDefFieldType)>),
@@ -210,11 +221,38 @@ impl CompositeDefFields {
         }
     }
 
+    /// Generate the code for type aliases which will be used to construct the `struct` or `enum`.
+    pub fn to_type_aliases_tokens(&self, visibility: Option<&syn::Visibility>) -> TokenStream {
+        match self {
+            Self::NoFields => {
+                quote!()
+            }
+            Self::Named(ref fields) => {
+                let fields = fields.iter().map(|(name, ty)| {
+                    let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
+                    // Alias without boxing to have a cleaner call interface.
+                    let ty_path = &ty.type_path;
+                    quote! ( #visibility type #alias_name = #ty_path; )
+                });
+                quote!( #( #fields )* )
+            }
+            Self::Unnamed(ref fields) => {
+                let fields = fields.iter().enumerate().map(|(idx, ty)| {
+                    let alias_name = format_ident!("Field{}", idx);
+                    quote! ( #visibility type #alias_name = #ty; )
+                });
+
+                quote!( #( #fields )* )
+            }
+        }
+    }
+
     /// Generate the code for fields which will compose a `struct`.
     pub fn to_struct_field_tokens(
         &self,
         phantom_data: Option<syn::TypePath>,
         visibility: Option<&syn::Visibility>,
+        alias_module_name: Option<&syn::Ident>,
     ) -> TokenStream {
         match self {
             Self::NoFields => {
@@ -227,7 +265,20 @@ impl CompositeDefFields {
             Self::Named(ref fields) => {
                 let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #compact_attr #visibility #name: #ty }
+
+                    if let Some(alias_module_name) = alias_module_name {
+                        let alias_name =
+                            format_ident!("{}", name.to_string().to_upper_camel_case());
+
+                        let mut path = quote!( #alias_module_name::#alias_name);
+                        if ty.is_boxed() {
+                            path = quote!( ::std::boxed::Box<#path> );
+                        }
+
+                        quote! { #compact_attr #visibility #name: #path }
+                    } else {
+                        quote! { #compact_attr #visibility #name: #ty }
+                    }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
@@ -243,9 +294,21 @@ impl CompositeDefFields {
                 )
             }
             Self::Unnamed(ref fields) => {
-                let fields = fields.iter().map(|ty| {
+                let fields = fields.iter().enumerate().map(|(idx, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #compact_attr #visibility #ty }
+
+                    if let Some(alias_module_name) = alias_module_name {
+                        let alias_name = format_ident!("Field{}", idx);
+
+                        let mut path = quote!( #alias_module_name::#alias_name);
+                        if ty.is_boxed() {
+                            path = quote!( ::std::boxed::Box<#path> );
+                        }
+
+                        quote! { #compact_attr #visibility #path }
+                    } else {
+                        quote! { #compact_attr #visibility #ty }
+                    }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
@@ -286,7 +349,7 @@ impl CompositeDefFields {
 }
 
 /// Represents a field of a composite type to be generated.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CompositeDefFieldType {
     pub type_id: u32,
     pub type_path: TypePath,
