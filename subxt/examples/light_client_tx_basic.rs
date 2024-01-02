@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::{client::LightClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 

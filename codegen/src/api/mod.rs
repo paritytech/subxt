@@ -358,12 +358,13 @@ impl RuntimeGenerator {
 /// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<F>(
     type_gen: &TypeGenerator,
+    types_mod_ident: &syn::Ident,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
     crate_path: &syn::Path,
     should_gen_docs: bool,
-) -> Result<Vec<(String, CompositeDef)>, CodegenError>
+) -> Result<Vec<(String, CompositeDef, TypeAliases)>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
@@ -386,19 +387,75 @@ where
                 type_gen,
             )?;
 
+            let alias_module_name = format_ident!("{}", var.name.to_snake_case());
+
             let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
             let struct_def = CompositeDef::struct_def(
                 &ty,
                 struct_name.as_ref(),
                 Default::default(),
-                fields,
+                fields.clone(),
                 Some(parse_quote!(pub)),
                 type_gen,
                 docs,
                 crate_path,
+                Some(alias_module_name.clone()),
             )?;
 
-            Ok((var.name.to_string(), struct_def))
+            let type_aliases = TypeAliases::new(fields, types_mod_ident.clone(), alias_module_name);
+
+            Ok((var.name.to_string(), struct_def, type_aliases))
         })
         .collect()
+}
+
+/// Generate the type aliases from a set of enum / struct definitions.
+///
+/// The type aliases are used to make the generated code more readable.
+#[derive(Debug)]
+pub struct TypeAliases {
+    fields: CompositeDefFields,
+    types_mod_ident: syn::Ident,
+    mod_name: syn::Ident,
+}
+
+impl TypeAliases {
+    pub fn new(
+        fields: CompositeDefFields,
+        types_mod_ident: syn::Ident,
+        mod_name: syn::Ident,
+    ) -> Self {
+        TypeAliases {
+            fields,
+            types_mod_ident,
+            mod_name,
+        }
+    }
+}
+
+impl quote::ToTokens for TypeAliases {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let has_fields = matches!(&self.fields, CompositeDefFields::Named(fields) if !fields.is_empty())
+            || matches!(&self.fields, CompositeDefFields::Unnamed(fields) if !fields.is_empty());
+        if !has_fields {
+            return;
+        }
+
+        let visibility: syn::Visibility = parse_quote!(pub);
+
+        let aliases = self
+            .fields
+            .to_type_aliases_tokens(Some(visibility).as_ref());
+
+        let mod_name = &self.mod_name;
+        let types_mod_ident = &self.types_mod_ident;
+
+        tokens.extend(quote! {
+            pub mod #mod_name {
+                use super::#types_mod_ident;
+
+                #aliases
+            }
+        })
+    }
 }

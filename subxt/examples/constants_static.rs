@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::{OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]

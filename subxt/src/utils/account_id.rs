@@ -23,6 +23,7 @@ use serde::{Deserialize, Serialize};
     Debug,
     scale_encode::EncodeAsType,
     scale_decode::DecodeAsType,
+    scale_info::TypeInfo,
 )]
 pub struct AccountId32(pub [u8; 32]);
 

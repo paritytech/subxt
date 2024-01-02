@@ -10,30 +10,6 @@
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
 
-#![deny(
-    bad_style,
-    improper_ctypes,
-    missing_docs,
-    non_shorthand_field_patterns,
-    no_mangle_generic_items,
-    overflowing_literals,
-    path_statements,
-    patterns_in_fns_without_body,
-    private_interfaces,
-    private_bounds,
-    unconditional_recursion,
-    unused_allocation,
-    unused_comparisons,
-    unused_parens,
-    while_true,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_crate_dependencies,
-    unused_extern_crates,
-    clippy::all
-)]
-#![allow(clippy::type_complexity)]
-
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))

@@ -172,6 +172,12 @@ where
                     .resolve(*key_ty)
                     .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
+                // If the provided keys are empty, the storage address must be
+                // equal to the storage root address.
+                if self.storage_entry_keys.is_empty() {
+                    return Ok(());
+                }
+
                 // If the key is a tuple, we encode each value to the corresponding tuple type.
                 // If the key is not a tuple, encode a single value to the key type.
                 let type_ids = match &ty.type_def {
@@ -181,7 +187,8 @@ where
                     _other => either::Either::Right(std::iter::once(*key_ty)),
                 };
 
-                if type_ids.len() != self.storage_entry_keys.len() {
+                if type_ids.len() < self.storage_entry_keys.len() {
+                    // Provided more keys than fields.
                     return Err(StorageAddressError::WrongNumberOfKeys {
                         expected: type_ids.len(),
                         actual: self.storage_entry_keys.len(),
@@ -198,7 +205,7 @@ where
                     }
                     hash_bytes(&input, &hashers[0], bytes);
                     Ok(())
-                } else if hashers.len() == type_ids.len() {
+                } else if hashers.len() >= type_ids.len() {
                     let iter = self.storage_entry_keys.iter().zip(type_ids).zip(hashers);
                     // A hasher per field; encode and hash each field independently.
                     for ((key, type_id), hasher) in iter {
@@ -208,7 +215,7 @@ where
                     }
                     Ok(())
                 } else {
-                    // Mismatch; wrong number of hashers/fields.
+                    // Provided more fields than hashers.
                     Err(StorageAddressError::WrongNumberOfHashers {
                         hashers: hashers.len(),
                         fields: type_ids.len(),

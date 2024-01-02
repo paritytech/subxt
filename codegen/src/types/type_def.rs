@@ -33,10 +33,10 @@ impl TypeDefGen {
     pub fn from_type(
         ty: &Type<PortableForm>,
         type_gen: &TypeGenerator,
-        crate_path: &syn::Path,
-        should_gen_docs: bool,
     ) -> Result<Self, CodegenError> {
         let derives = type_gen.type_derives(ty)?;
+        let crate_path = type_gen.crate_path();
+        let should_gen_docs = type_gen.should_gen_docs();
 
         let type_params = ty
             .type_params
@@ -77,6 +77,7 @@ impl TypeDefGen {
                     type_gen,
                     docs,
                     crate_path,
+                    None,
                 )?;
                 TypeDefGenKind::Struct(composite_def)
             }

@@ -16,6 +16,9 @@ description = "Command line utilities for working with subxt codegen"
 name = "subxt"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
 [features]
 # Compute the state root hash from the genesis entry.
 # Enable this to create a smaller chain spec file.

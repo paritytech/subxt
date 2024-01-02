@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! Benchmarks for metadata hashing.
+
 use codec::Decode;
 use criterion::*;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use futures::StreamExt;
 use std::{iter, num::NonZeroU32};
 use subxt::{

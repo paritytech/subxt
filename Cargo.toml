@@ -23,20 +23,39 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-version = "0.32.1"
-rust-version = "1.70.0"
+version = "0.33.0"
+rust-version = "1.74.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
+
+[workspace.lints.rust]
+bad_style = "deny"
+improper_ctypes = "deny"
+missing_docs = "deny"
+non_shorthand_field_patterns = "deny"
+no_mangle_generic_items = "deny"
+overflowing_literals = "deny"
+path_statements = "deny"
+patterns_in_fns_without_body = "deny"
+unconditional_recursion = "deny"
+unused_allocation = "deny"
+unused_comparisons = "deny"
+unused_parens = "deny"
+unused_extern_crates = "deny"
+
+[workspace.lints.clippy]
+type_complexity = "allow"
+all = "deny"
 
 [workspace.dependencies]
 async-trait = "0.1.74"
 assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
-blake2 = { version = "0.10.4", default-features = false }
-clap = { version = "4.4.8", features = ["derive", "cargo"] }
+blake2 = { version = "0.10.6", default-features = false }
+clap = { version = "4.4.10", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -74,12 +93,12 @@ tracing-subscriber = "0.3.18"
 trybuild = "1.0.85"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
-which = "4.4.2"
+which = "5.0.0"
 scale-typegen-description = { git = "https://github.com/paritytech/scale-typegen", branch = "tadeohepperle/validate-codegen" }
 
 # Light client support:
-smoldot = { version = "0.12.0", default-features = false }
-smoldot-light = { version = "0.10.0", default-features = false }
+smoldot = { version = "0.14.0", default-features = false }
+smoldot-light = { version = "0.12.0", default-features = false }
 tokio-stream = "0.1.14"
 futures-util = "0.3.29"
 rand = "0.8.5"
@@ -87,27 +106,27 @@ pin-project = "1.1.3"
 
 # Light client wasm:
 web-sys = { version = "0.3.65", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
-wasm-bindgen = "0.2.88"
+wasm-bindgen = "0.2.89"
 send_wrapper = "0.6.0"
-js-sys = "0.3.65"
+js-sys = "0.3.66"
 wasm-bindgen-futures = "0.4.38"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
 tokio-util = "0.7.10"
 
 # Substrate crates:
-sp-core = { version = "21.0.0", default-features = false }
-sp-core-hashing = { version = "9.0.0", default-features = false }
-sp-runtime = "24.0.0"
-sp-keyring = "24.0.0"
+sp-core = { version = "26.0.0", default-features = false }
+sp-core-hashing = { version = "13.0.0", default-features = false }
+sp-runtime = "29.0.0"
+sp-keyring = "29.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.32.1", path = "subxt", default-features = false }
-subxt-macro = { version = "0.32.1", path = "macro" }
-subxt-metadata = { version = "0.32.1", path = "metadata" }
-subxt-codegen = { version = "0.32.1", path = "codegen" }
-subxt-signer = { version = "0.32.1", path = "signer" }
-subxt-lightclient = { version = "0.32.1", path = "lightclient", default-features = false }
+subxt = { version = "0.33.0", path = "subxt", default-features = false }
+subxt-macro = { version = "0.33.0", path = "macro" }
+subxt-metadata = { version = "0.33.0", path = "metadata" }
+subxt-codegen = { version = "0.33.0", path = "codegen" }
+subxt-signer = { version = "0.33.0", path = "signer" }
+subxt-lightclient = { version = "0.33.0", path = "lightclient", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 
@@ -115,8 +134,17 @@ substrate-runner = { path = "testing/substrate-runner" }
 bip39 = "2.0.0"
 hmac = "0.12.1"
 pbkdf2 = { version = "0.12.2", default-features = false }
-schnorrkel = "0.10.2"
-secp256k1 = "0.27.0"
+schnorrkel = "0.11.3"
+secp256k1 = "0.28.0"
 secrecy = "0.8.0"
-sha2 = "0.10.6"
+sha2 = "0.10.8"
 zeroize = { version = "1", default-features = false }
+
+[profile.dev.package.smoldot-light]
+opt-level = 2
+[profile.test.package.smoldot-light]
+opt-level = 2
+[profile.dev.package.smoldot]
+opt-level = 2
+[profile.test.package.smoldot]
+opt-level = 2

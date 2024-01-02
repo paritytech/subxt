@@ -6,10 +6,12 @@ use super::wasm_socket::WasmSocket;
 
 use core::time::Duration;
 use futures::prelude::*;
+use smoldot::libp2p::with_buffers;
 use smoldot_light::platform::{
-    Address, ConnectError, ConnectionType, IpAddr, MultiStreamAddress, MultiStreamWebRtcConnection,
-    PlatformRef, SubstreamDirection,
+    Address, ConnectionType, IpAddr, MultiStreamAddress, MultiStreamWebRtcConnection, PlatformRef,
+    SubstreamDirection,
 };
+
 use std::{io, net::SocketAddr, pin::Pin};
 
 const LOG_TARGET: &str = "subxt-platform-wasm";
@@ -34,12 +36,9 @@ impl PlatformRef for SubxtPlatform {
     type Instant = super::wasm_helpers::Instant;
     type MultiStream = std::convert::Infallible;
     type Stream = super::wasm_helpers::Stream;
-    type StreamConnectFuture = future::BoxFuture<'static, Result<Self::Stream, ConnectError>>;
-    type MultiStreamConnectFuture = future::BoxFuture<
-        'static,
-        Result<MultiStreamWebRtcConnection<Self::MultiStream>, ConnectError>,
-    >;
-    type ReadWriteAccess<'a> = super::wasm_helpers::with_buffers::ReadWriteAccess<'a>;
+    type StreamConnectFuture = future::Ready<Self::Stream>;
+    type MultiStreamConnectFuture = future::Pending<MultiStreamWebRtcConnection<Self::MultiStream>>;
+    type ReadWriteAccess<'a> = with_buffers::ReadWriteAccess<'a, Self::Instant>;
     type StreamUpdateFuture<'a> = future::BoxFuture<'a, ()>;
     type StreamErrorRef<'a> = &'a std::io::Error;
     type NextSubstreamFuture<'a> = future::Pending<Option<(Self::Stream, SubstreamDirection)>>;
@@ -142,17 +141,15 @@ impl PlatformRef for SubxtPlatform {
             }
         };
 
-        Box::pin(async move {
+        let socket_future = async move {
             tracing::debug!(target: LOG_TARGET, "Connecting to addr={addr}");
+            WasmSocket::new(addr.as_str())
+                .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))
+        };
 
-            let socket = WasmSocket::new(addr.as_str()).map_err(|err| ConnectError {
-                message: format!("Failed to reach peer: {err}"),
-            })?;
-
-            Ok(super::wasm_helpers::Stream(
-                super::wasm_helpers::with_buffers::WithBuffers::new(socket),
-            ))
-        })
+        future::ready(super::wasm_helpers::Stream(with_buffers::WithBuffers::new(
+            Box::pin(socket_future),
+        )))
     }
 
     fn connect_multistream(&self, _address: MultiStreamAddress) -> Self::MultiStreamConnectFuture {
