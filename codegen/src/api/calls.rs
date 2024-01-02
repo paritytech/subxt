@@ -28,26 +28,27 @@ pub fn generate_calls(
         return Ok(quote!());
     };
 
-    let struct_defs = super::generate_structs_from_variants(
+    let variant_names_and_struct_defs = super::generate_structs_from_variants(
         type_gen,
         call_ty,
         |name| name.to_upper_camel_case().into(),
         "Call",
     )?;
-    let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
+    let (call_structs, call_fns): (Vec<_>, Vec<_>) = variant_names_and_struct_defs
         .into_iter()
-        .map(|(variant_name, composite)| {
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match &composite.kind {
+        .map(|var| {
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match &var.composite.kind {
                 CompositeIRKind::Named(named_fields) => named_fields
                     .iter()
                     .map(|(name, field)| {
+                        // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
                         let fn_arg_type = &field.type_path;
                         let call_arg = if field.is_boxed {
                             quote! { #name: ::std::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };
-                        (quote!( #name: #fn_arg_type ), call_arg)
+                        (quote!( #name: types::#fn_arg_type ), call_arg)
                     })
                     .unzip(),
                 CompositeIRKind::NoFields => Default::default(),
@@ -57,23 +58,26 @@ pub fn generate_calls(
             };
 
             let pallet_name = pallet.name();
-            let call_name = &variant_name;
-            let struct_name = &composite.name;
+            let call_name = &var.variant_name;
+            let struct_name = &var.composite.name;
             let Some(call_hash) = pallet.call_hash(call_name) else {
                 return Err(CodegenError::MissingCallMetadata(
                     pallet_name.into(),
                     call_name.to_string(),
                 ));
             };
-            let fn_name = format_ident!("{}", variant_name.to_snake_case());
+            let fn_name = format_ident!("{}", var.variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
-            let docs = &composite.docs;
+            let docs = &var.composite.docs;
 
             // this converts the composite into a full struct type. No Type Parameters needed here.
-            let struct_def = type_gen.upcast_composite(&composite);
+            let struct_def = type_gen.upcast_composite(&var.composite);
+            let alias_mod = var.type_alias_mod;
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
+                // #alias_mod
+
                 #struct_def
 
                 impl #crate_path::blocks::StaticExtrinsic for #struct_name {

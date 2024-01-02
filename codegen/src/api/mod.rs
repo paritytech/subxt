@@ -12,16 +12,18 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use scale_typegen::typegen::ir::type_ir::CompositeIR;
+use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
 use scale_typegen::typegen::type_params::TypeParameters;
+use scale_typegen::typegen::type_path::{TypePath, TypePathType};
 use scale_typegen::TypeGenerator;
 use subxt_metadata::Metadata;
+use syn::{parse_quote, Ident};
 
 use crate::error::CodegenError;
 use crate::subxt_type_gen_settings;
 use crate::{api::custom_values::generate_custom_values, ir};
 
-use heck::ToSnakeCase as _;
+use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 
@@ -326,7 +328,7 @@ pub fn generate_structs_from_variants<F>(
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-) -> Result<Vec<(String, CompositeIR)>, CodegenError>
+) -> Result<Vec<StructFromVariant>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
@@ -344,12 +346,87 @@ where
             let composite_ir_kind =
                 type_gen.create_composite_ir_kind(&var.fields, &mut type_params)?;
             let struct_name = variant_to_struct_name(&var.name);
-            let composite_ir = CompositeIR::new(
+            let mut composite = CompositeIR::new(
                 syn::parse_str(&struct_name).expect("enum variant name is valid ident"),
                 composite_ir_kind,
                 type_gen.docs_from_scale_info(&var.docs),
             );
-            Ok((var.name.to_string(), composite_ir))
+
+            let type_alias_mod = generate_type_alias_mod(&mut composite, type_gen);
+            Ok(StructFromVariant {
+                variant_name: var.name.to_string(),
+                composite,
+                type_alias_mod,
+            })
         })
         .collect()
+}
+
+pub struct StructFromVariant {
+    variant_name: String,
+    composite: CompositeIR,
+    type_alias_mod: TokenStream2,
+}
+
+/// Modifies the composite, by replacing its types with references to the generated type alias module.
+/// Returns the TokenStream of the type alias module.
+///
+/// E.g a struct like this:
+/// ```ignore
+/// pub struct SetMaxCodeSize {
+///     pub new: ::core::primitive::u32,
+/// }
+/// ```
+/// will be made into this:
+/// ```ignore
+/// pub struct SetMaxCodeSize {
+///     pub new: set_max_code_size::New,
+/// }
+/// ```
+/// And the type alias module will look like this:
+/// ```ignore
+/// pub mod set_max_code_size {
+///     use super::runtime_types;
+///     pub type New = ::core::primitive::u32;
+/// }
+/// ```
+pub fn generate_type_alias_mod(
+    composite: &mut CompositeIR,
+    type_gen: &TypeGenerator,
+) -> TokenStream2 {
+    let mut aliases: Vec<TokenStream2> = vec![];
+    let alias_mod_name: Ident = syn::parse_str(&composite.name.to_string().to_snake_case())
+        .expect("composite name in snake_case should be a valid identifier");
+
+    let mut modify_field_to_be_type_alias = |field: &mut CompositeFieldIR, alias_name: Ident| {
+        let type_path = &field.type_path;
+        aliases.push(quote!(pub type #alias_name = #type_path;));
+
+        let type_alias_path: syn::Path = parse_quote!(#alias_mod_name::#alias_name);
+        field.type_path = TypePath::from_syn_path(type_alias_path);
+    };
+
+    match &mut composite.kind {
+        CompositeIRKind::NoFields => {
+            return quote!(); // no types mod generated for unit structs.
+        }
+        CompositeIRKind::Named(named) => {
+            for (name, field) in named.iter_mut() {
+                let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
+                modify_field_to_be_type_alias(field, alias_name);
+            }
+        }
+        CompositeIRKind::Unnamed(unnamed) => {
+            for (i, field) in unnamed.iter_mut().enumerate() {
+                let alias_name = format_ident!("Field{}", i);
+                modify_field_to_be_type_alias(field, alias_name);
+            }
+        }
+    };
+
+    let types_mod_ident = type_gen.types_mod_ident();
+    quote!(pub mod #alias_mod_name {
+        use super::#types_mod_ident;
+        #( #aliases )*
+    })
 }

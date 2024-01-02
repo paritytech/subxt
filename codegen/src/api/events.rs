@@ -48,16 +48,17 @@ pub fn generate_events(
         return Ok(quote!());
     };
 
-    let struct_defs =
+    let variant_names_and_struct_defs =
         super::generate_structs_from_variants(type_gen, event_ty, |name| name.into(), "Event")?;
 
-    let event_structs = struct_defs.into_iter().map(|(variant_name, composite)| {
+    let event_structs = variant_names_and_struct_defs.into_iter().map(|var| {
         let pallet_name = pallet.name();
-        let event_struct_name = &composite.name;
-        let event_name = variant_name;
-
-        let struct_def = type_gen.upcast_composite(&composite);
+        let event_struct_name = &var.composite.name;
+        let event_name = var.variant_name;
+        let alias_mod = var.type_alias_mod;
+        let struct_def = type_gen.upcast_composite(&var.composite);
         quote! {
+            // #alias_mod
             #struct_def
 
             impl #crate_path::events::StaticEvent for #event_struct_name {
