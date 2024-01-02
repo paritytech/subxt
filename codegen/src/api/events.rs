@@ -58,9 +58,9 @@ pub fn generate_events(
         let alias_mod = var.type_alias_mod;
         let struct_def = type_gen.upcast_composite(&var.composite);
         quote! {
-            // #alias_mod
             #struct_def
-
+            #alias_mod
+            
             impl #crate_path::events::StaticEvent for #event_struct_name {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;

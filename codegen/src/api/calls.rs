@@ -76,9 +76,8 @@ pub fn generate_calls(
             let alias_mod = var.type_alias_mod;
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
-                // #alias_mod
-
                 #struct_def
+                #alias_mod
 
                 impl #crate_path::blocks::StaticExtrinsic for #struct_name {
                     const PALLET: &'static str = #pallet_name;
