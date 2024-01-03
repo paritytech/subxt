@@ -188,7 +188,7 @@ pub mod tests {
     #[tokio::test]
     async fn test_commands() {
         // show pallets:
-        let output = simulate_run("").await;
+        let output = run_against_file("").await;
         assert_eq!(output.unwrap(), "Usage:\n    subxt explore <PALLET>\n        explore a specific pallet\n\nAvailable <PALLET> values are:\n    Balances\n    Multisig\n    ParaInherent\n    System\n    Timestamp\n");
         // if incorrect pallet, error:
         let output = run_against_file("abc123").await;
@@ -207,10 +207,10 @@ pub mod tests {
         let output = run_against_file("Balances abc123").await;
         assert!(output.is_err());
         // check that we can explore a certain call:
-        let output = simulate_run("Balances calls transfer_allow_death").await;
+        let output = run_against_file("Balances calls transfer_allow_death").await;
         assert!(output.unwrap().starts_with("Usage:\n    subxt explore Balances calls transfer_allow_death <SCALE_VALUE>\n        construct the call by providing a valid argument\n\nThe call expect expects a <SCALE_VALUE> with this shape:\n    {\n        dest: enum MultiAddress"));
         // check that unsigned extrinsic can be constructed:
-        let output = simulate_run(
+        let output = run_against_file(
             "Balances calls transfer_allow_death {\"dest\":v\"Raw\"((255,255, 255)),\"value\":0}",
         )
         .await;
@@ -219,7 +219,7 @@ pub mod tests {
             "Encoded call data:\n    0x24040400020cffffff00\n"
         );
         // check that we can explore a certain constant:
-        let output = simulate_run("Balances constants ExistentialDeposit").await;
+        let output = run_against_file("Balances constants ExistentialDeposit").await;
         assert_eq!(output.unwrap(), "Description:\n    The minimum amount required to keep an account open. MUST BE GREATER THAN ZERO!\n\nThe constant has the following shape:\n    u128\n\nThe value of the constant is:\n    33333333\n");
         // check that we can explore a certain storage entry:
         let output = run_against_file("System storage Account").await;
