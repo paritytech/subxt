@@ -3850,7 +3850,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eca99148e026936bbc444c3708748207033968e4ef1c33bfc885660ae4d44d21"
 dependencies = [
  "arrayvec 0.7.4",
- "async-lock 2.8.0",
+ "async-lock 3.1.2",
  "atomic-take",
  "base64 0.21.5",
  "bip39",
@@ -3861,9 +3861,9 @@ dependencies = [
  "derive_more",
  "ed25519-zebra 4.0.3",
  "either",
- "event-listener 2.5.3",
+ "event-listener 3.1.0",
  "fnv",
- "futures-lite 1.13.0",
+ "futures-lite 2.0.1",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
@@ -3904,16 +3904,16 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e6f1898682b618b81570047b9d870b3faaff6ae1891b468eddd94d7f903c2fe"
 dependencies = [
- "async-channel 1.9.0",
- "async-lock 2.8.0",
+ "async-channel 2.1.1",
+ "async-lock 3.1.2",
  "base64 0.21.5",
  "blake2-rfc",
  "derive_more",
  "either",
- "event-listener 2.5.3",
+ "event-listener 3.1.0",
  "fnv",
  "futures-channel",
- "futures-lite 1.13.0",
+ "futures-lite 2.0.1",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
@@ -4632,26 +4632,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
 dependencies = [
  "thiserror-impl",
-]
-
-[[package]]
-name = "thiserror-core"
-version = "1.0.50"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c001ee18b7e5e3f62cbf58c7fe220119e68d902bb7443179c0c8aef30090e999"
-dependencies = [
- "thiserror-core-impl",
-]
-
-[[package]]
-name = "thiserror-core-impl"
-version = "1.0.50"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4c60d69f36615a077cc7663b9cb8e42275722d23e58a7fa3d2c7f2915d09d04"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.39",
 ]
 
 [[package]]
@@ -5441,6 +5421,7 @@ dependencies = [
  "home",
  "once_cell",
  "rustix 0.38.25",
+ "windows-sys 0.48.0",
 ]
 
 [[package]]

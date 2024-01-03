@@ -30,7 +30,6 @@ pub fn generate_calls(
 
     let variant_names_and_struct_defs = super::generate_structs_from_variants(
         type_gen,
-        types_mod_ident,
         call_ty,
         |name| name.to_upper_camel_case().into(),
         "Call",
@@ -58,9 +57,6 @@ pub fn generate_calls(
                 }
             };
 
-            let call_fn_args = result.iter().map(|(call_fn_arg, _)| call_fn_arg);
-            let call_args = result.iter().map(|(_, call_arg)| call_arg);
-
             let pallet_name = pallet.name();
             let call_name = &var.variant_name;
             let struct_name = &var.composite.name;
@@ -82,8 +78,6 @@ pub fn generate_calls(
             let call_struct = quote! {
                 #struct_def
                 #alias_mod
-
-                #aliases
 
                 impl #crate_path::blocks::StaticExtrinsic for #struct_name {
                     const PALLET: &'static str = #pallet_name;
@@ -108,10 +102,9 @@ pub fn generate_calls(
 
             Ok((call_struct, client_fn))
         })
-        .collect::<Result<Vec<_>, _>>()?;
-
-    let call_structs = result.iter().map(|(call_struct, _)| call_struct);
-    let call_fns = result.iter().map(|(_, client_fn)| client_fn);
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .unzip();
 
     let call_type = type_gen.resolve_type_path(call_ty)?;
     let call_ty = type_gen.resolve_type(call_ty)?;

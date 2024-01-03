@@ -2,8 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use heck::ToSnakeCase as _;
-use heck::ToUpperCamelCase as _;
+use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
 use scale_info::TypeDef;
@@ -32,12 +31,13 @@ pub fn generate_storage(
         return Ok(quote!());
     };
 
-    let (storage_fns, alias_modules): (Vec<_>, Vec<_>) = storage
+    let (storage_fns, alias_modules): (Vec<TokenStream2>, Vec<TokenStream2>) = storage
         .entries()
         .iter()
         .map(|entry| generate_storage_entry_fns(type_gen, pallet, entry, crate_path))
-        .collect::<Result<Vec<_>, CodegenError>>()?;
-
+        .collect::<Result<Vec<_>, CodegenError>>()?
+        .into_iter()
+        .unzip();
     let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
@@ -59,34 +59,56 @@ pub fn generate_storage(
     })
 }
 
+/// Returns storage entry functions and alias modules.
 fn generate_storage_entry_fns(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
     storage_entry: &StorageEntryMetadata,
     crate_path: &syn::Path,
-) -> Result<TokenStream2, CodegenError> {
-    let keys: Vec<(Ident, TypePath)> = match storage_entry.entry_type() {
+) -> Result<(TokenStream2, TokenStream2), CodegenError> {
+    let snake_case_name = storage_entry.name().to_snake_case();
+    let storage_entry_ty = storage_entry.entry_type().value_ty();
+    let storage_entry_value_ty = type_gen
+        .resolve_type_path(storage_entry_ty)
+        .expect("type should be present");
+
+    let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
+    let alias_module_name = format_ident!("{snake_case_name}");
+    let alias_storage_path = quote!( types::#alias_module_name::#alias_name );
+
+    let storage_entry_map = |idx, id| {
+        let ident: Ident = format_ident!("_{}", idx);
+        let ty_path = type_gen
+            .resolve_type_path(id)
+            .expect("type should be present");
+
+        let alias_name = format_ident!("Param{}", idx);
+        let alias_type = primitive_type_alias(&ty_path);
+
+        let alias_type = quote!( pub type #alias_name = #alias_type; );
+        let path_to_alias = quote!( types::#alias_module_name::#alias_name );
+
+        (ident, alias_type, path_to_alias)
+    };
+
+    let keys: Vec<(Ident, TokenStream, TokenStream)> = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => vec![],
         StorageEntryType::Map { key_ty, .. } => {
-            match &type_gen.resolve_type(*key_ty)?.type_def {
+            match &type_gen
+                .resolve_type(*key_ty)
+                .expect("key type should be present")
+                .type_def
+            {
                 // An N-map; return each of the keys separately.
                 TypeDef::Tuple(tuple) => tuple
                     .fields
                     .iter()
                     .enumerate()
-                    .map(|(i, f)| {
-                        let ident: Ident = format_ident!("_{}", syn::Index::from(i));
-                        let ty_path = type_gen
-                            .resolve_type_path(f.id)
-                            .expect("resolving type should not fail");
-                        (ident, ty_path)
-                    })
+                    .map(|(idx, f)| storage_entry_map(idx, f.id))
                     .collect::<Vec<_>>(),
                 // A map with a single key; return the single key.
                 _ => {
-                    let ident = format_ident!("_0");
-                    let ty_path = type_gen.resolve_type_path(*key_ty)?;
-                    vec![(ident, ty_path)]
+                    vec![storage_entry_map(0, *key_ty)]
                 }
             }
         }
@@ -100,9 +122,6 @@ fn generate_storage_entry_fns(
         ));
     };
 
-    let snake_case_name = storage_entry.name().to_snake_case();
-    let storage_entry_ty = storage_entry.entry_type().value_ty();
-    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty)?;
     let docs = storage_entry.docs();
     let docs = type_gen
         .settings()
@@ -159,6 +178,7 @@ fn generate_storage_entry_fns(
 
     let alias_types = keys.iter().map(|(_, alias_type, _)| alias_type);
 
+    let types_mod_ident = type_gen.types_mod_ident();
     // Generate type alias for the return type only, since
     // the keys of the storage entry are not explicitly named.
     let alias_module = quote! {
@@ -195,7 +215,7 @@ fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
 mod tests {
     use crate::RuntimeGenerator;
     use frame_metadata::v15;
-    use heck::ToUpperCamelCase as _;
+    use heck::ToUpperCamelCase;
     use quote::{format_ident, quote};
     use scale_info::{meta_type, MetaType};
 
@@ -309,6 +329,8 @@ mod tests {
                     _0: impl ::std::borrow::Borrow<types::#name_ident::Param0>,
                 )
             );
+            dbg!(&generated_str);
+            dbg!(&expected_storage_constructor.to_string());
             assert!(generated_str.contains(&expected_storage_constructor.to_string()));
 
             let alias_name = format_ident!("{}", name.to_upper_camel_case());

@@ -38,4 +38,3 @@ getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 scale-info = { workspace = true, features = ["bit-vec"] }
-pretty_assertions = { workspace = true }
