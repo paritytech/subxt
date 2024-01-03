@@ -6,7 +6,6 @@ use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
 use crate::error::RpcError;
-use crate::utils::url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
@@ -103,7 +102,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
-        if !url_is_secure(url.as_ref())? {
+        if !crate::utils::url_is_secure(url.as_ref())? {
             return Err(Error::Rpc(RpcError::InsecureUrl(url.as_ref().into())));
         }
         self.build_from_insecure_url(url).await
@@ -250,7 +249,6 @@ async fn build_client_from_rpc<T: Config>(
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     use jsonrpsee::core::client::ClientT;
-
     let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
     client

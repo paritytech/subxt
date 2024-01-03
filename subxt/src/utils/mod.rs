@@ -31,8 +31,6 @@ pub use wrapper_opaque::WrapperKeepOpaque;
 #[doc(hidden)]
 pub use primitive_types::{H160, H256, H512};
 
-use crate::Error;
-
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -56,9 +54,9 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
 ///
 /// Returns an error if the the string could not be parsed into a URL.
 #[cfg(feature = "jsonrpsee")]
-pub fn url_is_secure(url: &str) -> Result<bool, Error> {
+pub fn url_is_secure(url: &str) -> Result<bool, crate::Error> {
     use crate::error::RpcError;
-    let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
+    let url = Url::parse(url).map_err(|e| crate::Error::Rpc(RpcError::ClientError(Box::new(e))))?;
 
     let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
     let is_localhost = url
