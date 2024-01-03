@@ -2260,9 +2260,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+checksum = "25db6b064527c5d482d0423354fcd07a89a2dfe07b67892e62411946db7f07b0"
 dependencies = [
  "either",
 ]
@@ -3848,9 +3848,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eca99148e026936bbc444c3708748207033968e4ef1c33bfc885660ae4d44d21"
+checksum = "8a326b4b4c4662f878f143b7605609416d2f0acab0faf494905ef32e0a2bf47a"
 dependencies = [
  "arrayvec 0.7.4",
  "async-lock 3.2.0",
@@ -3864,14 +3864,14 @@ dependencies = [
  "derive_more",
  "ed25519-zebra 4.0.3",
  "either",
- "event-listener 3.1.0",
+ "event-listener 4.0.0",
  "fnv",
  "futures-lite 2.1.0",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
  "hmac 0.12.1",
- "itertools 0.11.0",
+ "itertools 0.12.0",
  "libm",
  "libsecp256k1",
  "merlin 3.0.0",
@@ -3903,9 +3903,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e6f1898682b618b81570047b9d870b3faaff6ae1891b468eddd94d7f903c2fe"
+checksum = "8eccb21b5f0ca753caf1abe4e88b2ac9a4b0e028b32e8212045ed4babbb86030"
 dependencies = [
  "async-channel 2.1.1",
  "async-lock 3.2.0",
@@ -3913,14 +3913,14 @@ dependencies = [
  "blake2-rfc",
  "derive_more",
  "either",
- "event-listener 3.1.0",
+ "event-listener 4.0.0",
  "fnv",
  "futures-channel",
  "futures-lite 2.1.0",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
- "itertools 0.11.0",
+ "itertools 0.12.0",
  "log",
  "lru",
  "no-std-net",
@@ -4631,18 +4631,18 @@ checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "thiserror"
-version = "1.0.50"
+version = "1.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
+checksum = "b2cd5904763bad08ad5513ddbb12cf2ae273ca53fa9f68e843e236ec6dfccc09"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.50"
+version = "1.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
+checksum = "3dcf4a824cce0aeacd6f38ae6f24234c8e80d68632338ebaa1443b5df9e29e19"
 dependencies = [
  "proc-macro2",
  "quote",
