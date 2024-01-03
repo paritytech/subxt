@@ -17,9 +17,6 @@ use std::time::Duration;
 
 pub use jsonrpsee::client_transport::ws::Url;
 
-// // // Part of the public interface:
-// pub use jsonrpsee::client_transport::ws::Url;
-
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]
 pub enum MetadataVersion {
