@@ -22,8 +22,8 @@ mod utils;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use std::collections::HashMap;
 use std::sync::Arc;
-use utils::ordered_map::OrderedMap;
 use utils::variant_index::VariantIndex;
+use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
 
 type ArcStr = Arc<str>;
 
@@ -163,7 +163,7 @@ impl Metadata {
         Some(crate::utils::validation::get_type_hash(
             &self.types,
             id,
-            &mut HashMap::new(),
+            &OuterEnumHashes::empty(),
         ))
     }
 
@@ -324,7 +324,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_pallet_hash(*self)
+        crate::utils::validation::get_pallet_hash(*self, &OuterEnumHashes::empty())
     }
 }
 
@@ -643,7 +643,7 @@ impl<'a> RuntimeApiMetadata<'a> {
 
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_trait_hash(*self)
+        crate::utils::validation::get_runtime_trait_hash(*self, &OuterEnumHashes::empty())
     }
 }
 
@@ -766,8 +766,7 @@ impl<'a> CustomValueMetadata<'a> {
 
     /// Calculates the hash for the CustomValueMetadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        let mut cache = HashMap::new();
-        get_custom_value_hash(self, &mut cache)
+        get_custom_value_hash(self, &OuterEnumHashes::empty())
     }
 }
 

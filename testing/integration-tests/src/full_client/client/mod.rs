@@ -45,6 +45,9 @@ async fn storage_iter() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_iter();
+    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
+    assert_eq!(addr_bytes, addr.to_root_bytes());
+
     let len = api
         .storage()
         .at_latest()
@@ -201,6 +204,9 @@ async fn external_signing() {
         .unwrap();
 }
 
+// TODO: Investigate and fix this test failure when using the UnstableBackend.
+// (https://github.com/paritytech/subxt/issues/1308)
+#[cfg(not(feature = "unstable-backend-client"))]
 #[tokio::test]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;

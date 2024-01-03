@@ -13,8 +13,6 @@
 //! Enable the `subxt` feature to enable use of this [`sr25519::Keypair`] in signing
 //! subxt transactions for chains supporting sr25519 signatures.
 
-#![deny(missing_docs)]
-
 #[macro_use]
 mod utils;
 mod crypto;

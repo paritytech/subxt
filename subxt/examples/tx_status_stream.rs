@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::{tx::TxStatus, OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 

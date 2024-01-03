@@ -14,6 +14,9 @@ homepage.workspace = true
 description = "Light Client for chain interaction"
 keywords = ["parity", "substrate", "blockchain"]
 
+[lints]
+workspace = true
+
 [features]
 default = ["native"]
 
@@ -33,6 +36,7 @@ web = [
     "getrandom/js",
 
     "smoldot",
+    "smoldot/std",
     "smoldot-light",
     "tokio-stream",
     "tokio/sync",
@@ -72,17 +76,7 @@ wasm-bindgen = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 instant = { workspace = true, optional = true }
-tokio-util = { workspace = true, optional = true }
 pin-project = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
-
-[profile.dev.package.smoldot-light]
-opt-level = 2
-[profile.test.package.smoldot-light]
-opt-level = 2
-[profile.dev.package.smoldot]
-opt-level = 2
-[profile.test.package.smoldot]
-opt-level = 2

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::config::polkadot::PolkadotExtrinsicParamsBuilder as Params;
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;

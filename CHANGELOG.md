@@ -4,6 +4,211 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.33.0] - 2023-12-06
+
+This release makes a bunch of small QoL improvements and changes. Let's look at the main ones.
+
+### Add support for configuring multiple chains ([#1238](https://github.com/paritytech/subxt/pull/1238))
+
+The light client support previously provided a high level interface for connecting to single chains (ie relay chains). This PR exposes a "low level" interface which allows smoldot (the light client implementation we use) to be configured somewhat more arbitrarily, and then converted into a valid subxt `OnlineClient` to be used.
+
+See [this example](https://github.com/paritytech/subxt/blob/418c3afc923cacd17501f374fdee0d8f588e14fd/subxt/examples/light_client_parachains.rs) for more on how to do this.
+
+We'll likely refine this over time and add a slightly higher level interface to make common operations much easier to do.
+
+### Support decoding signed extensions ([#1209](https://github.com/paritytech/subxt/pull/1209) and [#1235](https://github.com/paritytech/subxt/pull/1235))
+
+This PR makes it possible to decode the signed extensions in extrinsics. This looks something like:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// Get blocks; here we just subscribe to them:
+let mut blocks_sub = api.blocks().subscribe_finalized().await?;
+
+while let Some(block) = blocks_sub.next().await {
+    let block = block?;
+
+    // Fetch the extrinsics in the block:
+    let extrinsics = block.extrinsics().await?;
+
+    // Iterate over them:
+    for extrinsic in extrinsics.iter() {
+
+        // Returns None if the extrinsic isn't signed, so no signed extensions:
+        let Some(signed_exts) = extrinsic.signed_extensions() else {
+            continue;
+        };
+
+        // We can ask for a couple of common values, None if not found:
+        println!("Tip: {:?}", signed_exts.tip());
+        println!("Nonce: {:?}", signed_exts.tip());
+
+        // Or we can find and decode into a static signed extension type
+        // (Err if we hit a decode error first, then None if it's not found):
+        if let Ok(Some(era)) = signed_exts.find::<CheckMortality<PolkadotConfig>>() {
+            println!("Era: {era:?}");
+        }
+
+        // Or we can iterate over the signed extensions to work with them:
+        for signed_ext in signed_exts {
+            println!("Signed Extension name: {}", signed_ext.name());
+
+            // We can try to statically decode each one:
+            if let Ok(Some(era)) = signed_ext.as_signed_extension::<CheckMortality<PolkadotConfig>>() {
+                println!("Era: {era:?}");
+            }
+
+            // Or we can dynamically decode it into a `scale_value::Value`:
+            if let Ok(value) = signed_ext.value() {
+                println!("Decoded extension: {value}");
+            }
+        }
+    }
+}
+```
+
+See the API docs for more.
+
+### ChargeAssetTxPayment: Add support for generic AssetId
+
+Still on the topic of signed extensions, the `ChargeAssetTxPayment` extension was previously not able to be used with a generic AssetId, which prohibited it from being used on the Asset Hub (which uses a `MultiLocation` instead). To address this, we added an `AssetId` type to our `subxt::Config`, which can now be configured.
+
+One example of doing that [can be found here](https://github.com/paritytech/subxt/blob/master/subxt/examples/setup_config_custom.rs).
+
+This example uses a generated `MultiLocation` type to be used as the `AssetId`. Currently it requires a rather hideous set of manual clones like so:
+
+```rust
+#[subxt::subxt(
+    runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
+    derive_for_type(path = "xcm::v2::multilocation::MultiLocation", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::multilocation::Junctions", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::junction::Junction", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::NetworkId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyPart", derive = "Clone"),
+    derive_for_type(
+        path = "bounded_collections::weak_bounded_vec::WeakBoundedVec",
+        derive = "Clone"
+    )
+)]
+```
+
+This is something we plan to address in the next version of Subxt.
+
+### Change SignedExtension matching logic ([#1283](https://github.com/paritytech/subxt/pull/1283))
+
+Before this release, each signed extension had a unique name (`SignedExtension::NAME`). We'd use this name to figure out which signed extensions to apply for a given chain inside the `signed_extensions::AnyOf` type.
+
+However, we recently ran into a new signed extension in Substrate called `SkipCheckIfFeeless`. This extension would wrap another signed extension, but maintained its own name. It has since been "hidden" from the public Substrate interface again, but a result of encountering this is that we have generalised the way that we "match" on signed extensions, so that we can be smarter about it going forwards.
+
+So now, for a given signed extension, we go from:
+
+```rust
+impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
+    const NAME: &'static str = "ChargeAssetTxPayment";
+    type Decoded = Self;
+}
+```
+
+To:
+
+```rust
+impl<T: Config> SignedExtension<T> for ChargeAssetTxPayment<T> {
+    type Decoded = Self;
+    fn matches(identifier: &str, type_id: u32, types: &PortableRegistry) -> bool {
+        identifier == "ChargeAssetTxPayment"
+    }
+}
+```
+
+On the whole, we continue matching by name, as in the example above, but this allows an author to inspect the type of the signed extension (and subtypes of it) too if they want the signed extension to match (and thus be used) only in certain cases.
+
+### Remove `wait_for_in_block` helper method ([#1237](https://github.com/paritytech/subxt/pull/1237))
+
+One can no longer use `tx.wait_for_in_block` to wait for a transaction to enter a block. The reason for this removal is that, especially when we migrate to the new `chainHead` APIs, we will no longer be able to reliably obtain any details about the block that the transaction made it into.
+
+In other words, the following sort of thing would often fail:
+
+```rust
+tx.wait_for_in_block()
+  .await?
+  .wait_for_success()
+  .await?;
+```
+
+The reason for this is that the block announced in the transaction status may not have been "pinned" yet in the new APIs. In the old APIs, errors would occasionally be encountered because the block announced may have been pruned by the time we ask for details for it. Overall; having an "unreliable" higher level API felt like a potential foot gun.
+
+That said, you can still achieve the same via the lower level APIs like so:
+
+```rust
+while let Some(status) = tx.next().await {
+    match status? {
+        TxStatus::InBestBlock(tx_in_block) | TxStatus::InFinalizedBlock(tx_in_block) => {
+            // now, we can attempt to work with the block, eg:
+            tx_in_block.wait_for_success().await?;
+        },
+        TxStatus::Error { message } | TxStatus::Invalid { message } | TxStatus::Dropped { message } => {
+            // Handle any errors:
+            println!("Error submitting tx: {message}");
+        },
+        // Continue otherwise:
+        _ => continue,
+    }
+}
+```
+
+### Subxt-codegen: Tidy crate interface ([#1225](https://github.com/paritytech/subxt/pull/1225))
+
+The `subxt-codegen` crate has always been a bit of a mess because it wasn't really supposed to be used outside of the subxt crates, which had led to issues like https://github.com/paritytech/subxt/issues/1211.
+
+This PR tidies up the interface to that crate so that it's much easier now to programmatically generate the Subxt interface. Now, we have three properly supported ways to do this, depending on your needs:
+
+1. Using the `#[subxt]` macro.
+2. Using the `subxt codegen` CLI command.
+3. Programmatically via the `subxt-codegen` crate.
+
+Each method aims to expose a similar and consistent set of options.
+
+If you were previously looking to use parts of the type generation logic to, for instance, generate runtime types but not the rest of the Subxt interface, then the https://github.com/paritytech/scale-typegen crate will aim to fill this role eventually.
+
+That sums up the most significant changes. A summary of all of the relevant changes is as follows:
+
+### Added
+
+- CLI: Add command to fetch chainSpec and optimize its size ([#1278](https://github.com/paritytech/subxt/pull/1278))
+- Add legacy RPC usage example ([#1279](https://github.com/paritytech/subxt/pull/1279))
+- impl RpcClientT for `Arc<T>` and `Box<T>` ([#1277](https://github.com/paritytech/subxt/pull/1277))
+- RPC: Implement legacy RPC system_account_next_index ([#1250](https://github.com/paritytech/subxt/pull/1250))
+- Lightclient: Add support for configuring multiple chains ([#1238](https://github.com/paritytech/subxt/pull/1238))
+- Extrinsics: Allow static decoding of signed extensions ([#1235](https://github.com/paritytech/subxt/pull/1235))
+- Extrinsics: Support decoding signed extensions ([#1209](https://github.com/paritytech/subxt/pull/1209))
+- ChargeAssetTxPayment: Add support for generic AssetId (eg `u32` or `MultiLocation`) ([#1227](https://github.com/paritytech/subxt/pull/1227))
+- Add Clone + Debug on Payloads/Addresses, and compare child storage results ([#1203](https://github.com/paritytech/subxt/pull/1203))
+
+### Changed
+
+- Lightclient: Update smoldot to `0.14.0` and smoldot-light to `0.12.0` ([#1307](https://github.com/paritytech/subxt/pull/1307))
+- Cargo: Switch to workspace lints ([#1299](https://github.com/paritytech/subxt/pull/1299))
+- Update substrate-* and signer-related dependencies ([#1297](https://github.com/paritytech/subxt/pull/1297))
+- Change SignedExtension matching logic and remove SkipCheckIfFeeless bits ([#1283](https://github.com/paritytech/subxt/pull/1283))
+- Update the README with the new location of node-cli ([#1282](https://github.com/paritytech/subxt/pull/1282))
+- Generalize `substrate-compat` impls to accept any valid hasher/header impl ([#1265](https://github.com/paritytech/subxt/pull/1265))
+- Extrinsics: Remove `wait_for_in_block` helper method ([#1237](https://github.com/paritytech/subxt/pull/1237))
+- Subxt-codegen: Tidy crate interface ([#1225](https://github.com/paritytech/subxt/pull/1225))
+- Lightclient: Update usage docs ([#1223](https://github.com/paritytech/subxt/pull/1223))
+- Wee tidy to subxt-signer flags ([#1200](https://github.com/paritytech/subxt/pull/1200))
+- Batch fetching storage values again to improve performance ([#1199](https://github.com/paritytech/subxt/pull/1199))
+- Add `subxt` feature in `subxt-signer` crate to default features ([#1193](https://github.com/paritytech/subxt/pull/1193))
+
+### Fixed
+
+- Trimmed metadata hash comparison fails in `is_codegen_valid_for`  ([#1306](https://github.com/paritytech/subxt/pull/1306))
+- Sync tx submission with chainHead_follow ([#1305](https://github.com/paritytech/subxt/pull/1305))
+- Storage: Fix partial key storage iteration ([#1298](https://github.com/paritytech/subxt/pull/1298))
+- Lightclient: Fix wasm socket closure called after being dropped ([#1289](https://github.com/paritytech/subxt/pull/1289))
+- Fix parachain example ([#1228](https://github.com/paritytech/subxt/pull/1228))
+
 ## [0.32.1] - 2023-10-05
 
 This is a patch release, mainly to deploy the fix [#1191](https://github.com/paritytech/subxt/pull/1191), which resolves an issue around codegen when runtime API definitions have an argument name "_".

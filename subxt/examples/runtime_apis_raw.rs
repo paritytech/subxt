@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use subxt::ext::codec::Compact;
 use subxt::ext::frame_metadata::RuntimeMetadataPrefixed;
 use subxt::{OnlineClient, PolkadotConfig};
