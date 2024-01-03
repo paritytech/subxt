@@ -33,7 +33,29 @@ pub struct FileOrUrl {
     pub version: Option<MetadataVersion>,
 }
 
-/// if `--path -` is provided, read bytes for metadata from stdin
+impl FromStr for FileOrUrl {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Ok(path) = PathOrStdIn::from_str(s) {
+            Ok(FileOrUrl {
+                url: None,
+                file: Some(path),
+                version: None,
+            })
+        } else {
+            Url::parse(s)
+                .map_err(|_| "Parsing Path or Uri failed.")
+                .map(|uri| FileOrUrl {
+                    url: Some(uri),
+                    file: None,
+                    version: None,
+                })
+        }
+    }
+}
+
+/// If `--path -` is provided, read bytes for metadata from stdin
 const STDIN_PATH_NAME: &str = "-";
 #[derive(Debug, Clone)]
 pub enum PathOrStdIn {
@@ -42,13 +64,19 @@ pub enum PathOrStdIn {
 }
 
 impl FromStr for PathOrStdIn {
-    type Err = <PathBuf as FromStr>::Err;
+    type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
         if s == STDIN_PATH_NAME {
             Ok(PathOrStdIn::StdIn)
         } else {
-            PathBuf::from_str(s).map(PathOrStdIn::Path)
+            let path = std::path::Path::new(s);
+            if path.exists() {
+                Ok(PathOrStdIn::Path(PathBuf::from(path)))
+            } else {
+                Err("Path does not exist.")
+            }
         }
     }
 }
@@ -116,32 +144,49 @@ pub fn with_indent(s: String, indent: usize) -> String {
         .join("\n")
 }
 
-impl FromStr for FileOrUrl {
-    type Err = &'static str;
+#[cfg(test)]
+mod tests {
+    use crate::utils::{FileOrUrl, PathOrStdIn};
+    use std::str::FromStr;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s == STDIN_PATH_NAME {
-            return Ok(FileOrUrl {
-                url: None,
-                file: Some(PathOrStdIn::StdIn),
-                version: None,
-            });
-        }
-        let path = std::path::Path::new(s);
-        if path.exists() {
+    #[test]
+    fn parsing() {
+        assert!(matches!(
+            FileOrUrl::from_str("-"),
             Ok(FileOrUrl {
                 url: None,
-                file: Some(PathOrStdIn::Path(PathBuf::from(s))),
-                version: None,
+                file: Some(PathOrStdIn::StdIn),
+                version: None
             })
-        } else {
-            Url::parse(s)
-                .map_err(|_| "no path or uri could be created.")
-                .map(|uri| FileOrUrl {
-                    url: Some(uri),
-                    file: None,
-                    version: None,
-                })
-        }
+        ),);
+
+        assert!(matches!(
+            FileOrUrl::from_str("  -  "),
+            Ok(FileOrUrl {
+                url: None,
+                file: Some(PathOrStdIn::StdIn),
+                version: None
+            })
+        ),);
+
+        assert!(matches!(
+            FileOrUrl::from_str("./src/main.rs"),
+            Ok(FileOrUrl {
+                url: None,
+                file: Some(PathOrStdIn::Path(_)),
+                version: None
+            })
+        ),);
+
+        assert!(FileOrUrl::from_str("./src/i_dont_exist.rs").is_err());
+
+        assert!(matches!(
+            FileOrUrl::from_str("https://github.com/paritytech/subxt"),
+            Ok(FileOrUrl {
+                url: Some(_),
+                file: None,
+                version: None
+            })
+        ));
     }
 }
