@@ -13,14 +13,14 @@ mod static_type;
 mod unchecked_extrinsic;
 mod wrapper_opaque;
 
+use crate::error::RpcError;
+use crate::Error;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
+use url::Url;
 
 pub use account_id::AccountId32;
 pub use era::Era;
-
-#[cfg(feature = "jsonrpsee")]
-use jsonrpsee::client_transport::ws::Url;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
@@ -53,10 +53,8 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
 ///
 /// Returns an error if the the string could not be parsed into a URL.
-#[cfg(feature = "jsonrpsee")]
-pub fn url_is_secure(url: &str) -> Result<bool, crate::Error> {
-    use crate::error::RpcError;
-    let url = Url::parse(url).map_err(|e| crate::Error::Rpc(RpcError::ClientError(Box::new(e))))?;
+pub fn url_is_secure(url: &str) -> Result<bool, Error> {
+    let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
 
     let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
     let is_localhost = url
