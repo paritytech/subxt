@@ -103,10 +103,7 @@ async fn run() {
 mod client {
     pub use jsonrpsee::{
         client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
+        core::{client::Client, Error},
     };
 
     pub use jsonrpsee::core::{client::ClientT, rpc_params};
