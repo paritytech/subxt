@@ -21,7 +21,7 @@ use crate::error::CodegenError;
 pub use self::{
     composite_def::{CompositeDef, CompositeDefFieldType, CompositeDefFields},
     derives::{Derives, DerivesRegistry},
-    substitutes::{AbsolutePath, TypeSubstitutes},
+    substitutes::TypeSubstitutes,
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,
     type_path::{TypeParameter, TypePath, TypePathType},
