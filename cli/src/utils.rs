@@ -21,7 +21,7 @@ pub struct FileOrUrl {
     pub url: Option<Url>,
     /// The path to the encoded metadata file.
     #[clap(long, value_parser)]
-    pub file: Option<PathBuf>,
+    pub file: Option<PathOrStdIn>,
     /// Specify the metadata version.
     ///
     ///  - "latest": Use the latest stable version available.
@@ -33,6 +33,26 @@ pub struct FileOrUrl {
     pub version: Option<MetadataVersion>,
 }
 
+/// if `--path -` is provided, read bytes for metadata from stdin
+const STDIN_PATH_NAME: &str = "-";
+#[derive(Debug, Clone)]
+pub enum PathOrStdIn {
+    Path(PathBuf),
+    StdIn,
+}
+
+impl FromStr for PathOrStdIn {
+    type Err = <PathBuf as FromStr>::Err;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == STDIN_PATH_NAME {
+            Ok(PathOrStdIn::StdIn)
+        } else {
+            PathBuf::from_str(s).map(PathOrStdIn::Path)
+        }
+    }
+}
+
 impl FileOrUrl {
     /// Fetch the metadata bytes.
     pub async fn fetch(&self) -> color_eyre::Result<Vec<u8>> {
@@ -42,11 +62,19 @@ impl FileOrUrl {
                 eyre::bail!("specify one of `--url` or `--file` but not both")
             }
             // Load from --file path
-            (Some(path), None, None) => {
+            (Some(PathOrStdIn::Path(path)), None, None) => {
                 let mut file = fs::File::open(path)?;
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes)?;
                 Ok(bytes)
+            }
+            (Some(PathOrStdIn::StdIn), None, None) => {
+                let res = std::io::stdin().bytes().collect::<Result<Vec<u8>, _>>();
+
+                match res {
+                    Ok(bytes) => Ok(bytes),
+                    Err(err) => eyre::bail!("reading bytes from stdin (`--file -`) failed: {err}"),
+                }
             }
             // Cannot load the metadata from the file and specify a version to fetch.
             (Some(_), None, Some(_)) => {
@@ -92,16 +120,23 @@ impl FromStr for FileOrUrl {
     type Err = &'static str;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == STDIN_PATH_NAME {
+            return Ok(FileOrUrl {
+                url: None,
+                file: Some(PathOrStdIn::StdIn),
+                version: None,
+            });
+        }
         let path = std::path::Path::new(s);
         if path.exists() {
             Ok(FileOrUrl {
                 url: None,
-                file: Some(PathBuf::from(s)),
+                file: Some(PathOrStdIn::Path(PathBuf::from(s))),
                 version: None,
             })
         } else {
             Url::parse(s)
-                .map_err(|_| "no path or uri could be crated")
+                .map_err(|_| "no path or uri could be created.")
                 .map(|uri| FileOrUrl {
                     url: Some(uri),
                     file: None,
