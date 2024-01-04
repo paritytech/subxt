@@ -523,7 +523,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             )));
         };
 
-        if spec_version >= runtime_version.spec_version {
+        if spec_version > runtime_version.spec_version {
             break block_ref;
         }
     };
