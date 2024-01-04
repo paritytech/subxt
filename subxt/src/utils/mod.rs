@@ -66,6 +66,15 @@ pub fn url_is_secure(url: &str) -> Result<bool, Error> {
     Ok(secure_scheme || is_localhost)
 }
 
+/// Validates, that the given Url is secure ("https" or "wss" scheme) or is referring to localhost.
+pub fn validate_url_is_secure(url: &str) -> Result<(), Error> {
+    if !url_is_secure(url)? {
+        Err(Error::Rpc(crate::error::RpcError::InsecureUrl(url.into())))
+    } else {
+        Ok(())
+    }
+}
+
 /// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
 /// because regardless of the generic param, it is always possible to Send + Sync this
 /// 0 size type).
