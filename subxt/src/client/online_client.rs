@@ -15,7 +15,6 @@ use crate::{
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
-    utils::url_is_secure,
     Config, Metadata,
 };
 use derivative::Derivative;
@@ -67,7 +66,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        if !url_is_secure(url.as_ref())? {
+        if !crate::utils::url_is_secure(url.as_ref())? {
             return Err(Error::Rpc(crate::error::RpcError::InsecureUrl(
                 url.as_ref().into(),
             )));

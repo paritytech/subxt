@@ -101,7 +101,7 @@ impl FileOrUrl {
 
                 match res {
                     Ok(bytes) => Ok(bytes),
-                    Err(err) => eyre::bail!("reading bytes from stdin (`--file -`) failed: {err}"),
+                    Err(err) => bail!("reading bytes from stdin (`--file -`) failed: {err}"),
                 }
             }
             // Cannot load the metadata from the file and specify a version to fetch.
