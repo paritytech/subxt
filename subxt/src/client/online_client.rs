@@ -3,13 +3,12 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
-use crate::config::Header;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{
         legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
     },
-    blocks::BlocksClient,
+    blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
@@ -438,11 +437,11 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             Err(err) => return Some(Err(err)),
         };
 
-        let at = match wait_for_runtime_upgrade(&self.client, &runtime_version).await {
-            Some(Ok(at)) => at,
-            Some(Err(err)) => return Some(Err(err)),
-            None => return None,
-        };
+        let at =
+            match wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await? {
+                Ok(at) => at,
+                Err(err) => return Some(Err(err)),
+            };
 
         let metadata = match OnlineClient::fetch_metadata(self.client.backend(), at.hash()).await {
             Ok(metadata) => metadata,
@@ -483,10 +482,10 @@ impl Update {
 }
 
 /// Helper to wait until the runtime upgrade is applied on at finalized block.
-async fn wait_for_runtime_upgrade<T: Config>(
+async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
     client: &OnlineClient<T>,
     runtime_version: &RuntimeVersion,
-) -> Option<Result<T::Header, Error>> {
+) -> Option<Result<BlockRef<T::Hash>, Error>> {
     use scale_value::At;
 
     let mut block_sub = match client.backend().stream_finalized_block_headers().await {
@@ -494,8 +493,8 @@ async fn wait_for_runtime_upgrade<T: Config>(
         Err(err) => return Some(Err(err)),
     };
 
-    let head = loop {
-        let (block, block_ref) = match block_sub.next().await? {
+    let block_ref = loop {
+        let (_, block_ref) = match block_sub.next().await? {
             Ok(n) => n,
             Err(err) => return Some(Err(err)),
         };
@@ -503,7 +502,7 @@ async fn wait_for_runtime_upgrade<T: Config>(
         let key: Vec<scale_value::Value> = vec![];
         let addr = crate::dynamic::storage("System", "LastRuntimeUpgrade", key);
 
-        let chunk = match client.storage().at(block_ref).fetch(&addr).await {
+        let chunk = match client.storage().at(block_ref.hash()).fetch(&addr).await {
             Ok(Some(v)) => v,
             Ok(None) => continue,
             Err(e) => return Some(Err(e)),
@@ -514,16 +513,20 @@ async fn wait_for_runtime_upgrade<T: Config>(
             Err(e) => return Some(Err(e)),
         };
 
-        let spec_version = scale_val
+        let Some(Ok(spec_version)) = scale_val
             .at("spec_version")
             .and_then(|v| v.as_u128())
-            .expect("specVersion should exist on RuntimeVersion; qed")
-            as u32;
+            .map(|v| u32::try_from(v))
+        else {
+            return Some(Err(Error::Other(
+                "Decoding `RuntimeVersion::spec_version` as u32 failed".to_string(),
+            )));
+        };
 
         if spec_version >= runtime_version.spec_version {
-            break block;
+            break block_ref;
         }
     };
 
-    Some(Ok(head))
+    Some(Ok(block_ref))
 }
