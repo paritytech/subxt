@@ -70,7 +70,7 @@ darling = "0.20.3"
 derivative = "2.2.0"
 either = "1.9.0"
 frame-metadata = { version = "16.0.0", default-features = false, features = ["current", "std"] }
-futures = { version = "0.3.29", default-features = false, features = ["std"] }
+futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hex = "0.4.3"
 heck = "0.4.1"
@@ -104,7 +104,7 @@ which = "5.0.0"
 smoldot = { version = "0.15.0", default-features = false }
 smoldot-light = { version = "0.13.0", default-features = false }
 tokio-stream = "0.1.14"
-futures-util = "0.3.29"
+futures-util = "0.3.30"
 rand = "0.8.5"
 pin-project = "1.1.3"
 
