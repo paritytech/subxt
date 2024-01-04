@@ -123,13 +123,15 @@ where
     // Acquire lock on the events cache. We either get back our events or we fetch and set them
     // before unlocking, so only one fetch call should ever be made. We do this because the
     // same events can be shared across all extrinsics in the block.
-    let lock = cached_events.lock().await;
+    let mut lock = cached_events.lock().await;
     let events = match &*lock {
         Some(events) => events.clone(),
         None => {
-            events::EventsClient::new(client.clone())
+            let events = events::EventsClient::new(client.clone())
                 .at(block_hash)
-                .await?
+                .await?;
+            lock.replace(events.clone());
+            events
         }
     };
 
