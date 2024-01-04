@@ -2266,9 +2266,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.11.0"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1c173a5686ce8bfa551b3563d0c2170bf24ca44da99c7ca4bfdab5418c3fe57"
+checksum = "25db6b064527c5d482d0423354fcd07a89a2dfe07b67892e62411946db7f07b0"
 dependencies = [
  "either",
 ]
@@ -3891,9 +3891,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eca99148e026936bbc444c3708748207033968e4ef1c33bfc885660ae4d44d21"
+checksum = "8a326b4b4c4662f878f143b7605609416d2f0acab0faf494905ef32e0a2bf47a"
 dependencies = [
  "arrayvec 0.7.4",
  "async-lock 3.2.0",
@@ -3907,14 +3907,14 @@ dependencies = [
  "derive_more",
  "ed25519-zebra 4.0.3",
  "either",
- "event-listener 3.1.0",
+ "event-listener 4.0.0",
  "fnv",
  "futures-lite 2.1.0",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
  "hmac 0.12.1",
- "itertools 0.11.0",
+ "itertools 0.12.0",
  "libm",
  "libsecp256k1",
  "merlin 3.0.0",
@@ -3946,9 +3946,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e6f1898682b618b81570047b9d870b3faaff6ae1891b468eddd94d7f903c2fe"
+checksum = "8eccb21b5f0ca753caf1abe4e88b2ac9a4b0e028b32e8212045ed4babbb86030"
 dependencies = [
  "async-channel 2.1.1",
  "async-lock 3.2.0",
@@ -3956,14 +3956,14 @@ dependencies = [
  "blake2-rfc",
  "derive_more",
  "either",
- "event-listener 3.1.0",
+ "event-listener 4.0.0",
  "fnv",
  "futures-channel",
  "futures-lite 2.1.0",
  "futures-util",
  "hashbrown 0.14.3",
  "hex",
- "itertools 0.11.0",
+ "itertools 0.12.0",
  "log",
  "lru",
  "no-std-net",
@@ -4688,18 +4688,18 @@ checksum = "222a222a5bfe1bba4a77b45ec488a741b3cb8872e5e499451fd7d0129c9c7c3d"
 
 [[package]]
 name = "thiserror"
-version = "1.0.50"
+version = "1.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9a7210f5c9a7156bb50aa36aed4c95afb51df0df00713949448cf9e97d382d2"
+checksum = "b2cd5904763bad08ad5513ddbb12cf2ae273ca53fa9f68e843e236ec6dfccc09"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.50"
+version = "1.0.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "266b2e40bc00e5a6c09c3584011e08b06f123c00362c92b975ba9843aaaa14b8"
+checksum = "3dcf4a824cce0aeacd6f38ae6f24234c8e80d68632338ebaa1443b5df9e29e19"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4743,9 +4743,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.34.0"
+version = "1.35.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0c014766411e834f7af5b8f4cf46257aab4036ca95e9d2c144a10f59ad6f5b9"
+checksum = "c89b4efa943be685f629b149f53829423f8f5531ea21249408e8e2f8671ec104"
 dependencies = [
  "backtrace",
  "bytes",
@@ -5787,18 +5787,18 @@ checksum = "ff4524214bc4629eba08d78ceb1d6507070cc0bcbbed23af74e19e6e924a24cf"
 
 [[package]]
 name = "zerocopy"
-version = "0.7.29"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d075cf85bbb114e933343e087b92f2146bac0d55b534cbb8188becf0039948e"
+checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.29"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86cd5ca076997b97ef09d3ad65efe811fa68c9e874cb636ccb211223a813b0c2"
+checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
 dependencies = [
  "proc-macro2",
  "quote",

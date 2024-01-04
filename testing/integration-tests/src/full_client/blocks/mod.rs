@@ -214,7 +214,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .collect::<Vec<_>>();
 
     // All blocks contain a timestamp; check this first:
-    let timestamp = block_extrinsics.get(0).unwrap();
+    let timestamp = block_extrinsics.first().unwrap();
     timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
     timestamp
         .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
