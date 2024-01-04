@@ -62,7 +62,7 @@ pub struct Opts {
     /// Defaults to `false` (default substitutions are provided).
     #[clap(long)]
     no_default_substitutions: bool,
-    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
     #[clap(long, short)]
     allow_insecure: bool,
 }

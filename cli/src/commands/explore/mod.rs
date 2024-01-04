@@ -71,7 +71,7 @@ pub struct Opts {
     pallet: Option<String>,
     #[command(subcommand)]
     pallet_subcommand: Option<PalletSubcommand>,
-    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
     #[clap(long, short)]
     allow_insecure: bool,
 }
@@ -237,7 +237,7 @@ pub mod tests {
             .await
             .unwrap_err()
             .to_string()
-            .contains("--allow-insecure"));
+            .contains("is not secure"));
 
         // also errors, but later, because of networking reasons:
         assert!(run("--url ws://rpc.polkadot.io:443 --allow-insecure")

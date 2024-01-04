@@ -57,10 +57,11 @@ pub fn url_is_secure(url: &str) -> Result<bool, Error> {
     let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
 
     let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
-    let is_localhost = url
-        .host_str()
-        .map(|host| host == "localhost" || host == "127.0.0.1")
-        .unwrap_or(false);
+    let is_localhost = url.host().is_some_and(|e| match e {
+        url::Host::Domain(e) => e == "localhost",
+        url::Host::Ipv4(e) => e.is_loopback(),
+        url::Host::Ipv6(e) => e.is_loopback(),
+    });
 
     Ok(secure_scheme || is_localhost)
 }

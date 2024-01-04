@@ -38,7 +38,7 @@ pub struct Opts {
     /// Defaults to latest.
     #[clap(long = "version", default_value = "latest")]
     version: MetadataVersion,
-    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
     #[clap(long, short)]
     allow_insecure: bool,
 }

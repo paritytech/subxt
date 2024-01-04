@@ -35,7 +35,7 @@ pub struct Opts {
     /// Write the output of the metadata command to the provided file path.
     #[clap(long, short, value_parser)]
     pub output_file: Option<PathBuf>,
-    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
     #[clap(long, short)]
     allow_insecure: bool,
 }

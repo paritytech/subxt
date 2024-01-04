@@ -29,7 +29,7 @@ pub struct Opts {
     metadata_or_url_1: FileOrUrl,
     /// metadata file or node URL
     metadata_or_url_2: FileOrUrl,
-    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL enscryption
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
     #[clap(long, short)]
     allow_insecure: bool,
 }
