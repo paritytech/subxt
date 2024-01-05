@@ -249,7 +249,7 @@ mod jsonrpsee_helpers {
     use crate::error::{Error, LightClientError};
     pub use jsonrpsee::{
         client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::client::{Client, ClientBuilder},
+        core::client::Client,
     };
 
     /// Build WS RPC client from URL

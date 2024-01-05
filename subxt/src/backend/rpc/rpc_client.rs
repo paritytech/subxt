@@ -230,10 +230,7 @@ impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
+        core::{client::Client, Error},
     };
 
     /// Build WS RPC client from URL
