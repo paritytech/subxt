@@ -4520,6 +4520,8 @@ dependencies = [
  "darling 0.20.3",
  "parity-scale-codec",
  "proc-macro-error",
+ "quote",
+ "scale-typegen",
  "subxt-codegen",
  "syn 2.0.39",
 ]

@@ -23,5 +23,7 @@ proc-macro = true
 codec = { package = "parity-scale-codec", workspace = true }
 darling = { workspace = true }
 proc-macro-error = { workspace = true }
-syn = { workspace = true }
+syn.workspace = true
+quote = { workspace = true }
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
+scale-typegen = { workspace = true }
