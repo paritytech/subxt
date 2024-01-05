@@ -94,7 +94,7 @@ wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
 scale-typegen-description = "0.1.0"
-scale-typegen = "0.1.0"
+scale-typegen = "0.1.1"
 
 # Light client support:
 smoldot = { version = "0.14.0", default-features = false }
