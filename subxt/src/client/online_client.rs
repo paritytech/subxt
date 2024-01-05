@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
+use crate::config::Header;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{
@@ -430,12 +431,30 @@ pub struct RuntimeUpdaterStream<T: Config> {
 impl<T: Config> RuntimeUpdaterStream<T> {
     /// Wait for the next runtime update.
     pub async fn next(&mut self) -> Option<Result<Update, Error>> {
-        let maybe_runtime_version = self.stream.next().await?;
-
-        let runtime_version = match maybe_runtime_version {
+        let runtime_version = match self.stream.next().await? {
             Ok(runtime_version) => runtime_version,
             Err(err) => return Some(Err(err)),
         };
+
+        // Remove this block before merging.
+        {
+            let b = self
+                .client
+                .backend()
+                .latest_finalized_block_ref()
+                .await
+                .unwrap();
+
+            let h = self
+                .client
+                .backend()
+                .block_header(b.hash())
+                .await
+                .unwrap()
+                .unwrap();
+
+            tracing::info!("Runtime upgrade initiated at #{}", h.number().into());
+        }
 
         let at =
             match wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await? {
@@ -494,7 +513,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
     };
 
     let block_ref = loop {
-        let (_, block_ref) = match block_sub.next().await? {
+        let (b, block_ref) = match block_sub.next().await? {
             Ok(n) => n,
             Err(err) => return Some(Err(err)),
         };
@@ -502,9 +521,14 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
         let key: Vec<scale_value::Value> = vec![];
         let addr = crate::dynamic::storage("System", "LastRuntimeUpgrade", key);
 
+        // The storage `system::lastRuntimeUpgrade` should always have a version
+        //
+        // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
         let chunk = match client.storage().at(block_ref.hash()).fetch(&addr).await {
             Ok(Some(v)) => v,
-            Ok(None) => continue,
+            Ok(None) => {
+                continue;
+            }
             Err(e) => return Some(Err(e)),
         };
 
@@ -523,8 +547,13 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             )));
         };
 
-        if spec_version >= runtime_version.spec_version {
+        // We are waiting for the chain to have the same spec version
+        // as sent out via the runtime subscription.
+        if spec_version == runtime_version.spec_version {
+            tracing::info!("block #{} new runtime", b.number().into());
             break block_ref;
+        } else {
+            tracing::info!("block #{} no new runtime", b.number().into());
         }
     };
 
