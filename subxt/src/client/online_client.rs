@@ -540,7 +540,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
         let Some(Ok(spec_version)) = scale_val
             .at("spec_version")
             .and_then(|v| v.as_u128())
-            .map(|v| u32::try_from(v))
+            .map(u32::try_from)
         else {
             return Some(Err(Error::Other(
                 "Decoding `RuntimeVersion::spec_version` as u32 failed".to_string(),
