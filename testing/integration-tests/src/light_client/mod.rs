@@ -39,17 +39,23 @@ type Client = LightClient<PolkadotConfig>;
 
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let mut sub = api.blocks().subscribe_best().await?;
 
     let _block = sub.next().await.unwrap()?;
     let _block = sub.next().await.unwrap()?;
     let _block = sub.next().await.unwrap()?;
 
+    println!("non_finalized_headers_subscription {:?}", now.elapsed());
+
     Ok(())
 }
 
 // Check that we can subscribe to finalized blocks.
 async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let mut sub = api.blocks().subscribe_finalized().await?;
     let header = sub.next().await.unwrap()?;
     let finalized_hash = api
@@ -65,11 +71,15 @@ async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error
     let _block = sub.next().await.unwrap()?;
     let _block = sub.next().await.unwrap()?;
 
+    println!("finalized_headers_subscription {:?}", now.elapsed());
+
     Ok(())
 }
 
 // Check that we can subscribe to non-finalized blocks.
 async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let mut sub = api.blocks().subscribe_best().await?;
 
     let block = sub.next().await.unwrap()?;
@@ -80,11 +90,14 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
         .call_raw::<(Compact<u32>, Metadata)>("Metadata_metadata", None)
         .await?;
 
+    println!("runtime_api_call {:?}", now.elapsed());
     Ok(())
 }
 
 // Lookup for the `Timestamp::now` plain storage entry.
 async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let addr = node_runtime::storage().timestamp().now();
     let entry = api
         .storage()
@@ -95,30 +108,40 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
 
     assert!(entry > 0);
 
+    println!("storage_plain_lookup {:?}", now.elapsed());
+
     Ok(())
 }
 
 // Make a dynamic constant query for `System::BlockLenght`.
 async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let constant_query = subxt::dynamic::constant("System", "BlockLength");
     let _value = api.constants().at(&constant_query)?;
 
+    println!("dynamic_constant_query {:?}", now.elapsed());
     Ok(())
 }
 
 // Fetch a few all events from the latest block and decode them dynamically.
 async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
     let events = api.events().at_latest().await?;
 
     for event in events.iter() {
         let _event = event?;
     }
 
+    println!("dynamic_events {:?}", now.elapsed());
     Ok(())
 }
 
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
+    tracing_subscriber::fmt::init();
+
     println!("light client initialization started");
     let now = std::time::Instant::now();
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
