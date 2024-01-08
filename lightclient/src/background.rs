@@ -289,15 +289,20 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
 
                 if let Some(sender) = self.subscriptions.get_mut(&(id, chain_id)) {
                     // Send the current notification response.
-                    if sender.send(result).is_err() {
-                        tracing::warn!(
-                            target: LOG_TARGET,
-                            "Cannot send notification to subscription id={id} chain={chain_id:?} method={method}",
-                        );
+                    match sender.send(result) {
+                        Ok(_) => {
+                            tracing::trace!(target: LOG_TARGET, "Received subscription id={id} chain={chain_id:?} method={method}");
+                        }
+                        Err(err) => {
+                            tracing::warn!(
+                                target: LOG_TARGET,
+                                "Cannot send notification to subscription id={id} chain={chain_id:?} method={method} error={err}",
+                            );
 
-                        // Remove the sender if the subscription dropped the receiver.
-                        self.subscriptions.remove(&(id, chain_id));
-                    }
+                            // Remove the sender if the subscription dropped the receiver.
+                            self.subscriptions.remove(&(id, chain_id));
+                        }
+                    };
                 } else {
                     tracing::warn!(
                         target: LOG_TARGET,
