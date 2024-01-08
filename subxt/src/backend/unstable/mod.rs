@@ -539,12 +539,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // If we have a finalized hash, we are done looking for tx events and we are just waiting
                 // for a pinned block with a matching hash (which must appear eventually given it's finalized).
                 if let Some(hash) = &finalized_hash {
-                    if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.remove(hash)
-                    {
+                    if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.get(hash) {
                         // Found it! Hand back the event with a pinned block. We're done.
                         done = true;
                         let ev = TransactionStatus::InFinalizedBlock {
-                            hash: block_ref.into(),
+                            hash: block_ref.clone().into(),
                         };
                         return Poll::Ready(Some(Ok(ev)));
                     } else {
