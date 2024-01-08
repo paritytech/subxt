@@ -439,7 +439,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // We care about new and finalized block hashes.
         #[derive(Debug)]
         enum SeenBlock<Ref> {
-            New(Ref),
+            New((Ref, Ref)),
             Finalized(Vec<Ref>),
         }
         #[derive(Debug)]
@@ -468,7 +468,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     }
                     None
                 }
-                FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
+                FollowEvent::NewBlock(ev) => {
+                    Some(SeenBlock::New((ev.block_hash, ev.parent_block_hash)))
+                }
                 FollowEvent::Finalized(ev) => {
                     unsafe {
                         PRUNED = Some(format!(" pruned {:?} {:?}", PRUNED, ev.pruned_block_hashes));
@@ -517,19 +519,22 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // Make a note of new or finalized blocks that have come in since we started the TX.
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
-                        SeenBlock::New(block_ref) => {
+                        SeenBlock::New((block_ref, parent)) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             // if finalized_hash.is_none() {
-                            seen_blocks.insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
+                            seen_blocks.insert(
+                                block_ref.hash(),
+                                (SeenBlockMarker::New, block_ref, parent),
+                            );
                             // }
                         }
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
-                                seen_blocks.insert(
-                                    block_ref.hash(),
-                                    (SeenBlockMarker::Finalized, block_ref),
-                                );
+                                seen_blocks
+                                    .get_mut(&block_ref.hash())
+                                    .expect("finalized block seen before new block")
+                                    .0 = SeenBlockMarker::Finalized;
                             }
                         }
                     }
@@ -539,7 +544,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // If we have a finalized hash, we are done looking for tx events and we are just waiting
                 // for a pinned block with a matching hash (which must appear eventually given it's finalized).
                 if let Some(hash) = &finalized_hash {
-                    if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.get(hash) {
+                    if let Some((SeenBlockMarker::Finalized, block_ref, _)) = seen_blocks.get(hash)
+                    {
                         // Found it! Hand back the event with a pinned block. We're done.
                         done = true;
                         let ev = TransactionStatus::InFinalizedBlock {
