@@ -520,10 +520,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         SeenBlock::New(block_ref) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
-                            if finalized_hash.is_none() {
-                                seen_blocks
-                                    .insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
-                            }
+                            // if finalized_hash.is_none() {
+                            seen_blocks.insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
+                            // }
                         }
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
