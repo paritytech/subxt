@@ -590,7 +590,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         // block on the node a tx was sent to will ever be known about on the
                         // chainHead_follow subscription.
                         let block_ref = match seen_blocks.get(&block.hash) {
-                            Some((_, block_ref)) => block_ref.clone().into(),
+                            Some((_, block_ref, _)) => block_ref.clone().into(),
                             None => BlockRef::from_hash(block.hash),
                         };
                         TransactionStatus::InBestBlock { hash: block_ref }
