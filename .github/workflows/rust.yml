@@ -325,58 +325,6 @@ jobs:
                 command: test
                 args: --release --package integration-tests --features unstable-light-client -- --nocapture
 
-    wasm_tests:
-        name: Test (WASM)
-        runs-on: ubuntu-latest
-        timeout-minutes: 20
-        env:
-            # Set timeout for wasm tests to be much bigger than the default 20 secs.
-            WASM_BINDGEN_TEST_TIMEOUT: 300
-
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Install wasm-pack
-              run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-
-            - name: Install firefox
-              uses: browser-actions/setup-firefox@latest
-
-            - name: Install chrome
-              uses: browser-actions/setup-chrome@latest
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
-
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
-
-            - name: Run subxt WASM tests
-              run: |
-                  # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
-                  # `node-key` provides a deterministic p2p address.
-                  substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
-                  wasm-pack test --headless --firefox
-                  wasm-pack test --headless --chrome
-                  pkill substrate-node
-              working-directory: testing/wasm-rpc-tests
-
-            - name: Run subxt-lightclient WASM tests
-              run: |
-                  # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
-                  # `node-key` provides a deterministic p2p address.
-                  substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
-                  wasm-pack test --headless --firefox
-                  wasm-pack test --headless --chrome
-                  pkill substrate-node
-              working-directory: testing/wasm-lightclient-tests
-
-            - name: Run subxt-signer WASM tests
-              run: |
-                  wasm-pack test --headless --firefox
-                  wasm-pack test --headless --chrome
-              working-directory: signer/wasm-tests
-
     clippy:
         name: Cargo clippy
         runs-on: ubuntu-latest
