@@ -20,6 +20,7 @@ env:
     CARGO_TERM_COLOR: always
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
     WASM_BINDGEN_TEST_TIMEOUT: 60
+    RUST_LOG: "trace,polling=info,async_io=info,sync-service-polkadot=info"
 
 jobs:
     check:
