@@ -259,10 +259,7 @@ mod jsonrpsee_helpers {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
+        core::client::{Client, ClientBuilder, Error},
     };
 
     /// Build web RPC client from URL

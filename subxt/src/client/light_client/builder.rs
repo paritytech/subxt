@@ -247,10 +247,15 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
 #[cfg(all(feature = "jsonrpsee", feature = "native"))]
 mod jsonrpsee_helpers {
     use crate::error::{Error, LightClientError};
+    use tokio_util::compat::Compat;
+
     pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
         core::client::Client,
     };
+
+    pub type Sender = ws::Sender<Compat<EitherStream>>;
+    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
 
     /// Build WS RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
