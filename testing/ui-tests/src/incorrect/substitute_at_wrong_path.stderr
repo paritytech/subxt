@@ -1,0 +1,18 @@
+error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
+
+       A type with the same name is present at:
+       frame_system::pallet::Event
+       pallet_balances::pallet::Event
+       pallet_multisig::pallet::Event
+ --> src/incorrect/substitute_at_wrong_path.rs:1:1
+  |
+1 | / #[subxt::subxt(
+2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
+3 | |     substitute_type(
+4 | |         path = "sp_runtime::multiaddress::Event",
+5 | |         with = "crate::MyEvent"
+6 | |     )
+7 | | )]
+  | |__^
+  |
+  = note: this error originates in the attribute macro `subxt::subxt` (in Nightly builds, run with -Z macro-backtrace for more info)
