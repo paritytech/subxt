@@ -500,7 +500,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
-                if now.elapsed().as_secs() > 120 {
+                if now.elapsed().as_secs() > 240 {
                     println!("Fin block {:?}", unsafe { &FIN_BLOCK });
                     println!("Pruned block {:?}", unsafe { &PRUNED });
                     println!("MemLog: {:#?}", mem_log);
