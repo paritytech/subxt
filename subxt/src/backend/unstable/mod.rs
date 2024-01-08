@@ -532,9 +532,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
                                 seen_blocks
-                                    .get_mut(&block_ref.hash())
-                                    .expect("finalized block seen before new block")
+                                    .entry(block_ref.hash())
+                                    .or_insert((
+                                        SeenBlockMarker::Finalized,
+                                        block_ref.clone(),
+                                        block_ref,
+                                    ))
                                     .0 = SeenBlockMarker::Finalized;
+
+                                // .get_mut(&block_ref.hash())
+                                // .expect("finalized block seen before new block")
+                                // .0 = SeenBlockMarker::Finalized;
                             }
                         }
                     }
