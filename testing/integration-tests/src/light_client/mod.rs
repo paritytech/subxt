@@ -119,16 +119,21 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
+    println!("light client initialization started");
+    let now = std::time::Instant::now();
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
         .build_from_url("wss://rpc.polkadot.io:443")
         .await?;
+    println!("light client initialization took {:?}", now.elapsed());
 
+    let now = std::time::Instant::now();
     non_finalized_headers_subscription(&api).await?;
     finalized_headers_subscription(&api).await?;
     runtime_api_call(&api).await?;
     storage_plain_lookup(&api).await?;
     dynamic_constant_query(&api).await?;
     dynamic_events(&api).await?;
+    println!("light client testing took {:?}", now.elapsed());
 
     Ok(())
 }

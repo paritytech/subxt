@@ -241,7 +241,7 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: test
-                  args: --release --package integration-tests --features unstable-light-client
+                  args: --release --package integration-tests --features unstable-light-client -- --nocapture
 
     wasm_tests:
         name: Test (WASM)
