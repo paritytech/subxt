@@ -124,8 +124,8 @@ path = "examples/light_client_parachains.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [package.metadata.docs.rs]
-all-features = true
+defalt-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-all-features = true
+defalt-features = true

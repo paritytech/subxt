@@ -60,8 +60,8 @@ sp-keyring = { workspace = true }
 ignored = ["getrandom"]
 
 [package.metadata.docs.rs]
-all-features = true
+defalt-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-all-features = true
+defalt-features = true

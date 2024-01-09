@@ -5,6 +5,7 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
+use crate::macros::cfg_substrate_compat;
 use crate::Config;
 
 /// Signing transactions requires a [`Signer`]. This is responsible for
@@ -24,9 +25,9 @@ pub trait Signer<T: Config> {
     fn sign(&self, signer_payload: &[u8]) -> T::Signature;
 }
 
-#[cfg(feature = "substrate-compat")]
-#[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
-pub use pair_signer::PairSigner;
+cfg_substrate_compat! {
+    pub use pair_signer::PairSigner;
+}
 
 // A signer suitable for substrate based chains. This provides compatibility with Substrate
 // packages like sp_keyring and such, and so relies on sp_core and sp_runtime to be included.

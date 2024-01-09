@@ -56,9 +56,9 @@
 // with other file names for their types.
 #![allow(clippy::module_inception)]
 
-#[cfg(feature = "jsonrpsee")]
-#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
-mod jsonrpsee_impl;
+crate::macros::cfg_jsonrpsee! {
+    mod jsonrpsee_impl;
+}
 
 mod rpc_client;
 mod rpc_client_t;

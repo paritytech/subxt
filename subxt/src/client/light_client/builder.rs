@@ -5,6 +5,7 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
+use crate::macros::cfg_jsonrpsee;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
@@ -245,35 +246,35 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
         .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-#[cfg_attr(docsrs, doc(cfg(all(feature = "jsonrpsee", feature = "native"))))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::client::Client,
-    };
+cfg_jsonrpsee_native! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        pub use jsonrpsee::{
+            client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+            core::client::Client,
+        };
 
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+        /// Build WS RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
 
-        if url.scheme() != "ws" && url.scheme() != "wss" {
-            return Err(Error::LightClient(LightClientError::InvalidScheme));
-        }
+            if url.scheme() != "ws" && url.scheme() != "wss" {
+                return Err(Error::LightClient(LightClientError::InvalidScheme));
+            }
 
-        let (sender, receiver) = ws_transport(url).await?;
+            let (sender, receiver) = ws_transport(url).await?;
 
-        Ok(Client::builder()
+            Ok(Client::builder()
             .max_buffer_capacity_per_subscription(4096)
             .build_with_tokio(sender, receiver))
-    }
+        }
 
-    async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))
+        async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
+            WsTransportClientBuilder::default()
+                .build(url)
+                .await
+                .map_err(|_| Error::LightClient(LightClientError::Handshake))
+        }
     }
 }
 

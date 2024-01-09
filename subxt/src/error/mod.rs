@@ -8,9 +8,9 @@ mod dispatch_error;
 
 use core::fmt::Debug;
 
-#[cfg(feature = "unstable-light-client")]
-#[cfg_attr(docsrs, doc(cfg(feature = "unstable-light-client")))]
-pub use crate::client::LightClientError;
+crate::macros::cfg_unstable_light_client! {
+    pub use crate::client::LightClientError;
+}
 
 // Re-export dispatch error types:
 pub use dispatch_error::{

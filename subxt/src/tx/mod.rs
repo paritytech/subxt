@@ -9,6 +9,8 @@
 //! additional and signed extra parameters are used when constructing an extrinsic, and is a part
 //! of the chain configuration (see [`crate::config::Config`]).
 
+use crate::macros::cfg_substrate_compat;
+
 mod signer;
 mod tx_client;
 mod tx_payload;
@@ -16,9 +18,9 @@ mod tx_progress;
 
 // The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
 // feature if we want to avoid needing sp_core and sp_runtime.
-#[cfg(feature = "substrate-compat")]
-#[cfg_attr(docsrs, doc(cfg(feature = "substrate-compat")))]
-pub use self::signer::PairSigner;
+cfg_substrate_compat! {
+    pub use self::signer::PairSigner;
+}
 
 pub use self::{
     signer::Signer,
