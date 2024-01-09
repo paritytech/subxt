@@ -1,0 +1,58 @@
+name: Rust
+
+on:
+    schedule:
+        - cron: "0 0 * * 1" # weekly on Monday at 00:00 UTC
+
+concurrency:
+    group: ${{ github.ref }}-${{ github.workflow }}
+    cancel-in-progress: true
+
+env:
+    CARGO_TERM_COLOR: always
+
+jobs:
+    check:
+        name: Renew Artifacts
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+            # Runs two processes asynchronously:
+            # - one for the substrate node, timing out after 60s,
+            # - and one to fetch the metadata from it with the `scripts/artifacts.sh` script.
+            - name: Fetch artifacts
+              run: |
+                  { timeout 60s substrate-node --dev --tmp; } & { sleep 15s && scripts/artifacts.sh; }
+
+            # Generate the polkadot.rs file we use for verifying the codegen
+            - name: Generate polkadot.rs file
+              run: cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
+
+            - name: Create Pull Request
+              uses: peter-evans/create-pull-request@v5
+              with:
+                  base: master
+                  branch: update-artifacts
+                  branch-suffix: timestamp
+                  title: Update Artifacts (auto-generated)
+                  body: |
+                      This PR updates the artifacts by fetching fresh metadata from a substrate node.
+                      It also recreates the polkadot.rs file used in the integration tests.
+
+                      It was created automatically by a Weekly GitHub Action Cronjob.
