@@ -5,13 +5,11 @@ authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish = true
-
 license.workspace = true
 repository.workspace = true
 documentation = "https://docs.rs/subxt-codegen"
 homepage.workspace = true
 description = "Generate an API for interacting with a substrate node from FRAME metadata"
-
 
 [features]
 default = []
@@ -42,7 +40,7 @@ pretty_assertions = { workspace = true }
 frame-metadata = { workspace = true }
 
 [package.metadata.docs.rs]
-defalt-features = true
+features = ["fetch-metadata"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]

@@ -5,7 +5,7 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
-use crate::macros::cfg_jsonrpsee;
+use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
@@ -278,22 +278,23 @@ cfg_jsonrpsee_native! {
     }
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "web"))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::client::{Client, ClientBuilder},
-    };
+cfg_jsonrpsee_web! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        pub use jsonrpsee::{
+            client_transport::web,
+            core::client::{Client, ClientBuilder},
+        };
 
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
+        /// Build web RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let (sender, receiver) = web::connect(url)
+                .await
+                .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
 
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
+            Ok(ClientBuilder::default()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_wasm(sender, receiver))
+        }
     }
 }

@@ -41,9 +41,19 @@ macro_rules! cfg_jsonrpsee_native {
 	}
 }
 
-pub(crate) use cfg_feature;
-pub(crate) use cfg_jsonrpsee;
 #[allow(unused)]
-pub(crate) use cfg_jsonrpsee_native;
-pub(crate) use cfg_substrate_compat;
-pub(crate) use cfg_unstable_light_client;
+macro_rules! cfg_jsonrpsee_web {
+	($($item:item)*) => {
+		$(
+			#[cfg(all(feature = "jsonrpsee", feature = "web"))]
+			#[cfg_attr(docsrs, doc(cfg(all(feature = "jsonrpsee", feature = "web"))))]
+			$item
+		)*
+	}
+}
+
+pub(crate) use {cfg_feature, cfg_jsonrpsee, cfg_substrate_compat, cfg_unstable_light_client};
+
+// Only used by light-client.
+#[allow(unused)]
+pub(crate) use {cfg_jsonrpsee_native, cfg_jsonrpsee_web};
