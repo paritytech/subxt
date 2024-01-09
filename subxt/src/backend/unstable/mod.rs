@@ -441,11 +441,25 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         enum SeenBlock<Ref> {
             New((Ref, Ref)),
             Finalized(Vec<Ref>),
+            Other(OtherEvent),
         }
         #[derive(Debug)]
         enum SeenBlockMarker {
             New,
             Finalized,
+        }
+
+        #[derive(Debug)]
+        enum OtherEvent {
+            BestBlockChanged,
+            OperationBodyDone,
+            OperationCallDone,
+            OperationStorageItems,
+            OperationWaitingForContinue,
+            OperationStorageDone,
+            OperationInaccessible,
+            OperationError,
+            Stop,
         }
 
         static mut FIN_BLOCK: Option<String> = None;
@@ -475,10 +489,33 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     unsafe {
                         PRUNED = Some(format!(" pruned {:?} {:?}", PRUNED, ev.pruned_block_hashes));
                     }
-
                     Some(SeenBlock::Finalized(ev.finalized_block_hashes))
                 }
-                _ => None,
+                FollowEvent::BestBlockChanged(_) => {
+                    Some(SeenBlock::Other(OtherEvent::BestBlockChanged))
+                }
+                FollowEvent::OperationBodyDone(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationBodyDone))
+                }
+                FollowEvent::OperationCallDone(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationCallDone))
+                }
+                FollowEvent::OperationStorageItems(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationStorageItems))
+                }
+                FollowEvent::OperationWaitingForContinue(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationWaitingForContinue))
+                }
+                FollowEvent::OperationStorageDone(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationStorageDone))
+                }
+                FollowEvent::OperationInaccessible(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationInaccessible))
+                }
+                FollowEvent::OperationError(_) => {
+                    Some(SeenBlock::Other(OtherEvent::OperationError))
+                }
+                FollowEvent::Stop => Some(SeenBlock::Other(OtherEvent::Stop)),
             })
         });
 
@@ -489,6 +526,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .await?;
 
         let mut seen_blocks = HashMap::new();
+        let mut seen_other = Vec::new();
         let mut done = false;
 
         // If we see the finalized event, we start waiting until we find a finalized block that
@@ -507,8 +545,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     println!("Pruned block {:?}", unsafe { &PRUNED });
                     println!("MemLog: {:#?}", mem_log);
                     println!("SeenBlocksLog: {:#?}", seen_blocks);
+                    println!("SeenOther: {:#?}", seen_other);
 
-                    panic!("{:#?} {:#?}", mem_log, seen_blocks);
+                    panic!("{:#?} {:#?} {:#?}", mem_log, seen_blocks, seen_other);
                 }
 
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
@@ -551,6 +590,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                                 // .expect("finalized block seen before new block")
                                 // .0 = SeenBlockMarker::Finalized;
                             }
+                        }
+                        SeenBlock::Other(other) => {
+                            seen_other.push((now.elapsed(), other));
                         }
                     }
                     continue;
