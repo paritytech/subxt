@@ -5,6 +5,9 @@
 //! Just sanity checking some of the new RPC methods to try and
 //! catch differences as the implementations evolve.
 
+use core::panic;
+use std::collections::HashMap;
+
 use crate::{test_context, utils::node_runtime};
 use assert_matches::assert_matches;
 use codec::Encode;
@@ -277,6 +280,86 @@ async fn transaction_unstable_submit_and_watch() {
         // This stream should end when it hits the relevant stopping event.
         // If the test continues forever then something isn't working.
         // If we hit an error then that's also an issue!
+    }
+}
+
+#[tokio::test]
+async fn chainhead_unstable_follow_order_of_blocks() {
+    let ctx = test_context().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
+
+    let event = blocks.next().await.unwrap().unwrap();
+
+    let finalized = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+
+    let mut tracked_blocks = HashMap::new();
+
+    println!("Initialized finalized={:?}", finalized);
+    tracked_blocks.insert(finalized, true);
+
+    let mut num_blocks = 0;
+    while let Some(event) = blocks.next().await {
+        let event = event.unwrap();
+
+        println!("event = {:?}\n", event);
+
+        match event {
+            FollowEvent::Initialized(_) => panic!("Unexpected"),
+            FollowEvent::NewBlock(new) => {
+                let hash = new.block_hash;
+                let parent = new.parent_block_hash;
+
+                if tracked_blocks.contains_key(&hash) {
+                    panic!(
+                        "NewBlock block={:?} parent={:?} already tracked tracked={:#?}",
+                        hash, parent, tracked_blocks
+                    );
+                }
+                if !tracked_blocks.contains_key(&parent) {
+                    panic!(
+                        "NewBlock PARENT NOT TRACKED block={:?} parent={:?} tracked={:#?}",
+                        hash, parent, tracked_blocks
+                    );
+                }
+
+                tracked_blocks.insert(hash, false);
+            }
+            FollowEvent::BestBlockChanged(best) => {
+                let hash = best.best_block_hash;
+
+                if !tracked_blocks.contains_key(&hash) {
+                    panic!(
+                        "BestBlockChanged not tracked block={:?} tracked={:#?}",
+                        hash, tracked_blocks
+                    );
+                }
+            }
+            FollowEvent::Finalized(fin) => {
+                let hashes = fin.finalized_block_hashes;
+
+                for hash in hashes {
+                    if !tracked_blocks.contains_key(&hash) {
+                        panic!(
+                            "Finalized block={:?} not tracked tracked={:#?}",
+                            hash, tracked_blocks
+                        );
+                    }
+
+                    tracked_blocks.insert(hash, true);
+                }
+
+                num_blocks += 1;
+                if num_blocks > 10 {
+                    break;
+                }
+            }
+            _ => continue,
+        }
     }
 }
 
