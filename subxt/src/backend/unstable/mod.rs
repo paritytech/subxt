@@ -577,7 +577,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
                                 if !seen_blocks.contains_key(&block_ref.hash()) {
-                                    panic!("Finalized before new Finalized {:#?}\n MEMLOG{:#?}\n SeenBlocks{:#?} \n Other{:#?}", block_ref.hash(), mem_log, seen_blocks, seen_other);
+                                    panic!("Finalized before new Finalized {:#?}\n initBlock {:#?} \nMEMLOG{:#?}\n SeenBlocks{:#?} \n Other{:#?}", block_ref.hash(), unsafe { &FIN_BLOCK }, mem_log, seen_blocks, seen_other);
                                 }
 
                                 let entry = seen_blocks.entry(block_ref.hash()).or_insert((
