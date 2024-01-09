@@ -19,8 +19,12 @@ use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use crate::backend::unstable::UnstableBlockRef;
+
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
+
+use super::unstable::rpc_methods::FollowEvent;
 
 /// The legacy backend.
 #[derive(Debug, Clone)]
@@ -41,6 +45,13 @@ impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
+    /// ChainHead follow
+    async fn chain_head_follow(
+        &self,
+    ) -> Result<StreamOfResults<FollowEvent<UnstableBlockRef<T::Hash>>>, Error> {
+        panic!("Unimplemented")
+    }
+
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,

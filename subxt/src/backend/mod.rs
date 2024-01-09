@@ -19,6 +19,10 @@ use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
 
+use crate::backend::unstable::UnstableBlockRef;
+
+use self::unstable::rpc_methods::FollowEvent;
+
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
 pub(crate) mod sealed {
@@ -99,6 +103,11 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error>;
+
+    /// ChainHead follow
+    async fn chain_head_follow(
+        &self,
+    ) -> Result<StreamOfResults<FollowEvent<UnstableBlockRef<T::Hash>>>, Error>;
 }
 
 /// helpeful utility methods derived from those provided on [`Backend`]

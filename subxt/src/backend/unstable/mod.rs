@@ -16,6 +16,8 @@ mod follow_stream_driver;
 mod follow_stream_unpin;
 mod storage_items;
 
+pub use follow_stream_unpin::BlockRef as UnstableBlockRef;
+
 pub mod rpc_methods;
 
 use self::rpc_methods::{
@@ -25,6 +27,7 @@ use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
     StreamOfResults, TransactionStatus,
 };
+
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use crate::Config;
@@ -330,6 +333,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .await;
 
         next_ref.ok_or_else(|| RpcError::SubscriptionDropped.into())
+    }
+
+    async fn chain_head_follow(
+        &self,
+    ) -> Result<StreamOfResults<FollowEvent<UnstableBlockRef<T::Hash>>>, Error> {
+        let stream = self
+            .follow_handle
+            .subscribe()
+            .events()
+            .map(|event| Ok(event));
+
+        Ok(StreamOf(Box::pin(stream)))
     }
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {

@@ -298,15 +298,14 @@ async fn chainhead_unstable_follow_order_of_blocks() {
     };
 
     let mut tracked_blocks = HashMap::new();
-
-    println!("Initialized finalized={:?}", finalized);
     tracked_blocks.insert(finalized, true);
+
+    let mut events = Vec::with_capacity(100);
 
     let mut num_blocks = 0;
     while let Some(event) = blocks.next().await {
         let event = event.unwrap();
-
-        println!("event = {:?}\n", event);
+        events.push(event.clone());
 
         match event {
             FollowEvent::Initialized(_) => panic!("Unexpected"),
@@ -316,14 +315,14 @@ async fn chainhead_unstable_follow_order_of_blocks() {
 
                 if tracked_blocks.contains_key(&hash) {
                     panic!(
-                        "NewBlock block={:?} parent={:?} already tracked tracked={:#?}",
-                        hash, parent, tracked_blocks
+                        "NewBlock block={:?} parent={:?} already tracked tracked={:#?}\n events={:#?}",
+                        hash, parent, tracked_blocks, events,
                     );
                 }
                 if !tracked_blocks.contains_key(&parent) {
                     panic!(
-                        "NewBlock PARENT NOT TRACKED block={:?} parent={:?} tracked={:#?}",
-                        hash, parent, tracked_blocks
+                        "NewBlock PARENT NOT TRACKED block={:?} parent={:?} tracked={:#?}, events={:#?}",
+                        hash, parent, tracked_blocks, events
                     );
                 }
 
@@ -334,8 +333,8 @@ async fn chainhead_unstable_follow_order_of_blocks() {
 
                 if !tracked_blocks.contains_key(&hash) {
                     panic!(
-                        "BestBlockChanged not tracked block={:?} tracked={:#?}",
-                        hash, tracked_blocks
+                        "BestBlockChanged not tracked block={:?} tracked={:#?} events={:#?}",
+                        hash, tracked_blocks, events,
                     );
                 }
             }
@@ -345,8 +344,8 @@ async fn chainhead_unstable_follow_order_of_blocks() {
                 for hash in hashes {
                     if !tracked_blocks.contains_key(&hash) {
                         panic!(
-                            "Finalized block={:?} not tracked tracked={:#?}",
-                            hash, tracked_blocks
+                            "Finalized block={:?} not tracked tracked={:#?} events={:#?}",
+                            hash, tracked_blocks, events,
                         );
                     }
 
@@ -354,7 +353,88 @@ async fn chainhead_unstable_follow_order_of_blocks() {
                 }
 
                 num_blocks += 1;
-                if num_blocks > 10 {
+                if num_blocks > 40 {
+                    break;
+                }
+            }
+            _ => continue,
+        }
+    }
+}
+
+#[tokio::test]
+async fn unstable_backend_follow_order_of_blocks() {
+    let ctx = test_context().await;
+
+    let api = ctx.unstable_client().await;
+    let backend = api.backend();
+    let mut blocks = backend.chain_head_follow().await.unwrap();
+
+    let event = blocks.next().await.unwrap().unwrap();
+
+    let finalized = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        _ => panic!("Unexpected event"),
+    };
+
+    let mut tracked_blocks = HashMap::new();
+
+    println!("Initialized finalized={:?}", finalized);
+    tracked_blocks.insert(finalized.hash(), true);
+
+    let mut events = Vec::with_capacity(100);
+    let mut num_blocks = 0;
+    while let Some(event) = blocks.next().await {
+        let event = event.unwrap();
+        events.push(event.clone());
+
+        match event {
+            FollowEvent::Initialized(_) => panic!("Unexpected"),
+            FollowEvent::NewBlock(new) => {
+                let hash = new.block_hash.hash();
+                let parent = new.parent_block_hash.hash();
+
+                if tracked_blocks.contains_key(&hash) {
+                    panic!(
+                        "NewBlock block={:?} parent={:?} already tracked tracked={:#?} events={:#?}",
+                        hash, parent, tracked_blocks, events,
+                    );
+                }
+                if !tracked_blocks.contains_key(&parent) {
+                    panic!(
+                        "NewBlock PARENT NOT TRACKED block={:?} parent={:?} tracked={:#?} events={:#?}",
+                        hash, parent, tracked_blocks, events,
+                    );
+                }
+
+                tracked_blocks.insert(hash, false);
+            }
+            FollowEvent::BestBlockChanged(best) => {
+                let hash = best.best_block_hash.hash();
+
+                if !tracked_blocks.contains_key(&hash) {
+                    panic!(
+                        "BestBlockChanged not tracked block={:?} tracked={:#?} events={:#?}",
+                        hash, tracked_blocks, events,
+                    );
+                }
+            }
+            FollowEvent::Finalized(fin) => {
+                let hashes = fin.finalized_block_hashes;
+
+                for hash in hashes {
+                    if !tracked_blocks.contains_key(&hash.hash()) {
+                        panic!(
+                            "Finalized block={:?} not tracked tracked={:#?} events={:#?}",
+                            hash, tracked_blocks, events,
+                        );
+                    }
+
+                    tracked_blocks.insert(hash.hash(), true);
+                }
+
+                num_blocks += 1;
+                if num_blocks > 40 {
                     break;
                 }
             }
