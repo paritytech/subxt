@@ -37,7 +37,7 @@ struct RuntimeMetadataArgs {
     #[darling(default)]
     runtime_metadata_path: Option<String>,
     #[darling(default)]
-    runtime_metadata_url: Option<String>,
+    runtime_metadata_insecure_url: Option<String>,
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(default)]
@@ -209,7 +209,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         (Some(rest_of_path), None) => {
             if unstable_metadata {
                 abort_call_site!(
-                    "The 'unstable_metadata' attribute requires `runtime_metadata_url`"
+                    "The 'unstable_metadata' attribute requires `runtime_metadata_insecure_url`"
                 )
             }
 
@@ -237,12 +237,12 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         }
         (None, None) => {
             abort_call_site!(
-                "One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided"
+                "One of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided"
             )
         }
         (Some(_), Some(_)) => {
             abort_call_site!(
-                "Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided"
+                "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
             )
         }
     };
