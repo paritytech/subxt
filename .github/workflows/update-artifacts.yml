@@ -36,12 +36,12 @@ jobs:
             # Runs two processes asynchronously:
             # - one for the substrate node, timing out after 60s,
             # - and one to fetch the metadata from it with the `scripts/artifacts.sh` script.
-            - name: Fetch artifacts
+            - name: Fetch Artifacts
               run: |
                   { timeout 60s substrate-node --dev --tmp; } & { sleep 15s && scripts/artifacts.sh; }
 
             # Generate the polkadot.rs file we use for verifying the codegen
-            - name: Generate polkadot.rs file
+            - name: Generate polkadot.rs File
               run: cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
 
             - name: Create Pull Request
@@ -49,6 +49,7 @@ jobs:
               with:
                   base: master
                   branch: update-artifacts
+                  commit-message: Update Artifacts (auto-generated)
                   branch-suffix: timestamp
                   title: Update Artifacts (auto-generated)
                   body: |
