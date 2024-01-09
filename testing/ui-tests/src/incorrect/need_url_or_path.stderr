@@ -1,4 +1,4 @@
-error: One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided
+error: One of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided
  --> src/incorrect/need_url_or_path.rs:1:1
   |
 1 | #[subxt::subxt()]
