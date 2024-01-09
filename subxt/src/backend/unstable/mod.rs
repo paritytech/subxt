@@ -644,7 +644,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         // Do not terminate the stream until we can correlate the tx with a finalized block.
                         if finalized_hash.is_some() {
                             panic!("TERMINATE EARLY");
-                            continue;
+                            // continue;
                         }
 
                         done = true;
