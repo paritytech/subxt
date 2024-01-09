@@ -57,7 +57,7 @@ pub mod storage;
 pub mod tx;
 pub mod utils;
 
-// Macros useful below, but not to be exposed outside of the crate.
+// Internal helper macros
 #[macro_use]
 mod macros;
 
