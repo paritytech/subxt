@@ -525,20 +525,27 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                             // if finalized_hash.is_none() {
                             seen_blocks.insert(
                                 block_ref.hash(),
-                                (SeenBlockMarker::New, block_ref, parent),
+                                (
+                                    SeenBlockMarker::New,
+                                    block_ref,
+                                    parent,
+                                    Some(now.elapsed()),
+                                    None,
+                                ),
                             );
                             // }
                         }
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
-                                seen_blocks
-                                    .entry(block_ref.hash())
-                                    .or_insert((
-                                        SeenBlockMarker::Finalized,
-                                        block_ref.clone(),
-                                        block_ref,
-                                    ))
-                                    .0 = SeenBlockMarker::Finalized;
+                                let entry = seen_blocks.entry(block_ref.hash()).or_insert((
+                                    SeenBlockMarker::Finalized,
+                                    block_ref.clone(),
+                                    block_ref,
+                                    None,
+                                    Some(now.elapsed()),
+                                ));
+                                entry.0 = SeenBlockMarker::Finalized;
+                                entry.4 = Some(now.elapsed());
 
                                 // .get_mut(&block_ref.hash())
                                 // .expect("finalized block seen before new block")
@@ -552,7 +559,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // If we have a finalized hash, we are done looking for tx events and we are just waiting
                 // for a pinned block with a matching hash (which must appear eventually given it's finalized).
                 if let Some(hash) = &finalized_hash {
-                    if let Some((SeenBlockMarker::Finalized, block_ref, _)) = seen_blocks.get(hash)
+                    if let Some((SeenBlockMarker::Finalized, block_ref, _, _, _)) =
+                        seen_blocks.get(hash)
                     {
                         // Found it! Hand back the event with a pinned block. We're done.
                         done = true;
@@ -598,7 +606,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         // block on the node a tx was sent to will ever be known about on the
                         // chainHead_follow subscription.
                         let block_ref = match seen_blocks.get(&block.hash) {
-                            Some((_, block_ref, _)) => block_ref.clone().into(),
+                            Some((_, block_ref, _, _, _)) => block_ref.clone().into(),
                             None => BlockRef::from_hash(block.hash),
                         };
                         TransactionStatus::InBestBlock { hash: block_ref }
