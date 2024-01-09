@@ -86,6 +86,9 @@ pub struct Opts {
     file_or_url: FileOrUrl,
     #[command(subcommand)]
     subcommand: Option<PalletOrRuntimeApi>,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 #[derive(Debug, Subcommand)]
@@ -113,6 +116,8 @@ pub struct RuntimeApiOpts {
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
+    validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
+
     // get the metadata
     let file_or_url = opts.file_or_url;
     let bytes = file_or_url.fetch().await?;
@@ -246,11 +251,8 @@ pub mod tests {
 
     use super::{run, Opts};
 
-    async fn simulate_run(cli_command: &str) -> color_eyre::Result<String> {
-        let mut args = vec![
-            "explore",
-            "--file=../artifacts/polkadot_metadata_small.scale",
-        ];
+    async fn run(cli_command: &str) -> color_eyre::Result<String> {
+        let mut args = vec!["explore"];
         let mut split: Vec<&str> = cli_command.split(' ').filter(|e| !e.is_empty()).collect();
         args.append(&mut split);
         let opts: Opts = clap::Parser::try_parse_from(args)?;
@@ -274,6 +276,13 @@ pub mod tests {
         ($a:expr, $b:expr) => {
             assert_eq!(&$a[0..$b.len()], &$b[..]);
         };
+    }
+
+    async fn run_against_file(cli_command: &str) -> color_eyre::Result<String> {
+        run(&format!(
+            "--file=../artifacts/polkadot_metadata_small.scale {cli_command}"
+        ))
+        .await
     }
 
     #[tokio::test]
@@ -314,7 +323,7 @@ pub mod tests {
         "};
         assert_eq!(output, expected_output);
         // if incorrect pallet, error:
-        let output = simulate_run("abc123").await;
+        let output = run_against_file("abc123").await;
         assert!(output.is_err());
         // if correct pallet, show options (calls, constants, storage)
         let output = simulate_run("pallet Balances").await.unwrap().strip_ansi();
@@ -408,5 +417,26 @@ pub mod tests {
             Available <METHOD>'s available for the \"Metadata\" runtime api:
         "};
         assert_eq_start!(output, start);
+    }
+
+    #[tokio::test]
+    async fn insecure_urls_get_denied() {
+        // Connection should work fine:
+        run("--url wss://rpc.polkadot.io:443").await.unwrap();
+
+        // Errors, because the --allow-insecure is not set:
+        assert!(run("--url ws://rpc.polkadot.io:443")
+            .await
+            .unwrap_err()
+            .to_string()
+            .contains("is not secure"));
+
+        // This checks, that we never prevent (insecure) requests to localhost, even if the `--allow-insecure` flag is not set.
+        // It errors, because there is no node running locally, which results in the "Request error".
+        assert!(run("--url ws://localhost")
+            .await
+            .unwrap_err()
+            .to_string()
+            .contains("Request error"));
     }
 }

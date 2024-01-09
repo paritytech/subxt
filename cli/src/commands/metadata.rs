@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::utils::FileOrUrl;
+use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
@@ -35,9 +35,13 @@ pub struct Opts {
     /// Write the output of the metadata command to the provided file path.
     #[clap(long, short, value_parser)]
     pub output_file: Option<PathBuf>,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
+    validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
     let bytes = opts.file_or_url.fetch().await?;
     let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 

@@ -317,6 +317,23 @@ impl<T: AsRef<str>> SyntaxHighlight for T {
     }
 }
 
+pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_eyre::Result<()> {
+    let Some(url) = url else {
+        return Ok(());
+    };
+    match subxt::utils::url_is_secure(url.as_str()) {
+        Ok(is_secure) => {
+            if !allow_insecure && !is_secure {
+                bail!("URL {url} is not secure!\nIf you are really want to use this URL, try using --allow-insecure (-a)");
+            }
+        }
+        Err(err) => {
+            bail!("URL {url} is not valid: {err}")
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::{FileOrUrl, PathOrStdIn};
