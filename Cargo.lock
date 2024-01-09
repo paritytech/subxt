@@ -4365,6 +4365,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "tracing-subscriber 0.3.18",
+ "url",
 ]
 
 [[package]]
