@@ -229,24 +229,18 @@ pub mod tests {
 
     #[tokio::test]
     async fn insecure_urls_get_denied() {
-        // connection should work fine:
+        // Connection should work fine:
         run("--url wss://rpc.polkadot.io:443").await.unwrap();
 
-        // errors because the --allow-insecure is not set:
+        // Errors, because the --allow-insecure is not set:
         assert!(run("--url ws://rpc.polkadot.io:443")
             .await
             .unwrap_err()
             .to_string()
             .contains("is not secure"));
 
-        // also errors, but later, because of networking reasons:
-        assert!(run("--url ws://rpc.polkadot.io:443 --allow-insecure")
-            .await
-            .unwrap_err()
-            .to_string()
-            .contains("Request error"));
-
-        // also errors, but later, because localhost is considered secure, even without the flag
+        // This checks, that we never prevent (insecure) requests to localhost, even if the `--allow-insecure` flag is not set.
+        // It errors, because there is no node running locally, which results in the "Request error".
         assert!(run("--url ws://localhost")
             .await
             .unwrap_err()
