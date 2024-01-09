@@ -622,6 +622,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 let ev = match tx_progress.poll_next_unpin(cx) {
                     Poll::Pending => return Poll::Pending,
                     Poll::Ready(None) => {
+                        // Do not terminate the stream until we can correlate the tx with a finalized block.
+                        if finalized_hash.is_some() {
+                            panic!("TERMINATE EARLY");
+                            continue;
+                        }
+
                         done = true;
                         return Poll::Ready(None);
                     }
