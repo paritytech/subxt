@@ -164,7 +164,7 @@ impl RuntimeGenerator {
 
                 let constants_mod = constants::generate_constants(&type_gen, pallet, &crate_path)?;
 
-                let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
+                let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
                 Ok(quote! {
                     pub mod #mod_name {
