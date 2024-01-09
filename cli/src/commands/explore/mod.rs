@@ -1,12 +1,12 @@
+use crate::utils::validate_url_security;
 use crate::utils::FileOrUrl;
 use clap::{command, Parser, Subcommand};
+use codec::Decode;
+use color_eyre::eyre::eyre;
 use color_eyre::owo_colors::OwoColorize;
 use indoc::writedoc;
 use std::fmt::Write;
 use std::write;
-
-use codec::Decode;
-use color_eyre::eyre::eyre;
 
 use subxt::Metadata;
 
@@ -249,7 +249,7 @@ pub mod tests {
     use indoc::formatdoc;
     use pretty_assertions::assert_eq;
 
-    use super::{run, Opts};
+    use super::Opts;
 
     async fn run(cli_command: &str) -> color_eyre::Result<String> {
         let mut args = vec!["explore"];
@@ -257,7 +257,7 @@ pub mod tests {
         args.append(&mut split);
         let opts: Opts = clap::Parser::try_parse_from(args)?;
         let mut output: Vec<u8> = Vec::new();
-        let r = run(opts, &mut output)
+        let r = super::run(opts, &mut output)
             .await
             .map(|_| String::from_utf8(output).unwrap())?;
         Ok(r)
@@ -288,7 +288,7 @@ pub mod tests {
     #[tokio::test]
     async fn test_commands() {
         // shows pallets and runtime apis:
-        let output = simulate_run("").await.unwrap().strip_ansi();
+        let output = run_against_file("").await.unwrap().strip_ansi();
         let expected_output = formatdoc! {
             "Usage:
                 subxt explore pallet <PALLET>
@@ -326,7 +326,10 @@ pub mod tests {
         let output = run_against_file("abc123").await;
         assert!(output.is_err());
         // if correct pallet, show options (calls, constants, storage)
-        let output = simulate_run("pallet Balances").await.unwrap().strip_ansi();
+        let output = run_against_file("pallet Balances")
+            .await
+            .unwrap()
+            .strip_ansi();
         let expected_output = formatdoc! {"
         Usage:
             subxt explore pallet Balances calls
@@ -340,7 +343,7 @@ pub mod tests {
         "};
         assert_eq!(output, expected_output);
         // check that exploring calls, storage entries and constants is possible:
-        let output = simulate_run("pallet Balances calls")
+        let output = run_against_file("pallet Balances calls")
             .await
             .unwrap()
             .strip_ansi();
@@ -352,7 +355,7 @@ pub mod tests {
             
             Available <CALL>'s in the \"Balances\" pallet:"};
         assert_eq_start!(output, start);
-        let output = simulate_run("pallet Balances storage")
+        let output = run_against_file("pallet Balances storage")
             .await
             .unwrap()
             .strip_ansi();
@@ -364,7 +367,7 @@ pub mod tests {
             Available <STORAGE_ENTRY>'s in the \"Balances\" pallet:
         "};
         assert_eq_start!(output, start);
-        let output = simulate_run("pallet Balances constants")
+        let output = run_against_file("pallet Balances constants")
             .await
             .unwrap()
             .strip_ansi();
@@ -376,7 +379,7 @@ pub mod tests {
         Available <CONSTANT>'s in the \"Balances\" pallet:
         "};
         assert_eq_start!(output, start);
-        let output = simulate_run("pallet Balances events")
+        let output = run_against_file("pallet Balances events")
             .await
             .unwrap()
             .strip_ansi();
@@ -389,10 +392,10 @@ pub mod tests {
         "};
         assert_eq_start!(output, start);
         // check that invalid subcommands don't work:
-        let output = simulate_run("pallet Balances abc123").await;
+        let output = run_against_file("pallet Balances abc123").await;
         assert!(output.is_err());
         // check that we can explore a certain call:
-        let output = simulate_run("pallet Balances calls transfer_keep_alive")
+        let output = run_against_file("pallet Balances calls transfer_keep_alive")
             .await
             .unwrap()
             .strip_ansi();
@@ -404,7 +407,7 @@ pub mod tests {
         "};
         assert_eq_start!(output, start);
         // check that we can see methods of a runtime api:
-        let output = simulate_run("api metadata").await.unwrap().strip_ansi();
+        let output = run_against_file("api metadata").await.unwrap().strip_ansi();
 
         let start = formatdoc! {"
             Description:
