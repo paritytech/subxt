@@ -188,6 +188,7 @@ impl LightClientRpc {
     > {
         let (sub_id, sub_id_rx) = oneshot::channel();
         let (sender, receiver) = mpsc::unbounded_channel();
+
         self.to_backend.send(FromSubxt::Subscription {
             method,
             params,
