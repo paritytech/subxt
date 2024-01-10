@@ -205,7 +205,10 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
-    let metadata = match (&args.runtime_metadata_path, &args.runtime_metadata_insecure_url) {
+    let metadata = match (
+        &args.runtime_metadata_path,
+        &args.runtime_metadata_insecure_url,
+    ) {
         (Some(rest_of_path), None) => {
             if unstable_metadata {
                 abort_call_site!(
