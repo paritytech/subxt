@@ -7,7 +7,7 @@ use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEve
 use crate::config::BlockHash;
 use crate::error::Error;
 use futures::stream::{Stream, StreamExt};
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
@@ -275,8 +275,26 @@ impl<Hash: BlockHash> Shared<Hash> {
                     }
                 }
 
-                // New finalized block, so clear the cache of older block events.
-                shared.block_events_from_last_finalized.clear();
+                // The blocks reported by the finalized event should not be reported again
+                // by the initialized event.
+                let to_remove: HashSet<Hash> = finalized_ev
+                    .finalized_block_hashes
+                    .iter()
+                    .chain(finalized_ev.pruned_block_hashes.iter())
+                    .map(|h| h.hash())
+                    .collect();
+
+                shared
+                    .block_events_from_last_finalized
+                    .retain(|ev| match ev {
+                        FollowEvent::NewBlock(new_block_ev) => {
+                            !to_remove.contains(&new_block_ev.block_hash.hash())
+                        }
+                        FollowEvent::BestBlockChanged(best_block_ev) => {
+                            !to_remove.contains(&best_block_ev.best_block_hash.hash())
+                        }
+                        _ => true,
+                    });
             }
             FollowStreamMsg::Event(FollowEvent::NewBlock(new_block_ev)) => {
                 // If a new runtime is seen, note it so that when a block is finalized, we
