@@ -551,16 +551,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         let now = std::time::Instant::now();
         let mut mem_log = vec![];
+        let mut loop_times = 0;
 
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
+                loop_times += 1;
+
                 if now.elapsed().as_secs() > 240 {
                     println!("Fin block {:?}", unsafe { &FIN_BLOCK });
                     println!("Pruned block {:?}", unsafe { &PRUNED });
                     println!("MemLog: {:#?}", mem_log);
                     println!("SeenBlocksLog: {:#?}", seen_blocks);
                     println!("SeenOther: {:#?}", seen_other);
+                    println!("Loop times: {:#?}", loop_times);
 
                     panic!("{:#?} {:#?} {:#?}", mem_log, seen_blocks, seen_other);
                 }
