@@ -185,19 +185,19 @@ impl<T: Config> LightClientBuilder<T> {
 }
 
 /// Raw builder for [`RawLightClient`].
-pub struct RawLightClientBuilder {
-    chains: Vec<AddedChain>,
+pub struct RawLightClientBuilder<TPlatform: smoldot::PlatformRef> {
+    chains: Vec<AddedChain<TPlatform>>,
 }
 
-impl Default for RawLightClientBuilder {
+impl<TPlatform: smoldot::PlatformRef> Default for RawLightClientBuilder<TPlatform> {
     fn default() -> Self {
         Self { chains: Vec::new() }
     }
 }
 
-impl RawLightClientBuilder {
+impl<TPlatform: smoldot::PlatformRef> RawLightClientBuilder<TPlatform> {
     /// Create a new [`RawLightClientBuilder`].
-    pub fn new() -> RawLightClientBuilder {
+    pub fn new() -> RawLightClientBuilder<TPlatform> {
         RawLightClientBuilder::default()
     }
 
@@ -205,7 +205,7 @@ impl RawLightClientBuilder {
     pub fn add_chain(
         mut self,
         chain_id: smoldot::ChainId,
-        rpc_responses: smoldot::JsonRpcResponses,
+        rpc_responses: smoldot::JsonRpcResponses<TPlatform>,
     ) -> Self {
         self.chains.push(AddedChain {
             chain_id,
@@ -218,10 +218,7 @@ impl RawLightClientBuilder {
     ///
     /// The provided `chain_id` is the chain with which the current instance of light client will interact.
     /// To target a different chain call the [`LightClient::target_chain`] method.
-    pub async fn build<TPlatform: smoldot::PlatformRef>(
-        self,
-        client: smoldot::Client<TPlatform>,
-    ) -> Result<RawLightClient, Error> {
+    pub async fn build(self, client: smoldot::Client<TPlatform>) -> Result<RawLightClient, Error> {
         // The raw subxt light client that spawns the smoldot background task.
         let raw_rpc: subxt_lightclient::RawLightClientRpc =
             subxt_lightclient::LightClientRpc::new_from_client(client, self.chains.into_iter());
