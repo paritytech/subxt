@@ -322,7 +322,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     pub async fn start_task(
         &mut self,
         from_subxt: mpsc::UnboundedReceiver<FromSubxt>,
-        from_node: Vec<AddedChain>,
+        from_node: Vec<AddedChain<TPlatform>>,
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
 
