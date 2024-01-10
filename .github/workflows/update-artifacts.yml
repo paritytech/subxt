@@ -1,59 +1,62 @@
-name: Rust
+name: Update Artifacts
 
 on:
-    schedule:
-        - cron: "0 0 * * 1" # weekly on Monday at 00:00 UTC
+  workflow_dispatch: # Allows manual triggering
+  schedule:
+    - cron: "0 0 * * 1" # weekly on Monday at 00:00 UTC
 
 concurrency:
-    group: ${{ github.ref }}-${{ github.workflow }}
-    cancel-in-progress: true
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
 
 env:
-    CARGO_TERM_COLOR: always
+  CARGO_TERM_COLOR: always
 
 jobs:
-    check:
-        name: Renew Artifacts
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
+  check:
+    name: Renew Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-            # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
+      # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
+      - name: Use substrate-node binary
+        uses: ./.github/workflows/actions/use-substrate
 
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  override: true
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
 
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
-            # Runs two processes asynchronously:
-            # - one for the substrate node, timing out after 60s,
-            # - and one to fetch the metadata from it with the `scripts/artifacts.sh` script.
-            - name: Fetch Artifacts
-              run: |
-                  { timeout 60s substrate-node --dev --tmp; } & { sleep 15s && scripts/artifacts.sh; }
+      # Needs to be built before, so that it starts quickly when called by artifacts script.
+      - name: Build the CLI tool)
+        run: cargo build --bin subxt
 
-            # Generate the polkadot.rs file we use for verifying the codegen
-            - name: Generate polkadot.rs File
-              run: cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
+      # Runs two processes asynchronously:
+      # - one for the substrate node, timing out after 120s.
+      # - and one to fetch the metadata from it with the `scripts/artifacts.sh` script. This waits for 30s first to give the node enough time to start up.
+      - name: Fetch Artifacts
+        run: |
+          { timeout 120s substrate-node --dev --tmp; } & { sleep 30s && ./scripts/artifacts.sh; }
+      # Generate the polkadot.rs file we use for verifying the codegen
+      - name: Generate polkadot.rs File
+        run: cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
 
-            - name: Create Pull Request
-              uses: peter-evans/create-pull-request@v5
-              with:
-                  base: master
-                  branch: update-artifacts
-                  commit-message: Update Artifacts (auto-generated)
-                  branch-suffix: timestamp
-                  title: Update Artifacts (auto-generated)
-                  body: |
-                      This PR updates the artifacts by fetching fresh metadata from a substrate node.
-                      It also recreates the polkadot.rs file used in the integration tests.
-
-                      It was created automatically by a Weekly GitHub Action Cronjob.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          base: master
+          branch: update-artifacts
+          commit-message: Update Artifacts (auto-generated)
+          branch-suffix: timestamp
+          title: Update Artifacts (auto-generated)
+          body: |
+            This PR updates the artifacts by fetching fresh metadata from a substrate node.
+            It also recreates the polkadot.rs file used in the integration tests.
+            It was created automatically by a Weekly GitHub Action Cronjob.
