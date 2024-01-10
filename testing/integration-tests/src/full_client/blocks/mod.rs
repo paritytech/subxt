@@ -286,6 +286,8 @@ async fn decode_signed_extensions_from_blocks() {
         .unwrap()
         .tip();
 
+    println!("Second transaction\n\n");
+
     let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
     let extensions2 = transaction2.signed_extensions().unwrap();
     let nonce2 = extensions2.nonce().unwrap();

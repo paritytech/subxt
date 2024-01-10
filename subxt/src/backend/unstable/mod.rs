@@ -490,47 +490,51 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         //   guarantee that when we return here, the finalized block we report has been
         //   reported from chainHead_follow already.
         let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
-            std::future::ready(match ev {
-                FollowEvent::Initialized(ev) => {
-                    unsafe {
-                        FIN_BLOCK = Some(format!("{:?}", ev.finalized_block_hash));
+            std::future::ready({
+                println!("EV: {:#?}", ev);
+                match ev {
+                    FollowEvent::Initialized(ev) => {
+                        unsafe {
+                            FIN_BLOCK = Some(format!("{:?}", ev.finalized_block_hash));
+                        }
+                        None
                     }
-                    None
-                }
-                FollowEvent::NewBlock(ev) => {
-                    Some(SeenBlock::New((ev.block_hash, ev.parent_block_hash)))
-                }
-                FollowEvent::Finalized(ev) => {
-                    unsafe {
-                        PRUNED = Some(format!(" pruned {:?} {:?}", PRUNED, ev.pruned_block_hashes));
+                    FollowEvent::NewBlock(ev) => {
+                        Some(SeenBlock::New((ev.block_hash, ev.parent_block_hash)))
                     }
-                    Some(SeenBlock::Finalized(ev.finalized_block_hashes))
+                    FollowEvent::Finalized(ev) => {
+                        unsafe {
+                            PRUNED =
+                                Some(format!(" pruned {:?} {:?}", PRUNED, ev.pruned_block_hashes));
+                        }
+                        Some(SeenBlock::Finalized(ev.finalized_block_hashes))
+                    }
+                    FollowEvent::BestBlockChanged(_) => {
+                        Some(SeenBlock::Other(OtherEvent::BestBlockChanged))
+                    }
+                    FollowEvent::OperationBodyDone(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationBodyDone))
+                    }
+                    FollowEvent::OperationCallDone(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationCallDone))
+                    }
+                    FollowEvent::OperationStorageItems(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationStorageItems))
+                    }
+                    FollowEvent::OperationWaitingForContinue(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationWaitingForContinue))
+                    }
+                    FollowEvent::OperationStorageDone(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationStorageDone))
+                    }
+                    FollowEvent::OperationInaccessible(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationInaccessible))
+                    }
+                    FollowEvent::OperationError(_) => {
+                        Some(SeenBlock::Other(OtherEvent::OperationError))
+                    }
+                    FollowEvent::Stop => Some(SeenBlock::Other(OtherEvent::Stop)),
                 }
-                FollowEvent::BestBlockChanged(_) => {
-                    Some(SeenBlock::Other(OtherEvent::BestBlockChanged))
-                }
-                FollowEvent::OperationBodyDone(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationBodyDone))
-                }
-                FollowEvent::OperationCallDone(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationCallDone))
-                }
-                FollowEvent::OperationStorageItems(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationStorageItems))
-                }
-                FollowEvent::OperationWaitingForContinue(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationWaitingForContinue))
-                }
-                FollowEvent::OperationStorageDone(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationStorageDone))
-                }
-                FollowEvent::OperationInaccessible(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationInaccessible))
-                }
-                FollowEvent::OperationError(_) => {
-                    Some(SeenBlock::Other(OtherEvent::OperationError))
-                }
-                FollowEvent::Stop => Some(SeenBlock::Other(OtherEvent::Stop)),
             })
         });
 
