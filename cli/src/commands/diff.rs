@@ -228,11 +228,11 @@ impl StorageEntryDiff {
         let value_1_ty_id = storage_entry_1.entry_type().value_ty();
         let value_1_hash = metadata_1
             .type_hash(value_1_ty_id)
-            .expect("type should be present");
+            .expect("type is in metadata; qed");
         let value_2_ty_id = storage_entry_2.entry_type().value_ty();
         let value_2_hash = metadata_1
             .type_hash(value_2_ty_id)
-            .expect("type should be present");
+            .expect("type is in metadata; qed");
         let value_different = value_1_hash != value_2_hash;
 
         let key_1_hash = storage_entry_1
@@ -241,7 +241,7 @@ impl StorageEntryDiff {
             .map(|key_ty| {
                 metadata_1
                     .type_hash(key_ty)
-                    .expect("type should be present")
+                    .expect("type is in metadata; qed")
             })
             .unwrap_or_default();
         let key_2_hash = storage_entry_2
@@ -250,7 +250,7 @@ impl StorageEntryDiff {
             .map(|key_ty| {
                 metadata_2
                     .type_hash(key_ty)
-                    .expect("type should be present")
+                    .expect("type is in metadata; qed")
             })
             .unwrap_or_default();
         let key_different = key_1_hash != key_2_hash;
@@ -309,12 +309,12 @@ fn storage_differences<'a>(
         |e| {
             pallet_metadata_1
                 .storage_hash(e.name())
-                .expect("storage entry should be present")
+                .expect("storage entry is in medadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .storage_hash(e.name())
-                .expect("storage entry should be present")
+                .expect("storage entry is in medadata; qed")
         },
         |e| e.name(),
     )
@@ -330,12 +330,12 @@ fn calls_differences<'a>(
         |e| {
             pallet_metadata_1
                 .call_hash(&e.name)
-                .expect("call should be present")
+                .expect("call is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .call_hash(&e.name)
-                .expect("call should be present")
+                .expect("call is in metadata; qed")
         },
         |e| &e.name,
     );
@@ -351,12 +351,12 @@ fn constants_differences<'a>(
         |e| {
             pallet_metadata_1
                 .constant_hash(e.name())
-                .expect("constant should be present")
+                .expect("constant is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .constant_hash(e.name())
-                .expect("constant should be present")
+                .expect("constant is in metadata; qed")
         },
         |e| e.name(),
     )

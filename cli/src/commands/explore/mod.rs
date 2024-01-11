@@ -142,7 +142,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
             explore_constants(command, &metadata, pallet_metadata, output)
         }
         PalletSubcommand::Storage(command) => {
-            // if the metadata came from some url, we use that same url to make storage calls against.
+            // if the metadata is in some url, we use that same url to make storage calls against.
             let node_url = opts.file_or_url.url.map(|url| url.to_string());
             explore_storage(command, &metadata, pallet_metadata, node_url, output).await
         }

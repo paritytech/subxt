@@ -401,11 +401,11 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let defaults = defaults.into_iter().map(|(from, to)| {
         (
             from,
-            absolute_path(to).expect("default substitutes should be all absolute paths"),
+            absolute_path(to).expect("default substitutes above are absolute paths; qed"),
         )
     });
     type_substitutes
         .extend(defaults)
-        .expect("default substitutes should never error");
+        .expect("default substitutes can always be parsed; qed");
     type_substitutes
 }

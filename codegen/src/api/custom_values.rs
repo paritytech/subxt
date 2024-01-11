@@ -59,7 +59,7 @@ fn generate_custom_value_fn(
     let (return_ty, decodable) = if type_is_valid {
         let return_ty = type_gen
             .resolve_type_path(custom_value.type_id())
-            .expect("expected to contain type id")
+            .expect("type is in metadata; qed")
             .to_token_stream();
         let decodable = quote!(#crate_path::custom_values::Yes);
         (return_ty, decodable)
