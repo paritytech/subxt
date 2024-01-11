@@ -95,6 +95,9 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
 
+# For parsing urls to disallow insecure schemes
+url = { workspace = true }
+
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
 

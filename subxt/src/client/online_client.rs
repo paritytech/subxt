@@ -66,7 +66,15 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        let client = RpcClient::from_url(url).await?;
+        crate::utils::validate_url_is_secure(url.as_ref())?;
+        OnlineClient::from_insecure_url(url).await
+    }
+
+    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    ///
+    /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    pub async fn from_insecure_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+        let client = RpcClient::from_insecure_url(url).await?;
         let backend = LegacyBackend::new(client);
         OnlineClient::from_backend(Arc::new(backend)).await
     }

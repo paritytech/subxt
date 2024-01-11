@@ -20,7 +20,18 @@ pub struct RpcClient {
 impl RpcClient {
     #[cfg(feature = "jsonrpsee")]
     /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
+    ///
+    /// Errors if an insecure URL is provided. In this case, use [`RpcClient::from_insecure_url`] instead.
     pub async fn from_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
+        crate::utils::validate_url_is_secure(url.as_ref())?;
+        RpcClient::from_insecure_url(url).await
+    }
+
+    #[cfg(feature = "jsonrpsee")]
+    /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
+    ///
+    /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    pub async fn from_insecure_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
         let client = jsonrpsee_helpers::client(url.as_ref())
             .await
             .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
