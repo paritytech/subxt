@@ -18,7 +18,7 @@ use subxt_signer::sr25519::dev;
     )
 )]
 pub mod runtime {}
-use runtime::runtime_types::xcm::v2::multilocation::{MultiLocation, Junctions};
+use runtime::runtime_types::xcm::v2::multilocation::{Junctions, MultiLocation};
 
 // We don't need to construct this at runtime, so an empty enum is appropriate.
 pub enum AssetHubConfig {}
@@ -47,7 +47,9 @@ async fn main() {
         parents: 3,
         interior: Junctions::Here,
     };
-    let tx_config = DefaultExtrinsicParamsBuilder::<AssetHubConfig>::new().tip_of(1234, location).build();
+    let tx_config = DefaultExtrinsicParamsBuilder::<AssetHubConfig>::new()
+        .tip_of(1234, location)
+        .build();
 
     // And provide the extrinsic params including the tip when submitting a transaction:
     let _ = client
