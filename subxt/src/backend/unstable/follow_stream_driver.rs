@@ -274,8 +274,12 @@ impl<Hash: BlockHash> Shared<Hash> {
                     }
                 }
 
-                // The blocks reported by the finalized event should not be reported again
-                // by the initialized event. The pruned blocks are not of interest.
+                // The last finalized block will be reported as Initialized by our driver,
+                // therefore there is no need to report NewBlock and BestBlock events for it.
+                // If the Finalized event reported multiple finalized hashes, we only care about
+                // the state at the head of the chain, therefore it is correct to remove those as well.
+                // Idem for the pruned hashes; they will never be reported again and we remove
+                // them from the window of events.
                 let to_remove: HashSet<Hash> = finalized_ev
                     .finalized_block_hashes
                     .iter()
