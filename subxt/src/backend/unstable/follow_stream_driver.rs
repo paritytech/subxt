@@ -502,4 +502,41 @@ mod test {
         ];
         assert_eq!(evs, expected);
     }
+
+    #[tokio::test]
+    async fn subscribers_receive_new_blocks_before_subscribing() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_new_block(1, 2)),
+                    Ok(ev_new_block(2, 3)),
+                    Ok(ev_finalized([1])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            10,
+        );
+
+        // Skip to the first finalized block F1.
+        let _r = driver.next().await.unwrap();
+        let _i0 = driver.next().await.unwrap();
+        let _n1 = driver.next().await.unwrap();
+        let _b1 = driver.next().await.unwrap();
+        let _n2 = driver.next().await.unwrap();
+        let _n3 = driver.next().await.unwrap();
+        let _f1 = driver.next().await.unwrap();
+
+        // THEN subscribe; and make sure new block 1 and 2 are received.
+        let evs: Vec<_> = driver.handle().subscribe().take(4).collect().await;
+        let expected = vec![
+            FollowStreamMsg::Ready("sub_id_0".into()),
+            FollowStreamMsg::Event(ev_initialized_ref(1)),
+            FollowStreamMsg::Event(ev_new_block_ref(1, 2)),
+            FollowStreamMsg::Event(ev_new_block_ref(2, 3)),
+        ];
+        assert_eq!(evs, expected);
+    }
 }
