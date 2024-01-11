@@ -5,7 +5,6 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
-use crate::error::RpcError;
 use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
