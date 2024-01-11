@@ -52,6 +52,21 @@ async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::E
     Ok(())
 }
 
+// Check that we can subscribe to non-finalized blocks.
+async fn non_finalized_headers_subscription2(api: &Client) -> Result<(), subxt::Error> {
+    let now = std::time::Instant::now();
+
+    let mut sub = api.blocks().subscribe_best().await?;
+
+    let _block = sub.next().await.unwrap()?;
+    let _block = sub.next().await.unwrap()?;
+    let _block = sub.next().await.unwrap()?;
+
+    println!("non_finalized_headers_subscription {:?}", now.elapsed());
+
+    Ok(())
+}
+
 // Check that we can subscribe to finalized blocks.
 async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
@@ -151,11 +166,14 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
 
     let now = std::time::Instant::now();
     non_finalized_headers_subscription(&api).await?;
+    non_finalized_headers_subscription2(&api).await?;
+
     finalized_headers_subscription(&api).await?;
     runtime_api_call(&api).await?;
     storage_plain_lookup(&api).await?;
     dynamic_constant_query(&api).await?;
     dynamic_events(&api).await?;
+
     println!("light client testing took {:?}", now.elapsed());
 
     Ok(())
