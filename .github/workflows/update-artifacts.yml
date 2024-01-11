@@ -34,19 +34,13 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
 
-      # Needs to be built before, so that it starts quickly when called by artifacts script.
-      - name: Build the CLI tool)
-        run: cargo build --bin subxt
-
-      # Runs two processes asynchronously:
-      # - one for the substrate node, timing out after 120s.
-      # - and one to fetch the metadata from it with the `scripts/artifacts.sh` script. This waits for 30s first to give the node enough time to start up.
+      # This starts a substrate node and runs a few subxt cli child processes to fetch metadata from it and generate code.
+      # In particular it generates:
+      # - 4 metadata (*.scale) files in the `artifacts` directory
+      # - a polkadot.rs file from the full metadata that is checked in integration tests
+      # - a polkadot.json in the `artifacts/demo_chain_specs` directory
       - name: Fetch Artifacts
-        run: |
-          { timeout 120s substrate-node --dev --tmp; } & { sleep 30s && ./scripts/artifacts.sh; }
-      # Generate the polkadot.rs file we use for verifying the codegen
-      - name: Generate polkadot.rs File
-        run: cargo run --bin subxt -- codegen --file artifacts/polkadot_metadata_full.scale | rustfmt > testing/integration-tests/src/full_client/codegen/polkadot.rs
+        run: cargo build --bin artifacts
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
