@@ -20,6 +20,7 @@ env:
     CARGO_TERM_COLOR: always
     # Increase wasm test timeout from 20 seconds (default) to 1 minute.
     WASM_BINDGEN_TEST_TIMEOUT: 60
+    RUST_LOG: "trace,polling=info,async_io=info,sync-service-polkadot=trace"
 
 jobs:
     check:
@@ -159,7 +160,7 @@ jobs:
     tests:
         name: "Test (Native)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
+        timeout-minutes: 20
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -189,7 +190,7 @@ jobs:
     unstable_backend_tests:
         name: "Test (Unstable Backend)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
+        timeout-minutes: 20
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -219,7 +220,7 @@ jobs:
     light_client_tests:
         name: "Test (Light Client)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
+        timeout-minutes: 20
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -241,12 +242,93 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: test
-                  args: --release --package integration-tests --features unstable-light-client
+                  args: --release --package integration-tests --features unstable-light-client -- --nocapture
+
+    light_client_tests1:
+      name: "Test (Light Client)1"
+      runs-on: ubuntu-latest-16-cores
+      timeout-minutes: 20
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: test
+                args: --release --package integration-tests --features unstable-light-client -- --nocapture
+
+    light_client_tests2:
+      name: "Test (Light Client)2"
+      runs-on: ubuntu-latest-16-cores
+      timeout-minutes: 20
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: test
+                args: --release --package integration-tests --features unstable-light-client -- --nocapture
+
+    light_client_tests3:
+      name: "Test (Light Client)3"
+      runs-on: ubuntu-latest-16-cores
+      timeout-minutes: 20
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: test
+                args: --release --package integration-tests --features unstable-light-client -- --nocapture
 
     wasm_tests:
         name: Test (WASM)
         runs-on: ubuntu-latest
-        timeout-minutes: 45
+        timeout-minutes: 20
         env:
             # Set timeout for wasm tests to be much bigger than the default 20 secs.
             WASM_BINDGEN_TEST_TIMEOUT: 300
