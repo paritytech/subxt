@@ -17,13 +17,7 @@ members = [
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = [
-    "testing/wasm-rpc-tests",
-    "testing/wasm-lightclient-tests",
-    "signer/wasm-tests",
-    "examples/wasm-example",
-    "examples/parachain-example"
-]
+exclude = ["testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
 resolver = "2"
 
 [workspace.package]
@@ -100,6 +94,8 @@ url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
+scale-typegen-description = "0.1.0"
+scale-typegen = "0.1.1"
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }

@@ -31,12 +31,10 @@ jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport
 hex = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 thiserror = { workspace = true }
+scale-typegen = { workspace = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
-bitvec = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
-pretty_assertions = { workspace = true }
-frame-metadata = { workspace = true }
