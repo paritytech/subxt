@@ -1,8 +1,6 @@
-# # Generates the 4 metadata files in `/artifacts` and the polkadot.rs file for integration tests.
-
 # This script is to be run from the root of the repository: `scripts/artifacts.sh`
 #
-# It expects a local polkadot node to be running a JSON-RPC HTTP server at 127.0.0.1:9933
+# It expects a local polkadot node to be running a JSON-RPC HTTP server at 127.0.0.1:9944
 # A local polkadot node can be run via:
 # ```
 # git clone https://github.com/paritytech/polkadot.git
