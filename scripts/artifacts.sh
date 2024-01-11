@@ -1,5 +1,5 @@
-# # Generates the 3 metadata files in `/artifacts` and the polkadot.rs file for integration tests
-#
+# # Generates the 4 metadata files in `/artifacts` and the polkadot.rs file for integration tests.
+
 # This script is to be run from the root of the repository: `scripts/artifacts.sh`
 #
 # It expects a local polkadot node to be running a JSON-RPC HTTP server at 127.0.0.1:9933
@@ -10,6 +10,11 @@
 # cargo build --release
 # ./target/release/polkadot --dev --tmp
 # ```
+#
+# Instead of this script you can also use the binary crate "scripts/artifacts",
+# which you can run with `cargo run --bin artifacts` from the root of the repository. 
+# It will spawn up a substrate node and generate the artifacts (This is to be preferred for CI jobs)
+#
 
 # get the full metadata
 cargo run --bin subxt metadata --version 15 > artifacts/polkadot_metadata_full.scale

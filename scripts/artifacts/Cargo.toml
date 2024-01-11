@@ -1,0 +1,14 @@
+[package]
+name = "artifacts"
+authors.workspace = true
+edition.workspace = true
+version.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Internal tool to regenerate artifacts"
+
+[dependencies]
+substrate-runner = { workspace = true }

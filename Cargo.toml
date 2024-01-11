@@ -12,6 +12,7 @@ members = [
     "metadata",
     "signer",
     "subxt",
+    "scripts/artifacts"
 ]
 
 # We exclude any crates that would depend on non mutually
