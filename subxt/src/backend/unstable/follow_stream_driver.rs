@@ -165,9 +165,8 @@ struct SharedState<Hash: BlockHash> {
     done: bool,
     next_id: usize,
     subscribers: HashMap<usize, SubscriberDetails<Hash>>,
-    // Keep a buffer of all events from last finalized block so that new
-    // subscriptions can be handed this info first.
-    block_events_from_last_finalized: VecDeque<FollowEvent<BlockRef<Hash>>>,
+    /// Keep a buffer of all events that should be handed to a new subscription.
+    block_events_for_new_subscriptions: VecDeque<FollowEvent<BlockRef<Hash>>>,
     // Keep track of the subscription ID we send out on new subs.
     current_subscription_id: Option<String>,
     // Keep track of the init message we send out on new subs.
@@ -186,7 +185,7 @@ impl<Hash: BlockHash> Default for Shared<Hash> {
             current_init_message: None,
             current_subscription_id: None,
             seen_runtime_events: HashMap::new(),
-            block_events_from_last_finalized: VecDeque::new(),
+            block_events_for_new_subscriptions: VecDeque::new(),
         })))
     }
 }
@@ -251,7 +250,7 @@ impl<Hash: BlockHash> Shared<Hash> {
                 // New subscriptions will be given this init message:
                 shared.current_init_message = Some(ev.clone());
                 // Clear block cache (since a new finalized block hash is seen):
-                shared.block_events_from_last_finalized.clear();
+                shared.block_events_for_new_subscriptions.clear();
             }
             FollowStreamMsg::Event(FollowEvent::Finalized(finalized_ev)) => {
                 // Update the init message that we'll hand out to new subscriptions. If the init message
@@ -276,7 +275,7 @@ impl<Hash: BlockHash> Shared<Hash> {
                 }
 
                 // The blocks reported by the finalized event should not be reported again
-                // by the initialized event.
+                // by the initialized event. The pruned blocks are not of interest.
                 let to_remove: HashSet<Hash> = finalized_ev
                     .finalized_block_hashes
                     .iter()
@@ -285,7 +284,7 @@ impl<Hash: BlockHash> Shared<Hash> {
                     .collect();
 
                 shared
-                    .block_events_from_last_finalized
+                    .block_events_for_new_subscriptions
                     .retain(|ev| match ev {
                         FollowEvent::NewBlock(new_block_ev) => {
                             !to_remove.contains(&new_block_ev.block_hash.hash())
@@ -306,15 +305,15 @@ impl<Hash: BlockHash> Shared<Hash> {
                 }
 
                 shared
-                    .block_events_from_last_finalized
+                    .block_events_for_new_subscriptions
                     .push_back(FollowEvent::NewBlock(new_block_ev));
             }
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
-                shared.block_events_from_last_finalized.push_back(ev);
+                shared.block_events_for_new_subscriptions.push_back(ev);
             }
             FollowStreamMsg::Event(FollowEvent::Stop) => {
                 // On a stop event, clear everything. Wait for resubscription and new ready/initialised events.
-                shared.block_events_from_last_finalized.clear();
+                shared.block_events_for_new_subscriptions.clear();
                 shared.current_subscription_id = None;
                 shared.current_init_message = None;
             }
@@ -352,7 +351,7 @@ impl<Hash: BlockHash> Shared<Hash> {
                 init_msg.clone(),
             )));
         }
-        for ev in &shared.block_events_from_last_finalized {
+        for ev in &shared.block_events_for_new_subscriptions {
             local_items.push_back(FollowStreamMsg::Event(ev.clone()));
         }
 
