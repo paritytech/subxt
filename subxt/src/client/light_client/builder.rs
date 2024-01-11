@@ -153,6 +153,8 @@ impl<T: Config> LightClientBuilder<T> {
         let chain_spec = serde_json::from_str(chain_spec)
             .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
 
+        tokio::time::sleep(std::time::Duration::from_secs(6)).await;
+
         self.build_client(chain_spec).await
     }
 
