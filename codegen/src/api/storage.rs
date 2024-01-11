@@ -69,7 +69,7 @@ fn generate_storage_entry_fns(
     let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
-        .expect("storage type is in medadata; qed");
+        .expect("storage type is in metadata; qed");
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
@@ -79,7 +79,7 @@ fn generate_storage_entry_fns(
         let ident: Ident = format_ident!("_{}", idx);
         let ty_path = type_gen
             .resolve_type_path(id)
-            .expect("type is in medadata; qed");
+            .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
         let alias_type = primitive_type_alias(&ty_path);

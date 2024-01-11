@@ -309,12 +309,12 @@ fn storage_differences<'a>(
         |e| {
             pallet_metadata_1
                 .storage_hash(e.name())
-                .expect("storage entry is in medadata; qed")
+                .expect("storage entry is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .storage_hash(e.name())
-                .expect("storage entry is in medadata; qed")
+                .expect("storage entry is in metadata; qed")
         },
         |e| e.name(),
     )
