@@ -437,28 +437,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
-        enum SeenBlock<Ref> {
-            New(Ref),
-            Finalized(Vec<Ref>),
-        }
         enum SeenBlockMarker {
             New,
             Finalized,
         }
 
         // First, subscribe to all new and finalized block refs.
-        // - we subscribe to new refs so that when we see `BestChainBlockIncluded`, we
-        //   can try to return a block ref for the best block.
-        // - we subscribe to finalized refs so that when we see `Finalized`, we can
-        //   guarantee that when we return here, the finalized block we report has been
-        //   reported from chainHead_follow already.
-        let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
-            std::future::ready(match ev {
-                FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
-                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
-                _ => None,
-            })
-        });
+        let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
         let mut tx_progress = self
@@ -499,18 +484,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // Make a note of new or finalized blocks that have come in since we started the TX.
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
-                        SeenBlock::New(block_ref) => {
-                            chainhead_logs.push((now.elapsed().as_secs(), "new", block_ref.hash()));
+                        FollowEvent::NewBlock(new_block) => {
+                            chainhead_logs.push((now.elapsed(), "new", new_block.hash()));
 
-                            // Optimization: once we have a `finalized_hash`, we only care about finalized
-                            // block refs now and can avoid bothering to save new blocks.
-                            if finalized_hash.is_none() {
-                                seen_blocks
-                                    .insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
-                            }
+                            seen_blocks.insert(
+                                new_block.block_hash.hash(),
+                                (SeenBlockMarker::New, new_block.block_hash),
+                            );
                         }
-                        SeenBlock::Finalized(block_refs) => {
-                            for block_ref in block_refs {
+                        FollowEvent::Finalized(finalized_block) => {
+                            for block_ref in finalized_block.finalized_block_hashes {
                                 chainhead_logs.push((
                                     now.elapsed().as_secs(),
                                     "finalized",
@@ -523,7 +506,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                                 );
                             }
                         }
-                    }
+                        _ => (),
+                    };
                     continue;
                 }
 
