@@ -32,7 +32,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let Ok(Some(transfer)) = ext.as_extrinsic::<TransferKeepAlive>() {
                 if let Some(extensions) = ext.signed_extensions() {
                     ext.address_bytes().unwrap();
-                    let addr_bytes = ext.address_bytes().expect("TransferKeepAlive should be signed");
+                    let addr_bytes = ext
+                        .address_bytes()
+                        .expect("TransferKeepAlive should be signed");
                     let sender = MultiAddress::<AccountId32, ()>::decode(&mut &addr_bytes[..])
                         .expect("Decoding should work");
                     let sender = display_address(&sender);
