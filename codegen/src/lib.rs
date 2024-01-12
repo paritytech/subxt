@@ -7,6 +7,7 @@
 //! be used directly if preferable.
 
 #![deny(unused_crate_dependencies, missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod api;
 pub mod error;
@@ -16,6 +17,7 @@ mod ir;
 // macro and CLI tool, so they only live here because this is a common
 // crate that both depend on.
 #[cfg(feature = "fetch-metadata")]
+#[cfg_attr(docsrs, doc(cfg(feature = "fetch-metadata")))]
 pub mod fetch_metadata;
 
 #[cfg(feature = "web")]

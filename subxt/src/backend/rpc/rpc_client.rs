@@ -19,6 +19,7 @@ pub struct RpcClient {
 
 impl RpcClient {
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
     ///
     /// Errors if an insecure URL is provided. In this case, use [`RpcClient::from_insecure_url`] instead.

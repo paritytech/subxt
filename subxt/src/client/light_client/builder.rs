@@ -5,6 +5,7 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
+use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
@@ -101,6 +102,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         validate_url_is_secure(url.as_ref())?;
         self.build_from_insecure_url(url).await
@@ -255,58 +257,60 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
         .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    use tokio_util::compat::Compat;
+cfg_jsonrpsee_native! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        use tokio_util::compat::Compat;
 
-    pub use jsonrpsee::{
-        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
-        core::client::Client,
-    };
+        pub use jsonrpsee::{
+            client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
+            core::client::Client,
+        };
 
-    pub type Sender = ws::Sender<Compat<EitherStream>>;
-    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
+        pub type Sender = ws::Sender<Compat<EitherStream>>;
+        pub type Receiver = ws::Receiver<Compat<EitherStream>>;
 
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+        /// Build WS RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
 
-        if url.scheme() != "ws" && url.scheme() != "wss" {
-            return Err(Error::LightClient(LightClientError::InvalidScheme));
+                if url.scheme() != "ws" && url.scheme() != "wss" {
+                    return Err(Error::LightClient(LightClientError::InvalidScheme));
+                }
+
+                let (sender, receiver) = ws_transport(url).await?;
+
+                Ok(Client::builder()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_tokio(sender, receiver))
+            }
+
+            async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
+                WsTransportClientBuilder::default()
+                    .build(url)
+                    .await
+                    .map_err(|_| Error::LightClient(LightClientError::Handshake))
+            }
         }
-
-        let (sender, receiver) = ws_transport(url).await?;
-
-        Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
-    }
-
-    async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))
-    }
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "web"))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::client::{Client, ClientBuilder},
-    };
+cfg_jsonrpsee_web! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        pub use jsonrpsee::{
+            client_transport::web,
+            core::client::{Client, ClientBuilder},
+        };
 
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
+        /// Build web RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let (sender, receiver) = web::connect(url)
+                .await
+                .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
 
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
+            Ok(ClientBuilder::default()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_wasm(sender, receiver))
+        }
     }
 }
