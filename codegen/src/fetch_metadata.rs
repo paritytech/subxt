@@ -9,13 +9,12 @@ use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::WsTransportClientBuilder,
-    core::{client::ClientT, Error},
+    core::client::{ClientT, Error},
     http_client::HttpClientBuilder,
     rpc_params,
 };
 use std::time::Duration;
 
-// Part of the public interface:
 pub use jsonrpsee::client_transport::ws::Url;
 
 /// The metadata version that is fetched from the node.

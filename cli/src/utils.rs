@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use clap::Args;
-use color_eyre::eyre;
+use color_eyre::eyre::bail;
 
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
@@ -87,7 +87,7 @@ impl FileOrUrl {
         match (&self.file, &self.url, self.version) {
             // Can't provide both --file and --url
             (Some(_), Some(_), _) => {
-                eyre::bail!("specify one of `--url` or `--file` but not both")
+                bail!("specify one of `--url` or `--file` but not both")
             }
             // Load from --file path
             (Some(PathOrStdIn::Path(path)), None, None) => {
@@ -101,7 +101,7 @@ impl FileOrUrl {
 
                 match res {
                     Ok(bytes) => Ok(bytes),
-                    Err(err) => eyre::bail!("reading bytes from stdin (`--file -`) failed: {err}"),
+                    Err(err) => bail!("reading bytes from stdin (`--file -`) failed: {err}"),
                 }
             }
             // Cannot load the metadata from the file and specify a version to fetch.
@@ -110,7 +110,7 @@ impl FileOrUrl {
                 // but that would be involved because we'd need to convert
                 // from each metadata to the latest one and from the
                 // latest one to each metadata version. For now, disable the conversion.
-                eyre::bail!("`--file` is incompatible with `--version`")
+                bail!("`--file` is incompatible with `--version`")
             }
             // Fetch from --url
             (None, Some(uri), version) => {
@@ -142,6 +142,23 @@ pub fn with_indent(s: String, indent: usize) -> String {
         .map(|line| format!("{indent_str}{line}"))
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_eyre::Result<()> {
+    let Some(url) = url else {
+        return Ok(());
+    };
+    match subxt::utils::url_is_secure(url.as_str()) {
+        Ok(is_secure) => {
+            if !allow_insecure && !is_secure {
+                bail!("URL {url} is not secure!\nIf you are really want to use this URL, try using --allow-insecure (-a)");
+            }
+        }
+        Err(err) => {
+            bail!("URL {url} is not valid: {err}")
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]

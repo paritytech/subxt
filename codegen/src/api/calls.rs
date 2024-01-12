@@ -3,10 +3,10 @@
 // see LICENSE for license details.
 
 use super::CodegenError;
-use crate::types::{CompositeDefFields, TypeGenerator};
 use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::{typegen::ir::type_ir::CompositeIRKind, TypeGenerator};
 use subxt_metadata::PalletMetadata;
 
 /// Generate calls from the provided pallet's metadata. Each call returns a `StaticTxPayload`
@@ -14,81 +14,69 @@ use subxt_metadata::PalletMetadata;
 ///
 /// # Arguments
 ///
-/// - `metadata` - Runtime metadata from which the calls are generated.
-/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
-/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
+/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no calls.
     let Some(call_ty) = pallet.call_ty_id() else {
         return Ok(quote!());
     };
 
-    let mut struct_defs = super::generate_structs_from_variants(
+    let variant_names_and_struct_defs = super::generate_structs_from_variants(
         type_gen,
-        types_mod_ident,
         call_ty,
         |name| name.to_upper_camel_case().into(),
         "Call",
-        crate_path,
-        should_gen_docs,
     )?;
-
-    let result = struct_defs
-        .iter_mut()
-        .map(|(variant_name, struct_def, aliases)| {
-            let fn_name = format_ident!("{}", variant_name.to_snake_case());
-
-            let result: Vec<_> = match struct_def.fields {
-                CompositeDefFields::Named(ref named_fields) => named_fields
+    let (call_structs, call_fns): (Vec<_>, Vec<_>) = variant_names_and_struct_defs
+        .into_iter()
+        .map(|var| {
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = match &var.composite.kind {
+                CompositeIRKind::Named(named_fields) => named_fields
                     .iter()
                     .map(|(name, field)| {
-                        let call_arg = if field.is_boxed() {
+                        // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
+                        let fn_arg_type = &field.type_path;
+                        let call_arg = if field.is_boxed {
                             quote! { #name: ::std::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };
-
-                        let alias_name =
-                            format_ident!("{}", name.to_string().to_upper_camel_case());
-
-                        (quote!( #name: types::#fn_name::#alias_name ), call_arg)
+                        (quote!( #name: types::#fn_arg_type ), call_arg)
                     })
-                    .collect(),
-                CompositeDefFields::NoFields => Default::default(),
-                CompositeDefFields::Unnamed(_) => {
+                    .unzip(),
+                CompositeIRKind::NoFields => Default::default(),
+                CompositeIRKind::Unnamed(_) => {
                     return Err(CodegenError::InvalidCallVariant(call_ty))
                 }
             };
 
-            let call_fn_args = result.iter().map(|(call_fn_arg, _)| call_fn_arg);
-            let call_args = result.iter().map(|(_, call_arg)| call_arg);
-
             let pallet_name = pallet.name();
-            let call_name = &variant_name;
-            let struct_name = &struct_def.name;
+            let call_name = &var.variant_name;
+            let struct_name = &var.composite.name;
             let Some(call_hash) = pallet.call_hash(call_name) else {
                 return Err(CodegenError::MissingCallMetadata(
                     pallet_name.into(),
                     call_name.to_string(),
                 ));
             };
-
+            let fn_name = format_ident!("{}", var.variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
-            let docs = should_gen_docs.then_some(struct_def.docs.take()).flatten();
+            let docs = &var.composite.docs;
 
+            // this converts the composite into a full struct type. No Type Parameters needed here.
+            let struct_def = type_gen.upcast_composite(&var.composite);
+            let alias_mod = var.type_alias_mod;
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
-
-                #aliases
+                #alias_mod
 
                 impl #crate_path::blocks::StaticExtrinsic for #struct_name {
                     const PALLET: &'static str = #pallet_name;
@@ -113,17 +101,15 @@ pub fn generate_calls(
 
             Ok((call_struct, client_fn))
         })
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .unzip();
 
-    let call_structs = result.iter().map(|(call_struct, _)| call_struct);
-    let call_fns = result.iter().map(|(_, client_fn)| client_fn);
+    let call_type = type_gen.resolve_type_path(call_ty)?;
+    let call_ty = type_gen.resolve_type(call_ty)?;
+    let docs = type_gen.docs_from_scale_info(&call_ty.docs);
 
-    let call_type = type_gen.resolve_type_path(call_ty);
-    let call_ty = type_gen.resolve_type(call_ty);
-    let docs = &call_ty.docs;
-    let docs = should_gen_docs
-        .then_some(quote! { #( #[doc = #docs ] )* })
-        .unwrap_or_default();
+    let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
         #docs

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::utils::FileOrUrl;
+use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::eyre;
@@ -62,6 +62,9 @@ pub struct Opts {
     /// Defaults to `false` (default substitutions are provided).
     #[clap(long)]
     no_default_substitutions: bool,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
@@ -89,6 +92,8 @@ fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
+    validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
+
     let bytes = opts.file_or_url.fetch().await?;
 
     codegen(
@@ -168,7 +173,8 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
         let derive = syn::parse_str(&derive)
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
-        codegen.add_derives_for_type(ty, std::iter::once(derive));
+        // Note: recursive derives and attributes not supported in the CLI => recursive: false
+        codegen.add_derives_for_type(ty, std::iter::once(derive), false);
     }
 
     // Configure attribtues:
@@ -185,7 +191,8 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
         let attribute: OuterAttribute = syn::parse_str(&attr)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
-        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0));
+        // Note: recursive derives and attributes not supported in the CLI => recursive: false
+        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0), false);
     }
 
     // Insert type substitutions:

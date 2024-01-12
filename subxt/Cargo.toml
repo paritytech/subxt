@@ -27,7 +27,8 @@ default = ["jsonrpsee", "native"]
 native = [
     "jsonrpsee?/async-client",
     "jsonrpsee?/client-ws-transport-native-tls",
-    "subxt-lightclient?/native"
+    "subxt-lightclient?/native",
+    "tokio-util"
 ]
 
 # Enable this for web/wasm builds.
@@ -94,8 +95,14 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
 
+# For parsing urls to disallow insecure schemes
+url = { workspace = true }
+
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
+
+# Included if "native" feature is enabled
+tokio-util = { workspace = true, features = ["compat"], optional = true }
 
 [dev-dependencies]
 bitvec = { workspace = true }

@@ -5,14 +5,12 @@
 //! Errors that can be emitted from codegen.
 
 use proc_macro2::{Span, TokenStream as TokenStream2};
+use scale_typegen::TypegenError;
 
 /// Error returned when the Codegen cannot generate the runtime API.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum CodegenError {
-    /// The given metadata type could not be found.
-    #[error("Could not find type with ID {0} in the type registry; please raise a support issue.")]
-    TypeNotFound(u32),
     /// Cannot fetch the metadata bytes.
     #[error("Failed to fetch metadata, make sure that you're pointing at a node which is providing substrate-based metadata: {0}")]
     Fetch(#[from] FetchMetadataError),
@@ -22,12 +20,6 @@ pub enum CodegenError {
     /// Out of line modules are not supported.
     #[error("Out-of-line subxt modules are not supported, make sure you are providing a body to your module: pub mod polkadot {{ ... }}")]
     InvalidModule(Span),
-    /// Expected named or unnamed fields.
-    #[error("Fields should either be all named or all unnamed, make sure you are providing a valid metadata: {0}")]
-    InvalidFields(String),
-    /// Substitute types must have a valid path.
-    #[error("Type substitution error: {0}")]
-    TypeSubstitutionError(#[from] TypeSubstitutionError),
     /// Invalid type path.
     #[error("Invalid type path {0}: {1}")]
     InvalidTypePath(String, syn::Error),
@@ -56,6 +48,9 @@ pub enum CodegenError {
         "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
     )]
     MissingCallType,
+    /// Cannot generate types.
+    #[error("Type Generation failed: {0}")]
+    TypeGeneration(#[from] TypegenError),
 }
 
 impl CodegenError {
@@ -65,7 +60,7 @@ impl CodegenError {
     fn get_location(&self) -> Span {
         match self {
             Self::InvalidModule(span) => *span,
-            Self::TypeSubstitutionError(err) => err.get_location(),
+            Self::TypeGeneration(TypegenError::InvalidSubstitute(err)) => err.span,
             Self::InvalidTypePath(_, err) => err.span(),
             _ => proc_macro2::Span::call_site(),
         }
@@ -91,7 +86,7 @@ pub enum FetchMetadataError {
     /// JSON-RPC error fetching metadata.
     #[cfg(feature = "fetch-metadata")]
     #[error("Request error: {0}")]
-    RequestError(#[from] jsonrpsee::core::Error),
+    RequestError(#[from] jsonrpsee::core::ClientError),
     /// Failed IO when fetching from a file.
     #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]
     Io(String, std::io::Error),
@@ -101,44 +96,4 @@ pub enum FetchMetadataError {
     /// Some other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-/// Error attempting to do type substitution.
-#[derive(Debug, thiserror::Error)]
-#[non_exhaustive]
-pub enum TypeSubstitutionError {
-    /// Substitute "to" type must be an absolute path.
-    #[error("`substitute_type(with = <path>)` must be a path prefixed with 'crate::' or '::'")]
-    ExpectedAbsolutePath(Span),
-    /// Substitute types must have a valid path.
-    #[error("Substitute types must have a valid path.")]
-    EmptySubstitutePath(Span),
-    /// From/To substitution types should use angle bracket generics.
-    #[error("Expected the from/to type generics to have the form 'Foo<A,B,C..>'.")]
-    ExpectedAngleBracketGenerics(Span),
-    /// Source substitute type must be an ident.
-    #[error("Expected an ident like 'Foo' or 'A' to mark a type to be substituted.")]
-    InvalidFromType(Span),
-    /// Target type is invalid.
-    #[error("Expected an ident like 'Foo' or an absolute concrete path like '::path::to::Bar' for the substitute type.")]
-    InvalidToType(Span),
-    /// Target ident doesn't correspond to any source type.
-    #[error("Cannot find matching param on 'from' type.")]
-    NoMatchingFromType(Span),
-}
-
-impl TypeSubstitutionError {
-    /// Fetch the location for this error.
-    // Todo: Probably worth storing location outside of the variant,
-    // so that there's a common way to set a location for some error.
-    fn get_location(&self) -> Span {
-        match self {
-            TypeSubstitutionError::ExpectedAbsolutePath(span) => *span,
-            TypeSubstitutionError::EmptySubstitutePath(span) => *span,
-            TypeSubstitutionError::ExpectedAngleBracketGenerics(span) => *span,
-            TypeSubstitutionError::InvalidFromType(span) => *span,
-            TypeSubstitutionError::InvalidToType(span) => *span,
-            TypeSubstitutionError::NoMatchingFromType(span) => *span,
-        }
-    }
 }

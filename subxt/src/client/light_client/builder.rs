@@ -6,6 +6,7 @@ use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
 use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
+use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
@@ -103,8 +104,19 @@ impl<T: Config> LightClientBuilder<T> {
     #[cfg(feature = "jsonrpsee")]
     #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
-        let chain_spec = fetch_url(url.as_ref()).await?;
+        validate_url_is_secure(url.as_ref())?;
+        self.build_from_insecure_url(url).await
+    }
 
+    /// Build the light client with specified URL to connect to. Allows insecure URLs (no SSL, ws:// or http://).
+    ///
+    /// For secure connections only, please use [`crate::LightClientBuilder::build_from_url`].
+    #[cfg(feature = "jsonrpsee")]
+    pub async fn build_from_insecure_url<Url: AsRef<str>>(
+        self,
+        url: Url,
+    ) -> Result<LightClient<T>, Error> {
+        let chain_spec = fetch_url(url.as_ref()).await?;
         self.build_client(chain_spec).await
     }
 
@@ -237,7 +249,6 @@ async fn build_client_from_rpc<T: Config>(
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     use jsonrpsee::core::client::ClientT;
-
     let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
     client
@@ -249,33 +260,38 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
 cfg_jsonrpsee_native! {
     mod jsonrpsee_helpers {
         use crate::error::{Error, LightClientError};
+        use tokio_util::compat::Compat;
+
         pub use jsonrpsee::{
-            client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
+            client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
             core::client::Client,
         };
+
+        pub type Sender = ws::Sender<Compat<EitherStream>>;
+        pub type Receiver = ws::Receiver<Compat<EitherStream>>;
 
         /// Build WS RPC client from URL
         pub async fn client(url: &str) -> Result<Client, Error> {
             let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
 
-            if url.scheme() != "ws" && url.scheme() != "wss" {
-                return Err(Error::LightClient(LightClientError::InvalidScheme));
+                if url.scheme() != "ws" && url.scheme() != "wss" {
+                    return Err(Error::LightClient(LightClientError::InvalidScheme));
+                }
+
+                let (sender, receiver) = ws_transport(url).await?;
+
+                Ok(Client::builder()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_tokio(sender, receiver))
             }
 
-            let (sender, receiver) = ws_transport(url).await?;
-
-            Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
+            async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
+                WsTransportClientBuilder::default()
+                    .build(url)
+                    .await
+                    .map_err(|_| Error::LightClient(LightClientError::Handshake))
+            }
         }
-
-        async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
-            WsTransportClientBuilder::default()
-                .build(url)
-                .await
-                .map_err(|_| Error::LightClient(LightClientError::Handshake))
-        }
-    }
 }
 
 cfg_jsonrpsee_web! {
