@@ -72,11 +72,13 @@ mod runtime_apis;
 /// subxt explore pallet Balances events frozen
 /// ```
 /// ## Runtime APIs
-/// Show the input and output types of a runtime api:
+/// Show the input and output types of a runtime api method.
+/// In this example "core" is the name of the runtime api and "version" is a method on it:
 /// ```text
 /// subxt explore api core version
 /// ```
-/// Execute a runtime API call with the `--execute` (`-e`) flag, to see the return value:
+/// Execute a runtime API call with the `--execute` (`-e`) flag, to see the return value.
+/// For example here we get the "version", via the "core" runtime API from the connected node:
 /// ```text
 /// subxt explore api core version --execute
 /// ```
@@ -137,7 +139,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
             subxt explore pallet {PALLET}
                 explore a specific pallet
             subxt explore api {RUNTIME_API}
-                explore a specific runtime api trait
+                explore a specific runtime api
 
         {pallets}
 
@@ -160,10 +162,9 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 return Ok(());
             };
 
-            let name_lower_case = name.to_lowercase();
             if let Some(pallet) = metadata
                 .pallets()
-                .find(|e| e.name().to_lowercase() == name_lower_case)
+                .find(|e| e.name().eq_ignore_ascii_case(&name))
             {
                 pallets::run(opts.subcommand, pallet, &metadata, file_or_url, output).await
             } else {
@@ -179,17 +180,16 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 writedoc! {output, "
                 Usage:
                     subxt explore api {RUNTIME_API}
-                        explore a specific runtime api trait
+                        explore a specific runtime api
 
                 {runtime_apis}
                 "}?;
                 return Ok(());
             };
 
-            let name_lower_case = name.to_lowercase();
             if let Some(runtime_api) = metadata
                 .runtime_api_traits()
-                .find(|e| e.name().to_lowercase() == name_lower_case)
+                .find(|e| e.name().eq_ignore_ascii_case(&name))
             {
                 runtime_apis::run(
                     opts.method,
@@ -294,7 +294,7 @@ pub mod tests {
                 subxt explore pallet <PALLET>
                     explore a specific pallet
                 subxt explore api <RUNTIME_API>
-                    explore a specific runtime api trait
+                    explore a specific runtime api
 
             Available <PALLET>'s are:
                 Balances
@@ -347,7 +347,6 @@ pub mod tests {
             .await
             .unwrap()
             .strip_ansi();
-        // dbg!(output);
         let start = formatdoc! {"
             Usage:
                 subxt explore pallet Balances calls <CALL>

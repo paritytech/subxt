@@ -70,7 +70,7 @@ pub async fn run<'a>(
     // If method is invalid: Show Error + available methods
     let Some(method) = runtime_api_metadata
         .methods()
-        .find(|e| e.name().to_lowercase() == method_name.to_lowercase())
+        .find(|e| e.name().eq_ignore_ascii_case(&method_name))
     else {
         return Err(eyre!(
             "\"{method_name}\" method not found for \"{method_name}\" runtime api!\n\n{}",

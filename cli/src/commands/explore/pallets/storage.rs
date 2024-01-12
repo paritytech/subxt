@@ -66,7 +66,7 @@ pub async fn explore_storage(
     let Some(storage) = storage_metadata
         .entries()
         .iter()
-        .find(|entry| entry.name().to_lowercase() == entry_name.to_lowercase())
+        .find(|entry| entry.name().eq_ignore_ascii_case(&entry_name))
     else {
         bail!(
             "Storage entry \"{entry_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",

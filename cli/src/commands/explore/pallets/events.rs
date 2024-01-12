@@ -39,7 +39,7 @@ pub fn explore_events(
     // if specified event is wrong, show user the events to choose from (but this time as an error):
     let Some(event) = event_variants
         .iter()
-        .find(|event| event.name.to_lowercase() == event_name.to_lowercase())
+        .find(|event| event.name.eq_ignore_ascii_case(&event_name))
     else {
         let err = eyre!(
             "event \"{event_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",

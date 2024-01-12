@@ -60,7 +60,7 @@ pub fn explore_calls(
     let Some(call) = calls_enum_type_def
         .variants
         .iter()
-        .find(|variant| variant.name.to_lowercase() == call_name.to_lowercase())
+        .find(|variant| variant.name.eq_ignore_ascii_case(&call_name))
     else {
         return Err(eyre!(
             "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{}",

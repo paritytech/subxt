@@ -83,7 +83,6 @@ scale-decode = "0.10.0"
 scale-encode = "0.5.0"
 serde = { version = "1.0.195" }
 serde_json = { version = "1.0.108" }
-strip-ansi-escapes = "0.2.0"
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.53"
 tokio = { version = "1.35", default-features = false }
