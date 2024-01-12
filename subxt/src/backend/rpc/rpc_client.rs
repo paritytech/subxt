@@ -19,6 +19,7 @@ pub struct RpcClient {
 
 impl RpcClient {
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     /// Create a default RPC client pointed at some URL, currently based on [`jsonrpsee`].
     ///
     /// Errors if an insecure URL is provided. In this case, use [`RpcClient::from_insecure_url`] instead.
@@ -240,9 +241,13 @@ impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
 #[cfg(all(feature = "jsonrpsee", feature = "native"))]
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{client::Client, Error},
+        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
+        core::client::{Client, Error},
     };
+    use tokio_util::compat::Compat;
+
+    pub type Sender = ws::Sender<Compat<EitherStream>>;
+    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
 
     /// Build WS RPC client from URL
     pub async fn client(url: &str) -> Result<Client, Error> {
@@ -266,10 +271,7 @@ mod jsonrpsee_helpers {
 mod jsonrpsee_helpers {
     pub use jsonrpsee::{
         client_transport::web,
-        core::{
-            client::{Client, ClientBuilder},
-            Error,
-        },
+        core::client::{Client, ClientBuilder, Error},
     };
 
     /// Build web RPC client from URL

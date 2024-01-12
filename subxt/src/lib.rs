@@ -10,6 +10,8 @@
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
@@ -55,6 +57,10 @@ pub mod storage;
 pub mod tx;
 pub mod utils;
 
+// Internal helper macros
+#[macro_use]
+mod macros;
+
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
@@ -73,10 +79,11 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
-    #[cfg(feature = "substrate-compat")]
-    pub use sp_core;
-    #[cfg(feature = "substrate-compat")]
-    pub use sp_runtime;
+
+    cfg_substrate_compat! {
+        pub use sp_runtime;
+        pub use sp_core;
+    }
 }
 
 /// Generate a strongly typed API for interacting with a Substrate runtime from its metadata.

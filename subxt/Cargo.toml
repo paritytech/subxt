@@ -27,7 +27,8 @@ default = ["jsonrpsee", "native"]
 native = [
     "jsonrpsee?/async-client",
     "jsonrpsee?/client-ws-transport-native-tls",
-    "subxt-lightclient?/native"
+    "subxt-lightclient?/native",
+    "tokio-util"
 ]
 
 # Enable this for web/wasm builds.
@@ -100,6 +101,9 @@ url = { workspace = true }
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }
 
+# Included if "native" feature is enabled
+tokio-util = { workspace = true, features = ["compat"], optional = true }
+
 [dev-dependencies]
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
@@ -125,3 +129,10 @@ required-features = ["unstable-light-client", "jsonrpsee"]
 name = "light_client_parachains"
 path = "examples/light_client_parachains.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
+
+[package.metadata.docs.rs]
+features = ["default", "substrate-compat", "unstable-light-client"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+features = ["default", "substrate-compat", "unstable-light-client"]
