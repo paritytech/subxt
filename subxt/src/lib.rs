@@ -107,7 +107,7 @@ pub mod ext {
 /// ```
 ///
 /// The `subxt` macro will populate the annotated module with all of the methods and types required
-/// for interacting with the runtime that the metadata came from via Subxt.
+/// for interacting with the runtime that the metadata is in via Subxt.
 ///
 /// # Configuration
 ///

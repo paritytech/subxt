@@ -9,7 +9,7 @@ use codec::{Decode, Encode};
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::WsTransportClientBuilder,
-    core::{client::ClientT, Error},
+    core::client::{ClientT, Error},
     http_client::HttpClientBuilder,
     rpc_params,
 };

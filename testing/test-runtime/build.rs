@@ -101,12 +101,16 @@ async fn run() {
 
 // Use jsonrpsee to obtain metadata from the node.
 mod client {
+    use jsonrpsee::client_transport::ws::EitherStream;
     pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::{client::Client, Error},
+        client_transport::ws::{self, Url, WsTransportClientBuilder},
+        core::client::{Client, Error},
     };
+    use tokio_util::compat::Compat;
 
     pub use jsonrpsee::core::{client::ClientT, rpc_params};
+    pub type Sender = ws::Sender<Compat<EitherStream>>;
+    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
 
     /// Build WS RPC client from URL
     pub async fn build(url: &str) -> Result<Client, Error> {
