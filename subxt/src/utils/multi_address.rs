@@ -37,6 +37,13 @@ pub enum MultiAddress<AccountId, AccountIndex> {
     Address20([u8; 20]),
 }
 
+impl<A, B> MultiAddress<A, B> {
+    ///sasda sa dsa
+    pub fn foo(&self) {
+        println!("lol")
+    }
+}
+
 impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, AccountIndex> {
     fn from(a: AccountId) -> Self {
         Self::Id(a)
