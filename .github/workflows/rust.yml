@@ -159,7 +159,6 @@ jobs:
     tests:
         name: "Test (Native)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -189,7 +188,6 @@ jobs:
     unstable_backend_tests:
         name: "Test (Unstable Backend)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -214,12 +212,246 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: nextest
-                  args: run --workspace --features unstable-backend-client
+                  args: run --workspace --features unstable-backend-client --no-capture
 
+
+    unstable_backend_tests1:
+      name: "Test1 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests2:
+      name: "Test2 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+                
+    unstable_backend_tests3:
+      name: "Test3 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests4:
+      name: "Test4 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests6:
+        name: "Test6 (Unstable Backend)"
+        runs-on: ubuntu-latest-16-cores
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+  
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+  
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+  
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+  
+            - name: Install cargo-nextest
+              run: cargo install cargo-nextest
+  
+            - name: Run tests
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: nextest
+                  args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests9:
+      name: "Test9 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests7:
+      name: "Test7 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+
+    unstable_backend_tests8:
+      name: "Test8 (Unstable Backend)"
+      runs-on: ubuntu-latest-16-cores
+      steps:
+          - name: Checkout sources
+            uses: actions/checkout@v4
+
+          - name: Use substrate-node binary
+            uses: ./.github/workflows/actions/use-substrate
+
+          - name: Install Rust stable toolchain
+            uses: actions-rs/toolchain@v1
+            with:
+                profile: minimal
+                toolchain: stable
+                override: true
+
+          - name: Rust Cache
+            uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
+
+          - name: Install cargo-nextest
+            run: cargo install cargo-nextest
+
+          - name: Run tests
+            uses: actions-rs/cargo@v1.0.3
+            with:
+                command: nextest
+                args: run --workspace --features unstable-backend-client --no-capture
+                        
     light_client_tests:
         name: "Test (Light Client)"
         runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 45
+        timeout-minutes: 25
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
@@ -246,7 +478,6 @@ jobs:
     wasm_tests:
         name: Test (WASM)
         runs-on: ubuntu-latest
-        timeout-minutes: 45
         env:
             # Set timeout for wasm tests to be much bigger than the default 20 secs.
             WASM_BINDGEN_TEST_TIMEOUT: 300
