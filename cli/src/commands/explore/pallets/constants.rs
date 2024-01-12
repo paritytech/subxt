@@ -38,7 +38,7 @@ pub fn explore_constants(
     // if specified constant is wrong, show user the constants to choose from (but this time as an error):
     let Some(constant) = pallet_metadata
         .constants()
-        .find(|constant| constant.name().to_lowercase() == constant_name.to_lowercase())
+        .find(|constant| constant.name().eq_ignore_ascii_case(&constant_name))
     else {
         let err = eyre!(
             "constant \"{constant_name}\" not found in \"{pallet_name}\" pallet!\n\n{}",
