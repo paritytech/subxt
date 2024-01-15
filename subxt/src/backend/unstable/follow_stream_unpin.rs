@@ -174,11 +174,13 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         })
                         .collect();
 
+                    let pruned_hashes = pruned_block_refs.iter().map(|block| block.hash());
+
                     // At this point, we also check to see which blocks we should submit unpin events
                     // for. When we see a block hash as finalized, we know that it won't be reported again
                     // (except as a parent hash of a new block), so we can safely make an unpin call for it
                     // without worrying about the hash being returned again despite the block not being pinned.
-                    this.unpin_blocks(cx.waker());
+                    this.unpin_blocks(pruned_hashes, cx.waker());
 
                     FollowStreamMsg::Event(FollowEvent::Finalized(Finalized {
                         finalized_block_hashes: finalized_block_refs,
@@ -292,8 +294,8 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         entry.block_ref.clone()
     }
 
-    /// Unpin any blocks that are either too old, or have the unpin flag set and are old enough.
-    fn unpin_blocks(&mut self, waker: &Waker) {
+    /// Unpin any blocks that are either too old, or have the unpin flag set and are in the list of pruned hashes.
+    fn unpin_blocks(&mut self, pruned_hashes: impl IntoIterator<Item = Hash>, waker: &Waker) {
         let unpin_flags = std::mem::take(&mut *self.unpin_flags.lock().unwrap());
         let rel_block_num = self.rel_block_num;
 
@@ -305,11 +307,15 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
         let mut blocks_to_unpin = vec![];
         for (hash, details) in &self.pinned {
-            if rel_block_num.saturating_sub(details.rel_block_num) >= self.max_block_life
-                || unpin_flags.contains(hash)
-            {
+            if rel_block_num.saturating_sub(details.rel_block_num) >= self.max_block_life {
                 // The block is too old, or it's been flagged to be unpinned (no refs to it left)
                 blocks_to_unpin.push(*hash);
+            }
+        }
+
+        for hash in pruned_hashes {
+            if unpin_flags.contains(&hash) {
+                blocks_to_unpin.push(hash);
             }
         }
 
