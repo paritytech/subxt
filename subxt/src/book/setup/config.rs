@@ -157,9 +157,9 @@
 //!
 //! You can also use types that are generated from chain metadata as type parameters of the Config trait.
 //! Just make sure all trait bounds are satisfied. This can often be achieved by using custom derives with the subxt macro.
-//! For example, the AssetHub Parachain, expects tips to include a `MultiLocation`, which is a type we can draw from the metadata.
+//! For example, the AssetHub Parachain expects tips to include a `MultiLocation`, which is a type we can draw from the metadata.
 //!
-//! This example shows, what using the `MultiLocation` struct as part of your config would look like in subxt:
+//! This example shows what using the `MultiLocation` struct as part of your config would look like in subxt:
 //!
 //! ```rust,ignore
 #![doc = include_str ! ("../../../examples/setup_config_assethub.rs")]

@@ -13,7 +13,7 @@ use polkadot::balances::calls::types::TransferKeepAlive;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a client that subscribes to blocks of the live Polkadot network.
+    // Create a client that subscribes to blocks of the Polkadot network.
     let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // Subscribe to all finalized blocks:
@@ -30,25 +30,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for ext in extrinsics.iter() {
             let ext = ext?;
             if let Ok(Some(transfer)) = ext.as_extrinsic::<TransferKeepAlive>() {
-                if let Some(extensions) = ext.signed_extensions() {
-                    ext.address_bytes().unwrap();
-                    let addr_bytes = ext
-                        .address_bytes()
-                        .expect("TransferKeepAlive should be signed");
-                    let sender = MultiAddress::<AccountId32, ()>::decode(&mut &addr_bytes[..])
-                        .expect("Decoding should work");
-                    let sender = display_address(&sender);
-                    let receiver = display_address(&transfer.dest);
-                    let value = transfer.value;
-                    let tip = extensions.tip().expect("Should have tip");
-                    let nonce = extensions.nonce().expect("Should have nonce");
-
-                    println!(
-                        "    Transfer of {value} DOT:\n        {sender} (Tip: {tip}, Nonce: {nonce}) ---> {receiver}",
-                    );
-                } else {
+                let Some(extensions) = ext.signed_extensions() else {
                     panic!("TransferKeepAlive should be signed")
-                }
+                };
+
+                ext.address_bytes().unwrap();
+                let addr_bytes = ext
+                    .address_bytes()
+                    .expect("TransferKeepAlive should be signed");
+                let sender = MultiAddress::<AccountId32, ()>::decode(&mut &addr_bytes[..])
+                    .expect("Decoding should work");
+                let sender = display_address(&sender);
+                let receiver = display_address(&transfer.dest);
+                let value = transfer.value;
+                let tip = extensions.tip().expect("Should have tip");
+                let nonce = extensions.nonce().expect("Should have nonce");
+
+                println!(
+                    "    Transfer of {value} DOT:\n        {sender} (Tip: {tip}, Nonce: {nonce}) ---> {receiver}",
+                );
             }
         }
     }

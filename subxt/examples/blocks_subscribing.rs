@@ -58,9 +58,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("        {name}: {value}");
                 }
             }
-
-            // // We could also decode the
-            // let decoded_as_remark = ext.as_root_extrinsic::<polkadot::Call>();
         }
     }
 
