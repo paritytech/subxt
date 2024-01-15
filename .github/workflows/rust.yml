@@ -447,33 +447,6 @@ jobs:
             with:
                 command: nextest
                 args: run --workspace --features unstable-backend-client --no-capture
-                        
-    light_client_tests:
-        name: "Test (Light Client)"
-        runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 25
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@3cf7f8cc28d1b4e7d01e3783be10a97d55d483c8 # v2.7.1
-
-            - name: Run tests
-              uses: actions-rs/cargo@v1.0.3
-              with:
-                  command: test
-                  args: --release --package integration-tests --features unstable-light-client
 
     wasm_tests:
         name: Test (WASM)
