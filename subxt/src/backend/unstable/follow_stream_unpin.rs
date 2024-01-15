@@ -634,4 +634,50 @@ mod test {
         let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
         assert_eq!(hash, H256::from_low_u64_le(1));
     }
+
+    #[tokio::test]
+    async fn unpin_new_block_before_finalized() {
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_new_block(1, 2)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([2])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            100,
+        );
+
+        let _r = follow_unpin.next().await.unwrap().unwrap();
+        let _i0 = follow_unpin.next().await.unwrap().unwrap();
+        // drop new block 1 and new block 2.
+        let n1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(n1);
+        let n2 = follow_unpin.next().await.unwrap().unwrap();
+        drop(n2);
+
+        let b1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(b1);
+        let f1 = follow_unpin.next().await.unwrap().unwrap();
+
+        // even though we dropped our block 1 in the new/best events, it won't be unpinned
+        // because it occurred again in finalized event.
+
+        // Although block 1 is not dropped; because we still hold a  reference to b1 via the finalized;
+        // block 2 is dropped immediately.
+        // thread 'backend::unstable::follow_stream_unpin::test::unpin_new_block_before_finalized' panicked at subxt/src/backend/unstable/follow_stream_unpin.rs:672:29:
+        // nothing unpinned yet: (0x0000000000000000000000000000000000000000000000000200000000000000, "sub_id_0")
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+
+        drop(f1);
+        let _f2 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Since we dropped the finalized block 1, we'll now unpin it when next block finalized.
+        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
+        assert_eq!(hash, H256::from_low_u64_le(1));
+    }
 }
