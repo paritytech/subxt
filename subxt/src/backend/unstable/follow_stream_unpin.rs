@@ -254,7 +254,10 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
             let methods = methods.clone();
             let fut: UnpinFut = Box::pin(async move {
                 // We ignore any errors trying to unpin at the moment.
-                let _ = methods.chainhead_unstable_unpin(&sub_id, hash).await;
+                let result = methods.chainhead_unstable_unpin(&sub_id, hash).await;
+                if let Err(e) = result {
+                    panic!("Error unpinning block: {:?}", e);
+                }
             });
             fut
         });
