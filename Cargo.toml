@@ -89,7 +89,7 @@ tokio = { version = "1.35", default-features = false }
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
-trybuild = "1.0.86"
+trybuild = "1.0.89"
 url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
