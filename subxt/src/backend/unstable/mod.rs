@@ -474,9 +474,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // with chainHead_follow.
         let mut finalized_hash: Option<T::Hash> = None;
 
+        let mut iter_num = 0;
+        let now = std::time::Instant::now();
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
+                iter_num += 1;
+                if now.elapsed().as_secs() > 120 {
+                    panic!("iter={:#?}", iter_num);
+                }
+
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
                 if done {
                     return Poll::Ready(None);
