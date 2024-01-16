@@ -32,7 +32,7 @@ struct RuntimeMetadataArgs {
     #[darling(default)]
     runtime_metadata_path: Option<String>,
     #[darling(default)]
-    runtime_metadata_url: Option<String>,
+    runtime_metadata_insecure_url: Option<String>,
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(default)]
@@ -61,12 +61,16 @@ struct RuntimeMetadataArgs {
 struct DeriveForType {
     path: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
+    #[darling(default)]
+    recursive: bool,
 }
 
 #[derive(Debug, FromMeta)]
 struct AttributesForType {
     path: syn::TypePath,
     attributes: Punctuated<OuterAttribute, syn::Token![,]>,
+    #[darling(default)]
+    recursive: bool,
 }
 
 #[derive(Debug, FromMeta)]
@@ -123,7 +127,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.derive_for_type {
-        codegen.add_derives_for_type(d.path, d.derive.into_iter());
+        codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
     }
 
     // Configure attributes:
@@ -135,7 +139,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.attributes_for_type {
-        codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0))
+        codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0), d.recursive)
     }
 
     // Insert type substitutions:
@@ -146,11 +150,14 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
 
-    match (args.runtime_metadata_path, args.runtime_metadata_url) {
+    match (
+        args.runtime_metadata_path,
+        args.runtime_metadata_insecure_url,
+    ) {
         (Some(rest_of_path), None) => {
             if unstable_metadata {
                 abort_call_site!(
-                    "The 'unstable_metadata' attribute requires `runtime_metadata_url`"
+                    "The 'unstable_metadata' attribute requires `runtime_metadata_insecure_url`"
                 )
             }
 
@@ -185,12 +192,12 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
         }
         (None, None) => {
             abort_call_site!(
-                "One of 'runtime_metadata_path' or 'runtime_metadata_url' must be provided"
+                "One of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided"
             )
         }
         (Some(_), Some(_)) => {
             abort_call_site!(
-                "Only one of 'runtime_metadata_path' or 'runtime_metadata_url' can be provided"
+                "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
             )
         }
     }

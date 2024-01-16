@@ -12,20 +12,20 @@ mod events;
 mod runtime_apis;
 mod storage;
 
+use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
+use scale_typegen::typegen::type_params::TypeParameters;
+use scale_typegen::typegen::type_path::TypePath;
+use scale_typegen::TypeGenerator;
 use subxt_metadata::Metadata;
+use syn::{parse_quote, Ident};
 
-use crate::api::custom_values::generate_custom_values;
 use crate::error::CodegenError;
-use crate::types::DerivesRegistry;
-use crate::{
-    ir,
-    types::{CompositeDef, CompositeDefFields, TypeGenerator, TypeSubstitutes},
-};
+use crate::subxt_type_gen_settings;
+use crate::{api::custom_values::generate_custom_values, ir};
 
-use heck::ToSnakeCase as _;
+use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
-use syn::parse_quote;
 
 /// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
@@ -60,26 +60,21 @@ impl RuntimeGenerator {
     pub fn generate_runtime_types(
         &self,
         item_mod: syn::ItemMod,
-        derives: DerivesRegistry,
-        type_substitutes: TypeSubstitutes,
+        derives: scale_typegen::DerivesRegistry,
+        type_substitutes: scale_typegen::TypeSubstitutes,
         crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
-
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
+
+        let settings =
+            subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
+
+        let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
+        let types_mod = type_gen.generate_types_mod()?;
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
-
-        let type_gen = TypeGenerator::new(
-            self.metadata.types(),
-            "runtime_types",
-            type_substitutes,
-            derives,
-            crate_path,
-            should_gen_docs,
-        );
-        let types_mod = type_gen.generate_types_mod()?;
 
         Ok(quote! {
             #( #item_mod_attrs )*
@@ -114,24 +109,20 @@ impl RuntimeGenerator {
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: DerivesRegistry,
-        type_substitutes: TypeSubstitutes,
+        derives: scale_typegen::DerivesRegistry,
+        type_substitutes: scale_typegen::TypeSubstitutes,
         crate_path: syn::Path,
         should_gen_docs: bool,
     ) -> Result<TokenStream2, CodegenError> {
         let item_mod_attrs = item_mod.attrs.clone();
         let item_mod_ir = ir::ItemMod::try_from(item_mod)?;
 
-        let type_gen = TypeGenerator::new(
-            self.metadata.types(),
-            "runtime_types",
-            type_substitutes,
-            derives,
-            crate_path.clone(),
-            should_gen_docs,
-        );
+        let settings =
+            subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
+
+        let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
         let types_mod = type_gen.generate_types_mod()?;
-        let types_mod_ident = types_mod.ident();
+        let types_mod_ident = type_gen.types_mod_ident();
         let pallets_with_mod_names = self
             .metadata
             .pallets()
@@ -165,39 +156,15 @@ impl RuntimeGenerator {
         let modules = pallets_with_mod_names
             .iter()
             .map(|(pallet, mod_name)| {
-                let calls = calls::generate_calls(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let calls = calls::generate_calls(&type_gen, pallet, &crate_path)?;
 
-                let event = events::generate_events(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let event = events::generate_events(&type_gen, pallet, &crate_path)?;
 
-                let storage_mod = storage::generate_storage(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let storage_mod = storage::generate_storage(&type_gen, pallet, &crate_path)?;
 
-                let constants_mod = constants::generate_constants(
-                    &type_gen,
-                    pallet,
-                    types_mod_ident,
-                    &crate_path,
-                    should_gen_docs,
-                )?;
+                let constants_mod = constants::generate_constants(&type_gen, pallet, &crate_path)?;
 
-                let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
+                let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
                 Ok(quote! {
                     pub mod #mod_name {
@@ -242,14 +209,14 @@ impl RuntimeGenerator {
             &type_gen,
             types_mod_ident,
             &crate_path,
-            should_gen_docs,
         )?;
 
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
-        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty());
-        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty());
-        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty());
+
+        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty())?;
+        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty())?;
+        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty())?;
 
         let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 
@@ -358,17 +325,14 @@ impl RuntimeGenerator {
 /// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<F>(
     type_gen: &TypeGenerator,
-    types_mod_ident: &syn::Ident,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-    crate_path: &syn::Path,
-    should_gen_docs: bool,
-) -> Result<Vec<(String, CompositeDef, TypeAliases)>, CodegenError>
+) -> Result<Vec<StructFromVariant>, CodegenError>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
-    let ty = type_gen.resolve_type(type_id);
+    let ty = type_gen.resolve_type(type_id)?;
 
     let scale_info::TypeDef::Variant(variant) = &ty.type_def else {
         return Err(CodegenError::InvalidType(error_message_type_name.into()));
@@ -378,84 +342,91 @@ where
         .variants
         .iter()
         .map(|var| {
+            let mut type_params = TypeParameters::from_scale_info(&[]);
+            let composite_ir_kind =
+                type_gen.create_composite_ir_kind(&var.fields, &mut type_params)?;
             let struct_name = variant_to_struct_name(&var.name);
+            let mut composite = CompositeIR::new(
+                syn::parse_str(&struct_name).expect("enum variant is a valid ident; qed"),
+                composite_ir_kind,
+                type_gen.docs_from_scale_info(&var.docs),
+            );
 
-            let fields = CompositeDefFields::from_scale_info_fields(
-                struct_name.as_ref(),
-                &var.fields,
-                &[],
-                type_gen,
-            )?;
-
-            let alias_module_name = format_ident!("{}", var.name.to_snake_case());
-
-            let docs = should_gen_docs.then_some(&*var.docs).unwrap_or_default();
-            let struct_def = CompositeDef::struct_def(
-                &ty,
-                struct_name.as_ref(),
-                Default::default(),
-                fields.clone(),
-                Some(parse_quote!(pub)),
-                type_gen,
-                docs,
-                crate_path,
-                Some(alias_module_name.clone()),
-            )?;
-
-            let type_aliases = TypeAliases::new(fields, types_mod_ident.clone(), alias_module_name);
-
-            Ok((var.name.to_string(), struct_def, type_aliases))
+            let type_alias_mod = generate_type_alias_mod(&mut composite, type_gen);
+            Ok(StructFromVariant {
+                variant_name: var.name.to_string(),
+                composite,
+                type_alias_mod,
+            })
         })
         .collect()
 }
 
-/// Generate the type aliases from a set of enum / struct definitions.
+pub struct StructFromVariant {
+    variant_name: String,
+    composite: CompositeIR,
+    type_alias_mod: TokenStream2,
+}
+
+/// Modifies the composite, by replacing its types with references to the generated type alias module.
+/// Returns the TokenStream of the type alias module.
 ///
-/// The type aliases are used to make the generated code more readable.
-#[derive(Debug)]
-pub struct TypeAliases {
-    fields: CompositeDefFields,
-    types_mod_ident: syn::Ident,
-    mod_name: syn::Ident,
-}
+/// E.g a struct like this:
+/// ```ignore
+/// pub struct SetMaxCodeSize {
+///     pub new: ::core::primitive::u32,
+/// }
+/// ```
+/// will be made into this:
+/// ```ignore
+/// pub struct SetMaxCodeSize {
+///     pub new: set_max_code_size::New,
+/// }
+/// ```
+/// And the type alias module will look like this:
+/// ```ignore
+/// pub mod set_max_code_size {
+///     use super::runtime_types;
+///     pub type New = ::core::primitive::u32;
+/// }
+/// ```
+pub fn generate_type_alias_mod(
+    composite: &mut CompositeIR,
+    type_gen: &TypeGenerator,
+) -> TokenStream2 {
+    let mut aliases: Vec<TokenStream2> = vec![];
+    let alias_mod_name: Ident = syn::parse_str(&composite.name.to_string().to_snake_case())
+        .expect("composite name in snake_case should be a valid identifier");
 
-impl TypeAliases {
-    pub fn new(
-        fields: CompositeDefFields,
-        types_mod_ident: syn::Ident,
-        mod_name: syn::Ident,
-    ) -> Self {
-        TypeAliases {
-            fields,
-            types_mod_ident,
-            mod_name,
+    let mut modify_field_to_be_type_alias = |field: &mut CompositeFieldIR, alias_name: Ident| {
+        let type_path = &field.type_path;
+        aliases.push(quote!(pub type #alias_name = #type_path;));
+
+        let type_alias_path: syn::Path = parse_quote!(#alias_mod_name::#alias_name);
+        field.type_path = TypePath::from_syn_path(type_alias_path);
+    };
+
+    match &mut composite.kind {
+        CompositeIRKind::NoFields => {
+            return quote!(); // no types mod generated for unit structs.
         }
-    }
-}
-
-impl quote::ToTokens for TypeAliases {
-    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let has_fields = matches!(&self.fields, CompositeDefFields::Named(fields) if !fields.is_empty())
-            || matches!(&self.fields, CompositeDefFields::Unnamed(fields) if !fields.is_empty());
-        if !has_fields {
-            return;
-        }
-
-        let visibility: syn::Visibility = parse_quote!(pub);
-
-        let aliases = self
-            .fields
-            .to_type_aliases_tokens(Some(visibility).as_ref());
-
-        let mod_name = &self.mod_name;
-        let types_mod_ident = &self.types_mod_ident;
-
-        tokens.extend(quote! {
-            pub mod #mod_name {
-                use super::#types_mod_ident;
-
-                #aliases
+        CompositeIRKind::Named(named) => {
+            for (name, field) in named.iter_mut() {
+                let alias_name = format_ident!("{}", name.to_string().to_upper_camel_case());
+                modify_field_to_be_type_alias(field, alias_name);
             }
-        })
-    }
+        }
+        CompositeIRKind::Unnamed(unnamed) => {
+            for (i, field) in unnamed.iter_mut().enumerate() {
+                let alias_name = format_ident!("Field{}", i);
+                modify_field_to_be_type_alias(field, alias_name);
+            }
+        }
+    };
+
+    let types_mod_ident = type_gen.types_mod_ident();
+    quote!(pub mod #alias_mod_name {
+        use super::#types_mod_ident;
+        #( #aliases )*
+    })
 }

@@ -10,6 +10,8 @@
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
@@ -55,6 +57,10 @@ pub mod storage;
 pub mod tx;
 pub mod utils;
 
+// Internal helper macros
+#[macro_use]
+mod macros;
+
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
@@ -73,10 +79,11 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
-    #[cfg(feature = "substrate-compat")]
-    pub use sp_core;
-    #[cfg(feature = "substrate-compat")]
-    pub use sp_runtime;
+
+    cfg_substrate_compat! {
+        pub use sp_runtime;
+        pub use sp_core;
+    }
 }
 
 /// Generate a strongly typed API for interacting with a Substrate runtime from its metadata.
@@ -107,7 +114,7 @@ pub mod ext {
 /// ```
 ///
 /// The `subxt` macro will populate the annotated module with all of the methods and types required
-/// for interacting with the runtime that the metadata came from via Subxt.
+/// for interacting with the runtime that the metadata is in via Subxt.
 ///
 /// # Configuration
 ///
@@ -220,7 +227,7 @@ pub mod ext {
 /// mod polkadot {}
 /// ```
 ///
-/// ## `runtime_metadata_url = "..."`
+/// ## `runtime_metadata_insecure_url = "..."`
 ///
 /// This attribute can be used instead of `runtime_metadata_path` and will tell the macro to download metadata from a node running
 /// at the provided URL, rather than a node running locally. This can be useful in CI, but is **not recommended** in production code,
@@ -228,7 +235,7 @@ pub mod ext {
 ///
 /// ```rust,ignore
 /// #[subxt::subxt(
-///     runtime_metadata_url = "wss://rpc.polkadot.io:443"
+///     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443"
 /// )]
 /// mod polkadot {}
 /// ```
@@ -281,14 +288,14 @@ pub mod ext {
 ///
 /// ## `unstable_metadata`
 ///
-/// This attribute works only in combination with `runtime_metadata_url`. By default, the macro will fetch the latest stable
+/// This attribute works only in combination with `runtime_metadata_insecure_url`. By default, the macro will fetch the latest stable
 /// version of the metadata from the target node. This attribute makes the codegen attempt to fetch the unstable version of
 /// the metadata first. This is **not recommended** in production code, since the unstable metadata a node is providing is likely
 /// to be incompatible with Subxt.
 ///
 /// ```rust,ignore
 /// #[subxt::subxt(
-///     runtime_metadata_url = "wss://rpc.polkadot.io:443",
+///     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443",
 ///     unstable_metadata
 /// )]
 /// mod polkadot {}

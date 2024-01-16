@@ -1,5 +1,4 @@
 use anyhow::anyhow;
-use futures::StreamExt;
 use js_sys::Promise;
 use serde::{Deserialize, Serialize};
 use serde_json::json;

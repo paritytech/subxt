@@ -8,8 +8,9 @@ mod dispatch_error;
 
 use core::fmt::Debug;
 
-#[cfg(feature = "unstable-light-client")]
-pub use crate::client::LightClientError;
+crate::macros::cfg_unstable_light_client! {
+    pub use crate::client::LightClientError;
+}
 
 // Re-export dispatch error types:
 pub use dispatch_error::{
@@ -73,6 +74,7 @@ pub enum Error {
     Unknown(Vec<u8>),
     /// Light client error.
     #[cfg(feature = "unstable-light-client")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "unstable-light-client")))]
     #[error("An error occurred but it could not be decoded: {0}")]
     LightClient(#[from] LightClientError),
     /// Other error.
@@ -115,6 +117,9 @@ pub enum RpcError {
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
+    /// The requested URL is insecure.
+    #[error("RPC error: insecure URL: {0}")]
+    InsecureUrl(String),
 }
 
 impl RpcError {

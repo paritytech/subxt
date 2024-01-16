@@ -4,7 +4,7 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ## Usage
 
-Take a look in the [examples](./subxt/examples) folder or the [examples](./examples) folder for various smaller or 
+Take a look in the [examples](./subxt/examples) folder or the [examples](./examples) folder for various smaller or
 larger `subxt` usage examples, or [read the guide](https://docs.rs/subxt/latest/subxt/book/index.html) to learn more.
 
 ### Downloading metadata from a Substrate node
@@ -12,10 +12,13 @@ larger `subxt` usage examples, or [read the guide](https://docs.rs/subxt/latest/
 Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
 
 1. Install:
+
 ```bash
 cargo install subxt-cli
 ```
+
 2. Save the encoded metadata to a file:
+
 ```bash
 subxt metadata -f bytes > metadata.scale
 ```
@@ -51,6 +54,7 @@ Please add your project to this list via a PR.
 - [staking-miner-v2](https://github.com/paritytech/staking-miner-v2) Submit NPos election solutions and get rewards.
 - [polkadot-introspector](https://github.com/paritytech/polkadot-introspector) Tools for monitoring Polkadot nodes.
 - [ink!](https://github.com/paritytech/ink) Smart contract language that uses `subxt` for allowing developers to conduct [End-to-End testing](https://use.ink/basics/contract-testing#end-to-end-e2e-tests) of their contracts.
+- [Chainflip](https://github.com/chainflip-io/chainflip-backend) A decentralised exchange for native cross-chain swaps.
 
 **Alternatives**
 

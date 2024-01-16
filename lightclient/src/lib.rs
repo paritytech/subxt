@@ -10,6 +10,8 @@
 //!
 //! This leverages the smoldot crate to connect to the chain.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
@@ -35,6 +37,7 @@ pub mod smoldot {
     };
 
     #[cfg(feature = "native")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "native")))]
     pub use smoldot_light::platform::default::DefaultPlatform;
 }
 

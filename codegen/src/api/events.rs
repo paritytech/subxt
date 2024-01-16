@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::types::TypeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
+use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
@@ -35,55 +35,48 @@ use super::CodegenError;
 ///
 /// # Arguments
 ///
-/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the events are generated.
-/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
+/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
-    types_mod_ident: &syn::Ident,
     crate_path: &syn::Path,
-    should_gen_docs: bool,
 ) -> Result<TokenStream2, CodegenError> {
     // Early return if the pallet has no events.
     let Some(event_ty) = pallet.event_ty_id() else {
         return Ok(quote!());
     };
 
-    let struct_defs = super::generate_structs_from_variants(
-        type_gen,
-        types_mod_ident,
-        event_ty,
-        |name| name.into(),
-        "Event",
-        crate_path,
-        should_gen_docs,
-    )?;
+    let variant_names_and_struct_defs =
+        super::generate_structs_from_variants(type_gen, event_ty, |name| name.into(), "Event")?;
 
-    let event_structs = struct_defs
-        .iter()
-        .map(|(variant_name, struct_def, aliases)| {
-            let pallet_name = pallet.name();
-            let event_struct = &struct_def.name;
-            let event_name = variant_name;
+    let event_structs = variant_names_and_struct_defs.into_iter().map(|var| {
+        let pallet_name = pallet.name();
+        let event_struct_name = &var.composite.name;
+        let event_name = var.variant_name;
+        let alias_mod = var.type_alias_mod;
+        let struct_def = type_gen.upcast_composite(&var.composite);
+        quote! {
+            #struct_def
+            #alias_mod
 
-            quote! {
-                #struct_def
-
-                #aliases
-
-                impl #crate_path::events::StaticEvent for #event_struct {
-                    const PALLET: &'static str = #pallet_name;
-                    const EVENT: &'static str = #event_name;
-                }
+            impl #crate_path::events::StaticEvent for #event_struct_name {
+                const PALLET: &'static str = #pallet_name;
+                const EVENT: &'static str = #event_name;
             }
-        });
-    let event_type = type_gen.resolve_type_path(event_ty);
-    let event_ty = type_gen.resolve_type(event_ty);
+        }
+    });
+
+    let event_type = type_gen.resolve_type_path(event_ty)?;
+    let event_ty = type_gen.resolve_type(event_ty)?;
     let docs = &event_ty.docs;
-    let docs = should_gen_docs
+    let docs = type_gen
+        .settings()
+        .should_gen_docs
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
+    let types_mod_ident = type_gen.types_mod_ident();
 
     Ok(quote! {
         #docs

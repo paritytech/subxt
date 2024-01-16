@@ -5,7 +5,7 @@ use frame_metadata::RuntimeMetadataPrefixed;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::utils::FileOrUrl;
+use crate::utils::{validate_url_security, FileOrUrl};
 use color_eyre::owo_colors::OwoColorize;
 
 use scale_info::form::PortableForm;
@@ -29,9 +29,15 @@ pub struct Opts {
     metadata_or_url_1: FileOrUrl,
     /// metadata file or node URL
     metadata_or_url_2: FileOrUrl,
+    /// Allow insecure URLs e.g. URLs starting with ws:// or http:// without SSL encryption
+    #[clap(long, short)]
+    allow_insecure: bool,
 }
 
 pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Result<()> {
+    validate_url_security(opts.metadata_or_url_1.url.as_ref(), opts.allow_insecure)?;
+    validate_url_security(opts.metadata_or_url_2.url.as_ref(), opts.allow_insecure)?;
+
     let (entry_1_metadata, entry_2_metadata) = get_metadata(&opts).await?;
 
     let metadata_diff = MetadataDiff::construct(&entry_1_metadata, &entry_2_metadata);
@@ -222,11 +228,11 @@ impl StorageEntryDiff {
         let value_1_ty_id = storage_entry_1.entry_type().value_ty();
         let value_1_hash = metadata_1
             .type_hash(value_1_ty_id)
-            .expect("type should be present");
+            .expect("type is in metadata; qed");
         let value_2_ty_id = storage_entry_2.entry_type().value_ty();
         let value_2_hash = metadata_1
             .type_hash(value_2_ty_id)
-            .expect("type should be present");
+            .expect("type is in metadata; qed");
         let value_different = value_1_hash != value_2_hash;
 
         let key_1_hash = storage_entry_1
@@ -235,7 +241,7 @@ impl StorageEntryDiff {
             .map(|key_ty| {
                 metadata_1
                     .type_hash(key_ty)
-                    .expect("type should be present")
+                    .expect("type is in metadata; qed")
             })
             .unwrap_or_default();
         let key_2_hash = storage_entry_2
@@ -244,7 +250,7 @@ impl StorageEntryDiff {
             .map(|key_ty| {
                 metadata_2
                     .type_hash(key_ty)
-                    .expect("type should be present")
+                    .expect("type is in metadata; qed")
             })
             .unwrap_or_default();
         let key_different = key_1_hash != key_2_hash;
@@ -303,12 +309,12 @@ fn storage_differences<'a>(
         |e| {
             pallet_metadata_1
                 .storage_hash(e.name())
-                .expect("storage entry should be present")
+                .expect("storage entry is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .storage_hash(e.name())
-                .expect("storage entry should be present")
+                .expect("storage entry is in metadata; qed")
         },
         |e| e.name(),
     )
@@ -324,12 +330,12 @@ fn calls_differences<'a>(
         |e| {
             pallet_metadata_1
                 .call_hash(&e.name)
-                .expect("call should be present")
+                .expect("call is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .call_hash(&e.name)
-                .expect("call should be present")
+                .expect("call is in metadata; qed")
         },
         |e| &e.name,
     );
@@ -345,12 +351,12 @@ fn constants_differences<'a>(
         |e| {
             pallet_metadata_1
                 .constant_hash(e.name())
-                .expect("constant should be present")
+                .expect("constant is in metadata; qed")
         },
         |e| {
             pallet_metadata_2
                 .constant_hash(e.name())
-                .expect("constant should be present")
+                .expect("constant is in metadata; qed")
         },
         |e| e.name(),
     )

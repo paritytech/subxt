@@ -5,7 +5,7 @@
 use jsonrpsee::{
     async_client::ClientBuilder,
     client_transport::ws::WsTransportClientBuilder,
-    core::{client::ClientT, Error},
+    core::client::{ClientT, Error},
     http_client::HttpClientBuilder,
 };
 use std::time::Duration;
@@ -56,7 +56,7 @@ pub async fn fetch_chain_spec(url: Url) -> Result<serde_json::Value, FetchSpecEr
 pub enum FetchSpecError {
     /// JSON-RPC error fetching metadata.
     #[error("Request error: {0}")]
-    RequestError(#[from] jsonrpsee::core::Error),
+    RequestError(#[from] jsonrpsee::core::ClientError),
     /// URL scheme is not http, https, ws or wss.
     #[error("'{0}' not supported, supported URI schemes are http, https, ws or wss.")]
     InvalidScheme(String),
