@@ -168,14 +168,13 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         .pruned_block_hashes
                         .into_iter()
                         .map(|hash| {
-                            // Make note of any pinned blocks as having been pruned by the backend, so that
-                            // we know we can unpin them now once dropped.
+                            // If we've pinned any of these pruned blocks, then make a note in our pinned block
+                            // details that they have been pruned (and thus will never show up again).
                             this.pinned
                                 .entry(hash)
                                 .and_modify(|entry| entry.has_been_pruned = true);
 
-                            // We should know about these, too, and if not we set their age to last_finalized + 1
-                            // Set the unpinning policy to `OnDrop` to unpin the block when the last ref is dropped.
+                            // We should know about these, too, and if not we set their age to last_finalized + 1.
                             let rel_block_num = this.rel_block_num + 1;
                             this.pin_block_at(rel_block_num, hash)
                         })
