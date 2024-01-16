@@ -43,13 +43,13 @@ pub async fn run<'a>(
     let api_name = runtime_api_metadata.name();
 
     let usage = || {
-        let available_methods = available_methods_string(&runtime_api_metadata);
+        let methods = methods_to_string(&runtime_api_metadata);
         formatdoc! {"
         Usage:
             subxt explore api {api_name} <METHOD>
                 explore a specific runtime api method
         
-        {available_methods}
+        {methods}
         "}
     };
 
@@ -160,13 +160,15 @@ pub async fn run<'a>(
             You submitted the following {INPUT_VALUE}:
             {value_str}
             "}?;
-
+            let t = metadata.types().resolve(6);
+            dbg!(t);
             let bytes = encode_scale_value_as_bytes(&value, ty.ty, metadata.types())?;
+            dbg!(&bytes);
             let bytes_composite = Value::from_bytes(bytes);
             Ok(bytes_composite)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;
-
+    dbg!(&args_data);
     let method_call = subxt::dynamic::runtime_api_call(api_name, method.name(), args_data);
     let client = create_client(&file_or_url).await?;
     let output_value = client
@@ -184,7 +186,7 @@ pub async fn run<'a>(
     Ok(())
 }
 
-fn available_methods_string(runtime_api_metadata: &RuntimeApiMetadata<'_>) -> String {
+fn methods_to_string(runtime_api_metadata: &RuntimeApiMetadata<'_>) -> String {
     let api_name = runtime_api_metadata.name();
     if runtime_api_metadata.methods().len() == 0 {
         return format!("No <METHOD>'s available for the \"{api_name}\" runtime api.");

@@ -40,13 +40,13 @@ pub fn explore_calls(
         get_calls_enum_type(pallet_metadata, metadata.types())?;
 
     let usage = || {
-        let available_calls = available_calls_string(calls_enum_type_def, pallet_name);
+        let calls = calls_to_string(calls_enum_type_def, pallet_name);
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} calls <CALL>
                 explore a specific call of this pallet
         
-        {available_calls}
+        {calls}
         "}
     };
 
@@ -116,10 +116,7 @@ pub fn explore_calls(
     Ok(())
 }
 
-fn available_calls_string(
-    pallet_calls: &TypeDefVariant<PortableForm>,
-    pallet_name: &str,
-) -> String {
+fn calls_to_string(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
     if pallet_calls.variants.is_empty() {
         return format!("No <CALL>'s available in the \"{pallet_name}\" pallet.");
     }

@@ -21,7 +21,7 @@ pub fn explore_events(
     let event_variants = pallet_metadata.event_variants().unwrap_or(&[]);
 
     let usage = || {
-        let events = available_events_string(event_variants, pallet_name);
+        let events = events_to_string(event_variants, pallet_name);
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} events <EVENT>
@@ -73,7 +73,7 @@ pub fn explore_events(
     Ok(())
 }
 
-fn available_events_string(event_variants: &[Variant<PortableForm>], pallet_name: &str) -> String {
+fn events_to_string(event_variants: &[Variant<PortableForm>], pallet_name: &str) -> String {
     if event_variants.is_empty() {
         return format!("No <EVENT>'s available in the \"{pallet_name}\" pallet.");
     }

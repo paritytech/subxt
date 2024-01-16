@@ -20,13 +20,13 @@ pub fn explore_constants(
     let pallet_name = pallet_metadata.name();
 
     let usage = || {
-        let available_constants = available_constants_string(pallet_metadata, pallet_name);
+        let constants = constants_to_string(pallet_metadata, pallet_name);
         formatdoc! {"
         Usage:
             subxt explore pallet {pallet_name} constants <CONSTANT>
                 explore a specific constant of this pallet
         
-        {available_constants}
+        {constants}
         "}
     };
 
@@ -81,7 +81,7 @@ pub fn explore_constants(
     Ok(())
 }
 
-fn available_constants_string(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
+fn constants_to_string(pallet_metadata: PalletMetadata, pallet_name: &str) -> String {
     if pallet_metadata.constants().len() == 0 {
         return format!("No <CONSTANT>'s available in the \"{pallet_name}\" pallet.");
     }
