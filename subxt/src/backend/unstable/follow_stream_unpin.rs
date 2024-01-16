@@ -159,7 +159,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                             // but if they don't, we just increment the num from the last finalized block
                             // we saw, which should be accurate.
                             //
-                            // `pin_final_block_at` indicates that the block will not show up in future events
+                            // `pin_unpinnable_block_at` indicates that the block will not show up in future events
                             // (They will show up as a parent block, but we don't care about that right now).
                             let rel_block_num = this.rel_block_num + idx + 1;
                             this.pin_unpinnable_block_at(rel_block_num, hash)
@@ -176,7 +176,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         .map(|hash| {
                             // We should know about these, too, and if not we set their age to last_finalized + 1.
                             //
-                            // `pin_final_block_at` indicates that the block will not show up in future events.
+                            // `pin_unpinnable_block_at` indicates that the block will not show up in future events.
                             let rel_block_num = this.rel_block_num + 1;
                             this.pin_unpinnable_block_at(rel_block_num, hash)
                         })
@@ -303,8 +303,8 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
             .pinned
             .entry(hash)
             // If there's already an entry, then clear any unpin_flags and update the
-            // pruned status (a pruned block can never become unpruned again, but vice versa
-            // is possible).
+            // can_be_unpinned status (this can become true but cannot become false again
+            // once true).
             .and_modify(|entry| {
                 entry.can_be_unpinned = entry.can_be_unpinned || can_be_unpinned;
                 self.unpin_flags.lock().unwrap().remove(&hash);
