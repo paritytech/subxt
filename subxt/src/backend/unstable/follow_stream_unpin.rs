@@ -564,8 +564,8 @@ mod test {
     }
 
     #[tokio::test]
-    async fn unpins_dropped_blocks() {
-        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+    async fn dropped_new_blocks_should_not_get_unpinned() {
+        let (mut follow_unpin, _) = test_unpin_stream_getter(
             || {
                 [
                     Ok(ev_initialized(0)),
@@ -581,19 +581,13 @@ mod test {
         let _i0 = follow_unpin.next().await.unwrap().unwrap();
         let f1 = follow_unpin.next().await.unwrap().unwrap();
 
-        // We don't care about block 1 any more; drop it. unpins happen at finalized evs.
+        // We don't care about block 1 any more; drop it. unpinning happens when the max_life is exceeded.
         drop(f1);
 
         let _f2 = follow_unpin.next().await.unwrap().unwrap();
 
-        // Check that we get the expected unpin event.
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(1));
-
         // Confirm that 0 and 2 are still pinned and that 1 isnt.
-        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
     }
