@@ -437,28 +437,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
-        enum SeenBlock<Ref> {
-            New(Ref),
-            Finalized(Vec<Ref>),
-        }
         enum SeenBlockMarker {
             New,
             Finalized,
         }
 
-        // First, subscribe to all new and finalized block refs.
-        // - we subscribe to new refs so that when we see `BestChainBlockIncluded`, we
-        //   can try to return a block ref for the best block.
-        // - we subscribe to finalized refs so that when we see `Finalized`, we can
-        //   guarantee that when we return here, the finalized block we report has been
-        //   reported from chainHead_follow already.
-        let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
-            std::future::ready(match ev {
-                FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
-                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
-                _ => None,
-            })
-        });
+        // First, subscribe to new blocks.
+        let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
         let mut tx_progress = self
@@ -485,22 +470,25 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // Make a note of new or finalized blocks that have come in since we started the TX.
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
-                        SeenBlock::New(block_ref) => {
+                        FollowEvent::NewBlock(ev) => {
+    println!("New block seen: {:?}", ev.block_hash.hash());
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
                                 seen_blocks
-                                    .insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
+                                    .insert(ev.block_hash.hash(), (SeenBlockMarker::New, ev.block_hash));
                             }
                         }
-                        SeenBlock::Finalized(block_refs) => {
-                            for block_ref in block_refs {
+                        FollowEvent::Finalized(ev) => {
+                            for block_ref in ev.finalized_block_hashes {
+    println!("Finalized block seen: {:?}", block_ref.hash());
                                 seen_blocks.insert(
                                     block_ref.hash(),
                                     (SeenBlockMarker::Finalized, block_ref),
                                 );
                             }
-                        }
+                        },
+                        _ => {}
                     }
                     continue;
                 }
@@ -508,8 +496,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // If we have a finalized hash, we are done looking for tx events and we are just waiting
                 // for a pinned block with a matching hash (which must appear eventually given it's finalized).
                 if let Some(hash) = &finalized_hash {
+    println!("Looking for finalized hash {hash:?}");
                     if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.remove(hash)
                     {
+    println!("Found finalized hash!");
                         // Found it! Hand back the event with a pinned block. We're done.
                         done = true;
                         let ev = TransactionStatus::InFinalizedBlock {
@@ -534,7 +524,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
-
+    println!("TX Event seen: {ev:?}");
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
                     rpc_methods::TransactionStatus::Finalized { block } => {
