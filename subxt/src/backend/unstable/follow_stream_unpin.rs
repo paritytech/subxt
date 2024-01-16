@@ -476,6 +476,23 @@ pub(super) mod test_utils {
         (follow_unpin, unpin_rx)
     }
 
+    /// Assert that the unpinned blocks sent from the `UnpinRx` channel match the items given.
+    pub fn assert_from_unpin_rx<Hash: BlockHash + 'static>(
+        unpin_rx: &UnpinRx<Hash>,
+        items: impl IntoIterator<Item = Hash>,
+    ) {
+        let expected_hashes = HashSet::<Hash>::from_iter(items.into_iter());
+        for i in 0..expected_hashes.len() {
+            let Ok((hash, _)) = unpin_rx.try_recv() else {
+                panic!("Another unpin event is expected, but failed to pull item {i} from channel");
+            };
+            assert!(
+                expected_hashes.contains(&hash),
+                "Hash {hash:?} was unpinned, but is not expected to have been"
+            );
+        }
+    }
+
     /// An initialized event containing a BlockRef (useful for comparisons)
     pub fn ev_initialized_ref(n: u64) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::Initialized(Initialized {
@@ -517,7 +534,7 @@ mod test {
     use super::super::follow_stream::test_utils::{
         ev_best_block, ev_finalized, ev_initialized, ev_new_block,
     };
-    use super::test_utils::{ev_new_block_ref, test_unpin_stream_getter};
+    use super::test_utils::{assert_from_unpin_rx, ev_new_block_ref, test_unpin_stream_getter};
     use super::*;
     use crate::config::substrate::H256;
 
@@ -574,10 +591,7 @@ mod test {
         let _f1 = follow_unpin.next().await.unwrap().unwrap();
 
         // Now, initialized block should be unpinned.
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(0));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(0)]);
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
     }
 
@@ -608,26 +622,17 @@ mod test {
         let _f3 = follow_unpin.next().await.unwrap().unwrap();
 
         // Max age is 3, so after block 3 finalized, block 0 becomes too old and is unpinned.
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(0));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(0)]);
 
         let _f4 = follow_unpin.next().await.unwrap().unwrap();
 
         // Block 1 is now too old and is unpinned.
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(1));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(1)]);
 
         let _f5 = follow_unpin.next().await.unwrap().unwrap();
 
         // Block 2 is now too old and is unpinned.
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(2));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(2)]);
     }
 
     #[tokio::test]
@@ -673,12 +678,7 @@ mod test {
         // After block 2 finalized, block 1 can be unpinned finally, but block 2 needs to wait one more event.
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
-
-        // Double check that the unpin method was called by seeing if an unpin event sent to the test receiver:
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(1));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(1)]);
     }
 
     #[tokio::test]
@@ -726,12 +726,7 @@ mod test {
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(3)));
-
-        // Confirm that drop calls were made for 1, too:
-        let (hash, _) = unpin_rx
-            .try_recv()
-            .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(1));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(1)]);
 
         let f4 = follow_unpin.next().await.unwrap().unwrap();
         drop(f4);
@@ -740,22 +735,9 @@ mod test {
         // finalized blocks 2 and 3.
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(3)));
-
-        // Confirm that drop calls were made for 2 and 3, too:
-        let dropped = {
-            let (h1, _) = unpin_rx
-                .try_recv()
-                .expect("unpin call should have happened");
-            let (h2, _) = unpin_rx
-                .try_recv()
-                .expect("unpin call should have happened");
-            let mut both = [h1, h2];
-            both.sort();
-            both
-        };
-        assert_eq!(
-            dropped,
-            [H256::from_low_u64_le(2), H256::from_low_u64_le(3)]
+        assert_from_unpin_rx(
+            &unpin_rx,
+            [H256::from_low_u64_le(2), H256::from_low_u64_le(3)],
         );
     }
 
@@ -802,10 +784,10 @@ mod test {
 
         let _f3 = follow_unpin.next().await.unwrap().unwrap();
 
-        // These blocks exceeded lifetime.
-        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
-        assert_eq!(hash, H256::from_low_u64_le(0));
-        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
-        assert_eq!(hash, H256::from_low_u64_le(1));
+        // These blocks exceeded lifetime and are dropped
+        assert_from_unpin_rx(
+            &unpin_rx,
+            [H256::from_low_u64_le(0), H256::from_low_u64_le(1)],
+        );
     }
 }
