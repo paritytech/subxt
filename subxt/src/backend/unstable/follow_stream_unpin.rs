@@ -109,11 +109,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                 FollowStreamMsg::Event(FollowEvent::Initialized(details)) => {
                     // The first finalized block gets the starting block_num.
                     let rel_block_num = this.rel_block_num;
-                    let block_ref = this.pin_block_at(
-                        rel_block_num,
-                        details.finalized_block_hash,
-                        UnpinPolicy::MaxAge,
-                    );
+                    let block_ref = this.pin_block_at(rel_block_num, details.finalized_block_hash);
 
                     FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
                         finalized_block_hash: block_ref,
@@ -130,16 +126,9 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         .map(|p| p.rel_block_num)
                         .unwrap_or(this.rel_block_num);
 
-                    let block_ref = this.pin_block_at(
-                        parent_rel_block_num + 1,
-                        details.block_hash,
-                        UnpinPolicy::MaxAge,
-                    );
-                    let parent_block_ref = this.pin_block_at(
-                        parent_rel_block_num,
-                        details.parent_block_hash,
-                        UnpinPolicy::MaxAge,
-                    );
+                    let block_ref = this.pin_block_at(parent_rel_block_num + 1, details.block_hash);
+                    let parent_block_ref =
+                        this.pin_block_at(parent_rel_block_num, details.parent_block_hash);
 
                     FollowStreamMsg::Event(FollowEvent::NewBlock(NewBlock {
                         block_hash: block_ref,
@@ -151,11 +140,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                     // We expect this block to already exist, so it'll keep its existing block_num,
                     // but worst case it'll just get the current finalized block_num + 1.
                     let rel_block_num = this.rel_block_num + 1;
-                    let block_ref = this.pin_block_at(
-                        rel_block_num,
-                        details.best_block_hash,
-                        UnpinPolicy::MaxAge,
-                    );
+                    let block_ref = this.pin_block_at(rel_block_num, details.best_block_hash);
 
                     FollowStreamMsg::Event(FollowEvent::BestBlockChanged(BestBlockChanged {
                         best_block_hash: block_ref,
@@ -171,7 +156,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                             // but if they don't, we just increment the num from the last finalized block
                             // we saw, which should be accurate.
                             let rel_block_num = this.rel_block_num + idx + 1;
-                            this.pin_block_at(rel_block_num, hash, UnpinPolicy::MaxAge)
+                            this.pin_block_at(rel_block_num, hash)
                         })
                         .collect();
 
@@ -183,17 +168,24 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         .pruned_block_hashes
                         .into_iter()
                         .map(|hash| {
+                            // Make note of any pinned blocks as having been pruned by the backend, so that
+                            // we know we can unpin them now once dropped.
+                            this.pinned
+                                .entry(hash)
+                                .and_modify(|entry| entry.has_been_pruned = true);
+
                             // We should know about these, too, and if not we set their age to last_finalized + 1
                             // Set the unpinning policy to `OnDrop` to unpin the block when the last ref is dropped.
                             let rel_block_num = this.rel_block_num + 1;
-                            this.pin_block_at(rel_block_num, hash, UnpinPolicy::OnDrop)
+                            this.pin_block_at(rel_block_num, hash)
                         })
                         .collect();
 
                     // At this point, we also check to see which blocks we should submit unpin events
-                    // for. When we see a block hash as finalized, we know that it won't be reported again
-                    // (except as a parent hash of a new block), so we can safely make an unpin call for it
-                    // without worrying about the hash being returned again despite the block not being pinned.
+                    // for. We will unpin:
+                    // - Any block that's older than the max age.
+                    // - Any block that has no references left (ie has been dropped) that _also_ has
+                    //   showed up in the pruned list in a finalized event (so it will never be in another event).
                     this.unpin_blocks(cx.waker());
 
                     FollowStreamMsg::Event(FollowEvent::Finalized(Finalized {
@@ -203,7 +195,9 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                 }
                 FollowStreamMsg::Event(FollowEvent::Stop) => {
                     // clear out "old" things that are no longer applicable since
-                    // the subscription has ended (a new one will be created under the hood).
+                    // the subscription has ended (a new one will be created under the hood, at
+                    // which point we'll get given a new subscription ID.
+                    this.subscription_id = None;
                     this.pinned.clear();
                     this.unpin_futs.clear();
                     this.unpin_flags.lock().unwrap().clear();
@@ -286,18 +280,12 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
     /// Pin a block, or return the reference to an already-pinned block. If the block has been registered to
     /// be unpinned, we'll clear those flags, so that it won't be unpinned. If the unpin request has already
     /// been sent though, then the block will be unpinned.
-    fn pin_block_at(
-        &mut self,
-        rel_block_num: usize,
-        hash: Hash,
-        unpin_policy: UnpinPolicy,
-    ) -> BlockRef<Hash> {
+    fn pin_block_at(&mut self, rel_block_num: usize, hash: Hash) -> BlockRef<Hash> {
         let entry = self
             .pinned
             .entry(hash)
             // Only if there's already an entry do we need to clear any unpin flags set against it.
-            .and_modify(|entry| {
-                entry.block_ref.unpin_policy = unpin_policy;
+            .and_modify(|_entry| {
                 self.unpin_flags.lock().unwrap().remove(&hash);
             })
             // If there's not an entry already, make one and return it.
@@ -308,8 +296,8 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
                         hash,
                         unpin_flags: self.unpin_flags.clone(),
                     }),
-                    unpin_policy,
                 },
+                has_been_pruned: false,
             });
 
         entry.block_ref.clone()
@@ -317,11 +305,11 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
     /// Unpin any blocks that are either too old, or have the unpin flag set and are old enough.
     fn unpin_blocks(&mut self, waker: &Waker) {
-        let unpin_flags = std::mem::take(&mut *self.unpin_flags.lock().unwrap());
+        let mut unpin_flags = self.unpin_flags.lock().unwrap();
         let rel_block_num = self.rel_block_num;
 
-        // If we asked to unpin and there was no subscription_id, then there's nothing to
-        // do here, and we've cleared the flags now above anyway.
+        // If we asked to unpin and there was no subscription_id, then there's nothing we can do,
+        // and nothing will need unpinning now anyway.
         let Some(sub_id) = &self.subscription_id else {
             return;
         };
@@ -329,12 +317,18 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         let mut blocks_to_unpin = vec![];
         for (hash, details) in &self.pinned {
             if rel_block_num.saturating_sub(details.rel_block_num) >= self.max_block_life
-                || unpin_flags.contains(hash)
+                || (unpin_flags.contains(hash) && details.has_been_pruned)
             {
-                // The block is too old, or it's been flagged to be unpinned (no refs to it left)
+                // The block is too old, or it's been flagged to be unpinned and has been pruned
+                // by the backend, so we can unpin it for real now.
                 blocks_to_unpin.push(*hash);
+                // Clear it from our unpin flags if present so that we don't try to unpin it again.
+                unpin_flags.remove(hash);
             }
         }
+
+        // Release our lock on unpin_flags ASAP.
+        drop(unpin_flags);
 
         // No need to call the waker etc if nothing to do:
         if blocks_to_unpin.is_empty() {
@@ -366,24 +360,16 @@ struct PinnedDetails<Hash: BlockHash> {
     /// Because we store one here until it's unpinned, the live count
     /// will only drop to 1 when no external refs are left.
     block_ref: BlockRef<Hash>,
-}
-
-/// The policy to use for unpinning blocks.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum UnpinPolicy {
-    /// Unpin blocks when they are too old.
-    MaxAge,
-    /// Unpin blocks when they are dropped.
-    ///
-    /// Unpinning happens with the next finalized event.
-    OnDrop,
+    /// Has this block showed up in the list of pruned blocks in a
+    /// finalized event from the backend? If so, it means that the
+    /// block will never show up in another event again.
+    has_been_pruned: bool,
 }
 
 /// All blocks reported will be wrapped in this.
 #[derive(Debug, Clone)]
 pub struct BlockRef<Hash: BlockHash> {
     inner: Arc<BlockRefInner<Hash>>,
-    unpin_policy: UnpinPolicy,
 }
 
 #[derive(Debug)]
@@ -402,7 +388,6 @@ impl<Hash: BlockHash> BlockRef<Hash> {
                 hash,
                 unpin_flags: Default::default(),
             }),
-            unpin_policy: UnpinPolicy::MaxAge,
         }
     }
 
@@ -430,7 +415,7 @@ impl<Hash: BlockHash> Drop for BlockRef<Hash> {
         // only "external" one left and we should ask to unpin it now. if it's
         // the only ref remaining, it means that it's already been unpinned, so
         // nothing to do here anyway.
-        if self.unpin_policy == UnpinPolicy::OnDrop && Arc::strong_count(&self.inner) == 2 {
+        if Arc::strong_count(&self.inner) == 2 {
             if let Ok(mut unpin_flags) = self.inner.unpin_flags.lock() {
                 unpin_flags.insert(self.inner.hash);
             }
