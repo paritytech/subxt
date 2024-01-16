@@ -315,7 +315,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         entry.block_ref.clone()
     }
 
-    /// Unpin any blocks that are either too old, or have the unpin flag set and are in the list of pruned hashes.
+    /// Unpin any blocks that are either too old, or have the unpin flag set and are old enough.
     fn unpin_blocks(&mut self, waker: &Waker) {
         let unpin_flags = std::mem::take(&mut *self.unpin_flags.lock().unwrap());
         let rel_block_num = self.rel_block_num;
