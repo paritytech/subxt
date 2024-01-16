@@ -477,12 +477,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut iter_num = 0;
         let now = std::time::Instant::now();
 
+        let mut tx_logs = Vec::with_capacity(32);
+        let mut chainhead_logs = Vec::with_capacity(32);
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
                 iter_num += 1;
                 if now.elapsed().as_secs() > 120 {
-                    panic!("iter={:#?}", iter_num);
+                    panic!(
+                        "iter_num: {}, tx_logs: {:#?}, chainhead_logs: {:#?}",
+                        iter_num, tx_logs, chainhead_logs
+                    );
                 }
 
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
@@ -494,6 +500,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
                         SeenBlock::New(block_ref) => {
+                            chainhead_logs.push((now.elapsed().as_secs(), "new", block_ref.hash()));
+
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
@@ -503,6 +511,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         }
                         SeenBlock::Finalized(block_refs) => {
                             for block_ref in block_refs {
+                                chainhead_logs.push((
+                                    now.elapsed().as_secs(),
+                                    "finalized",
+                                    block_ref.hash(),
+                                ));
+
                                 seen_blocks.insert(
                                     block_ref.hash(),
                                     (SeenBlockMarker::Finalized, block_ref),
@@ -542,6 +556,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
+
+                tx_logs.push((now.elapsed().as_secs(), ev.clone()));
 
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
