@@ -164,72 +164,77 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
 }
 
 #[tokio::test]
-async fn fetch_block_and_decode_extrinsic_details() {
+async fn test_lots_of_transfers_to_spot_failure() {
     let ctx = test_context().await;
     let api = ctx.client();
 
     let alice = dev::alice();
     let bob = dev::bob();
 
-    // Setup; put an extrinsic into a block:
-    let tx = node_runtime::tx()
-        .balances()
-        .transfer_allow_death(bob.public_key().into(), 10_000);
+    for i in 0..100 {
+        println!("###### Running test #{i}");
 
-    let signed_extrinsic = api
-        .tx()
-        .create_signed(&tx, &alice, Default::default())
-        .await
-        .unwrap();
+        // Setup; put an extrinsic into a block:
+        let tx = node_runtime::tx()
+            .balances()
+            .transfer_allow_death(bob.public_key().into(), 10_000);
 
-    let in_block = signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized()
-        .await
-        .unwrap();
+        let signed_extrinsic = api
+            .tx()
+            .create_signed(&tx, &alice, Default::default())
+            .await
+            .unwrap();
 
-    // Now, separately, download that block. Let's see what it contains..
-    let block_hash = in_block.block_hash();
-    let block = api.blocks().at(block_hash).await.unwrap();
-    let extrinsics = block.extrinsics().await.unwrap();
+        let in_block = signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_finalized()
+            .await
+            .unwrap();
 
-    assert_eq!(extrinsics.block_hash(), block_hash);
+        // Now, separately, download that block. Let's see what it contains..
+        let block_hash = in_block.block_hash();
+        let block = api.blocks().at(block_hash).await.unwrap();
+        let extrinsics = block.extrinsics().await.unwrap();
 
-    // `.has` should work and find a transfer call.
-    assert!(extrinsics
-        .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap());
+        assert_eq!(extrinsics.block_hash(), block_hash);
 
-    // `.find_first` should similarly work to find the transfer call:
-    assert!(extrinsics
-        .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap()
-        .is_some());
+        // `.has` should work and find a transfer call.
+        assert!(extrinsics
+            .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap());
 
-    let block_extrinsics = extrinsics
-        .iter()
-        .map(|res| res.unwrap())
-        .collect::<Vec<_>>();
+        // `.find_first` should similarly work to find the transfer call:
+        assert!(extrinsics
+            .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+            .is_some());
 
-    // All blocks contain a timestamp; check this first:
-    let timestamp = block_extrinsics.first().unwrap();
-    timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    timestamp
-        .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
-        .unwrap();
-    assert!(!timestamp.is_signed());
+        let block_extrinsics = extrinsics
+            .iter()
+            .map(|res| res.unwrap())
+            .collect::<Vec<_>>();
 
-    // Next we expect our transfer:
-    let tx = block_extrinsics.get(1).unwrap();
-    tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    let ext = tx
-        .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap()
-        .unwrap();
-    assert_eq!(ext.value, 10_000);
-    assert!(tx.is_signed());
+        // All blocks contain a timestamp; check this first:
+        let timestamp = block_extrinsics.first().unwrap();
+        timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
+        timestamp
+            .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
+            .unwrap();
+        assert!(!timestamp.is_signed());
+
+        // Next we expect our transfer:
+        let tx = block_extrinsics.get(1).unwrap();
+        tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
+        let ext = tx
+            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+            .unwrap();
+        assert_eq!(ext.value, 10_000);
+        assert!(tx.is_signed());
+
+    }
 }
 
 #[tokio::test]
