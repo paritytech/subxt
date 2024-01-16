@@ -50,7 +50,7 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: nextest
-                  args: run --workspace --features unstable-backend-client
+                  args: run --workspace --features unstable-backend-client --no-capture
     unstable_backend_tests2:
         name: "Test (Unstable Backend) 2"
         runs-on: ubuntu-latest-16-cores
@@ -79,7 +79,7 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: nextest
-                  args: run --workspace --features unstable-backend-client
+                  args: run --workspace --features unstable-backend-client --no-capture
     unstable_backend_tests3:
         name: "Test (Unstable Backend) 3"
         runs-on: ubuntu-latest-16-cores
@@ -108,4 +108,4 @@ jobs:
               uses: actions-rs/cargo@v1.0.3
               with:
                   command: nextest
-                  args: run --workspace --features unstable-backend-client
+                  args: run --workspace --features unstable-backend-client --no-capture
