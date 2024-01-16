@@ -7,17 +7,17 @@
 //! be used directly if preferable.
 
 #![deny(unused_crate_dependencies, missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod api;
-mod ir;
-mod types;
-
 pub mod error;
+mod ir;
 
 // These should probably be in a separate crate; they are used by the
 // macro and CLI tool, so they only live here because this is a common
 // crate that both depend on.
 #[cfg(feature = "fetch-metadata")]
+#[cfg_attr(docsrs, doc(cfg(feature = "fetch-metadata")))]
 pub mod fetch_metadata;
 
 #[cfg(feature = "web")]
@@ -25,14 +25,12 @@ use getrandom as _;
 
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
+use scale_typegen::{
+    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeGeneratorSettings,
+    TypeSubstitutes, TypegenError,
+};
 use std::collections::HashMap;
-
-// We expose these only because they are currently needed in subxt-explorer.
-// Eventually we'll move the type generation stuff out into a separate crate.
-#[doc(hidden)]
-pub mod __private {
-    pub use crate::types::{DerivesRegistry, TypeDefGen, TypeGenerator, TypeSubstitutes};
-}
+use syn::parse_quote;
 
 // Part of the public interface, so expose:
 pub use error::CodegenError;
@@ -72,6 +70,8 @@ pub struct CodegenBuilder {
     type_substitutes: HashMap<syn::Path, syn::Path>,
     derives_for_type: HashMap<syn::TypePath, Vec<syn::Path>>,
     attributes_for_type: HashMap<syn::TypePath, Vec<syn::Attribute>>,
+    derives_for_type_recursive: HashMap<syn::TypePath, Vec<syn::Path>>,
+    attributes_for_type_recursive: HashMap<syn::TypePath, Vec<syn::Attribute>>,
 }
 
 impl Default for CodegenBuilder {
@@ -90,6 +90,8 @@ impl Default for CodegenBuilder {
             type_substitutes: HashMap::new(),
             derives_for_type: HashMap::new(),
             attributes_for_type: HashMap::new(),
+            derives_for_type_recursive: HashMap::new(),
+            attributes_for_type_recursive: HashMap::new(),
         }
     }
 }
@@ -159,33 +161,47 @@ impl CodegenBuilder {
 
     /// Set additional derives for a specific type at the path given.
     ///
-    /// # Warning
-    ///
-    /// For composite types, you may also need to set the same additional derives on all of
-    /// the contained types as well to avoid compile errors in the generated code.
+    /// If you want to set the additional derives on all contained types recursively as well,
+    /// you can set the `recursive` argument to `true`. If you don't do that,
+    /// there might be compile errors in the generated code, if the derived trait
+    /// relies on the fact that contained types also implement that trait.
     pub fn add_derives_for_type(
         &mut self,
         ty: syn::TypePath,
         derives: impl IntoIterator<Item = syn::Path>,
+        recursive: bool,
     ) {
-        self.derives_for_type.entry(ty).or_default().extend(derives);
+        if recursive {
+            self.derives_for_type_recursive
+                .entry(ty)
+                .or_default()
+                .extend(derives);
+        } else {
+            self.derives_for_type.entry(ty).or_default().extend(derives);
+        }
     }
 
     /// Set additional attributes for a specific type at the path given.
     ///
-    /// # Warning
-    ///
-    /// For composite types, you may also need to consider contained types and whether they need
-    /// similar attributes setting.
+    /// Setting the `recursive` argument to `true` will additionally add the specified
+    /// attributes to all contained types recursively.
     pub fn add_attributes_for_type(
         &mut self,
         ty: syn::TypePath,
         attributes: impl IntoIterator<Item = syn::Attribute>,
+        recursive: bool,
     ) {
-        self.attributes_for_type
-            .entry(ty)
-            .or_default()
-            .extend(attributes);
+        if recursive {
+            self.attributes_for_type_recursive
+                .entry(ty)
+                .or_default()
+                .extend(attributes);
+        } else {
+            self.attributes_for_type
+                .entry(ty)
+                .or_default()
+                .extend(attributes);
+        }
     }
 
     /// Substitute a type at the given path with some type at the second path. During codegen,
@@ -217,30 +233,39 @@ impl CodegenBuilder {
     pub fn generate(self, metadata: Metadata) -> Result<TokenStream2, CodegenError> {
         let crate_path = self.crate_path;
 
-        let mut derives_registry = if self.use_default_derives {
-            types::DerivesRegistry::with_default_derives(&crate_path)
+        let mut derives_registry: DerivesRegistry = if self.use_default_derives {
+            default_derives(&crate_path)
         } else {
-            types::DerivesRegistry::new()
+            DerivesRegistry::new()
         };
 
-        derives_registry.extend_for_all(self.extra_global_derives, self.extra_global_attributes);
+        derives_registry.add_derives_for_all(self.extra_global_derives);
+        derives_registry.add_attributes_for_all(self.extra_global_attributes);
 
         for (ty, derives) in self.derives_for_type {
-            derives_registry.extend_for_type(ty, derives, vec![]);
+            derives_registry.add_derives_for(ty, derives, false);
+        }
+        for (ty, derives) in self.derives_for_type_recursive {
+            derives_registry.add_derives_for(ty, derives, true);
         }
         for (ty, attributes) in self.attributes_for_type {
-            derives_registry.extend_for_type(ty, vec![], attributes);
+            derives_registry.add_attributes_for(ty, attributes, false);
+        }
+        for (ty, attributes) in self.attributes_for_type_recursive {
+            derives_registry.add_attributes_for(ty, attributes, true);
         }
 
-        let mut type_substitutes = if self.use_default_substitutions {
-            types::TypeSubstitutes::with_default_substitutes(&crate_path)
+        let mut type_substitutes: TypeSubstitutes = if self.use_default_substitutions {
+            default_substitutes(&crate_path)
         } else {
-            types::TypeSubstitutes::new()
+            TypeSubstitutes::new()
         };
 
         for (from, with) in self.type_substitutes {
-            let abs_path = with.try_into()?;
-            type_substitutes.insert(from, abs_path)?;
+            let abs_path = absolute_path(with).map_err(TypegenError::from)?;
+            type_substitutes
+                .insert(from, abs_path)
+                .map_err(TypegenError::from)?;
         }
 
         let item_mod = self.item_mod;
@@ -265,4 +290,124 @@ impl CodegenBuilder {
             )
         }
     }
+}
+
+/// The default [`scale_typegen::TypeGeneratorSettings`], subxt is using for generating code.
+/// Useful for emulating subxt's code generation settings from e.g. subxt-explorer.
+pub fn default_subxt_type_gen_settings() -> TypeGeneratorSettings {
+    let crate_path: syn::Path = parse_quote!(::subxt);
+    let derives = default_derives(&crate_path);
+    let substitutes = default_substitutes(&crate_path);
+    subxt_type_gen_settings(derives, substitutes, &crate_path, true)
+}
+
+fn subxt_type_gen_settings(
+    derives: scale_typegen::DerivesRegistry,
+    substitutes: scale_typegen::TypeSubstitutes,
+    crate_path: &syn::Path,
+    should_gen_docs: bool,
+) -> TypeGeneratorSettings {
+    TypeGeneratorSettings {
+        types_mod_ident: parse_quote!(runtime_types),
+        should_gen_docs,
+        derives,
+        substitutes,
+        decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
+        compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
+        compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
+        insert_codec_attributes: true,
+    }
+}
+
+fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
+    let encode_crate_path = quote::quote! { #crate_path::ext::scale_encode }.to_string();
+    let decode_crate_path = quote::quote! { #crate_path::ext::scale_decode }.to_string();
+
+    let derives: [syn::Path; 5] = [
+        parse_quote!(#crate_path::ext::scale_encode::EncodeAsType),
+        parse_quote!(#crate_path::ext::scale_decode::DecodeAsType),
+        parse_quote!(#crate_path::ext::codec::Encode),
+        parse_quote!(#crate_path::ext::codec::Decode),
+        parse_quote!(Debug),
+    ];
+
+    let attributes: [syn::Attribute; 3] = [
+        parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
+        parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
+        parse_quote!(#[codec(crate = #crate_path::ext::codec)]),
+    ];
+
+    let mut derives_registry = DerivesRegistry::new();
+    derives_registry.add_derives_for_all(derives);
+    derives_registry.add_attributes_for_all(attributes);
+    derives_registry
+}
+
+fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
+    let mut type_substitutes = TypeSubstitutes::new();
+
+    let defaults: [(syn::Path, syn::Path); 11] = [
+        (
+            parse_quote!(bitvec::order::Lsb0),
+            parse_quote!(#crate_path::utils::bits::Lsb0),
+        ),
+        (
+            parse_quote!(bitvec::order::Msb0),
+            parse_quote!(#crate_path::utils::bits::Msb0),
+        ),
+        (
+            parse_quote!(sp_core::crypto::AccountId32),
+            parse_quote!(#crate_path::utils::AccountId32),
+        ),
+        (
+            parse_quote!(sp_runtime::multiaddress::MultiAddress),
+            parse_quote!(#crate_path::utils::MultiAddress),
+        ),
+        (
+            parse_quote!(primitive_types::H160),
+            parse_quote!(#crate_path::utils::H160),
+        ),
+        (
+            parse_quote!(primitive_types::H256),
+            parse_quote!(#crate_path::utils::H256),
+        ),
+        (
+            parse_quote!(primitive_types::H512),
+            parse_quote!(#crate_path::utils::H512),
+        ),
+        (
+            parse_quote!(frame_support::traits::misc::WrapperKeepOpaque),
+            parse_quote!(#crate_path::utils::WrapperKeepOpaque),
+        ),
+        // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
+        // can cause an issue with generated code that doesn't impl `Ord` by default.
+        // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
+        // suitable type params) avoids these issues.
+        (
+            parse_quote!(BTreeMap),
+            parse_quote!(#crate_path::utils::KeyedVec),
+        ),
+        (parse_quote!(BTreeSet), parse_quote!(::std::vec::Vec)),
+        // The `UncheckedExtrinsic(pub Vec<u8>)` is part of the runtime API calls.
+        // The inner bytes represent the encoded extrinsic, however when deriving the
+        // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes
+        // being altered by adding the length prefix in front of them.
+
+        // Note: Not sure if this is appropriate or not. The most recent polkadot.rs file does not have these.
+        (
+            parse_quote!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
+            parse_quote!(#crate_path::utils::UncheckedExtrinsic),
+        ),
+    ];
+
+    let defaults = defaults.into_iter().map(|(from, to)| {
+        (
+            from,
+            absolute_path(to).expect("default substitutes above are absolute paths; qed"),
+        )
+    });
+    type_substitutes
+        .extend(defaults)
+        .expect("default substitutes can always be parsed; qed");
+    type_substitutes
 }

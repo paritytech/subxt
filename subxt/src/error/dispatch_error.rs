@@ -213,7 +213,7 @@ impl ModuleError {
 
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
-    /// The pallet that the error came from
+    /// The pallet that the error is in
     pub pallet: crate::metadata::types::PalletMetadata<'a>,
     /// The variant representing the error
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,

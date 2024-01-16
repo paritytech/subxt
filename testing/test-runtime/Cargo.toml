@@ -12,6 +12,7 @@ substrate-runner = { workspace = true }
 impl-serde = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio-util = { workspace = true, features = ["compat"] }
 which = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls"] }
 hex = { workspace = true }
