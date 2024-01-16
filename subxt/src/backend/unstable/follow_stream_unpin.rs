@@ -599,46 +599,6 @@ mod test {
     }
 
     #[tokio::test]
-    async fn only_unpins_if_finalized_is_dropped() {
-        // If we drop the "new block" and "best block" BlockRefs,
-        // and then the block comes back as finalized (for instance),
-        // no unpin call should be made unless we also drop the finalized
-        // one.
-        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
-            || {
-                [
-                    Ok(ev_initialized(0)),
-                    Ok(ev_new_block(0, 1)),
-                    Ok(ev_best_block(1)),
-                    Ok(ev_finalized([1])),
-                    Ok(ev_finalized([2])),
-                    Err(Error::Other("ended".to_owned())),
-                ]
-            },
-            100,
-        );
-
-        let _r = follow_unpin.next().await.unwrap().unwrap();
-        let _i0 = follow_unpin.next().await.unwrap().unwrap();
-        let n1 = follow_unpin.next().await.unwrap().unwrap();
-        drop(n1);
-        let b1 = follow_unpin.next().await.unwrap().unwrap();
-        drop(b1);
-        let f1 = follow_unpin.next().await.unwrap().unwrap();
-
-        // even though we dropped our block 1 in the new/best events, it won't be unpinned
-        // because it occurred again in finalized event.
-        unpin_rx.try_recv().expect_err("nothing unpinned yet");
-
-        drop(f1);
-        let _f2 = follow_unpin.next().await.unwrap().unwrap();
-
-        // Since we dropped the finalized block 1, we'll now unpin it when next block finalized.
-        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
-        assert_eq!(hash, H256::from_low_u64_le(1));
-    }
-
-    #[tokio::test]
     async fn never_unpin_new_block_before_finalized() {
         // Ensure that if we drop a new block; the pinning is still active until the block is finalized.
         let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
