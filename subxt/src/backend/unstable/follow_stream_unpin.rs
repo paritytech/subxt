@@ -753,41 +753,43 @@ mod test {
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Ok(ev_finalized([3], [])),
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
-            2,
+            10,
         );
 
         let _r = follow_unpin.next().await.unwrap().unwrap();
-        let _i0 = follow_unpin.next().await.unwrap().unwrap();
 
-        // drop new block 1 and new block 2.
+        // drop initialised block 0 and new block 1 and new block 2.
+        let i0 = follow_unpin.next().await.unwrap().unwrap();
+        drop(i0);
         let n1 = follow_unpin.next().await.unwrap().unwrap();
         drop(n1);
         let n2 = follow_unpin.next().await.unwrap().unwrap();
         drop(n2);
-
-        // drop best block 1.
         let b1 = follow_unpin.next().await.unwrap().unwrap();
         drop(b1);
 
-        let f1 = follow_unpin.next().await.unwrap().unwrap();
-
-        // Expect the blocks to be pinned until we receive the finalized event.
+        // Nothing unpinned yet!
         unpin_rx.try_recv().expect_err("nothing unpinned yet");
 
+        let f1 = follow_unpin.next().await.unwrap().unwrap();
         drop(f1);
+
+        // After finalization, block 1 is now ready to be unpinned (it won't be seen again),
+        // but isn't actually unpinned yet (because it was just handed back in f1). Block 0
+        // however has now been unpinned.
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(0)]);
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+
         let f2 = follow_unpin.next().await.unwrap().unwrap();
         drop(f2);
 
-        let _f3 = follow_unpin.next().await.unwrap().unwrap();
-
-        // These blocks exceeded lifetime and are dropped
-        assert_from_unpin_rx(
-            &unpin_rx,
-            [H256::from_low_u64_le(0), H256::from_low_u64_le(1)],
-        );
+        // After f2, we can get rid of block 1 now, which was finalized last time.
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert_from_unpin_rx(&unpin_rx, [H256::from_low_u64_le(1)]);
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
     }
 }
