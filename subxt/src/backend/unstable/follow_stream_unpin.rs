@@ -637,4 +637,54 @@ mod test {
         let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
         assert_eq!(hash, H256::from_low_u64_le(1));
     }
+
+    #[tokio::test]
+    async fn never_unpin_new_block_before_finalized() {
+        // Ensure that if we drop a new block; the pinning is still active until the block is finalized.
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_new_block(1, 2)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([2])),
+                    Ok(ev_finalized([3])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            2,
+        );
+
+        let _r = follow_unpin.next().await.unwrap().unwrap();
+        let _i0 = follow_unpin.next().await.unwrap().unwrap();
+
+        // drop new block 1 and new block 2.
+        let n1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(n1);
+        let n2 = follow_unpin.next().await.unwrap().unwrap();
+        drop(n2);
+
+        // drop best block 1.
+        let b1 = follow_unpin.next().await.unwrap().unwrap();
+        drop(b1);
+
+        let f1 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Expect the blocks to be pinned until we receive the finalized event.
+        unpin_rx.try_recv().expect_err("nothing unpinned yet");
+
+        drop(f1);
+        let f2 = follow_unpin.next().await.unwrap().unwrap();
+        drop(f2);
+
+        let _f3 = follow_unpin.next().await.unwrap().unwrap();
+
+        // These blocks exceeded lifetime.
+        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
+        assert_eq!(hash, H256::from_low_u64_le(0));
+        let (hash, _) = unpin_rx.try_recv().expect("unpin should have happened now");
+        assert_eq!(hash, H256::from_low_u64_le(1));
+    }
 }
