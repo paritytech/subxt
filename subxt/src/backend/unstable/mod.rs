@@ -485,7 +485,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
                         FollowEvent::NewBlock(new_block) => {
-                            chainhead_logs.push((now.elapsed(), "new", new_block.hash()));
+                            chainhead_logs.push((
+                                now.elapsed(),
+                                "new",
+                                new_block.block_hash.hash(),
+                            ));
 
                             seen_blocks.insert(
                                 new_block.block_hash.hash(),
@@ -494,11 +498,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         }
                         FollowEvent::Finalized(finalized_block) => {
                             for block_ref in finalized_block.finalized_block_hashes {
-                                chainhead_logs.push((
-                                    now.elapsed().as_secs(),
-                                    "finalized",
-                                    block_ref.hash(),
-                                ));
+                                chainhead_logs.push((now.elapsed(), "finalized", block_ref.hash()));
 
                                 seen_blocks.insert(
                                     block_ref.hash(),
