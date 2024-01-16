@@ -109,7 +109,9 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                 FollowStreamMsg::Event(FollowEvent::Initialized(details)) => {
                     // The first finalized block gets the starting block_num.
                     let rel_block_num = this.rel_block_num;
-                    let block_ref = this.pin_block_at(rel_block_num, details.finalized_block_hash);
+                    // Pin this block, but note that it can be unpinned any time since it won't show up again (except
+                    // as a parten block, which we are ignoring at the moment).
+                    let block_ref = this.pin_unpinnable_block_at(rel_block_num, details.finalized_block_hash);
 
                     FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
                         finalized_block_hash: block_ref,
@@ -155,8 +157,11 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                             // These blocks _should_ exist already and so will have a known block num,
                             // but if they don't, we just increment the num from the last finalized block
                             // we saw, which should be accurate.
+                            //
+                            // `pin_final_block_at` indicates that the block will not show up in future events
+                            // (They will show up as a parent block, but we don't care about that right now).
                             let rel_block_num = this.rel_block_num + idx + 1;
-                            this.pin_block_at(rel_block_num, hash)
+                            this.pin_unpinnable_block_at(rel_block_num, hash)
                         })
                         .collect();
 
@@ -168,15 +173,11 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                         .pruned_block_hashes
                         .into_iter()
                         .map(|hash| {
-                            // If we've pinned any of these pruned blocks, then make a note in our pinned block
-                            // details that they have been pruned (and thus will never show up again).
-                            this.pinned
-                                .entry(hash)
-                                .and_modify(|entry| entry.has_been_pruned = true);
-
                             // We should know about these, too, and if not we set their age to last_finalized + 1.
+                            //
+                            // `pin_final_block_at` indicates that the block will not show up in future events.
                             let rel_block_num = this.rel_block_num + 1;
-                            this.pin_block_at(rel_block_num, hash)
+                            this.pin_unpinnable_block_at(rel_block_num, hash)
                         })
                         .collect();
 
@@ -280,11 +281,26 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
     /// be unpinned, we'll clear those flags, so that it won't be unpinned. If the unpin request has already
     /// been sent though, then the block will be unpinned.
     fn pin_block_at(&mut self, rel_block_num: usize, hash: Hash) -> BlockRef<Hash> {
+        self.pin_block_at_setting_unpinnable_flag(rel_block_num, hash, false)
+    }
+
+    /// Pin a block, or return the reference to an already-pinned block.
+    ///
+    /// This is the same as [`Self::pin_block_at`], except that it also marks the block as being unpinnable now,
+    /// which should be done for any block that will no longer be seen in future events.
+    fn pin_unpinnable_block_at(&mut self, rel_block_num: usize, hash: Hash) -> BlockRef<Hash> {
+        self.pin_block_at_setting_unpinnable_flag(rel_block_num, hash, true)
+    }
+
+    fn pin_block_at_setting_unpinnable_flag(&mut self, rel_block_num: usize, hash: Hash, can_be_unpinned: bool) -> BlockRef<Hash> {
         let entry = self
             .pinned
             .entry(hash)
-            // Only if there's already an entry do we need to clear any unpin flags set against it.
-            .and_modify(|_entry| {
+            // If there's already an entry, then clear any unpin_flags and update the
+            // pruned status (a pruned block can never become unpruned again, but vice versa
+            // is possible).
+            .and_modify(|entry| {
+                entry.can_be_unpinned = entry.can_be_unpinned || can_be_unpinned;
                 self.unpin_flags.lock().unwrap().remove(&hash);
             })
             // If there's not an entry already, make one and return it.
@@ -296,7 +312,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
                         unpin_flags: self.unpin_flags.clone(),
                     }),
                 },
-                has_been_pruned: false,
+                can_be_unpinned,
             });
 
         entry.block_ref.clone()
@@ -316,10 +332,10 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         let mut blocks_to_unpin = vec![];
         for (hash, details) in &self.pinned {
             if rel_block_num.saturating_sub(details.rel_block_num) >= self.max_block_life
-                || (unpin_flags.contains(hash) && details.has_been_pruned)
+                || (unpin_flags.contains(hash) && details.can_be_unpinned)
             {
-                // The block is too old, or it's been flagged to be unpinned and has been pruned
-                // by the backend, so we can unpin it for real now.
+                // The block is too old, or it's been flagged to be unpinned and won't be in a future
+                // backend event, so we can unpin it for real now.
                 blocks_to_unpin.push(*hash);
                 // Clear it from our unpin flags if present so that we don't try to unpin it again.
                 unpin_flags.remove(hash);
@@ -362,7 +378,7 @@ struct PinnedDetails<Hash: BlockHash> {
     /// Has this block showed up in the list of pruned blocks in a
     /// finalized event from the backend? If so, it means that the
     /// block will never show up in another event again.
-    has_been_pruned: bool,
+    can_be_unpinned: bool,
 }
 
 /// All blocks reported will be wrapped in this.
@@ -529,6 +545,37 @@ mod test {
     }
 
     #[tokio::test]
+    async fn unpins_initialized_block() {
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_finalized([1], [])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            3,
+        );
+
+        let _r = follow_unpin.next().await.unwrap().unwrap();
+
+        // Drop the initialized block:
+        let i0 = follow_unpin.next().await.unwrap().unwrap();
+        drop(i0);
+
+        // Let a finalization event occur.
+        let _f1 = follow_unpin.next().await.unwrap().unwrap();
+
+        // Now, initialized block should be unpinned.
+        let (hash, _) = unpin_rx
+            .try_recv()
+            .expect("unpin call should have happened");
+        assert_eq!(hash, H256::from_low_u64_le(0));
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
+    }
+
+
+    #[tokio::test]
     async fn unpins_old_blocks() {
         let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
             || {
@@ -578,8 +625,8 @@ mod test {
     }
 
     #[tokio::test]
-    async fn dropped_new_blocks_should_not_get_unpinned() {
-        let (mut follow_unpin, _) = test_unpin_stream_getter(
+    async fn dropped_new_blocks_should_not_get_unpinned_until_finalization() {
+        let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
             || {
                 [
                     Ok(ev_initialized(0)),
@@ -601,20 +648,35 @@ mod test {
         let n2 = follow_unpin.next().await.unwrap().unwrap();
         drop(n2);
 
+        // New blocks dropped but still pinned:
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+
         let f1 = follow_unpin.next().await.unwrap().unwrap();
-        // We don't care about block 1 any more; drop it. unpinning happens when the max_life is exceeded.
         drop(f1);
 
-        let _f2 = follow_unpin.next().await.unwrap().unwrap();
-
-        // Confirm that 0 and 2 are still pinned and that 1 isnt.
+        // After block 1 finalized, both blocks are still pinned because:
+        // - block 1 was handed back in the finalized event, so will be unpinned next time.
+        // - block 2 wasn't mentioned in the finalized event, so should not have been unpinned yet.
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
-        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
         assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+
+        let f2 = follow_unpin.next().await.unwrap().unwrap();
+        drop(f2);
+
+        // After block 2 finalized, block 1 can be unpinned finally, but block 2 needs to wait one more event.
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+
+        // Double check that the unpin method was called by seeing if an unpin event sent to the test receiver:
+        let (hash, _) = unpin_rx
+            .try_recv()
+            .expect("unpin call should have happened");
+        assert_eq!(hash, H256::from_low_u64_le(1));
     }
 
     #[tokio::test]
-    async fn pruned_blocks_should_get_unpinned() {
+    async fn dropped_new_blocks_should_not_get_unpinned_until_pruned() {
         let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
             || {
                 [
@@ -622,8 +684,9 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(1, 3)),
-                    Ok(ev_finalized([1], [3])),
-                    Ok(ev_finalized([2], [])),
+                    Ok(ev_finalized([1], [])),
+                    Ok(ev_finalized([2], [3])),
+                    Ok(ev_finalized([4], [])),
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
@@ -642,20 +705,49 @@ mod test {
 
         let f1 = follow_unpin.next().await.unwrap().unwrap();
         drop(f1);
+
+        // After block 1 is finalized, everything is still pinned because the finalization event
+        // itself returns 1, and 2/3 aren't finalized or pruned yet.
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(3)));
+
         let f2 = follow_unpin.next().await.unwrap().unwrap();
         drop(f2);
 
+        // After the next finalization event, block 1 can finally be unpinned since it was Finalized
+        // last event _and_ is no longer handed back anywhere. 2 and 3 should still be pinned.
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
+        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(3)));
+
+        // Confirm that drop calls were made for 1, too:
         let (hash, _) = unpin_rx
             .try_recv()
             .expect("unpin call should have happened");
-        assert_eq!(hash, H256::from_low_u64_le(3));
+        assert_eq!(hash, H256::from_low_u64_le(1));
 
-        // Confirm that 0 and 2 are still pinned and that 1 isnt.
-        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
-        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(1)));
-        assert!(follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
-        // Block 3 was pruned, so should be unpinned by the second finalized event.
+        let f4 = follow_unpin.next().await.unwrap().unwrap();
+        drop(f4);
+
+        // After some other finalized event, we are now allowed to ditch the previously pruned and
+        // finalized blocks 2 and 3.
+        assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(2)));
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(3)));
+
+        // Confirm that drop calls were made for 2 and 3, too:
+        let dropped = {
+            let (h1, _) = unpin_rx
+                .try_recv()
+                .expect("unpin call should have happened");
+            let (h2, _) = unpin_rx
+                .try_recv()
+                .expect("unpin call should have happened");
+            let mut both = [h1,h2];
+            both.sort();
+            both
+        };
+        assert_eq!(dropped,[H256::from_low_u64_le(2), H256::from_low_u64_le(3)]);
     }
 
     #[tokio::test]
