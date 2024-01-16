@@ -470,6 +470,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // Make a note of new or finalized blocks that have come in since we started the TX.
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
+                        FollowEvent::Initialized(ev) => {
+                            // Just in case this stream is really slow to start or something..
+                            seen_blocks.insert(
+                                ev.finalized_block_hash.hash(),
+                                (SeenBlockMarker::Finalized, ev.finalized_block_hash),
+                            );
+                        }
                         FollowEvent::NewBlock(ev) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
@@ -487,6 +494,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                                     (SeenBlockMarker::Finalized, block_ref),
                                 );
                             }
+                        }
+                        FollowEvent::Stop => {
+                            // If we get this event, we'll lose all of our existing pinned blocks and have a gap
+                            // in which we may lose the finaliuzed block that the TX is in. For now, just error if
+                            // this happens, to prevent the case in which we never see a finalized block and wait
+                            // forever.
+                            return Poll::Ready(Some(Err(Error::Other("chainHead_follow emitted 'stop' event during transaction submission".into()))));
                         }
                         _ => {}
                     }
