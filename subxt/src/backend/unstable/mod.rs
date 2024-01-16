@@ -474,8 +474,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
-                                seen_blocks
-                                    .insert(ev.block_hash.hash(), (SeenBlockMarker::New, ev.block_hash));
+                                seen_blocks.insert(
+                                    ev.block_hash.hash(),
+                                    (SeenBlockMarker::New, ev.block_hash),
+                                );
                             }
                         }
                         FollowEvent::Finalized(ev) => {
@@ -485,7 +487,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                                     (SeenBlockMarker::Finalized, block_ref),
                                 );
                             }
-                        },
+                        }
                         _ => {}
                     }
                     continue;
