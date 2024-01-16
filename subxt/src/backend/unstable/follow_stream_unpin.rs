@@ -481,7 +481,7 @@ pub(super) mod test_utils {
         unpin_rx: &UnpinRx<Hash>,
         items: impl IntoIterator<Item = Hash>,
     ) {
-        let expected_hashes = HashSet::<Hash>::from_iter(items.into_iter());
+        let expected_hashes = HashSet::<Hash>::from_iter(items);
         for i in 0..expected_hashes.len() {
             let Ok((hash, _)) = unpin_rx.try_recv() else {
                 panic!("Another unpin event is expected, but failed to pull item {i} from channel");
