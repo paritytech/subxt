@@ -111,7 +111,8 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                     let rel_block_num = this.rel_block_num;
                     // Pin this block, but note that it can be unpinned any time since it won't show up again (except
                     // as a parten block, which we are ignoring at the moment).
-                    let block_ref = this.pin_unpinnable_block_at(rel_block_num, details.finalized_block_hash);
+                    let block_ref =
+                        this.pin_unpinnable_block_at(rel_block_num, details.finalized_block_hash);
 
                     FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
                         finalized_block_hash: block_ref,
@@ -292,7 +293,12 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         self.pin_block_at_setting_unpinnable_flag(rel_block_num, hash, true)
     }
 
-    fn pin_block_at_setting_unpinnable_flag(&mut self, rel_block_num: usize, hash: Hash, can_be_unpinned: bool) -> BlockRef<Hash> {
+    fn pin_block_at_setting_unpinnable_flag(
+        &mut self,
+        rel_block_num: usize,
+        hash: Hash,
+        can_be_unpinned: bool,
+    ) -> BlockRef<Hash> {
         let entry = self
             .pinned
             .entry(hash)
@@ -574,7 +580,6 @@ mod test {
         assert!(!follow_unpin.is_pinned(&H256::from_low_u64_le(0)));
     }
 
-
     #[tokio::test]
     async fn unpins_old_blocks() {
         let (mut follow_unpin, unpin_rx) = test_unpin_stream_getter(
@@ -743,11 +748,14 @@ mod test {
             let (h2, _) = unpin_rx
                 .try_recv()
                 .expect("unpin call should have happened");
-            let mut both = [h1,h2];
+            let mut both = [h1, h2];
             both.sort();
             both
         };
-        assert_eq!(dropped,[H256::from_low_u64_le(2), H256::from_low_u64_le(3)]);
+        assert_eq!(
+            dropped,
+            [H256::from_low_u64_le(2), H256::from_low_u64_le(3)]
+        );
     }
 
     #[tokio::test]
