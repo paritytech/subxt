@@ -221,9 +221,8 @@ impl<Hash: BlockHash> Shared<Hash> {
 
         // else, take whatever items, and save the waker if not done yet.
         let items = std::mem::take(&mut details.items);
-        if !is_done {
-            details.waker = Some(waker.clone());
-        }
+        // Always save the waker.
+        details.waker = Some(waker.clone());
         Some(items)
     }
 
