@@ -329,7 +329,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
         let mut blocks_to_unpin = vec![];
         for (hash, details) in &self.pinned {
             if rel_block_num.saturating_sub(details.rel_block_num) >= self.max_block_life
-                || unpin_flags.contains(&hash)
+                || unpin_flags.contains(hash)
             {
                 // The block is too old, or it's been flagged to be unpinned (no refs to it left)
                 blocks_to_unpin.push(*hash);
