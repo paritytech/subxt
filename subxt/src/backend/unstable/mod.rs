@@ -471,7 +471,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
                     match seen_block {
                         FollowEvent::NewBlock(ev) => {
-    println!("New block seen: {:?}", ev.block_hash.hash());
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
@@ -481,7 +480,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         }
                         FollowEvent::Finalized(ev) => {
                             for block_ref in ev.finalized_block_hashes {
-    println!("Finalized block seen: {:?}", block_ref.hash());
                                 seen_blocks.insert(
                                     block_ref.hash(),
                                     (SeenBlockMarker::Finalized, block_ref),
@@ -496,10 +494,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // If we have a finalized hash, we are done looking for tx events and we are just waiting
                 // for a pinned block with a matching hash (which must appear eventually given it's finalized).
                 if let Some(hash) = &finalized_hash {
-    println!("Looking for finalized hash {hash:?}");
                     if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.remove(hash)
                     {
-    println!("Found finalized hash!");
                         // Found it! Hand back the event with a pinned block. We're done.
                         done = true;
                         let ev = TransactionStatus::InFinalizedBlock {
@@ -524,7 +520,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
-    println!("TX Event seen: {ev:?}");
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
                     rpc_methods::TransactionStatus::Finalized { block } => {
