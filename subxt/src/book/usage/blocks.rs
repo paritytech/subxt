@@ -46,6 +46,7 @@
 //! variants has a field that is another enum whose variants cover all calls of the respective pallet.
 //! If the extrinsic bytes are valid and your metadata matches the chain's metadata, decoding the bytes of an extrinsic into
 //! this root extrinsic type should always succeed.
+//! 
 //! This example shows how to subscribe to blocks and decode the extrinsics in each block into the root extrinsic type.
 //! Once we get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails), we can decode it statically or dynamically.
 //! We can also access details about the extrinsic, including the associated events and signed extensions.
@@ -88,7 +89,7 @@
 //! The [Config](crate::Config) implementation for your chain defines which signed extensions you expect.
 //! Once you get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails) for an extrinsic you are interested in,
 //! you can try to [get its signed extensions](crate::blocks::ExtrinsicDetails::signed_extensions()).
-//! In general these are only available on signed extrinsics (not inherents). You can try to [find a specific signed extension](crate::blocks::ExtrinsicSignedExtensions::find),
+//! These are only available on signed extrinsics. You can try to [find a specific signed extension](crate::blocks::ExtrinsicSignedExtensions::find),
 //! in the returned [signed extensions](crate::blocks::ExtrinsicSignedExtensions).
 //!
 //! Subxt also provides utility functions to get the [tip](crate::blocks::ExtrinsicSignedExtensions::tip()) and the
