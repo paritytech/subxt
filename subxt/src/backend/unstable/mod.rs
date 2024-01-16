@@ -353,7 +353,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .filter_map(move |ev| {
                 let output = match ev {
                     FollowEvent::Initialized(ev) => {
-                        runtimes.clear();
+                        runtimes.remove(&ev.finalized_block_hash.hash());
                         ev.finalized_block_runtime
                     }
                     FollowEvent::NewBlock(ev) => {
@@ -363,14 +363,35 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         None
                     }
                     FollowEvent::Finalized(ev) => {
-                        let next_runtime = ev
+                        let next_runtime = {
+                            let mut it = ev
+                                .finalized_block_hashes
+                                .iter()
+                                .rev()
+                                .filter_map(|h| runtimes.get(&h.hash()).cloned())
+                                .peekable();
+
+                            let next = it.next();
+
+                            if it.peek().is_some() {
+                                tracing::warn!(
+                                    target: "subxt",
+                                    "Several runtime upgrades in the finalized blocks but only the latest runtime upgrade is returned"
+                                );
+                            }
+
+                            next
+                        };
+
+                        // Remove finalized and pruned blocks as valid runtime upgrades.
+                        for block in ev
                             .finalized_block_hashes
                             .iter()
-                            .rev()
-                            .filter_map(|h| runtimes.get(&h.hash()).cloned())
-                            .next();
+                            .chain(ev.pruned_block_hashes.iter())
+                        {
+                            runtimes.remove(&block.hash());
+                        }
 
-                        runtimes.clear();
                         next_runtime
                     }
                     _ => None,
