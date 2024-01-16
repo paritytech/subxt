@@ -110,7 +110,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                     // The first finalized block gets the starting block_num.
                     let rel_block_num = this.rel_block_num;
                     // Pin this block, but note that it can be unpinned any time since it won't show up again (except
-                    // as a parten block, which we are ignoring at the moment).
+                    // as a parent block, which we are ignoring at the moment).
                     let block_ref =
                         this.pin_unpinnable_block_at(rel_block_num, details.finalized_block_hash);
 
@@ -381,9 +381,10 @@ struct PinnedDetails<Hash: BlockHash> {
     /// Because we store one here until it's unpinned, the live count
     /// will only drop to 1 when no external refs are left.
     block_ref: BlockRef<Hash>,
-    /// Has this block showed up in the list of pruned blocks in a
-    /// finalized event from the backend? If so, it means that the
-    /// block will never show up in another event again.
+    /// Has this block showed up in the list of pruned blocks, or has it
+    /// been finalized? In this case, it can now been pinned as it won't
+    /// show up again in future events (except as a "parent block" of some
+    /// new block, which we're currently ignoring).
     can_be_unpinned: bool,
 }
 
