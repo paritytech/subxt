@@ -265,10 +265,13 @@ pub(super) mod test_utils {
     }
 
     /// A finalized event
-    pub fn ev_finalized(ns: impl IntoIterator<Item = u64>) -> FollowEvent<H256> {
+    pub fn ev_finalized(
+        ns: impl IntoIterator<Item = u64>,
+        pruned: impl IntoIterator<Item = u64>,
+    ) -> FollowEvent<H256> {
         FollowEvent::Finalized(Finalized {
             finalized_block_hashes: ns.into_iter().map(H256::from_low_u64_le).collect(),
-            pruned_block_hashes: vec![],
+            pruned_block_hashes: pruned.into_iter().map(H256::from_low_u64_le).collect(),
         })
     }
 }
