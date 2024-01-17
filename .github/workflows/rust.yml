@@ -46,34 +46,10 @@ jobs:
           command: fmt
           args: --all -- --check
 
-  check:
-    name: Cargo check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
-
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-      - name: Install cargo-hack
-        uses: baptiste0928/cargo-install@v2
-        with:
-          crate: cargo-hack
-          version: 0.5
   clippy:
     name: Cargo clippy
     runs-on: ubuntu-latest
+    needs: fmt
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -97,9 +73,62 @@ jobs:
         with:
           command: clippy
           args: --all-targets -- -D warnings
+
+  check:
+    name: Cargo check
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Use substrate-node binary
+        uses: ./.github/workflows/actions/use-substrate
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      - name: Install cargo-hack
+        uses: baptiste0928/cargo-install@v2
+        with:
+          crate: cargo-hack
+          version: 0.5
+
+  wasm_check:
+    name: Cargo check (WASM)
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
+      - name: Cargo check WASM examples
+        run: |
+          cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
+
   machete:
     name: "Check unused dependencies"
     runs-on: ubuntu-latest
+    needs: [check, wasm_check]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -157,33 +186,10 @@ jobs:
       - name: Cargo check parachain-example
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
 
-  wasm_check:
-    name: Cargo check (WASM)
-    runs-on: ubuntu-latest
-    needs: check
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          target: wasm32-unknown-unknown
-          override: true
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-      # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
-      - name: Cargo check WASM examples
-        run: |
-          cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
-
   docs:
     name: Check documentation and run doc tests
     runs-on: ubuntu-latest
+    needs: [check, wasm_check]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -213,6 +219,7 @@ jobs:
   tests:
     name: "Test (Native)"
     runs-on: ubuntu-latest-16-cores
+    needs: [machete, docs]
     timeout-minutes: 30
     steps:
       - name: Checkout sources
@@ -243,6 +250,7 @@ jobs:
   unstable_backend_tests:
     name: "Test (Unstable Backend)"
     runs-on: ubuntu-latest-16-cores
+    needs: [machete, docs]
     timeout-minutes: 30
     steps:
       - name: Checkout sources
@@ -273,6 +281,7 @@ jobs:
   light_client_tests:
     name: "Test (Light Client)"
     runs-on: ubuntu-latest
+    needs: [machete, docs]
     timeout-minutes: 15
     steps:
       - name: Checkout sources
@@ -300,6 +309,7 @@ jobs:
   wasm_tests:
     name: Test (WASM)
     runs-on: ubuntu-latest
+    needs: [machete, docs]
     timeout-minutes: 30
     env:
       # Set timeout for wasm tests to be much bigger than the default 20 secs.
