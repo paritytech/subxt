@@ -489,6 +489,22 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut num_polls: usize = 0;
         let mut num_loops: usize = 0;
 
+        macro_rules! panic_with_stats {
+            ($msg:literal) => {{
+                let msg = stringify!($lit);
+                panic!(
+                    "submit_transaction error: {msg}. Please raise an issue. Details: \
+                     start_time={start_instant:?}, \
+                     num_polls={num_polls}, \
+                     num_loops={num_loops}, \
+                     last_follow_event_time={last_seen_follow_event_time:?}, \
+                     last_follow_event={last_seen_follow_event_str:?}, \
+                     last_tx_event_time={last_seen_tx_event_time:?}, \
+                     last_tx_event={last_seen_tx_event_str:?}",
+                );
+            }};
+        }
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             num_polls = num_polls.saturating_add(1);
@@ -504,22 +520,19 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 // Panic if we exceed 4 mins; something very likely went wrong. We'll remove this
                 // once we get to the bottom of a spurious error that causes this to hang.
                 if start_instant.elapsed().as_secs() > 240 {
-                    panic!(
-                        "Finalized block expected by now: \
-                         start_time={start_instant:?}, \
-                         num_polls={num_polls}, \
-                         num_loops={num_loops}, \
-                         last_follow_event_time={last_seen_follow_event_time:?}, \
-                         last_follow_event={last_seen_follow_event_str:?}, \
-                         last_tx_event_time={last_seen_tx_event_time:?}, \
-                         last_tx_event={last_seen_tx_event_str:?}",
-                    );
+                    panic_with_stats!("finalized block expected by now");
                 }
 
-                // Make a note of new or finalized blocks that have come in since we started the TX.
-                if let Poll::Ready(Some(follow_event)) = seen_blocks_sub.poll_next_unpin(cx) {
+                if let Poll::Ready(maybe_follow_event) = seen_blocks_sub.poll_next_unpin(cx) {
+                    // If we get back `None`, and we didn't previously see a `Stop`, which would be
+                    // caught first below, then something has gone wrong and we should exit with an error.
+                    let Some(follow_event) = maybe_follow_event else {
+                        panic_with_stats!("chainHead_follow stream ended unexpectedly");
+                    };
+
                     last_seen_follow_event_str = Some(format!("{follow_event:?}"));
                     last_seen_follow_event_time = Some(instant::Instant::now());
+
                     match follow_event {
                         FollowEvent::NewBlock(ev) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
