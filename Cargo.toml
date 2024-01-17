@@ -7,12 +7,13 @@ members = [
     "testing/test-runtime",
     "testing/integration-tests",
     "testing/ui-tests",
+    "testing/no-std-tests",
     "testing/generate-custom-metadata",
     "macro",
     "metadata",
     "signer",
     "subxt",
-    "scripts/artifacts"
+    "scripts/artifacts",
 ]
 
 # We exclude any crates that would depend on non mutually
@@ -56,6 +57,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
+cfg-if = "1.0"
 clap = { version = "4.4.16", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }

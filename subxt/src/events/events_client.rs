@@ -4,6 +4,7 @@
 
 use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{client::OnlineClientT, error::Error, events::Events, Config};
+use crate::prelude::*;
 use derivative::Derivative;
 use std::future::Future;
 

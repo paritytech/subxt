@@ -7,6 +7,7 @@ use crate::{
     backend::rpc::{RawRpcFuture, RawRpcSubscription, RpcClientT},
     error::{Error, RpcError},
 };
+use crate::prelude::*;
 use futures::StreamExt;
 use serde_json::value::RawValue;
 use tokio_stream::wrappers::UnboundedReceiverStream;

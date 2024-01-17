@@ -4,6 +4,7 @@
 
 use super::Metadata;
 use crate::error::Error;
+use crate::prelude::*;
 
 /// This trait is implemented for all types that also implement [`scale_decode::DecodeAsType`].
 pub trait DecodeWithMetadata: Sized {

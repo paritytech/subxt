@@ -8,6 +8,7 @@ use crate::client::RawLightClient;
 use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
+use crate::prelude::*;
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
 

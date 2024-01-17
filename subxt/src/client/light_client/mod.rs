@@ -20,6 +20,7 @@ use crate::{
     tx::TxClient,
     OnlineClient,
 };
+use crate::prelude::*;
 pub use builder::{LightClientBuilder, RawLightClientBuilder};
 use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;

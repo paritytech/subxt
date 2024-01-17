@@ -7,6 +7,7 @@
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
 use crate::{Config, Error};
+use crate::prelude::*;
 use codec::Decode;
 use derivative::Derivative;
 use primitive_types::U256;

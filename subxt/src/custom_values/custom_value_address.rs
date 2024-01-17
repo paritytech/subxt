@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
+use crate::prelude::*;
 
 /// This represents the address of a custom value in in the metadata.
 /// Anything, that implements the [CustomValueAddress] trait can be used, to fetch

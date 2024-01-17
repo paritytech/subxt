@@ -20,16 +20,13 @@ workspace = true
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native"]
+default = ["std", "jsonrpsee", "native"]
+
+std = ["bitvec/std"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
-native = [
-    "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-native-tls",
-    "subxt-lightclient?/native",
-    "tokio-util"
-]
+native = ["jsonrpsee?/async-client", "jsonrpsee?/client-ws-transport-native-tls", "subxt-lightclient?/native", "tokio-util"]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
@@ -55,6 +52,7 @@ unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 
 [dependencies]
 async-trait = { workspace = true }
+cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 scale-info = { workspace = true }
 scale-value = { workspace = true }
@@ -68,7 +66,7 @@ serde_json = { workspace = true, features = ["raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
-derivative = { workspace = true }
+derivative = { workspace = true, features = ["use_core"] }
 either = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:

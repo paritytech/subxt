@@ -3,6 +3,7 @@ use crate::custom_values::custom_value_address::{CustomValueAddress, Yes};
 use crate::error::MetadataError;
 use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
+use crate::prelude::*;
 use derivative::Derivative;
 
 /// A client for accessing custom values stored in the metadata.

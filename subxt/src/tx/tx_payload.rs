@@ -10,6 +10,7 @@ use crate::{
     error::{Error, MetadataError},
     metadata::Metadata,
 };
+use crate::prelude::*;
 use codec::Encode;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, ValueDef, Variant};

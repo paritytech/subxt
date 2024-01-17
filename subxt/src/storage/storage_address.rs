@@ -8,6 +8,7 @@ use crate::{
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
+use crate::prelude::*;
 use derivative::Derivative;
 use scale_info::TypeDef;
 use std::borrow::Cow;

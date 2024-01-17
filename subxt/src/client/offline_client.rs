@@ -8,6 +8,7 @@ use crate::{
     events::EventsClient, runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
     Config, Metadata,
 };
+use crate::prelude::*;
 use derivative::Derivative;
 
 use std::sync::Arc;

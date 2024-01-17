@@ -10,7 +10,7 @@ use crate::{
     metadata::{DecodeWithMetadata, Metadata},
 };
 use scale_decode::DecodeAsType;
-
+use crate::prelude::*;
 pub use scale_value::{At, Value};
 
 /// A [`scale_value::Value`] type endowed with contextual information

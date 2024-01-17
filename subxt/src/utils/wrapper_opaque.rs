@@ -153,7 +153,7 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
 impl<T> IntoVisitor for WrapperKeepOpaque<T> {
     type Visitor = WrapperKeepOpaqueVisitor<T>;
     fn into_visitor() -> Self::Visitor {
-        WrapperKeepOpaqueVisitor(std::marker::PhantomData)
+        WrapperKeepOpaqueVisitor(PhantomData)
     }
 }
 

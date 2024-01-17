@@ -14,6 +14,7 @@ use crate::{
     events::EventsClient,
     Config,
 };
+use crate::prelude::*;
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
 

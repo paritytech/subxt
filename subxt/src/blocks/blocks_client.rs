@@ -9,6 +9,7 @@ use crate::{
     config::Config,
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
+    prelude::*,
 };
 use derivative::Derivative;
 use futures::StreamExt;

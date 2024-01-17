@@ -2344,6 +2344,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13e3bf6590cbc649f4d1a3eefc9d5d6eb746f5200ffb04e5e142700b8faa56e7"
 
 [[package]]
+name = "libc_alloc"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a835c038b748123287f9fb1743d565e7c635879997f43c345a18a026690364e"
+
+[[package]]
 name = "libm"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2540,6 +2546,19 @@ name = "no-std-net"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43794a0ace135be66a25d3ae77d41b91615fb68ae937f904090203e81f755b65"
+
+[[package]]
+name = "no-std-tests"
+version = "0.0.0"
+dependencies = [
+ "hex",
+ "libc",
+ "libc_alloc",
+ "parity-scale-codec",
+ "scale-info",
+ "subxt",
+ "subxt-metadata",
+]
 
 [[package]]
 name = "nodrop"
@@ -4367,6 +4386,7 @@ dependencies = [
  "base58",
  "bitvec",
  "blake2",
+ "cfg-if",
  "derivative",
  "either",
  "frame-metadata 16.0.0",

@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
+use crate::prelude::*;
 use derivative::Derivative;
 use std::borrow::Cow;
 

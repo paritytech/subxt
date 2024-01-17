@@ -11,6 +11,7 @@
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(any(
     all(feature = "web", feature = "native"),
@@ -56,6 +57,7 @@ pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+pub mod prelude;
 
 // Internal helper macros
 #[macro_use]

@@ -9,6 +9,7 @@ use crate::{
     metadata::DecodeWithMetadata,
     Config,
 };
+use crate::prelude::*;
 use derivative::Derivative;
 
 /// A client for accessing constants.

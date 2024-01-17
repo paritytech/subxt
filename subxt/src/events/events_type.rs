@@ -12,6 +12,7 @@ use crate::{
     metadata::types::PalletMetadata,
     Config, Metadata,
 };
+use crate::prelude::*;
 use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::DecodeAsType;

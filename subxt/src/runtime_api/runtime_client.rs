@@ -5,6 +5,7 @@
 use super::runtime_types::RuntimeApi;
 
 use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
+use crate::prelude::*;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
 

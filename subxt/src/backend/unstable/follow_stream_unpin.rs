@@ -9,6 +9,7 @@ use crate::backend::unstable::rpc_methods::{
 };
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
+use crate::prelude::*;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use std::collections::{HashMap, HashSet};
 use std::future::Future;

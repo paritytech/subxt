@@ -15,6 +15,7 @@ mod wrapper_opaque;
 
 use crate::error::RpcError;
 use crate::Error;
+use crate::prelude::*;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use url::Url;

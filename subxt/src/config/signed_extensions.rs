@@ -10,6 +10,7 @@
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
+use crate::prelude::*;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
 use derivative::Derivative;

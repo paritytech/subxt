@@ -13,6 +13,7 @@ use crate::backend::{
     TransactionStatus,
 };
 use crate::{config::Header, Config, Error};
+use crate::prelude::*;
 use async_trait::async_trait;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;

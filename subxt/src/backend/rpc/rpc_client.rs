@@ -4,6 +4,7 @@
 
 use super::{RawRpcSubscription, RpcClientT};
 use crate::error::Error;
+use crate::prelude::*;
 use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;

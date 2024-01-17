@@ -8,6 +8,7 @@
 //! implementation of this that will work in many cases.
 
 use crate::{client::OfflineClientT, Config};
+use crate::prelude::*;
 use core::fmt::Debug;
 
 /// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],

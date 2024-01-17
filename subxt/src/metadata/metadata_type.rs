@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::MetadataError;
-
+use crate::prelude::*;
 use std::sync::Arc;
 
 /// A cheaply clone-able representation of the runtime metadata received from a node.

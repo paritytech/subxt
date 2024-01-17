@@ -4,6 +4,7 @@
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
 use crate::error::RpcError;
+use crate::prelude::*;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{

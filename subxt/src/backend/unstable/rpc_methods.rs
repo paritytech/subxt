@@ -9,6 +9,7 @@
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::config::BlockHash;
 use crate::{Config, Error};
+use crate::prelude::*;
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};

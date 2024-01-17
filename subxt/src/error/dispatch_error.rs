@@ -9,6 +9,7 @@ use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
 use std::borrow::Cow;
+use crate::prelude::*;
 
 use super::{Error, MetadataError};
 

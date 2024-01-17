@@ -16,6 +16,7 @@ pub mod signed_extensions;
 pub mod substrate;
 
 use crate::macros::cfg_substrate_compat;
+use crate::prelude::*;
 use codec::{Decode, Encode};
 use core::fmt::Debug;
 use scale_decode::DecodeAsType;
