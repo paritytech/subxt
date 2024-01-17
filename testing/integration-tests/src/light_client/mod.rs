@@ -117,43 +117,10 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     Ok(())
 }
 
-/// Fetch the chainSpec from the given url.
-async fn fetch_spec_from_url(url: &str) -> serde_json::Value {
-    // use jsonrpsee::core::client::ClientT;
-    // let client = jsonrpsee_helpers::client(url.as_ref()).await?;
-
-    pub use jsonrpsee::{
-        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
-        core::client::{Client, ClientT},
-    };
-
-    let url = Url::parse(url).expect("Failed to parse url");
-    let (sender, receiver) = WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .expect("Failed to connect to the node");
-
-    let client = Client::builder()
-        .max_buffer_capacity_per_subscription(4096)
-        .build_with_tokio(sender, receiver);
-
-    client
-        .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
-        .await
-        .expect("Failed to fetch the chainSpec")
-}
-
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
-    let chain_spec = fetch_spec_from_url("wss://rpc.polkadot.io:443").await;
-
-    // Sleep 8 seconds to ensure that a new block is produced for the substrate test node.
-    // Although the block production should be 6 seconds, the CI environment is sometimes slow.
-    // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
-    tokio::time::sleep(std::time::Duration::from_secs(8)).await;
-
     let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
-        .build(&chain_spec.to_string())
+        .build_from_url("wss://rpc.polkadot.io:443")
         .await?;
 
     non_finalized_headers_subscription(&api).await?;
