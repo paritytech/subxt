@@ -251,10 +251,14 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     use jsonrpsee::core::client::ClientT;
     let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
-    client
+    let result = client
         .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
-        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
+        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))));
+
+    tokio::time::sleep(std::time::Duration::from_secs(8)).await;
+
+    result
 }
 
 cfg_jsonrpsee_native! {
