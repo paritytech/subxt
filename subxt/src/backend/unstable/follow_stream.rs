@@ -249,9 +249,9 @@ pub(super) mod test_utils {
     }
 
     /// A new block event
-    pub fn ev_new_block(parent: u64, n: u64) -> FollowEvent<H256> {
+    pub fn ev_new_block(parent_n: u64, n: u64) -> FollowEvent<H256> {
         FollowEvent::NewBlock(NewBlock {
-            parent_block_hash: H256::from_low_u64_le(parent),
+            parent_block_hash: H256::from_low_u64_le(parent_n),
             block_hash: H256::from_low_u64_le(n),
             new_runtime: None,
         })
@@ -265,10 +265,16 @@ pub(super) mod test_utils {
     }
 
     /// A finalized event
-    pub fn ev_finalized(ns: impl IntoIterator<Item = u64>) -> FollowEvent<H256> {
+    pub fn ev_finalized(
+        finalized_ns: impl IntoIterator<Item = u64>,
+        pruned_ns: impl IntoIterator<Item = u64>,
+    ) -> FollowEvent<H256> {
         FollowEvent::Finalized(Finalized {
-            finalized_block_hashes: ns.into_iter().map(H256::from_low_u64_le).collect(),
-            pruned_block_hashes: vec![],
+            finalized_block_hashes: finalized_ns
+                .into_iter()
+                .map(H256::from_low_u64_le)
+                .collect(),
+            pruned_block_hashes: pruned_ns.into_iter().map(H256::from_low_u64_le).collect(),
         })
     }
 }
