@@ -218,7 +218,7 @@ jobs:
 
   light_client_tests:
     name: "Test (Light Client)"
-    runs-on: ubuntu-latest-16-cores
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout sources
