@@ -241,7 +241,7 @@ impl<Hash: BlockHash> Shared<Hash> {
             }
         }
 
-        // Keep our buffer of ready/block events uptodate:
+        // Keep our buffer of ready/block events up-to-date:
         match item {
             FollowStreamMsg::Ready(sub_id) => {
                 // Set new subscription ID when it comes in.

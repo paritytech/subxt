@@ -212,7 +212,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
 
                     FollowStreamMsg::Event(FollowEvent::Stop)
                 }
-                // These events aren't intresting; we just forward them on:
+                // These events aren't interesting; we just forward them on:
                 FollowStreamMsg::Event(FollowEvent::OperationBodyDone(details)) => {
                     FollowStreamMsg::Event(FollowEvent::OperationBodyDone(details))
                 }
@@ -370,7 +370,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
         // Any new futures pushed above need polling to start. We could
         // just wait for the next stream event, but let's wake the task to
-        // have it polled sooner, just incase it's slow to receive things.
+        // have it polled sooner, just in case it's slow to receive things.
         waker.wake_by_ref();
     }
 }
