@@ -248,13 +248,36 @@ async fn build_client_from_rpc<T: Config>(
 /// Fetch the chain spec from the URL.
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
-    use jsonrpsee::core::client::ClientT;
+    use jsonrpsee::core::client::{ClientT, SubscriptionClientT};
+    use jsonrpsee::rpc_params;
+    use serde_json::value::RawValue;
+
     let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
-    client
+    let result = client
         .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
-        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
+        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))?;
+
+    // Subscribe to the finalized heads of the chain.
+    let mut subscription = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
+        &client,
+        "chain_subscribeFinalizedHeads",
+        rpc_params![],
+        "chain_unsubscribeFinalizedHeads",
+    )
+    .await
+    .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))?;
+
+    // We must ensure that the finalized block of the chain is not the block included
+    // in the chainSpec.
+    // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
+    // The first finalized block that is received might by the finalized block could be the one
+    // included in the chainSpec. Decoding the chainSpec for this purpose is too complex.
+    let _ = subscription.next().await;
+    let _ = subscription.next().await;
+
+    Ok(result)
 }
 
 cfg_jsonrpsee_native! {
