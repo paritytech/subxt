@@ -51,7 +51,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "tokio-stream", "tokio/time"]
+unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 
 [dependencies]
 async-trait = { workspace = true }
@@ -94,7 +94,6 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
-tokio = { workspace = true, optional = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
