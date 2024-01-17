@@ -480,24 +480,47 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // with chainHead_follow.
         let mut finalized_hash: Option<T::Hash> = None;
 
+        // Monitor usage to help track down an obscure issue.
+        let start_instant = instant::Instant::now();
+        let mut last_seen_follow_event_str = None;
+        let mut last_seen_follow_event_time = None;
+        let mut last_seen_tx_event_str = None;
+        let mut last_seen_tx_event_time = None;
+        let mut num_polls: usize = 0;
+        let mut num_loops: usize = 0;
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
+            num_polls = num_polls.saturating_add(1);
+
             loop {
+                num_loops = num_loops.saturating_add(1);
+
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
                 if done {
                     return Poll::Ready(None);
                 }
 
+                // Panic if we exceed 4 mins; something very likely went wrong. We'll remove this
+                // once we get to the bottom of a spurious error that causes this to hang.
+                if start_instant.elapsed().as_secs() > 240 {
+                    panic!(
+                        "Finalized block expected by now: \
+                         start_time={start_instant:?}, \
+                         num_polls={num_polls}, \
+                         num_loops={num_loops}, \
+                         last_follow_event_time={last_seen_follow_event_time:?}, \
+                         last_follow_event={last_seen_follow_event_str:?}, \
+                         last_tx_event_time={last_seen_tx_event_time:?}, \
+                         last_tx_event={last_seen_tx_event_str:?}",
+                    );
+                }
+
                 // Make a note of new or finalized blocks that have come in since we started the TX.
-                if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
-                    match seen_block {
-                        FollowEvent::Initialized(ev) => {
-                            // Just in case this stream is really slow to start or something..
-                            seen_blocks.insert(
-                                ev.finalized_block_hash.hash(),
-                                (SeenBlockMarker::Finalized, ev.finalized_block_hash),
-                            );
-                        }
+                if let Poll::Ready(Some(follow_event)) = seen_blocks_sub.poll_next_unpin(cx) {
+                    last_seen_follow_event_str = Some(format!("{follow_event:?}"));
+                    last_seen_follow_event_time = Some(instant::Instant::now());
+                    match follow_event {
                         FollowEvent::NewBlock(ev) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
@@ -557,6 +580,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
+
+                last_seen_tx_event_str = Some(format!("{ev:?}"));
+                last_seen_tx_event_time = Some(instant::Instant::now());
+
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
                 let ev = match ev {
                     rpc_methods::TransactionStatus::Finalized { block } => {
