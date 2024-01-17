@@ -22,6 +22,113 @@ env:
     WASM_BINDGEN_TEST_TIMEOUT: 60
 
 jobs:
+    clippy:
+        name: Cargo clippy
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  components: clippy
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+            - name: Run clippy
+              uses: actions-rs/cargo@v1
+              with:
+                  command: clippy
+                  args: --all-targets -- -D warnings
+    machete:
+        name: "Check unused dependencies"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+            - name: Install cargo-machete
+              run: cargo install cargo-machete
+
+            - name: Check unused dependencies
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: machete
+
+    fmt:
+        name: Cargo fmt
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Install Rust nightly toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+                  components: rustfmt
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+            - name: Cargo fmt
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: fmt
+                  args: --all -- --check
+
+    docs:
+        name: Check documentation and run doc tests
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
+
+            - name: Use substrate-node binary
+              uses: ./.github/workflows/actions/use-substrate
+
+            - name: Install Rust stable toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  profile: minimal
+                  toolchain: stable
+                  override: true
+
+            - name: Rust Cache
+              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+            - name: Check internal documentation links
+              run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
+
+            - name: Run cargo test on documentation
+              uses: actions-rs/cargo@v1.0.3
+              with:
+                  command: test
+                  args: --doc
+
     check:
         name: Cargo check
         runs-on: ubuntu-latest
@@ -103,61 +210,9 @@ jobs:
               run: |
                   cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
-    fmt:
-        name: Cargo fmt
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Install Rust nightly toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  override: true
-                  components: rustfmt
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-            - name: Cargo fmt
-              uses: actions-rs/cargo@v1.0.3
-              with:
-                  command: fmt
-                  args: --all -- --check
-
-    docs:
-        name: Check documentation and run doc tests
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-            - name: Check internal documentation links
-              run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
-
-            - name: Run cargo test on documentation
-              uses: actions-rs/cargo@v1.0.3
-              with:
-                  command: test
-                  args: --doc
-
     tests:
         name: "Test (Native)"
+        needs: [clippy, fmt] # avoid running at all if basic/quick tests fail
         runs-on: ubuntu-latest-16-cores
         timeout-minutes: 30
         steps:
@@ -188,6 +243,7 @@ jobs:
 
     unstable_backend_tests:
         name: "Test (Unstable Backend)"
+        needs: [clippy, fmt] # avoid running at all if basic/quick tests fail
         runs-on: ubuntu-latest-16-cores
         timeout-minutes: 30
         steps:
@@ -218,6 +274,7 @@ jobs:
 
     light_client_tests:
         name: "Test (Light Client)"
+        needs: [clippy, fmt] # avoid running at all if basic/quick tests fail
         runs-on: ubuntu-latest-16-cores
         timeout-minutes: 30
         steps:
@@ -245,6 +302,7 @@ jobs:
 
     wasm_tests:
         name: Test (WASM)
+        needs: [clippy, fmt] # avoid running at all if basic/quick tests fail
         runs-on: ubuntu-latest
         timeout-minutes: 30
         env:
@@ -294,57 +352,3 @@ jobs:
                   wasm-pack test --headless --firefox
                   wasm-pack test --headless --chrome
               working-directory: signer/wasm-tests
-
-    clippy:
-        name: Cargo clippy
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  components: clippy
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-            - name: Run clippy
-              uses: actions-rs/cargo@v1
-              with:
-                  command: clippy
-                  args: --all-targets -- -D warnings
-    machete:
-        name: "Check unused dependencies"
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout sources
-              uses: actions/checkout@v4
-
-            - name: Use substrate-node binary
-              uses: ./.github/workflows/actions/use-substrate
-
-            - name: Install Rust stable toolchain
-              uses: actions-rs/toolchain@v1
-              with:
-                  profile: minimal
-                  toolchain: stable
-                  override: true
-
-            - name: Rust Cache
-              uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-            - name: Install cargo-machete
-              run: cargo install cargo-machete
-
-            - name: Check unused dependencies
-              uses: actions-rs/cargo@v1.0.3
-              with:
-                  command: machete
