@@ -424,7 +424,7 @@ mod test {
                     Ok(ev_initialized(0)),
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_best_block(1)),
-                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([1], [])),
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
@@ -465,7 +465,7 @@ mod test {
                     Ok(ev_initialized(0)),
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_best_block(1)),
-                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([1], [])),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
                     Err(Error::Other("ended".to_owned())),
@@ -517,7 +517,7 @@ mod test {
                     Ok(ev_best_block(1)),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
-                    Ok(ev_finalized([1])),
+                    Ok(ev_finalized([1], [])),
                     Err(Error::Other("ended".to_owned())),
                 ]
             },
