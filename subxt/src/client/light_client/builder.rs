@@ -254,14 +254,14 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     let result = client
         .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
-        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))));
+        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))?;
 
     // Sleep 8 seconds to ensure that a new block is produced for the substrate test node.
     // Although the block production should be 6 seconds, the CI environment is sometimes slow.
     // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
     tokio::time::sleep(std::time::Duration::from_secs(8)).await;
 
-    result
+    Ok(result)
 }
 
 cfg_jsonrpsee_native! {
