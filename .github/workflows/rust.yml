@@ -101,6 +101,38 @@ jobs:
           crate: cargo-hack
           version: 0.5
 
+      # A basic check over all targets together. This may lead to features being combined etc,
+      # and doesn't test combinations of different features.
+      - name: Cargo check all targets.
+        run: cargo check --all-targets
+
+      # Next, check subxt features.
+      # - `native` feature must always be enabled
+      # - `web` feature is always ignored.
+      # - This means, don't check --no-default-features and don't try enabling --all-features; both will fail
+      - name: Cargo hack; check each subxt feature
+        run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+
+      # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
+      # check it without. We can't enable subxt or web features here, so no cargo hack.
+      - name: Cargo check subxt-signer
+        run: |
+          cargo check -p subxt-signer
+          cargo check -p subxt-signer --no-default-features --features sr25519,native
+          cargo check -p subxt-signer --no-default-features --features ecdsa,native
+
+      # We can't enable web features here, so no cargo hack.
+      - name: Cargo check subxt-lightclient
+        run: cargo check -p subxt-lightclient
+
+      # Next, check each other package in isolation.
+      - name: Cargo hack; check each feature/crate on its own
+        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
+
+      # Check the parachain-example code, which isn't a part of the workspace so is otherwise ignored.
+      - name: Cargo check parachain-example
+        run: cargo check --manifest-path examples/parachain-example/Cargo.toml
+
   wasm_check:
     name: Cargo check (WASM)
     runs-on: ubuntu-latest
@@ -153,38 +185,6 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: machete
-
-      # A basic check over all targets together. This may lead to features being combined etc,
-      # and doesn't test combinations of different features.
-      - name: Cargo check all targets.
-        run: cargo check --all-targets
-
-      # Next, check subxt features.
-      # - `native` feature must always be enabled
-      # - `web` feature is always ignored.
-      # - This means, don't check --no-default-features and don't try enabling --all-features; both will fail
-      - name: Cargo hack; check each subxt feature
-        run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
-
-      # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
-      # check it without. We can't enable subxt or web features here, so no cargo hack.
-      - name: Cargo check subxt-signer
-        run: |
-          cargo check -p subxt-signer
-          cargo check -p subxt-signer --no-default-features --features sr25519,native
-          cargo check -p subxt-signer --no-default-features --features ecdsa,native
-
-      # We can't enable web features here, so no cargo hack.
-      - name: Cargo check subxt-lightclient
-        run: cargo check -p subxt-lightclient
-
-      # Next, check each other package in isolation.
-      - name: Cargo hack; check each feature/crate on its own
-        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
-
-      # Check the parachain-example code, which isn't a part of the workspace so is otherwise ignored.
-      - name: Cargo check parachain-example
-        run: cargo check --manifest-path examples/parachain-example/Cargo.toml
 
   docs:
     name: Check documentation and run doc tests
