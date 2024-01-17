@@ -489,10 +489,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut num_polls: usize = 0;
         let mut num_loops: usize = 0;
 
-        macro_rules! panic_with_stats {
+        macro_rules! bail_with_stats {
             ($msg:literal) => {{
                 let msg = stringify!($lit);
-                panic!(
+                let err = format!(
                     "submit_transaction error: {msg}. Please raise an issue. Details: \
                      start_time={start_instant:?}, \
                      num_polls={num_polls}, \
@@ -502,6 +502,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                      last_tx_event_time={last_seen_tx_event_time:?}, \
                      last_tx_event={last_seen_tx_event_str:?}",
                 );
+                return Poll::Ready(Some(Err(Error::Other(err))));
             }};
         }
 
@@ -517,17 +518,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     return Poll::Ready(None);
                 }
 
-                // Panic if we exceed 4 mins; something very likely went wrong. We'll remove this
+                // Bail if we exceed 4 mins; something very likely went wrong. We'll remove this
                 // once we get to the bottom of a spurious error that causes this to hang.
                 if start_instant.elapsed().as_secs() > 240 {
-                    panic_with_stats!("finalized block expected by now");
+                    bail_with_stats!("finalized block expected by now");
                 }
 
                 if let Poll::Ready(maybe_follow_event) = seen_blocks_sub.poll_next_unpin(cx) {
-                    // If we get back `None`, and we didn't previously see a `Stop`, which would be
-                    // caught first below, then something has gone wrong and we should exit with an error.
+                    // Bail if we get back `None`, and we didn't previously see a `Stop`, which would be
+                    // caught first below. Something unexpected has happened here.
                     let Some(follow_event) = maybe_follow_event else {
-                        panic_with_stats!("chainHead_follow stream ended unexpectedly");
+                        bail_with_stats!("chainHead_follow stream ended unexpectedly");
                     };
 
                     last_seen_follow_event_str = Some(format!("{follow_event:?}"));
