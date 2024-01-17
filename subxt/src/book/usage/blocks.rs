@@ -46,7 +46,7 @@
 //! variants has a field that is another enum whose variants cover all calls of the respective pallet.
 //! If the extrinsic bytes are valid and your metadata matches the chain's metadata, decoding the bytes of an extrinsic into
 //! this root extrinsic type should always succeed.
-//! 
+//!
 //! This example shows how to subscribe to blocks and decode the extrinsics in each block into the root extrinsic type.
 //! Once we get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails), we can decode it statically or dynamically.
 //! We can also access details about the extrinsic, including the associated events and signed extensions.
