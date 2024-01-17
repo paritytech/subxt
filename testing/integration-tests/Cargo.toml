@@ -30,6 +30,8 @@ futures = { workspace = true }
 hex = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
+jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 syn = { workspace = true }
