@@ -207,8 +207,14 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
-      - name: Install cargo-nextest
-        run: cargo install cargo-nextest
+    tests:
+        name: "Test (Native)"
+        needs: [fmt, machete] # avoid running at all if basic/quick tests fail
+        runs-on: ubuntu-latest-16-cores
+        timeout-minutes: 30
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
 
       - name: Run tests
         uses: actions-rs/cargo@v1.0.3
@@ -237,11 +243,14 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --release --package integration-tests --features unstable-light-client
+    unstable_backend_tests:
+        name: "Test (Unstable Backend)"
+        needs: [fmt, machete] # avoid running at all if basic/quick tests fail
+        runs-on: ubuntu-latest-16-cores
+        timeout-minutes: 30
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
 
   wasm_tests:
     name: Test (WASM)
@@ -263,8 +272,14 @@ jobs:
       - name: Install chrome
         uses: browser-actions/setup-chrome@latest
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+    light_client_tests:
+        name: "Test (Light Client)"
+        needs: [fmt, machete] # avoid running at all if basic/quick tests fail
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Checkout sources
+              uses: actions/checkout@v4
 
       - name: Use substrate-node binary
         uses: ./.github/workflows/actions/use-substrate
@@ -295,12 +310,14 @@ jobs:
           wasm-pack test --headless --chrome
         working-directory: signer/wasm-tests
 
-  clippy:
-    name: Cargo clippy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
+    wasm_tests:
+        name: Test (WASM)
+        needs: [fmt, machete] # avoid running at all if basic/quick tests fail
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        env:
+            # Set timeout for wasm tests to be much bigger than the default 20 secs.
+            WASM_BINDGEN_TEST_TIMEOUT: 300
 
       - name: Use substrate-node binary
         uses: ./.github/workflows/actions/use-substrate
