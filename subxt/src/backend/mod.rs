@@ -310,7 +310,7 @@ pub enum TransactionStatus<Hash> {
         /// Number of peers it's been broadcast to.
         num_peers: u32,
     },
-    /// Transaciton is no longer in a best block.
+    /// Transaction is no longer in a best block.
     NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.
     InBestBlock {

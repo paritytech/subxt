@@ -542,7 +542,7 @@ pub enum StorageResultType {
     ClosestDescendantMerkleValue(Bytes),
 }
 
-/// The method respose of `chainHead_body`, `chainHead_call` and `chainHead_storage`.
+/// The method response of `chainHead_body`, `chainHead_call` and `chainHead_storage`.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(tag = "result")]
