@@ -100,7 +100,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         self
     }
 
-    /// Provide a tip to the block auther using the token denominated by the `asset_id` provided. This
+    /// Provide a tip to the block author using the token denominated by the `asset_id` provided. This
     /// is not applicable on chains which don't use the `ChargeAssetTxPayment` signed extension; in this
     /// case, no tip will be given.
     pub fn tip_of(mut self, tip: u128, asset_id: T::AssetId) -> Self {
