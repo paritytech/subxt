@@ -275,8 +275,8 @@ jobs:
     light_client_tests:
         name: "Test (Light Client)"
         needs: [clippy, fmt] # avoid running at all if basic/quick tests fail
-        runs-on: ubuntu-latest-16-cores
-        timeout-minutes: 30
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
         steps:
             - name: Checkout sources
               uses: actions/checkout@v4
