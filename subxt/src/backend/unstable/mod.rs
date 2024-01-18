@@ -491,7 +491,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         macro_rules! bail_with_stats {
             ($msg:literal) => {{
-                let msg = stringify!($lit);
+                let msg = $msg;
                 let err = format!(
                     "submit_transaction error: {msg}. Please raise an issue. Details: \
                      start_time={start_instant:?}, \
