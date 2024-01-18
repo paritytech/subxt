@@ -9,14 +9,17 @@ use scale_value::Value;
 use std::fmt::Write;
 use std::write;
 
-use subxt::metadata::{
-    types::{PalletMetadata, StorageEntryType, StorageMetadata},
-    Metadata,
+use subxt::{
+    ext::scale_encode::EncodeAsType,
+    metadata::{
+        types::{PalletMetadata, StorageEntryType, StorageMetadata},
+        Metadata,
+    },
 };
 
 use crate::utils::{
-    create_client, encode_scale_value_as_bytes, first_paragraph_of_docs,
-    parse_string_into_scale_value, type_example, FileOrUrl, Indent, SyntaxHighlight,
+    create_client, first_paragraph_of_docs, parse_string_into_scale_value, type_example, FileOrUrl,
+    Indent, SyntaxHighlight,
 };
 
 #[derive(Debug, Clone, Args)]
@@ -159,7 +162,7 @@ pub async fn explore_storage(
             {value_str}
             "}?;
 
-            let key_bytes = encode_scale_value_as_bytes(&value, type_id, metadata.types())?;
+            let key_bytes = value.encode_as_type(type_id, metadata.types())?;
             let bytes_composite = Value::from_bytes(key_bytes);
             vec![bytes_composite]
         }

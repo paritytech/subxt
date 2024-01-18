@@ -1,6 +1,6 @@
 use crate::utils::{
-    create_client, encode_scale_value_as_bytes, fields_composite_example, fields_description,
-    first_paragraph_of_docs, parse_string_into_scale_value, FileOrUrl, Indent, SyntaxHighlight,
+    create_client, fields_composite_example, fields_description, first_paragraph_of_docs,
+    parse_string_into_scale_value, FileOrUrl, Indent, SyntaxHighlight,
 };
 
 use color_eyre::{
@@ -11,7 +11,10 @@ use color_eyre::{
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use scale_value::Value;
-use subxt::Metadata;
+use subxt::{
+    ext::{scale_decode::DecodeAsType, scale_encode::EncodeAsType},
+    Metadata,
+};
 use subxt_metadata::RuntimeApiMetadata;
 
 /// Runs for a specified runtime API trait.
@@ -160,15 +163,14 @@ pub async fn run<'a>(
             You submitted the following {INPUT_VALUE}:
             {value_str}
             "}?;
-            let t = metadata.types().resolve(6);
-            dbg!(t);
-            let bytes = encode_scale_value_as_bytes(&value, ty.ty, metadata.types())?;
-            dbg!(&bytes);
-            let bytes_composite = Value::from_bytes(bytes);
-            Ok(bytes_composite)
+            // encode, then decode. This ensures that the scale value is of the correct shape for the param:
+            let bytes = value.encode_as_type(ty.ty, metadata.types())?;
+            let value = Value::decode_as_type(&mut &bytes[..], ty.ty, metadata.types())?
+                .map_context(|_| ());
+            Ok(value)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;
-    dbg!(&args_data);
+
     let method_call = subxt::dynamic::runtime_api_call(api_name, method.name(), args_data);
     let client = create_client(&file_or_url).await?;
     let output_value = client

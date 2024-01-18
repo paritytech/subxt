@@ -11,7 +11,6 @@ use scale_typegen_description::{format_type_description, type_description};
 use std::fmt::Display;
 use std::str::FromStr;
 use std::{fs, io::Read, path::PathBuf};
-use subxt::ext::scale_encode::EncodeAsType;
 use subxt::{OnlineClient, PolkadotConfig};
 
 use scale_value::Value;
@@ -231,16 +230,6 @@ pub fn parse_string_into_scale_value(str: &str) -> color_eyre::Result<Value> {
         )
     })?;
     Ok(value)
-}
-
-pub fn encode_scale_value_as_bytes(
-    scale_value: &Value,
-    type_id: u32,
-    types: &PortableRegistry,
-) -> color_eyre::Result<Vec<u8>> {
-    let mut out: Vec<u8> = Vec::new();
-    scale_value.encode_as_type_to(type_id, types, &mut out)?;
-    Ok(out)
 }
 
 pub trait SyntaxHighlight {
