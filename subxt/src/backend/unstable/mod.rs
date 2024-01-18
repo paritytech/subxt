@@ -492,11 +492,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut traces: [&'static str; 64] = ["none"; 64];
         macro_rules! trace {
             ($path:literal) => {{
-                for i in 0..(traces.len()-1) {
-                    traces[i] = traces[i +1];
+                for i in 0..(traces.len() - 1) {
+                    traces[i] = traces[i + 1];
                 }
-                traces[traces.len()-1] = $path;
-            }}
+                traces[traces.len() - 1] = $path;
+            }};
         }
 
         macro_rules! bail_with_stats {
@@ -639,9 +639,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     }
                     Poll::Ready(Some(Err(e))) => {
                         trace!("poll_next_unpin is Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e)))");
-                        return Poll::Ready(Some(Err(e)))
-
-                    },
+                        return Poll::Ready(Some(Err(e)));
+                    }
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
 
