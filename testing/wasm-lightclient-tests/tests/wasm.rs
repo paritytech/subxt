@@ -1,10 +1,10 @@
 #![cfg(target_arch = "wasm32")]
 
-use subxt::{
-    config::PolkadotConfig,
-    client::{LightClient, LightClientBuilder},
-};
 use futures_util::StreamExt;
+use subxt::{
+    client::{LightClient, LightClientBuilder},
+    config::PolkadotConfig,
+};
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -12,16 +12,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 // Run the tests by calling:
 //
 // ```text
-// wasm-pack test --firefox --headless`
-// ```
-//
-// You'll need to have a substrate/polkadot node running:
-//
-// ```bash
-// # Polkadot does not accept by default WebSocket connections to the P2P network.
-// # Ensure `--listen-addr` is provided with valid ws address endpoint.
-// # The `--node-key` provides a deterministic p2p address for the node.
-// ./polkadot --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws
+// wasm-pack test --firefox --headless
 // ```
 //
 // Use the following to enable logs:
@@ -32,17 +23,18 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 async fn light_client_works() {
-    console_error_panic_hook::set_once();
-
-    let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
-        .build_from_url("wss://rpc.polkadot.io:443")
-        .await
-        .expect("Cannot construct light client");
+    let api = connect_to_rpc_node().await;
 
     tracing::info!("Subscribe to latest finalized blocks: ");
 
-    let mut blocks_sub = api.blocks().subscribe_finalized().await.expect("Cannot subscribe to finalized hashes").take(3);
-    // For each block, print a bunch of information about it:
+    let mut blocks_sub = api
+        .blocks()
+        .subscribe_finalized()
+        .await
+        .expect("Cannot subscribe to finalized hashes")
+        .take(3);
+
+    // For each block, print information about it:
     while let Some(block) = blocks_sub.next().await {
         let block = block.expect("Block not valid");
 
@@ -52,4 +44,26 @@ async fn light_client_works() {
         tracing::info!("Block #{block_number}:");
         tracing::info!("  Hash: {block_hash}");
     }
+}
+
+/// We connect to an RPC node because the light client can struggle to sync in
+/// time to a new local node for some reason. Because this can be brittle (eg RPC nodes can
+/// go down or have network issues), we try a few RPC nodes until we find one that works.
+async fn connect_to_rpc_node() -> LightClient<PolkadotConfig> {
+    let rpc_node_urls = [
+        "wss://rpc.polkadot.io",
+        "wss://1rpc.io/dot",
+        "wss://polkadot-public-rpc.blockops.network/ws",
+    ];
+
+    for url in rpc_node_urls {
+        let res = LightClientBuilder::new().build_from_url(url).await;
+
+        match res {
+            Ok(api) => return api,
+            Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
+        }
+    }
+
+    panic!("Could not connect to any RPC node")
 }
