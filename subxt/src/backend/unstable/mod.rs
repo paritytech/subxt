@@ -489,6 +489,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut num_polls: usize = 0;
         let mut num_loops: usize = 0;
 
+        let mut traces: [&'static str; 64] = ["none"; 64];
+        macro_rules! trace {
+            ($path:literal) => {{
+                for i in 0..(traces.len()-1) {
+                    traces[i] = traces[i +1];
+                }
+                traces[traces.len()-1] = $path;
+            }}
+        }
+
         macro_rules! bail_with_stats {
             ($msg:literal) => {{
                 let msg = $msg;
@@ -500,7 +510,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                      last_follow_event_time={last_seen_follow_event_time:?}, \
                      last_follow_event={last_seen_follow_event_str:?}, \
                      last_tx_event_time={last_seen_tx_event_time:?}, \
-                     last_tx_event={last_seen_tx_event_str:?}",
+                     last_tx_event={last_seen_tx_event_str:?}, \
+                     traces={traces:?}
+                     ",
                 );
                 return Poll::Ready(Some(Err(Error::Other(err))));
             }};
@@ -509,12 +521,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             num_polls = num_polls.saturating_add(1);
+            trace!("poll start");
 
             loop {
                 num_loops = num_loops.saturating_add(1);
-
+                trace!("loop start");
                 // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
                 if done {
+                    trace!("done");
                     return Poll::Ready(None);
                 }
 
@@ -536,6 +550,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
                     match follow_event {
                         FollowEvent::NewBlock(ev) => {
+                            trace!("new block");
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
@@ -546,6 +561,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                             }
                         }
                         FollowEvent::Finalized(ev) => {
+                            trace!("finalized block");
                             for block_ref in ev.finalized_block_hashes {
                                 seen_blocks.insert(
                                     block_ref.hash(),
@@ -558,9 +574,36 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                             // in which we may lose the finaliuzed block that the TX is in. For now, just error if
                             // this happens, to prevent the case in which we never see a finalized block and wait
                             // forever.
+                            trace!("chainHead_follow emitted 'stop' event during transaction submission");
                             return Poll::Ready(Some(Err(Error::Other("chainHead_follow emitted 'stop' event during transaction submission".into()))));
                         }
-                        _ => {}
+                        FollowEvent::Initialized(_) => {
+                            trace!("FollowEvent::Initialized");
+                        }
+                        FollowEvent::BestBlockChanged(_) => {
+                            trace!("FollowEvent::BestBlockChanged");
+                        }
+                        FollowEvent::OperationBodyDone(_) => {
+                            trace!("FollowEvent::OperationBodyDone");
+                        }
+                        FollowEvent::OperationCallDone(_) => {
+                            trace!("FollowEvent::OperationCallDone");
+                        }
+                        FollowEvent::OperationStorageItems(_) => {
+                            trace!("FollowEvent::OperationStorageItems");
+                        }
+                        FollowEvent::OperationStorageDone(_) => {
+                            trace!("FollowEvent::OperationStorageDone");
+                        }
+                        FollowEvent::OperationWaitingForContinue(_) => {
+                            trace!("FollowEvent::OperationWaitingForContinue");
+                        }
+                        FollowEvent::OperationInaccessible(_) => {
+                            trace!("FollowEvent::OperationInaccessible");
+                        }
+                        FollowEvent::OperationError(_) => {
+                            trace!("FollowEvent::OperationError");
+                        }
                     }
                     continue;
                 }
@@ -575,11 +618,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         let ev = TransactionStatus::InFinalizedBlock {
                             hash: block_ref.into(),
                         };
+                        trace!("TransactionStatus::InFinalizedBlock => return Poll::Ready");
                         return Poll::Ready(Some(Ok(ev)));
                     } else {
                         // Keep waiting for more finalized blocks until we find it (get rid of any other block refs
                         // now, since none of them were what we were looking for anyway).
                         seen_blocks.clear();
+                        trace!("seen_blocks.clear()");
                         continue;
                     }
                 }
@@ -589,9 +634,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Poll::Pending => return Poll::Pending,
                     Poll::Ready(None) => {
                         done = true;
+                        trace!("poll_next_unpin is Poll::Ready(None) => return Poll::Ready(None)");
                         return Poll::Ready(None);
                     }
-                    Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
+                    Poll::Ready(Some(Err(e))) => {
+                        trace!("poll_next_unpin is Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e)))");
+                        return Poll::Ready(Some(Err(e)))
+
+                    },
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
 
@@ -605,6 +655,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         // that when we return this event, the corresponding block is
                         // pinned and accessible.
                         finalized_hash = Some(block.hash);
+                        trace!("rpc_methods::TransactionStatus::Finalized");
                         continue;
                     }
                     rpc_methods::TransactionStatus::BestChainBlockIncluded {
@@ -637,6 +688,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     }
                     rpc_methods::TransactionStatus::Validated => TransactionStatus::Validated,
                 };
+                trace!("return Poll::Ready end of loop");
                 return Poll::Ready(Some(Ok(ev)));
             }
         });
