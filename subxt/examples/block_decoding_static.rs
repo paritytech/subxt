@@ -27,29 +27,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Block #{block_number}  ({block_hash}):");
 
         let extrinsics = block.extrinsics().await?;
-        for ext in extrinsics.iter() {
-            let ext = ext?;
-            if let Ok(Some(transfer)) = ext.as_extrinsic::<TransferKeepAlive>() {
-                let Some(extensions) = ext.signed_extensions() else {
-                    panic!("TransferKeepAlive should be signed")
-                };
+        for transfer in extrinsics.find::<TransferKeepAlive>() {
+            let transfer = transfer?;
 
-                ext.address_bytes().unwrap();
-                let addr_bytes = ext
-                    .address_bytes()
-                    .expect("TransferKeepAlive should be signed");
-                let sender = MultiAddress::<AccountId32, ()>::decode(&mut &addr_bytes[..])
-                    .expect("Decoding should work");
-                let sender = display_address(&sender);
-                let receiver = display_address(&transfer.dest);
-                let value = transfer.value;
-                let tip = extensions.tip().expect("Should have tip");
-                let nonce = extensions.nonce().expect("Should have nonce");
+            let Some(extensions) = transfer.details.signed_extensions() else {
+                panic!("TransferKeepAlive should be signed")
+            };
 
-                println!(
+            let addr_bytes = transfer
+                .details
+                .address_bytes()
+                .expect("TransferKeepAlive should be signed");
+            let sender = MultiAddress::<AccountId32, ()>::decode(&mut &addr_bytes[..])
+                .expect("Decoding should work");
+            let sender = display_address(&sender);
+            let receiver = display_address(&transfer.value.dest);
+            let value = transfer.value.value;
+            let tip = extensions.tip().expect("Should have tip");
+            let nonce = extensions.nonce().expect("Should have nonce");
+
+            println!(
                     "    Transfer of {value} DOT:\n        {sender} (Tip: {tip}, Nonce: {nonce}) ---> {receiver}",
                 );
-            }
         }
     }
 
