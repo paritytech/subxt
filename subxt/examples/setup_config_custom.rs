@@ -4,16 +4,8 @@ use subxt::client::OfflineClientT;
 use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use subxt_signer::sr25519::dev;
 
-#[subxt::subxt(
-    runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
-    derive_for_type(
-        path = "xcm::v2::multilocation::MultiLocation",
-        derive = "Clone",
-        recursive
-    )
-)]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 pub mod runtime {}
-use runtime::runtime_types::xcm::v2::multilocation::MultiLocation;
 
 // We don't need to construct this at runtime,
 // so an empty enum is appropriate:
@@ -27,7 +19,7 @@ impl Config for CustomConfig {
     type Hasher = subxt::config::substrate::BlakeTwo256;
     type Header = subxt::config::substrate::SubstrateHeader<u32, Self::Hasher>;
     type ExtrinsicParams = CustomExtrinsicParams<Self>;
-    type AssetId = MultiLocation;
+    type AssetId = u32;
 }
 
 // This represents some arbitrary (and nonsensical) custom parameters that

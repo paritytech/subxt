@@ -37,8 +37,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("    Extrinsic #{idx}:");
             println!("      Bytes: {bytes_hex}");
             println!("      Decoded: {decoded_ext:?}");
-            println!("      Events:");
 
+            println!("      Events:");
             for evt in events.iter() {
                 let evt = evt?;
                 let pallet_name = evt.pallet_name();

@@ -1,6 +1,6 @@
 #![cfg(target_arch = "wasm32")]
 
-use subxt::{config::PolkadotConfig};
+use subxt::config::SubstrateConfig;
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -11,10 +11,10 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 // wasm-pack test --firefox --headless`
 // ```
 //
-// You'll need to have a substrate/polkadot node running:
+// You'll need to have a substrate node running:
 //
 // ```bash
-// ./polkadot --dev
+// ./substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws
 // ```
 //
 // Use the following to enable logs:
@@ -25,7 +25,9 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 
 #[wasm_bindgen_test]
 async fn wasm_ws_transport_works() {
-    let client = subxt::client::OnlineClient::<PolkadotConfig>::from_url("ws://127.0.0.1:9944")
+    console_error_panic_hook::set_once();
+    tracing_wasm::set_as_global_default();
+    let client = subxt::client::OnlineClient::<SubstrateConfig>::from_url("ws://127.0.0.1:9944")
         .await
         .unwrap();
 

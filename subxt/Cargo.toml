@@ -33,7 +33,14 @@ native = [
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
-web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js", "subxt-lightclient?/web", "subxt-macro/web"]
+web = [
+    "jsonrpsee?/async-wasm-client",
+    "jsonrpsee?/client-web-transport",
+    "getrandom/js",
+    "subxt-lightclient?/web",
+    "subxt-macro/web",
+    "instant/wasm-bindgen"
+]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
@@ -70,6 +77,7 @@ tracing = { workspace = true }
 frame-metadata = { workspace = true }
 derivative = { workspace = true }
 either = { workspace = true }
+instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }

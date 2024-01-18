@@ -45,19 +45,20 @@ impl<Hash: BlockHash> Stream for FollowStreamDriver<Hash> {
     type Item = Result<(), Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let item = match self.inner.poll_next_unpin(cx) {
-            Poll::Pending => return Poll::Pending,
+        match self.inner.poll_next_unpin(cx) {
+            Poll::Pending => Poll::Pending,
             Poll::Ready(None) => {
                 // Mark ourselves as done so that everything can end.
                 self.shared.done();
-                return Poll::Ready(None);
+                Poll::Ready(None)
             }
-            Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
-            Poll::Ready(Some(Ok(item))) => item,
-        };
-
-        self.shared.push_item(item);
-        Poll::Ready(Some(Ok(())))
+            Poll::Ready(Some(Err(e))) => Poll::Ready(Some(Err(e))),
+            Poll::Ready(Some(Ok(item))) => {
+                // Push item to any subscribers.
+                self.shared.push_item(item);
+                Poll::Ready(Some(Ok(())))
+            }
+        }
     }
 }
 
