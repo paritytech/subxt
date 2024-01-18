@@ -512,7 +512,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 let follow_ev_is_pending = follow_ev_poll.is_pending();
 
                 // If there was a follow event, then handle it and loop around to see if there are more.
-                // We want to buffer follow events until we hit Pending, so that we are as uptodate as possible
+                // We want to buffer follow events until we hit Pending, so that we are as up-to-date as possible
                 // for when we see a BestBlockChanged event, so that we have the best change of already having
                 // seen the block that it mentions and returning a proper pinned block.
                 if let Poll::Ready(follow_ev) = follow_ev_poll {
