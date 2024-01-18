@@ -119,8 +119,7 @@ pub async fn run<'a>(
         {fields_description}
     
         For example you could provide this {INPUT_VALUE}:
-        {fields_example}
-        "}
+        {fields_example}"}
     };
 
     let execute_usage = || {
@@ -159,7 +158,6 @@ pub async fn run<'a>(
             let value_str = value.indent(4);
             // convert to bytes:
             writedoc! {output, "
-    
             You submitted the following {INPUT_VALUE}:
             {value_str}
             "}?;
@@ -182,6 +180,7 @@ pub async fn run<'a>(
 
     let output_value = output_value.to_value()?.to_string().highlight();
     writedoc! {output, "
+    
     Returned value:
         {output_value}
     "}?;
