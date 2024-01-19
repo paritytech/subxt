@@ -25,14 +25,16 @@ pub struct Opts {
     attributes: Vec<String>,
     /// Additional derives for a given type.
     ///
-    /// Example `--derive-for-type my_module::my_type=serde::Serialize`.
+    /// Example 1: `--derive-for-type my_module::my_type=serde::Serialize`.
+    /// Example 2: `--derive-for-type my_module::my_type=serde::Serialize,recursive`.
     #[clap(long = "derive-for-type", value_parser = derive_for_type_parser)]
-    derives_for_type: Vec<(String, String)>,
+    derives_for_type: Vec<DeriveForType>,
     /// Additional attributes for a given type.
     ///
-    /// Example `--attributes-for-type my_module::my_type=#[allow(clippy::all)]`.
+    /// Example 1: `--attributes-for-type my_module::my_type=#[allow(clippy::all)]`.
+    /// Example 2: `--attributes-for-type my_module::my_type=#[allow(clippy::all)],recursive`.
     #[clap(long = "attributes-for-type", value_parser = attributes_for_type_parser)]
-    attributes_for_type: Vec<(String, String)>,
+    attributes_for_type: Vec<AttributeForType>,
     /// Substitute a type for another.
     ///
     /// Example `--substitute-type sp_runtime::MultiAddress<A,B>=subxt::utils::Static<::sp_runtime::MultiAddress<A,B>>`
@@ -67,20 +69,52 @@ pub struct Opts {
     allow_insecure: bool,
 }
 
-fn derive_for_type_parser(src: &str) -> Result<(String, String), String> {
-    let (ty, derive) = src
-        .split_once('=')
-        .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive`, like `my_type=serde::Serialize`"))?;
-
-    Ok((ty.to_string(), derive.to_string()))
+#[derive(Debug, Clone)]
+struct DeriveForType {
+    type_path: String,
+    trait_path: String,
+    recursive: bool,
 }
 
-fn attributes_for_type_parser(src: &str) -> Result<(String, String), String> {
-    let (ty, attribute) = src
-        .split_once('=')
-        .ok_or_else(|| String::from("Invalid pattern for `attribute-type`. It should be `type=attribute`, like `my_type=serde::#[allow(clippy::all)]`"))?;
+#[derive(Debug, Clone)]
+struct AttributeForType {
+    type_path: String,
+    attribute: String,
+    recursive: bool,
+}
 
-    Ok((ty.to_string(), attribute.to_string()))
+fn derive_for_type_parser(src: &str) -> Result<DeriveForType, String> {
+    let (type_path,trait_path , recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive` or `type=derive,recursive`, like `my_type=serde::Serialize` or `my_type=serde::Serialize,recursive`"))?;
+    Ok(DeriveForType {
+        type_path,
+        trait_path,
+        recursive,
+    })
+}
+
+fn attributes_for_type_parser(src: &str) -> Result<AttributeForType, String> {
+    let (type_path,attribute , recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    .ok_or_else(|| String::from("Invalid pattern for `attributes-for-type`. It should be `type=attribute` like `my_type=serde::#[allow(clippy::all)]` or `type=attribute,recursive` like `my_type=serde::#[allow(clippy::all)], recursive`"))?;
+    Ok(AttributeForType {
+        type_path,
+        attribute,
+        recursive,
+    })
+}
+
+/// Parses a `&str` of the form `str1=str2` into `(str1, str2, false)` or `str1=str2,recursive` into `(str1, str2, true)`.
+fn str_equals_str_comma_maybe_recursive_parser(src: &str) -> Option<(String, String, bool)> {
+    let (str1, rest) = src.split_once('=')?;
+
+    let mut split_rest = rest.split(',');
+    let str2 = split_rest
+        .next()
+        .expect("split iter always returns at least one element; qed");
+
+    let rest_args = split_rest.collect::<Vec<_>>();
+    let recursive = rest_args.contains(&"recursive");
+    Some((str1.to_owned(), str2.to_owned(), recursive))
 }
 
 fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
@@ -127,8 +161,8 @@ fn codegen(
     metadata_bytes: &[u8],
     raw_derives: Vec<String>,
     raw_attributes: Vec<String>,
-    derives_for_type: Vec<(String, String)>,
-    attributes_for_type: Vec<(String, String)>,
+    derives_for_type: Vec<DeriveForType>,
+    attributes_for_type: Vec<AttributeForType>,
     substitute_types: Vec<(String, String)>,
     crate_path: Option<String>,
     no_docs: bool,
@@ -168,13 +202,14 @@ fn codegen(
         .map_err(|e| eyre!("Cannot parse global derives: {e}"))?;
     codegen.set_additional_global_derives(global_derives);
 
-    for (ty_str, derive) in derives_for_type {
-        let ty: syn::TypePath = syn::parse_str(&ty_str)
+    for d in derives_for_type {
+        let ty_str = &d.type_path;
+        let ty: syn::TypePath = syn::parse_str(ty_str)
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
-        let derive = syn::parse_str(&derive)
+        let derive = syn::parse_str(&d.trait_path)
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
         // Note: recursive derives and attributes not supported in the CLI => recursive: false
-        codegen.add_derives_for_type(ty, std::iter::once(derive), false);
+        codegen.add_derives_for_type(ty, std::iter::once(derive), d.recursive);
     }
 
     // Configure attribtues:
@@ -186,13 +221,14 @@ fn codegen(
         .map_err(|e| eyre!("Cannot parse global attributes: {e}"))?;
     codegen.set_additional_global_attributes(universal_attributes);
 
-    for (ty_str, attr) in attributes_for_type {
-        let ty = syn::parse_str(&ty_str)
+    for a in attributes_for_type {
+        let ty_str = &a.type_path;
+        let ty = syn::parse_str(ty_str)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
-        let attribute: OuterAttribute = syn::parse_str(&attr)
+        let attribute: OuterAttribute = syn::parse_str(&a.attribute)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
         // Note: recursive derives and attributes not supported in the CLI => recursive: false
-        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0), false);
+        codegen.add_attributes_for_type(ty, std::iter::once(attribute.0), a.recursive);
     }
 
     // Insert type substitutions:
