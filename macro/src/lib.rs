@@ -94,7 +94,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-// Node: just an additonal function to make early returns easier.
+// Note: just an additional function to make early returns easier.
 fn _subxt(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream, TokenStream> {
     let attr_args = NestedMeta::parse_meta_list(args.into())
         .map_err(|e| TokenStream::from(darling::Error::from(e).write_errors()))?;
