@@ -31,14 +31,19 @@ mod runtime_apis;
 /// ### Calls
 ///
 /// Show the calls in a pallet:
+///
 /// ```text
 /// subxt explore pallet Balances calls
 /// ```
+///
 /// Show the call parameters a call expects:
+///
 /// ```text
 /// subxt explore pallet Balances calls transfer
 /// ```
+///
 /// Create an unsigned extrinsic from a scale value, validate it and output its hex representation
+///
 /// ```text
 /// subxt explore pallet Grandpa calls note_stalled { "delay": 5, "best_finalized_block_number": 5 }
 /// # Encoded call data:
@@ -47,41 +52,56 @@ mod runtime_apis;
 /// # Encoded call data:
 /// # 0x24040607020cffffff00
 /// ```
+///
 /// ### Constants
 ///
 /// Show the constants in a pallet:
+///
 /// ```text
 /// subxt explore pallet Balances constants
 /// ```
+///
 /// ### Storage
 ///
 /// Show the storage entries in a pallet
+///
 /// ```text
 /// subxt explore pallet Alliance storage
 /// ```
+///
 /// Show the types and value of a specific storage entry
+///
 /// ```text
 /// subxt explore pallet Alliance storage Announcements [KEY_SCALE_VALUE]
 /// ```
+///
 /// ### Events
+///
 /// ```text
 /// subxt explore pallet Balances events
 /// ```
+///
 /// Show the type of a specific event
+///
 /// ```text
 /// subxt explore pallet Balances events frozen
 /// ```
+///
 /// ## Runtime APIs
 /// Show the input and output types of a runtime api method.
 /// In this example "core" is the name of the runtime api and "version" is a method on it:
+///
 /// ```text
 /// subxt explore api core version
 /// ```
+///
 /// Execute a runtime API call with the `--execute` (`-e`) flag, to see the return value.
 /// For example here we get the "version", via the "core" runtime API from the connected node:
+///
 /// ```text
 /// subxt explore api core version --execute
 /// ```
+///
 #[derive(Debug, Parser)]
 pub struct Opts {
     #[command(flatten)]
@@ -125,10 +145,8 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     let bytes = file_or_url.fetch().await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
 
-    #[allow(non_snake_case)]
-    let PALLET: String = "<PALLET>".blue().to_string();
-    #[allow(non_snake_case)]
-    let RUNTIME_API: String = "<RUNTIME_API>".blue().to_string();
+    let pallet_placeholder = "<PALLET>".blue();
+    let runtime_api_placeholder = "<RUNTIME_API>".blue();
 
     // if no pallet/runtime_api specified, show user the pallets/runtime_apis to choose from:
     let Some(pallet_or_runtime_api) = opts.subcommand else {
@@ -136,9 +154,9 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
         let runtime_apis = runtime_apis_as_string(&metadata);
         writedoc! {output, "
         Usage:
-            subxt explore pallet {PALLET}
+            subxt explore pallet {pallet_placeholder}
                 explore a specific pallet
-            subxt explore api {RUNTIME_API}
+            subxt explore api {runtime_api_placeholder}
                 explore a specific runtime api
 
         {pallets}
@@ -154,7 +172,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 let pallets = pallets_as_string(&metadata);
                 writedoc! {output, "
                 Usage:
-                    subxt explore pallet {PALLET}
+                    subxt explore pallet {pallet_placeholder}
                         explore a specific pallet
     
                 {pallets}
@@ -179,7 +197,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 let runtime_apis = runtime_apis_as_string(&metadata);
                 writedoc! {output, "
                 Usage:
-                    subxt explore api {RUNTIME_API}
+                    subxt explore api {runtime_api_placeholder}
                         explore a specific runtime api
 
                 {runtime_apis}
@@ -212,12 +230,11 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
 }
 
 fn pallets_as_string(metadata: &Metadata) -> String {
-    #[allow(non_snake_case)]
-    let PALLET: String = "<PALLET>".blue().to_string();
+    let pallet_placeholder = "<PALLET>".blue();
     if metadata.pallets().len() == 0 {
-        format!("There are no {PALLET}'s available.")
+        format!("There are no {pallet_placeholder}'s available.")
     } else {
-        let mut output = format!("Available {PALLET}'s are:");
+        let mut output = format!("Available {pallet_placeholder}'s are:");
         let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
@@ -228,12 +245,11 @@ fn pallets_as_string(metadata: &Metadata) -> String {
 }
 
 pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
-    #[allow(non_snake_case)]
-    let RUNTIME_API: String = "<RUNTIME_API>".blue().to_string();
+    let runtime_api_placeholder = "<RUNTIME_API>".blue();
     if metadata.runtime_api_traits().len() == 0 {
-        format!("There are no {RUNTIME_API}'s available.")
+        format!("There are no {runtime_api_placeholder}'s available.")
     } else {
-        let mut output = format!("Available {RUNTIME_API}'s are:");
+        let mut output = format!("Available {runtime_api_placeholder}'s are:");
         let mut strings: Vec<_> = metadata.runtime_api_traits().map(|p| p.name()).collect();
         strings.sort();
         for api in strings {

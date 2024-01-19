@@ -25,6 +25,8 @@ use crate::utils::{
 #[derive(Debug, Clone, Args)]
 pub struct StorageSubcommand {
     storage_entry: Option<String>,
+    #[clap(long, short, action)]
+    execute: bool,
     #[clap(required = false)]
     trailing_args: Vec<String>,
 }
@@ -48,11 +50,12 @@ pub async fn explore_storage(
         return Ok(());
     };
 
+    let storage_entry_placeholder = "<STORAGE_ENTRY>".blue();
     let usage = || {
         let storage_entries = storage_entries_string(storage_metadata, pallet_name);
         formatdoc! {"
         Usage:
-            subxt explore pallet {pallet_name} storage <STORAGE_ENTRY>
+            subxt explore pallet {pallet_name} storage {storage_entry_placeholder}
                 explore a specific storage entry of this pallet
         
         {storage_entries}
@@ -84,24 +87,24 @@ pub async fn explore_storage(
         } => (*value_ty, Some(*key_ty)),
     };
 
-    #[allow(non_snake_case)]
-    let KEY_VALUE: String = "<KEY_VALUE>".blue().to_string();
-
-    // only inform user about usage if a key can be provided:
-    if key_ty_id.is_some() && trailing_args.is_empty() {
-        writedoc! {output, "
-        Usage:
-            subxt explore pallet {pallet_name} storage {entry_name} {KEY_VALUE}
-                retrieve a value from storage
-        "}?;
-    }
+    let key_value_placeholder = "<KEY_VALUE>".blue();
 
     let docs_string = first_paragraph_of_docs(storage.docs()).indent(4);
     if !docs_string.is_empty() {
         writedoc! {output, "
-
         Description:
         {docs_string}
+
+        "}?;
+    }
+
+    // only inform user about usage if `execute` flag not provided
+    if !command.execute {
+        writedoc! {output, "
+        Usage:
+            subxt explore pallet {pallet_name} storage {entry_name} --execute {key_value_placeholder}
+                retrieve a value from storage
+
         "}?;
     }
 
@@ -111,7 +114,6 @@ pub async fn explore_storage(
         .highlight();
 
     writedoc! {output, "
-
     The storage entry has the following shape:
     {return_ty_description}
     "}?;
@@ -129,23 +131,28 @@ pub async fn explore_storage(
 
         writedoc! {output, "
 
-        The {KEY_VALUE} has the following shape:
+        The {key_value_placeholder} has the following shape:
         {key_ty_description}
 
-        For example you could provide this {KEY_VALUE}:
+        For example you could provide this {key_value_placeholder}:
         {key_ty_example}
         "}?;
     } else {
         writedoc! {output,"
         
-        The storage entry can be accessed without providing a key.
+        Can be accessed without providing a {key_value_placeholder}.
         "}?;
+    }
+
+    // if `--execute`/`-e` flag is set, try to execute the storage entry request
+    if !command.execute {
+        return Ok(());
     }
 
     let storage_entry_keys: Vec<Value> = match (trailing_args.is_empty(), key_ty_id) {
         (false, None) => {
-            let warning = "Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key.".yellow();
-            writeln!(output, "{warning}")?;
+            let warning = format!("Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key.");
+            writeln!(output, "{}", warning.yellow())?;
             return Ok(());
         }
         (true, Some(_)) => {
@@ -158,7 +165,7 @@ pub async fn explore_storage(
             let value_str = value.indent(4);
             writedoc! {output, "
     
-            You submitted the following {KEY_VALUE}:
+            You submitted the following {key_value_placeholder}:
             {value_str}
             "}?;
 
@@ -182,22 +189,23 @@ pub async fn explore_storage(
     let decoded_value_thunk =
         decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
 
-    let value = decoded_value_thunk.to_value()?.indent(4);
+    let value = decoded_value_thunk.to_value()?.to_string().highlight();
     writedoc! {output, "
     
     The value of the storage entry is:
-    {value}
+        {value}
     "}?;
 
     Ok(())
 }
 
 fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str) -> String {
+    let storage_entry_placeholder = "<STORAGE_ENTRY>".blue();
     if storage_metadata.entries().is_empty() {
-        format!("No <STORAGE_ENTRY>'s available in the \"{pallet_name}\" pallet.")
+        format!("No {storage_entry_placeholder}'s available in the \"{pallet_name}\" pallet.")
     } else {
         let mut output = format!(
-            "Available <STORAGE_ENTRY>'s in the \"{}\" pallet:",
+            "Available {storage_entry_placeholder}'s in the \"{}\" pallet:",
             pallet_name
         );
         let mut strings: Vec<_> = storage_metadata

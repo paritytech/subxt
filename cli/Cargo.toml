@@ -42,10 +42,10 @@ jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { workspace = true }
 heck = { workspace = true }
-indoc = "2"
+indoc = { workspace = true }
 thiserror = { workspace = true }
 smoldot = { workspace = true, optional = true }
 
 [dev-dependencies]
-strip-ansi-escapes = "0.2.0"
+strip-ansi-escapes = { workspace = true }
 pretty_assertions = { workspace = true }
