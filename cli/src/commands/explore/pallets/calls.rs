@@ -84,18 +84,17 @@ pub fn explore_calls(
                 .indent(4)
                 .highlight();
 
-        #[allow(non_snake_case)]
-        let SCALE_VALUE = "<SCALE_VALUE>".blue();
+        let scale_value_placeholder = "<SCALE_VALUE>".blue();
 
         writedoc! {output, "
         Usage:
-            subxt explore pallet {pallet_name} calls {call_name} {SCALE_VALUE}
+            subxt explore pallet {pallet_name} calls {call_name} {scale_value_placeholder}
                 construct the call by providing a valid argument
 
-        The call expects a {SCALE_VALUE} with this shape:
+        The call expects a {scale_value_placeholder} with this shape:
         {type_description}
 
-        For example you could provide this {SCALE_VALUE}:
+        For example you could provide this {scale_value_placeholder}:
         {fields_example}
         "}?;
         return Ok(());

@@ -93,13 +93,12 @@ pub async fn run<'a>(
         "}?;
     }
 
-    #[allow(non_snake_case)]
-    let INPUT_VALUE: String = "<INPUT_VALUE>".blue().to_string();
+    let input_value_placeholder = "<INPUT_VALUE>".blue();
 
     // Output type description
     let input_values = || {
         if method.inputs().len() == 0 {
-            return format!("The method does not require an {INPUT_VALUE}");
+            return format!("The method does not require an {input_value_placeholder}");
         }
 
         let fields: Vec<(Option<&str>, u32)> = method
@@ -115,10 +114,10 @@ pub async fn run<'a>(
                 .highlight();
 
         formatdoc! {"
-        The method expects an {INPUT_VALUE} with this shape:
+        The method expects an {input_value_placeholder} with this shape:
         {fields_description}
     
-        For example you could provide this {INPUT_VALUE}:
+        For example you could provide this {input_value_placeholder}:
         {fields_example}"}
     };
 
@@ -130,14 +129,13 @@ pub async fn run<'a>(
         let input = input_values();
         formatdoc! {"
         Usage:
-            subxt explore api {api_name} {method_name} --execute {INPUT_VALUE}
+            subxt explore api {api_name} {method_name} --execute {input_value_placeholder}
                 make a runtime api request
 
         The Output of this method has the following shape:
         {output}
 
-        {input}
-        "}
+        {input}"}
     };
 
     writeln!(output, "{}", execute_usage())?;
@@ -146,7 +144,7 @@ pub async fn run<'a>(
     }
 
     if trailing_args.len() != method.inputs().len() {
-        bail!("The number of trailing arguments you provided after the `execute` flag does not match the expected number of inputs!\n{}", usage());
+        bail!("The number of trailing arguments you provided after the `execute` flag does not match the expected number of inputs!\n{}", execute_usage());
     }
 
     // encode each provided input as bytes of the correct type:
@@ -158,7 +156,8 @@ pub async fn run<'a>(
             let value_str = value.indent(4);
             // convert to bytes:
             writedoc! {output, "
-            You submitted the following {INPUT_VALUE}:
+            
+            You submitted the following {input_value_placeholder}:
             {value_str}
             "}?;
             // encode, then decode. This ensures that the scale value is of the correct shape for the param:
