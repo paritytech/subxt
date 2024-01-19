@@ -84,7 +84,7 @@ struct AttributeForType {
 }
 
 fn derive_for_type_parser(src: &str) -> Result<DeriveForType, String> {
-    let (type_path,trait_path , recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    let (type_path, trait_path, recursive) = str_equals_str_comma_maybe_recursive_parser(src)
     .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive` or `type=derive,recursive`, like `my_type=serde::Serialize` or `my_type=serde::Serialize,recursive`"))?;
     Ok(DeriveForType {
         type_path,
@@ -94,7 +94,7 @@ fn derive_for_type_parser(src: &str) -> Result<DeriveForType, String> {
 }
 
 fn attributes_for_type_parser(src: &str) -> Result<AttributeForType, String> {
-    let (type_path,attribute , recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    let (type_path, attribute, recursive) = str_equals_str_comma_maybe_recursive_parser(src)
     .ok_or_else(|| String::from("Invalid pattern for `attributes-for-type`. It should be `type=attribute` like `my_type=serde::#[allow(clippy::all)]` or `type=attribute,recursive` like `my_type=serde::#[allow(clippy::all)], recursive`"))?;
     Ok(AttributeForType {
         type_path,
