@@ -130,22 +130,30 @@ where
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `E` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<E: StaticExtrinsic>(&self) -> impl Iterator<Item = Result<E, Error>> + '_ {
-        self.iter().filter_map(|e| {
-            e.and_then(|e| e.as_extrinsic::<E>().map_err(Into::into))
-                .transpose()
+    pub fn find<E: StaticExtrinsic>(
+        &self,
+    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, C, E>, Error>> + '_ {
+        self.iter().filter_map(|res| match res {
+            Err(err) => Some(Err(err)),
+            Ok(details) => match details.as_extrinsic::<E>() {
+                // Failed to decode extrinsic:
+                Err(err) => Some(Err(err)),
+                // Extrinsic for a different pallet / different call (skip):
+                Ok(None) => None,
+                Ok(Some(value)) => Some(Ok(FoundExtrinsic { details, value })),
+            },
         })
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the first extrinsic found which decodes to the provided `E` type.
-    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, Error> {
         self.find::<E>().next().transpose()
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
-    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, Error> {
         self.find::<E>().last().transpose()
     }
 
@@ -477,6 +485,12 @@ where
         let ext_hash = T::Hasher::hash_of(&self.bytes);
         Ok(ExtrinsicEvents::new(ext_hash, self.index, events))
     }
+}
+
+/// A Static Extrinsic found in a block coupled with it's details.
+pub struct FoundExtrinsic<T: Config, C, E> {
+    pub details: ExtrinsicDetails<T, C>,
+    pub value: E,
 }
 
 /// Details for the given extrinsic plucked from the metadata.
