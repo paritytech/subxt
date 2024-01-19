@@ -7,6 +7,7 @@
 //! be used directly if preferable.
 
 #![deny(unused_crate_dependencies, missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod api;
 pub mod error;
@@ -16,6 +17,7 @@ mod ir;
 // macro and CLI tool, so they only live here because this is a common
 // crate that both depend on.
 #[cfg(feature = "fetch-metadata")]
+#[cfg_attr(docsrs, doc(cfg(feature = "fetch-metadata")))]
 pub mod fetch_metadata;
 
 #[cfg(feature = "web")]
@@ -159,10 +161,10 @@ impl CodegenBuilder {
 
     /// Set additional derives for a specific type at the path given.
     ///
-    /// # Warning
-    ///
-    /// For composite types, you may also need to set the same additional derives on all of
-    /// the contained types as well to avoid compile errors in the generated code.
+    /// If you want to set the additional derives on all contained types recursively as well,
+    /// you can set the `recursive` argument to `true`. If you don't do that,
+    /// there might be compile errors in the generated code, if the derived trait
+    /// relies on the fact that contained types also implement that trait.
     pub fn add_derives_for_type(
         &mut self,
         ty: syn::TypePath,
@@ -181,10 +183,8 @@ impl CodegenBuilder {
 
     /// Set additional attributes for a specific type at the path given.
     ///
-    /// # Warning
-    ///
-    /// For composite types, you may also need to consider contained types and whether they need
-    /// similar attributes setting.
+    /// Setting the `recursive` argument to `true` will additionally add the specified
+    /// attributes to all contained types recursively.
     pub fn add_attributes_for_type(
         &mut self,
         ty: syn::TypePath,
@@ -403,11 +403,11 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let defaults = defaults.into_iter().map(|(from, to)| {
         (
             from,
-            absolute_path(to).expect("default substitutes should be all absolute paths"),
+            absolute_path(to).expect("default substitutes above are absolute paths; qed"),
         )
     });
     type_substitutes
         .extend(defaults)
-        .expect("default substitutes should never error");
+        .expect("default substitutes can always be parsed; qed");
     type_substitutes
 }

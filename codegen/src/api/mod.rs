@@ -164,7 +164,7 @@ impl RuntimeGenerator {
 
                 let constants_mod = constants::generate_constants(&type_gen, pallet, &crate_path)?;
 
-                let errors = errors::generate_error_type_alias(&type_gen, pallet, should_gen_docs)?;
+                let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
                 Ok(quote! {
                     pub mod #mod_name {
@@ -347,7 +347,7 @@ where
                 type_gen.create_composite_ir_kind(&var.fields, &mut type_params)?;
             let struct_name = variant_to_struct_name(&var.name);
             let mut composite = CompositeIR::new(
-                syn::parse_str(&struct_name).expect("enum variant name is valid ident"),
+                syn::parse_str(&struct_name).expect("enum variant is a valid ident; qed"),
                 composite_ir_kind,
                 type_gen.docs_from_scale_info(&var.docs),
             );

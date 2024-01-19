@@ -35,9 +35,9 @@ use super::CodegenError;
 ///
 /// # Arguments
 ///
-/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the events are generated.
-/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
+/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,

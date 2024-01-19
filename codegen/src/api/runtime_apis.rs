@@ -77,7 +77,7 @@ fn generate_runtime_api(
                     // Generate alias for runtime type.
                     let ty = type_gen
                         .resolve_type_path(input.ty)
-                        .expect("type should be present");
+                        .expect("runtime api input type is in metadata; qed");
                     let aliased_param = quote!( pub type #alias_name = #ty; );
 
                     // Structures are placed on the same level as the alias module.

@@ -18,10 +18,9 @@ use super::CodegenError;
 ///
 /// # Arguments
 ///
-/// - `metadata` - Runtime metadata from which the storages are generated.
-/// - `type_gen` - The type generator containing all types defined by metadata.
-/// - `pallet` - Pallet metadata from which the storages are generated.
-/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
+/// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
+/// - `pallet` - Pallet metadata from which the storage items are generated.
+/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -70,7 +69,7 @@ fn generate_storage_entry_fns(
     let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
-        .expect("type should be present");
+        .expect("storage type is in metadata; qed");
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
@@ -80,7 +79,7 @@ fn generate_storage_entry_fns(
         let ident: Ident = format_ident!("_{}", idx);
         let ty_path = type_gen
             .resolve_type_path(id)
-            .expect("type should be present");
+            .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
         let alias_type = primitive_type_alias(&ty_path);

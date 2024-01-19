@@ -219,8 +219,10 @@ async fn build_unstable_client<T: Config>(
         use futures::StreamExt;
         while let Some(val) = driver.next().await {
             if let Err(e) = val {
-                eprintln!("Error driving unstable backend: {e}");
-                break;
+                // This is a test; bail if something does wrong and try to
+                // ensure that the message makes it to some logs.
+                eprintln!("Error driving unstable backend in tests (will panic): {e}");
+                panic!("Error driving unstable backend in tests: {e}");
             }
         }
     });

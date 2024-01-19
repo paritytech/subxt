@@ -5,7 +5,7 @@
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
-use crate::error::RpcError;
+use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
@@ -102,6 +102,7 @@ impl<T: Config> LightClientBuilder<T> {
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     #[cfg(feature = "jsonrpsee")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
     pub async fn build_from_url<Url: AsRef<str>>(self, url: Url) -> Result<LightClient<T>, Error> {
         validate_url_is_secure(url.as_ref())?;
         self.build_from_insecure_url(url).await
@@ -247,62 +248,92 @@ async fn build_client_from_rpc<T: Config>(
 /// Fetch the chain spec from the URL.
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
-    use jsonrpsee::core::client::ClientT;
+    use jsonrpsee::core::client::{ClientT, SubscriptionClientT};
+    use jsonrpsee::rpc_params;
+    use serde_json::value::RawValue;
+
     let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
-    client
+    let result = client
         .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
-        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))
+        .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))?;
+
+    // Subscribe to the finalized heads of the chain.
+    let mut subscription = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
+        &client,
+        "chain_subscribeFinalizedHeads",
+        rpc_params![],
+        "chain_unsubscribeFinalizedHeads",
+    )
+    .await
+    .map_err(|err| Error::Rpc(crate::error::RpcError::ClientError(Box::new(err))))?;
+
+    // We must ensure that the finalized block of the chain is not the block included
+    // in the chainSpec.
+    // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
+    // The first finalized block that is received might by the finalized block could be the one
+    // included in the chainSpec. Decoding the chainSpec for this purpose is too complex.
+    let _ = subscription.next().await;
+    let _ = subscription.next().await;
+
+    Ok(result)
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    pub use jsonrpsee::{
-        client_transport::ws::{Receiver, Sender, Url, WsTransportClientBuilder},
-        core::client::Client,
-    };
+cfg_jsonrpsee_native! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        use tokio_util::compat::Compat;
 
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+        pub use jsonrpsee::{
+            client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
+            core::client::Client,
+        };
 
-        if url.scheme() != "ws" && url.scheme() != "wss" {
-            return Err(Error::LightClient(LightClientError::InvalidScheme));
+        pub type Sender = ws::Sender<Compat<EitherStream>>;
+        pub type Receiver = ws::Receiver<Compat<EitherStream>>;
+
+        /// Build WS RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let url = Url::parse(url).map_err(|_| Error::LightClient(LightClientError::InvalidUrl))?;
+
+                if url.scheme() != "ws" && url.scheme() != "wss" {
+                    return Err(Error::LightClient(LightClientError::InvalidScheme));
+                }
+
+                let (sender, receiver) = ws_transport(url).await?;
+
+                Ok(Client::builder()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_tokio(sender, receiver))
+            }
+
+            async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
+                WsTransportClientBuilder::default()
+                    .build(url)
+                    .await
+                    .map_err(|_| Error::LightClient(LightClientError::Handshake))
+            }
         }
-
-        let (sender, receiver) = ws_transport(url).await?;
-
-        Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
-    }
-
-    async fn ws_transport(url: Url) -> Result<(Sender, Receiver), Error> {
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))
-    }
 }
 
-#[cfg(all(feature = "jsonrpsee", feature = "web"))]
-mod jsonrpsee_helpers {
-    use crate::error::{Error, LightClientError};
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::client::{Client, ClientBuilder},
-    };
+cfg_jsonrpsee_web! {
+    mod jsonrpsee_helpers {
+        use crate::error::{Error, LightClientError};
+        pub use jsonrpsee::{
+            client_transport::web,
+            core::client::{Client, ClientBuilder},
+        };
 
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
+        /// Build web RPC client from URL
+        pub async fn client(url: &str) -> Result<Client, Error> {
+            let (sender, receiver) = web::connect(url)
+                .await
+                .map_err(|_| Error::LightClient(LightClientError::Handshake))?;
 
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
+            Ok(ClientBuilder::default()
+                .max_buffer_capacity_per_subscription(4096)
+                .build_with_wasm(sender, receiver))
+        }
     }
 }

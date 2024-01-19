@@ -245,6 +245,7 @@ pub mod dev {
 // Make `Keypair` usable to sign transactions in Subxt. This is optional so that
 // `subxt-signer` can be used entirely independently of Subxt.
 #[cfg(feature = "subxt")]
+#[cfg_attr(docsrs, doc(cfg(feature = "subxt")))]
 mod subxt_compat {
     use super::*;
 

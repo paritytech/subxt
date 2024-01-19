@@ -353,7 +353,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .filter_map(move |ev| {
                 let output = match ev {
                     FollowEvent::Initialized(ev) => {
-                        runtimes.clear();
+                        runtimes.remove(&ev.finalized_block_hash.hash());
                         ev.finalized_block_runtime
                     }
                     FollowEvent::NewBlock(ev) => {
@@ -363,14 +363,35 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         None
                     }
                     FollowEvent::Finalized(ev) => {
-                        let next_runtime = ev
+                        let next_runtime = {
+                            let mut it = ev
+                                .finalized_block_hashes
+                                .iter()
+                                .rev()
+                                .filter_map(|h| runtimes.get(&h.hash()).cloned())
+                                .peekable();
+
+                            let next = it.next();
+
+                            if it.peek().is_some() {
+                                tracing::warn!(
+                                    target: "subxt",
+                                    "Several runtime upgrades in the finalized blocks but only the latest runtime upgrade is returned"
+                                );
+                            }
+
+                            next
+                        };
+
+                        // Remove finalized and pruned blocks as valid runtime upgrades.
+                        for block in ev
                             .finalized_block_hashes
                             .iter()
-                            .rev()
-                            .filter_map(|h| runtimes.get(&h.hash()).cloned())
-                            .next();
+                            .chain(ev.pruned_block_hashes.iter())
+                        {
+                            runtimes.remove(&block.hash());
+                        }
 
-                        runtimes.clear();
                         next_runtime
                     }
                     _ => None,
@@ -437,28 +458,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
-        enum SeenBlock<Ref> {
-            New(Ref),
-            Finalized(Vec<Ref>),
-        }
         enum SeenBlockMarker {
             New,
             Finalized,
         }
 
-        // First, subscribe to all new and finalized block refs.
-        // - we subscribe to new refs so that when we see `BestChainBlockIncluded`, we
-        //   can try to return a block ref for the best block.
-        // - we subscribe to finalized refs so that when we see `Finalized`, we can
-        //   guarantee that when we return here, the finalized block we report has been
-        //   reported from chainHead_follow already.
-        let mut seen_blocks_sub = self.follow_handle.subscribe().events().filter_map(|ev| {
-            std::future::ready(match ev {
-                FollowEvent::NewBlock(ev) => Some(SeenBlock::New(ev.block_hash)),
-                FollowEvent::Finalized(ev) => Some(SeenBlock::Finalized(ev.finalized_block_hashes)),
-                _ => None,
-            })
-        });
+        // First, subscribe to new blocks.
+        let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
         let mut tx_progress = self
@@ -474,33 +480,69 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // with chainHead_follow.
         let mut finalized_hash: Option<T::Hash> = None;
 
+        // Record the start time so that we can time out if things appear to take too long.
+        let start_instant = instant::Instant::now();
+
+        // A quick helper to return a generic error.
+        let err_other = |s: &str| Some(Err(Error::Other(s.into())));
+
         // Now we can attempt to associate tx events with pinned blocks.
         let tx_stream = futures::stream::poll_fn(move |cx| {
             loop {
-                // Bail early if no more tx events; we don't want to keep polling for pinned blocks.
+                // Bail early if we're finished; nothing else to do.
                 if done {
                     return Poll::Ready(None);
                 }
 
-                // Make a note of new or finalized blocks that have come in since we started the TX.
-                if let Poll::Ready(Some(seen_block)) = seen_blocks_sub.poll_next_unpin(cx) {
-                    match seen_block {
-                        SeenBlock::New(block_ref) => {
+                // Bail if we exceed 4 mins; something very likely went wrong.
+                if start_instant.elapsed().as_secs() > 240 {
+                    return Poll::Ready(err_other(
+                        "Timeout waiting for the transaction to be finalized",
+                    ));
+                }
+
+                // Poll for a follow event, and error if the stream has unexpectedly ended.
+                let follow_ev_poll = match seen_blocks_sub.poll_next_unpin(cx) {
+                    Poll::Ready(None) => {
+                        return Poll::Ready(err_other("chainHead_follow stream ended unexpectedly"))
+                    }
+                    Poll::Ready(Some(follow_ev)) => Poll::Ready(follow_ev),
+                    Poll::Pending => Poll::Pending,
+                };
+                let follow_ev_is_pending = follow_ev_poll.is_pending();
+
+                // If there was a follow event, then handle it and loop around to see if there are more.
+                // We want to buffer follow events until we hit Pending, so that we are as up-to-date as possible
+                // for when we see a BestBlockChanged event, so that we have the best change of already having
+                // seen the block that it mentions and returning a proper pinned block.
+                if let Poll::Ready(follow_ev) = follow_ev_poll {
+                    match follow_ev {
+                        FollowEvent::NewBlock(ev) => {
                             // Optimization: once we have a `finalized_hash`, we only care about finalized
                             // block refs now and can avoid bothering to save new blocks.
                             if finalized_hash.is_none() {
-                                seen_blocks
-                                    .insert(block_ref.hash(), (SeenBlockMarker::New, block_ref));
+                                seen_blocks.insert(
+                                    ev.block_hash.hash(),
+                                    (SeenBlockMarker::New, ev.block_hash),
+                                );
                             }
                         }
-                        SeenBlock::Finalized(block_refs) => {
-                            for block_ref in block_refs {
+                        FollowEvent::Finalized(ev) => {
+                            for block_ref in ev.finalized_block_hashes {
                                 seen_blocks.insert(
                                     block_ref.hash(),
                                     (SeenBlockMarker::Finalized, block_ref),
                                 );
                             }
                         }
+                        FollowEvent::Stop => {
+                            // If we get this event, we'll lose all of our existing pinned blocks and have a gap
+                            // in which we may lose the finaliuzed block that the TX is in. For now, just error if
+                            // this happens, to prevent the case in which we never see a finalized block and wait
+                            // forever.
+                            return Poll::Ready(err_other("chainHead_follow emitted 'stop' event during transaction submission"));
+                        }
+                        _ => {}
                     }
                     continue;
                 }
@@ -517,26 +559,27 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         };
                         return Poll::Ready(Some(Ok(ev)));
                     } else {
-                        // Keep waiting for more finalized blocks until we find it (get rid of any other block refs
-                        // now, since none of them were what we were looking for anyway).
+                        // Not found it! If follow ev is pending, then return pending here and wait for
+                        // a new one to come in, else loop around and see if we get another one immediately.
                         seen_blocks.clear();
-                        continue;
+                        if follow_ev_is_pending {
+                            return Poll::Pending;
+                        } else {
+                            continue;
+                        }
                     }
                 }
 
-                // Otherwise, we are still watching for tx events:
-                let ev = match tx_progress.poll_next_unpin(cx) {
+                // If we don't have a finalized block yet, we keep polling for tx progress events.
+                let tx_progress_ev = match tx_progress.poll_next_unpin(cx) {
                     Poll::Pending => return Poll::Pending,
-                    Poll::Ready(None) => {
-                        done = true;
-                        return Poll::Ready(None);
-                    }
+                    Poll::Ready(None) => return Poll::Ready(err_other("No more transaction progress events, but we haven't seen a Finalized one yet")),
                     Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
 
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
-                let ev = match ev {
+                let tx_progress_ev = match tx_progress_ev {
                     rpc_methods::TransactionStatus::Finalized { block } => {
                         // We'll wait until we have seen this hash, to try to guarantee
                         // that when we return this event, the corresponding block is
@@ -574,7 +617,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     }
                     rpc_methods::TransactionStatus::Validated => TransactionStatus::Validated,
                 };
-                return Poll::Ready(Some(Ok(ev)));
+                return Poll::Ready(Some(Ok(tx_progress_ev)));
             }
         });
 

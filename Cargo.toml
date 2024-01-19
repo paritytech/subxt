@@ -12,6 +12,7 @@ members = [
     "metadata",
     "signer",
     "subxt",
+    "scripts/artifacts"
 ]
 
 # We exclude any crates that would depend on non mutually
@@ -55,7 +56,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-clap = { version = "4.4.13", features = ["derive", "cargo"] }
+clap = { version = "4.4.16", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -69,7 +70,7 @@ getrandom = { version = "0.2", default-features = false }
 hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
-jsonrpsee = { version = "0.20" }
+jsonrpsee = { version = "0.21" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
@@ -89,7 +90,7 @@ tokio = { version = "1.35", default-features = false }
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
-trybuild = "1.0.86"
+trybuild = "1.0.89"
 url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
@@ -107,9 +108,9 @@ pin-project = "1.1.3"
 
 # Light client wasm:
 web-sys = { version = "0.3.65", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
-wasm-bindgen = "0.2.89"
+wasm-bindgen = "0.2.90"
 send_wrapper = "0.6.0"
-js-sys = "0.3.66"
+js-sys = "0.3.67"
 wasm-bindgen-futures = "0.4.38"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
