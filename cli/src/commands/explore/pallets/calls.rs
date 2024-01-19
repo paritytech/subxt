@@ -1,5 +1,7 @@
 use clap::Args;
 use color_eyre::eyre::eyre;
+use color_eyre::owo_colors::OwoColorize;
+use indoc::{formatdoc, writedoc};
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
@@ -13,9 +15,10 @@ use subxt::{
     OfflineClient,
 };
 
-use crate::utils::type_description::print_type_description;
-use crate::utils::type_example::print_type_examples;
-use crate::utils::with_indent;
+use crate::utils::{
+    fields_composite_example, fields_description, parse_string_into_scale_value, Indent,
+    SyntaxHighlight,
+};
 
 #[derive(Debug, Clone, Args)]
 pub struct CallsSubcommand {
@@ -26,8 +29,8 @@ pub struct CallsSubcommand {
 
 pub fn explore_calls(
     command: CallsSubcommand,
-    metadata: &Metadata,
     pallet_metadata: PalletMetadata,
+    metadata: &Metadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
@@ -36,10 +39,20 @@ pub fn explore_calls(
     let (calls_enum_type_def, _calls_enum_type) =
         get_calls_enum_type(pallet_metadata, metadata.types())?;
 
+    let usage = || {
+        let calls = calls_to_string(calls_enum_type_def, pallet_name);
+        formatdoc! {"
+        Usage:
+            subxt explore pallet {pallet_name} calls <CALL>
+                explore a specific call of this pallet
+        
+        {calls}
+        "}
+    };
+
     // if no call specified, show user the calls to choose from:
     let Some(call_name) = command.call else {
-        let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        writeln!(output, "Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}")?;
+        writeln!(output, "{}", usage())?;
         return Ok(());
     };
 
@@ -47,12 +60,11 @@ pub fn explore_calls(
     let Some(call) = calls_enum_type_def
         .variants
         .iter()
-        .find(|variant| variant.name.to_lowercase() == call_name.to_lowercase())
+        .find(|variant| variant.name.eq_ignore_ascii_case(&call_name))
     else {
-        let available_calls = print_available_calls(calls_enum_type_def, pallet_name);
-        let description = format!("Usage:\n    subxt explore {pallet_name} calls <CALL>\n        explore a specific call within this pallet\n\n{available_calls}", );
         return Err(eyre!(
-            "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{description}"
+            "\"{call_name}\" call not found in \"{pallet_name}\" pallet!\n\n{}",
+            usage()
         ));
     };
 
@@ -61,38 +73,49 @@ pub fn explore_calls(
 
     // if no trailing arguments specified show user the expected type of arguments with examples:
     if trailing_args.is_empty() {
-        let mut type_description = print_type_description(&call.fields, metadata.types())?;
-        type_description = with_indent(type_description, 4);
-        let mut type_examples = print_type_examples(&call.fields, metadata.types(), "SCALE_VALUE")?;
-        type_examples = with_indent(type_examples, 4);
-        writeln!(output, "Usage:")?;
-        writeln!(
-            output,
-            "    subxt explore {pallet_name} calls {call_name} <SCALE_VALUE>"
-        )?;
-        writeln!(
-            output,
-            "        construct the call by providing a valid argument\n"
-        )?;
-        writeln!(
-            output,
-            "The call expect expects a <SCALE_VALUE> with this shape:\n{type_description}\n\n{}\n\nYou may need to surround the value in single quotes when providing it as an argument."
-            , &type_examples[4..])?;
+        let fields: Vec<(Option<&str>, u32)> = call
+            .fields
+            .iter()
+            .map(|f| (f.name.as_deref(), f.ty.id))
+            .collect();
+        let type_description = fields_description(&fields, &call.name, metadata.types()).indent(4);
+        let fields_example =
+            fields_composite_example(call.fields.iter().map(|e| e.ty.id), metadata.types())
+                .indent(4)
+                .highlight();
+
+        let scale_value_placeholder = "<SCALE_VALUE>".blue();
+
+        writedoc! {output, "
+        Usage:
+            subxt explore pallet {pallet_name} calls {call_name} {scale_value_placeholder}
+                construct the call by providing a valid argument
+
+        The call expects a {scale_value_placeholder} with this shape:
+        {type_description}
+
+        For example you could provide this {scale_value_placeholder}:
+        {fields_example}
+        "}?;
         return Ok(());
     }
 
     // parse scale_value from trailing arguments and try to create an unsigned extrinsic with it:
-    let value = scale_value::stringify::from_str(&trailing_args).0.map_err(|err| eyre!("scale_value::stringify::from_str led to a ParseError.\n\ntried parsing: \"{}\"\n\n{}", trailing_args, err))?;
+    let value = parse_string_into_scale_value(&trailing_args)?;
     let value_as_composite = value_into_composite(value);
     let offline_client = mocked_offline_client(metadata.clone());
     let payload = tx::dynamic(pallet_name, call_name, value_as_composite);
     let unsigned_extrinsic = offline_client.tx().create_unsigned(&payload)?;
     let hex_bytes = format!("0x{}", hex::encode(unsigned_extrinsic.encoded()));
-    writeln!(output, "Encoded call data:\n    {hex_bytes}")?;
+    writedoc! {output, "
+    Encoded call data:
+        {hex_bytes}
+    "}?;
+
     Ok(())
 }
 
-fn print_available_calls(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
+fn calls_to_string(pallet_calls: &TypeDefVariant<PortableForm>, pallet_name: &str) -> String {
     if pallet_calls.variants.is_empty() {
         return format!("No <CALL>'s available in the \"{pallet_name}\" pallet.");
     }
