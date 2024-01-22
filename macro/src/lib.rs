@@ -88,14 +88,14 @@ struct SubstituteType {
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    match _subxt(args, parse_macro_input!(input as syn::ItemMod)) {
+    match subxt_inner(args, parse_macro_input!(input as syn::ItemMod)) {
         Ok(e) => e,
         Err(e) => e,
     }
 }
 
 // Note: just an additional function to make early returns easier.
-fn _subxt(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream, TokenStream> {
+fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream, TokenStream> {
     let attr_args = NestedMeta::parse_meta_list(args.into())
         .map_err(|e| TokenStream::from(darling::Error::from(e).write_errors()))?;
     let args = RuntimeMetadataArgs::from_list(&attr_args)
@@ -201,7 +201,7 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
     }
 }
 
-/// Fetches metadata in a blocking manner, either from a url (not recommended) or from a file path.
+/// Fetches metadata in a blocking manner, from a url or file path.
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
