@@ -56,7 +56,7 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-clap = { version = "4.4.16", features = ["derive", "cargo"] }
+clap = { version = "4.4.18", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
@@ -75,7 +75,7 @@ jsonrpsee = { version = "0.21" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.70"
+proc-macro2 = "1.0.78"
 quote = "1.0.35"
 regex = "1.10.3"
 scale-info = "2.10.0"
