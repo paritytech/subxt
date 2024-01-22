@@ -6,7 +6,9 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
+use crate::prelude::*;
 use codec::{Decode, Encode};
+use derive_more::Display;
 use serde::{Deserialize, Serialize};
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
@@ -100,16 +102,16 @@ impl AccountId32 {
 }
 
 /// An error obtained from trying to interpret an SS58 encoded string into an AccountId32
-#[derive(thiserror::Error, Clone, Copy, Eq, PartialEq, Debug)]
+#[derive(Display, Clone, Copy, Eq, PartialEq, Debug)]
 #[allow(missing_docs)]
 pub enum FromSs58Error {
-    #[error("Base 58 requirement is violated")]
+    #[display(fmt = "Base 58 requirement is violated")]
     BadBase58,
-    #[error("Length is bad")]
+    #[display(fmt = "Length is bad")]
     BadLength,
-    #[error("Invalid checksum")]
+    #[display(fmt = "Invalid checksum")]
     InvalidChecksum,
-    #[error("Invalid SS58 prefix byte.")]
+    #[display(fmt = "Invalid SS58 prefix byte.")]
     InvalidPrefix,
 }
 
@@ -142,13 +144,13 @@ impl<'de> Deserialize<'de> for AccountId32 {
     }
 }
 
-impl std::fmt::Display for AccountId32 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl fmt::Display for AccountId32 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.to_ss58check())
     }
 }
 
-impl std::str::FromStr for AccountId32 {
+impl crate::prelude::str::FromStr for AccountId32 {
     type Err = FromSs58Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         AccountId32::from_ss58check(s)

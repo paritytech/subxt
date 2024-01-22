@@ -41,4 +41,4 @@ syn = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 thiserror = { workspace = true }
-smoldot = { workspace = true, optional = true}
+smoldot = { workspace = true, optional = true }

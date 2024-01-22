@@ -6,9 +6,9 @@ use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
 use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
+use crate::prelude::*;
 use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
-use crate::prelude::*;
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
 
@@ -19,7 +19,7 @@ pub struct LightClientBuilder<T: Config> {
     max_subscriptions: u32,
     bootnodes: Option<Vec<serde_json::Value>>,
     potential_relay_chains: Option<Vec<smoldot::ChainId>>,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T: Config> Default for LightClientBuilder<T> {
@@ -30,7 +30,7 @@ impl<T: Config> Default for LightClientBuilder<T> {
             max_subscriptions: 1024,
             bootnodes: None,
             potential_relay_chains: None,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 }

@@ -3,13 +3,13 @@
 // see LICENSE for license details.
 
 use super::ConstantAddress;
+use crate::prelude::*;
 use crate::{
     client::OfflineClientT,
     error::{Error, MetadataError},
     metadata::DecodeWithMetadata,
     Config,
 };
-use crate::prelude::*;
 use derivative::Derivative;
 
 /// A client for accessing constants.
@@ -17,7 +17,7 @@ use derivative::Derivative;
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct ConstantsClient<T, Client> {
     client: Client,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T, Client> ConstantsClient<T, Client> {
@@ -25,7 +25,7 @@ impl<T, Client> ConstantsClient<T, Client> {
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 }

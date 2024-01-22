@@ -21,68 +21,74 @@ pub use dispatch_error::{
 pub use crate::config::ExtrinsicParamsError;
 pub use crate::metadata::Metadata;
 use crate::prelude::*;
+use derive_more::{Display, From};
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
-
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
 /// using this type directly.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Display, From)]
 #[non_exhaustive]
 pub enum Error {
     /// Io error.
-    #[error("Io error: {0}")]
-    Io(#[from] std::io::Error),
+    #[display(fmt = "Io error: {_0}")]
+    Io(std::io::Error),
     /// Codec error.
-    #[error("Scale codec error: {0}")]
-    Codec(#[from] codec::Error),
+    #[display(fmt = "Scale codec error: {_0}")]
+    Codec(codec::Error),
     /// Rpc error.
-    #[error("Rpc error: {0}")]
-    Rpc(#[from] RpcError),
+    #[cfg(feature = "std")]
+    #[display(fmt = "Rpc error: {_0}")]
+    Rpc(RpcError),
     /// Serde serialization error
-    #[error("Serde json error: {0}")]
-    Serialization(#[from] serde_json::error::Error),
+    #[display(fmt = "Serde json error: {_0}")]
+    Serialization(serde_json::error::Error),
     /// Error working with metadata.
-    #[error("Metadata error: {0}")]
-    Metadata(#[from] MetadataError),
+    #[display(fmt = "Metadata error: {_0}")]
+    Metadata(MetadataError),
     /// Error decoding metadata.
-    #[error("Metadata Decoding error: {0}")]
-    MetadataDecoding(#[from] MetadataTryFromError),
+    #[display(fmt = "Metadata Decoding error: {_0}")]
+    MetadataDecoding(MetadataTryFromError),
     /// Runtime error.
-    #[error("Runtime error: {0}")]
-    Runtime(#[from] DispatchError),
+    #[display(fmt = "Runtime error: {_0}")]
+    Runtime(DispatchError),
     /// Error decoding to a [`crate::dynamic::Value`].
-    #[error("Error decoding into dynamic value: {0}")]
-    Decode(#[from] DecodeError),
+    #[display(fmt = "Error decoding into dynamic value: {_0}")]
+    Decode(DecodeError),
     /// Error encoding from a [`crate::dynamic::Value`].
-    #[error("Error encoding from dynamic value: {0}")]
-    Encode(#[from] EncodeError),
+    #[display(fmt = "Error encoding from dynamic value: {_0}")]
+    Encode(EncodeError),
     /// Transaction progress error.
-    #[error("Transaction error: {0}")]
-    Transaction(#[from] TransactionError),
+    #[display(fmt = "Transaction error: {_0}")]
+    Transaction(TransactionError),
     /// Error constructing the appropriate extrinsic params.
-    #[error("Extrinsic params error: {0}")]
-    ExtrinsicParams(#[from] ExtrinsicParamsError),
+    #[display(fmt = "Extrinsic params error: {_0}")]
+    ExtrinsicParams(ExtrinsicParamsError),
     /// Block related error.
-    #[error("Block error: {0}")]
-    Block(#[from] BlockError),
+    #[display(fmt = "Block error: {_0}")]
+    Block(BlockError),
     /// An error encoding a storage address.
-    #[error("Error encoding storage address: {0}")]
-    StorageAddress(#[from] StorageAddressError),
+    #[display(fmt = "Error encoding storage address: {_0}")]
+    StorageAddress(StorageAddressError),
     /// The bytes representing an error that we were unable to decode.
-    #[error("An error occurred but it could not be decoded: {0:?}")]
+    #[display(fmt = "An error occurred but it could not be decoded: {_0:?}")]
+    #[from(ignore)]
     Unknown(Vec<u8>),
     /// Light client error.
     #[cfg(feature = "unstable-light-client")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unstable-light-client")))]
-    #[error("An error occurred but it could not be decoded: {0}")]
-    LightClient(#[from] LightClientError),
+    #[display(fmt = "An error occurred but it could not be decoded: {_0}")]
+    LightClient(LightClientError),
     /// Other error.
-    #[error("Other error: {0}")]
+    #[display(fmt = "Other error: {_0}")]
+    #[from(ignore)]
     Other(String),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 impl<'a> From<&'a str> for Error {
     fn from(error: &'a str) -> Self {
@@ -104,26 +110,32 @@ impl From<std::convert::Infallible> for Error {
 
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
-#[derive(Debug, thiserror::Error)]
+
+#[cfg(feature = "std")]
+#[derive(Debug, Display)]
 #[non_exhaustive]
 pub enum RpcError {
     // Dev note: We need the error to be safely sent between threads
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
-    #[error("RPC error: {0}")]
+    #[display(fmt = "RPC error: {_0}")]
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
     /// This error signals that the request was rejected for some reason.
     /// The specific reason is provided.
-    #[error("RPC error: request rejected: {0}")]
+    #[display(fmt = "RPC error: request rejected: {_0}")]
     RequestRejected(String),
     /// The RPC subscription dropped.
-    #[error("RPC error: subscription dropped.")]
+    #[display(fmt = "RPC error: subscription dropped.")]
     SubscriptionDropped,
     /// The requested URL is insecure.
-    #[error("RPC error: insecure URL: {0}")]
+    #[display(fmt = "RPC error: insecure URL: {_0}")]
     InsecureUrl(String),
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for RpcError {}
+
+#[cfg(feature = "std")]
 impl RpcError {
     /// Create a `RequestRejected` error from anything that can be turned into a string.
     pub fn request_rejected<S: Into<String>>(s: S) -> RpcError {
@@ -132,21 +144,25 @@ impl RpcError {
 }
 
 /// Block error
-#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+#[derive(Clone, Debug, Eq, Display, PartialEq)]
 #[non_exhaustive]
 pub enum BlockError {
     /// An error containing the hash of the block that was not found.
-    #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
+    #[display(
+        fmt = "Could not find a block with hash {_0} (perhaps it was on a non-finalized fork?)"
+    )]
     NotFound(String),
     /// Extrinsic type ID cannot be resolved with the provided metadata.
-    #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
+    #[display(
+        fmt = "Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata"
+    )]
     MissingType,
     /// Unsupported signature.
-    #[error("Unsupported extrinsic version, only version 4 is supported currently")]
+    #[display(fmt = "Unsupported extrinsic version, only version 4 is supported currently")]
     /// The extrinsic has an unsupported version.
     UnsupportedVersion(u8),
     /// Decoding error.
-    #[error("Cannot decode extrinsic: {0}")]
+    #[display(fmt = "Cannot decode extrinsic: {_0}")]
     DecodingError(codec::Error),
 }
 
@@ -157,35 +173,42 @@ impl BlockError {
         BlockError::NotFound(hash)
     }
 }
+#[cfg(feature = "std")]
+impl std::error::Error for BlockError {}
 
 /// Transaction error.
-#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+#[derive(Clone, Debug, Eq, Display, PartialEq)]
 #[non_exhaustive]
 pub enum TransactionError {
     /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
-    #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
+    #[display(
+        fmt = "The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)"
+    )]
     BlockNotFound,
     /// An error happened on the node that the transaction was submitted to.
-    #[error("Error handling transaction: {0}")]
+    #[display(fmt = "Error handling transaction: {_0}")]
     Error(String),
     /// The transaction was deemed invalid.
-    #[error("The transaction is not valid: {0}")]
+    #[display(fmt = "The transaction is not valid: {_0}")]
     Invalid(String),
     /// The transaction was dropped.
-    #[error("The transaction was dropped: {0}")]
+    #[display(fmt = "The transaction was dropped: {_0}")]
     Dropped(String),
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for TransactionError {}
+
 /// Something went wrong trying to encode a storage address.
-#[derive(Clone, Debug, thiserror::Error)]
+#[derive(Clone, Debug, Display)]
 #[non_exhaustive]
 pub enum StorageAddressError {
     /// Storage map type must be a composite type.
-    #[error("Storage map type must be a composite type")]
+    #[display(fmt = "Storage map type must be a composite type")]
     MapTypeMustBeTuple,
     /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
+    #[display(fmt = "Storage lookup requires {expected} keys but got {actual} keys")]
     WrongNumberOfKeys {
         /// The actual number of keys needed, based on the metadata.
         actual: usize,
@@ -193,7 +216,9 @@ pub enum StorageAddressError {
         expected: usize,
     },
     /// This storage entry in the metadata does not have the correct number of hashers to fields.
-    #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
+    #[display(
+        fmt = "Storage entry in metadata does not have the correct number of hashers to fields"
+    )]
     WrongNumberOfHashers {
         /// The number of hashers in the metadata for this storage entry.
         hashers: usize,
@@ -202,53 +227,59 @@ pub enum StorageAddressError {
     },
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for StorageAddressError {}
+
 /// Something went wrong trying to access details in the metadata.
-#[derive(Clone, Debug, PartialEq, thiserror::Error)]
+#[derive(Clone, Debug, PartialEq, Display)]
 #[non_exhaustive]
 pub enum MetadataError {
     /// The DispatchError type isn't available in the metadata
-    #[error("The DispatchError type isn't available")]
+    #[display(fmt = "The DispatchError type isn't available")]
     DispatchErrorNotFound,
     /// Type not found in metadata.
-    #[error("Type with ID {0} not found")]
+    #[display(fmt = "Type with ID {_0} not found")]
     TypeNotFound(u32),
     /// Pallet not found (index).
-    #[error("Pallet with index {0} not found")]
+    #[display(fmt = "Pallet with index {_0} not found")]
     PalletIndexNotFound(u8),
     /// Pallet not found (name).
-    #[error("Pallet with name {0} not found")]
+    #[display(fmt = "Pallet with name {_0} not found")]
     PalletNameNotFound(String),
     /// Variant not found.
-    #[error("Variant with index {0} not found")]
+    #[display(fmt = "Variant with index {_0} not found")]
     VariantIndexNotFound(u8),
     /// Constant not found.
-    #[error("Constant with name {0} not found")]
+    #[display(fmt = "Constant with name {_0} not found")]
     ConstantNameNotFound(String),
     /// Call not found.
-    #[error("Call with name {0} not found")]
+    #[display(fmt = "Call with name {_0} not found")]
     CallNameNotFound(String),
     /// Runtime trait not found.
-    #[error("Runtime trait with name {0} not found")]
+    #[display(fmt = "Runtime trait with name {_0} not found")]
     RuntimeTraitNotFound(String),
     /// Runtime method not found.
-    #[error("Runtime method with name {0} not found")]
+    #[display(fmt = "Runtime method with name {_0} not found")]
     RuntimeMethodNotFound(String),
     /// Call type not found in metadata.
-    #[error("Call type not found in pallet with index {0}")]
+    #[display(fmt = "Call type not found in pallet with index {_0}")]
     CallTypeNotFoundInPallet(u8),
     /// Event type not found in metadata.
-    #[error("Event type not found in pallet with index {0}")]
+    #[display(fmt = "Event type not found in pallet with index {_0}")]
     EventTypeNotFoundInPallet(u8),
     /// Storage details not found in metadata.
-    #[error("Storage details not found in pallet with name {0}")]
+    #[display(fmt = "Storage details not found in pallet with name {_0}")]
     StorageNotFoundInPallet(String),
     /// Storage entry not found.
-    #[error("Storage entry {0} not found")]
+    #[display(fmt = "Storage entry {_0} not found")]
     StorageEntryNotFound(String),
     /// The generated interface used is not compatible with the node.
-    #[error("The generated code is not compatible with the node")]
+    #[display(fmt = "The generated code is not compatible with the node")]
     IncompatibleCodegen,
     /// Custom value not found.
-    #[error("Custom value with name {0} not found")]
+    #[display(fmt = "Custom value with name {_0} not found")]
     CustomValueNameNotFound(String),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for MetadataError {}

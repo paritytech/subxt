@@ -8,8 +8,8 @@
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::config::BlockHash;
-use crate::{Config, Error};
 use crate::prelude::*;
+use crate::{Config, Error};
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
@@ -23,7 +23,7 @@ use std::task::Poll;
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct UnstableRpcMethods<T> {
     client: RpcClient,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T: Config> UnstableRpcMethods<T> {
@@ -31,7 +31,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     pub fn new(client: RpcClient) -> Self {
         UnstableRpcMethods {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 
@@ -747,6 +747,7 @@ fn to_hex(bytes: impl AsRef<[u8]>) -> String {
 /// Attempt to deserialize either a string or integer into an integer.
 /// See <https://github.com/paritytech/json-rpc-interface-spec/issues/83>
 pub(crate) mod unsigned_number_as_string {
+    use crate::prelude::*;
     use serde::de::{Deserializer, Visitor};
     use std::fmt;
 
@@ -755,10 +756,10 @@ pub(crate) mod unsigned_number_as_string {
     where
         D: Deserializer<'de>,
     {
-        deserializer.deserialize_any(NumberVisitor(std::marker::PhantomData))
+        deserializer.deserialize_any(NumberVisitor(PhantomData))
     }
 
-    struct NumberVisitor<N>(std::marker::PhantomData<N>);
+    struct NumberVisitor<N>(PhantomData<N>);
 
     impl<'de, N: From<u64>> Visitor<'de> for NumberVisitor<N> {
         type Value = N;
@@ -794,11 +795,11 @@ pub(crate) mod unsigned_number_as_string {
 ///
 /// Adapted from <https://tikv.github.io/doc/serde_with/rust/hashmap_as_tuple_list>
 pub(crate) mod hashmap_as_tuple_list {
+    use crate::prelude::*;
     use serde::de::{Deserialize, Deserializer, SeqAccess, Visitor};
     use std::collections::HashMap;
     use std::fmt;
     use std::hash::{BuildHasher, Hash};
-    use std::marker::PhantomData;
 
     /// Deserialize a [`HashMap`] from a list of tuples or object
     pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>

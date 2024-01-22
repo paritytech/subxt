@@ -7,18 +7,19 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::OfflineClientT, Config};
 use crate::prelude::*;
+use crate::{client::OfflineClientT, Config};
 use core::fmt::Debug;
+use derive_more::Display;
 
 /// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.
-#[derive(thiserror::Error, Debug)]
+#[derive(Display, Debug)]
 #[non_exhaustive]
 pub enum ExtrinsicParamsError {
     /// Cannot find a type id in the metadata. The context provides some additional
     /// information about the source of the error (eg the signed extension name).
-    #[error("Cannot find type id '{type_id} in the metadata (context: {context})")]
+    #[display(fmt = "Cannot find type id '{type_id} in the metadata (context: {context})")]
     MissingTypeId {
         /// Type ID.
         type_id: u32,
@@ -26,12 +27,17 @@ pub enum ExtrinsicParamsError {
         context: &'static str,
     },
     /// A signed extension in use on some chain was not provided.
-    #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
+    #[display(
+        fmt = "The chain expects a signed extension with the name {_0}, but we did not provide one"
+    )]
     UnknownSignedExtension(String),
     /// Some custom error.
-    #[error("Error constructing extrinsic parameters: {0}")]
+    #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
     Custom(CustomExtrinsicParamsError),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for ExtrinsicParamsError {}
 
 /// A custom error.
 pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;

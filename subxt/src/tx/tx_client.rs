@@ -4,6 +4,7 @@
 
 use std::borrow::Cow;
 
+use crate::prelude::*;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
@@ -13,7 +14,6 @@ use crate::{
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
-use crate::prelude::*;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
@@ -386,7 +386,7 @@ where
 pub struct SubmittableExtrinsic<T, C> {
     client: C,
     encoded: Encoded,
-    marker: std::marker::PhantomData<T>,
+    marker: PhantomData<T>,
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
@@ -405,7 +405,7 @@ where
         Self {
             client,
             encoded: Encoded(tx_bytes),
-            marker: std::marker::PhantomData,
+            marker: PhantomData,
         }
     }
 

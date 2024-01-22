@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use crate::backend::{Backend, BackendExt, BlockRef};
-use crate::{client::OnlineClientT, error::Error, events::Events, Config};
 use crate::prelude::*;
+use crate::{client::OnlineClientT, error::Error, events::Events, Config};
 use derivative::Derivative;
 use std::future::Future;
 
@@ -13,7 +13,7 @@ use std::future::Future;
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct EventsClient<T, Client> {
     client: Client,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T, Client> EventsClient<T, Client> {
@@ -21,7 +21,7 @@ impl<T, Client> EventsClient<T, Client> {
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 }

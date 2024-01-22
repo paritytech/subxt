@@ -26,25 +26,27 @@ cfg_if! {
             mem,
             num,
             ops,
-            string,
+            string::{String},
+            str,
             sync,
             time,
-            vec::{vec, Vec},
+            vec,
             rc,
             iter,
         };
+        pub use std::vec::Vec;
     } else {
         pub use alloc::{
             borrow,
             boxed::{Box},
             collections,
             format,
-            string,
+            string::{String},
             sync,
-            vec::{vec, Vec},
-            rc
+            vec::{Vec},
+            rc,
         };
-
+        pub use std::vec::Vec;
         pub use core::{
             any,
             cmp,
@@ -56,6 +58,7 @@ cfg_if! {
             ops,
             time,
             iter,
+            str,
         };
     }
 }

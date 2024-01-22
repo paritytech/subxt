@@ -1,5 +1,5 @@
 use derivative::Derivative;
-use std::marker::PhantomData;
+use PhantomData;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;

@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use core::marker::PhantomData;
 use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
@@ -10,8 +9,8 @@ use std::borrow::Cow;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::error::MetadataError;
-use crate::{metadata::DecodeWithMetadata, Error, Metadata};
 use crate::prelude::*;
+use crate::{metadata::DecodeWithMetadata, Error, Metadata};
 
 /// This represents a runtime API payload that can call into the runtime of node.
 ///
@@ -147,7 +146,7 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
             method_name: Cow::Borrowed(method_name),
             args_data,
             validation_hash: Some(hash),
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 

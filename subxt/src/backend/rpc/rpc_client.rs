@@ -181,7 +181,7 @@ impl RpcParams {
 /// [`StreamExt`] extension trait.
 pub struct RpcSubscription<Res> {
     inner: RawRpcSubscription,
-    _marker: std::marker::PhantomData<Res>,
+    _marker: PhantomData<Res>,
 }
 
 impl<Res> std::fmt::Debug for RpcSubscription<Res> {
@@ -198,7 +198,7 @@ impl<Res> RpcSubscription<Res> {
     pub fn new(inner: RawRpcSubscription) -> Self {
         Self {
             inner,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 

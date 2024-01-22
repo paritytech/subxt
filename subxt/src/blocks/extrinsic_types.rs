@@ -2,6 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::config::signed_extensions::{
+    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
+};
+use crate::config::SignedExtension;
+use crate::dynamic::DecodedValue;
+use crate::prelude::*;
+use crate::utils::strip_compact_prefix;
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
@@ -11,13 +18,6 @@ use crate::{
     metadata::types::PalletMetadata,
     Metadata,
 };
-use crate::prelude::*;
-use crate::config::signed_extensions::{
-    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
-};
-use crate::config::SignedExtension;
-use crate::dynamic::DecodedValue;
-use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
@@ -177,7 +177,7 @@ pub struct ExtrinsicDetails<T: Config, C> {
     cached_events: CachedEvents<T>,
     /// Subxt metadata to fetch the extrinsic metadata.
     metadata: Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 /// Details only available in signed extrinsics.
@@ -290,7 +290,7 @@ where
             client,
             cached_events,
             metadata,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         })
     }
 
@@ -376,7 +376,7 @@ where
         Some(ExtrinsicSignedExtensions {
             bytes: extra_bytes,
             metadata: &self.metadata,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         })
     }
 
@@ -613,7 +613,7 @@ impl<T: Config> ExtrinsicEvents<T> {
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
@@ -655,7 +655,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                 ty_id,
                 identifier: extension.identifier(),
                 metadata,
-                _marker: std::marker::PhantomData,
+                _marker: PhantomData,
             }))
         })
     }
@@ -713,7 +713,7 @@ pub struct ExtrinsicSignedExtension<'a, T: Config> {
     ty_id: u32,
     identifier: &'a str,
     metadata: &'a Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {

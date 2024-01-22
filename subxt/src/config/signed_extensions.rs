@@ -8,9 +8,9 @@
 //! when interacting with a chain.
 
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use crate::prelude::*;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
-use crate::prelude::*;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
 use derivative::Derivative;
@@ -368,7 +368,7 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 /// is a sensible default, and allows for a single configuration to work across multiple chains.
 pub struct AnyOf<T, Params> {
     params: Vec<Box<dyn ExtrinsicParamsEncoder>>,
-    _marker: std::marker::PhantomData<(T, Params)>,
+    _marker: PhantomData<(T, Params)>,
 }
 
 macro_rules! impl_tuples {
@@ -425,7 +425,7 @@ macro_rules! impl_tuples {
 
                 Ok(AnyOf {
                     params,
-                    _marker: std::marker::PhantomData
+                    _marker: PhantomData
                 })
             }
         }

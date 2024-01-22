@@ -2,13 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::prelude::*;
 use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-use crate::prelude::*;
 use derivative::Derivative;
 use scale_info::TypeDef;
 use std::borrow::Cow;
@@ -63,7 +63,7 @@ pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     entry_name: Cow<'static, str>,
     storage_entry_keys: Vec<StorageKey>,
     validation_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
+    _marker: PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
@@ -87,7 +87,7 @@ where
             entry_name: Cow::Owned(entry_name.into()),
             storage_entry_keys: storage_entry_keys.into_iter().collect(),
             validation_hash: None,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 
@@ -105,7 +105,7 @@ where
             entry_name: Cow::Borrowed(entry_name),
             storage_entry_keys: storage_entry_keys.into_iter().collect(),
             validation_hash: Some(hash),
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 
@@ -185,7 +185,7 @@ where
                     TypeDef::Tuple(tuple) => {
                         either::Either::Left(tuple.fields.iter().map(|f| f.id))
                     }
-                    _other => either::Either::Right(std::iter::once(*key_ty)),
+                    _other => either::Either::Right(core::iter::once(*key_ty)),
                 };
 
                 if type_ids.len() < self.storage_entry_keys.len() {

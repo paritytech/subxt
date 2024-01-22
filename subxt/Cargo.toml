@@ -63,10 +63,10 @@ futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["raw_value"] }
-thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
 derivative = { workspace = true, features = ["use_core"] }
+derive_more = { workspace = true }
 either = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:

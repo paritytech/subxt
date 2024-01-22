@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::PhantomDataSendSync;
+use crate::prelude::*;
 use codec::{Compact, Decode, DecodeAll, Encode};
 use derivative::Derivative;
 use scale_decode::{IntoVisitor, Visitor};
@@ -108,7 +109,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
     }
 }
 
-pub struct WrapperKeepOpaqueVisitor<T>(std::marker::PhantomData<T>);
+pub struct WrapperKeepOpaqueVisitor<T>(PhantomData<T>);
 impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
     type Value<'scale, 'info> = WrapperKeepOpaque<T>;
     type Error = scale_decode::Error;

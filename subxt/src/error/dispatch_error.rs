@@ -6,124 +6,139 @@
 //! something fails in trying to submit/execute a transaction.
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
+use crate::prelude::*;
 use core::fmt::Debug;
+use derive_more::Display;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
 use std::borrow::Cow;
-use crate::prelude::*;
 
 use super::{Error, MetadataError};
 
 /// An error dispatching a transaction.
-#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Debug, Display, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum DispatchError {
     /// Some error occurred.
-    #[error("Some unknown error occurred.")]
+    #[display(fmt = "Some unknown error occurred.")]
     Other,
     /// Failed to lookup some data.
-    #[error("Failed to lookup some data.")]
+    #[display(fmt = "Failed to lookup some data.")]
     CannotLookup,
     /// A bad origin.
-    #[error("Bad origin.")]
+    #[display(fmt = "Bad origin.")]
     BadOrigin,
     /// A custom error in a module.
-    #[error("Pallet error: {0}")]
+    #[display(fmt = "Pallet error: {_0}")]
     Module(ModuleError),
     /// At least one consumer is remaining so the account cannot be destroyed.
-    #[error("At least one consumer is remaining so the account cannot be destroyed.")]
+    #[display(fmt = "At least one consumer is remaining so the account cannot be destroyed.")]
     ConsumerRemaining,
     /// There are no providers so the account cannot be created.
-    #[error("There are no providers so the account cannot be created.")]
+    #[display(fmt = "There are no providers so the account cannot be created.")]
     NoProviders,
     /// There are too many consumers so the account cannot be created.
-    #[error("There are too many consumers so the account cannot be created.")]
+    #[display(fmt = "There are too many consumers so the account cannot be created.")]
     TooManyConsumers,
     /// An error to do with tokens.
-    #[error("Token error: {0}")]
+    #[display(fmt = "Token error: {_0}")]
     Token(TokenError),
     /// An arithmetic error.
-    #[error("Arithmetic error: {0}")]
+    #[display(fmt = "Arithmetic error: {_0}")]
     Arithmetic(ArithmeticError),
     /// The number of transactional layers has been reached, or we are not in a transactional layer.
-    #[error("Transactional error: {0}")]
+    #[display(fmt = "Transactional error: {_0}")]
     Transactional(TransactionalError),
     /// Resources exhausted, e.g. attempt to read/write data which is too large to manipulate.
-    #[error(
-        "Resources exhausted, e.g. attempt to read/write data which is too large to manipulate."
+    #[display(
+        fmt = "Resources exhausted, e.g. attempt to read/write data which is too large to manipulate."
     )]
     Exhausted,
     /// The state is corrupt; this is generally not going to fix itself.
-    #[error("The state is corrupt; this is generally not going to fix itself.")]
+    #[display(fmt = "The state is corrupt; this is generally not going to fix itself.")]
     Corruption,
     /// Some resource (e.g. a preimage) is unavailable right now. This might fix itself later.
-    #[error(
-        "Some resource (e.g. a preimage) is unavailable right now. This might fix itself later."
+    #[display(
+        fmt = "Some resource (e.g. a preimage) is unavailable right now. This might fix itself later."
     )]
     Unavailable,
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for DispatchError {}
+
 /// An error relating to tokens when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(scale_decode::DecodeAsType, Display, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TokenError {
     /// Funds are unavailable.
-    #[error("Funds are unavailable.")]
+    #[display(fmt = "Funds are unavailable.")]
     FundsUnavailable,
     /// Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved.
-    #[error("Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved.")]
+    #[display(
+        fmt = "Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved."
+    )]
     OnlyProvider,
     /// Account cannot exist with the funds that would be given.
-    #[error("Account cannot exist with the funds that would be given.")]
+    #[display(fmt = "Account cannot exist with the funds that would be given.")]
     BelowMinimum,
     /// Account cannot be created.
-    #[error("Account cannot be created.")]
+    #[display(fmt = "Account cannot be created.")]
     CannotCreate,
     /// The asset in question is unknown.
-    #[error("The asset in question is unknown.")]
+    #[display(fmt = "The asset in question is unknown.")]
     UnknownAsset,
     /// Funds exist but are frozen.
-    #[error("Funds exist but are frozen.")]
+    #[display(fmt = "Funds exist but are frozen.")]
     Frozen,
     /// Operation is not supported by the asset.
-    #[error("Operation is not supported by the asset.")]
+    #[display(fmt = "Operation is not supported by the asset.")]
     Unsupported,
     /// Account cannot be created for a held balance.
-    #[error("Account cannot be created for a held balance.")]
+    #[display(fmt = "Account cannot be created for a held balance.")]
     CannotCreateHold,
     /// Withdrawal would cause unwanted loss of account.
-    #[error("Withdrawal would cause unwanted loss of account.")]
+    #[display(fmt = "Withdrawal would cause unwanted loss of account.")]
     NotExpendable,
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for TokenError {}
+
 /// An error relating to arithmetic when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(scale_decode::DecodeAsType, Debug, Display, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ArithmeticError {
     /// Underflow.
-    #[error("Underflow.")]
+    #[display(fmt = "Underflow.")]
     Underflow,
     /// Overflow.
-    #[error("Overflow.")]
+    #[display(fmt = "Overflow.")]
     Overflow,
     /// Division by zero.
-    #[error("Division by zero.")]
+    #[display(fmt = "Division by zero.")]
     DivisionByZero,
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for ArithmeticError {}
+
 /// An error relating to thr transactional layers when dispatching a transaction.
-#[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(scale_decode::DecodeAsType, Debug, Display, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TransactionalError {
     /// Too many transactional layers have been spawned.
-    #[error("Too many transactional layers have been spawned.")]
+    #[display(fmt = "Too many transactional layers have been spawned.")]
     LimitReached,
     /// A transactional layer was expected, but does not exist.
-    #[error("A transactional layer was expected, but does not exist.")]
+    #[display(fmt = "A transactional layer was expected, but does not exist.")]
     NoLayer,
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for TransactionalError {}
+
 /// Details about a module error that has occurred.
-#[derive(Clone, thiserror::Error)]
+#[derive(Clone)]
 #[non_exhaustive]
 pub struct ModuleError {
     metadata: Metadata,
@@ -146,18 +161,21 @@ impl Eq for ModuleError {}
 /// Custom `Debug` implementation, ignores the very large `metadata` field, using it instead (as
 /// intended) to resolve the actual pallet and error names. This is much more useful for debugging.
 impl Debug for ModuleError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let details = self.details_string();
         write!(f, "ModuleError(<{details}>)")
     }
 }
 
-impl std::fmt::Display for ModuleError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for ModuleError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let details = self.details_string();
         write!(f, "{details}")
     }
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for ModuleError {}
 
 impl ModuleError {
     /// Return more details about this error.

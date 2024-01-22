@@ -4,13 +4,13 @@
 
 //! Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
 
+use crate::prelude::*;
 use codec::{Compact, Input};
 use scale_bits::{
     scale::format::{Format, OrderFormat, StoreFormat},
     Bits,
 };
 use scale_decode::IntoVisitor;
-use std::marker::PhantomData;
 
 /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
 ///
@@ -144,7 +144,7 @@ impl<Store: BitStore, Order: BitOrder> codec::Encode for DecodedBits<Store, Orde
 }
 
 #[doc(hidden)]
-pub struct DecodedBitsVisitor<S, O>(std::marker::PhantomData<(S, O)>);
+pub struct DecodedBitsVisitor<S, O>(PhantomData<(S, O)>);
 impl<Store, Order> scale_decode::Visitor for DecodedBitsVisitor<Store, Order> {
     type Value<'scale, 'info> = DecodedBits<Store, Order>;
     type Error = scale_decode::Error;

@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
 use crate::prelude::*;
+use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
 use derivative::Derivative;
 use std::borrow::Cow;
 
@@ -34,7 +34,7 @@ pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<ReturnTy>,
+    _marker: PhantomData<ReturnTy>,
 }
 
 /// The type of address typically used to return dynamic constant values.
@@ -47,7 +47,7 @@ impl<ReturnTy> Address<ReturnTy> {
             pallet_name: Cow::Owned(pallet_name.into()),
             constant_name: Cow::Owned(constant_name.into()),
             constant_hash: None,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 
@@ -63,7 +63,7 @@ impl<ReturnTy> Address<ReturnTy> {
             pallet_name: Cow::Borrowed(pallet_name),
             constant_name: Cow::Borrowed(constant_name),
             constant_hash: Some(hash),
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 

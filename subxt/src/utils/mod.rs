@@ -14,8 +14,8 @@ mod unchecked_extrinsic;
 mod wrapper_opaque;
 
 use crate::error::RpcError;
-use crate::Error;
 use crate::prelude::*;
+use crate::Error;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use url::Url;
@@ -76,7 +76,7 @@ pub fn validate_url_is_secure(url: &str) -> Result<(), Error> {
     }
 }
 
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
+/// A version of [`PhantomData`] that is also Send and Sync (which is fine
 /// because regardless of the generic param, it is always possible to Send + Sync this
 /// 0 size type).
 #[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]

@@ -6,8 +6,8 @@
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
-use crate::{Config, Error};
 use crate::prelude::*;
+use crate::{Config, Error};
 use codec::Decode;
 use derivative::Derivative;
 use primitive_types::U256;
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct LegacyRpcMethods<T> {
     client: RpcClient,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T: Config> LegacyRpcMethods<T> {
@@ -28,7 +28,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     pub fn new(client: RpcClient) -> Self {
         LegacyRpcMethods {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 

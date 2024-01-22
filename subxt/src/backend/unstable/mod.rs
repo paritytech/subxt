@@ -27,8 +27,8 @@ use crate::backend::{
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
-use crate::Config;
 use crate::prelude::*;
+use crate::Config;
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::{Stream, StreamExt};
@@ -43,7 +43,7 @@ pub use rpc_methods::UnstableRpcMethods;
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
     max_block_life: usize,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T: Config> Default for UnstableBackendBuilder<T> {
@@ -57,7 +57,7 @@ impl<T: Config> UnstableBackendBuilder<T> {
     pub fn new() -> Self {
         Self {
             max_block_life: usize::MAX,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 

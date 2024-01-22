@@ -2,8 +2,8 @@ use crate::client::OfflineClientT;
 use crate::custom_values::custom_value_address::{CustomValueAddress, Yes};
 use crate::error::MetadataError;
 use crate::metadata::DecodeWithMetadata;
-use crate::{Config, Error};
 use crate::prelude::*;
+use crate::{Config, Error};
 use derivative::Derivative;
 
 /// A client for accessing custom values stored in the metadata.
@@ -11,7 +11,7 @@ use derivative::Derivative;
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct CustomValuesClient<T, Client> {
     client: Client,
-    _marker: std::marker::PhantomData<T>,
+    _marker: PhantomData<T>,
 }
 
 impl<T, Client> CustomValuesClient<T, Client> {
@@ -19,7 +19,7 @@ impl<T, Client> CustomValuesClient<T, Client> {
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: std::marker::PhantomData,
+            _marker: PhantomData,
         }
     }
 }

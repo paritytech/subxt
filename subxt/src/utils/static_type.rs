@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::prelude::*;
 use codec::{Decode, Encode};
 use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 use scale_encode::EncodeAsType;
@@ -29,7 +30,7 @@ impl<T: Encode> EncodeAsType for Static<T> {
     }
 }
 
-pub struct StaticDecodeAsTypeVisitor<T>(std::marker::PhantomData<T>);
+pub struct StaticDecodeAsTypeVisitor<T>(PhantomData<T>);
 
 impl<T: Decode> Visitor for StaticDecodeAsTypeVisitor<T> {
     type Value<'scale, 'info> = Static<T>;
@@ -52,7 +53,7 @@ impl<T: Decode> Visitor for StaticDecodeAsTypeVisitor<T> {
 impl<T: Decode> IntoVisitor for Static<T> {
     type Visitor = StaticDecodeAsTypeVisitor<T>;
     fn into_visitor() -> Self::Visitor {
-        StaticDecodeAsTypeVisitor(std::marker::PhantomData)
+        StaticDecodeAsTypeVisitor(PhantomData)
     }
 }
 
@@ -64,14 +65,14 @@ impl<T> From<T> for Static<T> {
 }
 
 // Static<T> is just a marker type and should be as transparent as possible:
-impl<T> std::ops::Deref for Static<T> {
+impl<T> ops::Deref for Static<T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<T> std::ops::DerefMut for Static<T> {
+impl<T> ops::DerefMut for Static<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
