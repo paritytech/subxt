@@ -40,7 +40,10 @@ jobs:
       # - a polkadot.rs file from the full metadata that is checked in integration tests
       # - a polkadot.json in the `artifacts/demo_chain_specs` directory
       - name: Fetch Artifacts
-        run: cargo build --bin artifacts
+        run: cargo run --bin artifacts
+
+      - name: Delete substrate node binary
+        run: rm ./substrate-node
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
