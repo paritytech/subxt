@@ -40,5 +40,12 @@ scale-value = { workspace = true }
 syn = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
+scale-typegen-description = { workspace = true }
+heck = { workspace = true }
+indoc = { workspace = true }
 thiserror = { workspace = true }
-smoldot = { workspace = true, optional = true}
+smoldot = { workspace = true, optional = true }
+
+[dev-dependencies]
+strip-ansi-escapes = { workspace = true }
+pretty_assertions = { workspace = true }
