@@ -84,27 +84,27 @@ struct AttributeForType {
 }
 
 fn derive_for_type_parser(src: &str) -> Result<DeriveForType, String> {
-    let (type_path, trait_path, recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    let (type_path, trait_path, recursive) = type_map_parser(src)
     .ok_or_else(|| String::from("Invalid pattern for `derive-for-type`. It should be `type=derive` or `type=derive,recursive`, like `my_type=serde::Serialize` or `my_type=serde::Serialize,recursive`"))?;
     Ok(DeriveForType {
-        type_path,
-        trait_path,
+        type_path: type_path.to_string(),
+        trait_path: trait_path.to_string(),
         recursive,
     })
 }
 
 fn attributes_for_type_parser(src: &str) -> Result<AttributeForType, String> {
-    let (type_path, attribute, recursive) = str_equals_str_comma_maybe_recursive_parser(src)
+    let (type_path, attribute, recursive) = type_map_parser(src)
     .ok_or_else(|| String::from("Invalid pattern for `attributes-for-type`. It should be `type=attribute` like `my_type=serde::#[allow(clippy::all)]` or `type=attribute,recursive` like `my_type=serde::#[allow(clippy::all)], recursive`"))?;
     Ok(AttributeForType {
-        type_path,
-        attribute,
+        type_path: type_path.to_string(),
+        attribute: attribute.to_string(),
         recursive,
     })
 }
 
 /// Parses a `&str` of the form `str1=str2` into `(str1, str2, false)` or `str1=str2,recursive` into `(str1, str2, true)`.
-fn str_equals_str_comma_maybe_recursive_parser(src: &str) -> Option<(String, String, bool)> {
+fn type_map_parser(src: &str) -> Option<(&str, &str, bool)> {
     let (str1, rest) = src.split_once('=')?;
 
     let mut split_rest = rest.split(',');
@@ -114,7 +114,7 @@ fn str_equals_str_comma_maybe_recursive_parser(src: &str) -> Option<(String, Str
 
     let rest_args = split_rest.collect::<Vec<_>>();
     let recursive = rest_args.contains(&"recursive");
-    Some((str1.to_owned(), str2.to_owned(), recursive))
+    Some((str1, str2, recursive))
 }
 
 fn substitute_type_parser(src: &str) -> Result<(String, String), String> {
@@ -248,4 +248,24 @@ fn codegen(
 
     writeln!(output, "{code}")?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::commands::codegen::type_map_parser;
+
+    #[test]
+    fn parse_types() {
+        assert_eq!(type_map_parser("Foo"), None);
+        assert_eq!(type_map_parser("Foo=Bar"), Some(("Foo", "Bar", false)));
+        assert_eq!(
+            type_map_parser("Foo=Bar,recursive"),
+            Some(("Foo", "Bar", true))
+        );
+        assert_eq!(type_map_parser("Foo=Bar,a"), Some(("Foo", "Bar", false)));
+        assert_eq!(
+            type_map_parser("Foo=Bar,a,b,c,recursive"),
+            Some(("Foo", "Bar", true))
+        );
+    }
 }
