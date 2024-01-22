@@ -95,7 +95,7 @@ fn derive_for_type_parser(src: &str) -> Result<DeriveForType, String> {
 
 fn attributes_for_type_parser(src: &str) -> Result<AttributeForType, String> {
     let (type_path, attribute, recursive) = type_map_parser(src)
-    .ok_or_else(|| String::from("Invalid pattern for `attributes-for-type`. It should be `type=attribute` like `my_type=serde::#[allow(clippy::all)]` or `type=attribute,recursive` like `my_type=serde::#[allow(clippy::all)], recursive`"))?;
+    .ok_or_else(|| String::from("Invalid pattern for `attributes-for-type`. It should be `type=attribute` like `my_type=serde::#[allow(clippy::all)]` or `type=attribute,recursive` like `my_type=serde::#[allow(clippy::all)],recursive`"))?;
     Ok(AttributeForType {
         type_path: type_path.to_string(),
         attribute: attribute.to_string(),
@@ -104,6 +104,8 @@ fn attributes_for_type_parser(src: &str) -> Result<AttributeForType, String> {
 }
 
 /// Parses a `&str` of the form `str1=str2` into `(str1, str2, false)` or `str1=str2,recursive` into `(str1, str2, true)`.
+///
+/// A `None` value returned is a parsing error.
 fn type_map_parser(src: &str) -> Option<(&str, &str, bool)> {
     let (str1, rest) = src.split_once('=')?;
 
@@ -112,8 +114,17 @@ fn type_map_parser(src: &str) -> Option<(&str, &str, bool)> {
         .next()
         .expect("split iter always returns at least one element; qed");
 
-    let rest_args = split_rest.collect::<Vec<_>>();
-    let recursive = rest_args.contains(&"recursive");
+    let mut recursive = false;
+    for r in split_rest {
+        match r {
+            // Note: later we can add other attributes to this match
+            "recursive" => {
+                recursive = true;
+            }
+            _ => return None,
+        }
+    }
+
     Some((str1, str2, recursive))
 }
 
@@ -262,10 +273,7 @@ mod tests {
             type_map_parser("Foo=Bar,recursive"),
             Some(("Foo", "Bar", true))
         );
-        assert_eq!(type_map_parser("Foo=Bar,a"), Some(("Foo", "Bar", false)));
-        assert_eq!(
-            type_map_parser("Foo=Bar,a,b,c,recursive"),
-            Some(("Foo", "Bar", true))
-        );
+        assert_eq!(type_map_parser("Foo=Bar,a"), None);
+        assert_eq!(type_map_parser("Foo=Bar,a,b,c,recursive"), None);
     }
 }
