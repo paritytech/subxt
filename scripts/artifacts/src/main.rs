@@ -20,70 +20,60 @@ fn main() {
     let node_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
     // Get the full metadata from the spawned substrate node
-    Command::make(&format!(
-        "cargo run --bin subxt metadata --version 15 --url {node_url}"
-    ))
-    .out("artifacts/polkadot_metadata_full.scale");
+    run_cmd(
+        &format!("cargo run --bin subxt metadata --version 15 --url {node_url}"),
+        Some("artifacts/polkadot_metadata_full.scale"),
+    );
 
     // Use it to generate polkadot.rs
-    Command::make("cargo run --bin subxt codegen --file artifacts/polkadot_metadata_full.scale")
-        .pipe("rustfmt")
-        .out("testing/integration-tests/src/full_client/codegen/polkadot.rs");
+    run_cmd(
+        "cargo run --bin subxt codegen --file artifacts/polkadot_metadata_full.scale",
+        Some("testing/integration-tests/src/full_client/codegen/polkadot.rs"),
+    );
+    run_cmd(
+        "rustfmt testing/integration-tests/src/full_client/codegen/polkadot.rs",
+        None,
+    );
 
     // Generate a metadata file that only contains a few pallets that we need for our examples.
-    Command::make(r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "Balances,Staking,System,Multisig,Timestamp,ParaInherent""#)
-    .out("artifacts/polkadot_metadata_small.scale");
+    run_cmd(
+        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "Balances,Staking,System,Multisig,Timestamp,ParaInherent""#,
+        Some("artifacts/polkadot_metadata_small.scale"),
+    );
 
     // Generate a metadata file that contains no pallets
-    Command::make(r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets """#)
-    .out("artifacts/polkadot_metadata_tiny.scale");
+    run_cmd(
+        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets """#,
+        Some("artifacts/polkadot_metadata_tiny.scale"),
+    );
 
     // Generate a metadata file that only contains some custom metadata
-    Command::make("cargo run --bin generate-custom-metadata")
-        .out("artifacts/metadata_with_custom_values.scale");
+    run_cmd(
+        "cargo run --bin generate-custom-metadata",
+        Some("artifacts/metadata_with_custom_values.scale"),
+    );
 
     // Generate the polkadot chain spec.
-    Command::make("cargo run --features chain-spec-pruning --bin subxt chain-spec --url wss://rpc.polkadot.io:443 --output-file artifacts/demo_chain_specs/polkadot.json --state-root-hash --remove-substitutes").spawn().unwrap().wait().unwrap();
+    run_cmd("cargo run --features chain-spec-pruning --bin subxt chain-spec --url wss://rpc.polkadot.io:443 --output-file artifacts/demo_chain_specs/polkadot.json --state-root-hash --remove-substitutes", None);
 }
 
-trait CommandT {
-    /// Creates a new command, parsing the arg_string provided.
-    fn make(arg_string: &str) -> Self;
-
-    /// Pipes the output of the current command to the next command.
-    fn pipe(self, arg_string: &str) -> Self;
-
-    /// Writes bytes from stdout to a new file at path.
-    fn out(self, path: &str);
-}
-
-impl CommandT for Command {
-    fn make(arg_string: &str) -> Self {
-        // Note: simple space splitting, no fancy parsing of e.g. quotes surrounding whitespace.
-        let mut parts = arg_string.split(' ');
-        let program = parts.next().expect("no program in command string");
-        let mut command = Command::new(program);
-        for e in parts {
-            command.arg(e);
-        }
-        command
+fn run_cmd(cmd: &str, out_path: Option<&str>) {
+    println!("Running Command: {cmd}");
+    // Note: simple space splitting, no fancy parsing of e.g. quotes surrounding whitespace.
+    let mut parts = cmd.split(' ');
+    let program = parts.next().expect("no program in command string");
+    let mut command = Command::new(program);
+    for e in parts {
+        command.arg(e);
     }
 
-    fn pipe(mut self, arg_string: &str) -> Self {
-        // execute self
-        let old_cmd = self.stdout(Stdio::piped()).spawn().unwrap();
-        let mut next_cmd = Self::make(arg_string);
-        next_cmd.stdin(Stdio::from(old_cmd.stdout.unwrap()));
-        next_cmd
+    if let Some(out_path) = out_path {
+        let file = File::create(out_path).unwrap();
+        command.stdout(Stdio::from(file));
     }
 
-    fn out(mut self, path: &str) {
-        dbg!(path);
-        let file = File::create(path).unwrap();
-        self.stdout(Stdio::from(file))
-            .spawn()
-            .unwrap()
-            .wait()
-            .unwrap();
+    let status = command.spawn().unwrap().wait().unwrap();
+    if !status.success() {
+        panic!("Command `{cmd}` failed with status: {status}")
     }
 }
