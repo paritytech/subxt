@@ -70,9 +70,9 @@ We introduced a `recursive` flag for custom derives and attributes that automati
 pub mod polkadot {}
 ```
 
-### Subxt CLI - New features and usibility improvements ([#1290](https://github.com/paritytech/subxt/pull/1290)), ([#1336](https://github.com/paritytech/subxt/pull/1336)) and ([#1379](https://github.com/paritytech/subxt/pull/1379))
+### Subxt CLI - New features and usibility improvements ([#1290](https://github.com/paritytech/subxt/pull/1290), [#1336](https://github.com/paritytech/subxt/pull/1336), and [#1379](https://github.com/paritytech/subxt/pull/1379))
 
-Our CLI tool now allows you to explore runtime APIs and events ([#1290](https://github.com/paritytech/subxt/pull/1290)). We also fully integrated with [`scale-typegen-description`](https://github.com/paritytech/scale-typegen), a crate that can describe types in a friendly way and provide type examples. The output is also color-coded to be easier on the eyes. Get started with these commands:
+Our CLI tool now allows you to explore runtime APIs and events ([#1290](https://github.com/paritytech/subxt/pull/1290)). We also fully integrated with [`scale-typegen-description`](https://github.com/paritytech/scale-typegen/tree/master/description), a crate that can describe types in a friendly way and provide type examples. The output is also color-coded to be easier on the eyes. Get started with these commands:
 
 ```sh
 # Show details about a runtime API call:
@@ -92,13 +92,13 @@ parachain-node export-metadata | subxt codegen --file - | rustfmt > main.rs
 Similar to the macro, the `subxt codegen` command can now also use `recursive` flags:
 ```sh
 subxt codegen --derive-for-type xcm::v2::multilocation::MultiLocation=Clone,recursive
-subxt codegen --attributes-for-type "xcm::v2::multilocation::MultiLocation=#[foofoo],recursive"
+subxt codegen --attributes-for-type "xcm::v2::multilocation::MultiLocation=#[myerror],recursive"
 ```
 
 ### Minor changes and things to be aware of
 
-- Using insecure connections is now an explicit opt-in ([#1309](https://github.com/paritytech/subxt/pull/1309)) in many places. 
-- When decoding extrinsics from a block into a static type, we now return it's details (e.g. signature, signed extensions, raw bytes) alongside the staticly decoded extrinsic itself ([#1376](https://github.com/paritytech/subxt/pull/1376)).
+- Using insecure connections is now an explicit opt-in in many places ([#1309](https://github.com/paritytech/subxt/pull/1309))
+- When decoding extrinsics from a block into a static type, we now return it's details (e.g. signature, signed extensions, raw bytes) alongside the staticly decoded extrinsic itself ([#1376](https://github.com/paritytech/subxt/pull/1376))
 
 We also made a few fixes and improvements around the unstable backend and the lightclient, preparing them for more stable usage in the future.
 
