@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use crate::error::RpcError;
-use crate::prelude::*;
 use futures::Stream;
 use std::{future::Future, pin::Pin};
 

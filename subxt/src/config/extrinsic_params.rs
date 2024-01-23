@@ -33,6 +33,7 @@ pub enum ExtrinsicParamsError {
     UnknownSignedExtension(String),
     /// Some custom error.
     #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
+    #[cfg(feature = "std")]
     Custom(CustomExtrinsicParamsError),
 }
 
@@ -40,13 +41,17 @@ pub enum ExtrinsicParamsError {
 impl std::error::Error for ExtrinsicParamsError {}
 
 /// A custom error.
+#[cfg(feature = "std")]
 pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-impl From<std::convert::Infallible> for ExtrinsicParamsError {
-    fn from(value: std::convert::Infallible) -> Self {
+
+impl From<core::convert::Infallible> for ExtrinsicParamsError {
+    fn from(value: core::convert::Infallible) -> Self {
         match value {}
     }
 }
+
+#[cfg(feature = "std")]
 impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
     fn from(value: CustomExtrinsicParamsError) -> Self {
         ExtrinsicParamsError::Custom(value)

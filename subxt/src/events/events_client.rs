@@ -2,11 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::prelude::*;
-use crate::{client::OnlineClientT, error::Error, events::Events, Config};
+use crate::{error::Error, events::Events, Config};
 use derivative::Derivative;
-use std::future::Future;
+
+#[cfg(feature = "std")]
+use crate::{
+    backend::{Backend, BackendExt, BlockRef},
+    client::OnlineClientT,
+};
+
+use core::future::Future;
 
 /// A client for working with events.
 #[derive(Derivative)]
@@ -26,6 +32,7 @@ impl<T, Client> EventsClient<T, Client> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, Client> EventsClient<T, Client>
 where
     T: Config,
@@ -86,6 +93,7 @@ fn system_events_key() -> [u8; 32] {
 }
 
 // Get the event bytes from the provided client, at the provided block hash.
+#[cfg(feature = "std")]
 pub(crate) async fn get_event_bytes<T: Config>(
     backend: &dyn Backend<T>,
     block_hash: T::Hash,

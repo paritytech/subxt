@@ -2,18 +2,24 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::borrow::Cow;
-
 use crate::prelude::*;
+use borrow::Cow;
+
+#[cfg(feature = "std")]
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
-    client::{OfflineClientT, OnlineClientT},
+    client::OnlineClientT,
+    tx::TxProgress,
+};
+use crate::{
+    client::OfflineClientT,
     config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
     prelude::*,
-    tx::{Signer as SignerT, TxPayload, TxProgress},
+    tx::{Signer as SignerT, TxPayload},
     utils::{Encoded, PhantomDataSendSync},
 };
+
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
@@ -162,6 +168,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, C> TxClient<T, C>
 where
     T: Config,
@@ -426,6 +433,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, C> SubmittableExtrinsic<T, C>
 where
     T: Config,

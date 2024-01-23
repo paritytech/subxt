@@ -12,12 +12,11 @@ use crate::prelude::*;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
+use collections::BTreeMap;
 use core::fmt::Debug;
 use derivative::Derivative;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
-
-use std::collections::HashMap;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
@@ -393,7 +392,7 @@ macro_rules! impl_tuples {
 
                 // For each signed extension in the tuple, find the matching index in the metadata, if
                 // there is one, and add it to a map with that index as the key.
-                let mut exts_by_index = HashMap::new();
+                let mut exts_by_index = BTreeMap::new();
                 $({
                     for (idx, e) in metadata.extrinsic().signed_extensions().iter().enumerate() {
                         // Skip over any exts that have a match already:

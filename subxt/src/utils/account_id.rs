@@ -6,6 +6,7 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
+use crate::prelude::vec;
 use crate::prelude::*;
 use codec::{Decode, Encode};
 use derive_more::Display;

@@ -2,19 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    storage_type::{validate_storage_address, Storage},
-    utils, StorageAddress,
-};
+use super::{utils, StorageAddress};
+use crate::prelude::*;
+use crate::{client::OfflineClientT, error::Error, Config};
+
+#[cfg(feature = "std")]
 use crate::{
     backend::BlockRef,
-    client::{OfflineClientT, OnlineClientT},
-    error::Error,
-    Config,
+    client::OnlineClientT,
+    storage::storage_type::{validate_storage_address, Storage},
 };
-use crate::prelude::*;
+
+use core::{future::Future, marker::PhantomData};
 use derivative::Derivative;
-use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -68,6 +68,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, Client> StorageClient<T, Client>
 where
     T: Config,

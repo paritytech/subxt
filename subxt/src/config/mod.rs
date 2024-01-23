@@ -76,7 +76,7 @@ pub trait BlockHash:
     + Encode
     + PartialEq
     + Eq
-    + std::hash::Hash
+    + core::hash::Hash
 {
 }
 impl<T> BlockHash for T where
@@ -91,7 +91,7 @@ impl<T> BlockHash for T where
         + Encode
         + PartialEq
         + Eq
-        + std::hash::Hash
+        + core::hash::Hash
 {
 }
 

@@ -33,13 +33,13 @@ pub use subxt_metadata::TryFromError as MetadataTryFromError;
 #[non_exhaustive]
 pub enum Error {
     /// Io error.
+    #[cfg(feature = "std")]
     #[display(fmt = "Io error: {_0}")]
     Io(std::io::Error),
     /// Codec error.
     #[display(fmt = "Scale codec error: {_0}")]
     Codec(codec::Error),
     /// Rpc error.
-    #[cfg(feature = "std")]
     #[display(fmt = "Rpc error: {_0}")]
     Rpc(RpcError),
     /// Serde serialization error
@@ -102,8 +102,8 @@ impl From<String> for Error {
     }
 }
 
-impl From<std::convert::Infallible> for Error {
-    fn from(value: std::convert::Infallible) -> Self {
+impl From<core::convert::Infallible> for Error {
+    fn from(value: core::convert::Infallible) -> Self {
         match value {}
     }
 }
@@ -111,13 +111,13 @@ impl From<std::convert::Infallible> for Error {
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 
-#[cfg(feature = "std")]
 #[derive(Debug, Display)]
 #[non_exhaustive]
 pub enum RpcError {
     // Dev note: We need the error to be safely sent between threads
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
+    #[cfg(feature = "std")]
     #[display(fmt = "RPC error: {_0}")]
     ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
     /// This error signals that the request was rejected for some reason.

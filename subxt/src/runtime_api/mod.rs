@@ -4,10 +4,18 @@
 
 //! Types associated with executing runtime API calls.
 
+#[cfg(feature = "std")]
 mod runtime_client;
+
 mod runtime_payload;
+#[cfg(feature = "std")]
 mod runtime_types;
 
+
+#[cfg(feature = "std")]
 pub use runtime_client::RuntimeApiClient;
+
 pub use runtime_payload::{dynamic, DynamicRuntimeApiPayload, Payload, RuntimeApiPayload};
+
+#[cfg(feature = "std")]
 pub use runtime_types::RuntimeApi;

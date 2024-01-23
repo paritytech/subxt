@@ -5,7 +5,6 @@
 use super::rpc_methods::{FollowEvent, UnstableRpcMethods};
 use crate::config::Config;
 use crate::error::Error;
-use crate::prelude::*;
 use futures::{FutureExt, Stream, StreamExt};
 use std::future::Future;
 use std::pin::Pin;

@@ -4,10 +4,12 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
-use crate::prelude::*;
+use crate::{error::Error, Config};
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
+
+#[cfg(feature = "std")]
+use crate::{backend::BlockRef, client::OnlineClientT};
 
 /// Execute runtime API calls.
 #[derive(Derivative)]
@@ -27,6 +29,7 @@ impl<T, Client> RuntimeApiClient<T, Client> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, Client> RuntimeApiClient<T, Client>
 where
     T: Config,

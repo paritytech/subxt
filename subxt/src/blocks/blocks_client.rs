@@ -4,12 +4,10 @@
 
 use super::Block;
 use crate::{
-    backend::{BlockRef, StreamOfResults},
-    client::OnlineClientT,
     config::Config,
     error::{BlockError, Error},
-    utils::PhantomDataSendSync,
     prelude::*,
+    utils::PhantomDataSendSync,
 };
 use derivative::Derivative;
 use futures::StreamExt;
@@ -17,6 +15,12 @@ use std::future::Future;
 
 type BlockStream<T> = StreamOfResults<T>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
+
+#[cfg(feature = "std")]
+use crate::{
+    backend::{BlockRef, StreamOfResults},
+    client::OnlineClientT,
+};
 
 /// A client for working with blocks.
 #[derive(Derivative)]
@@ -36,6 +40,7 @@ impl<T, Client> BlocksClient<T, Client> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, Client> BlocksClient<T, Client>
 where
     T: Config,

@@ -5,7 +5,8 @@
 use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
-use std::borrow::Cow;
+use crate::prelude::*;
+use borrow::Cow;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::error::MetadataError;
@@ -69,7 +70,7 @@ pub trait RuntimeApiPayload {
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "ArgsData: Clone"),
-    Debug(bound = "ArgsData: std::fmt::Debug")
+    Debug(bound = "ArgsData: core::fmt::Debug")
 )]
 pub struct Payload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,

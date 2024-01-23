@@ -16,6 +16,7 @@ cfg_if! {
         pub use std::{
             any,
             borrow,
+            borrow::ToOwned,
             boxed::{Box},
             cmp,
             collections,
@@ -29,8 +30,8 @@ cfg_if! {
             string::{String},
             str,
             sync,
-            time,
             vec,
+            time,
             rc,
             iter,
         };
@@ -38,15 +39,16 @@ cfg_if! {
     } else {
         pub use alloc::{
             borrow,
+            borrow::ToOwned,
             boxed::{Box},
             collections,
             format,
             string::{String},
             sync,
-            vec::{Vec},
+            vec,
             rc,
         };
-        pub use std::vec::Vec;
+        pub use alloc::vec::Vec;
         pub use core::{
             any,
             cmp,

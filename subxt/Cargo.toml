@@ -68,6 +68,7 @@ frame-metadata = { workspace = true }
 derivative = { workspace = true, features = ["use_core"] }
 derive_more = { workspace = true }
 either = { workspace = true }
+instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }

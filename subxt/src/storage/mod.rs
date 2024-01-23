@@ -6,12 +6,15 @@
 
 mod storage_address;
 mod storage_client;
+
+#[cfg(feature = "std")]
 mod storage_type;
 
 pub mod utils;
 
 pub use storage_client::StorageClient;
 
+#[cfg(feature = "std")]
 pub use storage_type::Storage;
 
 /// Types representing an address which describes where a storage

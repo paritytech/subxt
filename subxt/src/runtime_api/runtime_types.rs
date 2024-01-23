@@ -3,12 +3,18 @@
 // see LICENSE for license details.
 
 use crate::{
-    backend::{BackendExt, BlockRef},
-    client::OnlineClientT,
+   
     error::{Error, MetadataError},
     metadata::DecodeWithMetadata,
     Config,
 };
+
+#[cfg(feature = "std")]
+use crate::{
+    backend::{BackendExt, BlockRef},
+    client::OnlineClientT,
+}
+
 use crate::prelude::*;
 use codec::Decode;
 use derivative::Derivative;
@@ -36,6 +42,7 @@ impl<T: Config, Client> RuntimeApi<T, Client> {
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, Client> RuntimeApi<T, Client>
 where
     T: Config,

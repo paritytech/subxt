@@ -11,18 +11,21 @@ use crate::prelude::*;
 use crate::utils::strip_compact_prefix;
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
-    client::{OfflineClientT, OnlineClientT},
+    client::{OfflineClientT},
     config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
     events,
     metadata::types::PalletMetadata,
     Metadata,
 };
+#[cfg(feature = "std")]
+use crate::client::OnlineClientT;
+
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 
-use std::sync::Arc;
+use crate::prelude::sync::Arc;
 
 /// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
 ///
@@ -102,7 +105,7 @@ where
         let ids = self.ids;
         let mut index = 0;
 
-        std::iter::from_fn(move || {
+        core::iter::from_fn(move || {
             if index == num_extrinsics {
                 None
             } else {
@@ -466,6 +469,7 @@ where
     }
 }
 
+#[cfg(feature = "std")]
 impl<T, C> ExtrinsicDetails<T, C>
 where
     T: Config,
@@ -627,7 +631,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
         let mut byte_start_idx = 0;
         let metadata = &self.metadata;
 
-        std::iter::from_fn(move || {
+        core::iter::from_fn(move || {
             if index == num_signed_extensions {
                 return None;
             }

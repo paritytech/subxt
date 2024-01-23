@@ -4,7 +4,6 @@
 
 //! Types representing extrinsics/transactions that have been submitted to a node.
 
-use crate::prelude::*;
 use crate::utils::strip_compact_prefix;
 use crate::{
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
@@ -24,8 +23,8 @@ pub struct TxProgress<T: Config, C> {
     client: C,
 }
 
-impl<T: Config, C> fmt::Debug for TxProgress<T, C> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl<T: Config, C> std::fmt::Debug for TxProgress<T, C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TxProgress")
             .field("sub", &"<subscription>")
             .field("ext_hash", &self.ext_hash)
@@ -168,7 +167,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 
 /// Possible transaction statuses returned from our [`TxProgress::next()`] call.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "C: fmt::Debug"))]
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub enum TxStatus<T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
@@ -222,7 +221,7 @@ impl<T: Config, C> TxStatus<T, C> {
 
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "C: fmt::Debug"))]
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TxInBlock<T: Config, C> {
     block_ref: BlockRef<T::Hash>,
     ext_hash: T::Hash,

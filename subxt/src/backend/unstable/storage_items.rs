@@ -9,7 +9,6 @@ use super::rpc_methods::{
 };
 use crate::config::Config;
 use crate::error::{Error, RpcError};
-use crate::prelude::*;
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::future::Future;

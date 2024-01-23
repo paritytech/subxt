@@ -9,7 +9,6 @@ use crate::backend::unstable::rpc_methods::{
 };
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
-use crate::prelude::*;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
@@ -75,10 +74,11 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
         let mut this = self.as_mut();
 
         loop {
-            // Poll the unpin tasks while they are completing. if we get back None, then
-            // no tasks in the list, and if pending, we'll be woken when we can poll again.
-            if let Poll::Ready(Some(())) = this.unpin_futs.poll_next_unpin(cx) {
-                continue;
+            // Poll any queued unpin tasks.
+            let unpin_futs_are_pending = match this.unpin_futs.poll_next_unpin(cx) {
+                Poll::Ready(Some(())) => continue,
+                Poll::Ready(None) => false,
+                Poll::Pending => true,
             };
 
             // Poll the inner stream for the next event.
@@ -86,9 +86,14 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                 return Poll::Pending;
             };
 
-            // No more progress to be made if inner stream done.
             let Some(ev) = ev else {
-                return Poll::Ready(None);
+                // if the stream is done, but `unpin_futs` are still pending, then
+                // return pending here so that they are still driven to completion.
+                // Else, return `Ready(None)` to signal nothing left to do.
+                return match unpin_futs_are_pending {
+                    true => Poll::Pending,
+                    false => Poll::Ready(None),
+                };
             };
 
             // Error? just return it and do nothing further.

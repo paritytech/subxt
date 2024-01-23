@@ -4,7 +4,6 @@
 
 use super::{RawRpcSubscription, RpcClientT};
 use crate::error::Error;
-use crate::prelude::*;
 use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
@@ -181,7 +180,7 @@ impl RpcParams {
 /// [`StreamExt`] extension trait.
 pub struct RpcSubscription<Res> {
     inner: RawRpcSubscription,
-    _marker: PhantomData<Res>,
+    _marker: std::marker::PhantomData<Res>,
 }
 
 impl<Res> std::fmt::Debug for RpcSubscription<Res> {
@@ -198,7 +197,7 @@ impl<Res> RpcSubscription<Res> {
     pub fn new(inner: RawRpcSubscription) -> Self {
         Self {
             inner,
-            _marker: PhantomData,
+            _marker: std::marker::PhantomData,
         }
     }
 

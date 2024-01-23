@@ -9,6 +9,7 @@
 //! access.
 
 mod offline_client;
+#[cfg(feature = "std")]
 mod online_client;
 
 crate::macros::cfg_unstable_light_client! {
@@ -20,6 +21,8 @@ crate::macros::cfg_unstable_light_client! {
 }
 
 pub use offline_client::{OfflineClient, OfflineClientT};
+
+#[cfg(feature = "std")]
 pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
 };

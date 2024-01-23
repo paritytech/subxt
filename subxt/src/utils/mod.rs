@@ -55,7 +55,7 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
 ///
 /// Returns an error if the the string could not be parsed into a URL.
 pub fn url_is_secure(url: &str) -> Result<bool, Error> {
-    let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
+    let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::InsecureUrl(url.to_owned())))?;
 
     let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
     let is_localhost = url.host().is_some_and(|e| match e {

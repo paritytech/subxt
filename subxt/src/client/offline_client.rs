@@ -11,7 +11,7 @@ use crate::{
 use crate::prelude::*;
 use derivative::Derivative;
 
-use std::sync::Arc;
+use sync::Arc;
 
 /// A trait representing a client that can perform
 /// offline-only actions.

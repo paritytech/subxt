@@ -5,7 +5,7 @@
 use crate::prelude::*;
 use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
 use derivative::Derivative;
-use std::borrow::Cow;
+use borrow::Cow;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.

@@ -39,7 +39,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         let custom = metadata.custom();
         let custom_value = custom
             .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
+            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_owned()))?;
 
         let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
             &mut custom_value.bytes(),
@@ -62,7 +62,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         let custom = metadata.custom();
         let custom_value = custom
             .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
+            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_owned()))?;
 
         Ok(custom_value.bytes().to_vec())
     }

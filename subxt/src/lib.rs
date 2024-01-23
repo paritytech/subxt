@@ -43,6 +43,7 @@ use tracing_subscriber as _;
 #[allow(unused_imports)]
 pub use getrandom as _;
 
+#[cfg(feature = "std")]
 pub mod backend;
 pub mod blocks;
 pub mod client;
@@ -53,11 +54,11 @@ pub mod dynamic;
 pub mod error;
 pub mod events;
 pub mod metadata;
+pub mod prelude;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
-pub mod prelude;
 
 // Internal helper macros
 #[macro_use]
@@ -66,11 +67,14 @@ mod macros;
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
-    client::{OfflineClient, OnlineClient},
+    client::OfflineClient,
     config::{Config, PolkadotConfig, SubstrateConfig},
     error::Error,
     metadata::Metadata,
 };
+
+#[cfg(feature = "std")]
+pub use crate::client::OnlineClient;
 
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {

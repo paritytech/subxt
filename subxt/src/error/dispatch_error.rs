@@ -10,7 +10,7 @@ use crate::prelude::*;
 use core::fmt::Debug;
 use derive_more::Display;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
-use std::borrow::Cow;
+use borrow::Cow;
 
 use super::{Error, MetadataError};
 

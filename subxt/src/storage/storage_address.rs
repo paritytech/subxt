@@ -11,7 +11,7 @@ use crate::{
 };
 use derivative::Derivative;
 use scale_info::TypeDef;
-use std::borrow::Cow;
+use borrow::Cow;
 use subxt_metadata::{StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
@@ -56,7 +56,7 @@ pub struct Yes;
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "StorageKey: Clone"),
-    Debug(bound = "StorageKey: std::fmt::Debug")
+    Debug(bound = "StorageKey: core::fmt::Debug")
 )]
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,

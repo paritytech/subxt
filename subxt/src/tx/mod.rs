@@ -14,6 +14,8 @@ use crate::macros::cfg_substrate_compat;
 mod signer;
 mod tx_client;
 mod tx_payload;
+
+#[cfg(feature = "std")]
 mod tx_progress;
 
 // The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
@@ -29,5 +31,7 @@ pub use self::{
         ValidationResult,
     },
     tx_payload::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
-    tx_progress::{TxInBlock, TxProgress, TxStatus},
 };
+
+#[cfg(feature = "std")]
+pub use self::tx_progress::{TxInBlock, TxProgress, TxStatus};

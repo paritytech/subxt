@@ -5,18 +5,20 @@
 //! A representation of a block of events.
 
 use super::{Phase, StaticEvent};
+use crate::prelude::*;
 use crate::{
-    client::OnlineClientT,
     error::{Error, MetadataError},
-    events::events_client::get_event_bytes,
     metadata::types::PalletMetadata,
     Config, Metadata,
 };
-use crate::prelude::*;
+
+#[cfg(feature = "std")]
+use crate::{client::OnlineClientT, events::events_client::get_event_bytes};
+
 use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::DecodeAsType;
-use std::sync::Arc;
+use sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -34,8 +36,8 @@ pub struct Events<T: Config> {
 }
 
 // Ignore the Metadata when debug-logging events; it's big and distracting.
-impl<T: Config> std::fmt::Debug for Events<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<T: Config> core::fmt::Debug for Events<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Events")
             .field("block_hash", &self.block_hash)
             .field("event_bytes", &self.event_bytes)
@@ -77,6 +79,7 @@ impl<T: Config> Events<T> {
     ///   latest metadata version.
     /// - The client may not be able to obtain the block at the given hash. Only
     ///   archive nodes keep hold of all past block information.
+    #[cfg(feature = "std")]
     pub async fn new_from_client<Client>(
         metadata: Metadata,
         block_hash: T::Hash,
@@ -120,7 +123,7 @@ impl<T: Config> Events<T> {
 
         let mut pos = self.start_idx;
         let mut index = 0;
-        std::iter::from_fn(move || {
+        core::iter::from_fn(move || {
             if event_bytes.len() <= pos || num_events == index {
                 None
             } else {
