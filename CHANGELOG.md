@@ -4,6 +4,132 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.34.0] - 2024-01-23
+ 
+This release introduces a bunch of features that make subxt easier to use. Let's look at a few of them.
+
+### Codegen - Integrating [`scale-typegen`](https://github.com/paritytech/scale-typegen) and adding type aliases ([#1249](https://github.com/paritytech/subxt/pull/1249))
+
+We rewrote the code generation functionality of subxt and outsourced it to the new [`scale-typegen`](https://github.com/paritytech/scale-typegen) crate, which serves a more general purpose.
+
+Since a lot of types used in substrate are rich with generics, this release introduces type aliases into the generated code.
+A type alias is generated for the arguments/keys or each call, storage entry, and runtime API method ([#1249](https://github.com/paritytech/subxt/pull/1249)).
+
+### Macro - Errors for misspecified type paths ([#1339](https://github.com/paritytech/subxt/pull/1339))
+
+The subxt macro provides attributes to specify custom derives, attributes, and type substitutions on a per-type basis.
+Previously we did not verify that the provided type paths are part of the metadata. This is now fixed:
+If you provide an invalid type path, the macro will tell you so. It also suggests similar type paths, you might have meant instead.
+
+```rust
+#[subxt::subxt(
+    runtime_metadata_path = "metadata.scale", 
+    derive_for_type(path = "Junctions", derive = "Clone")
+)]
+pub mod polkadot {}
+```
+
+This gives you a compile-time error like this:
+
+```md
+Type `Junctions` does not exist at path `Junctions`
+
+A type with the same name is present at: 
+xcm::v3::junctions::Junctions
+xcm::v2::multilocation::Junctions
+```
+
+### Macro - Recursive derives and attributes ([#1379](https://github.com/paritytech/subxt/pull/1379))
+
+Previously adding derives on a type containing other types was also cumbersome, see this example:
+
+```rust
+#[subxt::subxt(
+    runtime_metadata_path = "metadata.scale",
+    derive_for_type(path = "xcm::v2::multilocation::MultiLocation", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::multilocation::Junctions", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::junction::Junction", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::NetworkId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyId", derive = "Clone"),
+    derive_for_type(path = "xcm::v2::BodyPart", derive = "Clone"),
+    derive_for_type(
+        path = "bounded_collections::weak_bounded_vec::WeakBoundedVec",
+        derive = "Clone"
+    )
+)]
+pub mod polkadot {}
+```
+
+We introduced a `recursive` flag for custom derives and attributes that automatically inserts the specified derives on all child types:
+
+```rust
+#[subxt::subxt(
+    runtime_metadata_path = "metadata.scale",
+    derive_for_type(path = "xcm::v2::multilocation::MultiLocation", derive = "Clone", recursive),
+)]
+pub mod polkadot {}
+```
+
+### Subxt CLI - New features and usibility improvements ([#1290](https://github.com/paritytech/subxt/pull/1290)), ([#1336](https://github.com/paritytech/subxt/pull/1336)) and ([#1379](https://github.com/paritytech/subxt/pull/1379))
+
+Our CLI tool now allows you to explore runtime APIs and events ([#1290](https://github.com/paritytech/subxt/pull/1290)). We also fully integrated with [`scale-typegen-description`](https://github.com/paritytech/scale-typegen), a crate that can describe types in a friendly way and provide type examples. The output is also color-coded to be easier on the eyes. Get started with these commands:
+
+```sh
+# Show details about a runtime API call:
+subxt explore --url wss://westend-rpc.polkadot.io api StakingAPI nominations_quota
+# Execute a runtime API call from the CLI:
+subxt explore --url wss://westend-rpc.polkadot.io api core version -e 
+# Discover what events a pallet can emit:
+subxt explore --url wss://westend-rpc.polkadot.io pallet Balances events
+```
+
+All CLI commands that take some metadata via `--file` or `--url`, can now also read the metadata directly from `stdin` with `--file -` ([#1336](https://github.com/paritytech/subxt/pull/1336)).
+This allows you to pipe in metadata from other processes like in this command chain:
+```sh
+parachain-node export-metadata | subxt codegen --file - | rustfmt > main.rs
+```
+
+Similar to the macro, the `subxt codegen` command can now also use `recursive` flags:
+```sh
+subxt codegen --derive-for-type xcm::v2::multilocation::MultiLocation=Clone,recursive
+subxt codegen --attributes-for-type "xcm::v2::multilocation::MultiLocation=#[foofoo],recursive"
+```
+
+### Minor changes and things to be aware of
+
+- Using insecure connections is now an explicit opt-in ([#1309](https://github.com/paritytech/subxt/pull/1309)) in many places. 
+- When decoding extrinsics from a block into a static type, we now return it's details (e.g. signature, signed extensions, raw bytes) alongside the staticly decoded extrinsic itself ([#1376](https://github.com/paritytech/subxt/pull/1376)).
+
+We also made a few fixes and improvements around the unstable backend and the lightclient, preparing them for more stable usage in the future.
+
+### Added
+
+- Errors for misspecified type paths + suggestions ([#1339](https://github.com/paritytech/subxt/pull/1339))
+- CLI: Recursive derives and attributes ([#1379](https://github.com/paritytech/subxt/pull/1379))
+- CLI: Explore runtime APIs and events, colorized outputs, scale-typegen integration for examples ([#1290](https://github.com/paritytech/subxt/pull/1290))
+- Add chainflip to real world usage section of README  ([#1351](https://github.com/paritytech/subxt/pull/1351))
+- CLI: Allow using `--file -` to read metadata from stdin ([#1336](https://github.com/paritytech/subxt/pull/1336))
+- Codegen: Generate type aliases for better API ergonomics ([#1249](https://github.com/paritytech/subxt/pull/1249))
+
+### Changed
+
+- Return Pending rather than loop around if no new finalized hash in submit_transaction ([#1378](https://github.com/paritytech/subxt/pull/1378))
+- Return `ExtrinsicDetails` alongside decoded static extrinsics ([#1376](https://github.com/paritytech/subxt/pull/1376))
+- Improve Signed Extension and Block Decoding Examples/Book ([#1357](https://github.com/paritytech/subxt/pull/1357))
+- Use `scale-typegen` as a backend for the codegen ([#1260](https://github.com/paritytech/subxt/pull/1260))
+- Using insecure connections is now opt-in ([#1309](https://github.com/paritytech/subxt/pull/1309))
+
+### Fixed
+
+- Ensure lightclient chainSpec is at least one block old ([#1372](https://github.com/paritytech/subxt/pull/1372))
+- Typo fix in docs ([#1370](https://github.com/paritytech/subxt/pull/1370))
+- Don't unpin blocks that may show up again ([#1368](https://github.com/paritytech/subxt/pull/1368))
+- Runtime upgrades in unstable backend ([#1348](https://github.com/paritytech/subxt/pull/1348))
+- Generate docs for feature gated items ([#1332](https://github.com/paritytech/subxt/pull/1332))
+- Backend: Remove only finalized blocks from the event window ([#1356](https://github.com/paritytech/subxt/pull/1356))
+- Runtime updates: wait until upgrade on chain ([#1321](https://github.com/paritytech/subxt/pull/1321))
+- Cache extrinsic events ([#1327](https://github.com/paritytech/subxt/pull/1327))
+
 ## [0.33.0] - 2023-12-06
 
 This release makes a bunch of small QoL improvements and changes. Let's look at the main ones.
