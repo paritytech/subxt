@@ -101,3 +101,51 @@ impl<T: RpcClientT> RpcClientT for Box<T> {
         (**self).subscribe_raw(sub, params, unsub)
     }
 }
+
+#[cfg(feature = "reconnecting-rpc-client")]
+impl RpcClientT for reconnecting_jsonrpsee_ws_client::Client {
+    fn request_raw<'a>(
+        &'a self,
+        method: &'a str,
+        params: Option<Box<RawValue>>,
+    ) -> RawRpcFuture<'a, Box<RawValue>> {
+        use futures::FutureExt;
+        use reconnecting_jsonrpsee_ws_client::RpcParams;
+
+        async {
+            self.request_raw(method.to_string(), RpcParams::new(params))
+                .await
+                .map_err(|e| RpcError::ClientError(Box::new(e)))
+        }
+        .boxed()
+    }
+
+    fn subscribe_raw<'a>(
+        &'a self,
+        sub: &'a str,
+        params: Option<Box<RawValue>>,
+        unsub: &'a str,
+    ) -> RawRpcFuture<'a, RawRpcSubscription> {
+        use futures::{FutureExt, StreamExt, TryStreamExt};
+        use reconnecting_jsonrpsee_ws_client::{RpcParams, SubscriptionId};
+
+        async {
+            let sub = self
+                .subscribe_raw(sub.to_string(), RpcParams::new(params), unsub.to_string())
+                .await
+                .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+
+            let id = match sub.id() {
+                SubscriptionId::Num(n) => n.to_string(),
+                SubscriptionId::Str(s) => s.to_string(),
+            };
+            let stream = sub.map_err(|_| RpcError::DisconnectedWillReconnect).boxed();
+
+            Ok(RawRpcSubscription {
+                stream,
+                id: Some(id),
+            })
+        }
+        .boxed()
+    }
+}

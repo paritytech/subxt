@@ -120,6 +120,9 @@ pub enum RpcError {
     /// The requested URL is insecure.
     #[error("RPC error: insecure URL: {0}")]
     InsecureUrl(String),
+    /// The connection was lost and automatically reconnected.
+    #[error("RPC error: the connection was lost and automatically reconnected")]
+    DisconnectedWillReconnect,
 }
 
 impl RpcError {

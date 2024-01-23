@@ -63,6 +63,5 @@ crate::macros::cfg_jsonrpsee! {
 mod rpc_client;
 mod rpc_client_t;
 
-pub use rpc_client_t::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClientT};
-
 pub use rpc_client::{rpc_params, RpcClient, RpcParams, RpcSubscription};
+pub use rpc_client_t::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClientT};

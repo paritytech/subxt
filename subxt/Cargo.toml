@@ -20,7 +20,7 @@ workspace = true
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native"]
+default = ["jsonrpsee", "native", "reconnecting-rpc-client"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -41,6 +41,9 @@ web = [
     "subxt-macro/web",
     "instant/wasm-bindgen"
 ]
+
+# Enable this to use the reconnecting rpc client
+reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
@@ -102,6 +105,9 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
+
+# Reconnecting jsonrpc client
+reconnecting-jsonrpsee-ws-client = { git = "https://github.com/niklasad1/reconnecting-jsonrpsee-ws-client", optional = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
