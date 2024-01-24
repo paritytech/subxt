@@ -3133,8 +3133,9 @@ dependencies = [
 
 [[package]]
 name = "reconnecting-jsonrpsee-ws-client"
-version = "0.1.0"
-source = "git+https://github.com/niklasad1/reconnecting-jsonrpsee-ws-client#2ba3e575e7d3da24fafa3abcde46e9d42975ddd7"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7265f5d33f189e19e7242325ff6874e540aa9c46ae8f44a52412fb59faafbe00"
 dependencies = [
  "futures",
  "jsonrpsee",

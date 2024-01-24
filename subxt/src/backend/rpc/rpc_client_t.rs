@@ -110,10 +110,9 @@ impl RpcClientT for reconnecting_jsonrpsee_ws_client::Client {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         use futures::FutureExt;
-        use reconnecting_jsonrpsee_ws_client::RpcParams;
 
         async {
-            self.request_raw(method.to_string(), RpcParams::new(params))
+            self.request_raw(method.to_string(), params)
                 .await
                 .map_err(|e| RpcError::ClientError(Box::new(e)))
         }
@@ -127,11 +126,11 @@ impl RpcClientT for reconnecting_jsonrpsee_ws_client::Client {
         unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         use futures::{FutureExt, StreamExt, TryStreamExt};
-        use reconnecting_jsonrpsee_ws_client::{RpcParams, SubscriptionId};
+        use reconnecting_jsonrpsee_ws_client::SubscriptionId;
 
         async {
             let sub = self
-                .subscribe_raw(sub.to_string(), RpcParams::new(params), unsub.to_string())
+                .subscribe_raw(sub.to_string(), params, unsub.to_string())
                 .await
                 .map_err(|e| RpcError::ClientError(Box::new(e)))?;
 

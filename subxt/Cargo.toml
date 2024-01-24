@@ -107,7 +107,7 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 tokio-stream = { workspace = true, optional = true }
 
 # Reconnecting jsonrpc client
-reconnecting-jsonrpsee-ws-client = { git = "https://github.com/niklasad1/reconnecting-jsonrpsee-ws-client", optional = true }
+reconnecting-jsonrpsee-ws-client = { version = "0.2", optional = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
