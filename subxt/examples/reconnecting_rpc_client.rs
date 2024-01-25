@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff, PingConfig};
 use subxt::backend::rpc::RpcClient;
-use subxt::error::{Error, RpcError};
+use subxt::error::{Error, RpcError, TransactionError};
 use subxt::{tx::TxStatus, OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 
@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a new client with with a reconnecting RPC client.
     let rpc = Client::builder()
         // Reconnect with exponential backoff.
-        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(60)))
+        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
         // Send period WebSocket pings/pongs every 6th second and if it's not ACK:ed in 30 seconds
         // then disconnect.
         //
@@ -65,27 +65,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match status {
             // It's finalized in a block!
             Ok(TxStatus::InFinalizedBlock(in_block)) => {
-                println!(
-                    "Transaction {:?} is finalized in block {:?}",
-                    in_block.extrinsic_hash(),
-                    in_block.block_hash()
-                );
-
                 // grab the events and fail if no ExtrinsicSuccess event seen:
                 let events = in_block.wait_for_success().await?;
                 // We can look for events (this uses the static interface; we can also iterate
                 // over them and dynamically decode them):
                 let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
 
-                if let Some(event) = transfer_event {
-                    println!("Balance transfer success: {event:?}");
+                if transfer_event.is_some() {
+                    println!("Balance transfer success");
                 } else {
                     println!("Failed to find Balances::Transfer Event");
                 }
             }
             // Just log any other status we encounter:
-            Ok(other) => {
-                println!("Status: {other:?}");
+            //
+            // In this example we emit some important status handling for
+            // here such as Dropped, Invalid etc....
+            Ok(_) => {
+                println!("New status");
             }
             // In this example we just ignore when reconnections occurs
             // but it's technically possible that we can lose

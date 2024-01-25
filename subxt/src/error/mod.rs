@@ -98,6 +98,13 @@ impl From<std::convert::Infallible> for Error {
     }
 }
 
+impl Error {
+    /// Checks whether the error was caused by a RPC re-connection.
+    pub fn is_disconnected_will_reconnect(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
+    }
+}
+
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
