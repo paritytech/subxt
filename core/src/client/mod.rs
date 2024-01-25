@@ -13,7 +13,7 @@ pub struct MinimalClient<C: Config> {
     pub genesis_hash: C::Hash,
     pub runtime_version: RuntimeVersion,
     pub metadata: Metadata,
-    marker: std::marker::PhantomData<C>,
+    marker: core::marker::PhantomData<C>,
 }
 
 impl<C: Config> MinimalClient<C> {

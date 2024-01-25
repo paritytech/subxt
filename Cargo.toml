@@ -75,7 +75,7 @@ impl-serde = { version = "0.4.0" }
 indoc = "2"
 jsonrpsee = { version = "0.21" }
 pretty_assertions = "1.4.0"
-primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
+primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde_no_std"] }
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"

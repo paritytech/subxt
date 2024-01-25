@@ -4535,6 +4535,7 @@ dependencies = [
  "base58",
  "bitvec",
  "blake2",
+ "cfg-if",
  "derivative",
  "derive_more",
  "frame-metadata 16.0.0",

@@ -64,7 +64,9 @@ pub fn url_is_secure(url: &str) -> Result<bool, url::ParseError> {
     Ok(secure_scheme || is_localhost)
 }
 
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
+use crate::prelude::*;
+
+/// A version of [`core::marker::PhantomData`] that is also Send and Sync (which is fine
 /// because regardless of the generic param, it is always possible to Send + Sync this
 /// 0 size type).
 #[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]

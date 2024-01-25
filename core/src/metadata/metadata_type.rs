@@ -2,8 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::prelude::*;
 use derive_more::Display;
-use std::sync::Arc;
+use sync::Arc;
 
 /// A cheaply clone-able representation of the runtime metadata received from a node.
 #[derive(Clone, Debug)]
@@ -11,7 +12,7 @@ pub struct Metadata {
     inner: Arc<subxt_metadata::Metadata>,
 }
 
-impl std::ops::Deref for Metadata {
+impl core::ops::Deref for Metadata {
     type Target = subxt_metadata::Metadata;
     fn deref(&self) -> &Self::Target {
         &self.inner

@@ -13,7 +13,7 @@
 // use codec::Encode;
 // use scale_encode::EncodeAsFields;
 // use scale_value::{Composite, ValueDef, Variant};
-// use std::{borrow::Cow, sync::Arc};
+// use core::{borrow::Cow, sync::Arc};
 
 // /// This represents a transaction payload that can be submitted
 // /// to a node.

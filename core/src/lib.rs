@@ -6,10 +6,13 @@
 //!
 //! `#[no_std]` compatible core crate for subxt.
 
+#![no_std]
+
 pub mod client;
 pub mod config;
 pub mod dynamic;
 pub mod metadata;
+pub mod prelude;
 pub mod tx;
 pub mod utils;
 

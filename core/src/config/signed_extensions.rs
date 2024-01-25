@@ -10,14 +10,14 @@
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use super::Config;
 use crate::client::MinimalClient;
+use crate::prelude::*;
 use crate::utils::Era;
 use codec::{Compact, Encode};
+use collections::BTreeMap;
 use core::fmt::Debug;
 use derivative::Derivative;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
-
-use std::collections::HashMap;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
@@ -368,7 +368,7 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 /// is a sensible default, and allows for a single configuration to work across multiple chains.
 pub struct AnyOf<T, Params> {
     params: Vec<Box<dyn ExtrinsicParamsEncoder>>,
-    _marker: std::marker::PhantomData<(T, Params)>,
+    _marker: core::marker::PhantomData<(T, Params)>,
 }
 
 macro_rules! impl_tuples {
@@ -393,7 +393,7 @@ macro_rules! impl_tuples {
 
                 // For each signed extension in the tuple, find the matching index in the metadata, if
                 // there is one, and add it to a map with that index as the key.
-                let mut exts_by_index = HashMap::new();
+                let mut exts_by_index = BTreeMap::new();
                 $({
                     for (idx, e) in metadata.extrinsic().signed_extensions().iter().enumerate() {
                         // Skip over any exts that have a match already:
@@ -425,7 +425,7 @@ macro_rules! impl_tuples {
 
                 Ok(AnyOf {
                     params,
-                    _marker: std::marker::PhantomData
+                    _marker: core::marker::PhantomData
                 })
             }
         }

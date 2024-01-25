@@ -9,9 +9,9 @@
 //! runtime APIs. Deriving `EncodeAsType` would lead to the inner
 //! bytes to be re-encoded (length prefixed).
 
-use std::marker::PhantomData;
-
+use crate::prelude::*;
 use codec::{Decode, Encode};
+use core::marker::PhantomData;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, Visitor};
 
 use super::{Encoded, Static};

@@ -11,6 +11,9 @@ use crate::client::MinimalClient;
 
 use super::Config;
 use core::fmt::Debug;
+
+use crate::prelude::*;
+
 use derive_more::Display;
 
 /// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
@@ -34,17 +37,21 @@ pub enum ExtrinsicParamsError {
     UnknownSignedExtension(String),
     /// Some custom error.
     #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
+    #[cfg(feature = "std")]
     Custom(CustomExtrinsicParamsError),
 }
 
 /// A custom error.
+#[cfg(feature = "std")]
 pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-impl From<std::convert::Infallible> for ExtrinsicParamsError {
-    fn from(value: std::convert::Infallible) -> Self {
+impl From<core::convert::Infallible> for ExtrinsicParamsError {
+    fn from(value: core::convert::Infallible) -> Self {
         match value {}
     }
 }
+
+#[cfg(feature = "std")]
 impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
     fn from(value: CustomExtrinsicParamsError) -> Self {
         ExtrinsicParamsError::Custom(value)

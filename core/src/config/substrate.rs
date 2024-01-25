@@ -8,6 +8,7 @@ use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hashe
 use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 
+use crate::prelude::*;
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
 

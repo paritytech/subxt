@@ -6,6 +6,7 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
+use crate::prelude::*;
 use codec::{Decode, Encode};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
@@ -146,13 +147,13 @@ impl<'de> Deserialize<'de> for AccountId32 {
     }
 }
 
-impl std::fmt::Display for AccountId32 {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl core::fmt::Display for AccountId32 {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         write!(f, "{}", self.to_ss58check())
     }
 }
 
-impl std::str::FromStr for AccountId32 {
+impl core::str::FromStr for AccountId32 {
     type Err = FromSs58Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         AccountId32::from_ss58check(s)
