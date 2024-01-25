@@ -1,0 +1,68 @@
+[package]
+name = "subxt-core"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Sign extrinsics to be submitted by Subxt"
+keywords = ["parity", "subxt", "extrinsic", "no-std"]
+
+[features]
+default = ["std"]
+std = []
+substrate-compat = ["sp-core", "sp-runtime"]
+
+[dependencies]
+
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+scale-info = { workspace = true }
+scale-value = { workspace = true }
+scale-bits = { workspace = true }
+scale-decode = { workspace = true }
+scale-encode = { workspace = true }
+frame-metadata = { workspace = true }
+subxt-metadata = { workspace = true }
+derivative = { workspace = true }
+derive_more = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+
+# For ss58 encoding AccountId32 to serialize them properly:
+base58 = { workspace = true }
+blake2 = { workspace = true }
+
+# Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
+impl-serde = { workspace = true }
+primitive-types = { workspace = true }
+sp-core-hashing = { workspace = true }
+
+# For parsing urls to disallow insecure schemes
+url = { workspace = true }
+
+# Included if the "substrate-compat" feature is enabled.
+sp-core = { workspace = true, optional = true }
+sp-runtime = { workspace = true, optional = true }
+
+
+[dev-dependencies]
+bitvec = { workspace = true }
+codec = { workspace = true, features = ["derive", "bit-vec"] }
+sp-core = { workspace = true }
+sp-keyring = { workspace = true }
+sp-runtime = { workspace = true }
+
+
+[package.metadata.docs.rs]
+defalt-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+defalt-features = true

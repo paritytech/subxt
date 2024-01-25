@@ -2,6 +2,7 @@
 members = [
     "cli",
     "codegen",
+    "core",
     "lightclient",
     "testing/substrate-runner",
     "testing/test-runtime",
@@ -18,7 +19,7 @@ members = [
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = ["testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
+exclude = ["testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example", "core/no_std_tests"]
 resolver = "2"
 
 [workspace.package]
@@ -63,6 +64,7 @@ color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.3"
 derivative = "2.2.0"
+derive_more = "0.99.17"
 either = "1.9.0"
 frame-metadata = { version = "16.0.0", default-features = false, features = ["current", "std"] }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
@@ -126,6 +128,7 @@ sp-keyring = "31.0.0"
 
 # Subxt workspace crates:
 subxt = { version = "0.34.0", path = "subxt", default-features = false }
+subxt-core = { version = "0.34.0", path = "core", default-features = false }
 subxt-macro = { version = "0.34.0", path = "macro" }
 subxt-metadata = { version = "0.34.0", path = "metadata" }
 subxt-codegen = { version = "0.34.0", path = "codegen" }

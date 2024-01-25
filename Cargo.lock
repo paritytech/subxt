@@ -4529,6 +4529,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "subxt-core"
+version = "0.34.0"
+dependencies = [
+ "base58",
+ "bitvec",
+ "blake2",
+ "derivative",
+ "derive_more",
+ "frame-metadata 16.0.0",
+ "hex",
+ "impl-serde",
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "scale-value",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-core-hashing",
+ "sp-keyring",
+ "sp-runtime",
+ "subxt-metadata",
+ "url",
+]
+
+[[package]]
 name = "subxt-lightclient"
 version = "0.34.0"
 dependencies = [

@@ -1,0 +1,22 @@
+[package]
+name = "subxt-core-no-std-tests"
+edition = "2021"
+publish = false
+version = "0.0.0"
+
+[dependencies]
+subxt-core = { path = "../", default-features = false }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+
+libc = { version = "0.2", default-features = false }
+libc_alloc = { version = "1.0.6" }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+# this shouldn't be needed, it's in workspace.exclude, but still
+# I get the complaint unless I add it...
+[workspace]

@@ -79,6 +79,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
             (cd lightclient && cargo publish) && \
             (cd codegen && cargo publish) && \
             (cd macro && cargo publish) && \
+            (cd core && cargo publish) && \
             (cd subxt && cargo publish) && \
             (cd signer && cargo publish) && \
             (cd cli && cargo publish);
