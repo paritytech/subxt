@@ -10,7 +10,7 @@ use std::time::Duration;
 
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff, PingConfig};
 use subxt::backend::rpc::RpcClient;
-use subxt::error::{Error, RpcError, TransactionError};
+use subxt::error::{Error, RpcError};
 use subxt::{tx::TxStatus, OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 
