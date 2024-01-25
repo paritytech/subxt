@@ -20,7 +20,7 @@ workspace = true
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native", "reconnecting-rpc-client"]
+default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -106,7 +106,7 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
 
-# Reconnecting jsonrpc client
+# Reconnecting jsonrpc ws client
 reconnecting-jsonrpsee-ws-client = { version = "0.2", optional = true }
 
 # For parsing urls to disallow insecure schemes
@@ -143,6 +143,11 @@ required-features = ["unstable-light-client", "jsonrpsee"]
 name = "light_client_parachains"
 path = "examples/light_client_parachains.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
+
+[[example]]
+name = "reconnecting_rpc_client"
+path = "examples/reconnecting_rpc_client.rs"
+required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "substrate-compat", "unstable-light-client"]

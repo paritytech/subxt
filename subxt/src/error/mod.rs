@@ -6,8 +6,6 @@
 
 mod dispatch_error;
 
-use core::fmt::Debug;
-
 crate::macros::cfg_unstable_light_client! {
     pub use crate::client::LightClientError;
 }
@@ -121,8 +119,8 @@ pub enum RpcError {
     #[error("RPC error: insecure URL: {0}")]
     InsecureUrl(String),
     /// The connection was lost and automatically reconnected.
-    #[error("RPC error: the connection was lost and automatically reconnected")]
-    DisconnectedWillReconnect,
+    #[error("RPC error: the connection was lost `{0:?}`; reconnect automatically initiated")]
+    DisconnectedWillReconnect(Option<String>),
 }
 
 impl RpcError {
