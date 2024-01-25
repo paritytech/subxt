@@ -10,11 +10,16 @@ use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, proc_macro_error};
+use quote::ToTokens;
+use scale_typegen::typegen::{
+    settings::substitutes::path_segments,
+    validation::{registry_contains_type_path, similar_type_paths_in_registry},
+};
 use subxt_codegen::{
     fetch_metadata::{
         fetch_metadata_from_file_blocking, fetch_metadata_from_url_blocking, MetadataVersion, Url,
     },
-    CodegenBuilder, CodegenError,
+    CodegenBuilder, CodegenError, Metadata,
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
 
@@ -83,17 +88,21 @@ struct SubstituteType {
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = match NestedMeta::parse_meta_list(args.into()) {
-        Ok(v) => v,
-        Err(e) => {
-            return TokenStream::from(darling::Error::from(e).write_errors());
-        }
-    };
-    let item_mod = parse_macro_input!(input as syn::ItemMod);
-    let args = match RuntimeMetadataArgs::from_list(&attr_args) {
-        Ok(v) => v,
-        Err(e) => return TokenStream::from(e.write_errors()),
-    };
+    match subxt_inner(args, parse_macro_input!(input as syn::ItemMod)) {
+        Ok(e) => e,
+        Err(e) => e,
+    }
+}
+
+// Note: just an additional function to make early returns easier.
+fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream, TokenStream> {
+    let attr_args = NestedMeta::parse_meta_list(args.into())
+        .map_err(|e| TokenStream::from(darling::Error::from(e).write_errors()))?;
+    let args = RuntimeMetadataArgs::from_list(&attr_args)
+        .map_err(|e| TokenStream::from(e.write_errors()))?;
+
+    // Fetch metadata first, because we need it to validate some of the chosen codegen options.
+    let metadata = fetch_metadata(&args)?;
 
     let mut codegen = CodegenBuilder::new();
 
@@ -127,6 +136,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.derive_for_type {
+        validate_type_path(&d.path.path, &metadata);
         codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
     }
 
@@ -139,20 +149,65 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             .collect(),
     );
     for d in args.attributes_for_type {
+        validate_type_path(&d.path.path, &metadata);
         codegen.add_attributes_for_type(d.path, d.attributes.into_iter().map(|a| a.0), d.recursive)
     }
 
     // Insert type substitutions:
     for sub in args.substitute_type.into_iter() {
+        validate_type_path(&sub.path, &metadata);
         codegen.set_type_substitute(sub.path, sub.with);
     }
 
+    let code = codegen
+        .generate(metadata)
+        .map_err(|e| e.into_compile_error())?;
+
+    Ok(code.into())
+}
+
+/// Checks that a type is present in the type registry. If it is not found, abort with a
+/// helpful error message, showing the user alternative types, that have the same name, but are at different locations in the metadata.
+fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
+    let path_segments = path_segments(path);
+    let ident = &path
+        .segments
+        .last()
+        .expect("Empty path should be filtered out before already")
+        .ident;
+    if !registry_contains_type_path(metadata.types(), &path_segments) {
+        let alternatives = similar_type_paths_in_registry(metadata.types(), path);
+        let alternatives: String = if alternatives.is_empty() {
+            format!("There is no Type with name `{ident}` in the provided metadata.")
+        } else {
+            let mut s = "A type with the same name is present at: ".to_owned();
+            for p in alternatives {
+                s.push('\n');
+                s.push_str(&pretty_path(&p));
+            }
+            s
+        };
+
+        abort_call_site!(
+            "Type `{}` does not exist at path `{}`\n\n{}",
+            ident.to_string(),
+            pretty_path(path),
+            alternatives
+        );
+    }
+
+    fn pretty_path(path: &syn::Path) -> String {
+        path.to_token_stream().to_string().replace(' ', "")
+    }
+}
+
+/// Fetches metadata in a blocking manner, from a url or file path.
+fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
-
-    match (
-        args.runtime_metadata_path,
-        args.runtime_metadata_insecure_url,
+    let metadata = match (
+        &args.runtime_metadata_path,
+        &args.runtime_metadata_insecure_url,
     ) {
         (Some(rest_of_path), None) => {
             if unstable_metadata {
@@ -164,16 +219,12 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
-            let generated_code = fetch_metadata_from_file_blocking(&path)
-                .map_err(CodegenError::from)
+            fetch_metadata_from_file_blocking(&path)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
-                .and_then(|m| codegen.generate(m).map_err(Into::into))
-                .unwrap_or_else(|e| e.into_compile_error());
-
-            generated_code.into()
+                .map_err(|e| CodegenError::from(e).into_compile_error())?
         }
         (None, Some(url_string)) => {
-            let url = Url::parse(&url_string).unwrap_or_else(|_| {
+            let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
 
@@ -182,13 +233,10 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 false => MetadataVersion::Latest,
             };
 
-            let generated_code = fetch_metadata_from_url_blocking(url, version)
+            fetch_metadata_from_url_blocking(url, version)
                 .map_err(CodegenError::from)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
-                .and_then(|m| codegen.generate(m).map_err(Into::into))
-                .unwrap_or_else(|e| e.into_compile_error());
-
-            generated_code.into()
+                .map_err(|e| e.into_compile_error())?
         }
         (None, None) => {
             abort_call_site!(
@@ -200,5 +248,6 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
                 "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
             )
         }
-    }
+    };
+    Ok(metadata)
 }

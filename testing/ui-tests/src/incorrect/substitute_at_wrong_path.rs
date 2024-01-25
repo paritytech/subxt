@@ -1,8 +1,8 @@
 #[subxt::subxt(
     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
     substitute_type(
-        path = "frame_support::dispatch::DispatchInfo",
-        with = "my_mod::DispatchInfo"
+        path = "sp_runtime::multiaddress::Event",
+        with = "crate::MyEvent"
     )
 )]
 pub mod node_runtime {}
