@@ -4524,6 +4524,7 @@ dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
  "pretty_assertions",
+ "quote",
  "scale-info",
  "scale-typegen-description",
  "scale-value",

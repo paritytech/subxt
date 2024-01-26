@@ -38,6 +38,7 @@ codec = { package = "parity-scale-codec", workspace = true }
 scale-info = { workspace = true }
 scale-value = { workspace = true }
 syn = { workspace = true }
+quote = { workspace = true }
 jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-native-tls", "http-client"] }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
 scale-typegen-description = { workspace = true }
