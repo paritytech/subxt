@@ -382,6 +382,7 @@ jobs:
       # Note: in `no_std` no real tests are possible, we just run a binary with some tests in it which panic upon failure.
       - name: Run tests
         uses: actions-rs/cargo@v1.0.3
-        run: |
-          cargo run
-        working-directory: testing/no-std-tests
+        with:
+          command: cargo
+          args: run
+          working-directory: testing/no-std-tests
