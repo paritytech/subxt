@@ -363,7 +363,7 @@ mod tests {
         ];
         for case in invalid_cases.iter() {
             let output = run(case).await;
-            // asset that we make suggestions pointing the user to the valid type
+            // assert that we make suggestions pointing the user to the valid type
             assert!(output.unwrap_err().to_string().contains(valid_type));
         }
     }
