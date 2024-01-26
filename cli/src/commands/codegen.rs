@@ -6,7 +6,12 @@ use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::eyre;
+use scale_typegen_description::scale_typegen::typegen::{
+    settings::substitutes::path_segments,
+    validation::{registry_contains_type_path, similar_type_paths_in_registry},
+};
 use subxt_codegen::CodegenBuilder;
+use subxt_metadata::Metadata;
 
 /// Generate runtime API client code from metadata.
 ///
@@ -205,6 +210,9 @@ fn codegen(
         codegen.no_docs()
     }
 
+    let metadata = subxt_metadata::Metadata::decode(&mut &*metadata_bytes)
+        .map_err(|e| eyre!("Cannot decode the provided metadata: {e}"))?;
+
     // Configure derives:
     let global_derives = raw_derives
         .iter()
@@ -219,6 +227,8 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
         let derive = syn::parse_str(&d.trait_path)
             .map_err(|e| eyre!("Cannot parse derive for type {ty_str}: {e}"))?;
+
+        validate_path_with_metadata(&ty.path, &metadata)?;
         // Note: recursive derives and attributes not supported in the CLI => recursive: false
         codegen.add_derives_for_type(ty, std::iter::once(derive), d.recursive);
     }
@@ -234,10 +244,12 @@ fn codegen(
 
     for a in attributes_for_type {
         let ty_str = &a.type_path;
-        let ty = syn::parse_str(ty_str)
+        let ty: syn::TypePath = syn::parse_str(ty_str)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
         let attribute: OuterAttribute = syn::parse_str(&a.attribute)
             .map_err(|e| eyre!("Cannot parse attribute for type {ty_str}: {e}"))?;
+
+        validate_path_with_metadata(&ty.path, &metadata)?;
         // Note: recursive derives and attributes not supported in the CLI => recursive: false
         codegen.add_attributes_for_type(ty, std::iter::once(attribute.0), a.recursive);
     }
@@ -248,11 +260,11 @@ fn codegen(
             .map_err(|e| eyre!("Cannot parse type substitution for path {from_str}: {e}"))?;
         let to: syn::Path = syn::parse_str(&to_str)
             .map_err(|e| eyre!("Cannot parse type substitution for path {from_str}: {e}"))?;
+
+        validate_path_with_metadata(&from, &metadata)?;
         codegen.set_type_substitute(from, to);
     }
 
-    let metadata = subxt_metadata::Metadata::decode(&mut &*metadata_bytes)
-        .map_err(|e| eyre!("Cannot decode the provided metadata: {e}"))?;
     let code = codegen
         .generate(metadata)
         .map_err(|e| eyre!("Cannot generate code: {e}"))?;
@@ -261,12 +273,50 @@ fn codegen(
     Ok(())
 }
 
+/// Validates that the type path is part of the metadata.
+fn validate_path_with_metadata(path: &syn::Path, metadata: &Metadata) -> color_eyre::Result<()> {
+    fn pretty_path(path: &syn::Path) -> String {
+        use quote::ToTokens;
+        path.to_token_stream().to_string().replace(' ', "")
+    }
+
+    let path_segments = path_segments(path);
+    let ident = &path
+        .segments
+        .last()
+        .expect("Empty path should be filtered out before already")
+        .ident;
+    if !registry_contains_type_path(metadata.types(), &path_segments) {
+        let alternatives = similar_type_paths_in_registry(metadata.types(), path);
+        let alternatives: String = if alternatives.is_empty() {
+            format!("There is no Type with name `{ident}` in the provided metadata.")
+        } else {
+            let mut s = "A type with the same name is present at: ".to_owned();
+            for p in alternatives {
+                s.push('\n');
+                s.push_str(&pretty_path(&p));
+            }
+            s
+        };
+
+        color_eyre::eyre::bail!(
+            "Type `{}` does not exist at path `{}`\n{}",
+            ident.to_string(),
+            pretty_path(path),
+            alternatives
+        );
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::commands::codegen::type_map_parser;
 
     #[test]
     fn parse_types() {
+        use crate::commands::codegen::type_map_parser;
+
         assert_eq!(type_map_parser("Foo"), None);
         assert_eq!(type_map_parser("Foo=Bar"), Some(("Foo", "Bar", false)));
         assert_eq!(
@@ -275,5 +325,46 @@ mod tests {
         );
         assert_eq!(type_map_parser("Foo=Bar,a"), None);
         assert_eq!(type_map_parser("Foo=Bar,a,b,c,recursive"), None);
+    }
+
+    async fn run(args_str: &str) -> color_eyre::Result<String> {
+        let mut args = vec![
+            "codegen",
+            "--file=../artifacts/polkadot_metadata_small.scale",
+        ];
+        args.extend(args_str.split(' ').filter(|e| !e.is_empty()));
+        let opts: super::Opts = clap::Parser::try_parse_from(args)?;
+        let mut output: Vec<u8> = Vec::new();
+        let r = super::run(opts, &mut output)
+            .await
+            .map(|_| String::from_utf8(output).unwrap())?;
+        Ok(r)
+    }
+
+    #[tokio::test]
+    async fn invalid_type_paths() {
+        let valid_type = "sp_runtime::multiaddress::MultiAddress";
+        let invalid_type = "my_module::MultiAddress";
+
+        let valid_cases = [
+            format!("--derive-for-type {valid_type}=serde::Serialize"),
+            format!("--attributes-for-type {valid_type}=#[allow(clippy::all)]"),
+            format!("--substitute-type {valid_type}=::my_crate::MultiAddress"),
+        ];
+        for case in valid_cases.iter() {
+            let output = run(case).await;
+            assert!(output.is_ok());
+        }
+
+        let invalid_cases = [
+            format!("--derive-for-type {invalid_type}=serde::Serialize"),
+            format!("--attributes-for-type {invalid_type}=#[allow(clippy::all)]"),
+            format!("--substitute-type {invalid_type}=my_module::MultiAddress"),
+        ];
+        for case in invalid_cases.iter() {
+            let output = run(case).await;
+            // assert that we make suggestions pointing the user to the valid type
+            assert!(output.unwrap_err().to_string().contains(valid_type));
+        }
     }
 }
