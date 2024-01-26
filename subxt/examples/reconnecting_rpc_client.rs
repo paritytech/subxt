@@ -24,7 +24,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create a new client with with a reconnecting RPC client.
     let rpc = Client::builder()
-        // Reconnect with exponential backoff.
+        // Reconnect with exponential backoff
+        //
+        // This API is "iterator-like" so one could limit it to only
+        // reconnect x times and then quit.
         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
         // Send period WebSocket pings/pongs every 6th second and if it's not ACK:ed in 30 seconds
         // then disconnect.
@@ -57,10 +60,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // When the connection is lost, a error RpcError::DisconnectWillReconnect is emitted on the stream.
-    // in such scenarios the error will be seen here.
+    // In this example we just ignore it and print the why it was disconnected.
     //
-    // In such scenario it's possible that messages are lost when reconnecting
-    // and if that's acceptable you may just ignore that error message.
+    // If you want to quit on reconnects just use `balance_transfer_progress.wait_for_finalized_success().await`
+    // and remove the while loop below.
     while let Some(status) = balance_transfer_progress.next().await {
         match status {
             // It's finalized in a block!
@@ -89,7 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // messages on the subscription such as `InFinalizedBlock`
             // when reconnecting.
             Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) => {
-                println!("{:?}", e);
+                println!("{e}");
             }
             Err(err) => {
                 return Err(err.into());

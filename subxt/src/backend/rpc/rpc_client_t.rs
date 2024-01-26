@@ -126,49 +126,7 @@ impl RpcClientT for reconnecting_jsonrpsee_ws_client::Client {
         unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         use futures::{FutureExt, StreamExt, TryStreamExt};
-        use reconnecting_jsonrpsee_ws_client::{RpcError as ReconnError, SubscriptionId};
-
-        // Helper for more human friendly error messages.
-        // Workaround for: https://github.com/paritytech/jsonrpsee/issues/1280
-        fn rpc_error(err: ReconnError) -> String {
-            match err {
-                ReconnError::Transport(e) => e.to_string(),
-                e @ ReconnError::InvalidSubscriptionId => e.to_string(),
-                ReconnError::InvalidRequestId(e) => e.to_string(),
-                ReconnError::Custom(e) => e,
-                ReconnError::RestartNeeded(inner_err) => {
-                    // HACK: jsonrpsee has Error::RestartNeeded(Arc<Error>) and
-                    // we need to visit one child because
-                    // RestartNeeded only contains one layer of recursion.
-                    //
-                    // Thus, `RestartNeeded(RestartNeededArc<Error>)`
-                    // and is unreachable.
-                    match &*inner_err {
-                        ReconnError::Transport(e) => e.to_string(),
-                        e @ ReconnError::InvalidSubscriptionId => e.to_string(),
-                        ReconnError::InvalidRequestId(e) => e.to_string(),
-                        ReconnError::Custom(e) => e.to_string(),
-                        // These variants are infallible.
-                        ReconnError::RestartNeeded(_)
-                        | ReconnError::RequestTimeout
-                        | ReconnError::MaxSlotsExceeded
-                        | ReconnError::Call(_)
-                        | ReconnError::ParseError(_)
-                        | ReconnError::HttpNotImplemented
-                        | ReconnError::EmptyBatchRequest(_)
-                        | ReconnError::RegisterMethod(_) => unreachable!(),
-                    }
-                }
-                // These variants are infallible.
-                ReconnError::RequestTimeout
-                | ReconnError::MaxSlotsExceeded
-                | ReconnError::Call(_)
-                | ReconnError::ParseError(_)
-                | ReconnError::HttpNotImplemented
-                | ReconnError::EmptyBatchRequest(_)
-                | ReconnError::RegisterMethod(_) => unreachable!(),
-            }
-        }
+        use reconnecting_jsonrpsee_ws_client::SubscriptionId;
 
         async {
             let sub = self
@@ -181,7 +139,7 @@ impl RpcClientT for reconnecting_jsonrpsee_ws_client::Client {
                 SubscriptionId::Str(s) => s.to_string(),
             };
             let stream = sub
-                .map_err(|e| RpcError::DisconnectedWillReconnect(Some(rpc_error(e.0))))
+                .map_err(|e| RpcError::DisconnectedWillReconnect(e.to_string()))
                 .boxed();
 
             Ok(RawRpcSubscription {
