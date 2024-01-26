@@ -24,23 +24,11 @@ default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
-native = [
-    "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-native-tls",
-    "subxt-lightclient?/native",
-    "tokio-util"
-]
+native = ["jsonrpsee?/async-client", "jsonrpsee?/client-ws-transport-native-tls", "subxt-lightclient?/native", "tokio-util"]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
-web = [
-    "jsonrpsee?/async-wasm-client",
-    "jsonrpsee?/client-web-transport",
-    "getrandom/js",
-    "subxt-lightclient?/web",
-    "subxt-macro/web",
-    "instant/wasm-bindgen"
-]
+web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js", "subxt-lightclient?/web", "subxt-macro/web", "instant/wasm-bindgen"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
@@ -97,7 +85,7 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-metadata = { workspace = true }
+subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Light client support:

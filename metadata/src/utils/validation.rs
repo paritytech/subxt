@@ -4,13 +4,15 @@
 
 //! Utility functions for metadata validation.
 
+use crate::prelude::*;
 use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
     RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
+use hashbrown::HashMap;
 use outer_enum_hashes::OuterEnumHashes;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
-use std::collections::HashMap;
+use vec::Vec;
 
 pub mod outer_enum_hashes;
 

@@ -358,3 +358,30 @@ jobs:
           wasm-pack test --headless --firefox
           wasm-pack test --headless --chrome
         working-directory: signer/wasm-tests
+
+  no-std-tests:
+    name: "Test (no_std)"
+    runs-on: ubuntu-latest
+    needs: [machete, docs]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      # Note: needs nighly toolchain because otherwise we cannot define custom lang-items.
+      - name: Install Rust nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      # Note: in `no_std` no real tests are possible, we just run a binary with some tests in it which panic upon failure.
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        run: |
+          cargo run
+        working-directory: testing/no-std-tests

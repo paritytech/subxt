@@ -14,16 +14,21 @@
 //! 2. Obtaining [`frame_metadata::RuntimeMetadataPrefixed`], and then
 //!    using `.try_into()` to convert it into [`Metadata`].
 
+#![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
 
 mod from_into;
+mod prelude;
 mod utils;
 
+use hashbrown::HashMap;
+use prelude::*;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::HashMap;
-use std::sync::Arc;
+use string::String;
+use sync::Arc;
 use utils::variant_index::VariantIndex;
 use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
+use vec::Vec;
 
 type ArcStr = Arc<str>;
 

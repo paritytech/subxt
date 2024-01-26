@@ -2,8 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::prelude::*;
+use borrow::ToOwned;
+use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, TypeDef, Variant};
-use std::collections::HashMap;
+use string::String;
 
 /// Given some type ID and type registry, build a couple of
 /// indexes to look up variants by index or name. If the ID provided
@@ -62,8 +65,8 @@ impl VariantIndex {
         types: &'a PortableRegistry,
     ) -> Option<&'a Variant<PortableForm>>
     where
-        String: std::borrow::Borrow<K>,
-        K: std::hash::Hash + Eq + ?Sized,
+        String: borrow::Borrow<K>,
+        K: hash::Hash + Eq + ?Sized,
     {
         let pos = *self.by_name.get(name)?;
         let variants = Self::get(variant_id, types)?;

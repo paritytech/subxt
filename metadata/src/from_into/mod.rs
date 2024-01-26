@@ -2,30 +2,37 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::prelude::*;
+use derive_more::Display;
+use string::String;
+
 mod v14;
 mod v15;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
-#[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[derive(Debug, Display, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TryFromError {
     /// Type missing from type registry
-    #[error("Type id {0} is expected but not found in the type registry")]
+    #[display(fmt = "Type id {_0} is expected but not found in the type registry")]
     TypeNotFound(u32),
     /// Type was not a variant/enum type
-    #[error("Type {0} was not a variant/enum type, but is expected to be one")]
+    #[display(fmt = "Type {_0} was not a variant/enum type, but is expected to be one")]
     VariantExpected(u32),
     /// An unsupported metadata version was provided.
-    #[error("Cannot convert v{0} metadata into Metadata type")]
+    #[display(fmt = "Cannot convert v{_0} metadata into Metadata type")]
     UnsupportedMetadataVersion(u32),
     /// Type name missing from type registry
-    #[error("Type name {0} is expected but not found in the type registry")]
+    #[display(fmt = "Type name {_0} is expected but not found in the type registry")]
     TypeNameNotFound(String),
     /// Invalid type path.
-    #[error("Type has an invalid path {0}")]
+    #[display(fmt = "Type has an invalid path {_0}")]
     InvalidTypePath(String),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for TryFromError {}
 
 impl From<crate::Metadata> for frame_metadata::RuntimeMetadataPrefixed {
     fn from(value: crate::Metadata) -> Self {
