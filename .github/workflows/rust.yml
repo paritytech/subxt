@@ -383,6 +383,5 @@ jobs:
       - name: Run tests
         uses: actions-rs/cargo@v1.0.3
         with:
-          command: cargo
-          args: run
+          command: run
           working-directory: testing/no-std-tests
