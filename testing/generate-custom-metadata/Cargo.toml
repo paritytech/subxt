@@ -12,6 +12,6 @@ homepage.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-scale-info = { workspace = true, features = ["bit-vec"] }
-frame-metadata = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
+scale-info = { workspace = true, features = ["std", "bit-vec"] }
+frame-metadata = { workspace = true, features = ["decode", "current"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["std", "derive", "bit-vec"] }
