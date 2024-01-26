@@ -319,35 +319,34 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     return;
                 };
 
-                if let Some(subscription_state) = self.subscriptions.get_mut(&(id, chain_id)) {
-                    // Send the current notification response.
-                    if subscription_state.sender.send(result).is_err() {
-                        tracing::warn!(
-                            target: LOG_TARGET,
-                            "Cannot send notification to subscription id={id} chain={chain_id:?} method={method}",
-                        );
-
-                        // Make a call to unsubscribe from this method.
-                        let unsub_id = self.next_id(chain_id);
-                        let request = format!(
-                            r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":[{{}}]}}"#,
-                            unsub_id, subscription_state.unsubscribe_method
-                        );
-
-                        if let Err(err) = self.client.json_rpc_request(request, chain_id) {
-                            tracing::warn!(
-                                target: LOG_TARGET,
-                                "Failed to unsubscribe chain={chain_id:?} method={:?}", subscription_state.unsubscribe_method
-                            );
-                        }
-
-                        // Remove the sender if the subscription dropped the receiver.
-                        self.subscriptions.remove(&(id, chain_id));
-                    }
-                } else {
+                let Some(subscription_state) = self.subscriptions.get_mut(&(id, chain_id)) else {
                     tracing::warn!(
                         target: LOG_TARGET,
-                        "Subscription response id={id} chain={chain_id:?} is not tracked",
+                        "Subscription response id={id} chain={chain_id:?} method={method} is not tracked",
+                    );
+                    return;
+                };
+                if subscription_state.sender.send(result).is_ok() {
+                    // Nothing else to do, user is informed about the notification.
+                    return;
+                }
+
+                // User dropped the receiver, unsubscribe from the method and remove internal tracking.
+                let Some(subscription_state) = self.subscriptions.remove(&(id, chain_id)) else {
+                    // State is checked to be some above, so this should never happen.
+                    return;
+                };
+                // Make a call to unsubscribe from this method.
+                let unsub_id = self.next_id(chain_id);
+                let request = format!(
+                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":[{{}}]}}"#,
+                    unsub_id, subscription_state.unsubscribe_method
+                );
+
+                if let Err(err) = self.client.json_rpc_request(request, chain_id) {
+                    tracing::warn!(
+                        target: LOG_TARGET,
+                        "Failed to unsubscribe chain={chain_id:?} method={:?} err={err:?}", subscription_state.unsubscribe_method
                     );
                 }
             }
