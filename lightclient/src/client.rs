@@ -123,7 +123,7 @@ impl LightClientRpc {
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
     pub fn new_from_client<TPlat>(
         client: smoldot_light::Client<TPlat>,
-        chains: impl IntoIterator<Item = AddedChain>,
+        chains: impl IntoIterator<Item = AddedChain<TPlat>>,
     ) -> RawLightClientRpc
     where
         TPlat: smoldot_light::platform::PlatformRef + Clone,
@@ -202,9 +202,9 @@ impl LightClientRpc {
 }
 
 /// The added chain of the light-client.
-pub struct AddedChain {
+pub struct AddedChain<TPlat: smoldot_light::platform::PlatformRef> {
     /// The id of the chain.
     pub chain_id: smoldot_light::ChainId,
     /// Producer of RPC responses for the chain.
-    pub rpc_responses: smoldot_light::JsonRpcResponses,
+    pub rpc_responses: smoldot_light::JsonRpcResponses<TPlat>,
 }

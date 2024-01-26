@@ -314,10 +314,10 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     /// Perform the main background task:
     /// - receiving requests from subxt RPC method / subscriptions
     /// - provides the results from the light client back to users.
-    pub async fn start_task(
+    pub async fn start_task<TPlat: smoldot_light::platform::PlatformRef>(
         &mut self,
         from_subxt: mpsc::UnboundedReceiver<FromSubxt>,
-        from_node: Vec<AddedChain>,
+        from_node: Vec<AddedChain<TPlat>>,
     ) {
         let from_subxt_event = tokio_stream::wrappers::UnboundedReceiverStream::new(from_subxt);
 
