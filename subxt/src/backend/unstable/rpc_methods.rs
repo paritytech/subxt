@@ -280,9 +280,9 @@ impl<T: Config> UnstableRpcMethods<T> {
         let sub = self
             .client
             .subscribe(
-                "transaction_unstable_submitAndWatch",
+                "transactionWatch_unstable_submitAndWatch",
                 rpc_params![to_hex(tx)],
-                "transaction_unstable_unwatch",
+                "transactionWatch_unstable_unwatch",
             )
             .await?;
 
