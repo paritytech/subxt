@@ -380,8 +380,7 @@ jobs:
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
       # Note: in `no_std` no real tests are possible, we just run a binary with some tests in it which panic upon failure.
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: run
-          working-directory: testing/no-std-tests
+      - name: Run no_std tests
+        run: |
+          cargo run
+        working-directory: testing/no-std-tests
