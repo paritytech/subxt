@@ -339,15 +339,17 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 // Make a call to unsubscribe from this method.
                 let unsub_id = self.next_id(chain_id);
                 let request = format!(
-                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":[{{}}]}}"#,
-                    unsub_id, subscription_state.unsubscribe_method
+                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":["{}"]}}"#,
+                    unsub_id, subscription_state.unsubscribe_method, id
                 );
 
                 if let Err(err) = self.client.json_rpc_request(request, chain_id) {
                     tracing::warn!(
                         target: LOG_TARGET,
-                        "Failed to unsubscribe chain={chain_id:?} method={:?} err={err:?}", subscription_state.unsubscribe_method
+                        "Failed to unsubscribe id={id:?} chain={chain_id:?} method={:?} err={err:?}", subscription_state.unsubscribe_method
                     );
+                } else {
+                    tracing::debug!(target: LOG_TARGET,"Unsubscribe id={id:?} chain={chain_id:?} method={:?}", subscription_state.unsubscribe_method);
                 }
             }
             Err(err) => {
