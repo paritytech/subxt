@@ -130,7 +130,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets -- -D warnings
+          args: --all-targets --features unstable-light-client -- -D warnings
+
+      - name: Cargo clippy for web
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --no-default-features --features web -- -D warnings
+
       - if: failure()
         name: Check Job Status
         uses: actions/github-script@v6
