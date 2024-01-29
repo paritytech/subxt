@@ -120,7 +120,7 @@ impl RpcClientT for LightClientRpc {
                 chain_id,
             );
 
-            let params = match params {
+            let params = match params.clone() {
                 Some(params) => serde_json::to_string(&params).map_err(|_| {
                     RpcError::ClientError(Box::new(LightClientError::InvalidParams))
                 })?,
@@ -130,7 +130,7 @@ impl RpcClientT for LightClientRpc {
             // Fails if the background is closed.
             let (sub_id, notif) = client
                 .0
-                .subscription_request(sub.to_string(), params)
+                .subscription_request(sub.to_string(), params.clone())
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
             // Fails if the background is closed.
