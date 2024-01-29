@@ -106,7 +106,7 @@ smoldot-light = { version = "0.14.0", default-features = false }
 tokio-stream = "0.1.14"
 futures-util = "0.3.30"
 rand = "0.8.5"
-pin-project = "1.1.3"
+pin-project = "1.1.4"
 
 # Light client wasm:
 web-sys = { version = "0.3.67", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
