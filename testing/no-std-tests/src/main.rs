@@ -47,3 +47,8 @@ fn subxt_metadata_test() {
     const METADATA: &[u8] = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 }
+
+fn subxt_core_test() {
+    let url = "wss://mysite.com";
+    assert!(subxt_core::utils::url_is_secure(url).unwrap());
+}

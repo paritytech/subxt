@@ -1,0 +1,215 @@
+subxt-core-no-std-tests v0.0.0 (/home/tadeo/code/subxt2/testing/no-std-tests)
+├── libc v0.2.152
+├── libc_alloc v1.0.6
+├── parity-scale-codec v3.6.9
+│   ├── arrayvec v0.7.4
+│   ├── byte-slice-cast v1.2.2
+│   ├── impl-trait-for-tuples v0.2.2 (proc-macro)
+│   │   ├── proc-macro2 v1.0.78
+│   │   │   └── unicode-ident v1.0.12
+│   │   ├── quote v1.0.35
+│   │   │   └── proc-macro2 v1.0.78 (*)
+│   │   └── syn v1.0.109
+│   │       ├── proc-macro2 v1.0.78 (*)
+│   │       ├── quote v1.0.35 (*)
+│   │       └── unicode-ident v1.0.12
+│   ├── parity-scale-codec-derive v3.6.9 (proc-macro)
+│   │   ├── proc-macro-crate v2.0.1
+│   │   │   ├── toml_datetime v0.6.3
+│   │   │   └── toml_edit v0.20.2
+│   │   │       ├── indexmap v2.1.0
+│   │   │       │   ├── equivalent v1.0.1
+│   │   │       │   └── hashbrown v0.14.3
+│   │   │       ├── toml_datetime v0.6.3
+│   │   │       └── winnow v0.5.34
+│   │   ├── proc-macro2 v1.0.78 (*)
+│   │   ├── quote v1.0.35 (*)
+│   │   └── syn v1.0.109 (*)
+│   └── serde v1.0.196
+│       └── serde_derive v1.0.196 (proc-macro)
+│           ├── proc-macro2 v1.0.78 (*)
+│           ├── quote v1.0.35 (*)
+│           └── syn v2.0.48
+│               ├── proc-macro2 v1.0.78 (*)
+│               ├── quote v1.0.35 (*)
+│               └── unicode-ident v1.0.12
+├── subxt-core v0.34.0 (/home/tadeo/code/subxt2/core)
+│   ├── base58 v0.2.0
+│   ├── blake2 v0.10.6
+│   │   └── digest v0.10.7
+│   │       ├── block-buffer v0.10.4
+│   │       │   └── generic-array v0.14.7
+│   │       │       └── typenum v1.17.0
+│   │       │       [build-dependencies]
+│   │       │       └── version_check v0.9.4
+│   │       ├── crypto-common v0.1.6
+│   │       │   ├── generic-array v0.14.7 (*)
+│   │       │   └── typenum v1.17.0
+│   │       └── subtle v2.5.0
+│   ├── cfg-if v1.0.0
+│   ├── derivative v2.2.0 (proc-macro)
+│   │   ├── proc-macro2 v1.0.78 (*)
+│   │   ├── quote v1.0.35 (*)
+│   │   └── syn v1.0.109 (*)
+│   ├── derive_more v0.99.17 (proc-macro)
+│   │   ├── convert_case v0.4.0
+│   │   ├── proc-macro2 v1.0.78 (*)
+│   │   ├── quote v1.0.35 (*)
+│   │   └── syn v1.0.109 (*)
+│   │   [build-dependencies]
+│   │   └── rustc_version v0.4.0
+│   │       └── semver v1.0.21
+│   ├── frame-metadata v16.0.0
+│   │   ├── cfg-if v1.0.0
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── scale-info v2.10.0
+│   │   │   ├── bitvec v1.0.1
+│   │   │   │   ├── funty v2.0.0
+│   │   │   │   ├── radium v0.7.0
+│   │   │   │   ├── tap v1.0.1
+│   │   │   │   └── wyz v0.5.1
+│   │   │   │       └── tap v1.0.1
+│   │   │   ├── cfg-if v1.0.0
+│   │   │   ├── derive_more v0.99.17 (proc-macro) (*)
+│   │   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   │   ├── scale-info-derive v2.10.0 (proc-macro)
+│   │   │   │   ├── proc-macro-crate v1.3.1
+│   │   │   │   │   ├── once_cell v1.19.0
+│   │   │   │   │   └── toml_edit v0.19.15
+│   │   │   │   │       ├── indexmap v2.1.0 (*)
+│   │   │   │   │       ├── toml_datetime v0.6.3
+│   │   │   │   │       └── winnow v0.5.34
+│   │   │   │   ├── proc-macro2 v1.0.78 (*)
+│   │   │   │   ├── quote v1.0.35 (*)
+│   │   │   │   └── syn v1.0.109 (*)
+│   │   │   └── serde v1.0.196 (*)
+│   │   └── serde v1.0.196 (*)
+│   ├── hex v0.4.3
+│   ├── impl-serde v0.4.0
+│   │   └── serde v1.0.196 (*)
+│   ├── parity-scale-codec v3.6.9 (*)
+│   ├── primitive-types v0.12.2
+│   │   ├── fixed-hash v0.8.0
+│   │   │   ├── byteorder v1.5.0
+│   │   │   ├── rand v0.8.5
+│   │   │   │   ├── libc v0.2.152
+│   │   │   │   ├── rand_chacha v0.3.1
+│   │   │   │   │   ├── ppv-lite86 v0.2.17
+│   │   │   │   │   └── rand_core v0.6.4
+│   │   │   │   │       └── getrandom v0.2.12
+│   │   │   │   │           ├── cfg-if v1.0.0
+│   │   │   │   │           └── libc v0.2.152
+│   │   │   │   └── rand_core v0.6.4 (*)
+│   │   │   ├── rustc-hex v2.1.0
+│   │   │   └── static_assertions v1.1.0
+│   │   ├── impl-codec v0.6.0
+│   │   │   └── parity-scale-codec v3.6.9 (*)
+│   │   ├── impl-serde v0.4.0 (*)
+│   │   ├── scale-info v2.10.0 (*)
+│   │   └── uint v0.9.5
+│   │       ├── byteorder v1.5.0
+│   │       ├── crunchy v0.2.2
+│   │       ├── hex v0.4.3
+│   │       └── static_assertions v1.1.0
+│   ├── scale-bits v0.4.0
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── scale-info v2.10.0 (*)
+│   │   └── serde v1.0.196 (*)
+│   ├── scale-decode v0.10.0
+│   │   ├── derive_more v0.99.17 (proc-macro) (*)
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── primitive-types v0.12.2 (*)
+│   │   ├── scale-bits v0.4.0 (*)
+│   │   ├── scale-decode-derive v0.10.0 (proc-macro)
+│   │   │   ├── darling v0.14.4
+│   │   │   │   ├── darling_core v0.14.4
+│   │   │   │   │   ├── fnv v1.0.7
+│   │   │   │   │   ├── ident_case v1.0.1
+│   │   │   │   │   ├── proc-macro2 v1.0.78 (*)
+│   │   │   │   │   ├── quote v1.0.35 (*)
+│   │   │   │   │   ├── strsim v0.10.0
+│   │   │   │   │   └── syn v1.0.109 (*)
+│   │   │   │   └── darling_macro v0.14.4 (proc-macro)
+│   │   │   │       ├── darling_core v0.14.4 (*)
+│   │   │   │       ├── quote v1.0.35 (*)
+│   │   │   │       └── syn v1.0.109 (*)
+│   │   │   ├── proc-macro-crate v1.3.1 (*)
+│   │   │   ├── proc-macro2 v1.0.78 (*)
+│   │   │   ├── quote v1.0.35 (*)
+│   │   │   └── syn v1.0.109 (*)
+│   │   ├── scale-info v2.10.0 (*)
+│   │   └── smallvec v1.13.1
+│   ├── scale-encode v0.5.0
+│   │   ├── derive_more v0.99.17 (proc-macro) (*)
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── primitive-types v0.12.2 (*)
+│   │   ├── scale-bits v0.4.0 (*)
+│   │   ├── scale-encode-derive v0.5.0 (proc-macro)
+│   │   │   ├── darling v0.14.4 (*)
+│   │   │   ├── proc-macro-crate v1.3.1 (*)
+│   │   │   ├── proc-macro2 v1.0.78 (*)
+│   │   │   ├── quote v1.0.35 (*)
+│   │   │   └── syn v1.0.109 (*)
+│   │   ├── scale-info v2.10.0 (*)
+│   │   └── smallvec v1.13.1
+│   ├── scale-info v2.10.0 (*)
+│   ├── scale-value v0.13.0
+│   │   ├── derive_more v0.99.17 (proc-macro) (*)
+│   │   ├── either v1.9.0
+│   │   ├── frame-metadata v15.1.0
+│   │   │   ├── cfg-if v1.0.0
+│   │   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   │   └── scale-info v2.10.0 (*)
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── scale-bits v0.4.0 (*)
+│   │   ├── scale-decode v0.10.0 (*)
+│   │   ├── scale-encode v0.5.0 (*)
+│   │   └── scale-info v2.10.0 (*)
+│   ├── serde v1.0.196 (*)
+│   ├── serde_json v1.0.113
+│   │   ├── itoa v1.0.10
+│   │   ├── ryu v1.0.16
+│   │   └── serde v1.0.196 (*)
+│   ├── sp-core-hashing v15.0.0
+│   │   ├── blake2b_simd v1.0.2
+│   │   │   ├── arrayref v0.3.7
+│   │   │   ├── arrayvec v0.7.4
+│   │   │   └── constant_time_eq v0.3.0
+│   │   ├── byteorder v1.5.0
+│   │   ├── digest v0.10.7 (*)
+│   │   ├── sha2 v0.10.8
+│   │   │   ├── cfg-if v1.0.0
+│   │   │   ├── cpufeatures v0.2.12
+│   │   │   └── digest v0.10.7 (*)
+│   │   ├── sha3 v0.10.8
+│   │   │   ├── digest v0.10.7 (*)
+│   │   │   └── keccak v0.1.5
+│   │   └── twox-hash v1.6.3
+│   │       ├── cfg-if v1.0.0
+│   │       ├── digest v0.10.7 (*)
+│   │       └── static_assertions v1.1.0
+│   ├── subxt-metadata v0.34.0 (/home/tadeo/code/subxt2/metadata)
+│   │   ├── cfg-if v1.0.0
+│   │   ├── derive_more v0.99.17 (proc-macro) (*)
+│   │   ├── frame-metadata v16.0.0 (*)
+│   │   ├── hashbrown v0.14.3
+│   │   │   ├── ahash v0.8.7
+│   │   │   │   ├── cfg-if v1.0.0
+│   │   │   │   ├── once_cell v1.19.0
+│   │   │   │   └── zerocopy v0.7.32
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── version_check v0.9.4
+│   │   │   └── allocator-api2 v0.2.16
+│   │   ├── parity-scale-codec v3.6.9 (*)
+│   │   ├── scale-info v2.10.0 (*)
+│   │   └── sp-core-hashing v15.0.0 (*)
+│   └── url v2.5.0
+│       ├── form_urlencoded v1.2.1
+│       │   └── percent-encoding v2.3.1
+│       ├── idna v0.5.0
+│       │   ├── unicode-bidi v0.3.15
+│       │   └── unicode-normalization v0.1.22
+│       │       └── tinyvec v1.6.0
+│       │           └── tinyvec_macros v0.1.1
+│       └── percent-encoding v2.3.1
+└── subxt-metadata v0.34.0 (/home/tadeo/code/subxt2/metadata) (*)
