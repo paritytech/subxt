@@ -186,14 +186,9 @@ impl<T: Config> LightClientBuilder<T> {
 }
 
 /// Raw builder for [`RawLightClient`].
+#[derive(Default)]
 pub struct RawLightClientBuilder {
     chains: Vec<AddedChain>,
-}
-
-impl Default for RawLightClientBuilder {
-    fn default() -> Self {
-        Self { chains: Vec::new() }
-    }
 }
 
 impl RawLightClientBuilder {
