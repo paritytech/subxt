@@ -124,14 +124,14 @@ impl PlatformRef for SubxtPlatform {
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr.to_string())
+                format!("ws://{}", addr)
             }
             Address::WebSocketIp {
                 ip: IpAddr::V6(ip),
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr.to_string())
+                format!("ws://{}", addr)
             }
 
             // The API user of the `PlatformRef` trait is never supposed to open connections of

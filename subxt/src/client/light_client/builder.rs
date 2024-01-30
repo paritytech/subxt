@@ -6,10 +6,12 @@ use super::{rpc::LightClientRpc, LightClient, LightClientError};
 use crate::backend::rpc::RpcClient;
 use crate::client::RawLightClient;
 use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
-use crate::utils::validate_url_is_secure;
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
+
+#[cfg(feature = "jsonrpsee")]
+use crate::utils::validate_url_is_secure;
 
 /// Builder for [`LightClient`].
 #[derive(Clone, Debug)]
