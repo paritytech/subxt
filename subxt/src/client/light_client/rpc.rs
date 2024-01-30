@@ -119,7 +119,7 @@ impl RpcClientT for LightClientRpc {
                 chain_id,
             );
 
-            let params = match params.clone() {
+            let params = match params {
                 Some(params) => serde_json::to_string(&params).map_err(|_| {
                     RpcError::ClientError(Box::new(LightClientError::InvalidParams))
                 })?,
