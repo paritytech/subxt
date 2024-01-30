@@ -47,7 +47,7 @@ jobs:
           args: --all -- --check
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   machete:
     name: "Check unused dependencies"
@@ -78,7 +78,7 @@ jobs:
           command: machete
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   clippy:
     name: Cargo clippy
@@ -110,7 +110,7 @@ jobs:
           cargo clippy -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   wasm_clippy:
     name: Cargo clippy (WASM)
@@ -141,7 +141,7 @@ jobs:
           args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   check:
     name: Cargo check
@@ -203,7 +203,7 @@ jobs:
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   wasm_check:
     name: Cargo check (WASM)
@@ -230,7 +230,7 @@ jobs:
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   docs:
     name: Check documentation and run doc tests
@@ -263,7 +263,7 @@ jobs:
           args: --doc
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   tests:
     name: "Test (Native)"
@@ -297,7 +297,7 @@ jobs:
           args: run --workspace
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   unstable_backend_tests:
     name: "Test (Unstable Backend)"
@@ -331,7 +331,7 @@ jobs:
           args: run --workspace --features unstable-backend-client
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   light_client_tests:
     name: "Test (Light Client)"
@@ -362,7 +362,7 @@ jobs:
           args: --release --package integration-tests --features unstable-light-client
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
 
   wasm_tests:
     name: Test (WASM)
@@ -418,4 +418,4 @@ jobs:
         working-directory: signer/wasm-tests
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@0.3"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1 # v0.3"
