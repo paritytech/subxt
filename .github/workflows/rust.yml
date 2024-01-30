@@ -108,11 +108,29 @@ jobs:
           command: clippy
           args: --all-targets --features unstable-light-client -- -D warnings
 
-      - name: Cargo clippy for web
+      - name: Cargo clippy for web subxt-lightclient
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --no-default-features --features web -- -D warnings
+          args: -p subxt-lightclient --no-default-features --features web -- -D warnings
+
+      - name: Cargo clippy for web subxt
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -p subxt-lightclient --no-default-features --features web -- -D warnings
+
+      - name: Cargo clippy for web subxt with light-client
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -p subxt-lightclient --no-default-features --features web,unstable-light-client -- -D warnings
+
+      - name: Cargo clippy for web subxt with light-client and jsonrpsee
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown   -- -D warnings
 
       - if: "failure()"
         uses: "andymckay/cancel-action@0.3"
