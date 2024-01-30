@@ -106,7 +106,7 @@ impl RpcClientT for LightClientRpc {
         &'a self,
         sub: &'a str,
         params: Option<Box<RawValue>>,
-        _unsub: &'a str,
+        unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         let client = self.clone();
         let chain_id = self.chain_id();
@@ -130,7 +130,7 @@ impl RpcClientT for LightClientRpc {
             // Fails if the background is closed.
             let (sub_id, notif) = client
                 .0
-                .subscription_request(sub.to_string(), params)
+                .subscription_request(sub.to_string(), params, unsub.to_string())
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
 
             // Fails if the background is closed.
