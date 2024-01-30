@@ -124,7 +124,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -p subxt-lightclient --no-default-features --features web,unstable-light-client -- -D warnings
+          args: -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
 
       - name: Cargo clippy for web subxt with light-client and jsonrpsee
         uses: actions-rs/cargo@v1
