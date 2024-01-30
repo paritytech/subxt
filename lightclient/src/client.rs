@@ -179,6 +179,7 @@ impl LightClientRpc {
         &self,
         method: String,
         params: String,
+        unsubscribe_method: String,
     ) -> Result<
         (
             oneshot::Receiver<MethodResponse>,
@@ -191,6 +192,7 @@ impl LightClientRpc {
 
         self.to_backend.send(FromSubxt::Subscription {
             method,
+            unsubscribe_method,
             params,
             sub_id,
             sender,
