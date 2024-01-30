@@ -49,6 +49,6 @@ fn subxt_metadata_test() {
 }
 
 fn subxt_core_test() {
-    let url = "wss://mysite.com";
-    assert!(subxt_core::utils::url_is_secure(url).unwrap());
+    // let er
+    // assert!(subxt_core::utils::url_is_secure(url).unwrap());
 }

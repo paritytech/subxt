@@ -4560,7 +4560,6 @@ dependencies = [
  "sp-keyring",
  "sp-runtime",
  "subxt-metadata",
- "url",
 ]
 
 [[package]]

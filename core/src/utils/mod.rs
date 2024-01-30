@@ -15,7 +15,6 @@ mod wrapper_opaque;
 
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use url::Url;
 
 pub use account_id::AccountId32;
 use borrow::ToOwned;
@@ -48,22 +47,6 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
     let cursor = &mut &*bytes;
     let val = <Compact<u64>>::decode(cursor)?;
     Ok((val.0, *cursor))
-}
-
-/// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
-///
-/// Returns an error if the the string could not be parsed into a URL.
-pub fn url_is_secure(url: &str) -> Result<bool, url::ParseError> {
-    let url = Url::parse(url)?;
-
-    let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
-    let is_localhost = url.host().is_some_and(|e| match e {
-        url::Host::Domain(e) => e == "localhost",
-        url::Host::Ipv4(e) => e.is_loopback(),
-        url::Host::Ipv6(e) => e.is_loopback(),
-    });
-
-    Ok(secure_scheme || is_localhost)
 }
 
 use crate::prelude::*;

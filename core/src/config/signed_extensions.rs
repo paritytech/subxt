@@ -9,7 +9,7 @@
 
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use super::Config;
-use crate::client::MinimalClient;
+use crate::client::ClientBase;
 use crate::prelude::*;
 use crate::utils::Era;
 use borrow::ToOwned;
@@ -45,7 +45,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
 
     fn new(
         _nonce: u64,
-        client: &MinimalClient<T>,
+        client: &ClientBase<T>,
         _other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckSpecVersion(client.runtime_version().spec_version))
@@ -73,7 +73,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckNonce {
 
     fn new(
         nonce: u64,
-        _client: &MinimalClient<T>,
+        _client: &ClientBase<T>,
         _other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckNonce(Compact(nonce)))
@@ -101,7 +101,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
 
     fn new(
         _nonce: u64,
-        client: &MinimalClient<T>,
+        client: &ClientBase<T>,
         _other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckTxVersion(client.runtime_version().transaction_version))
@@ -129,7 +129,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
 
     fn new(
         _nonce: u64,
-        client: &MinimalClient<T>,
+        client: &ClientBase<T>,
         _other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckGenesis(client.genesis_hash()))
@@ -195,7 +195,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
 
     fn new(
         _nonce: u64,
-        client: &MinimalClient<T>,
+        client: &ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckMortality {
@@ -286,7 +286,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
 
     fn new(
         _nonce: u64,
-        _client: &MinimalClient<T>,
+        _client: &ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
@@ -344,7 +344,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
 
     fn new(
         _nonce: u64,
-        _client: &MinimalClient<T>,
+        _client: &ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {
@@ -388,7 +388,7 @@ macro_rules! impl_tuples {
 
             fn new(
                 nonce: u64,
-                client: &MinimalClient<T>,
+                client: &ClientBase<T>,
                 other_params: Self::OtherParams,
             ) -> Result<Self, ExtrinsicParamsError> {
                 let metadata = client.metadata();

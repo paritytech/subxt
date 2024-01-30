@@ -7,7 +7,7 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::client::MinimalClient;
+use crate::client::ClientBase;
 
 use super::Config;
 use crate::prelude::*;
@@ -71,7 +71,7 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new(
         nonce: u64,
-        client: &MinimalClient<T>,
+        client: &ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError>;
 }

@@ -44,9 +44,6 @@ impl-serde = { workspace = true }
 primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
 sp-core-hashing = { workspace = true }
 
-# For parsing urls to disallow insecure schemes
-url = { workspace = true }
-
 # Included if the "substrate-compat" feature is enabled.
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }

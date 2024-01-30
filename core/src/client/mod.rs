@@ -9,14 +9,14 @@ use crate::{config::Config, metadata::Metadata};
 
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct MinimalClient<C: Config> {
+pub struct ClientBase<C: Config> {
     pub genesis_hash: C::Hash,
     pub runtime_version: RuntimeVersion,
     pub metadata: Metadata,
     marker: core::marker::PhantomData<C>,
 }
 
-impl<C: Config> MinimalClient<C> {
+impl<C: Config> ClientBase<C> {
     pub fn metadata(&self) -> Metadata {
         self.metadata.clone()
     }
