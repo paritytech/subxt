@@ -45,21 +45,9 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   machete:
     name: "Check unused dependencies"
@@ -88,21 +76,9 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: machete
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   clippy:
     name: Cargo clippy
@@ -138,21 +114,8 @@ jobs:
           command: clippy
           args: --no-default-features --features web -- -D warnings
 
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   check:
     name: Cargo check
@@ -212,21 +175,9 @@ jobs:
       # Check the parachain-example code, which isn't a part of the workspace so is otherwise ignored.
       - name: Cargo check parachain-example
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   wasm_check:
     name: Cargo check (WASM)
@@ -251,21 +202,9 @@ jobs:
       - name: Cargo check WASM examples
         run: |
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   docs:
     name: Check documentation and run doc tests
@@ -296,21 +235,9 @@ jobs:
         with:
           command: test
           args: --doc
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   tests:
     name: "Test (Native)"
@@ -342,21 +269,9 @@ jobs:
         with:
           command: nextest
           args: run --workspace
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   unstable_backend_tests:
     name: "Test (Unstable Backend)"
@@ -388,21 +303,9 @@ jobs:
         with:
           command: nextest
           args: run --workspace --features unstable-backend-client
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   light_client_tests:
     name: "Test (Light Client)"
@@ -431,21 +334,9 @@ jobs:
         with:
           command: test
           args: --release --package integration-tests --features unstable-light-client
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
 
   wasm_tests:
     name: Test (WASM)
@@ -499,18 +390,6 @@ jobs:
           wasm-pack test --headless --firefox
           wasm-pack test --headless --chrome
         working-directory: signer/wasm-tests
-      - if: failure()
-        name: Check Job Status
-        uses: actions/github-script@v6
-        env:
-          RUN_ID: ${{ github.run_id }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          script: |
-            const runId = process.env.RUN_ID
-            const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
-            const resp = await github.rest.actions.cancelWorkflowRun({
-              owner,
-              repo,
-              runId
-            })
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@0.3"
