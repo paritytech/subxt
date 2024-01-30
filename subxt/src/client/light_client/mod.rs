@@ -75,7 +75,7 @@ impl RawLightClient {
     /// # Note
     ///
     /// If you are unsure, please use [`LightClient::builder`] instead.
-    pub fn builder() -> RawLightClientBuilder {
+    pub fn builder<TPlatform: smoldot::PlatformRef>() -> RawLightClientBuilder<TPlatform> {
         RawLightClientBuilder::default()
     }
 
