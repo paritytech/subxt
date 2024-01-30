@@ -19,19 +19,25 @@ pub struct SubstrateNodeBuilder {
     custom_flags: HashMap<CowStr, Option<CowStr>>,
 }
 
-impl Default for SubstrateNodeBuilder {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl SubstrateNodeBuilder {
     /// Configure a new Substrate node.
     pub fn new() -> Self {
         SubstrateNodeBuilder {
-            binary_paths: vec!["substrate-node".into(), "substrate".into()],
+            binary_paths: vec![],
             custom_flags: Default::default(),
         }
+    }
+
+    /// Provide "substrate-node" and "substrate" as binary paths
+    pub fn substrate(&mut self) -> &mut Self {
+        self.binary_paths = vec!["substrate-node".into(), "substrate".into()];
+        self
+    }
+
+    /// Provide "polkadot" as binary path.
+    pub fn polkadot(&mut self) -> &mut Self {
+        self.binary_paths = vec!["polkadot".into()];
+        self
     }
 
     /// Set the path to the `substrate` binary; defaults to "substrate-node"

@@ -22,7 +22,7 @@ jobs:
 
       # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
       - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
