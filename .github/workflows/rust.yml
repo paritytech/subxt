@@ -46,10 +46,44 @@ jobs:
           command: fmt
           args: --all -- --check
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
+  machete:
+    name: "Check unused dependencies"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Use substrate-node binary
+        uses: ./.github/workflows/actions/use-substrate
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      - name: Install cargo-machete
+        run: cargo install cargo-machete
+
+      - name: Check unused dependencies
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: machete
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   clippy:
     name: Cargo clippy
     runs-on: ubuntu-latest
-    needs: fmt
+    needs: [fmt, machete]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -69,15 +103,50 @@ jobs:
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
       - name: Run clippy
+        run: |
+          cargo clippy --all-targets --features unstable-light-client -- -D warnings
+          cargo clippy -p subxt-lightclient --no-default-features --features web -- -D warnings
+          cargo clippy -p subxt --no-default-features --features web -- -D warnings
+          cargo clippy -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
+  wasm_clippy:
+    name: Cargo clippy (WASM)
+    runs-on: ubuntu-latest
+    needs: [fmt, machete]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Use substrate-node binary
+        uses: ./.github/workflows/actions/use-substrate
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      - name: Run clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets -- -D warnings
+          args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
 
   check:
     name: Cargo check
     runs-on: ubuntu-latest
-    needs: [fmt, clippy]
+    needs: [fmt, machete]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -133,10 +202,13 @@ jobs:
       - name: Cargo check parachain-example
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   wasm_check:
     name: Cargo check (WASM)
     runs-on: ubuntu-latest
-    needs: [fmt, clippy]
+    needs: [fmt, machete]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -157,39 +229,13 @@ jobs:
         run: |
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
-  machete:
-    name: "Check unused dependencies"
-    runs-on: ubuntu-latest
-    needs: [check, wasm_check]
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
-
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
-
-      - name: Install cargo-machete
-        run: cargo install cargo-machete
-
-      - name: Check unused dependencies
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: machete
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
 
   docs:
     name: Check documentation and run doc tests
     runs-on: ubuntu-latest
-    needs: [check, wasm_check]
+    needs: [fmt, machete]
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -216,10 +262,13 @@ jobs:
           command: test
           args: --doc
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   tests:
     name: "Test (Native)"
     runs-on: ubuntu-latest-16-cores
-    needs: [machete, docs]
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
     steps:
       - name: Checkout sources
@@ -247,10 +296,13 @@ jobs:
           command: nextest
           args: run --workspace
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   unstable_backend_tests:
     name: "Test (Unstable Backend)"
     runs-on: ubuntu-latest-16-cores
-    needs: [machete, docs]
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
     steps:
       - name: Checkout sources
@@ -278,10 +330,13 @@ jobs:
           command: nextest
           args: run --workspace --features unstable-backend-client
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   light_client_tests:
     name: "Test (Light Client)"
     runs-on: ubuntu-latest
-    needs: [machete, docs]
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 15
     steps:
       - name: Checkout sources
@@ -306,10 +361,13 @@ jobs:
           command: test
           args: --release --package integration-tests --features unstable-light-client
 
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
+
   wasm_tests:
     name: Test (WASM)
     runs-on: ubuntu-latest
-    needs: [machete, docs]
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
     env:
       # Set timeout for wasm tests to be much bigger than the default 20 secs.
@@ -358,3 +416,6 @@ jobs:
           wasm-pack test --headless --firefox
           wasm-pack test --headless --chrome
         working-directory: signer/wasm-tests
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@b9280e3f8986d7a8e91c7462efc0fa318010c8b1" # v0.3
