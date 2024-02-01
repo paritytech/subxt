@@ -19,6 +19,12 @@ pub struct SubstrateNodeBuilder {
     custom_flags: HashMap<CowStr, Option<CowStr>>,
 }
 
+impl Default for SubstrateNodeBuilder {
+    fn default() -> Self {
+        SubstrateNodeBuilder::new()
+    }
+}
+
 impl SubstrateNodeBuilder {
     /// Configure a new Substrate node.
     pub fn new() -> Self {
