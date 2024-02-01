@@ -10,7 +10,7 @@ use substrate_runner::SubstrateNode;
 /// Run with `cargo run --bin artifacts` from the root of the repository.
 fn main() {
     let mut node_builder = SubstrateNode::builder();
-    node_builder.binary_paths(["polkadot"]);
+    node_builder.polkadot();
 
     // Spawn the node and retrieve a ws URL to it:
     let proc = node_builder

@@ -4,14 +4,14 @@ runs:
   using: composite
   steps:
     - name: Download substrate-node binary
-      id: download-artifact
+      id: download-substrate-binary
       uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
       with:
         workflow: build-nodes.yml
         name: nightly-substrate-binary
 
     - name: Download polkadot binary
-      id: download-artifact
+      id: download-polkadot-binary
       uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
       with:
         workflow: build-nodes.yml
