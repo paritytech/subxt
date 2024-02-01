@@ -51,11 +51,11 @@ unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 [dependencies]
 async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-scale-info = { workspace = true }
-scale-value = { workspace = true }
-scale-bits = { workspace = true }
-scale-decode = { workspace = true }
-scale-encode = { workspace = true }
+scale-info = { workspace = true, features = ["default"] }
+scale-value = { workspace = true, features = ["default"] }
+scale-bits = { workspace = true, features = ["default"] }
+scale-decode = { workspace = true, features = ["default"] }
+scale-encode = { workspace = true, features = ["default"] }
 futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -69,7 +69,7 @@ instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
-primitive-types = { workspace = true }
+primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 sp-core-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:

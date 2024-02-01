@@ -49,6 +49,5 @@ fn subxt_metadata_test() {
 }
 
 fn subxt_core_test() {
-    // let er
-    // assert!(subxt_core::utils::url_is_secure(url).unwrap());
+    let era = subxt_core::utils::era::Era::Immortal;
 }

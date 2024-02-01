@@ -4,6 +4,12 @@
 
 //! Miscellaneous utility helpers.
 
+use crate::prelude::*;
+use borrow::ToOwned;
+use codec::{Compact, Decode, Encode};
+use derivative::Derivative;
+use vec::Vec;
+
 mod account_id;
 pub mod bits;
 mod era;
@@ -13,17 +19,12 @@ mod static_type;
 mod unchecked_extrinsic;
 mod wrapper_opaque;
 
-use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
-
 pub use account_id::AccountId32;
-use borrow::ToOwned;
 pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
-use vec::Vec;
 pub use wrapper_opaque::WrapperKeepOpaque;
 
 // Used in codegen
@@ -48,8 +49,6 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
     let val = <Compact<u64>>::decode(cursor)?;
     Ok((val.0, *cursor))
 }
-
-use crate::prelude::*;
 
 /// A version of [`core::marker::PhantomData`] that is also Send and Sync (which is fine
 /// because regardless of the generic param, it is always possible to Send + Sync this
