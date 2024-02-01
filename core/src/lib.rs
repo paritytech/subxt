@@ -11,10 +11,15 @@
 pub mod client;
 pub mod config;
 pub mod dynamic;
+mod error;
 pub mod metadata;
 pub mod prelude;
+pub mod signer;
+pub mod storage;
 pub mod tx;
 pub mod utils;
+
+pub use error::{Error, MetadataError, StorageAddressError};
 
 pub use config::{
     BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, PolkadotConfig,

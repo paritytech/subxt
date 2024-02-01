@@ -48,6 +48,7 @@ sp-core-hashing = { workspace = true }
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
 cfg-if = { workspace = true }
+either = { workspace = true }
 
 [dev-dependencies]
 bitvec = { workspace = true }

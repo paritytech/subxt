@@ -18,7 +18,7 @@ use vec::Vec;
 pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
 
 // // Submit dynamic transactions.
-// pub use crate::tx::dynamic as tx;
+pub use crate::tx::dynamic as tx;
 
 // // Lookup constants dynamically.
 // pub use crate::constants::dynamic as constant;
