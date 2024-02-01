@@ -43,7 +43,7 @@ web = [
 ]
 
 # Enable this to use the reconnecting rpc client
-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
+unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
@@ -147,7 +147,7 @@ required-features = ["unstable-light-client", "jsonrpsee", "native"]
 [[example]]
 name = "reconnecting_rpc_client"
 path = "examples/reconnecting_rpc_client.rs"
-required-features = ["reconnecting-rpc-client"]
+required-features = ["unstable-reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "substrate-compat", "unstable-light-client"]
