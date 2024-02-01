@@ -111,7 +111,7 @@ impl WasmSocket {
 
                 let mut inner = inner.lock().expect("Mutex is poised; qed");
                 let bytes = js_sys::Uint8Array::new(&buffer).to_vec();
-                inner.data.extend(bytes.into_iter());
+                inner.data.extend(bytes);
 
                 if let Some(waker) = inner.waker.take() {
                     waker.wake();
