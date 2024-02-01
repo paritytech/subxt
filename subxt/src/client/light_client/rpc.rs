@@ -56,8 +56,7 @@ impl LightClientRpc {
     pub fn new(
         config: smoldot::AddChainConfig<'_, (), impl Iterator<Item = smoldot::ChainId>>,
     ) -> Result<LightClientRpc, Error> {
-        let rpc = subxt_lightclient::LightClientRpc::new(config)
-            .map_err(|err| LightClientError::Rpc(err))?;
+        let rpc = subxt_lightclient::LightClientRpc::new(config).map_err(LightClientError::Rpc)?;
 
         Ok(LightClientRpc(rpc))
     }
