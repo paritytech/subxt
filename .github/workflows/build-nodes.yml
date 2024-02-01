@@ -6,6 +6,10 @@ on:
   # Run at 2am every day for nightly builds.
   schedule:
     - cron: "0 2 * * *"
+  pull_request:
+    # Warning: Just used for initial build of the nodes to get them into the loop... This is hacky, remove later!!
+    branches:
+      - master
 
 jobs:
   tests:
