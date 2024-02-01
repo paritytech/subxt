@@ -44,7 +44,7 @@ impl codec::Encode for Encoded {
 
 /// Decodes a compact encoded value from the beginning of the provided bytes,
 /// returning the value and any remaining bytes.
-pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> {
+pub fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> {
     let cursor = &mut &*bytes;
     let val = <Compact<u64>>::decode(cursor)?;
     Ok((val.0, *cursor))
@@ -67,7 +67,7 @@ pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::
 pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
 
 impl<T> PhantomDataSendSync<T> {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self(core::marker::PhantomData)
     }
 }

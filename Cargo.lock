@@ -4471,6 +4471,7 @@ dependencies = [
  "sp-core-hashing",
  "sp-keyring",
  "sp-runtime",
+ "subxt-core",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
