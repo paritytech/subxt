@@ -83,8 +83,8 @@ scale-value = "0.13.0"
 scale-bits = "0.4.0"
 scale-decode = "0.10.0"
 scale-encode = "0.5.0"
-serde = { version = "1.0.195" }
-serde_json = { version = "1.0.108" }
+serde = { version = "1.0.196" }
+serde_json = { version = "1.0.113" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.53"
 tokio = { version = "1.35", default-features = false }
@@ -106,7 +106,7 @@ smoldot-light = { version = "0.14.0", default-features = false }
 tokio-stream = "0.1.14"
 futures-util = "0.3.30"
 rand = "0.8.5"
-pin-project = "1.1.3"
+pin-project = "1.1.4"
 
 # Light client wasm:
 web-sys = { version = "0.3.67", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
