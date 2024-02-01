@@ -2,9 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
+use crate::dynamic::DecodedValueThunk;
 use derivative::Derivative;
 use std::borrow::Cow;
+use subxt_core::metadata::DecodeWithMetadata;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.

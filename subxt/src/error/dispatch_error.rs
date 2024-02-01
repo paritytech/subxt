@@ -5,10 +5,10 @@
 //! A representation of the dispatch error; an error returned when
 //! something fails in trying to submit/execute a transaction.
 
-use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
 use std::borrow::Cow;
+use subxt_core::metadata::{DecodeWithMetadata, Metadata};
 
 use super::{Error, MetadataError};
 
@@ -214,7 +214,7 @@ impl ModuleError {
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
     /// The pallet that the error is in
-    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    pub pallet: subxt_core::metadata::types::PalletMetadata<'a>,
     /// The variant representing the error
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }

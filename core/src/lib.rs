@@ -21,5 +21,7 @@ pub use config::{
     PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
 };
 
+pub use metadata::Metadata;
+
 #[macro_use]
 mod macros;

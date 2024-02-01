@@ -8,12 +8,12 @@
 use crate::{
     dynamic::Value,
     error::{Error, MetadataError},
-    metadata::Metadata,
 };
 use codec::Encode;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, ValueDef, Variant};
 use std::{borrow::Cow, sync::Arc};
+use subxt_core::metadata::Metadata;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.

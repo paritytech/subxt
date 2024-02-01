@@ -10,7 +10,9 @@ use std::borrow::Cow;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::error::MetadataError;
-use crate::{metadata::DecodeWithMetadata, Error, Metadata};
+use crate::Error;
+
+use subxt_core::metadata::{DecodeWithMetadata, Metadata};
 
 /// This represents a runtime API payload that can call into the runtime of node.
 ///

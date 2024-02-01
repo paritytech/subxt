@@ -11,13 +11,13 @@ pub mod rpc;
 pub mod unstable;
 
 use crate::error::Error;
-use crate::metadata::Metadata;
 use crate::Config;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
+use subxt_core::metadata::Metadata;
 
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]

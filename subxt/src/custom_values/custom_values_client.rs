@@ -1,9 +1,9 @@
 use crate::client::OfflineClientT;
 use crate::custom_values::custom_value_address::{CustomValueAddress, Yes};
 use crate::error::MetadataError;
-use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
 use derivative::Derivative;
+use subxt_core::metadata::DecodeWithMetadata;
 
 /// A client for accessing custom values stored in the metadata.
 #[derive(Derivative)]

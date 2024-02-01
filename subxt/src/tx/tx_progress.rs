@@ -337,7 +337,7 @@ mod test {
     struct MockClient;
 
     impl OfflineClientT<SubstrateConfig> for MockClient {
-        fn metadata(&self) -> crate::Metadata {
+        fn metadata(&self) -> subxt_core::metadata {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 

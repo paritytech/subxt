@@ -49,5 +49,5 @@ fn subxt_metadata_test() {
 }
 
 fn subxt_core_test() {
-    let era = subxt_core::utils::era::Era::Immortal;
+    let era = subxt_core::utils::Era::Immortal;
 }

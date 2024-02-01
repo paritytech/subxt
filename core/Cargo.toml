@@ -31,16 +31,16 @@ frame-metadata = { workspace = true, default-features = false }
 subxt-metadata = { workspace = true, default-features = false }
 derivative = { workspace = true, features = ["use_core"] }
 derive_more = { workspace = true }
-hex = { workspace = true }
-serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, features = ["raw_value"] }
+hex = { workspace = true, default-features = false, features = ["alloc"] }
+serde = { workspace = true, default-features = false, features = ["derive"] }
+serde_json = { workspace = true, default-features = false, features = ["raw_value", "alloc"] }
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }
 blake2 = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
-impl-serde = { workspace = true }
+impl-serde = { workspace = true, default-features = false }
 primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
 sp-core-hashing = { workspace = true }
 

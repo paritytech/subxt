@@ -22,7 +22,7 @@ impl core::ops::Deref for Metadata {
 }
 
 impl Metadata {
-    pub(crate) fn new(md: subxt_metadata::Metadata) -> Self {
+    pub fn new(md: subxt_metadata::Metadata) -> Self {
         Metadata {
             inner: Arc::new(md),
         }
@@ -125,3 +125,6 @@ pub enum MetadataError {
     #[display(fmt = "Custom value with name {_0} not found")]
     CustomValueNameNotFound(String),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for MetadataError {}

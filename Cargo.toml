@@ -71,9 +71,9 @@ frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.3"
-hex = "0.4.3"
+hex = { version = "0.4.3", default-features = false }
 heck = "0.4.1"
-impl-serde = { version = "0.4.0" }
+impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.21" }
 pretty_assertions = "1.4.0"
@@ -87,8 +87,8 @@ scale-value = { version = "0.13.0", default-features = false }
 scale-bits = { version = "0.4.0", default-features = false }
 scale-decode = { version = "0.10.0", default-features = false }
 scale-encode = { version = "0.5.0", default-features = false }
-serde = { version = "1.0.196" }
-serde_json = { version = "1.0.113" }
+serde = { version = "1.0.196", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.113", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.53"
 tokio = { version = "1.35", default-features = false }

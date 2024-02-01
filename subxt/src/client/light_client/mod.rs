@@ -117,8 +117,8 @@ impl<T: Config> LightClient<T> {
     // think about importing the OnlineClientT/OfflineClientT
     // traits to use these things:
 
-    /// Return the [`crate::Metadata`] used in this client.
-    fn metadata(&self) -> crate::Metadata {
+    /// Return the [`subxt_core::metadata`] used in this client.
+    fn metadata(&self) -> subxt_core::metadata {
         self.client.metadata()
     }
 
@@ -180,7 +180,7 @@ impl<T: Config> OnlineClientT<T> for LightClient<T> {
 }
 
 impl<T: Config> OfflineClientT<T> for LightClient<T> {
-    fn metadata(&self) -> crate::Metadata {
+    fn metadata(&self) -> subxt_core::metadata {
         self.metadata()
     }
 

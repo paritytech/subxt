@@ -5,12 +5,12 @@
 //! An interface to call the raw legacy RPC methods.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
 use derivative::Derivative;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
+use subxt_core::metadata::Metadata;
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
@@ -530,7 +530,7 @@ impl DryRunResultBytes {
     /// Attempt to decode the error bytes into a [`DryRunResult`] using the provided [`Metadata`].
     pub fn into_dry_run_result(
         self,
-        metadata: &crate::metadata::Metadata,
+        metadata: &subxt_core::metadata::Metadata,
     ) -> Result<DryRunResult, crate::Error> {
         // dryRun returns an ApplyExtrinsicResult, which is basically a
         // `Result<Result<(), DispatchError>, TransactionValidityError>`.

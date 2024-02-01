@@ -6,12 +6,12 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError},
-    metadata::DecodeWithMetadata,
     Config,
 };
 use codec::Decode;
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::metadata::DecodeWithMetadata;
 
 use super::RuntimeApiPayload;
 

@@ -9,13 +9,13 @@ use crate::{
     client::OnlineClientT,
     error::{Error, MetadataError},
     events::events_client::get_event_bytes,
-    metadata::types::PalletMetadata,
     Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
 use scale_decode::DecodeAsType;
 use std::sync::Arc;
+use subxt_core::metadata::types::PalletMetadata;
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.

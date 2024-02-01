@@ -8,7 +8,7 @@ mod decode_encode_traits;
 mod metadata_type;
 
 pub use decode_encode_traits::{DecodeWithMetadata, EncodeWithMetadata};
-pub use metadata_type::Metadata;
+pub use metadata_type::{Metadata, MetadataError};
 
 // Expose metadata types under a sub module in case somebody needs to reference them:
 pub use subxt_metadata as types;

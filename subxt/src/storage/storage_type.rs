@@ -8,13 +8,13 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError},
-    metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
 use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::metadata::{DecodeWithMetadata, Metadata};
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
 /// This is returned from a couple of storage functions.

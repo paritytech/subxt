@@ -5,9 +5,11 @@
 use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
-    metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
+
+use subxt_core::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata};
+
 use derivative::Derivative;
 use scale_info::TypeDef;
 use std::borrow::Cow;

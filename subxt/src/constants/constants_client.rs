@@ -6,10 +6,11 @@ use super::ConstantAddress;
 use crate::{
     client::OfflineClientT,
     error::{Error, MetadataError},
-    metadata::DecodeWithMetadata,
     Config,
 };
+
 use derivative::Derivative;
+use subxt_core::metadata::DecodeWithMetadata;
 
 /// A client for accessing constants.
 #[derive(Derivative)]

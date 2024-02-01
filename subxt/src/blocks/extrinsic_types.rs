@@ -7,10 +7,10 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
-    events,
-    metadata::types::PalletMetadata,
-    Metadata,
+    events, Metadata,
 };
+
+use subxt_core::metadata::types::PalletMetadata;
 
 use crate::config::signed_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
