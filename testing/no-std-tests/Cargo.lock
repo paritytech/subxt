@@ -371,7 +371,6 @@ dependencies = [
 name = "subxt-metadata"
 version = "0.34.0"
 dependencies = [
- "cfg-if",
  "derive_more",
  "frame-metadata",
  "hashbrown",

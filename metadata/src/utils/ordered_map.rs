@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::prelude::*;
+use alloc::vec::Vec;
+use core::mem;
 use hashbrown::HashMap;
-use vec::Vec;
 
 /// A minimal ordered map to let one search for
 /// things by key or get the values in insert order.
@@ -25,7 +25,7 @@ impl<K, V> Default for OrderedMap<K, V> {
 
 impl<K, V> OrderedMap<K, V>
 where
-    K: PartialEq + Eq + hash::Hash,
+    K: PartialEq + Eq + core::hash::Hash,
 {
     /// Create a new, empty [`OrderedMap`].
     pub fn new() -> Self {
@@ -80,8 +80,8 @@ where
     /// Get an item by its key.
     pub fn get_by_key<Q>(&self, key: &Q) -> Option<&V>
     where
-        K: borrow::Borrow<Q>,
-        Q: hash::Hash + Eq + ?Sized,
+        K: alloc::borrow::Borrow<Q>,
+        Q: core::hash::Hash + Eq + ?Sized,
     {
         self.map.get(key).and_then(|&v| self.values.get(v))
     }
@@ -109,7 +109,7 @@ where
 
 impl<K, V> FromIterator<(K, V)> for OrderedMap<K, V>
 where
-    K: PartialEq + Eq + hash::Hash,
+    K: PartialEq + Eq + core::hash::Hash,
 {
     fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
         let mut map = OrderedMap::new();

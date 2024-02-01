@@ -4,12 +4,11 @@
 
 //! Utility functions to generate a subset of the metadata.
 
-use crate::prelude::*;
 use crate::{
     ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
     StorageEntryType,
 };
-use collections::BTreeMap;
+use alloc::collections::BTreeMap;
 use hashbrown::HashSet;
 use scale_info::TypeDef;
 

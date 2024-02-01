@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::TryFromError;
-use crate::prelude::*;
+
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
@@ -11,7 +11,7 @@ use crate::{
     RuntimeApiMethodParamMetadata, SignedExtensionMetadata, StorageEntryMetadata,
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
-use borrow::ToOwned;
+use alloc::borrow::ToOwned;
 use frame_metadata::v15;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;

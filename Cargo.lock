@@ -4578,7 +4578,6 @@ version = "0.34.0"
 dependencies = [
  "assert_matches",
  "bitvec",
- "cfg-if",
  "criterion",
  "derive_more",
  "frame-metadata 16.0.0",
