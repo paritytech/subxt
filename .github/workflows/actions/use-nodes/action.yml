@@ -22,8 +22,12 @@ runs:
       run: |
         chmod u+x ./substrate-node
         chmod u+x ./polkadot
+        chmod u+x ./polkadot-execute-worker
+        chmod u+x ./polkadot-prepare-worker
         ./substrate-node --version
         ./polkadot --version
         mkdir -p ~/.local/bin
         cp ./substrate-node ~/.local/bin
         cp ./polkadot ~/.local/bin
+        cp ./polkadot-execute-worker ~/.local/bin
+        cp ./polkadot-prepare-worker ~/.local/bin

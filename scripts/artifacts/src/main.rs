@@ -37,13 +37,13 @@ fn main() {
 
     // Generate a metadata file that only contains a few pallets that we need for our examples.
     run_cmd(
-        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "Balances,Staking,System,Multisig,Timestamp,ParaInherent""#,
+        "cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets Balances,Staking,System,Multisig,Timestamp,ParaInherent",
         Some("artifacts/polkadot_metadata_small.scale"),
     );
 
     // Generate a metadata file that contains no pallets
     run_cmd(
-        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets """#,
+        "cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets \"\"",
         Some("artifacts/polkadot_metadata_tiny.scale"),
     );
 

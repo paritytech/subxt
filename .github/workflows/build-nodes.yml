@@ -47,12 +47,15 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --bin polkadot --release
+          args: --release --manifest-path polkadot/Cargo.toml
 
       - name: upload polkadot binary
         uses: actions/upload-artifact@v3
         with:
           name: nightly-polkadot-binary
-          path: target/release/polkadot
+          path: |
+            target/release/polkadot
+            target/release/polkadot-execute-worker
+            target/release/polkadot-prepare-worker
           retention-days: 2
           if-no-files-found: error
