@@ -1,7 +1,8 @@
 #![allow(missing_docs)]
 use codec::Encode;
 use subxt::client::OfflineClientT;
-use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
+use subxt_core::error::ExtrinsicParamsError;
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]

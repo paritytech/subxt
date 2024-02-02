@@ -11,11 +11,8 @@ use crate::client::ClientBase;
 
 use super::Config;
 use crate::ExtrinsicParamsError;
-use alloc::string::String;
-use alloc::vec::Vec;
-use core::fmt::Debug;
 
-use derive_more::Display;
+use alloc::vec::Vec;
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload
@@ -29,7 +26,7 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new(
         nonce: u64,
-        client: &ClientBase<T>,
+        client: ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError>;
 }

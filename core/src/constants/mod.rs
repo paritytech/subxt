@@ -52,7 +52,7 @@ pub fn get_constant<Address: ConstantAddress>(
     let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut constant.value(),
         constant.ty(),
-        &metadata,
+        metadata,
     )?;
     Ok(value)
 }

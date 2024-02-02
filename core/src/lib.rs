@@ -33,14 +33,8 @@ pub use config::{
 pub use metadata::Metadata;
 pub use signer::Signer;
 pub use storage::StorageAddress;
-pub use utils::{AccountId32, MultiAddress, MultiSignature, H160, H256, H512};
+pub use utils::{AccountId32, MultiAddress, MultiSignature, H160, H256, H512, Yes, to_hex};
 
 #[macro_use]
 mod macros;
 
-mod marker {
-    /// A unit marker struct signalling that some property is true
-    pub struct Yes;
-}
-
-pub use marker::Yes;

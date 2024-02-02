@@ -3,11 +3,11 @@ use codec::Encode;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
 use subxt::client::OfflineClientT;
-use subxt::config::signed_extensions;
 use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
-    ExtrinsicParamsError,
 };
+use subxt_core::config::signed_extensions;
+use subxt_core::error::ExtrinsicParamsError;
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -60,9 +60,9 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type OtherParams = ();
 
-    fn new<Client: OfflineClientT<T>>(
+    fn new(
         _nonce: u64,
-        _client: Client,
+        _client: subxt_core::ClientBase,
         _other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)

@@ -51,7 +51,7 @@ pub fn get_custom_value<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>
     let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut custom_value.bytes(),
         custom_value.type_id(),
-        &metadata,
+        metadata,
     )?;
     Ok(value)
 }

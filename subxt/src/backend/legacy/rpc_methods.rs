@@ -10,7 +10,7 @@ use codec::Decode;
 use derivative::Derivative;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
-use subxt_core::metadata::Metadata;
+use subxt_core::{metadata::Metadata, to_hex};
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
@@ -654,11 +654,6 @@ impl From<U256> for NumberOrHex {
     fn from(n: U256) -> Self {
         NumberOrHex::Hex(n)
     }
-}
-
-/// A quick helper to encode some bytes to hex.
-fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 /// Hex-serialized shim for `Vec<u8>`.

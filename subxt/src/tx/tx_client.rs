@@ -124,7 +124,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
             account_nonce,
-            &self.client.base(),
+            self.client.base(),
             other_params,
         )?;
 

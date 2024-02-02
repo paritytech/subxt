@@ -6,7 +6,6 @@
 
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
-use alloc::string::String;
 use alloc::vec::Vec;
 use codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
@@ -289,10 +288,7 @@ impl From<U256> for NumberOrHex {
     }
 }
 
-/// A quick helper to encode some bytes to hex.
-fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-    alloc::format!("0x{}", hex::encode(bytes.as_ref()))
-}
+
 
 #[cfg(test)]
 mod test {

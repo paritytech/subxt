@@ -47,7 +47,6 @@ pub mod blocks;
 pub mod client;
 pub mod constants;
 pub mod custom_values;
-pub mod dynamic;
 pub mod error;
 pub mod events;
 pub mod runtime_api;
@@ -66,10 +65,10 @@ pub use crate::{
     error::Error,
 };
 
-pub use subxt_core::config;
-pub use subxt_core::config::{Config, PolkadotConfig, SubstrateConfig};
-
-use subxt_core::metadata::Metadata;
+// pub use subxt_core::config;
+// pub use subxt_core::config::{Config, PolkadotConfig, SubstrateConfig};
+// pub use subxt_core::dynamic;
+pub use subxt_core::*;
 
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {

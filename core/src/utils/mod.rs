@@ -78,3 +78,11 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// with collections like BTreeMap. This has the same type params
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
+
+    /// A unit marker struct signalling that some property is true
+    pub struct Yes;
+
+    /// A quick helper to encode some bytes to hex.
+pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    alloc::format!("0x{}", hex::encode(bytes.as_ref()))
+}

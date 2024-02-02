@@ -3,14 +3,9 @@
 // see LICENSE for license details.
 
 use super::ConstantAddress;
-use crate::{
-    client::OfflineClientT,
-    error::{Error, MetadataError},
-    Config,
-};
+use crate::{client::OfflineClientT, error::Error, Config};
 
 use derivative::Derivative;
-use subxt_core::metadata::DecodeWithMetadata;
 
 /// A client for accessing constants.
 #[derive(Derivative)]

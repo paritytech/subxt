@@ -17,7 +17,7 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::future;
-use std::borrow::Borrow;
+
 use std::sync::{Arc, RwLock};
 use subxt_core::{ClientBase, RuntimeVersion};
 

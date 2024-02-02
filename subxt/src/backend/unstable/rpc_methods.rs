@@ -14,6 +14,7 @@ use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::task::Poll;
+use subxt_core::to_hex;
 
 /// An interface to call the unstable RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
@@ -737,10 +738,6 @@ impl From<Vec<u8>> for Bytes {
     fn from(s: Vec<u8>) -> Self {
         Bytes(s)
     }
-}
-
-fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 /// Attempt to deserialize either a string or integer into an integer.

@@ -9,8 +9,6 @@
 //! additional and signed extra parameters are used when constructing an extrinsic, and is a part
 //! of the chain configuration (see [`crate::config::Config`]).
 
-use crate::macros::cfg_substrate_compat;
-
 mod tx_client;
 mod tx_progress;
 

@@ -118,7 +118,7 @@ impl<T: Config> LightClient<T> {
     // traits to use these things:
 
     /// Return the [`subxt_core::metadata`] used in this client.
-    fn metadata(&self) -> subxt_core::metadata {
+    fn metadata(&self) -> subxt_core::Metadata {
         self.client.metadata()
     }
 
@@ -128,7 +128,7 @@ impl<T: Config> LightClient<T> {
     }
 
     /// Return the runtime version.
-    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+    fn runtime_version(&self) -> subxt_core::RuntimeVersion {
         self.client.runtime_version()
     }
 
@@ -180,7 +180,7 @@ impl<T: Config> OnlineClientT<T> for LightClient<T> {
 }
 
 impl<T: Config> OfflineClientT<T> for LightClient<T> {
-    fn metadata(&self) -> subxt_core::metadata {
+    fn metadata(&self) -> subxt_core::Metadata {
         self.metadata()
     }
 
@@ -188,7 +188,11 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
         self.genesis_hash()
     }
 
-    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+    fn runtime_version(&self) -> subxt_core::RuntimeVersion {
         self.runtime_version()
+    }
+
+    fn base(&self) -> subxt_core::ClientBase<T> {
+        self.client.base()
     }
 }
