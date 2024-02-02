@@ -36,6 +36,7 @@ extern crate alloc;
 // Note: Panics in this function will lead to `Aborted (core dumped)` and a non-zero exit status => suitable for CI tests.
 fn run_tests() {
     subxt_metadata_test();
+    subxt_signer_test();
     subxt_core_test();
 }
 

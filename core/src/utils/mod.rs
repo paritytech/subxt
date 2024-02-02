@@ -6,6 +6,7 @@
 
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
+use alloc::string::String;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 
@@ -25,6 +26,7 @@ pub use multi_signature::MultiSignature;
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
+
 
 // Used in codegen
 #[doc(hidden)]
