@@ -12,6 +12,7 @@ extern crate alloc;
 
 pub mod client;
 pub mod config;
+pub mod constants;
 pub mod dynamic;
 mod error;
 pub mod metadata;
@@ -35,6 +36,8 @@ pub use metadata::Metadata;
 mod macros;
 
 mod marker {
-    /// A unit marker struct that is only used for specialized generics.
+    /// A unit marker struct signalling that some property is true
     pub struct Yes;
 }
+
+pub use marker::Yes;

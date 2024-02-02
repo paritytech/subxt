@@ -5,8 +5,9 @@
 use crate::{
     dynamic::DecodedValueThunk,
     error::StorageAddressError,
+    metadata::MetadatExt,
     utils::{Encoded, Static},
-    MetadataError,
+    MetadataError, Yes,
 };
 
 use crate::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata};
@@ -14,6 +15,7 @@ use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
+
 use derivative::Derivative;
 use scale_info::TypeDef;
 use subxt_metadata::{StorageEntryType, StorageHasher};
@@ -50,10 +52,6 @@ pub trait StorageAddress {
         None
     }
 }
-
-/// Used to signal whether a [`StorageAddress`] can be iterated,
-/// fetched and returned with a default value in the type system.
-pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
@@ -125,7 +123,7 @@ where
     /// the pallet and entry name). Use [`crate::storage::StorageClient::address_bytes()`]
     /// to obtain the bytes representing the entire address.
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        super::storage_address_root_bytes(self)
+        super::utils::storage_address_root_bytes(self)
     }
 }
 

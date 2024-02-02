@@ -25,9 +25,28 @@ impl Metadata {
             inner: Arc::new(md),
         }
     }
+}
 
+pub trait MetadatExt {
+    fn pallet_by_name_err(
+        &self,
+        name: &str,
+    ) -> Result<subxt_metadata::PalletMetadata, MetadataError>;
+
+    fn pallet_by_index_err(
+        &self,
+        index: u8,
+    ) -> Result<subxt_metadata::PalletMetadata, MetadataError>;
+
+    fn runtime_api_trait_by_name_err(
+        &self,
+        name: &str,
+    ) -> Result<subxt_metadata::RuntimeApiMetadata, MetadataError>;
+}
+
+impl MetadatExt for subxt_metadata::Metadata {
     /// Identical to `metadata.pallet_by_name()`, but returns an error if the pallet is not found.
-    pub fn pallet_by_name_err(
+    fn pallet_by_name_err(
         &self,
         name: &str,
     ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
@@ -36,7 +55,7 @@ impl Metadata {
     }
 
     /// Identical to `metadata.pallet_by_index()`, but returns an error if the pallet is not found.
-    pub fn pallet_by_index_err(
+    fn pallet_by_index_err(
         &self,
         index: u8,
     ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
@@ -45,7 +64,7 @@ impl Metadata {
     }
 
     /// Identical to `metadata.runtime_api_trait_by_name()`, but returns an error if the trait is not found.
-    pub fn runtime_api_trait_by_name_err(
+    fn runtime_api_trait_by_name_err(
         &self,
         name: &str,
     ) -> Result<subxt_metadata::RuntimeApiMetadata, MetadataError> {

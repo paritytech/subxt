@@ -5,6 +5,7 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
+use crate::metadata::MetadatExt;
 use crate::Error;
 use crate::MetadataError;
 use crate::{dynamic::Value, metadata::Metadata};

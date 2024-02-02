@@ -20,10 +20,10 @@ pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
 pub use crate::tx::dynamic as tx;
 
 // // Lookup constants dynamically.
-// pub use crate::constants::dynamic as constant;
+pub use crate::constants::dynamic as constant;
 
 // // Lookup storage values dynamically.
-// pub use crate::storage::dynamic as storage;
+pub use crate::storage::dynamic as storage;
 
 // // Execute runtime API function call dynamically.
 // pub use crate::runtime_api::dynamic as runtime_api_call;
