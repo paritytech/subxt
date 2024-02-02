@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{prelude::*, MetadataError};
-use borrow::ToOwned;
-use sync::Arc;
+use crate::error::MetadataError;
+use alloc::borrow::ToOwned;
+use alloc::sync::Arc;
 
 /// A cheaply clone-able representation of the runtime metadata received from a node.
 #[derive(Clone, Debug)]

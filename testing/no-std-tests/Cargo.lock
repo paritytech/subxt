@@ -675,9 +675,9 @@ version = "0.34.0"
 dependencies = [
  "base58",
  "blake2",
- "cfg-if",
  "derivative",
  "derive_more",
+ "either",
  "frame-metadata 16.0.0",
  "hex",
  "impl-serde",

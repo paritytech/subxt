@@ -6,9 +6,8 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_runtime::MultiAddress`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use crate::prelude::*;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
-use vec::Vec;
 
 /// A multi-format address wrapper for on-chain accounts. This is a simplified version of Substrate's
 /// `sp_runtime::MultiAddress`. To obtain more functionality, convert this into that type (this conversion

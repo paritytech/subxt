@@ -2,11 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::prelude::*;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
 use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
 use scale_encode::EncodeAsType;
-use vec::Vec;
 
 /// If the type inside this implements [`Encode`], this will implement [`scale_encode::EncodeAsType`].
 /// If the type inside this implements [`Decode`], this will implement [`scale_decode::DecodeAsType`].

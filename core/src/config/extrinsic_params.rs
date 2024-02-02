@@ -10,10 +10,9 @@
 use crate::client::ClientBase;
 
 use super::Config;
-use crate::prelude::*;
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::fmt::Debug;
-use string::String;
-use vec::Vec;
 
 use derive_more::Display;
 

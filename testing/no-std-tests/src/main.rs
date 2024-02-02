@@ -36,6 +36,7 @@ extern crate alloc;
 // Note: Panics in this function will lead to `Aborted (core dumped)` and a non-zero exit status => suitable for CI tests.
 fn run_tests() {
     subxt_metadata_test();
+    subxt_core_test();
 }
 
 /// Makes sure, subxt-metadata works in a no-std-context:
@@ -49,5 +50,5 @@ fn subxt_metadata_test() {
 }
 
 fn subxt_core_test() {
-    let era = subxt_core::utils::Era::Immortal;
+    let _ = subxt_core::utils::Era::Immortal;
 }

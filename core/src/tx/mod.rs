@@ -5,21 +5,16 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::prelude::*;
 use crate::Error;
 use crate::MetadataError;
-use crate::{
-    dynamic::Value,
-    metadata::{self, Metadata},
-};
-use borrow::Cow;
-use borrow::ToOwned;
+use crate::{dynamic::Value, metadata::Metadata};
+use alloc::borrow::{Cow, ToOwned};
+use alloc::string::String;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
 use codec::Encode;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, ValueDef, Variant};
-use string::String;
-use sync::Arc;
-use vec::Vec;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.

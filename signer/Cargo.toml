@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["sr25519", "ecdsa", "subxt", "native"]
+default = ["sr25519", "ecdsa", "subxt"]
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting
@@ -26,15 +26,14 @@ ecdsa = ["secp256k1"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
-subxt = ["dep:subxt"]
+subxt = ["dep:subxt-core"]
 
 # The getrandom package is used via schnorrkel. We need to enable the JS
 # feature on it if compiling for the web.
-web = ["getrandom/js", "subxt?/web"]
-native = ["subxt?/native"]
+web = ["getrandom/js"]
 
 [dependencies]
-subxt = { workspace = true, optional = true, default-features = false }
+subxt-core = { workspace = true, optional = true, default-features = false }
 regex = { workspace = true }
 hex = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }

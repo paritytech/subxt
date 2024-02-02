@@ -5,13 +5,12 @@
 //! Substrate specific configuration
 
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
-use crate::prelude::*;
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
+use alloc::string::String;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
 use serde::{Deserialize, Serialize};
-use string::String;
-use vec::Vec;
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
@@ -209,7 +208,7 @@ impl<'a> serde::Deserialize<'a> for DigestItem {
     {
         let r = impl_serde::serialize::deserialize(de)?;
         Decode::decode(&mut &r[..])
-            .map_err(|e| serde::de::Error::custom(format!("Decode error: {e}")))
+            .map_err(|e| serde::de::Error::custom(alloc::format!("Decode error: {e}")))
     }
 }
 
@@ -292,7 +291,7 @@ impl From<U256> for NumberOrHex {
 
 /// A quick helper to encode some bytes to hex.
 fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-    format!("0x{}", hex::encode(bytes.as_ref()))
+    alloc::format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 #[cfg(test)]

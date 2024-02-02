@@ -11,9 +11,11 @@ use crate::{
 
 use crate::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata};
 use crate::Error;
+use alloc::borrow::{Cow, ToOwned};
+use alloc::string::String;
+use alloc::vec::Vec;
 use derivative::Derivative;
 use scale_info::TypeDef;
-use std::borrow::Cow;
 use subxt_metadata::{StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
@@ -58,14 +60,14 @@ pub struct Yes;
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "StorageKey: Clone"),
-    Debug(bound = "StorageKey: std::fmt::Debug")
+    Debug(bound = "StorageKey: core::fmt::Debug")
 )]
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
     storage_entry_keys: Vec<StorageKey>,
     validation_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
+    _marker: core::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
@@ -89,7 +91,7 @@ where
             entry_name: Cow::Owned(entry_name.into()),
             storage_entry_keys: storage_entry_keys.into_iter().collect(),
             validation_hash: None,
-            _marker: std::marker::PhantomData,
+            _marker: core::marker::PhantomData,
         }
     }
 
@@ -107,7 +109,7 @@ where
             entry_name: Cow::Borrowed(entry_name),
             storage_entry_keys: storage_entry_keys.into_iter().collect(),
             validation_hash: Some(hash),
-            _marker: std::marker::PhantomData,
+            _marker: core::marker::PhantomData,
         }
     }
 
@@ -187,7 +189,7 @@ where
                     TypeDef::Tuple(tuple) => {
                         either::Either::Left(tuple.fields.iter().map(|f| f.id))
                     }
-                    _other => either::Either::Right(std::iter::once(*key_ty)),
+                    _other => either::Either::Right(core::iter::once(*key_ty)),
                 };
 
                 if type_ids.len() < self.storage_entry_keys.len() {

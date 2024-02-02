@@ -8,12 +8,13 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+extern crate alloc;
+
 pub mod client;
 pub mod config;
 pub mod dynamic;
 mod error;
 pub mod metadata;
-pub mod prelude;
 pub mod signer;
 pub mod storage;
 pub mod tx;
@@ -26,7 +27,14 @@ pub use config::{
     PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
 };
 
+pub use signer::Signer;
+
 pub use metadata::Metadata;
 
 #[macro_use]
 mod macros;
+
+mod marker {
+    /// A unit marker struct that is only used for specialized generics.
+    pub struct Yes;
+}

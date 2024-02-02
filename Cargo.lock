@@ -4541,7 +4541,6 @@ dependencies = [
  "base58",
  "bitvec",
  "blake2",
- "cfg-if",
  "derivative",
  "derive_more",
  "either",
@@ -4636,7 +4635,7 @@ dependencies = [
  "sp-core",
  "sp-core-hashing",
  "sp-keyring",
- "subxt",
+ "subxt-core",
  "thiserror",
  "zeroize",
 ]

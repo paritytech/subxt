@@ -4,7 +4,8 @@
 
 //! Generic `scale_bits` over `bitvec`-like `BitOrder` and `BitFormat` types.
 
-use crate::prelude::*;
+use alloc::vec;
+use alloc::vec::Vec;
 use codec::{Compact, Input};
 use core::marker::PhantomData;
 use scale_bits::{
@@ -12,7 +13,6 @@ use scale_bits::{
     Bits,
 };
 use scale_decode::IntoVisitor;
-use vec::Vec;
 
 /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.
 ///

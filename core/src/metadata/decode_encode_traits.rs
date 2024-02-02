@@ -3,8 +3,7 @@
 // see LICENSE for license details.
 
 use super::Metadata;
-use crate::prelude::*;
-use vec::Vec;
+use alloc::vec::Vec;
 
 /// This trait is implemented for all types that also implement [`scale_decode::DecodeAsType`].
 pub trait DecodeWithMetadata: Sized {

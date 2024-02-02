@@ -4,9 +4,12 @@
 
 //! Types associated with accessing and working with storage items.
 
-mod storage_address;
+use alloc::vec::Vec;
+
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
+pub mod storage_address;
+
 pub mod address {
     pub use super::storage_address::{
         dynamic, make_static_storage_map_key, Address, DynamicAddress, StaticStorageMapKey,

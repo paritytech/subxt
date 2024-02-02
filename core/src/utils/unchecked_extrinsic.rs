@@ -10,11 +10,10 @@
 //! bytes to be re-encoded (length prefixed).
 
 use super::{Encoded, Static};
-use crate::prelude::*;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
 use core::marker::PhantomData;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, Visitor};
-use vec::Vec;
 
 /// The unchecked extrinsic from substrate.
 #[derive(Clone, Debug, Eq, PartialEq, Encode)]

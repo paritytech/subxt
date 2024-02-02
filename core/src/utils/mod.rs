@@ -4,11 +4,10 @@
 
 //! Miscellaneous utility helpers.
 
-use crate::prelude::*;
-use borrow::ToOwned;
+use alloc::borrow::ToOwned;
+use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use vec::Vec;
 
 mod account_id;
 pub mod bits;

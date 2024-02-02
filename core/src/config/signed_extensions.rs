@@ -10,17 +10,16 @@
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use super::Config;
 use crate::client::ClientBase;
-use crate::prelude::*;
 use crate::utils::Era;
-use borrow::ToOwned;
-use boxed::Box;
+use alloc::borrow::ToOwned;
+use alloc::boxed::Box;
+use alloc::collections::BTreeMap;
+use alloc::vec::Vec;
 use codec::{Compact, Encode};
-use collections::BTreeMap;
 use core::fmt::Debug;
 use derivative::Derivative;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
-use vec::Vec;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and

@@ -6,10 +6,9 @@
 //! transactions, storage and constant lookups.
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
-use crate::prelude::*;
+use alloc::vec::Vec;
 use scale_decode::DecodeAsType;
 pub use scale_value::{At, Value};
-use vec::Vec;
 
 /// A [`scale_value::Value`] type endowed with contextual information
 /// regarding what type was used to decode each part of it. This implements
