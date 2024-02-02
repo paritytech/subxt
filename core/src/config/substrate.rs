@@ -288,8 +288,6 @@ impl From<U256> for NumberOrHex {
     }
 }
 
-
-
 #[cfg(test)]
 mod test {
     use super::*;

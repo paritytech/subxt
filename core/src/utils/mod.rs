@@ -5,8 +5,8 @@
 //! Miscellaneous utility helpers.
 
 use alloc::borrow::ToOwned;
-use alloc::vec::Vec;
 use alloc::string::String;
+use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 
@@ -26,7 +26,6 @@ pub use multi_signature::MultiSignature;
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
-
 
 // Used in codegen
 #[doc(hidden)]
@@ -81,10 +80,10 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
 
-    /// A unit marker struct signalling that some property is true
-    pub struct Yes;
+/// A unit marker struct signalling that some property is true
+pub struct Yes;
 
-    /// A quick helper to encode some bytes to hex.
+/// A quick helper to encode some bytes to hex.
 pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {
     alloc::format!("0x{}", hex::encode(bytes.as_ref()))
 }
