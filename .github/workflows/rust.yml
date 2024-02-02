@@ -56,8 +56,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -88,8 +88,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -120,8 +120,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -151,8 +151,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -240,8 +240,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -274,8 +274,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -308,8 +308,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -342,8 +342,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -388,8 +388,8 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Run subxt WASM tests
         run: |
