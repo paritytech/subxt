@@ -1077,6 +1077,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "critical-section"
+version = "1.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7059fff8937831a9ae6f0fe4d658ffabf58f2ca96aa9dec1c889f936f705f216"
+
+[[package]]
 name = "crossbeam-deque"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2732,6 +2738,10 @@ name = "once_cell"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
+dependencies = [
+ "critical-section",
+ "portable-atomic",
+]
 
 [[package]]
 name = "oorandom"
@@ -2978,6 +2988,12 @@ dependencies = [
  "opaque-debug 0.3.0",
  "universal-hash",
 ]
+
+[[package]]
+name = "portable-atomic"
+version = "1.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7170ef9988bc169ba16dd36a7fa041e5c4cbeb6a35b76d4c03daded371eae7c0"
 
 [[package]]
 name = "ppv-lite86"
@@ -4622,9 +4638,11 @@ name = "subxt-signer"
 version = "0.34.0"
 dependencies = [
  "bip39",
+ "derive_more",
  "getrandom",
  "hex",
  "hmac 0.12.1",
+ "once_cell",
  "parity-scale-codec",
  "pbkdf2 0.12.2",
  "regex",
@@ -4636,7 +4654,6 @@ dependencies = [
  "sp-core-hashing",
  "sp-keyring",
  "subxt-core",
- "thiserror",
  "zeroize",
 ]
 

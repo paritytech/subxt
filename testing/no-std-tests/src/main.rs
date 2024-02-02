@@ -49,6 +49,14 @@ fn subxt_metadata_test() {
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 }
 
+fn subxt_signer_test() {
+    use subxt_signer::{ SecretUri, ecdsa::Keypair };
+    use core::str::FromStr;
+    let uri = SecretUri::from_str("//Alice").unwrap();
+    let keypair = Keypair::from_uri(&uri).unwrap();
+}
+
 fn subxt_core_test() {
     let _ = subxt_core::utils::Era::Immortal;
 }
+

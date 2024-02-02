@@ -76,12 +76,13 @@ heck = "0.4.1"
 impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.21" }
+once_cell = { version = "1.19.0", default-features = false }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"
-regex = "1.10.3"
+regex = { version = "1.10.3", default-features = false }
 scale-info = { version = "2.10.0", default-features = false }
 scale-value = { version = "0.13.0", default-features = false }
 scale-bits = { version = "0.4.0", default-features = false }
@@ -134,19 +135,19 @@ subxt-macro = { version = "0.34.0", path = "macro" }
 subxt-core = { version = "0.34.0", path = "core", default-features = false }
 subxt-metadata = { version = "0.34.0", path = "metadata", default-features = false }
 subxt-codegen = { version = "0.34.0", path = "codegen" }
-subxt-signer = { version = "0.34.0", path = "signer" }
+subxt-signer = { version = "0.34.0", path = "signer", default-features = false }
 subxt-lightclient = { version = "0.34.0", path = "lightclient", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 
 # subxt-signer deps that I expect aren't useful anywhere else:
-bip39 = "2.0.0"
-hmac = "0.12.1"
+bip39 = { version = "2.0.0", default-features = false }
+hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
-schnorrkel = "0.11.4"
-secp256k1 = "0.28.1"
+schnorrkel = { version = "0.11.4", default-features = false }
+secp256k1 = { version = "0.28.1", default-features = false }
 secrecy = "0.8.0"
-sha2 = "0.10.8"
+sha2 = { version = "0.10.8", default-features = false }
 zeroize = { version = "1", default-features = false }
 
 [profile.dev.package.smoldot-light]

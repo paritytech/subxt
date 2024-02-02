@@ -19,7 +19,7 @@ macro_rules! once_static {
         $(
             $(#[$attr])*
             $vis fn $name() -> &'static $ty {
-                static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
+                static VAR: once_cell::sync::OnceCell<$ty> = once_cell::sync::OnceCell::new();
                 VAR.get_or_init(|| { $expr })
             }
         )+
@@ -33,7 +33,7 @@ macro_rules! once_static_cloned {
         $(
             $(#[$attr])*
             $vis fn $name() -> $ty {
-                static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
+                static VAR: once_cell::sync::OnceCell<$ty> = once_cell::sync::OnceCell::new();
                 VAR.get_or_init(|| { $expr }).clone()
             }
         )+

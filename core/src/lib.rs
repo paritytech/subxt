@@ -30,6 +30,8 @@ pub use config::{
     PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
 };
 
+pub use utils::{AccountId32, MultiAddress, MultiSignature, H160, H256, H512};
+
 pub use signer::Signer;
 
 pub use metadata::Metadata;
