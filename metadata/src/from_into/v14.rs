@@ -3,15 +3,15 @@
 // see LICENSE for license details.
 
 use super::TryFromError;
-use crate::prelude::*;
 use crate::Metadata;
-use borrow::ToOwned;
-use fmt::Write;
+use alloc::borrow::ToOwned;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::fmt::Write;
 use frame_metadata::{v14, v15};
 use hashbrown::HashMap;
 use scale_info::TypeDef;
-use string::String;
-use vec::Vec;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
@@ -372,7 +372,7 @@ fn generate_outer_error_enum_type(
                 return None;
             };
 
-            // Note:  using the `format!` macro like in `let path = format!("{}Error", pallet.name);`
+            // Note:  using the `alloc::format!` macro like in `let path = format!("{}Error", pallet.name);`
             // leads to linker errors about extern function `_Unwind_Resume` not being defined.
             let mut path = String::new();
             write!(path, "{}Error", pallet.name).expect("Cannot panic, qed;");

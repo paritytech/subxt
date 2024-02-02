@@ -258,5 +258,5 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClie
         .bootnodes([bootnode.as_str()])
         .build_from_url(ws_url.as_str())
         .await
-        .map_err(|e| format!("Failed to construct light client {}", e.to_string()))
+        .map_err(|e| format!("Failed to construct light client {}", e))
 }

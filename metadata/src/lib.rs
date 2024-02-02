@@ -17,18 +17,18 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
 
+extern crate alloc;
+
 mod from_into;
-mod prelude;
 mod utils;
 
+use alloc::string::String;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
 use hashbrown::HashMap;
-use prelude::*;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use string::String;
-use sync::Arc;
 use utils::variant_index::VariantIndex;
 use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
-use vec::Vec;
 
 type ArcStr = Arc<str>;
 
@@ -205,7 +205,7 @@ impl Metadata {
             // its name to ensure that every unique type has a unique path, too.
             if *visited_count > 1 {
                 if let Some(name) = ty.ty.path.segments.last_mut() {
-                    *name = format!("{name}{visited_count}");
+                    *name = alloc::format!("{name}{visited_count}");
                 }
             }
         }

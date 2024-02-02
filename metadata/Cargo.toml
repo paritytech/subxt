@@ -24,7 +24,6 @@ codec = { package = "parity-scale-codec", workspace = true, default-features = f
 sp-core-hashing = { workspace = true }
 hashbrown = { workspace = true }
 derive_more = { workspace = true }
-cfg-if = { workspace = true }
 
 [dev-dependencies]
 bitvec = { workspace = true, features = ["alloc"] }
