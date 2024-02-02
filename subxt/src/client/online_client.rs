@@ -5,9 +5,7 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{
-        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
-    },
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
@@ -19,7 +17,9 @@ use crate::{
 };
 use derivative::Derivative;
 use futures::future;
+use std::borrow::Borrow;
 use std::sync::{Arc, RwLock};
+use subxt_core::{ClientBase, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -33,16 +33,8 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
-    inner: Arc<RwLock<Inner<T>>>,
+    inner: Arc<RwLock<ClientBase<T>>>,
     backend: Arc<dyn Backend<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
 }
 
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
@@ -146,11 +138,11 @@ impl<T: Config> OnlineClient<T> {
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
-            inner: Arc::new(RwLock::new(Inner {
+            inner: Arc::new(RwLock::new(ClientBase::new(
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
-            })),
+                metadata.into(),
+            ))),
             backend,
         })
     }
@@ -360,6 +352,11 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
     }
+
+    fn base(&self) -> ClientBase<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        inner.clone()
+    }
 }
 
 impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
@@ -521,7 +518,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         let scale_val = match chunk.to_value() {
             Ok(v) => v,
-            Err(e) => return Some(Err(e)),
+            Err(e) => return Some(Err(e.into())),
         };
 
         let Some(Ok(spec_version)) = scale_val

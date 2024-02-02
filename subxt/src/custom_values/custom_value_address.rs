@@ -1,8 +1,7 @@
 use derivative::Derivative;
 use std::marker::PhantomData;
 
-use crate::dynamic::DecodedValueThunk;
-use subxt_core::metadata::DecodeWithMetadata;
+use subxt_core::{dynamic::DecodedValueThunk, metadata::DecodeWithMetadata};
 
 /// This represents the address of a custom value in in the metadata.
 /// Anything, that implements the [CustomValueAddress] trait can be used, to fetch

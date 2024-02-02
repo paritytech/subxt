@@ -2,10 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    storage_type::{validate_storage_address, Storage},
-    utils, StorageAddress,
-};
+use super::{storage_type::Storage, StorageAddress};
 use crate::{
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
@@ -14,6 +11,10 @@ use crate::{
 };
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::{
+    metadata::MetadatExt,
+    storage::utils::{storage_address_bytes, storage_address_root_bytes, validate_storage_address},
+};
 
 /// Query the runtime storage.
 #[derive(Derivative)]
@@ -45,13 +46,14 @@ where
     pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
         let metadata = self.client.metadata();
         let pallet_metadata = metadata.pallet_by_name_err(address.pallet_name())?;
-        validate_storage_address(address, pallet_metadata)
+        validate_storage_address(address, pallet_metadata)?;
+        Ok(())
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
     /// to retrieve the entries at the root of the associated address.
     pub fn address_root_bytes<Address: StorageAddress>(&self, address: &Address) -> Vec<u8> {
-        utils::storage_address_root_bytes(address)
+        storage_address_root_bytes(address)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
@@ -63,7 +65,8 @@ where
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        utils::storage_address_bytes(address, &self.client.metadata())
+        let bytes = storage_address_bytes(address, &self.client.metadata())?;
+        Ok(bytes)
     }
 }
 

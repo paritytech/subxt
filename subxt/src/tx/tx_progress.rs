@@ -337,7 +337,7 @@ mod test {
     struct MockClient;
 
     impl OfflineClientT<SubstrateConfig> for MockClient {
-        fn metadata(&self) -> subxt_core::metadata {
+        fn metadata(&self) -> subxt_core::Metadata {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
@@ -345,7 +345,11 @@ mod test {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
-        fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+        fn runtime_version(&self) -> subxt_core::RuntimeVersion {
+            unimplemented!("just a mock impl to satisfy trait bounds")
+        }
+
+        fn base(&self) -> subxt_core::ClientBase<SubstrateConfig> {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }

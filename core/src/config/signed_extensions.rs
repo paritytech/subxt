@@ -7,10 +7,11 @@
 //! [`AnyOf`] to configure the set of signed extensions which are known about
 //! when interacting with a chain.
 
-use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
 use super::Config;
 use crate::client::ClientBase;
 use crate::utils::Era;
+use crate::ExtrinsicParamsError;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;

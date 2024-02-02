@@ -8,7 +8,7 @@ use crate::{config::Config, metadata::Metadata};
 /// - metadata
 
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct ClientBase<C: Config> {
     pub genesis_hash: C::Hash,
     pub runtime_version: RuntimeVersion,
@@ -17,6 +17,15 @@ pub struct ClientBase<C: Config> {
 }
 
 impl<C: Config> ClientBase<C> {
+    pub fn new(genesis_hash: C::Hash, runtime_version: RuntimeVersion, metadata: Metadata) -> Self {
+        Self {
+            genesis_hash,
+            runtime_version,
+            metadata,
+            marker: core::marker::PhantomData,
+        }
+    }
+
     pub fn metadata(&self) -> Metadata {
         self.metadata.clone()
     }

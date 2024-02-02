@@ -10,53 +10,12 @@
 use crate::client::ClientBase;
 
 use super::Config;
+use crate::ExtrinsicParamsError;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Debug;
 
 use derive_more::Display;
-
-/// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
-/// encode data from the instance, or match on signed extensions.
-#[derive(Display, Debug)]
-#[non_exhaustive]
-pub enum ExtrinsicParamsError {
-    /// Cannot find a type id in the metadata. The context provides some additional
-    /// information about the source of the error (eg the signed extension name).
-    #[display(fmt = "Cannot find type id '{type_id} in the metadata (context: {context})")]
-    MissingTypeId {
-        /// Type ID.
-        type_id: u32,
-        /// Some arbitrary context to help narrow the source of the error.
-        context: &'static str,
-    },
-    /// A signed extension in use on some chain was not provided.
-    #[display(
-        fmt = "The chain expects a signed extension with the name {_0}, but we did not provide one"
-    )]
-    UnknownSignedExtension(String),
-    /// Some custom error.
-    #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
-    #[cfg(feature = "std")]
-    Custom(CustomExtrinsicParamsError),
-}
-
-/// A custom error.
-#[cfg(feature = "std")]
-pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
-
-impl From<core::convert::Infallible> for ExtrinsicParamsError {
-    fn from(value: core::convert::Infallible) -> Self {
-        match value {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
-    fn from(value: CustomExtrinsicParamsError) -> Self {
-        ExtrinsicParamsError::Custom(value)
-    }
-}
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload

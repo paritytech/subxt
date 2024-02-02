@@ -17,13 +17,12 @@ pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
 
-pub use subxt_core::metadata::MetadataError;
+pub use subxt_core::MetadataError;
 
 // Re-expose the errors we use from other crates here:
-pub use crate::config::ExtrinsicParamsError;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
-pub use subxt_core::metadata::Metadata;
+pub use subxt_core::{ExtrinsicParamsError, Metadata};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
@@ -46,7 +45,7 @@ pub enum Error {
     Serialization(#[from] serde_json::error::Error),
     /// Error working with metadata.
     #[error("Metadata error: {0}")]
-    Metadata(#[from] MetadataError),
+    Metadata(#[from] subxt_core::MetadataError),
     /// Error decoding metadata.
     #[error("Metadata Decoding error: {0}")]
     MetadataDecoding(#[from] MetadataTryFromError),
@@ -64,13 +63,13 @@ pub enum Error {
     Transaction(#[from] TransactionError),
     /// Error constructing the appropriate extrinsic params.
     #[error("Extrinsic params error: {0}")]
-    ExtrinsicParams(#[from] ExtrinsicParamsError),
+    ExtrinsicParams(#[from] subxt_core::ExtrinsicParamsError),
     /// Block related error.
     #[error("Block error: {0}")]
     Block(#[from] BlockError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
-    StorageAddress(#[from] StorageAddressError),
+    StorageAddress(#[from] subxt_core::StorageAddressError),
     /// The bytes representing an error that we were unable to decode.
     #[error("An error occurred but it could not be decoded: {0:?}")]
     Unknown(Vec<u8>),
@@ -82,6 +81,18 @@ pub enum Error {
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
+}
+
+impl From<subxt_core::Error> for Error {
+    fn from(value: subxt_core::Error) -> Self {
+        match value {
+            subxt_core::Error::Metadata(e) => Error::Metadata(e),
+            subxt_core::Error::StorageAddress(e) => Error::StorageAddress(e),
+            subxt_core::Error::Decode(e) => Error::Decode(e),
+            subxt_core::Error::Encode(e) => Error::Encode(e),
+            subxt_core::Error::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+        }
+    }
 }
 
 impl<'a> From<&'a str> for Error {
@@ -175,29 +186,4 @@ pub enum TransactionError {
     /// The transaction was dropped.
     #[error("The transaction was dropped: {0}")]
     Dropped(String),
-}
-
-/// Something went wrong trying to encode a storage address.
-#[derive(Clone, Debug, thiserror::Error)]
-#[non_exhaustive]
-pub enum StorageAddressError {
-    /// Storage map type must be a composite type.
-    #[error("Storage map type must be a composite type")]
-    MapTypeMustBeTuple,
-    /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
-    WrongNumberOfKeys {
-        /// The actual number of keys needed, based on the metadata.
-        actual: usize,
-        /// The number of keys provided in the storage address.
-        expected: usize,
-    },
-    /// This storage entry in the metadata does not have the correct number of hashers to fields.
-    #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
-    WrongNumberOfHashers {
-        /// The number of hashers in the metadata for this storage entry.
-        hashers: usize,
-        /// The number of fields in the metadata for this storage entry.
-        fields: usize,
-    },
 }

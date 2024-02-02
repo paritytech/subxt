@@ -8,7 +8,7 @@
 use core::fmt::Debug;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
 use std::borrow::Cow;
-use subxt_core::metadata::{DecodeWithMetadata, Metadata};
+use subxt_core::metadata::{DecodeWithMetadata, MetadatExt, Metadata};
 
 use super::{Error, MetadataError};
 

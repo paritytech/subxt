@@ -6,13 +6,16 @@ pub enum Error {
     #[display(fmt = "Metadata Error: {_0}")]
     Metadata(MetadataError),
     #[display(fmt = "Storage Error: {_0}")]
-    Storage(StorageAddressError),
+    StorageAddress(StorageAddressError),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[display(fmt = "Error decoding into dynamic value: {_0}")]
     Decode(scale_decode::Error),
     /// Error encoding from a [`crate::dynamic::Value`].
     #[display(fmt = "Error encoding from dynamic value: {_0}")]
     Encode(scale_encode::Error),
+    /// Error constructing the appropriate extrinsic params.
+    #[display(fmt = "Extrinsic params error: {_0}")]
+    ExtrinsicParams(ExtrinsicParamsError),
 }
 
 #[cfg(feature = "std")]
@@ -97,4 +100,52 @@ pub enum StorageAddressError {
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
     },
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for StorageAddressError {}
+
+/// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
+/// encode data from the instance, or match on signed extensions.
+#[derive(Display, Debug)]
+#[non_exhaustive]
+pub enum ExtrinsicParamsError {
+    /// Cannot find a type id in the metadata. The context provides some additional
+    /// information about the source of the error (eg the signed extension name).
+    #[display(fmt = "Cannot find type id '{type_id} in the metadata (context: {context})")]
+    MissingTypeId {
+        /// Type ID.
+        type_id: u32,
+        /// Some arbitrary context to help narrow the source of the error.
+        context: &'static str,
+    },
+    /// A signed extension in use on some chain was not provided.
+    #[display(
+        fmt = "The chain expects a signed extension with the name {_0}, but we did not provide one"
+    )]
+    UnknownSignedExtension(String),
+    /// Some custom error.
+    #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
+    #[cfg(feature = "std")]
+    Custom(CustomExtrinsicParamsError),
+}
+
+/// A custom error.
+#[cfg(feature = "std")]
+pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
+
+#[cfg(feature = "std")]
+impl std::error::Error for ExtrinsicParamsError {}
+
+impl From<core::convert::Infallible> for ExtrinsicParamsError {
+    fn from(value: core::convert::Infallible) -> Self {
+        match value {}
+    }
+}
+
+#[cfg(feature = "std")]
+impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
+    fn from(value: CustomExtrinsicParamsError) -> Self {
+        ExtrinsicParamsError::Custom(value)
+    }
 }

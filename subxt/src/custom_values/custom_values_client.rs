@@ -93,7 +93,6 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
 
 #[cfg(test)]
 mod tests {
-    use crate::backend::RuntimeVersion;
     use crate::custom_values::CustomValuesClient;
     use crate::{Metadata, OfflineClient, SubstrateConfig};
     use codec::Encode;
@@ -101,6 +100,7 @@ mod tests {
     use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
     use std::collections::BTreeMap;
+    use subxt_core::RuntimeVersion;
 
     #[derive(Debug, Clone, PartialEq, Eq, Encode, TypeInfo, DecodeAsType)]
     pub struct Person {

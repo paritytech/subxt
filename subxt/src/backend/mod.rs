@@ -17,6 +17,7 @@ use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
+use subxt_core::client::RuntimeVersion;
 use subxt_core::metadata::Metadata;
 
 /// Prevent the backend trait being implemented externally.
@@ -275,26 +276,6 @@ impl<T> StreamOf<T> {
 
 /// A stream of [`Result<Item, Error>`].
 pub type StreamOfResults<T> = StreamOf<Result<T, Error>>;
-
-/// Runtime version information needed to submit transactions.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RuntimeVersion {
-    /// Version of the runtime specification. A full-node will not attempt to use its native
-    /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
-    /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    pub spec_version: u32,
-
-    /// All existing dispatches are fully compatible when this number doesn't change. If this
-    /// number changes, then `spec_version` must change, also.
-    ///
-    /// This number must change when an existing dispatchable (module ID, dispatch ID) is changed,
-    /// either through an alteration in its user-level semantics, a parameter
-    /// added/removed/changed, a dispatchable being removed, a module being removed, or a
-    /// dispatchable/module changing its index.
-    ///
-    /// It need *not* change when a new module is added or when a dispatchable is added.
-    pub transaction_version: u32,
-}
 
 /// The status of the transaction.
 ///

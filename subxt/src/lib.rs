@@ -45,7 +45,6 @@ pub use getrandom as _;
 pub mod backend;
 pub mod blocks;
 pub mod client;
-pub mod config;
 pub mod constants;
 pub mod custom_values;
 pub mod dynamic;
@@ -64,9 +63,11 @@ mod macros;
 // but leave most types behind their respective modules.
 pub use crate::{
     client::{OfflineClient, OnlineClient},
-    config::{Config, PolkadotConfig, SubstrateConfig},
     error::Error,
 };
+
+pub use subxt_core::config;
+pub use subxt_core::config::{Config, PolkadotConfig, SubstrateConfig};
 
 use subxt_core::metadata::Metadata;
 

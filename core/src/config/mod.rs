@@ -23,7 +23,7 @@ use scale_encode::EncodeAsType;
 use serde::{de::DeserializeOwned, Serialize};
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
-pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use signed_extensions::SignedExtension;
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};

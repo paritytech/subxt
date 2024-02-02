@@ -9,12 +9,14 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
-    tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
 };
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
+use subxt_core::{metadata::MetadatExt, tx::TxPayload, Signer as SignerT};
+
+use super::TxProgress;
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -122,7 +124,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
             account_nonce,
-            self.client.clone(),
+            &self.client.base(),
             other_params,
         )?;
 

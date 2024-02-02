@@ -2,7 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{StorageAddress, Yes};
+use subxt_core::{
+    storage::utils::{
+        decode_storage_with_metadata, lookup_entry_details, storage_address_bytes,
+        validate_storage_address,
+    },
+    StorageAddress, Yes,
+};
 
 use crate::{
     backend::{BackendExt, BlockRef},
@@ -14,8 +20,7 @@ use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
-use subxt_core::metadata::{DecodeWithMetadata, Metadata};
-use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
+use subxt_core::metadata::DecodeWithMetadata;
 
 /// This is returned from a couple of storage functions.
 pub use crate::backend::StreamOfResults;
@@ -132,7 +137,7 @@ where
             validate_storage_address(address, pallet)?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
-            let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
+            let lookup_bytes = storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(lookup_bytes).await? {
                 let val =
                     decode_storage_with_metadata::<Address::Target>(&mut &*data, &metadata, entry)?;
@@ -163,7 +168,7 @@ where
                 let (_pallet_metadata, storage_entry) =
                     lookup_entry_details(pallet_name, entry_name, &metadata)?;
 
-                let return_ty_id = return_type_from_storage_entry_type(storage_entry.entry_type());
+                let return_ty_id = storage_entry.entry_type().value_ty();
                 let bytes = &mut storage_entry.default_bytes();
 
                 let val = Address::Target::decode_with_metadata(bytes, return_ty_id, &metadata)?;
@@ -226,10 +231,10 @@ where
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
+            let return_type_id = entry.entry_type().value_ty();
 
             // The address bytes of this entry:
-            let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
+            let address_bytes = storage_address_bytes(&address, &metadata)?;
 
             let s = client
                 .backend()
