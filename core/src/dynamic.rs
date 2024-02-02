@@ -16,17 +16,17 @@ pub use scale_value::{At, Value};
 /// for dynamic requests.
 pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
 
-// // Submit dynamic transactions.
+/// Submit dynamic transactions.
 pub use crate::tx::dynamic as tx;
 
-// // Lookup constants dynamically.
+/// Lookup constants dynamically.
 pub use crate::constants::dynamic as constant;
 
-// // Lookup storage values dynamically.
+/// Lookup storage values dynamically.
 pub use crate::storage::dynamic as storage;
 
-// // Execute runtime API function call dynamically.
-// pub use crate::runtime_api::dynamic as runtime_api_call;
+/// Execute runtime API function call dynamically.
+pub use crate::runtime_api::dynamic as runtime_api_call;
 
 /// This is the result of making a dynamic request to a node. From this,
 /// we can return the raw SCALE bytes that we were handed back, or we can

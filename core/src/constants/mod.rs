@@ -37,7 +37,7 @@ pub fn validate_constant<Address: ConstantAddress>(
     Ok(())
 }
 
-pub fn access_constant<Address: ConstantAddress>(
+pub fn get_constant<Address: ConstantAddress>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Address::Target, Error> {
