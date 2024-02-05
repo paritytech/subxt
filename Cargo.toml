@@ -61,7 +61,7 @@ criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
-darling = "0.20.3"
+darling = "0.20.5"
 derivative = "2.2.0"
 either = "1.9.0"
 frame-metadata = { version = "16.0.0", default-features = false, features = ["current", "std"] }
