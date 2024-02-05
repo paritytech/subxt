@@ -9,7 +9,7 @@
 
 #[start]
 fn start(_argc: isize, _argv: *const *const u8) -> isize {
-    run_tests();
+    compile_test();
     0
 }
 
@@ -19,9 +19,7 @@ pub extern "C" fn rust_eh_personality() {}
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
-    unsafe {
-        libc::abort();
-    }
+    loop {}
 }
 
 use libc_alloc::LibcAlloc;
@@ -33,13 +31,13 @@ static ALLOCATOR: LibcAlloc = LibcAlloc;
 
 extern crate alloc;
 
-// Note: Panics in this function will lead to `Aborted (core dumped)` and a non-zero exit status => suitable for CI tests.
-fn run_tests() {
-    subxt_metadata_test();
+/// Including code here makes sure it is not pruned.
+/// We want all code included to compile fine for the `thumbv7em-none-eabi` target.
+fn compile_test() {
+    subxt_metadata_compiles();
 }
 
-/// Makes sure, subxt-metadata works in a no-std-context:
-fn subxt_metadata_test() {
+fn subxt_metadata_compiles() {
     use codec::Decode;
     let bytes: alloc::vec::Vec<u8> = alloc::vec![0, 1, 2, 3, 4];
     subxt_metadata::Metadata::decode(&mut &bytes[..]).expect_err("invalid byte sequence");
