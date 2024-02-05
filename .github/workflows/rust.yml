@@ -437,13 +437,19 @@ jobs:
           toolchain: nightly
           override: true
 
+      - name: Add the `thumbv7em-none-eabi` target
+        run: |
+          rustup target add `thumbv7em-none-eabi`
+
       - name: Rust Cache
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
-      # Note: in `no_std` no real tests are possible, we just run a binary with some tests in it which panic upon failure.
-      - name: Run no_std tests
+      # Note: We currently do not have a way to run real tests in a `no_std` environment.
+      # We can only make sure that they compile to ARM thumb ISA.
+      # Running the binary and inspecting the output would require an actual machine with matching ISA or some sort of emulator.
+      - name: Compile `no-std-tests` crate to `thumbv7em-none-eabi` target.
         run: |
-          cargo run
+          cargo build --target thumbv7em-none-eabi
         working-directory: testing/no-std-tests
 
       - if: "failure()"
