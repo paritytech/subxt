@@ -7,8 +7,8 @@ resolver = "2"
 
 [dependencies]
 subxt-metadata = { path = "../../metadata", default-features = false }
-subxt-core = { path = "../../core", default-features = false }
 subxt-signer = { path = "../../signer", default-features = false, features = ["sr25519", "ecdsa", "subxt"] }
+subxt-core = { path = "../../core", default-features = false }
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false, features = ["derive"] }
 libc = { version = "0.2", default-features = false }
 libc_alloc = { version = "1.0.6" }

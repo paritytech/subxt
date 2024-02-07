@@ -9,7 +9,7 @@
 
 #[start]
 fn start(_argc: isize, _argv: *const *const u8) -> isize {
-    compile_test();
+    test();
     0
 }
 
@@ -19,7 +19,9 @@ pub extern "C" fn rust_eh_personality() {}
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
+    unsafe {
+        libc::abort();
+    }
 }
 
 use libc_alloc::LibcAlloc;
@@ -33,27 +35,30 @@ extern crate alloc;
 
 /// Including code here makes sure it is not pruned.
 /// We want all code included to compile fine for the `thumbv7em-none-eabi` target.
-fn compile_test() {
-    subxt_metadata_compiles();
-}
+fn test() {
+    // /////////////////////////////////////////////////////////////////////////////
+    // subxt-metadata
+    // /////////////////////////////////////////////////////////////////////////////
 
-fn subxt_metadata_compiles() {
     use codec::Decode;
     let bytes: alloc::vec::Vec<u8> = alloc::vec![0, 1, 2, 3, 4];
     subxt_metadata::Metadata::decode(&mut &bytes[..]).expect_err("invalid byte sequence");
 
     const METADATA: &[u8] = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
-}
 
-fn subxt_signer_test() {
-    use subxt_signer::{ SecretUri, ecdsa::Keypair };
+    // /////////////////////////////////////////////////////////////////////////////
+    // subxt-signer
+    // /////////////////////////////////////////////////////////////////////////////
+
     use core::str::FromStr;
+    use subxt_signer::{ecdsa::Keypair, SecretUri};
     let uri = SecretUri::from_str("//Alice").unwrap();
-    let keypair = Keypair::from_uri(&uri).unwrap();
-}
+    let _keypair = Keypair::from_uri(&uri).unwrap();
 
-fn subxt_core_test() {
-    let _ = subxt_core::utils::Era::Immortal;
-}
+    // /////////////////////////////////////////////////////////////////////////////
+    // subxt-core
+    // /////////////////////////////////////////////////////////////////////////////
 
+    let _era = subxt_core::utils::Era::Immortal;
+}

@@ -7,7 +7,7 @@ use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
 };
 use subxt_core::config::signed_extensions;
-use subxt_core::error::ExtrinsicParamsError;
+use subxt_core::ExtrinsicParamsError;
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
