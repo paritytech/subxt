@@ -12,7 +12,7 @@ use derivative::Derivative;
 use scale_encode::EncodeAsType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
-use subxt_metadata::{StorageEntryMetadata, StorageEntryType, StorageHasher};
+use subxt_metadata::{StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -63,33 +63,6 @@ pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iter
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
-// #[derive(Derivative)]
-// #[derivative(Clone(bound = "K: Clone"), Debug(bound = "K: std::fmt::Debug"))]
-// pub enum StorageKey<K: EncodeAsType> {
-//     Encoded(Static<Encoded>),
-//     Bare(K),
-// }
-
-// impl<K: codec::Encode + EncodeAsType> StorageKey<K> {
-//     pub fn new_encoded(key_ty: &K) -> StorageKey<K> {
-//         StorageKey::Encoded(Static(Encoded(key_ty.encode())))
-//     }
-// }
-
-// impl<K: EncodeAsType> EncodeAsType for StorageKey<K> {
-//     fn encode_as_type_to(
-//         &self,
-//         type_id: u32,
-//         types: &scale_info::PortableRegistry,
-//         out: &mut Vec<u8>,
-//     ) -> Result<(), scale_encode::Error> {
-//         match self {
-//             StorageKey::Encoded(e) => e.encode_as_type_to(type_id, types, out),
-//             StorageKey::Bare(e) => e.encode_as_type_to(type_id, types, out),
-//         }
-//     }
-// }
-
 /// A storage key, mostly used for static encoded values.
 /// The original value is only given during construction, but can be
 pub struct StorageKey<K> {
@@ -109,17 +82,6 @@ impl<K: EncodeAsType + codec::Encode + codec::Decode> StorageKey<K> {
         &self.bytes.0 .0
     }
 }
-
-// impl<K: codec::Encode> EncodeAsType for StorageKey<K> {
-//     fn encode_as_type_to(
-//         &self,
-//         type_id: u32,
-//         types: &scale_info::PortableRegistry,
-//         out: &mut Vec<u8>,
-//     ) -> Result<(), scale_encode::Error> {
-//         self.bytes.encode_as_type_to(type_id, types, out)
-//     }
-// }
 
 pub trait StorageMultiKey {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType>;
@@ -150,13 +112,15 @@ impl<K: EncodeAsType> StorageMultiKey for Vec<K> {
     }
 }
 
-// impl<A: EncodeAsType, B: EncodeAsType> StorageMultiKey for (StorageKey<A>, StorageKey<B>) {
-//     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
-//         let arr = [&self.0 as &dyn EncodeAsType, &self.1 as &dyn EncodeAsType];
-//         arr.into_iter()
-//     }
-// }
-
+/// Generates StorageMultiKey implementations for tuples, e.g.
+/// ```rs,norun
+/// impl<A: EncodeAsType, B: EncodeAsType> StorageMultiKey for (StorageKey<A>, StorageKey<B>) {
+///     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+///         let arr = [&self.0 as &dyn EncodeAsType, &self.1 as &dyn EncodeAsType];
+///         arr.into_iter()
+///     }
+/// }
+/// ```
 macro_rules! impl_tuples {
     ($($ty:ident $n:tt),+) => {{
         impl<$($ty: EncodeAsType),+> StorageMultiKey for ($( StorageKey<$ty >),+) {
@@ -378,31 +342,4 @@ fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
             bytes.extend(input);
         }
     }
-}
-
-/// Tries to recover from the hash, the bytes of the value that was originially hashed.
-/// Note: this only returns `Some(..)` for concat-style hashers.
-pub fn value_bytes_from_hash_bytes<'a>(hash: &'a [u8], hasher: &StorageHasher) -> Option<&'a [u8]> {
-    match hasher {
-        StorageHasher::Blake2_128Concat => Some(&hash[16..0]),
-        StorageHasher::Twox64Concat => Some(&hash[8..0]),
-        StorageHasher::Blake2_128
-        | StorageHasher::Blake2_256
-        | StorageHasher::Twox128
-        | StorageHasher::Twox256
-        | StorageHasher::Identity => None,
-    }
-}
-
-/// Tries to recover an encoded value from a concat-style hash.
-pub fn value_from_hash_bytes<V: codec::Encode + codec::Decode>(
-    hash: &[u8],
-    hasher: &StorageHasher,
-) -> Option<Result<V, Error>> {
-    let value_bytes = value_bytes_from_hash_bytes(hash, hasher)?;
-    let value = match V::decode(&mut &value_bytes[..]) {
-        Ok(value) => value,
-        Err(err) => return Some(Err(err.into())),
-    };
-    Some(Ok(value))
 }

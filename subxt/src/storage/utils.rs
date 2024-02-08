@@ -6,6 +6,8 @@
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
+use subxt_metadata::StorageHasher;
+
 use super::StorageAddress;
 use crate::{error::Error, metadata::Metadata};
 
@@ -36,4 +38,31 @@ pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address
     let mut bytes = Vec::new();
     write_storage_address_root_bytes(addr, &mut bytes);
     bytes
+}
+
+/// Tries to recover an encoded value from a concat-style hash.
+pub fn recover_value_from_hash<V: codec::Encode + codec::Decode>(
+    hash: &[u8],
+    hasher: &StorageHasher,
+) -> Option<Result<V, Error>> {
+    let value_bytes = value_bytes_from_hash_bytes(hash, hasher)?;
+    let value = match V::decode(&mut &value_bytes[..]) {
+        Ok(value) => value,
+        Err(err) => return Some(Err(err.into())),
+    };
+    Some(Ok(value))
+}
+
+/// Tries to recover from the hash, the bytes of the value that was originially hashed.
+/// Note: this only returns `Some(..)` for concat-style hashers.
+fn value_bytes_from_hash_bytes<'a>(hash: &'a [u8], hasher: &StorageHasher) -> Option<&'a [u8]> {
+    match hasher {
+        StorageHasher::Blake2_128Concat => Some(&hash[16..0]),
+        StorageHasher::Twox64Concat => Some(&hash[8..0]),
+        StorageHasher::Blake2_128
+        | StorageHasher::Blake2_256
+        | StorageHasher::Twox128
+        | StorageHasher::Twox256
+        | StorageHasher::Identity => None,
+    }
 }
