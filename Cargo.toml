@@ -61,7 +61,7 @@ criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
-darling = "0.20.3"
+darling = "0.20.5"
 derivative = "2.2.0"
 either = "1.9.0"
 frame-metadata = { version = "16.0.0", default-features = false, features = ["current", "std"] }
@@ -87,7 +87,7 @@ serde = { version = "1.0.196" }
 serde_json = { version = "1.0.113" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.53"
-tokio = { version = "1.35", default-features = false }
+tokio = { version = "1.36", default-features = false }
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
@@ -139,7 +139,7 @@ bip39 = "2.0.0"
 hmac = "0.12.1"
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = "0.11.4"
-secp256k1 = "0.28.1"
+secp256k1 = "0.28.2"
 secrecy = "0.8.0"
 sha2 = "0.10.8"
 zeroize = { version = "1", default-features = false }

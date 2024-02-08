@@ -16,8 +16,8 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Use substrate-node binary
-        uses: ./.github/workflows/actions/use-substrate
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
