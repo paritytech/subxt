@@ -42,6 +42,9 @@ web = [
     "instant/wasm-bindgen"
 ]
 
+# Enable this to use the reconnecting rpc client
+unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
+
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = ["dep:jsonrpsee"]
 
@@ -103,6 +106,9 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 # Light client support:
 tokio-stream = { workspace = true, optional = true }
 
+# Reconnecting jsonrpc ws client
+reconnecting-jsonrpsee-ws-client = { version = "0.3", optional = true }
+
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
 
@@ -137,6 +143,11 @@ required-features = ["unstable-light-client", "jsonrpsee"]
 name = "light_client_parachains"
 path = "examples/light_client_parachains.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
+
+[[example]]
+name = "reconnecting_rpc_client"
+path = "examples/reconnecting_rpc_client.rs"
+required-features = ["unstable-reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "substrate-compat", "unstable-light-client"]
