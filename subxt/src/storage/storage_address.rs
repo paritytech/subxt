@@ -63,32 +63,63 @@ pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iter
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
-#[derive(Derivative)]
-#[derivative(Clone(bound = "K: Clone"), Debug(bound = "K: std::fmt::Debug"))]
-pub enum StorageKey<K: EncodeAsType> {
-    Encoded(Static<Encoded>),
-    Bare(K),
+// #[derive(Derivative)]
+// #[derivative(Clone(bound = "K: Clone"), Debug(bound = "K: std::fmt::Debug"))]
+// pub enum StorageKey<K: EncodeAsType> {
+//     Encoded(Static<Encoded>),
+//     Bare(K),
+// }
+
+// impl<K: codec::Encode + EncodeAsType> StorageKey<K> {
+//     pub fn new_encoded(key_ty: &K) -> StorageKey<K> {
+//         StorageKey::Encoded(Static(Encoded(key_ty.encode())))
+//     }
+// }
+
+// impl<K: EncodeAsType> EncodeAsType for StorageKey<K> {
+//     fn encode_as_type_to(
+//         &self,
+//         type_id: u32,
+//         types: &scale_info::PortableRegistry,
+//         out: &mut Vec<u8>,
+//     ) -> Result<(), scale_encode::Error> {
+//         match self {
+//             StorageKey::Encoded(e) => e.encode_as_type_to(type_id, types, out),
+//             StorageKey::Bare(e) => e.encode_as_type_to(type_id, types, out),
+//         }
+//     }
+// }
+
+/// A storage key, mostly used for static encoded values.
+/// The original value is only given during construction, but can be
+pub struct StorageKey<K> {
+    bytes: Static<Encoded>,
+    _marker: std::marker::PhantomData<K>,
 }
 
-impl<K: codec::Encode + EncodeAsType> StorageKey<K> {
-    pub fn new_encoded(key_ty: &K) -> StorageKey<K> {
-        StorageKey::Encoded(Static(Encoded(key_ty.encode())))
-    }
-}
-
-impl<K: EncodeAsType> EncodeAsType for StorageKey<K> {
-    fn encode_as_type_to(
-        &self,
-        type_id: u32,
-        types: &scale_info::PortableRegistry,
-        out: &mut Vec<u8>,
-    ) -> Result<(), scale_encode::Error> {
-        match self {
-            StorageKey::Encoded(e) => e.encode_as_type_to(type_id, types, out),
-            StorageKey::Bare(e) => e.encode_as_type_to(type_id, types, out),
+impl<K: EncodeAsType + codec::Encode + codec::Decode> StorageKey<K> {
+    pub fn new(key: &K) -> Self {
+        StorageKey {
+            bytes: Static(Encoded(key.encode())),
+            _marker: std::marker::PhantomData,
         }
     }
+
+    pub fn bytes(&self) -> &[u8] {
+        &self.bytes.0 .0
+    }
 }
+
+// impl<K: codec::Encode> EncodeAsType for StorageKey<K> {
+//     fn encode_as_type_to(
+//         &self,
+//         type_id: u32,
+//         types: &scale_info::PortableRegistry,
+//         out: &mut Vec<u8>,
+//     ) -> Result<(), scale_encode::Error> {
+//         self.bytes.encode_as_type_to(type_id, types, out)
+//     }
+// }
 
 pub trait StorageMultiKey {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType>;
@@ -107,11 +138,11 @@ impl<K: EncodeAsType> StorageMultiKey for StorageKey<K> {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
         // Note: this returns the storage root address of the storage entry.
         // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
-        std::iter::once(self as &dyn EncodeAsType)
+        std::iter::once(&self.bytes as &dyn EncodeAsType)
     }
 }
 
-impl<K: EncodeAsType> StorageMultiKey for Vec<StorageKey<K>> {
+impl<K: EncodeAsType> StorageMultiKey for Vec<K> {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
         // Note: this returns the storage root address of the storage entry.
         // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
@@ -131,7 +162,7 @@ macro_rules! impl_tuples {
         impl<$($ty: EncodeAsType),+> StorageMultiKey for ($( StorageKey<$ty >),+) {
             fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
                 let arr = [$(
-                    &self.$n as &dyn EncodeAsType
+                    &self.$n.bytes as &dyn EncodeAsType
                 ),+];
                 arr.into_iter()
             }
@@ -158,6 +189,7 @@ const _: () = {
 pub type DynamicAddress<Keys> = Address<Keys, DecodedValueThunk, Yes, Yes, Yes>;
 
 impl<Keys: StorageMultiKey> DynamicAddress<Keys> {
+    /// Creates a new dynamic address. As `Keys` you can use a `Vec<scale_value::Value>`
     pub fn new(pallet_name: impl Into<String>, entry_name: impl Into<String>, keys: Keys) -> Self {
         Self {
             pallet_name: Cow::Owned(pallet_name.into()),
@@ -346,4 +378,31 @@ fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
             bytes.extend(input);
         }
     }
+}
+
+/// Tries to recover from the hash, the bytes of the value that was originially hashed.
+/// Note: this only returns `Some(..)` for concat-style hashers.
+pub fn value_bytes_from_hash_bytes<'a>(hash: &'a [u8], hasher: &StorageHasher) -> Option<&'a [u8]> {
+    match hasher {
+        StorageHasher::Blake2_128Concat => Some(&hash[16..0]),
+        StorageHasher::Twox64Concat => Some(&hash[8..0]),
+        StorageHasher::Blake2_128
+        | StorageHasher::Blake2_256
+        | StorageHasher::Twox128
+        | StorageHasher::Twox256
+        | StorageHasher::Identity => None,
+    }
+}
+
+/// Tries to recover an encoded value from a concat-style hash.
+pub fn value_from_hash_bytes<V: codec::Encode + codec::Decode>(
+    hash: &[u8],
+    hasher: &StorageHasher,
+) -> Option<Result<V, Error>> {
+    let value_bytes = value_bytes_from_hash_bytes(hash, hasher)?;
+    let value = match V::decode(&mut &value_bytes[..]) {
+        Ok(value) => value,
+        Err(err) => return Some(Err(err.into())),
+    };
+    Some(Ok(value))
 }
