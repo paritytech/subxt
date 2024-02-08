@@ -1,5 +1,5 @@
 //! Example to utilize the `reconnecting rpc client` in subxt
-//! which hidden behind behind `--feature reconnecting-rpc-client`
+//! which hidden behind behind `--feature unstable-reconnecting-rpc-client`
 //!
 //! To utilize full logs from the RPC client use:
 //! `RUST_LOG="jsonrpsee=trace,reconnecting_jsonrpsee_ws_client=trace"`
@@ -52,8 +52,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(block) = blocks_sub.next().await {
         let block = match block {
             Ok(b) => b,
-            Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) => {
-                println!("The connection was lost: `{}`; reconnecting", e);
+            Err(Error::Rpc(RpcError::DisconnectedWillReconnect(err))) => {
+                println!("{err}");
                 continue;
             }
             Err(e) => {
