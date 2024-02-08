@@ -9,9 +9,10 @@ use crate::{
     utils::{Encoded, Static},
 };
 use derivative::Derivative;
+use scale_encode::EncodeAsType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
-use subxt_metadata::{StorageEntryType, StorageHasher};
+use subxt_metadata::{StorageEntryMetadata, StorageEntryType, StorageHasher};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -53,61 +54,152 @@ pub struct Yes;
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive(Derivative)]
-#[derivative(
-    Clone(bound = "StorageKey: Clone"),
-    Debug(bound = "StorageKey: std::fmt::Debug")
-)]
-pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
+#[derivative(Clone(bound = "Keys: Clone"), Debug(bound = "Keys: std::fmt::Debug"))]
+pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
-    storage_entry_keys: Vec<StorageKey>,
+    keys: Keys,
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
+#[derive(Derivative)]
+#[derivative(Clone(bound = "K: Clone"), Debug(bound = "K: std::fmt::Debug"))]
+pub enum StorageKey<K: EncodeAsType> {
+    Encoded(Static<Encoded>),
+    Bare(K),
+}
+
+impl<K: codec::Encode + EncodeAsType> StorageKey<K> {
+    pub fn new_encoded(key_ty: &K) -> StorageKey<K> {
+        StorageKey::Encoded(Static(Encoded(key_ty.encode())))
+    }
+}
+
+impl<K: EncodeAsType> EncodeAsType for StorageKey<K> {
+    fn encode_as_type_to(
+        &self,
+        type_id: u32,
+        types: &scale_info::PortableRegistry,
+        out: &mut Vec<u8>,
+    ) -> Result<(), scale_encode::Error> {
+        match self {
+            StorageKey::Encoded(e) => e.encode_as_type_to(type_id, types, out),
+            StorageKey::Bare(e) => e.encode_as_type_to(type_id, types, out),
+        }
+    }
+}
+
+pub trait StorageMultiKey {
+    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType>;
+}
+
+/// Implement `StorageMultiKey` for `()` which can be used for keyless storage entries
+impl StorageMultiKey for () {
+    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+        // Note: this returns the storage root address of the storage entry.
+        // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
+        std::iter::empty()
+    }
+}
+
+impl<K: EncodeAsType> StorageMultiKey for StorageKey<K> {
+    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+        // Note: this returns the storage root address of the storage entry.
+        // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
+        std::iter::once(self as &dyn EncodeAsType)
+    }
+}
+
+impl<K: EncodeAsType> StorageMultiKey for Vec<StorageKey<K>> {
+    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+        // Note: this returns the storage root address of the storage entry.
+        // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
+        self.iter().map(|e| e as &dyn EncodeAsType)
+    }
+}
+
+// impl<A: EncodeAsType, B: EncodeAsType> StorageMultiKey for (StorageKey<A>, StorageKey<B>) {
+//     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+//         let arr = [&self.0 as &dyn EncodeAsType, &self.1 as &dyn EncodeAsType];
+//         arr.into_iter()
+//     }
+// }
+
+macro_rules! impl_tuples {
+    ($($ty:ident $n:tt),+) => {{
+        impl<$($ty: EncodeAsType),+> StorageMultiKey for ($( StorageKey<$ty >),+) {
+            fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+                let arr = [$(
+                    &self.$n as &dyn EncodeAsType
+                ),+];
+                arr.into_iter()
+            }
+        }
+    }};
+}
+
+#[rustfmt::skip]
+const _: () = {
+    impl_tuples!(A 0, B 1);
+    impl_tuples!(A 0, B 1, C 2);
+    impl_tuples!(A 0, B 1, C 2, D 3);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
+};
+
+// todo! impl MultiStorageKey for Vec<StorageKey<K>> and for (StorageKey<K1>, StorageKey<K2>), ...
+// impl MultiStorageKey
+
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
-pub type DynamicAddress<StorageKey> = Address<StorageKey, DecodedValueThunk, Yes, Yes, Yes>;
+pub type DynamicAddress<Keys> = Address<Keys, DecodedValueThunk, Yes, Yes, Yes>;
 
-impl<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-where
-    StorageKey: EncodeWithMetadata,
-    ReturnTy: DecodeWithMetadata,
-{
-    /// Create a new [`Address`] to use to access a storage entry.
-    pub fn new(
-        pallet_name: impl Into<String>,
-        entry_name: impl Into<String>,
-        storage_entry_keys: Vec<StorageKey>,
-    ) -> Self {
+impl<Keys: StorageMultiKey> DynamicAddress<Keys> {
+    pub fn new(pallet_name: impl Into<String>, entry_name: impl Into<String>, keys: Keys) -> Self {
         Self {
             pallet_name: Cow::Owned(pallet_name.into()),
             entry_name: Cow::Owned(entry_name.into()),
-            storage_entry_keys: storage_entry_keys.into_iter().collect(),
+            keys,
             validation_hash: None,
             _marker: std::marker::PhantomData,
         }
     }
+}
 
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+where
+    Keys: StorageMultiKey,
+    ReturnTy: DecodeWithMetadata,
+{
     /// Create a new [`Address`] using static strings for the pallet and call name.
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
         pallet_name: &'static str,
         entry_name: &'static str,
-        storage_entry_keys: Vec<StorageKey>,
+        keys: Keys,
         hash: [u8; 32],
     ) -> Self {
         Self {
             pallet_name: Cow::Borrowed(pallet_name),
             entry_name: Cow::Borrowed(entry_name),
-            storage_entry_keys: storage_entry_keys.into_iter().collect(),
+            keys,
             validation_hash: Some(hash),
             _marker: std::marker::PhantomData,
         }
     }
+}
 
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+where
+    Keys: StorageMultiKey,
+    ReturnTy: DecodeWithMetadata,
+{
     /// Do not validate this storage entry prior to accessing it.
     pub fn unvalidated(self) -> Self {
         Self {
@@ -124,10 +216,10 @@ where
     }
 }
 
-impl<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
-    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
+    for Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
-    StorageKey: EncodeWithMetadata,
+    Keys: StorageMultiKey,
     ReturnTy: DecodeWithMetadata,
 {
     type Target = ReturnTy;
@@ -152,78 +244,65 @@ where
             .entry_by_name(self.entry_name())
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
-        match entry.entry_type() {
-            StorageEntryType::Plain(_) => {
-                if !self.storage_entry_keys.is_empty() {
-                    Err(StorageAddressError::WrongNumberOfKeys {
-                        expected: 0,
-                        actual: self.storage_entry_keys.len(),
-                    }
-                    .into())
-                } else {
-                    Ok(())
-                }
+        let keys_iter = self.keys.keys_iter();
+        let keys_len = keys_iter.len();
+
+        if keys_len == 0 {
+            return Ok(());
+        }
+
+        let StorageEntryType::Map {
+            hashers, key_ty, ..
+        } = entry.entry_type()
+        else {
+            // Plain entries are only okay, if keys_len == 0, see early return above.
+            return Err(StorageAddressError::WrongNumberOfKeys {
+                expected: 0,
+                actual: keys_len,
             }
-            StorageEntryType::Map {
-                hashers, key_ty, ..
-            } => {
-                let ty = metadata
-                    .types()
-                    .resolve(*key_ty)
-                    .ok_or(MetadataError::TypeNotFound(*key_ty))?;
+            .into());
+        };
 
-                // If the provided keys are empty, the storage address must be
-                // equal to the storage root address.
-                if self.storage_entry_keys.is_empty() {
-                    return Ok(());
-                }
+        let ty = metadata
+            .types()
+            .resolve(*key_ty)
+            .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
-                // If the key is a tuple, we encode each value to the corresponding tuple type.
-                // If the key is not a tuple, encode a single value to the key type.
-                let type_ids = match &ty.type_def {
-                    TypeDef::Tuple(tuple) => {
-                        either::Either::Left(tuple.fields.iter().map(|f| f.id))
-                    }
-                    _other => either::Either::Right(std::iter::once(*key_ty)),
-                };
+        // If the key is a tuple, we encode each value to the corresponding tuple type.
+        // If the key is not a tuple, encode a single value to the key type.
+        let type_ids = match &ty.type_def {
+            TypeDef::Tuple(tuple) => either::Either::Left(tuple.fields.iter().map(|f| f.id)),
+            _other => either::Either::Right(std::iter::once(*key_ty)),
+        };
 
-                if type_ids.len() < self.storage_entry_keys.len() {
-                    // Provided more keys than fields.
-                    return Err(StorageAddressError::WrongNumberOfKeys {
-                        expected: type_ids.len(),
-                        actual: self.storage_entry_keys.len(),
-                    }
-                    .into());
-                }
+        // Provided more fields than hashers: This is unacceptable (on the contrary, providing more hashers than keys is ok)
+        if hashers.len() < type_ids.len() {
+            return Err(StorageAddressError::WrongNumberOfHashers {
+                hashers: hashers.len(),
+                fields: type_ids.len(),
+            }
+            .into());
+        }
 
-                if hashers.len() == 1 {
-                    // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
-                    let mut input = Vec::new();
-                    let iter = self.storage_entry_keys.iter().zip(type_ids);
-                    for (key, type_id) in iter {
-                        key.encode_with_metadata(type_id, metadata, &mut input)?;
-                    }
-                    hash_bytes(&input, &hashers[0], bytes);
-                    Ok(())
-                } else if hashers.len() >= type_ids.len() {
-                    let iter = self.storage_entry_keys.iter().zip(type_ids).zip(hashers);
-                    // A hasher per field; encode and hash each field independently.
-                    for ((key, type_id), hasher) in iter {
-                        let mut input = Vec::new();
-                        key.encode_with_metadata(type_id, metadata, &mut input)?;
-                        hash_bytes(&input, hasher, bytes);
-                    }
-                    Ok(())
-                } else {
-                    // Provided more fields than hashers.
-                    Err(StorageAddressError::WrongNumberOfHashers {
-                        hashers: hashers.len(),
-                        fields: type_ids.len(),
-                    }
-                    .into())
-                }
+        if hashers.len() == 1 {
+            // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
+            let mut input = Vec::new();
+            let iter = keys_iter.zip(type_ids);
+            for (key, type_id) in iter {
+                key.encode_with_metadata(type_id, metadata, &mut input)?;
+            }
+            hash_bytes(&input, &hashers[0], bytes);
+        } else {
+            // A hasher per field; encode and hash each field independently.
+            let iter = keys_iter.zip(type_ids).zip(hashers);
+            for ((key, type_id), hasher) in iter {
+                let mut input = Vec::new();
+                key.encode_with_metadata(type_id, metadata, &mut input)?;
+                hash_bytes(&input, hasher, bytes);
             }
         }
+
+        Ok(())
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
@@ -242,11 +321,11 @@ pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKe
 }
 
 /// Construct a new dynamic storage lookup.
-pub fn dynamic<StorageKey: EncodeWithMetadata>(
+pub fn dynamic<Keys: StorageMultiKey>(
     pallet_name: impl Into<String>,
     entry_name: impl Into<String>,
-    storage_entry_keys: Vec<StorageKey>,
-) -> DynamicAddress<StorageKey> {
+    storage_entry_keys: Keys,
+) -> DynamicAddress<Keys> {
     DynamicAddress::new(pallet_name, entry_name, storage_entry_keys)
 }
 
