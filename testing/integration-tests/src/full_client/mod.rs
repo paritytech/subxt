@@ -7,6 +7,8 @@ mod blocks;
 #[cfg(test)]
 mod client;
 #[cfg(test)]
+mod codegen;
+#[cfg(test)]
 mod frame;
 #[cfg(test)]
 mod metadata;

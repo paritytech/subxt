@@ -4,7 +4,7 @@
 
 use codec::Decode;
 use regex::Regex;
-use subxt_codegen::{ syn, CodegenBuilder };
+use subxt_codegen::{syn, CodegenBuilder};
 use subxt_metadata::Metadata;
 
 fn load_test_metadata() -> Metadata {
