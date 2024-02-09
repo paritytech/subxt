@@ -47,6 +47,9 @@ jobs:
       # - name: Delete substrate node binary
       #   run: rm ./substrate-node
 
+      - name: Create test file
+        run: echo test > test.txt
+
       - uses: actions/create-github-app-token@v1
         id: app-token
         with:
