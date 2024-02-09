@@ -59,9 +59,9 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           base: master
           branch: update-artifacts
-          commit-message: Update Artifacts (auto-generated)
+          commit-message: Update Artifacts (auto-generated) - test
           branch-suffix: timestamp
-          title: Update Artifacts (auto-generated)
+          title: Update Artifacts (auto-generated) - test
           body: |
             This PR updates the artifacts by fetching fresh metadata from a substrate node.
             It also recreates the polkadot.rs file used in the integration tests.
