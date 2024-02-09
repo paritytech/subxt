@@ -49,12 +49,17 @@ jobs:
           command: build
           args: --release --manifest-path polkadot/Cargo.toml
 
+      # Note: Uncompressed polkadot binary is ~124MB -> too large for git (max 100MB) without git lfs. Compressed it is only ~45MB
+      - name: compress polkadot binary
+        run: |
+          tar -zcvf target/release/polkadot.tar.gz target/release/polkadot
+
       - name: upload polkadot binary
         uses: actions/upload-artifact@v3
         with:
           name: nightly-polkadot-binary
           path: |
-            target/release/polkadot
+            target/release/polkadot.tar.gz
             target/release/polkadot-execute-worker
             target/release/polkadot-prepare-worker
           retention-days: 2
