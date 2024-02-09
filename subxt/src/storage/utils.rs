@@ -57,8 +57,20 @@ pub fn recover_value_from_hash<V: codec::Encode + codec::Decode>(
 /// Note: this only returns `Some(..)` for concat-style hashers.
 fn value_bytes_from_hash_bytes<'a>(hash: &'a [u8], hasher: &StorageHasher) -> Option<&'a [u8]> {
     match hasher {
-        StorageHasher::Blake2_128Concat => Some(&hash[16..0]),
-        StorageHasher::Twox64Concat => Some(&hash[8..0]),
+        StorageHasher::Blake2_128Concat => {
+            if hash.len() > 16 {
+                Some(&hash[16..])
+            } else {
+                None
+            }
+        }
+        StorageHasher::Twox64Concat => {
+            if hash.len() > 8 {
+                Some(&hash[8..])
+            } else {
+                None
+            }
+        }
         StorageHasher::Blake2_128
         | StorageHasher::Blake2_256
         | StorageHasher::Twox128

@@ -65,12 +65,13 @@ pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iter
 
 /// A storage key, mostly used for static encoded values.
 /// The original value is only given during construction, but can be
-pub struct StorageKey<K> {
+pub struct StorageKey<K: ?Sized> {
     bytes: Static<Encoded>,
     _marker: std::marker::PhantomData<K>,
 }
 
-impl<K: EncodeAsType + codec::Encode + codec::Decode> StorageKey<K> {
+impl<K: codec::Encode + ?Sized> StorageKey<K> {
+    /// Creates a new static storage key
     pub fn new(key: &K) -> Self {
         StorageKey {
             bytes: Static(Encoded(key.encode())),
@@ -78,12 +79,16 @@ impl<K: EncodeAsType + codec::Encode + codec::Decode> StorageKey<K> {
         }
     }
 
+    /// Returns the scale-encoded bytes that make up this key
     pub fn bytes(&self) -> &[u8] {
         &self.bytes.0 .0
     }
 }
 
+/// This trait should be implemented by anything that can be used as one or multiple storage keys.
 pub trait StorageMultiKey {
+    /// Iterator over the storage keys, each key implements EncodeAsType to
+    /// give the corresponding bytes to a `StorageHasher`.
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType>;
 }
 
@@ -96,7 +101,8 @@ impl StorageMultiKey for () {
     }
 }
 
-impl<K: EncodeAsType> StorageMultiKey for StorageKey<K> {
+// Note: The ?Sized bound is necessary to support e.g. `StorageKey<[u8]>`.
+impl<K: EncodeAsType + ?Sized> StorageMultiKey for StorageKey<K> {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
         // Note: this returns the storage root address of the storage entry.
         // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
@@ -123,7 +129,7 @@ impl<K: EncodeAsType> StorageMultiKey for Vec<K> {
 /// ```
 macro_rules! impl_tuples {
     ($($ty:ident $n:tt),+) => {{
-        impl<$($ty: EncodeAsType),+> StorageMultiKey for ($( StorageKey<$ty >),+) {
+        impl<$($ty: EncodeAsType + ?Sized),+> StorageMultiKey for ($( StorageKey<$ty >),+) {
             fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
                 let arr = [$(
                     &self.$n.bytes as &dyn EncodeAsType
@@ -304,16 +310,6 @@ where
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.validation_hash
     }
-}
-
-/// A static storage key; this is some pre-encoded bytes
-/// likely provided by the generated interface.
-pub type StaticStorageMapKey = Static<Encoded>;
-
-// Used in codegen to construct the above.
-#[doc(hidden)]
-pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKey {
-    Static(Encoded(t.encode()))
 }
 
 /// Construct a new dynamic storage lookup.

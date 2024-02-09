@@ -148,7 +148,24 @@ fn generate_storage_entry_fns(
         };
         let is_fetchable_type = is_fetchable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
         let is_iterable_type = is_iterable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let key_impls = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) ));
+        let (keys, keys_type) = match keys_slice.len(){
+            0 => (quote!( () ), quote!( () )),
+            1 => {
+                let field_name = &keys_slice[0].0;
+                let keys = quote!( #crate_path::storage::address::StorageKey::new(#field_name.borrow()) );
+                let path = &keys_slice[0].2;
+                let path = quote!( #crate_path::storage::address::StorageKey<#path> );
+                (keys, path)
+            }
+            _ =>  {
+                let keys_iter = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::StorageKey::new(#field_name.borrow()) ));
+                let keys = quote!( (#(#keys_iter,)*) );
+                let paths_iter = keys_slice.iter().map(|(_, _, path_to_alias)| quote!( #crate_path::storage::address::StorageKey<#path_to_alias> ) );
+                let paths = quote!( (#(#paths_iter,)*) );
+                (keys, paths)
+            }
+        };
+
         let key_args = keys_slice.iter().map(|(field_name, _, path_to_alias )| {
             quote!( #field_name: impl ::std::borrow::Borrow<#path_to_alias> )
         });
@@ -159,7 +176,7 @@ fn generate_storage_entry_fns(
                 &self,
                 #(#key_args,)*
             ) -> #crate_path::storage::address::Address::<
-                #crate_path::storage::address::StaticStorageMapKey,
+                #keys_type,
                 #alias_storage_path,
                 #is_fetchable_type,
                 #is_defaultable_type,
@@ -168,7 +185,7 @@ fn generate_storage_entry_fns(
                 #crate_path::storage::address::Address::new_static(
                     #pallet_name,
                     #storage_name,
-                    vec![#(#key_impls,)*],
+                    #keys,
                     [#(#storage_hash,)*]
                 )
             }

@@ -18,8 +18,7 @@ pub use storage_type::Storage;
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        dynamic, make_static_storage_map_key, Address, DynamicAddress, StaticStorageMapKey,
-        StorageAddress, Yes,
+        dynamic, Address, DynamicAddress, StorageAddress, StorageKey, Yes,
     };
 }
 
