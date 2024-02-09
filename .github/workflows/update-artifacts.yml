@@ -25,7 +25,6 @@ jobs:
         with:
           app-id: ${{ secrets.SUBXT_PR_MAKER_APP_ID }}
           private-key: ${{ secrets.SUBXT_PR_MAKER_APP_KEY }}
-          github-api-url: "https://github.acme-inc.com/api/v3"
       - name: Checkout sources
         uses: actions/checkout@v4
 
