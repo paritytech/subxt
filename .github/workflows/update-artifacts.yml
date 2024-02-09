@@ -4,9 +4,6 @@ on:
   workflow_dispatch: # Allows manual triggering
   schedule:
     - cron: "0 0 * * 1" # weekly on Monday at 00:00 UTC
-  # REMOVE_ME before merging
-  pull_request:
-    types: [opened, synchronize]
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
@@ -23,32 +20,29 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
       # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
-      # - name: Use substrate and polkadot node binaries
-      #   uses: ./.github/workflows/actions/use-nodes
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
 
-      # - name: Install Rust stable toolchain
-      #   uses: actions-rs/toolchain@v1
-      #   with:
-      #     profile: minimal
-      #     toolchain: stable
-      #     override: true
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
 
-      # - name: Rust Cache
-      #   uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
 
-      # # This starts a substrate node and runs a few subxt cli child processes to fetch metadata from it and generate code.
-      # # In particular it generates:
-      # # - 4 metadata (*.scale) files in the `artifacts` directory
-      # # - a polkadot.rs file from the full metadata that is checked in integration tests
-      # # - a polkadot.json in the `artifacts/demo_chain_specs` directory
-      # - name: Fetch Artifacts
-      #   run: cargo run --bin artifacts
+      # This starts a substrate node and runs a few subxt cli child processes to fetch metadata from it and generate code.
+      # In particular it generates:
+      # - 4 metadata (*.scale) files in the `artifacts` directory
+      # - a polkadot.rs file from the full metadata that is checked in integration tests
+      # - a polkadot.json in the `artifacts/demo_chain_specs` directory
+      - name: Fetch Artifacts
+        run: cargo run --bin artifacts
 
-      # - name: Delete substrate node binary
-      #   run: rm ./substrate-node
-
-      - name: Create test file
-        run: echo test > test.txt
+      - name: Delete substrate node binary
+        run: rm ./substrate-node
 
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -61,10 +55,10 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           base: master
-          branch: update-artifacts-test
-          commit-message: Update Artifacts (auto-generated) - test
+          branch: update-artifacts
+          commit-message: Update Artifacts (auto-generated)
           branch-suffix: timestamp
-          title: Update Artifacts (auto-generated) - test
+          title: Update Artifacts (auto-generated)
           body: |
             This PR updates the artifacts by fetching fresh metadata from a substrate node.
             It also recreates the polkadot.rs file used in the integration tests.
