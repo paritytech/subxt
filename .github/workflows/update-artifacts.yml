@@ -58,7 +58,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           base: master
-          branch: update-artifacts
+          branch: update-artifacts-test
           commit-message: Update Artifacts (auto-generated) - test
           branch-suffix: timestamp
           title: Update Artifacts (auto-generated) - test
