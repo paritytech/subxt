@@ -20,6 +20,8 @@ jobs:
     name: Renew Artifacts
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
       # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -50,8 +52,6 @@ jobs:
         with:
           app-id: ${{ secrets.SUBXT_PR_MAKER_APP_ID }}
           private-key: ${{ secrets.SUBXT_PR_MAKER_APP_KEY }}
-      - name: Checkout sources
-        uses: actions/checkout@v4
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
