@@ -50,9 +50,6 @@ unused_extern_crates = "deny"
 type_complexity = "allow"
 all = "deny"
 
-[patch.crates-io]
-jsonrpsee = { git = "https://github.com/blue-freedom-technologies/jsonrpsee.git", branch="esp32c6"}
-
 [workspace.dependencies]
 async-trait = "0.1.74"
 assert_matches = "1.5.0"
@@ -74,7 +71,8 @@ hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
 indoc = "2"
-jsonrpsee = { version = "0.21" }
+#jsonrpsee = { version = "0.21" }
+jsonrpsee = { git = "https://github.com/blue-freedom-technologies/jsonrpsee.git", branch="esp32c6" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
