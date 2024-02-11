@@ -50,6 +50,9 @@ unused_extern_crates = "deny"
 type_complexity = "allow"
 all = "deny"
 
+[patch.crates-io]
+jsonrpsee = { git = "https://github.com/blue-freedom-technologies/jsonrpsee.git", branch="esp32c6"}
+
 [workspace.dependencies]
 async-trait = "0.1.74"
 assert_matches = "1.5.0"

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="EMPTY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/cli/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/codegen/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/lightclient/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/macro/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/metadata/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/metadata/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/scripts/artifacts/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/signer/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subxt/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/subxt/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing/generate-custom-metadata/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing/integration-tests/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing/substrate-runner/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing/test-runtime/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing/ui-tests/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
