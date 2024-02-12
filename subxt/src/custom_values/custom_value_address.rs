@@ -43,13 +43,18 @@ pub struct Yes;
     Debug(bound = ""),
     Eq(bound = ""),
     Ord(bound = ""),
-    PartialEq(bound = ""),
-    PartialOrd(bound = "")
+    PartialEq(bound = "")
 )]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,
     phantom: PhantomData<(ReturnTy, IsDecodable)>,
+}
+
+impl<ReturnTy, IsDecodable> PartialOrd for StaticAddress<ReturnTy, IsDecodable> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {

@@ -33,14 +33,19 @@ pub trait ConstantAddress {
     Debug(bound = ""),
     Eq(bound = ""),
     Ord(bound = ""),
-    PartialEq(bound = ""),
-    PartialOrd(bound = "")
+    PartialEq(bound = "")
 )]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<ReturnTy>,
+}
+
+impl<ReturnTy> PartialOrd for Address<ReturnTy> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 /// The type of address typically used to return dynamic constant values.
