@@ -28,7 +28,14 @@ pub trait ConstantAddress {
 
 /// This represents the address of a constant.
 #[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
+#[derivative(
+    Clone(bound = ""),
+    Debug(bound = ""),
+    Eq(bound = ""),
+    Ord(bound = ""),
+    PartialEq(bound = ""),
+    PartialOrd(bound = "")
+)]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
