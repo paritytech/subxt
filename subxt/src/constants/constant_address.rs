@@ -42,7 +42,7 @@ pub struct Address<ReturnTy> {
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-// Manual implementation to work aroud https://github.com/mcarton/rust-derivative/issues/115.
+// Manual implementation to work around https://github.com/mcarton/rust-derivative/issues/115.
 impl<ReturnTy> PartialOrd for Address<ReturnTy> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
