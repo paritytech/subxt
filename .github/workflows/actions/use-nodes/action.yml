@@ -18,6 +18,7 @@ runs:
         name: nightly-polkadot-binary
 
     - name: decompress polkadot binary
+      shell: bash
       run: |
         tar -xzvf ./polkadot.tar.gz
 
