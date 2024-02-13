@@ -57,7 +57,14 @@ pub struct Yes;
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive(Derivative)]
-#[derivative(Clone(bound = "Keys: Clone"), Debug(bound = "Keys: std::fmt::Debug"))]
+#[derivative(
+    Clone(bound = "Keys: Clone"),
+    Debug(bound = "Keys: std::fmt::Debug"),
+    Eq(bound = "Keys: std::cmp::Eq"),
+    Ord(bound = "Keys: std::cmp::Ord"),
+    PartialEq(bound = "Keys: std::cmp::PartialEq"),
+    PartialOrd(bound = "Keys: std::cmp::PartialOrd")
+)]
 pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
