@@ -43,21 +43,7 @@ pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address
     bytes
 }
 
-/// Tries to recover an encoded value from a concat-style hash.
-pub fn decode_from_hash<V: codec::Decode>(
-    hash: &mut &[u8],
-    hasher: &StorageHasher,
-) -> Option<Result<V, Error>> {
-    if let Err(err) = strip_concat_hash_bytes(hash, hasher)? {
-        return Some(Err(err.into()));
-    };
-    let value = match V::decode(hash) {
-        Ok(value) => value,
-        Err(err) => return Some(Err(err.into())),
-    };
-    Some(Ok(value))
-}
-
+/// Strips the first 16 bytes (8 for the pallet hash, 8 for the entry hash) off some storage address bytes.
 pub fn strip_storage_addess_root_bytes(
     address_bytes: &mut &[u8],
 ) -> Result<(), StorageAddressError> {
@@ -69,8 +55,8 @@ pub fn strip_storage_addess_root_bytes(
     }
 }
 
-/// Strips the first few bytes of a concat hasher.
-/// Returns None(..) if the hasher is not a concat hasher.
+/// Strips the first few bytes off a hash produced byt a concat hasher.
+/// Returns None(..) if the hasher provided is not a concat hasher.
 /// Returns Some(Err(..)) if there are not enough bytes.
 /// Returns Some(Ok(..)) if the stripping was successful.
 pub fn strip_concat_hash_bytes<'a>(

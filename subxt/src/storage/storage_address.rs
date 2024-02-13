@@ -6,11 +6,10 @@ use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
-    storage::utils::{decode_from_hash, strip_concat_hash_bytes, strip_storage_addess_root_bytes},
+    storage::utils::{strip_concat_hash_bytes, strip_storage_addess_root_bytes},
     utils::{Encoded, Static},
 };
 use derivative::Derivative;
-use scale_decode::DecodeAsType;
 use scale_encode::EncodeAsType;
 use scale_info::TypeDef;
 use std::borrow::Cow;
@@ -190,8 +189,7 @@ pub fn decode_storage_key_from_hash<K: ?Sized>(
     Some(Ok(key))
 }
 
-/// Note: This implementation is useful to use e.g. Vec<scale_value::Value> as a MultiStorageKey.
-impl<K: EncodeAsType + DecodeAsType> StorageMultiKey for Vec<K> {
+impl StorageMultiKey for Vec<scale_value::Value> {
     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
         // Note: this returns the storage root address of the storage entry.
         // It gives the same result as if you were to use `vec![]` as a `StorageMultiKey`.
@@ -212,7 +210,7 @@ impl<K: EncodeAsType + DecodeAsType> StorageMultiKey for Vec<K> {
         }
         let mut hashers_and_ty_ids_iter = hashers_and_ty_ids.iter();
 
-        let mut result: Vec<K> = vec![];
+        let mut result: Vec<scale_value::Value> = vec![];
         while cursor.len() > 0 {
             let Some((hasher, ty_id)) = hashers_and_ty_ids_iter.next() else {
                 // Still bytes left, but no hashers and type ids anymore to pull from: this is an unexpected error.
@@ -221,8 +219,13 @@ impl<K: EncodeAsType + DecodeAsType> StorageMultiKey for Vec<K> {
             if let Err(err) = strip_concat_hash_bytes(cursor, hasher)? {
                 return Some(Err(err.into()));
             }
-            match <K as DecodeWithMetadata>::decode_with_metadata(cursor, *ty_id, metadata) {
-                Ok(element) => result.push(element),
+            match DecodedValueThunk::decode_with_metadata(cursor, *ty_id, metadata) {
+                Ok(decoded) => {
+                    match decoded.to_value() {
+                        Ok(value) => result.push(value.remove_context()),
+                        Err(err) => return Some(Err(err.into())),
+                    };
+                }
                 Err(err) => return Some(Err(err.into())),
             }
         }
