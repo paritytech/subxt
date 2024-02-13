@@ -12,7 +12,7 @@ pub mod utils;
 
 pub use storage_client::StorageClient;
 
-pub use storage_type::Storage;
+pub use storage_type::{Storage, StorageKeyValuePair};
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.

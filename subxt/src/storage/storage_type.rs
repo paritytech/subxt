@@ -2,19 +2,21 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{StorageAddress, Yes};
+use super::storage_address::{StorageAddress, StorageMultiKey, Yes};
 
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
-    error::{Error, MetadataError},
+    error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
 use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
+use scale_info::TypeDef;
 use std::{future::Future, marker::PhantomData};
+use subxt_metadata::StorageHasher;
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
 /// This is returned from a couple of storage functions.
@@ -206,9 +208,10 @@ where
     pub fn iter<Address>(
         &self,
         address: Address,
-    ) -> impl Future<Output = Result<StreamOfResults<(Vec<u8>, Address::Target)>, Error>> + 'static
+    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Address>>, Error>> + 'static
     where
         Address: StorageAddress<IsIterable = Yes> + 'static,
+        Address::Keys: 'static + Sized,
     {
         let client = self.client.clone();
         let block_ref = self.block_ref.clone();
@@ -226,7 +229,10 @@ where
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
+            let entry = entry.entry_type();
+
+            let return_type_id = entry.value_ty();
+            let hasher_type_id_pairs = storage_hasher_type_id_pairs(entry, &metadata)?;
 
             // The address bytes of this entry:
             let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
@@ -240,12 +246,24 @@ where
                         Ok(kv) => kv,
                         Err(e) => return Err(e),
                     };
-                    let val = Address::Target::decode_with_metadata(
+                    let value = Address::Target::decode_with_metadata(
                         &mut &*kv.value,
                         return_type_id,
                         &metadata,
                     )?;
-                    Ok((kv.key, val))
+
+                    let key_bytes = kv.key;
+                    let keys = <Address::Keys as StorageMultiKey>::decode_from_address_bytes(
+                        &key_bytes,
+                        &hasher_type_id_pairs,
+                        &metadata,
+                    )
+                    .transpose()?;
+                    Ok(StorageKeyValuePair::<Address> {
+                        keys,
+                        key_bytes,
+                        value,
+                    })
                 });
 
             let s = StreamOfResults::new(Box::pin(s));
@@ -288,6 +306,64 @@ where
             format!("Unexpected: entry for well known key \"{CODE}\" not found").into()
         })
     }
+}
+
+pub(crate) fn storage_hasher_type_id_pairs(
+    entry: &StorageEntryType,
+    metadata: &Metadata,
+) -> Result<Vec<(StorageHasher, u32)>, Error> {
+    match entry {
+        StorageEntryType::Plain(_) => Ok(vec![]),
+        StorageEntryType::Map {
+            hashers, key_ty, ..
+        } => {
+            let ty = metadata
+                .types()
+                .resolve(*key_ty)
+                .ok_or(MetadataError::TypeNotFound(*key_ty))?;
+            match &ty.type_def {
+                TypeDef::Tuple(tuple) => {
+                    if hashers.len() < tuple.fields.len() {
+                        return Err(StorageAddressError::WrongNumberOfHashers {
+                            hashers: hashers.len(),
+                            fields: tuple.fields.len(),
+                        }
+                        .into());
+                    }
+                    let pairs: Vec<(StorageHasher, u32)> = tuple
+                        .fields
+                        .iter()
+                        .zip(hashers.iter())
+                        .map(|(e, h)| (*h, e.id))
+                        .collect();
+
+                    Ok(pairs)
+                }
+                _other => {
+                    if hashers.is_empty() {
+                        return Err(StorageAddressError::WrongNumberOfHashers {
+                            hashers: 0,
+                            fields: 1,
+                        }
+                        .into());
+                    }
+                    Ok(vec![(hashers[0], *key_ty)])
+                }
+            }
+        }
+    }
+}
+
+/// A pair of keys and values together with all the bytes that make up the storage address.
+/// `keys` is `None` if non-concat hashers are used. In this case the keys could not be extracted back from the key_bytes.
+#[derive(Clone, Debug)]
+pub struct StorageKeyValuePair<T: StorageAddress> {
+    /// The keys that can be used to construct the address of this storage entry.
+    pub keys: Option<T::Keys>,
+    /// The bytes that make up the address of the storage entry.
+    pub key_bytes: Vec<u8>,
+    /// The value of the storage entry.
+    pub value: T::Target,
 }
 
 /// Validate a storage address against the metadata.

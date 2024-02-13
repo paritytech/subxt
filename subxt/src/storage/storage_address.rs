@@ -20,6 +20,8 @@ use subxt_metadata::{StorageEntryType, StorageHasher};
 pub trait StorageAddress {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
+    /// The keys type used to construc this address.
+    type Keys: StorageMultiKey;
     /// Can an entry be fetched from this address?
     /// Set this type to [`Yes`] to enable the corresponding calls to be made.
     type IsFetchable;
@@ -66,6 +68,8 @@ pub struct Address<Keys: StorageMultiKey, ReturnTy, Fetchable, Defaultable, Iter
 
 /// A storage key, mostly used for static encoded values.
 /// The original value is only given during construction, but can be
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct StorageKey<K: ?Sized> {
     bytes: Static<Encoded>,
     _marker: std::marker::PhantomData<K>,
@@ -378,6 +382,7 @@ where
     ReturnTy: DecodeWithMetadata,
 {
     type Target = ReturnTy;
+    type Keys = Keys;
     type IsFetchable = Fetchable;
     type IsDefaultable = Defaultable;
     type IsIterable = Iterable;
