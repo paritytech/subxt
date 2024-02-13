@@ -9,7 +9,10 @@
 use subxt_metadata::StorageHasher;
 
 use super::StorageAddress;
-use crate::{error::Error, metadata::Metadata};
+use crate::{
+    error::{Error, StorageAddressError},
+    metadata::Metadata,
+};
 
 /// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name
 /// and append those bytes to the output.
@@ -41,34 +44,54 @@ pub(crate) fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address
 }
 
 /// Tries to recover an encoded value from a concat-style hash.
-pub fn recover_value_from_hash<V: codec::Encode + codec::Decode>(
-    hash: &[u8],
+pub fn decode_from_hash<V: codec::Decode>(
+    hash: &mut &[u8],
     hasher: &StorageHasher,
 ) -> Option<Result<V, Error>> {
-    let value_bytes = value_bytes_from_hash_bytes(hash, hasher)?;
-    let value = match V::decode(&mut &value_bytes[..]) {
+    if let Err(err) = strip_concat_hash_bytes(hash, hasher)? {
+        return Some(Err(err.into()));
+    };
+    let value = match V::decode(hash) {
         Ok(value) => value,
         Err(err) => return Some(Err(err.into())),
     };
     Some(Ok(value))
 }
 
-/// Tries to recover from the hash, the bytes of the value that was originially hashed.
-/// Note: this only returns `Some(..)` for concat-style hashers.
-fn value_bytes_from_hash_bytes<'a>(hash: &'a [u8], hasher: &StorageHasher) -> Option<&'a [u8]> {
+pub fn strip_storage_addess_root_bytes(
+    address_bytes: &mut &[u8],
+) -> Result<(), StorageAddressError> {
+    if address_bytes.len() >= 16 {
+        *address_bytes = &mut &address_bytes[16..];
+        Ok(())
+    } else {
+        Err(StorageAddressError::UnexpectedAddressBytes)
+    }
+}
+
+/// Strips the first few bytes of a concat hasher.
+/// Returns None(..) if the hasher is not a concat hasher.
+/// Returns Some(Err(..)) if there are not enough bytes.
+/// Returns Some(Ok(..)) if the stripping was successful.
+pub fn strip_concat_hash_bytes<'a>(
+    hash: &'a mut &[u8],
+    hasher: &StorageHasher,
+) -> Option<Result<(), StorageAddressError>> {
     match hasher {
         StorageHasher::Blake2_128Concat => {
-            if hash.len() > 16 {
-                Some(&hash[16..])
+            if hash.len() >= 16 {
+                *hash = &mut &hash[16..];
+                Some(Ok(()))
             } else {
-                None
+                Some(Err(StorageAddressError::UnexpectedAddressBytes))
             }
         }
         StorageHasher::Twox64Concat => {
-            if hash.len() > 8 {
-                Some(&hash[8..])
+            if hash.len() >= 8 {
+                *hash = &mut &hash[8..];
+                Some(Ok(()))
             } else {
-                None
+                Some(Err(StorageAddressError::UnexpectedAddressBytes))
             }
         }
         StorageHasher::Blake2_128

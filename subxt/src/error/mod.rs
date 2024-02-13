@@ -206,6 +206,9 @@ pub enum StorageAddressError {
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
     },
+    /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
+    #[error("Storage address bytes are not the expected format")]
+    UnexpectedAddressBytes,
 }
 
 /// Something went wrong trying to access details in the metadata.
