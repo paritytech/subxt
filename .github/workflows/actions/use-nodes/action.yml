@@ -21,6 +21,7 @@ runs:
       shell: bash
       run: |
         tar -xzvf ./polkadot.tar.gz
+        cp ./target/release/polkadot ./polkadot
 
     - name: Prepare binaries
       shell: bash
