@@ -6,8 +6,6 @@
 
 mod dispatch_error;
 
-use core::fmt::Debug;
-
 crate::macros::cfg_unstable_light_client! {
     pub use crate::client::LightClientError;
 }
@@ -100,6 +98,13 @@ impl From<std::convert::Infallible> for Error {
     }
 }
 
+impl Error {
+    /// Checks whether the error was caused by a RPC re-connection.
+    pub fn is_disconnected_will_reconnect(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
+    }
+}
+
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
@@ -120,6 +125,9 @@ pub enum RpcError {
     /// The requested URL is insecure.
     #[error("RPC error: insecure URL: {0}")]
     InsecureUrl(String),
+    /// The connection was lost and automatically reconnected.
+    #[error("RPC error: the connection was lost `{0}`; reconnect automatically initiated")]
+    DisconnectedWillReconnect(String),
 }
 
 impl RpcError {

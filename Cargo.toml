@@ -56,16 +56,16 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-clap = { version = "4.4.18", features = ["derive", "cargo"] }
 cfg-if = "1.0.0"
+clap = { version = "4.5.0", features = ["derive", "cargo"] }
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
-darling = "0.20.3"
+darling = "0.20.5"
 derivative = "2.2.0"
 derive_more = "0.99.17"
-either = "1.9.0"
+either = "1.10.0"
 frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -74,7 +74,7 @@ hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
 indoc = "2"
-jsonrpsee = { version = "0.21" }
+jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
 proc-macro-error = "1.0.4"
@@ -89,8 +89,8 @@ scale-encode = "0.5.0"
 serde = { version = "1.0.196" }
 serde_json = { version = "1.0.113" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.53"
-tokio = { version = "1.35", default-features = false }
+thiserror = "1.0.57"
+tokio = { version = "1.36", default-features = false }
 tracing = "0.1.40"
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
@@ -115,7 +115,7 @@ pin-project = "1.1.4"
 web-sys = { version = "0.3.67", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
 wasm-bindgen = "0.2.90"
 send_wrapper = "0.6.0"
-js-sys = "0.3.67"
+js-sys = "0.3.68"
 wasm-bindgen-futures = "0.4.38"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
@@ -142,7 +142,7 @@ bip39 = "2.0.0"
 hmac = "0.12.1"
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = "0.11.4"
-secp256k1 = "0.28.1"
+secp256k1 = "0.28.2"
 secrecy = "0.8.0"
 sha2 = "0.10.8"
 zeroize = { version = "1", default-features = false }
