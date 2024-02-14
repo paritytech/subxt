@@ -878,6 +878,7 @@ version = "0.0.0"
 dependencies = [
  "libc_alloc",
  "parity-scale-codec",
+ "subxt-core",
  "subxt-metadata",
  "subxt-signer",
 ]

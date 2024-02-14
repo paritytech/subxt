@@ -58,5 +58,5 @@ fn test() {
     // subxt-core
     // /////////////////////////////////////////////////////////////////////////////
 
-    // let _era = subxt_core::utils::Era::Immortal;
+    let _era = subxt_core::utils::Era::Immortal;
 }

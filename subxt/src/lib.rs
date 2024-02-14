@@ -65,9 +65,7 @@ pub use crate::{
     error::Error,
 };
 
-// pub use subxt_core::config;
-// pub use subxt_core::config::{Config, PolkadotConfig, SubstrateConfig};
-// pub use subxt_core::dynamic;
+// We replace this by proper exports, once the API of subxt_core is aggreed upon.
 pub use subxt_core::*;
 
 /// Re-export external crates that are made use of in the subxt API.
