@@ -17,6 +17,12 @@ runs:
         workflow: build-nodes.yml
         name: nightly-polkadot-binary
 
+    - name: decompress polkadot binary
+      shell: bash
+      run: |
+        tar -xzvf ./polkadot.tar.gz
+        cp ./target/release/polkadot ./polkadot
+
     - name: Prepare binaries
       shell: bash
       run: |
