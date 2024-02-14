@@ -97,7 +97,7 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-metadata = { workspace = true, features = ["std"] }
+subxt-metadata = { workspace = true }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Light client support:
