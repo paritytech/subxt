@@ -35,6 +35,17 @@ jobs:
           command: build
           args: --release --manifest-path substrate/bin/node/cli/Cargo.toml
 
+      - name: build polkadot binary
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --manifest-path polkadot/Cargo.toml
+
+      - name: Strip binaries
+        run: |
+          cargo install cargo-strip
+          cargo strip
+
       - name: upload substrate binary
         uses: actions/upload-artifact@v3
         with:
@@ -42,12 +53,6 @@ jobs:
           path: target/release/substrate-node
           retention-days: 2
           if-no-files-found: error
-
-      - name: build polkadot binary
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --manifest-path polkadot/Cargo.toml
 
       # Note: Uncompressed polkadot binary is ~124MB -> too large for git (max 100MB) without git lfs. Compressed it is only ~45MB
       - name: compress polkadot binary
