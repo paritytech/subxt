@@ -74,11 +74,11 @@ pub trait RuntimeApiPayload {
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "ArgsData: Clone"),
-    Debug(bound = "ArgsData: std::fmt::Debug"),
-    Eq(bound = "ArgsData: std::cmp::Eq"),
-    Ord(bound = "ArgsData: std::cmp::Ord"),
-    PartialEq(bound = "ArgsData: std::cmp::PartialEq"),
-    PartialOrd(bound = "ArgsData: std::cmp::PartialOrd")
+    Debug(bound = "ArgsData: core::fmt::Debug"),
+    Eq(bound = "ArgsData: core::cmp::Eq"),
+    Ord(bound = "ArgsData: core::cmp::Ord"),
+    PartialEq(bound = "ArgsData: core::cmp::PartialEq"),
+    PartialOrd(bound = "ArgsData: core::cmp::PartialOrd")
 )]
 pub struct Payload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,

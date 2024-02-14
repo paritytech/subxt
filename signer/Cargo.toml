@@ -45,7 +45,7 @@ pbkdf2 = { workspace = true, default-features = false }
 sha2 = { workspace = true, default-features = false }
 hmac = { workspace = true, default-features = false }
 zeroize = { workspace = true }
-bip39 = { workspace = true, default-features = false, features = ["unicode-normalization"] }
+bip39 = { workspace = true, default-features = false }
 schnorrkel = { workspace = true, optional = true, default-features = false }
 secp256k1 = { workspace = true, optional = true, default-features = false, features = ["alloc", "recovery"] } # features = ["recovery", "global-context"], 
 secrecy = { workspace = true }

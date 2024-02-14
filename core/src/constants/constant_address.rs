@@ -46,7 +46,7 @@ pub struct Address<ReturnTy> {
 
 // Manual implementation to work around https://github.com/mcarton/rust-derivative/issues/115.
 impl<ReturnTy> PartialOrd for Address<ReturnTy> {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }

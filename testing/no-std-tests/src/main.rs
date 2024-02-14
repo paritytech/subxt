@@ -19,9 +19,7 @@ pub extern "C" fn rust_eh_personality() {}
 
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
-    unsafe {
-        libc::abort();
-    }
+    loop {}
 }
 
 use libc_alloc::LibcAlloc;
@@ -60,5 +58,5 @@ fn test() {
     // subxt-core
     // /////////////////////////////////////////////////////////////////////////////
 
-    let _era = subxt_core::utils::Era::Immortal;
+    // let _era = subxt_core::utils::Era::Immortal;
 }

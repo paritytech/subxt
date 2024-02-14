@@ -58,11 +58,11 @@ pub trait StorageAddress {
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "StorageKey: Clone"),
-    Debug(bound = "StorageKey: std::fmt::Debug"),
-    Eq(bound = "StorageKey: std::cmp::Eq"),
-    Ord(bound = "StorageKey: std::cmp::Ord"),
-    PartialEq(bound = "StorageKey: std::cmp::PartialEq"),
-    PartialOrd(bound = "StorageKey: std::cmp::PartialOrd")
+    Debug(bound = "StorageKey: core::fmt::Debug"),
+    Eq(bound = "StorageKey: core::cmp::Eq"),
+    Ord(bound = "StorageKey: core::cmp::Ord"),
+    PartialEq(bound = "StorageKey: core::cmp::PartialEq"),
+    PartialOrd(bound = "StorageKey: core::cmp::PartialOrd")
 )]
 pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
