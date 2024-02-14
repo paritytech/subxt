@@ -9,18 +9,8 @@ use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use core::str::FromStr;
 use derive_more::{Display, From};
 use hex::FromHex;
-use secp256k1::{ecdsa::RecoverableSignature, All, Message, Secp256k1, SecretKey};
+use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
-
-struct GlobalSecp256K1Context;
-impl core::ops::Deref for GlobalSecp256K1Context {
-    type Target = Secp256k1<All>;
-
-    fn deref(&self) -> &Self::Target {
-        static ONCE: once_cell::sync::OnceCell<Secp256k1<All>> = once_cell::sync::OnceCell::new();
-        ONCE.get_or_init(|| Secp256k1::new())
-    }
-}
 
 const SEED_LENGTH: usize = 32;
 
@@ -122,7 +112,7 @@ impl Keypair {
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
         Ok(Self(secp256k1::Keypair::from_secret_key(
-            &GlobalSecp256K1Context,
+            &Secp256k1::signing_only(),
             &secret,
         )))
     }
@@ -175,7 +165,7 @@ impl Keypair {
         // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         let recsig: RecoverableSignature =
-            GlobalSecp256K1Context.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
+            Secp256k1::signing_only().sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
         // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
         let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
         let mut signature_bytes: [u8; 65] = [0; 65];
@@ -206,7 +196,8 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
     };
     let message_hash = sp_core_hashing::blake2_256(message.as_ref());
     let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
-    GlobalSecp256K1Context
+
+    Secp256k1::verification_only()
         .verify_ecdsa(&wrapped, &signature, &public)
         .is_ok()
 }

@@ -37,6 +37,7 @@ web = ["getrandom/js"]
 subxt-core = { workspace = true, optional = true, default-features = false }
 regex = { workspace = true, default-features = false }
 hex = { workspace = true }
+cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 sp-core-hashing = { workspace = true, default-features = false }
 derive_more = { workspace = true }
@@ -49,8 +50,6 @@ schnorrkel = { workspace = true, optional = true, default-features = false }
 secp256k1 = { workspace = true, optional = true, default-features = false, features = ["alloc", "recovery"] } # features = ["recovery", "global-context"], 
 secrecy = { workspace = true }
 
-# We only pull this in because `std::sync::OnceLock` is not available in no-std contexts.
-once_cell = { workspace = true, default-features = false, features = ["alloc", "critical-section"] }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
