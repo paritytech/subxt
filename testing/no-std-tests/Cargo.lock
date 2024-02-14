@@ -893,7 +893,6 @@ dependencies = [
 name = "subxt-core-no-std-tests"
 version = "0.0.0"
 dependencies = [
- "libc",
  "libc_alloc",
  "parity-scale-codec",
  "subxt-core",

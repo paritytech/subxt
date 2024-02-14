@@ -19,7 +19,6 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-
       # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -45,9 +44,16 @@ jobs:
       - name: Delete substrate node binary
         run: rm ./substrate-node
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
+      - uses: actions/create-github-app-token@v1
+        id: app-token
         with:
+          app-id: ${{ secrets.SUBXT_PR_MAKER_APP_ID }}
+          private-key: ${{ secrets.SUBXT_PR_MAKER_APP_KEY }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.app-token.outputs.token }}
           base: master
           branch: update-artifacts
           commit-message: Update Artifacts (auto-generated)

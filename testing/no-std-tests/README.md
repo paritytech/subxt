@@ -1,11 +1,7 @@
-# no_std tests
+# No-Std Testing Crate
 
-This crate makes sure some of the subxt-* crates work in a no-std environment.
+To test the no-std compatibility of various subxt-* crates, please run:
 
-We would like it to run in a no-std environment. You can try any of the following to get it to compile:
+```bash
+cargo build --target thumbv7em-none-eabi
 ```
-cargo run 
-cargo build --target thumbv7em-none-eabi 
-cargo build --target aarch64-unknown-none
-```
-Currently it does not compile due to linker errors and I have no idea how to resovle these. 

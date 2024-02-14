@@ -185,6 +185,7 @@ impl<H: PartialEq> PartialEq for BlockRef<H> {
 }
 impl<H: Eq> Eq for BlockRef<H> {}
 
+// Manual implementation to work around https://github.com/mcarton/rust-derivative/issues/115.
 impl<H: PartialOrd> PartialOrd for BlockRef<H> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.hash.partial_cmp(&other.hash)

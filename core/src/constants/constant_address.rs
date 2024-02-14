@@ -30,12 +30,25 @@ pub trait ConstantAddress {
 
 /// This represents the address of a constant.
 #[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
+#[derivative(
+    Clone(bound = ""),
+    Debug(bound = ""),
+    Eq(bound = ""),
+    Ord(bound = ""),
+    PartialEq(bound = "")
+)]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
     _marker: core::marker::PhantomData<ReturnTy>,
+}
+
+// Manual implementation to work around https://github.com/mcarton/rust-derivative/issues/115.
+impl<ReturnTy> PartialOrd for Address<ReturnTy> {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 /// The type of address typically used to return dynamic constant values.
