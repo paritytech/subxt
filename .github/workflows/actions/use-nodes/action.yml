@@ -33,7 +33,8 @@ runs:
         ./substrate-node --version
         ./polkadot --version
         mkdir -p ~/.local/bin
-        cp ./substrate-node ~/.local/bin
-        cp ./polkadot ~/.local/bin
-        cp ./polkadot-execute-worker ~/.local/bin
-        cp ./polkadot-prepare-worker ~/.local/bin
+        mv ./substrate-node ~/.local/bin
+        mv ./polkadot ~/.local/bin
+        mv ./polkadot-execute-worker ~/.local/bin
+        mv ./polkadot-prepare-worker ~/.local/bin
+        rm ./polkadot.tar.gz
