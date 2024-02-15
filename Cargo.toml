@@ -18,7 +18,7 @@ members = [
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = ["testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
+exclude = ["testing/no-std-tests", "testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
 resolver = "2"
 
 [workspace.package]
@@ -58,15 +58,17 @@ bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 clap = { version = "4.5.0", features = ["derive", "cargo"] }
 criterion = "0.4"
-codec = { package = "parity-scale-codec", version = "3.4.0", default-features = false }
+codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.1"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.5"
 derivative = "2.2.0"
+derive_more = "0.99.17"
 either = "1.10.0"
-frame-metadata = { version = "16.0.0", default-features = false, features = ["current", "std"] }
+frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
+hashbrown = "0.14.3"
 hex = "0.4.3"
 heck = "0.4.1"
 impl-serde = { version = "0.4.0" }
@@ -78,7 +80,7 @@ proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"
 regex = "1.10.3"
-scale-info = "2.10.0"
+scale-info = { version = "2.10.0", default-features = false }
 scale-value = "0.13.0"
 scale-bits = "0.4.0"
 scale-decode = "0.10.0"
