@@ -167,9 +167,11 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let addr_bytes = api.storage().address_bytes(&addr)?;
     let mut results = api.storage().at_latest().await?.iter(addr).await?;
     let mut approvals = Vec::new();
-    while let Some(Ok((key, value))) = results.next().await {
-        assert!(key.starts_with(&addr_bytes));
-        approvals.push(value);
+    while let Some(Ok(kv)) = results.next().await {
+        assert!(kv.key_bytes.starts_with(&addr_bytes));
+        kv.keys
+            .expect("concat hasher used for approvals, so should be Some(..)");
+        approvals.push(kv.value);
     }
     assert_eq!(approvals.len(), assets.len());
     let mut amounts = approvals.iter().map(|a| a.amount).collect::<Vec<_>>();
@@ -188,9 +190,11 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
         let mut results = api.storage().at_latest().await?.iter(addr).await?;
 
         let mut approvals = Vec::new();
-        while let Some(Ok((key, value))) = results.next().await {
-            assert!(key.starts_with(&addr_bytes));
-            approvals.push(value);
+        while let Some(Ok(kv)) = results.next().await {
+            assert!(kv.key_bytes.starts_with(&addr_bytes));
+            kv.keys
+                .expect("concat hasher used for approvals, so should be Some(..)");
+            approvals.push(kv.value);
         }
         assert_eq!(approvals.len(), 1);
         assert_eq!(approvals[0].amount, amount);

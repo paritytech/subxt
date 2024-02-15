@@ -356,12 +356,12 @@ pub(crate) fn storage_hasher_type_id_pairs(
 
 /// A pair of keys and values together with all the bytes that make up the storage address.
 /// `keys` is `None` if non-concat hashers are used. In this case the keys could not be extracted back from the key_bytes.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct StorageKeyValuePair<T: StorageAddress> {
-    /// The keys that can be used to construct the address of this storage entry.
-    pub keys: Option<T::Keys>,
     /// The bytes that make up the address of the storage entry.
     pub key_bytes: Vec<u8>,
+    /// The keys that can be used to construct the address of this storage entry.
+    pub keys: Option<T::Keys>,
     /// The value of the storage entry.
     pub value: T::Target,
 }
