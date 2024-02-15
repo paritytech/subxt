@@ -88,10 +88,6 @@ impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 sp-core-hashing = { workspace = true }
 
-# For ss58 encoding AccountId32 to serialize them properly:
-base58 = { workspace = true }
-blake2 = { workspace = true }
-
 # Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
 

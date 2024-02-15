@@ -4502,9 +4502,7 @@ version = "0.34.0"
 dependencies = [
  "assert_matches",
  "async-trait",
- "base58",
  "bitvec",
- "blake2",
  "derivative",
  "either",
  "frame-metadata 16.0.0",
