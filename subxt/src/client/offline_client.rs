@@ -93,7 +93,7 @@ impl<T: Config> OfflineClient<T> {
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version.clone()
+        self.inner.runtime_version
     }
 
     /// Return the [`Metadata`] used in this client.

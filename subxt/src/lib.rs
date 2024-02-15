@@ -69,11 +69,10 @@ pub use crate::{
 // pub use subxt_core::*;
 
 pub use subxt_core::{
-    dynamic, signed_extensions, AccountId32, BlockHash, ClientBase, Config, DecodedValue,
-    DecodedValueThunk, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, Metadata,
-    MultiAddress, PolkadotConfig, PolkadotExtrinsicParams, RuntimeVersion, Signer, StorageAddress,
-    SubstrateConfig, SubstrateExtrinsicParams,
-    config, metadata,
+    config, dynamic, metadata, signed_extensions, AccountId32, BlockHash, ClientBase, Config,
+    DecodedValue, DecodedValueThunk, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header,
+    Metadata, MultiAddress, PolkadotConfig, PolkadotExtrinsicParams, RuntimeVersion, Signer,
+    StorageAddress, SubstrateConfig, SubstrateExtrinsicParams,
 };
 
 /// Re-export external crates that are made use of in the subxt API.

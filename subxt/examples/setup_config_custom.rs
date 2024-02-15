@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use codec::Encode;
-use subxt::client::{ClientBase};
+use subxt::client::ClientBase;
 use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
 use subxt_core::ExtrinsicParamsError;
 use subxt_signer::sr25519::dev;
