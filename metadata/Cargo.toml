@@ -13,12 +13,17 @@ documentation.workspace = true
 homepage.workspace = true
 description = "Command line utilities for checking metadata compatibility between nodes."
 
+[features]
+default = ["std"]
+std = ["scale-info/std", "frame-metadata/std"]
+
 [dependencies]
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-frame-metadata = { workspace = true }
-scale-info = { workspace = true }
+scale-info = { workspace = true, default-features = false }
+frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
+codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 sp-core-hashing = { workspace = true }
-thiserror = { workspace = true }
+hashbrown = { workspace = true }
+derive_more = { workspace = true }
 
 [dev-dependencies]
 bitvec = { workspace = true, features = ["alloc"] }

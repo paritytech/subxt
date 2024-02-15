@@ -8,9 +8,10 @@ use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
     RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
+use alloc::vec::Vec;
+use hashbrown::HashMap;
 use outer_enum_hashes::OuterEnumHashes;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
-use std::collections::HashMap;
 
 pub mod outer_enum_hashes;
 

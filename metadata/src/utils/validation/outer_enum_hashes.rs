@@ -1,6 +1,6 @@
 //! Hash representations of the `frame_metadata::v15::OuterEnums`.
 
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 use scale_info::{PortableRegistry, TypeDef};
 
