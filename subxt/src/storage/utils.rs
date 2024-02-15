@@ -59,8 +59,8 @@ pub fn strip_storage_addess_root_bytes(
 /// Returns None(..) if the hasher provided is not a concat hasher.
 /// Returns Some(Err(..)) if there are not enough bytes.
 /// Returns Some(Ok(..)) if the stripping was successful.
-pub fn strip_concat_hash_bytes<'a>(
-    hash: &'a mut &[u8],
+pub fn strip_concat_hash_bytes(
+    hash: &mut &[u8],
     hasher: &StorageHasher,
 ) -> Option<Result<(), StorageAddressError>> {
     match hasher {

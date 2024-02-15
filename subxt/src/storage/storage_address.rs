@@ -222,7 +222,7 @@ impl StorageMultiKey for Vec<scale_value::Value> {
         let mut hashers_and_ty_ids_iter = hashers_and_ty_ids.iter();
 
         let mut result: Vec<scale_value::Value> = vec![];
-        while cursor.len() > 0 {
+        while !cursor.is_empty() {
             let Some((hasher, ty_id)) = hashers_and_ty_ids_iter.next() else {
                 // Still bytes left, but no hashers and type ids anymore to pull from: this is an unexpected error.
                 return Some(Err(StorageAddressError::UnexpectedAddressBytes.into()));
@@ -234,10 +234,10 @@ impl StorageMultiKey for Vec<scale_value::Value> {
                 Ok(decoded) => {
                     match decoded.to_value() {
                         Ok(value) => result.push(value.remove_context()),
-                        Err(err) => return Some(Err(err.into())),
+                        Err(err) => return Some(Err(err)),
                     };
                 }
-                Err(err) => return Some(Err(err.into())),
+                Err(err) => return Some(Err(err)),
             }
         }
         Some(Ok(result))
