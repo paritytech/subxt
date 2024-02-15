@@ -436,10 +436,10 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
+          target: thumbv7em-none-eabi
 
-      - name: Add the `thumbv7em-none-eabi` target
-        run: |
-          rustup target add `thumbv7em-none-eabi`
+      - name: Install the gcc-arm-none-eabi linker
+        run: sudo apt install gcc-arm-none-eabi
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
@@ -448,8 +448,7 @@ jobs:
       # We can only make sure that they compile to ARM thumb ISA.
       # Running the binary and inspecting the output would require an actual machine with matching ISA or some sort of emulator.
       - name: Compile `no-std-tests` crate to `thumbv7em-none-eabi` target.
-        run: |
-          cargo build --target thumbv7em-none-eabi
+        run: cargo build --target thumbv7em-none-eabi
         working-directory: testing/no-std-tests
 
       - if: "failure()"
