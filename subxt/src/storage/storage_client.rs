@@ -7,10 +7,10 @@ use crate::{
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
     error::Error,
-    Config,
 };
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::Config;
 use subxt_core::{
     metadata::MetadatExt,
     storage::utils::{storage_address_bytes, storage_address_root_bytes, validate_storage_address},

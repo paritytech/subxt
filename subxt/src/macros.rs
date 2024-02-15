@@ -64,7 +64,7 @@ macro_rules! cfg_reconnecting_rpc_client {
 }
 
 pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_substrate_compat,
+    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client,
     cfg_unstable_light_client,
 };
 

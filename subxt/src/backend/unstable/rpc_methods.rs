@@ -7,13 +7,13 @@
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::config::BlockHash;
 use crate::{Config, Error};
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::task::Poll;
+use subxt_core::config::BlockHash;
 use subxt_core::to_hex;
 
 /// An interface to call the unstable RPC methods. This interface is instantiated with

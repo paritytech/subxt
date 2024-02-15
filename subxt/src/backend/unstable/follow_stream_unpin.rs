@@ -7,7 +7,6 @@ use super::UnstableRpcMethods;
 use crate::backend::unstable::rpc_methods::{
     BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
 };
-use crate::config::{BlockHash, Config};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use std::collections::{HashMap, HashSet};
@@ -15,6 +14,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
+use subxt_core::config::{BlockHash, Config};
 
 /// The type of stream item.
 pub use super::follow_stream::FollowStreamMsg;
@@ -455,7 +455,7 @@ impl<Hash: BlockHash> Drop for BlockRef<Hash> {
 pub(super) mod test_utils {
     use super::super::follow_stream::{test_utils::test_stream_getter, FollowStream};
     use super::*;
-    use crate::config::substrate::H256;
+    use subxt_core::config::substrate::H256;
 
     pub type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
 
@@ -542,7 +542,7 @@ mod test {
     };
     use super::test_utils::{assert_from_unpin_rx, ev_new_block_ref, test_unpin_stream_getter};
     use super::*;
-    use crate::config::substrate::H256;
+    use subxt_core::config::substrate::H256;
 
     #[tokio::test]
     async fn hands_back_blocks() {

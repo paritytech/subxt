@@ -25,7 +25,6 @@ use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
     StreamOfResults, TransactionStatus,
 };
-use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use crate::Config;
 use async_trait::async_trait;
@@ -35,6 +34,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::task::Poll;
 use storage_items::StorageItems;
+use subxt_core::config::BlockHash;
 
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;

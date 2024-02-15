@@ -6,16 +6,16 @@
 
 use std::task::Poll;
 
-use crate::utils::strip_compact_prefix;
 use crate::{
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
-    Config,
 };
 use derivative::Derivative;
 use futures::{Stream, StreamExt};
+use subxt_core::utils::strip_compact_prefix;
+use subxt_core::Config;
 
 /// This struct represents a subscription to the progress of some transaction.
 pub struct TxProgress<T: Config, C> {
@@ -296,7 +296,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let extrinsic_idx = block_body
             .iter()
             .position(|ext| {
-                use crate::config::Hasher;
+                use subxt_core::Hasher;
                 let Ok((_, stripped)) = strip_compact_prefix(ext) else {
                     return false;
                 };
@@ -325,8 +325,10 @@ mod test {
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
         tx::TxProgress,
-        Config, Error, SubstrateConfig,
+        Error,
     };
+
+    use subxt_core::{Config, SubstrateConfig};
 
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;
     type MockHash = <SubstrateConfig as Config>::Hash;

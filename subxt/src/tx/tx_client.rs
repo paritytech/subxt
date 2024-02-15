@@ -4,19 +4,20 @@
 
 use std::borrow::Cow;
 
+use super::TxProgress;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
-    error::{Error, MetadataError},
-    utils::{Encoded, PhantomDataSendSync},
+    error::Error,
 };
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use sp_core_hashing::blake2_256;
-use subxt_core::{metadata::MetadatExt, tx::TxPayload, Signer as SignerT};
-
-use super::TxProgress;
+use subxt_core::{
+    tx::TxPayload,
+    utils::{Encoded, PhantomDataSendSync},
+    Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Signer as SignerT,
+};
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -45,18 +46,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        if let Some(details) = call.validation_details() {
-            let expected_hash = self
-                .client
-                .metadata()
-                .pallet_by_name_err(details.pallet_name)?
-                .call_hash(details.call_name)
-                .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
-
-            if details.hash != expected_hash {
-                return Err(MetadataError::IncompatibleCodegen.into());
-            }
-        }
+        call.validate(&self.client.metadata())?;
         Ok(())
     }
 

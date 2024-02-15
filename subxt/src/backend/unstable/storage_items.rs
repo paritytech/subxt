@@ -7,7 +7,6 @@ use super::follow_stream_unpin::BlockRef;
 use super::rpc_methods::{
     FollowEvent, MethodResponse, StorageQuery, StorageResult, UnstableRpcMethods,
 };
-use crate::config::Config;
 use crate::error::{Error, RpcError};
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
@@ -15,6 +14,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll};
+use subxt_core::config::Config;
 
 /// Obtain a stream of storage items given some query. this handles continuing
 /// and stopping under the hood, and returns a stream of `StorageResult`s.

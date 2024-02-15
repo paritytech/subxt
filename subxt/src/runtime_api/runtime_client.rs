@@ -4,9 +4,10 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
+use crate::{backend::BlockRef, client::OnlineClientT, error::Error};
 use derivative::Derivative;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::Config;
 
 /// Execute runtime API calls.
 #[derive(Derivative)]

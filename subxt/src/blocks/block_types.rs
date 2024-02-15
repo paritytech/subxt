@@ -6,16 +6,15 @@ use crate::{
     backend::BlockRef,
     blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, Header},
     error::{BlockError, DecodeError, Error},
     events,
     runtime_api::RuntimeApi,
     storage::Storage,
 };
-
 use codec::{Decode, Encode};
 use futures::lock::Mutex as AsyncMutex;
 use std::sync::Arc;
+use subxt_core::{Config, Header};
 
 /// A representation of a block.
 pub struct Block<T: Config, C> {
@@ -57,7 +56,7 @@ where
     }
 
     /// Return the block number.
-    pub fn number(&self) -> <T::Header as crate::config::Header>::Number {
+    pub fn number(&self) -> <T::Header as subxt_core::Header>::Number {
         self.header().number()
     }
 

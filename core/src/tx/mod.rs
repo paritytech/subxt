@@ -38,6 +38,20 @@ pub trait TxPayload {
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
         None
     }
+
+    fn validate(&self, metadata: &Metadata) -> Result<(), Error> {
+        if let Some(details) = self.validation_details() {
+            let expected_hash = metadata
+                .pallet_by_name_err(details.pallet_name)?
+                .call_hash(details.call_name)
+                .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
+
+            if details.hash != expected_hash {
+                return Err(MetadataError::IncompatibleCodegen.into());
+            }
+        }
+        Ok(())
+    }
 }
 
 pub struct ValidationDetails<'a> {

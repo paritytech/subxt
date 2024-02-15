@@ -23,3 +23,4 @@ pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
 };
+pub use subxt_core::ClientBase;

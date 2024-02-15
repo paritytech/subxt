@@ -15,7 +15,7 @@ pub mod config;
 pub mod constants;
 pub mod custom_values;
 pub mod dynamic;
-mod error;
+pub mod error;
 pub mod metadata;
 pub mod runtime_api;
 pub mod signer;
@@ -23,17 +23,21 @@ pub mod storage;
 pub mod tx;
 pub mod utils;
 
-pub use error::{Error, ExtrinsicParamsError, MetadataError, StorageAddressError};
-
 pub use client::{ClientBase, RuntimeVersion};
 pub use config::{
-    BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, PolkadotConfig,
-    PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
+    signed_extensions, BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header,
+    PolkadotConfig, PolkadotExtrinsicParams, SignedExtension, SubstrateConfig,
+    SubstrateExtrinsicParams,
 };
+pub use dynamic::{DecodedValue, DecodedValueThunk};
+pub use error::{Error, ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use metadata::Metadata;
 pub use signer::Signer;
 pub use storage::StorageAddress;
-pub use utils::{to_hex, AccountId32, MultiAddress, MultiSignature, Yes, H160, H256, H512};
+pub use utils::{
+    strip_compact_prefix, to_hex, AccountId32, KeyedVec, MultiAddress, MultiSignature, Yes, H160,
+    H256, H512,
+};
 
 #[macro_use]
 mod macros;

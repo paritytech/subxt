@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use codec::Encode;
-use subxt::client::OfflineClientT;
+use subxt::client::{ClientBase};
 use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder};
 use subxt_core::ExtrinsicParamsError;
 use subxt_signer::sr25519::dev;
@@ -57,9 +57,9 @@ impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     type OtherParams = CustomExtrinsicParamsBuilder;
 
     // Gather together all of the params we will need to encode:
-    fn new<Client: OfflineClientT<T>>(
+    fn new(
         _nonce: u64,
-        client: Client,
+        client: ClientBase<T>,
         other_params: Self::OtherParams,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {

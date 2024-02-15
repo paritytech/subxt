@@ -66,7 +66,15 @@ pub use crate::{
 };
 
 // We replace this by proper exports, once the API of subxt_core is aggreed upon.
-pub use subxt_core::*;
+// pub use subxt_core::*;
+
+pub use subxt_core::{
+    dynamic, signed_extensions, AccountId32, BlockHash, ClientBase, Config, DecodedValue,
+    DecodedValueThunk, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, Metadata,
+    MultiAddress, PolkadotConfig, PolkadotExtrinsicParams, RuntimeVersion, Signer, StorageAddress,
+    SubstrateConfig, SubstrateExtrinsicParams,
+    config, metadata,
+};
 
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {
@@ -77,6 +85,7 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
+    pub use subxt_core;
 
     cfg_substrate_compat! {
         pub use sp_runtime;

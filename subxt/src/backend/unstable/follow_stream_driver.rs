@@ -4,7 +4,6 @@
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
-use crate::config::BlockHash;
 use crate::error::Error;
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -12,6 +11,7 @@ use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
+use subxt_core::config::BlockHash;
 
 /// A `Stream` which builds on `FollowStreamDriver`, and allows multiple subscribers to obtain events
 /// from the single underlying subscription (each being provided an `Initialized` message and all new

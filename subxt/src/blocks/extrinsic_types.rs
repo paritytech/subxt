@@ -5,22 +5,20 @@
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
-    events, Metadata,
+    events,
+};
+use subxt_core::{
+    metadata::MetadatExt,
+    signed_extensions::{ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce},
+    strip_compact_prefix, Config, Hasher, Metadata,
 };
 
-use subxt_core::metadata::{types::PalletMetadata, MetadatExt};
-
-use crate::config::signed_extensions::{
-    ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
-};
-use crate::config::SignedExtension;
-use crate::dynamic::DecodedValue;
-use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
+use subxt_core::{DecodedValue, SignedExtension};
+use subxt_metadata::PalletMetadata;
 
 use std::sync::Arc;
 

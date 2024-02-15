@@ -14,13 +14,13 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError},
-    Config,
 };
 use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
 use subxt_core::metadata::DecodeWithMetadata;
+use subxt_core::Config;
 
 /// This is returned from a couple of storage functions.
 pub use crate::backend::StreamOfResults;

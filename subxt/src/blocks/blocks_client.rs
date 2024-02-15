@@ -6,13 +6,13 @@ use super::Block;
 use crate::{
     backend::{BlockRef, StreamOfResults},
     client::OnlineClientT,
-    config::Config,
     error::{BlockError, Error},
-    utils::PhantomDataSendSync,
 };
 use derivative::Derivative;
 use futures::StreamExt;
 use std::future::Future;
+use subxt_core::utils::PhantomDataSendSync;
+use subxt_core::Config;
 
 type BlockStream<T> = StreamOfResults<T>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;

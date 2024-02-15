@@ -12,12 +12,13 @@ use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
-use crate::{config::Header, Config, Error};
+use crate::Error;
 use async_trait::async_trait;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use subxt_core::{config::Header, Config};
 
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
