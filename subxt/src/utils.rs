@@ -6,7 +6,7 @@
 
 pub use subxt_core::utils::{
     bits, strip_compact_prefix, to_hex, AccountId32, KeyedVec, MultiAddress, MultiSignature,
-    UncheckedExtrinsic, Yes, H160, H256, H512,
+    UncheckedExtrinsic, Yes, H160, H256, H512, Era,Static,
 };
 
 use url::Url;

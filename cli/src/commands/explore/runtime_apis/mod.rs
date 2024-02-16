@@ -19,7 +19,7 @@ use subxt_metadata::RuntimeApiMetadata;
 
 /// Runs for a specified runtime API trait.
 /// Cases to consider:
-/// ```norun
+/// ```txt
 /// method is:
 ///   None => Show pallet docs + available methods
 ///   Some (invalid) => Show Error + available methods

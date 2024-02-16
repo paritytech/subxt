@@ -21,5 +21,6 @@ pub use self::{
 };
 pub use subxt_core::{
     signer::Signer,
+    tx,
     tx::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
 };
