@@ -5,8 +5,8 @@
 //! Utility functions used in subxt. Reexports all elements from [`subxt_core::utils`];
 
 pub use subxt_core::utils::{
-    bits, strip_compact_prefix, to_hex, AccountId32, KeyedVec, MultiAddress, MultiSignature,
-    UncheckedExtrinsic, Yes, H160, H256, H512, Era,Static,
+    bits, strip_compact_prefix, to_hex, AccountId32, Era, KeyedVec, MultiAddress, MultiSignature,
+    Static, UncheckedExtrinsic, Yes, H160, H256, H512,
 };
 
 use url::Url;

@@ -72,7 +72,7 @@ pub use subxt_core::{
     config, dynamic, metadata, signed_extensions, AccountId32, BlockHash, ClientBase, Config,
     DecodedValue, DecodedValueThunk, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header,
     Metadata, MultiAddress, PolkadotConfig, PolkadotExtrinsicParams, RuntimeVersion, Signer,
-    StorageAddress, SubstrateConfig, SubstrateExtrinsicParams
+    StorageAddress, SubstrateConfig, SubstrateExtrinsicParams,
 };
 
 /// Re-export external crates that are made use of in the subxt API.
