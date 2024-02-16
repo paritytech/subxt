@@ -442,15 +442,6 @@ where
             _other => either::Either::Right(std::iter::once(*key_ty)),
         };
 
-        // Provided more fields than hashers: This is unacceptable (on the contrary, providing more hashers than keys is ok)
-        if hashers.len() < type_ids.len() {
-            return Err(StorageAddressError::WrongNumberOfHashers {
-                hashers: hashers.len(),
-                fields: type_ids.len(),
-            }
-            .into());
-        }
-
         if hashers.len() == 1 {
             // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
             let mut input = Vec::new();
@@ -459,7 +450,7 @@ where
                 key.encode_with_metadata(type_id, metadata, &mut input)?;
             }
             hash_bytes(&input, &hashers[0], bytes);
-        } else {
+        } else if hashers.len() >= type_ids.len() {
             // A hasher per field; encode and hash each field independently.
             let iter = keys_iter.zip(type_ids).zip(hashers);
             for ((key, type_id), hasher) in iter {
@@ -467,6 +458,13 @@ where
                 key.encode_with_metadata(type_id, metadata, &mut input)?;
                 hash_bytes(&input, hasher, bytes);
             }
+        } else {
+            // Provided more fields than hashers.
+            return Err(StorageAddressError::WrongNumberOfHashers {
+                hashers: hashers.len(),
+                fields: type_ids.len(),
+            }
+            .into());
         }
 
         Ok(())
