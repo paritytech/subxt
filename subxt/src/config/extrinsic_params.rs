@@ -88,7 +88,7 @@ pub trait DefaultOrFrom<T> {
 }
 
 impl<T> DefaultOrFrom<T> for () {
-    fn default_or_from(_value: Option<&T>) -> () {}
+    fn default_or_from(_value: Option<&T>) {}
 }
 
 macro_rules! impl_default_from_tuples {
@@ -109,6 +109,7 @@ macro_rules! impl_default_from_tuples {
     }
 }
 
+// Note: these implementations are necessary for AnyOf to work properly where arbitrary tuples are the `OtherParams`.
 #[rustfmt::skip]
 const _: () = {
     impl_default_from_tuples!(A);

@@ -167,5 +167,3 @@ where
     };
     Ok(account_nonce)
 }
-
-pub struct LatestBlockHeader {}
