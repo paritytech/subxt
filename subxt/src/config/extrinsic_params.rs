@@ -83,7 +83,7 @@ pub trait ExtrinsicParamsEncoder: 'static {
 /// Like the `From<T>` trait, if value is Some(_), but it lets us circumvent the orphan rule, because we want to implement
 /// `DefaultOrFrom<Header>` for `()`, such that DefaultOrFrom<Header> is implemented by `((),(),(),CheckMortalityParams)`, if `CheckMortalityParams` implements `DefaultFrom<Header>`
 pub trait DefaultOrFrom<T> {
-    /// If value
+    /// If value is None, Self is constructed as some default value. Otherwise it takes the value of `T` into account.
     fn default_or_from(value: Option<&T>) -> Self;
 }
 
@@ -93,9 +93,6 @@ impl<T> DefaultOrFrom<T> for () {
 
 macro_rules! impl_default_from_tuples {
     ($($ident:ident),+) => {
-        // We do some magic when the tuple is wrapped in AnyOf. We
-        // look at the metadata, and use this to select and make use of only the extensions
-        // that we actually need for the chain we're dealing with.
         impl <T, $($ident),+> DefaultOrFrom<T> for ($($ident,)+)
         where
             $($ident: DefaultOrFrom<T>,)+
@@ -109,7 +106,7 @@ macro_rules! impl_default_from_tuples {
     }
 }
 
-// Note: these implementations are necessary for AnyOf to work properly where arbitrary tuples are the `OtherParams`.
+// Note: these implementations are necessary, such that `DefaultOrFrom` works with `AnyOf` where arbitrary tuples are the `OtherParams`.
 #[rustfmt::skip]
 const _: () = {
     impl_default_from_tuples!(A);
