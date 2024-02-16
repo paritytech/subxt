@@ -7,7 +7,10 @@
 //! [`AnyOf`] to configure the set of signed extensions which are known about
 //! when interacting with a chain.
 
-use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use super::extrinsic_params::{
+    DefaultOrFrom, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError,
+};
+use crate::config::Header;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
@@ -166,6 +169,17 @@ impl<T: Config> Default for CheckMortalityParams<T> {
     }
 }
 
+impl<T: Config> DefaultOrFrom<T::Header> for CheckMortalityParams<T> {
+    fn default_or_from(value: Option<&T::Header>) -> Self {
+        if let Some(header) = value {
+            const FOR_N_BLOCKS: u64 = 32;
+            CheckMortalityParams::mortal(FOR_N_BLOCKS, header.number().into(), header.hash())
+        } else {
+            Default::default()
+        }
+    }
+}
+
 impl<T: Config> CheckMortalityParams<T> {
     /// Configure a mortal transaction. The `period` is (roughly) how many
     /// blocks the transaction will be valid for. The `block_number` and
@@ -253,6 +267,12 @@ impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
     }
 }
 
+impl<T: Config> DefaultOrFrom<T::Header> for ChargeAssetTxPaymentParams<T> {
+    fn default_or_from(_value: Option<&T::Header>) -> Self {
+        Default::default()
+    }
+}
+
 impl<T: Config> ChargeAssetTxPaymentParams<T> {
     /// Don't provide a tip to the extrinsic author.
     pub fn no_tip() -> Self {
@@ -322,6 +342,12 @@ impl ChargeTransactionPayment {
 #[derive(Default)]
 pub struct ChargeTransactionPaymentParams {
     tip: u128,
+}
+
+impl<T> DefaultOrFrom<T> for ChargeTransactionPaymentParams {
+    fn default_or_from(_value: Option<&T>) -> Self {
+        Default::default()
+    }
 }
 
 impl ChargeTransactionPaymentParams {

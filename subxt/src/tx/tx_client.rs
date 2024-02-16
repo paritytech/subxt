@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
+    config::{Config, DefaultOrFrom, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
     error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
@@ -213,9 +213,13 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: DefaultOrFrom<T::Header>,
     {
-        self.sign_and_submit_then_watch(call, signer, Default::default())
+        let latest_block = self.client.blocks().at_latest().await.ok();
+        let latest_header = latest_block.as_ref().map(|b| b.header());
+        let other_params =
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams::default_or_from(latest_header);
+        self.sign_and_submit_then_watch(call, signer, other_params)
             .await
     }
 
@@ -257,9 +261,13 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: DefaultOrFrom<T::Header>,
     {
-        self.sign_and_submit(call, signer, Default::default()).await
+        let latest_block = self.client.blocks().at_latest().await.ok();
+        let latest_header = latest_block.as_ref().map(|b| b.header());
+        let other_params =
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams::default_or_from(latest_header);
+        self.sign_and_submit(call, signer, other_params).await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.

@@ -79,3 +79,57 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// signing it, meaning the client and node must agree on their values.
     fn encode_additional_to(&self, _v: &mut Vec<u8>) {}
 }
+
+/// Like the `From<T>` trait, if value is Some(_), but it lets us circumvent the orphan rule, because we want to implement
+/// `DefaultOrFrom<Header>` for `()`, such that DefaultOrFrom<Header> is implemented by `((),(),(),CheckMortalityParams)`, if `CheckMortalityParams` implements `DefaultFrom<Header>`
+pub trait DefaultOrFrom<T> {
+    /// If value
+    fn default_or_from(value: Option<&T>) -> Self;
+}
+
+impl<T> DefaultOrFrom<T> for () {
+    fn default_or_from(_value: Option<&T>) -> () {}
+}
+
+macro_rules! impl_default_from_tuples {
+    ($($ident:ident),+) => {
+        // We do some magic when the tuple is wrapped in AnyOf. We
+        // look at the metadata, and use this to select and make use of only the extensions
+        // that we actually need for the chain we're dealing with.
+        impl <T, $($ident),+> DefaultOrFrom<T> for ($($ident,)+)
+        where
+            $($ident: DefaultOrFrom<T>,)+
+        {
+            fn default_or_from(value: Option<&T>) -> Self {
+                ($(
+                    (<$ident as DefaultOrFrom<T>>::default_or_from(value)),
+                )+)
+            }
+        }
+    }
+}
+
+#[rustfmt::skip]
+const _: () = {
+    impl_default_from_tuples!(A);
+    impl_default_from_tuples!(A, B);
+    impl_default_from_tuples!(A, B, C);
+    impl_default_from_tuples!(A, B, C, D);
+    impl_default_from_tuples!(A, B, C, D, E);
+    impl_default_from_tuples!(A, B, C, D, E, F);
+    impl_default_from_tuples!(A, B, C, D, E, F, G);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U);
+    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U, V);
+};

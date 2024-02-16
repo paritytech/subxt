@@ -8,6 +8,7 @@
 //! require network access. The [`OnlineClient`] requires network
 //! access.
 
+mod client_capabilities;
 mod offline_client;
 mod online_client;
 
