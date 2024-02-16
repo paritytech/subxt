@@ -2323,14 +2323,13 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9579d0ca9fb30da026bac2f0f7d9576ec93489aeb7cd4971dd5b4617d82c79b2"
+checksum = "4a95f7cc23d5fab0cdeeaf6bad8c8f5e7a3aa7f0d211957ea78232b327ab27b0"
 dependencies = [
- "jsonrpsee-client-transport 0.21.0",
- "jsonrpsee-core 0.21.0",
- "jsonrpsee-http-client",
- "jsonrpsee-types 0.21.0",
+ "jsonrpsee-core 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "jsonrpsee-types 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "jsonrpsee-ws-client",
 ]
 
 [[package]]
@@ -2338,22 +2337,21 @@ name = "jsonrpsee"
 version = "0.22.0"
 source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
 dependencies = [
- "jsonrpsee-core 0.22.0",
- "jsonrpsee-types 0.22.0",
- "jsonrpsee-ws-client",
+ "jsonrpsee-client-transport 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-http-client",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
 ]
 
 [[package]]
 name = "jsonrpsee-client-transport"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3f9f9ed46590a8d5681975f126e22531698211b926129a40a2db47cbca429220"
+checksum = "6b1736cfa3845fd9f8f43751f2b8e0e83f7b6081e754502f7d63b6587692cc83"
 dependencies = [
- "futures-channel",
  "futures-util",
- "gloo-net",
  "http",
- "jsonrpsee-core 0.21.0",
+ "jsonrpsee-core 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-project",
  "rustls-native-certs 0.7.0",
  "rustls-pki-types",
@@ -2371,9 +2369,11 @@ name = "jsonrpsee-client-transport"
 version = "0.22.0"
 source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
 dependencies = [
+ "futures-channel",
  "futures-util",
+ "gloo-net",
  "http",
- "jsonrpsee-core 0.22.0",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "pin-project",
  "rustls-native-certs 0.7.0",
  "rustls-pki-types",
@@ -2388,9 +2388,31 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-core"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "776d009e2f591b78c038e0d053a796f94575d66ca4e77dd84bfc5e81419e436c"
+checksum = "82030d038658974732103e623ba2e0abec03bbbe175b39c0a2fafbada60c5868"
+dependencies = [
+ "anyhow",
+ "async-lock 3.3.0",
+ "async-trait",
+ "beef",
+ "futures-timer",
+ "futures-util",
+ "jsonrpsee-types 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "pin-project",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+]
+
+[[package]]
+name = "jsonrpsee-core"
+version = "0.22.0"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
 dependencies = [
  "anyhow",
  "async-lock 3.3.0",
@@ -2399,7 +2421,7 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "hyper",
- "jsonrpsee-types 0.21.0",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "pin-project",
  "rustc-hash",
  "serde",
@@ -2412,38 +2434,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "jsonrpsee-core"
+name = "jsonrpsee-http-client"
 version = "0.22.0"
 source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
-dependencies = [
- "anyhow",
- "async-lock 3.3.0",
- "async-trait",
- "beef",
- "futures-timer",
- "futures-util",
- "jsonrpsee-types 0.22.0",
- "pin-project",
- "rustc-hash",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tokio-stream",
- "tracing",
-]
-
-[[package]]
-name = "jsonrpsee-http-client"
-version = "0.21.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "78b7de9f3219d95985eb77fd03194d7c1b56c19bce1abfcc9d07462574b15572"
 dependencies = [
  "async-trait",
  "hyper",
  "hyper-rustls",
- "jsonrpsee-core 0.21.0",
- "jsonrpsee-types 0.21.0",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "serde",
  "serde_json",
  "thiserror",
@@ -2455,9 +2454,9 @@ dependencies = [
 
 [[package]]
 name = "jsonrpsee-types"
-version = "0.21.0"
+version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3266dfb045c9174b24c77c2dfe0084914bb23a6b2597d70c9dc6018392e1cd1b"
+checksum = "9a48fdc1202eafc51c63e00406575e59493284ace8b8b61aa16f3a6db5d64f1a"
 dependencies = [
  "anyhow",
  "beef",
@@ -2481,12 +2480,13 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-ws-client"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5ce25d70a8e4d3cc574bbc3cad0137c326ad64b194793d5e7bbdd3fa4504181"
 dependencies = [
  "http",
- "jsonrpsee-client-transport 0.22.0",
- "jsonrpsee-core 0.22.0",
- "jsonrpsee-types 0.22.0",
+ "jsonrpsee-client-transport 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "jsonrpsee-core 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "jsonrpsee-types 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "url",
 ]
 
@@ -3252,7 +3252,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ea5cf7b021db88f1af45a9b2ecdbe5bc1c5cbebc146632269d572cdd435f5cf"
 dependencies = [
  "futures",
- "jsonrpsee 0.22.0",
+ "jsonrpsee 0.22.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json",
  "thiserror",
  "tokio",
@@ -4575,7 +4575,7 @@ dependencies = [
  "hex",
  "impl-serde",
  "instant",
- "jsonrpsee 0.21.0",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "parity-scale-codec",
  "primitive-types",
  "reconnecting-jsonrpsee-ws-client",
@@ -4613,7 +4613,7 @@ dependencies = [
  "heck",
  "hex",
  "indoc",
- "jsonrpsee 0.21.0",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "parity-scale-codec",
  "pretty_assertions",
  "quote",
@@ -4640,7 +4640,7 @@ dependencies = [
  "getrandom",
  "heck",
  "hex",
- "jsonrpsee 0.21.0",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "parity-scale-codec",
  "proc-macro2",
  "quote",
@@ -4777,7 +4777,7 @@ version = "0.34.0"
 dependencies = [
  "hex",
  "impl-serde",
- "jsonrpsee 0.21.0",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
  "parity-scale-codec",
  "serde",
  "substrate-runner",
