@@ -152,15 +152,15 @@ fn generate_storage_entry_fns(
             0 => (quote!( () ), quote!( () )),
             1 => {
                 let field_name = &keys_slice[0].0;
-                let keys = quote!( #crate_path::storage::address::StorageKey::new(#field_name.borrow()) );
+                let keys = quote!( #crate_path::storage::address::StaticStorageKey::new(#field_name.borrow()) );
                 let path = &keys_slice[0].2;
-                let path = quote!( #crate_path::storage::address::StorageKey<#path> );
+                let path = quote!( #crate_path::storage::address::StaticStorageKey<#path> );
                 (keys, path)
             }
             _ =>  {
-                let keys_iter = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::StorageKey::new(#field_name.borrow()) ));
+                let keys_iter = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::StaticStorageKey::new(#field_name.borrow()) ));
                 let keys = quote!( (#(#keys_iter,)*) );
-                let paths_iter = keys_slice.iter().map(|(_, _, path_to_alias)| quote!( #crate_path::storage::address::StorageKey<#path_to_alias> ) );
+                let paths_iter = keys_slice.iter().map(|(_, _, path_to_alias)| quote!( #crate_path::storage::address::StaticStorageKey<#path_to_alias> ) );
                 let paths = quote!( (#(#paths_iter,)*) );
                 (keys, paths)
             }

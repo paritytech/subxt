@@ -207,7 +207,7 @@ pub enum StorageAddressError {
         fields: usize,
     },
     /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
-    #[error("Storage address bytes are not the expected format")]
+    #[error("Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata.")]
     UnexpectedAddressBytes,
 }
 

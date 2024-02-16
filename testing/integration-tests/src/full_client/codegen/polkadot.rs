@@ -4741,7 +4741,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::account::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -4750,7 +4750,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "System",
                         "Account",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             14u8, 233u8, 115u8, 214u8, 0u8, 109u8, 222u8, 121u8, 162u8, 65u8, 60u8,
                             175u8, 209u8, 79u8, 222u8, 124u8, 22u8, 235u8, 138u8, 176u8, 133u8,
@@ -4850,7 +4850,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::block_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::block_hash::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::block_hash::Param0>,
                     types::block_hash::BlockHash,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -4859,7 +4859,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "System",
                         "BlockHash",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             217u8, 32u8, 215u8, 253u8, 24u8, 182u8, 207u8, 178u8, 157u8, 24u8,
                             103u8, 100u8, 195u8, 165u8, 69u8, 152u8, 112u8, 181u8, 56u8, 192u8,
@@ -4894,7 +4894,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::extrinsic_data::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::extrinsic_data::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::extrinsic_data::Param0>,
                     types::extrinsic_data::ExtrinsicData,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -4903,7 +4903,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "System",
                         "ExtrinsicData",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             160u8, 180u8, 122u8, 18u8, 196u8, 26u8, 2u8, 37u8, 115u8, 232u8, 133u8,
                             220u8, 106u8, 245u8, 4u8, 129u8, 42u8, 84u8, 241u8, 45u8, 199u8, 179u8,
@@ -5068,7 +5068,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::event_topics::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::event_topics::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::event_topics::Param0>,
                     types::event_topics::EventTopics,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -5077,7 +5077,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "System",
                         "EventTopics",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             40u8, 225u8, 14u8, 75u8, 44u8, 176u8, 76u8, 34u8, 143u8, 107u8, 69u8,
                             133u8, 114u8, 13u8, 172u8, 250u8, 141u8, 73u8, 12u8, 65u8, 217u8, 63u8,
@@ -5791,7 +5791,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::under_construction::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::under_construction::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::under_construction::Param0>,
                     types::under_construction::UnderConstruction,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -5800,7 +5800,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Babe",
                         "UnderConstruction",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             120u8, 120u8, 59u8, 247u8, 50u8, 6u8, 220u8, 14u8, 2u8, 76u8, 203u8,
                             244u8, 232u8, 144u8, 253u8, 191u8, 101u8, 35u8, 99u8, 85u8, 111u8,
@@ -6535,7 +6535,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::accounts::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::accounts::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::accounts::Param0>,
                     types::accounts::Accounts,
                     ::subxt::storage::address::Yes,
                     (),
@@ -6544,7 +6544,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Indices",
                         "Accounts",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             48u8, 189u8, 43u8, 119u8, 32u8, 168u8, 28u8, 12u8, 245u8, 81u8, 119u8,
                             182u8, 23u8, 201u8, 33u8, 147u8, 128u8, 171u8, 155u8, 134u8, 71u8,
@@ -7577,7 +7577,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::account::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -7586,7 +7586,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
                         "Account",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             213u8, 38u8, 200u8, 69u8, 218u8, 0u8, 112u8, 181u8, 160u8, 23u8, 96u8,
                             90u8, 3u8, 88u8, 126u8, 22u8, 103u8, 74u8, 64u8, 69u8, 29u8, 247u8,
@@ -7622,7 +7622,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::locks::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::locks::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::locks::Param0>,
                     types::locks::Locks,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -7631,7 +7631,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
                         "Locks",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             10u8, 223u8, 55u8, 0u8, 249u8, 69u8, 168u8, 41u8, 75u8, 35u8, 120u8,
                             167u8, 18u8, 132u8, 9u8, 20u8, 91u8, 51u8, 27u8, 69u8, 136u8, 187u8,
@@ -7665,7 +7665,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::reserves::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::reserves::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::reserves::Param0>,
                     types::reserves::Reserves,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -7674,7 +7674,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
                         "Reserves",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             112u8, 10u8, 241u8, 77u8, 64u8, 187u8, 106u8, 159u8, 13u8, 153u8,
                             140u8, 178u8, 182u8, 50u8, 1u8, 55u8, 149u8, 92u8, 196u8, 229u8, 170u8,
@@ -7709,7 +7709,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::holds::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::holds::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::holds::Param0>,
                     types::holds::Holds,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -7718,7 +7718,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
                         "Holds",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             181u8, 39u8, 29u8, 45u8, 45u8, 198u8, 129u8, 210u8, 189u8, 183u8,
                             121u8, 125u8, 57u8, 90u8, 95u8, 107u8, 51u8, 13u8, 22u8, 105u8, 191u8,
@@ -7753,7 +7753,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::freezes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::freezes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::freezes::Param0>,
                     types::freezes::Freezes,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -7762,7 +7762,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
                         "Freezes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             69u8, 49u8, 165u8, 76u8, 135u8, 142u8, 179u8, 118u8, 50u8, 109u8, 53u8,
                             112u8, 110u8, 94u8, 30u8, 93u8, 173u8, 38u8, 27u8, 142u8, 19u8, 5u8,
@@ -8111,7 +8111,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::reports::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::reports::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::reports::Param0>,
                     types::reports::Reports,
                     ::subxt::storage::address::Yes,
                     (),
@@ -8120,7 +8120,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Offences",
                         "Reports",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             255u8, 234u8, 162u8, 48u8, 243u8, 210u8, 198u8, 231u8, 218u8, 142u8,
                             167u8, 10u8, 232u8, 223u8, 239u8, 55u8, 74u8, 23u8, 14u8, 236u8, 88u8,
@@ -8156,7 +8156,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::concurrent_reports_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::concurrent_reports_index::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::concurrent_reports_index::Param0,
+                    >,
                     types::concurrent_reports_index::ConcurrentReportsIndex,
                     (),
                     ::subxt::storage::address::Yes,
@@ -8165,7 +8167,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Offences",
                         "ConcurrentReportsIndex",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             170u8, 186u8, 72u8, 29u8, 251u8, 38u8, 193u8, 195u8, 109u8, 86u8, 0u8,
                             241u8, 20u8, 235u8, 108u8, 126u8, 215u8, 82u8, 73u8, 113u8, 199u8,
@@ -8181,10 +8183,10 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::concurrent_reports_index::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::concurrent_reports_index::Param0,
                         >,
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::concurrent_reports_index::Param1,
                         >,
                     ),
@@ -8197,8 +8199,8 @@ pub mod api {
                         "Offences",
                         "ConcurrentReportsIndex",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             170u8, 186u8, 72u8, 29u8, 251u8, 38u8, 193u8, 195u8, 109u8, 86u8, 0u8,
@@ -8257,7 +8259,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::historical_sessions::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::historical_sessions::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::historical_sessions::Param0>,
                     types::historical_sessions::HistoricalSessions,
                     ::subxt::storage::address::Yes,
                     (),
@@ -8266,7 +8268,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Historical",
                         "HistoricalSessions",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             9u8, 138u8, 247u8, 141u8, 178u8, 146u8, 124u8, 81u8, 162u8, 211u8,
                             205u8, 149u8, 222u8, 254u8, 253u8, 188u8, 170u8, 242u8, 218u8, 41u8,
@@ -8599,7 +8601,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::set_id_session::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
                     types::set_id_session::SetIdSession,
                     ::subxt::storage::address::Yes,
                     (),
@@ -8608,7 +8610,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "SetIdSession",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
                             65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
@@ -8795,7 +8797,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::nodes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::nodes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::nodes::Param0>,
                     types::nodes::Nodes,
                     ::subxt::storage::address::Yes,
                     (),
@@ -8804,7 +8806,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
                         "Nodes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
                             206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
@@ -9188,7 +9190,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::next_keys::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::next_keys::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::next_keys::Param0>,
                     types::next_keys::NextKeys,
                     ::subxt::storage::address::Yes,
                     (),
@@ -9197,7 +9199,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
                         "NextKeys",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             13u8, 219u8, 184u8, 220u8, 199u8, 150u8, 34u8, 166u8, 125u8, 46u8,
                             26u8, 160u8, 113u8, 243u8, 227u8, 6u8, 121u8, 176u8, 222u8, 250u8,
@@ -9233,7 +9235,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::key_owner::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::key_owner::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::key_owner::Param0>,
                     types::key_owner::KeyOwner,
                     (),
                     (),
@@ -9242,7 +9244,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
                         "KeyOwner",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             217u8, 204u8, 21u8, 114u8, 247u8, 129u8, 32u8, 242u8, 93u8, 91u8,
                             253u8, 253u8, 248u8, 90u8, 12u8, 202u8, 195u8, 25u8, 18u8, 100u8,
@@ -9258,8 +9260,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::key_owner::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::key_owner::Param0>,
-                        ::subxt::storage::address::StorageKey<types::key_owner::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::key_owner::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::key_owner::Param1>,
                     ),
                     types::key_owner::KeyOwner,
                     ::subxt::storage::address::Yes,
@@ -9270,8 +9272,8 @@ pub mod api {
                         "Session",
                         "KeyOwner",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             217u8, 204u8, 21u8, 114u8, 247u8, 129u8, 32u8, 242u8, 93u8, 91u8,
@@ -9700,7 +9702,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::set_id_session::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
                     types::set_id_session::SetIdSession,
                     ::subxt::storage::address::Yes,
                     (),
@@ -9709,7 +9711,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Grandpa",
                         "SetIdSession",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
                             65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
@@ -10696,7 +10698,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::proposals::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::proposals::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::proposals::Param0>,
                     types::proposals::Proposals,
                     ::subxt::storage::address::Yes,
                     (),
@@ -10705,7 +10707,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Treasury",
                         "Proposals",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             207u8, 135u8, 145u8, 146u8, 48u8, 10u8, 252u8, 40u8, 20u8, 115u8,
                             205u8, 41u8, 173u8, 83u8, 115u8, 46u8, 106u8, 40u8, 130u8, 157u8,
@@ -10806,7 +10808,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::spends::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::spends::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::spends::Param0>,
                     types::spends::Spends,
                     ::subxt::storage::address::Yes,
                     (),
@@ -10815,7 +10817,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Treasury",
                         "Spends",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             207u8, 104u8, 63u8, 103u8, 177u8, 66u8, 236u8, 100u8, 122u8, 213u8,
                             125u8, 153u8, 180u8, 219u8, 124u8, 22u8, 88u8, 161u8, 188u8, 197u8,
@@ -11338,7 +11340,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::voting_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::voting_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::voting_for::Param0>,
                     types::voting_for::VotingFor,
                     (),
                     ::subxt::storage::address::Yes,
@@ -11347,7 +11349,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ConvictionVoting",
                         "VotingFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             76u8, 63u8, 153u8, 193u8, 39u8, 137u8, 186u8, 29u8, 202u8, 56u8, 169u8,
                             56u8, 103u8, 138u8, 192u8, 18u8, 179u8, 114u8, 56u8, 121u8, 197u8,
@@ -11363,8 +11365,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::voting_for::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::voting_for::Param0>,
-                        ::subxt::storage::address::StorageKey<types::voting_for::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::voting_for::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::voting_for::Param1>,
                     ),
                     types::voting_for::VotingFor,
                     ::subxt::storage::address::Yes,
@@ -11375,8 +11377,8 @@ pub mod api {
                         "ConvictionVoting",
                         "VotingFor",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             76u8, 63u8, 153u8, 193u8, 39u8, 137u8, 186u8, 29u8, 202u8, 56u8, 169u8,
@@ -11415,7 +11417,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::class_locks_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::class_locks_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::class_locks_for::Param0>,
                     types::class_locks_for::ClassLocksFor,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -11424,7 +11426,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ConvictionVoting",
                         "ClassLocksFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             74u8, 74u8, 8u8, 82u8, 215u8, 61u8, 13u8, 9u8, 44u8, 222u8, 33u8,
                             245u8, 195u8, 124u8, 6u8, 174u8, 65u8, 245u8, 71u8, 42u8, 47u8, 46u8,
@@ -12360,7 +12362,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::referendum_info_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::referendum_info_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::referendum_info_for::Param0>,
                     types::referendum_info_for::ReferendumInfoFor,
                     ::subxt::storage::address::Yes,
                     (),
@@ -12369,7 +12371,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
                         "ReferendumInfoFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             244u8, 215u8, 156u8, 181u8, 105u8, 12u8, 138u8, 249u8, 173u8, 158u8,
                             171u8, 67u8, 107u8, 228u8, 45u8, 180u8, 252u8, 244u8, 186u8, 78u8,
@@ -12410,7 +12412,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::track_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::track_queue::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::track_queue::Param0>,
                     types::track_queue::TrackQueue,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -12419,7 +12421,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
                         "TrackQueue",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             125u8, 59u8, 111u8, 68u8, 27u8, 236u8, 82u8, 55u8, 83u8, 159u8, 105u8,
                             20u8, 241u8, 118u8, 58u8, 141u8, 103u8, 60u8, 246u8, 49u8, 121u8,
@@ -12454,7 +12456,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::deciding_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::deciding_count::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::deciding_count::Param0>,
                     types::deciding_count::DecidingCount,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -12463,7 +12465,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
                         "DecidingCount",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             203u8, 89u8, 158u8, 179u8, 194u8, 82u8, 248u8, 162u8, 93u8, 140u8,
                             146u8, 51u8, 110u8, 232u8, 51u8, 1u8, 128u8, 212u8, 199u8, 14u8, 182u8,
@@ -12509,7 +12511,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::metadata_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::metadata_of::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::metadata_of::Param0>,
                     types::metadata_of::MetadataOf,
                     ::subxt::storage::address::Yes,
                     (),
@@ -12518,7 +12520,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
                         "MetadataOf",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             159u8, 250u8, 56u8, 189u8, 247u8, 165u8, 206u8, 166u8, 91u8, 139u8,
                             124u8, 164u8, 25u8, 246u8, 199u8, 36u8, 159u8, 56u8, 227u8, 136u8, 4u8,
@@ -13053,7 +13055,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::member_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::member_count::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::member_count::Param0>,
                     types::member_count::MemberCount,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -13062,7 +13064,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "MemberCount",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             0u8, 141u8, 66u8, 91u8, 155u8, 74u8, 17u8, 191u8, 143u8, 41u8, 231u8,
                             56u8, 123u8, 219u8, 145u8, 27u8, 197u8, 62u8, 118u8, 237u8, 30u8, 7u8,
@@ -13097,7 +13099,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::members::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::members::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::members::Param0>,
                     types::members::Members,
                     ::subxt::storage::address::Yes,
                     (),
@@ -13106,7 +13108,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "Members",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             101u8, 183u8, 36u8, 241u8, 67u8, 8u8, 252u8, 116u8, 110u8, 153u8,
                             117u8, 210u8, 128u8, 80u8, 130u8, 163u8, 38u8, 76u8, 230u8, 107u8,
@@ -13141,7 +13143,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::id_to_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::id_to_index::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::id_to_index::Param0>,
                     types::id_to_index::IdToIndex,
                     (),
                     (),
@@ -13150,7 +13152,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "IdToIndex",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             121u8, 225u8, 69u8, 131u8, 194u8, 3u8, 82u8, 27u8, 129u8, 152u8, 157u8,
                             45u8, 39u8, 47u8, 166u8, 28u8, 42u8, 92u8, 217u8, 189u8, 160u8, 102u8,
@@ -13165,8 +13167,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::id_to_index::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::id_to_index::Param0>,
-                        ::subxt::storage::address::StorageKey<types::id_to_index::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::id_to_index::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::id_to_index::Param1>,
                     ),
                     types::id_to_index::IdToIndex,
                     ::subxt::storage::address::Yes,
@@ -13177,8 +13179,8 @@ pub mod api {
                         "FellowshipCollective",
                         "IdToIndex",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             121u8, 225u8, 69u8, 131u8, 194u8, 3u8, 82u8, 27u8, 129u8, 152u8, 157u8,
@@ -13216,7 +13218,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::index_to_id::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::index_to_id::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::index_to_id::Param0>,
                     types::index_to_id::IndexToId,
                     (),
                     (),
@@ -13225,7 +13227,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "IndexToId",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             110u8, 48u8, 214u8, 224u8, 56u8, 195u8, 186u8, 24u8, 111u8, 37u8, 15u8,
                             153u8, 245u8, 101u8, 229u8, 149u8, 216u8, 185u8, 7u8, 242u8, 196u8,
@@ -13242,8 +13244,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::index_to_id::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::index_to_id::Param0>,
-                        ::subxt::storage::address::StorageKey<types::index_to_id::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::index_to_id::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::index_to_id::Param1>,
                     ),
                     types::index_to_id::IndexToId,
                     ::subxt::storage::address::Yes,
@@ -13254,8 +13256,8 @@ pub mod api {
                         "FellowshipCollective",
                         "IndexToId",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             110u8, 48u8, 214u8, 224u8, 56u8, 195u8, 186u8, 24u8, 111u8, 37u8, 15u8,
@@ -13292,7 +13294,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::voting::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::voting::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::voting::Param0>,
                     types::voting::Voting,
                     (),
                     (),
@@ -13301,7 +13303,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "Voting",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             180u8, 146u8, 236u8, 178u8, 30u8, 50u8, 161u8, 50u8, 140u8, 110u8,
                             220u8, 1u8, 109u8, 209u8, 17u8, 94u8, 234u8, 223u8, 222u8, 177u8,
@@ -13317,8 +13319,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::voting::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::voting::Param0>,
-                        ::subxt::storage::address::StorageKey<types::voting::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::voting::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::voting::Param1>,
                     ),
                     types::voting::Voting,
                     ::subxt::storage::address::Yes,
@@ -13329,8 +13331,8 @@ pub mod api {
                         "FellowshipCollective",
                         "Voting",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             180u8, 146u8, 236u8, 178u8, 30u8, 50u8, 161u8, 50u8, 140u8, 110u8,
@@ -13364,7 +13366,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::voting_cleanup::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::voting_cleanup::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::voting_cleanup::Param0>,
                     types::voting_cleanup::VotingCleanup,
                     ::subxt::storage::address::Yes,
                     (),
@@ -13373,7 +13375,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
                         "VotingCleanup",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             223u8, 130u8, 79u8, 104u8, 94u8, 221u8, 222u8, 72u8, 187u8, 95u8,
                             231u8, 59u8, 28u8, 119u8, 191u8, 63u8, 40u8, 186u8, 58u8, 254u8, 14u8,
@@ -14261,7 +14263,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::referendum_info_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::referendum_info_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::referendum_info_for::Param0>,
                     types::referendum_info_for::ReferendumInfoFor,
                     ::subxt::storage::address::Yes,
                     (),
@@ -14270,7 +14272,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
                         "ReferendumInfoFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             64u8, 146u8, 31u8, 207u8, 209u8, 86u8, 44u8, 53u8, 78u8, 240u8, 222u8,
                             131u8, 225u8, 83u8, 114u8, 205u8, 225u8, 20u8, 128u8, 183u8, 19u8,
@@ -14312,7 +14314,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::track_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::track_queue::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::track_queue::Param0>,
                     types::track_queue::TrackQueue,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -14321,7 +14323,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
                         "TrackQueue",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             187u8, 113u8, 225u8, 99u8, 159u8, 207u8, 182u8, 41u8, 116u8, 136u8,
                             119u8, 196u8, 152u8, 50u8, 192u8, 22u8, 171u8, 182u8, 237u8, 228u8,
@@ -14357,7 +14359,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::deciding_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::deciding_count::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::deciding_count::Param0>,
                     types::deciding_count::DecidingCount,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -14366,7 +14368,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
                         "DecidingCount",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             203u8, 89u8, 158u8, 179u8, 194u8, 82u8, 248u8, 162u8, 93u8, 140u8,
                             146u8, 51u8, 110u8, 232u8, 51u8, 1u8, 128u8, 212u8, 199u8, 14u8, 182u8,
@@ -14412,7 +14414,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::metadata_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::metadata_of::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::metadata_of::Param0>,
                     types::metadata_of::MetadataOf,
                     ::subxt::storage::address::Yes,
                     (),
@@ -14421,7 +14423,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
                         "MetadataOf",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             159u8, 250u8, 56u8, 189u8, 247u8, 165u8, 206u8, 166u8, 91u8, 139u8,
                             124u8, 164u8, 25u8, 246u8, 199u8, 36u8, 159u8, 56u8, 227u8, 136u8, 4u8,
@@ -14824,7 +14826,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::whitelisted_call::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::whitelisted_call::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::whitelisted_call::Param0>,
                     types::whitelisted_call::WhitelistedCall,
                     ::subxt::storage::address::Yes,
                     (),
@@ -14833,7 +14835,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Whitelist",
                         "WhitelistedCall",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             82u8, 208u8, 214u8, 72u8, 225u8, 35u8, 51u8, 212u8, 25u8, 138u8, 30u8,
                             87u8, 54u8, 232u8, 72u8, 132u8, 4u8, 9u8, 28u8, 143u8, 251u8, 106u8,
@@ -15200,7 +15202,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::claims::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::claims::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::claims::Param0>,
                     types::claims::Claims,
                     ::subxt::storage::address::Yes,
                     (),
@@ -15209,7 +15211,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
                         "Claims",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             148u8, 115u8, 159u8, 169u8, 36u8, 116u8, 15u8, 108u8, 57u8, 195u8,
                             226u8, 180u8, 187u8, 112u8, 114u8, 63u8, 3u8, 205u8, 113u8, 141u8,
@@ -15272,7 +15274,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::vesting::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::vesting::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::vesting::Param0>,
                     types::vesting::Vesting,
                     ::subxt::storage::address::Yes,
                     (),
@@ -15281,7 +15283,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
                         "Vesting",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             206u8, 106u8, 195u8, 101u8, 55u8, 137u8, 50u8, 105u8, 137u8, 87u8,
                             230u8, 34u8, 255u8, 94u8, 210u8, 186u8, 179u8, 72u8, 24u8, 194u8,
@@ -15316,7 +15318,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::signing::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::signing::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::signing::Param0>,
                     types::signing::Signing,
                     ::subxt::storage::address::Yes,
                     (),
@@ -15325,7 +15327,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
                         "Signing",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             111u8, 90u8, 178u8, 121u8, 241u8, 28u8, 169u8, 231u8, 61u8, 189u8,
                             113u8, 207u8, 26u8, 153u8, 189u8, 15u8, 192u8, 25u8, 22u8, 22u8, 124u8,
@@ -15360,7 +15362,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::preclaims::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::preclaims::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::preclaims::Param0>,
                     types::preclaims::Preclaims,
                     ::subxt::storage::address::Yes,
                     (),
@@ -15369,7 +15371,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
                         "Preclaims",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             197u8, 114u8, 147u8, 235u8, 203u8, 255u8, 94u8, 113u8, 151u8, 119u8,
                             224u8, 147u8, 48u8, 246u8, 124u8, 38u8, 190u8, 237u8, 226u8, 65u8,
@@ -17270,7 +17272,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::identity_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::identity_of::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::identity_of::Param0>,
                     types::identity_of::IdentityOf,
                     ::subxt::storage::address::Yes,
                     (),
@@ -17279,7 +17281,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "IdentityOf",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             0u8, 73u8, 213u8, 52u8, 49u8, 235u8, 238u8, 43u8, 119u8, 12u8, 35u8,
                             162u8, 230u8, 24u8, 246u8, 200u8, 44u8, 254u8, 13u8, 84u8, 10u8, 27u8,
@@ -17315,7 +17317,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::super_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::super_of::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::super_of::Param0>,
                     types::super_of::SuperOf,
                     ::subxt::storage::address::Yes,
                     (),
@@ -17324,7 +17326,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "SuperOf",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             84u8, 72u8, 64u8, 14u8, 56u8, 9u8, 143u8, 100u8, 141u8, 163u8, 36u8,
                             55u8, 38u8, 254u8, 164u8, 17u8, 3u8, 110u8, 88u8, 175u8, 161u8, 65u8,
@@ -17367,7 +17369,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::subs_of::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::subs_of::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::subs_of::Param0>,
                     types::subs_of::SubsOf,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -17376,7 +17378,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "SubsOf",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             164u8, 140u8, 52u8, 123u8, 220u8, 118u8, 147u8, 3u8, 67u8, 22u8, 191u8,
                             18u8, 186u8, 21u8, 154u8, 8u8, 205u8, 224u8, 163u8, 173u8, 174u8,
@@ -17436,7 +17438,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::username_authorities::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::username_authorities::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::username_authorities::Param0,
+                    >,
                     types::username_authorities::UsernameAuthorities,
                     ::subxt::storage::address::Yes,
                     (),
@@ -17445,7 +17449,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "UsernameAuthorities",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             89u8, 102u8, 60u8, 184u8, 127u8, 244u8, 3u8, 61u8, 209u8, 78u8, 178u8,
                             44u8, 159u8, 27u8, 7u8, 0u8, 22u8, 116u8, 42u8, 240u8, 130u8, 93u8,
@@ -17488,7 +17492,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::account_of_username::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::account_of_username::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::account_of_username::Param0>,
                     types::account_of_username::AccountOfUsername,
                     ::subxt::storage::address::Yes,
                     (),
@@ -17497,7 +17501,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "AccountOfUsername",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             131u8, 96u8, 207u8, 217u8, 223u8, 54u8, 51u8, 156u8, 8u8, 238u8, 134u8,
                             57u8, 42u8, 110u8, 180u8, 107u8, 30u8, 109u8, 162u8, 110u8, 178u8,
@@ -17543,7 +17547,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pending_usernames::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::pending_usernames::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::pending_usernames::Param0>,
                     types::pending_usernames::PendingUsernames,
                     ::subxt::storage::address::Yes,
                     (),
@@ -17552,7 +17556,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
                         "PendingUsernames",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             237u8, 213u8, 92u8, 249u8, 11u8, 169u8, 104u8, 7u8, 201u8, 133u8,
                             164u8, 64u8, 191u8, 172u8, 169u8, 229u8, 206u8, 105u8, 190u8, 113u8,
@@ -19126,7 +19130,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::members::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::members::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::members::Param0>,
                     types::members::Members,
                     ::subxt::storage::address::Yes,
                     (),
@@ -19135,7 +19139,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "Members",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             207u8, 227u8, 130u8, 247u8, 29u8, 198u8, 129u8, 83u8, 3u8, 6u8, 19u8,
                             37u8, 163u8, 227u8, 0u8, 94u8, 8u8, 166u8, 111u8, 70u8, 101u8, 65u8,
@@ -19169,7 +19173,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::payouts::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::payouts::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::payouts::Param0>,
                     types::payouts::Payouts,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -19178,7 +19182,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "Payouts",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             251u8, 249u8, 170u8, 219u8, 131u8, 113u8, 178u8, 165u8, 173u8, 36u8,
                             175u8, 199u8, 57u8, 188u8, 59u8, 226u8, 4u8, 45u8, 36u8, 173u8, 113u8,
@@ -19237,7 +19241,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::member_by_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::member_by_index::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::member_by_index::Param0>,
                     types::member_by_index::MemberByIndex,
                     ::subxt::storage::address::Yes,
                     (),
@@ -19246,7 +19250,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "MemberByIndex",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             13u8, 233u8, 212u8, 149u8, 220u8, 158u8, 17u8, 27u8, 201u8, 61u8,
                             202u8, 248u8, 192u8, 37u8, 199u8, 73u8, 32u8, 140u8, 204u8, 206u8,
@@ -19282,7 +19286,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::suspended_members::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::suspended_members::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::suspended_members::Param0>,
                     types::suspended_members::SuspendedMembers,
                     ::subxt::storage::address::Yes,
                     (),
@@ -19291,7 +19295,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "SuspendedMembers",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             156u8, 11u8, 75u8, 79u8, 74u8, 79u8, 98u8, 89u8, 63u8, 83u8, 84u8,
                             249u8, 177u8, 227u8, 113u8, 21u8, 26u8, 165u8, 129u8, 5u8, 129u8,
@@ -19367,7 +19371,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::candidates::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::candidates::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::candidates::Param0>,
                     types::candidates::Candidates,
                     ::subxt::storage::address::Yes,
                     (),
@@ -19376,7 +19380,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "Candidates",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             52u8, 250u8, 201u8, 163u8, 0u8, 5u8, 156u8, 84u8, 96u8, 130u8, 228u8,
                             205u8, 34u8, 75u8, 121u8, 209u8, 82u8, 15u8, 247u8, 21u8, 54u8, 177u8,
@@ -19433,7 +19437,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::votes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::votes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::votes::Param0>,
                     types::votes::Votes,
                     (),
                     (),
@@ -19442,7 +19446,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "Votes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             34u8, 201u8, 151u8, 130u8, 149u8, 159u8, 32u8, 201u8, 127u8, 178u8,
                             77u8, 214u8, 73u8, 158u8, 11u8, 247u8, 188u8, 156u8, 146u8, 59u8,
@@ -19458,8 +19462,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::votes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::votes::Param0>,
-                        ::subxt::storage::address::StorageKey<types::votes::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::votes::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::votes::Param1>,
                     ),
                     types::votes::Votes,
                     ::subxt::storage::address::Yes,
@@ -19470,8 +19474,8 @@ pub mod api {
                         "Society",
                         "Votes",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             34u8, 201u8, 151u8, 130u8, 149u8, 159u8, 32u8, 201u8, 127u8, 178u8,
@@ -19508,7 +19512,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::vote_clear_cursor::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::vote_clear_cursor::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::vote_clear_cursor::Param0>,
                     types::vote_clear_cursor::VoteClearCursor,
                     ::subxt::storage::address::Yes,
                     (),
@@ -19517,7 +19521,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "VoteClearCursor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             157u8, 200u8, 216u8, 228u8, 235u8, 144u8, 13u8, 111u8, 252u8, 213u8,
                             209u8, 114u8, 157u8, 159u8, 47u8, 125u8, 45u8, 152u8, 27u8, 145u8,
@@ -19618,7 +19622,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::defender_votes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::defender_votes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::defender_votes::Param0>,
                     types::defender_votes::DefenderVotes,
                     (),
                     (),
@@ -19627,7 +19631,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
                         "DefenderVotes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             208u8, 137u8, 138u8, 215u8, 215u8, 207u8, 236u8, 140u8, 175u8, 50u8,
                             110u8, 228u8, 48u8, 174u8, 16u8, 59u8, 72u8, 108u8, 7u8, 183u8, 119u8,
@@ -19643,8 +19647,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::defender_votes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::defender_votes::Param0>,
-                        ::subxt::storage::address::StorageKey<types::defender_votes::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::defender_votes::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::defender_votes::Param1>,
                     ),
                     types::defender_votes::DefenderVotes,
                     ::subxt::storage::address::Yes,
@@ -19655,8 +19659,8 @@ pub mod api {
                         "Society",
                         "DefenderVotes",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             208u8, 137u8, 138u8, 215u8, 215u8, 207u8, 236u8, 140u8, 175u8, 50u8,
@@ -20391,7 +20395,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::recoverable::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::recoverable::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::recoverable::Param0>,
                     types::recoverable::Recoverable,
                     ::subxt::storage::address::Yes,
                     (),
@@ -20400,7 +20404,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
                         "Recoverable",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             112u8, 7u8, 56u8, 46u8, 138u8, 197u8, 63u8, 234u8, 140u8, 123u8, 145u8,
                             106u8, 189u8, 190u8, 247u8, 61u8, 250u8, 67u8, 107u8, 42u8, 170u8,
@@ -20441,7 +20445,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::active_recoveries::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::active_recoveries::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::active_recoveries::Param0>,
                     types::active_recoveries::ActiveRecoveries,
                     (),
                     (),
@@ -20450,7 +20454,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
                         "ActiveRecoveries",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             104u8, 252u8, 28u8, 142u8, 48u8, 26u8, 91u8, 201u8, 184u8, 163u8,
                             180u8, 197u8, 189u8, 71u8, 144u8, 88u8, 225u8, 13u8, 183u8, 84u8,
@@ -20469,8 +20473,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::active_recoveries::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::active_recoveries::Param0>,
-                        ::subxt::storage::address::StorageKey<types::active_recoveries::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::active_recoveries::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::active_recoveries::Param1,
+                        >,
                     ),
                     types::active_recoveries::ActiveRecoveries,
                     ::subxt::storage::address::Yes,
@@ -20481,8 +20489,8 @@ pub mod api {
                         "Recovery",
                         "ActiveRecoveries",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             104u8, 252u8, 28u8, 142u8, 48u8, 26u8, 91u8, 201u8, 184u8, 163u8,
@@ -20522,7 +20530,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::proxy::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::proxy::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::proxy::Param0>,
                     types::proxy::Proxy,
                     ::subxt::storage::address::Yes,
                     (),
@@ -20531,7 +20539,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
                         "Proxy",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             161u8, 242u8, 17u8, 183u8, 161u8, 47u8, 87u8, 110u8, 201u8, 177u8,
                             199u8, 157u8, 30u8, 131u8, 49u8, 89u8, 182u8, 86u8, 152u8, 19u8, 199u8,
@@ -20991,7 +20999,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::vesting::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::vesting::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::vesting::Param0>,
                     types::vesting::Vesting,
                     ::subxt::storage::address::Yes,
                     (),
@@ -21000,7 +21008,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Vesting",
                         "Vesting",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             95u8, 168u8, 217u8, 248u8, 149u8, 86u8, 195u8, 93u8, 73u8, 206u8,
                             105u8, 165u8, 33u8, 173u8, 232u8, 81u8, 147u8, 254u8, 50u8, 228u8,
@@ -21620,7 +21628,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::agenda::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::agenda::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::agenda::Param0>,
                     types::agenda::Agenda,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -21629,7 +21637,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
                         "Agenda",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             10u8, 123u8, 252u8, 106u8, 154u8, 9u8, 245u8, 203u8, 188u8, 254u8,
                             20u8, 41u8, 6u8, 226u8, 78u8, 188u8, 0u8, 173u8, 143u8, 44u8, 117u8,
@@ -21669,7 +21677,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::lookup::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::lookup::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::lookup::Param0>,
                     types::lookup::Lookup,
                     ::subxt::storage::address::Yes,
                     (),
@@ -21678,7 +21686,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
                         "Lookup",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             24u8, 87u8, 96u8, 127u8, 136u8, 205u8, 238u8, 174u8, 71u8, 110u8, 65u8,
                             98u8, 228u8, 167u8, 99u8, 71u8, 171u8, 186u8, 12u8, 218u8, 137u8, 70u8,
@@ -22417,7 +22425,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::proxies::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::proxies::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::proxies::Param0>,
                     types::proxies::Proxies,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -22426,7 +22434,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Proxy",
                         "Proxies",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             92u8, 131u8, 10u8, 14u8, 241u8, 148u8, 230u8, 81u8, 54u8, 152u8, 147u8,
                             180u8, 85u8, 28u8, 87u8, 215u8, 110u8, 13u8, 158u8, 207u8, 77u8, 102u8,
@@ -22461,7 +22469,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::announcements::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::announcements::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::announcements::Param0>,
                     types::announcements::Announcements,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -22470,7 +22478,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Proxy",
                         "Announcements",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             129u8, 228u8, 198u8, 210u8, 90u8, 69u8, 151u8, 198u8, 206u8, 174u8,
                             148u8, 58u8, 134u8, 14u8, 53u8, 56u8, 234u8, 71u8, 84u8, 247u8, 246u8,
@@ -22978,7 +22986,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::multisigs::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::multisigs::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::multisigs::Param0>,
                     types::multisigs::Multisigs,
                     (),
                     (),
@@ -22987,7 +22995,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Multisig",
                         "Multisigs",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             154u8, 109u8, 45u8, 18u8, 155u8, 151u8, 81u8, 28u8, 86u8, 127u8, 189u8,
                             151u8, 49u8, 61u8, 12u8, 149u8, 84u8, 61u8, 110u8, 197u8, 200u8, 140u8,
@@ -23002,8 +23010,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::multisigs::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::multisigs::Param0>,
-                        ::subxt::storage::address::StorageKey<types::multisigs::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::multisigs::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::multisigs::Param1>,
                     ),
                     types::multisigs::Multisigs,
                     ::subxt::storage::address::Yes,
@@ -23014,8 +23022,8 @@ pub mod api {
                         "Multisig",
                         "Multisigs",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             154u8, 109u8, 45u8, 18u8, 155u8, 151u8, 81u8, 28u8, 86u8, 127u8, 189u8,
@@ -23422,7 +23430,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::status_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::status_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::status_for::Param0>,
                     types::status_for::StatusFor,
                     ::subxt::storage::address::Yes,
                     (),
@@ -23431,7 +23439,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
                         "StatusFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             187u8, 100u8, 54u8, 112u8, 96u8, 129u8, 36u8, 149u8, 127u8, 226u8,
                             126u8, 171u8, 72u8, 189u8, 59u8, 126u8, 204u8, 125u8, 67u8, 204u8,
@@ -23466,7 +23474,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::request_status_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::request_status_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::request_status_for::Param0>,
                     types::request_status_for::RequestStatusFor,
                     ::subxt::storage::address::Yes,
                     (),
@@ -23475,7 +23483,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
                         "RequestStatusFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             72u8, 59u8, 254u8, 211u8, 96u8, 223u8, 10u8, 64u8, 6u8, 139u8, 213u8,
                             85u8, 14u8, 29u8, 166u8, 37u8, 140u8, 124u8, 186u8, 156u8, 172u8,
@@ -23508,7 +23516,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::preimage_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::preimage_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::preimage_for::Param0>,
                     types::preimage_for::PreimageFor,
                     (),
                     (),
@@ -23517,7 +23525,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
                         "PreimageFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             106u8, 5u8, 17u8, 46u8, 6u8, 184u8, 177u8, 113u8, 169u8, 34u8, 119u8,
                             141u8, 117u8, 40u8, 30u8, 94u8, 187u8, 35u8, 206u8, 216u8, 143u8,
@@ -23532,8 +23540,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::preimage_for::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::preimage_for::Param0>,
-                        ::subxt::storage::address::StorageKey<types::preimage_for::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::preimage_for::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::preimage_for::Param1>,
                     ),
                     types::preimage_for::PreimageFor,
                     ::subxt::storage::address::Yes,
@@ -23544,8 +23552,8 @@ pub mod api {
                         "Preimage",
                         "PreimageFor",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             106u8, 5u8, 17u8, 46u8, 6u8, 184u8, 177u8, 113u8, 169u8, 34u8, 119u8,
@@ -23830,7 +23838,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::conversion_rate_to_native::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::conversion_rate_to_native::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::conversion_rate_to_native::Param0,
+                    >,
                     types::conversion_rate_to_native::ConversionRateToNative,
                     ::subxt::storage::address::Yes,
                     (),
@@ -23839,7 +23849,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "AssetRate",
                         "ConversionRateToNative",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             230u8, 127u8, 110u8, 126u8, 79u8, 168u8, 134u8, 97u8, 195u8, 105u8,
                             16u8, 57u8, 197u8, 104u8, 87u8, 144u8, 83u8, 188u8, 85u8, 253u8, 230u8,
@@ -24593,7 +24603,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::bounties::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::bounties::Param0>,
                     types::bounties::Bounties,
                     ::subxt::storage::address::Yes,
                     (),
@@ -24602,7 +24612,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Bounties",
                         "Bounties",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             183u8, 96u8, 172u8, 86u8, 167u8, 129u8, 51u8, 179u8, 238u8, 155u8,
                             196u8, 77u8, 158u8, 102u8, 188u8, 19u8, 79u8, 178u8, 145u8, 189u8,
@@ -24637,7 +24647,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::bounty_descriptions::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::bounty_descriptions::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::bounty_descriptions::Param0>,
                     types::bounty_descriptions::BountyDescriptions,
                     ::subxt::storage::address::Yes,
                     (),
@@ -24646,7 +24656,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Bounties",
                         "BountyDescriptions",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             71u8, 40u8, 133u8, 84u8, 55u8, 207u8, 169u8, 189u8, 160u8, 51u8, 202u8,
                             144u8, 15u8, 226u8, 97u8, 114u8, 54u8, 247u8, 53u8, 26u8, 36u8, 54u8,
@@ -25380,7 +25390,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::parent_child_bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::parent_child_bounties::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::parent_child_bounties::Param0,
+                    >,
                     types::parent_child_bounties::ParentChildBounties,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -25389,7 +25401,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
                         "ParentChildBounties",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             52u8, 179u8, 242u8, 212u8, 91u8, 185u8, 176u8, 52u8, 100u8, 200u8, 1u8,
                             41u8, 184u8, 234u8, 234u8, 8u8, 123u8, 252u8, 131u8, 55u8, 109u8,
@@ -25424,7 +25436,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::child_bounties::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::child_bounties::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::child_bounties::Param0>,
                     types::child_bounties::ChildBounties,
                     (),
                     (),
@@ -25433,7 +25445,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
                         "ChildBounties",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             165u8, 240u8, 158u8, 204u8, 183u8, 190u8, 129u8, 65u8, 226u8, 8u8,
                             182u8, 103u8, 46u8, 162u8, 35u8, 155u8, 131u8, 45u8, 163u8, 64u8,
@@ -25449,8 +25461,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::child_bounties::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::child_bounties::Param0>,
-                        ::subxt::storage::address::StorageKey<types::child_bounties::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::child_bounties::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::child_bounties::Param1>,
                     ),
                     types::child_bounties::ChildBounties,
                     ::subxt::storage::address::Yes,
@@ -25461,8 +25473,8 @@ pub mod api {
                         "ChildBounties",
                         "ChildBounties",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             165u8, 240u8, 158u8, 204u8, 183u8, 190u8, 129u8, 65u8, 226u8, 8u8,
@@ -25498,7 +25510,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::child_bounty_descriptions::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::child_bounty_descriptions::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::child_bounty_descriptions::Param0,
+                    >,
                     types::child_bounty_descriptions::ChildBountyDescriptions,
                     ::subxt::storage::address::Yes,
                     (),
@@ -25507,7 +25521,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
                         "ChildBountyDescriptions",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             192u8, 0u8, 220u8, 156u8, 109u8, 65u8, 113u8, 102u8, 119u8, 0u8, 109u8,
                             141u8, 211u8, 128u8, 237u8, 61u8, 28u8, 56u8, 206u8, 93u8, 183u8, 74u8,
@@ -25541,7 +25555,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::children_curator_fees::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::children_curator_fees::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::children_curator_fees::Param0,
+                    >,
                     types::children_curator_fees::ChildrenCuratorFees,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -25550,7 +25566,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
                         "ChildrenCuratorFees",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             32u8, 16u8, 190u8, 193u8, 6u8, 80u8, 163u8, 16u8, 85u8, 111u8, 39u8,
                             141u8, 209u8, 70u8, 213u8, 167u8, 22u8, 12u8, 93u8, 17u8, 104u8, 94u8,
@@ -26180,7 +26196,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::queues::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::queues::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::queues::Param0>,
                     types::queues::Queues,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -26189,7 +26205,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Nis",
                         "Queues",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             144u8, 181u8, 173u8, 134u8, 6u8, 165u8, 174u8, 91u8, 75u8, 241u8,
                             142u8, 192u8, 246u8, 71u8, 132u8, 146u8, 181u8, 158u8, 125u8, 34u8,
@@ -26246,7 +26262,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::receipts::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::receipts::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::receipts::Param0>,
                     types::receipts::Receipts,
                     ::subxt::storage::address::Yes,
                     (),
@@ -26255,7 +26271,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Nis",
                         "Receipts",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             123u8, 179u8, 0u8, 14u8, 5u8, 132u8, 165u8, 192u8, 163u8, 22u8, 174u8,
                             22u8, 252u8, 44u8, 167u8, 22u8, 116u8, 170u8, 186u8, 118u8, 131u8, 5u8,
@@ -27437,7 +27453,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::account::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::account::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -27446,7 +27462,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
                         "Account",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             213u8, 38u8, 200u8, 69u8, 218u8, 0u8, 112u8, 181u8, 160u8, 23u8, 96u8,
                             90u8, 3u8, 88u8, 126u8, 22u8, 103u8, 74u8, 64u8, 69u8, 29u8, 247u8,
@@ -27482,7 +27498,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::locks::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::locks::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::locks::Param0>,
                     types::locks::Locks,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -27491,7 +27507,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
                         "Locks",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             10u8, 223u8, 55u8, 0u8, 249u8, 69u8, 168u8, 41u8, 75u8, 35u8, 120u8,
                             167u8, 18u8, 132u8, 9u8, 20u8, 91u8, 51u8, 27u8, 69u8, 136u8, 187u8,
@@ -27525,7 +27541,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::reserves::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::reserves::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::reserves::Param0>,
                     types::reserves::Reserves,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -27534,7 +27550,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
                         "Reserves",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             112u8, 10u8, 241u8, 77u8, 64u8, 187u8, 106u8, 159u8, 13u8, 153u8,
                             140u8, 178u8, 182u8, 50u8, 1u8, 55u8, 149u8, 92u8, 196u8, 229u8, 170u8,
@@ -27569,7 +27585,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::holds::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::holds::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::holds::Param0>,
                     types::holds::Holds,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -27578,7 +27594,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
                         "Holds",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             181u8, 39u8, 29u8, 45u8, 45u8, 198u8, 129u8, 210u8, 189u8, 183u8,
                             121u8, 125u8, 57u8, 90u8, 95u8, 107u8, 51u8, 13u8, 22u8, 105u8, 191u8,
@@ -27613,7 +27629,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::freezes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::freezes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::freezes::Param0>,
                     types::freezes::Freezes,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -27622,7 +27638,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
                         "Freezes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             69u8, 49u8, 165u8, 76u8, 135u8, 142u8, 179u8, 118u8, 50u8, 109u8, 53u8,
                             112u8, 110u8, 94u8, 30u8, 93u8, 173u8, 38u8, 27u8, 142u8, 19u8, 5u8,
@@ -29969,7 +29985,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::availability_bitfields::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::availability_bitfields::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::availability_bitfields::Param0,
+                    >,
                     types::availability_bitfields::AvailabilityBitfields,
                     ::subxt::storage::address::Yes,
                     (),
@@ -29978,7 +29996,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
                         "AvailabilityBitfields",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             163u8, 169u8, 217u8, 160u8, 147u8, 165u8, 186u8, 21u8, 171u8, 177u8,
                             74u8, 69u8, 55u8, 205u8, 46u8, 13u8, 253u8, 83u8, 55u8, 190u8, 22u8,
@@ -30012,7 +30030,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pending_availability::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::pending_availability::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::pending_availability::Param0,
+                    >,
                     types::pending_availability::PendingAvailability,
                     ::subxt::storage::address::Yes,
                     (),
@@ -30021,7 +30041,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
                         "PendingAvailability",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             164u8, 175u8, 34u8, 182u8, 190u8, 147u8, 42u8, 185u8, 162u8, 130u8,
                             33u8, 159u8, 234u8, 242u8, 90u8, 119u8, 2u8, 195u8, 48u8, 150u8, 135u8,
@@ -30055,7 +30075,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pending_availability_commitments::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::pending_availability_commitments::Param0,
                     >,
                     types::pending_availability_commitments::PendingAvailabilityCommitments,
@@ -30066,7 +30086,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             196u8, 210u8, 210u8, 16u8, 246u8, 105u8, 121u8, 178u8, 5u8, 48u8, 40u8,
                             183u8, 63u8, 147u8, 48u8, 74u8, 20u8, 83u8, 76u8, 84u8, 41u8, 30u8,
@@ -31092,7 +31112,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pvf_active_vote_map::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::pvf_active_vote_map::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::pvf_active_vote_map::Param0>,
                     types::pvf_active_vote_map::PvfActiveVoteMap,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31101,7 +31121,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "PvfActiveVoteMap",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             72u8, 55u8, 139u8, 104u8, 161u8, 63u8, 114u8, 153u8, 16u8, 221u8, 60u8,
                             88u8, 52u8, 207u8, 123u8, 193u8, 11u8, 30u8, 19u8, 39u8, 231u8, 39u8,
@@ -31182,7 +31202,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::para_lifecycles::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::para_lifecycles::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::para_lifecycles::Param0>,
                     types::para_lifecycles::ParaLifecycles,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31191,7 +31211,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "ParaLifecycles",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             2u8, 203u8, 32u8, 194u8, 76u8, 227u8, 250u8, 9u8, 168u8, 201u8, 171u8,
                             180u8, 18u8, 169u8, 206u8, 183u8, 48u8, 189u8, 204u8, 192u8, 237u8,
@@ -31226,7 +31246,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::heads::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::heads::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::heads::Param0>,
                     types::heads::Heads,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31235,7 +31255,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "Heads",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             222u8, 116u8, 180u8, 190u8, 172u8, 192u8, 174u8, 132u8, 225u8, 180u8,
                             119u8, 90u8, 5u8, 39u8, 92u8, 230u8, 116u8, 202u8, 92u8, 99u8, 135u8,
@@ -31269,7 +31289,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::most_recent_context::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::most_recent_context::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::most_recent_context::Param0>,
                     types::most_recent_context::MostRecentContext,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31278,7 +31298,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "MostRecentContext",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             196u8, 150u8, 125u8, 121u8, 196u8, 182u8, 2u8, 5u8, 244u8, 170u8, 75u8,
                             57u8, 162u8, 8u8, 104u8, 94u8, 114u8, 32u8, 192u8, 236u8, 120u8, 91u8,
@@ -31317,7 +31337,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::current_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::current_code_hash::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::current_code_hash::Param0>,
                     types::current_code_hash::CurrentCodeHash,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31326,7 +31346,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "CurrentCodeHash",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             251u8, 100u8, 30u8, 46u8, 191u8, 60u8, 45u8, 221u8, 218u8, 20u8, 154u8,
                             233u8, 211u8, 198u8, 151u8, 195u8, 99u8, 210u8, 126u8, 165u8, 240u8,
@@ -31367,7 +31387,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::past_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::past_code_hash::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::past_code_hash::Param0>,
                     types::past_code_hash::PastCodeHash,
                     (),
                     (),
@@ -31376,7 +31396,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "PastCodeHash",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             73u8, 209u8, 188u8, 36u8, 127u8, 42u8, 171u8, 136u8, 29u8, 126u8,
                             220u8, 209u8, 230u8, 22u8, 12u8, 63u8, 8u8, 102u8, 45u8, 158u8, 178u8,
@@ -31394,8 +31414,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::past_code_hash::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::past_code_hash::Param0>,
-                        ::subxt::storage::address::StorageKey<types::past_code_hash::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::past_code_hash::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::past_code_hash::Param1>,
                     ),
                     types::past_code_hash::PastCodeHash,
                     ::subxt::storage::address::Yes,
@@ -31406,8 +31426,8 @@ pub mod api {
                         "Paras",
                         "PastCodeHash",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             73u8, 209u8, 188u8, 36u8, 127u8, 42u8, 171u8, 136u8, 29u8, 126u8,
@@ -31446,7 +31466,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::past_code_meta::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::past_code_meta::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::past_code_meta::Param0>,
                     types::past_code_meta::PastCodeMeta,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -31455,7 +31475,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "PastCodeMeta",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             233u8, 47u8, 137u8, 174u8, 98u8, 64u8, 11u8, 75u8, 93u8, 222u8, 78u8,
                             58u8, 66u8, 245u8, 151u8, 39u8, 144u8, 36u8, 84u8, 176u8, 239u8, 183u8,
@@ -31519,7 +31539,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::future_code_upgrades::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::future_code_upgrades::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::future_code_upgrades::Param0,
+                    >,
                     types::future_code_upgrades::FutureCodeUpgrades,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31528,7 +31550,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "FutureCodeUpgrades",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             163u8, 168u8, 23u8, 138u8, 198u8, 70u8, 135u8, 221u8, 167u8, 187u8,
                             15u8, 144u8, 228u8, 8u8, 138u8, 125u8, 101u8, 154u8, 11u8, 74u8, 173u8,
@@ -31566,7 +31588,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::future_code_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::future_code_hash::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::future_code_hash::Param0>,
                     types::future_code_hash::FutureCodeHash,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31575,7 +31597,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "FutureCodeHash",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             62u8, 238u8, 183u8, 12u8, 197u8, 119u8, 163u8, 239u8, 192u8, 228u8,
                             110u8, 58u8, 128u8, 223u8, 32u8, 137u8, 109u8, 127u8, 41u8, 83u8, 91u8,
@@ -31628,7 +31650,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::upgrade_go_ahead_signal::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::upgrade_go_ahead_signal::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::upgrade_go_ahead_signal::Param0,
+                    >,
                     types::upgrade_go_ahead_signal::UpgradeGoAheadSignal,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31637,7 +31661,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "UpgradeGoAheadSignal",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             41u8, 80u8, 120u8, 6u8, 98u8, 85u8, 36u8, 37u8, 170u8, 189u8, 56u8,
                             127u8, 155u8, 180u8, 112u8, 195u8, 135u8, 214u8, 235u8, 87u8, 197u8,
@@ -31689,7 +31713,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::upgrade_restriction_signal::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::upgrade_restriction_signal::Param0,
                     >,
                     types::upgrade_restriction_signal::UpgradeRestrictionSignal,
@@ -31700,7 +31724,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "UpgradeRestrictionSignal",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             158u8, 105u8, 62u8, 252u8, 149u8, 145u8, 34u8, 92u8, 119u8, 204u8,
                             46u8, 96u8, 117u8, 183u8, 134u8, 20u8, 172u8, 243u8, 145u8, 113u8,
@@ -31783,7 +31807,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::actions_queue::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::actions_queue::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::actions_queue::Param0>,
                     types::actions_queue::ActionsQueue,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -31792,7 +31816,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "ActionsQueue",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             13u8, 25u8, 129u8, 203u8, 95u8, 206u8, 254u8, 240u8, 170u8, 209u8,
                             55u8, 117u8, 70u8, 220u8, 139u8, 102u8, 9u8, 229u8, 139u8, 120u8, 67u8,
@@ -31833,7 +31857,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::upcoming_paras_genesis::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::upcoming_paras_genesis::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::upcoming_paras_genesis::Param0,
+                    >,
                     types::upcoming_paras_genesis::UpcomingParasGenesis,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31842,7 +31868,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "UpcomingParasGenesis",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             215u8, 121u8, 106u8, 13u8, 102u8, 47u8, 129u8, 221u8, 153u8, 91u8,
                             23u8, 94u8, 11u8, 39u8, 19u8, 180u8, 136u8, 136u8, 254u8, 152u8, 250u8,
@@ -31878,7 +31904,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::code_by_hash_refs::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::code_by_hash_refs::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::code_by_hash_refs::Param0>,
                     types::code_by_hash_refs::CodeByHashRefs,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -31887,7 +31913,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "CodeByHashRefs",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             47u8, 50u8, 103u8, 161u8, 130u8, 252u8, 157u8, 35u8, 174u8, 37u8,
                             102u8, 60u8, 195u8, 30u8, 164u8, 203u8, 67u8, 129u8, 107u8, 181u8,
@@ -31928,7 +31954,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::code_by_hash::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::code_by_hash::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::code_by_hash::Param0>,
                     types::code_by_hash::CodeByHash,
                     ::subxt::storage::address::Yes,
                     (),
@@ -31937,7 +31963,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
                         "CodeByHash",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             155u8, 102u8, 73u8, 180u8, 127u8, 211u8, 181u8, 44u8, 56u8, 235u8,
                             49u8, 4u8, 25u8, 213u8, 116u8, 200u8, 232u8, 203u8, 190u8, 90u8, 93u8,
@@ -32153,7 +32179,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::downward_message_queues::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::downward_message_queues::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::downward_message_queues::Param0,
+                    >,
                     types::downward_message_queues::DownwardMessageQueues,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -32162,7 +32190,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
                         "DownwardMessageQueues",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             38u8, 183u8, 133u8, 200u8, 199u8, 135u8, 68u8, 232u8, 189u8, 168u8,
                             3u8, 219u8, 201u8, 180u8, 156u8, 79u8, 134u8, 164u8, 94u8, 114u8,
@@ -32209,7 +32237,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::downward_message_queue_heads::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::downward_message_queue_heads::Param0,
                     >,
                     types::downward_message_queue_heads::DownwardMessageQueueHeads,
@@ -32220,7 +32248,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
                         "DownwardMessageQueueHeads",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             135u8, 165u8, 240u8, 0u8, 25u8, 110u8, 9u8, 108u8, 251u8, 225u8, 109u8,
                             184u8, 90u8, 132u8, 9u8, 151u8, 12u8, 118u8, 153u8, 212u8, 140u8,
@@ -32254,7 +32282,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::delivery_fee_factor::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::delivery_fee_factor::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::delivery_fee_factor::Param0>,
                     types::delivery_fee_factor::DeliveryFeeFactor,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -32263,7 +32291,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
                         "DeliveryFeeFactor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             43u8, 5u8, 63u8, 235u8, 115u8, 155u8, 130u8, 27u8, 75u8, 216u8, 177u8,
                             135u8, 203u8, 147u8, 167u8, 95u8, 208u8, 188u8, 25u8, 14u8, 84u8, 63u8,
@@ -33040,7 +33068,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_open_channel_requests::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_open_channel_requests::Param0,
                     >,
                     types::hrmp_open_channel_requests::HrmpOpenChannelRequests,
@@ -33051,7 +33079,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             164u8, 97u8, 52u8, 242u8, 255u8, 67u8, 248u8, 170u8, 204u8, 92u8, 81u8,
                             144u8, 11u8, 63u8, 145u8, 167u8, 8u8, 174u8, 221u8, 147u8, 125u8,
@@ -33112,7 +33140,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_open_channel_request_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_open_channel_request_count::Param0,
                     >,
                     types::hrmp_open_channel_request_count::HrmpOpenChannelRequestCount,
@@ -33123,7 +33151,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             136u8, 72u8, 56u8, 31u8, 229u8, 99u8, 241u8, 14u8, 159u8, 243u8, 179u8,
                             222u8, 252u8, 56u8, 63u8, 24u8, 204u8, 130u8, 47u8, 161u8, 133u8,
@@ -33163,7 +33191,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_accepted_channel_request_count::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_accepted_channel_request_count::Param0,
                     >,
                     types::hrmp_accepted_channel_request_count::HrmpAcceptedChannelRequestCount,
@@ -33174,7 +33202,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             29u8, 100u8, 52u8, 28u8, 180u8, 84u8, 132u8, 120u8, 117u8, 172u8,
                             169u8, 40u8, 237u8, 92u8, 89u8, 87u8, 230u8, 148u8, 140u8, 226u8, 60u8,
@@ -33222,7 +33250,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_close_channel_requests::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_close_channel_requests::Param0,
                     >,
                     types::hrmp_close_channel_requests::HrmpCloseChannelRequests,
@@ -33233,7 +33261,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpCloseChannelRequests",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             155u8, 13u8, 73u8, 166u8, 58u8, 67u8, 138u8, 58u8, 215u8, 172u8, 241u8,
                             168u8, 57u8, 4u8, 230u8, 248u8, 31u8, 183u8, 227u8, 224u8, 139u8,
@@ -33294,7 +33322,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_watermarks::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::hrmp_watermarks::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::hrmp_watermarks::Param0>,
                     types::hrmp_watermarks::HrmpWatermarks,
                     ::subxt::storage::address::Yes,
                     (),
@@ -33303,7 +33331,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpWatermarks",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             245u8, 104u8, 137u8, 120u8, 131u8, 7u8, 178u8, 85u8, 96u8, 124u8,
                             241u8, 2u8, 86u8, 63u8, 116u8, 77u8, 217u8, 235u8, 162u8, 38u8, 104u8,
@@ -33342,7 +33370,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_channels::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::hrmp_channels::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::hrmp_channels::Param0>,
                     types::hrmp_channels::HrmpChannels,
                     ::subxt::storage::address::Yes,
                     (),
@@ -33351,7 +33379,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpChannels",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             174u8, 90u8, 72u8, 93u8, 43u8, 140u8, 181u8, 170u8, 138u8, 171u8,
                             179u8, 156u8, 33u8, 87u8, 63u8, 1u8, 131u8, 59u8, 230u8, 14u8, 40u8,
@@ -33411,7 +33439,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_ingress_channels_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_ingress_channels_index::Param0,
                     >,
                     types::hrmp_ingress_channels_index::HrmpIngressChannelsIndex,
@@ -33422,7 +33450,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             125u8, 229u8, 102u8, 230u8, 74u8, 109u8, 173u8, 67u8, 176u8, 169u8,
                             57u8, 24u8, 75u8, 129u8, 246u8, 198u8, 63u8, 49u8, 56u8, 102u8, 149u8,
@@ -33455,7 +33483,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_egress_channels_index::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<
+                    ::subxt::storage::address::StaticStorageKey<
                         types::hrmp_egress_channels_index::Param0,
                     >,
                     types::hrmp_egress_channels_index::HrmpEgressChannelsIndex,
@@ -33466,7 +33494,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             237u8, 183u8, 188u8, 57u8, 20u8, 238u8, 166u8, 7u8, 94u8, 155u8, 22u8,
                             9u8, 173u8, 209u8, 210u8, 17u8, 160u8, 79u8, 243u8, 4u8, 245u8, 240u8,
@@ -33503,7 +33531,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_channel_contents::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::hrmp_channel_contents::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::hrmp_channel_contents::Param0,
+                    >,
                     types::hrmp_channel_contents::HrmpChannelContents,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -33512,7 +33542,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpChannelContents",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             55u8, 16u8, 135u8, 69u8, 54u8, 180u8, 246u8, 124u8, 104u8, 92u8, 45u8,
                             18u8, 223u8, 145u8, 43u8, 190u8, 121u8, 59u8, 35u8, 195u8, 234u8,
@@ -33557,7 +33587,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::hrmp_channel_digests::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::hrmp_channel_digests::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::hrmp_channel_digests::Param0,
+                    >,
                     types::hrmp_channel_digests::HrmpChannelDigests,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -33566,7 +33598,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
                         "HrmpChannelDigests",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             90u8, 90u8, 139u8, 78u8, 47u8, 2u8, 104u8, 211u8, 42u8, 246u8, 193u8,
                             210u8, 142u8, 223u8, 17u8, 136u8, 3u8, 182u8, 25u8, 56u8, 72u8, 72u8,
@@ -33688,7 +33720,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::sessions::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::sessions::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::sessions::Param0>,
                     types::sessions::Sessions,
                     ::subxt::storage::address::Yes,
                     (),
@@ -33697,7 +33729,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
                         "Sessions",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             254u8, 40u8, 169u8, 18u8, 252u8, 203u8, 49u8, 182u8, 123u8, 19u8,
                             241u8, 150u8, 227u8, 153u8, 108u8, 109u8, 66u8, 129u8, 157u8, 27u8,
@@ -33733,7 +33765,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::account_keys::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::account_keys::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::account_keys::Param0>,
                     types::account_keys::AccountKeys,
                     ::subxt::storage::address::Yes,
                     (),
@@ -33742,7 +33774,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
                         "AccountKeys",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             30u8, 98u8, 58u8, 140u8, 96u8, 231u8, 205u8, 111u8, 194u8, 100u8,
                             185u8, 242u8, 210u8, 143u8, 110u8, 144u8, 170u8, 187u8, 62u8, 196u8,
@@ -33777,7 +33809,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::session_executor_params::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::session_executor_params::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::session_executor_params::Param0,
+                    >,
                     types::session_executor_params::SessionExecutorParams,
                     ::subxt::storage::address::Yes,
                     (),
@@ -33786,7 +33820,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
                         "SessionExecutorParams",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             38u8, 80u8, 118u8, 112u8, 189u8, 55u8, 95u8, 184u8, 19u8, 8u8, 114u8,
                             6u8, 173u8, 80u8, 254u8, 98u8, 107u8, 202u8, 215u8, 107u8, 149u8,
@@ -34009,7 +34043,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::disputes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::disputes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::disputes::Param0>,
                     types::disputes::Disputes,
                     (),
                     (),
@@ -34018,7 +34052,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
                         "Disputes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             38u8, 237u8, 141u8, 222u8, 135u8, 82u8, 210u8, 166u8, 192u8, 122u8,
                             175u8, 96u8, 91u8, 1u8, 225u8, 182u8, 128u8, 4u8, 159u8, 56u8, 180u8,
@@ -34034,8 +34068,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::disputes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::disputes::Param0>,
-                        ::subxt::storage::address::StorageKey<types::disputes::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::disputes::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::disputes::Param1>,
                     ),
                     types::disputes::Disputes,
                     ::subxt::storage::address::Yes,
@@ -34046,8 +34080,8 @@ pub mod api {
                         "ParasDisputes",
                         "Disputes",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             38u8, 237u8, 141u8, 222u8, 135u8, 82u8, 210u8, 166u8, 192u8, 122u8,
@@ -34086,7 +34120,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::backers_on_disputes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::backers_on_disputes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::backers_on_disputes::Param0>,
                     types::backers_on_disputes::BackersOnDisputes,
                     (),
                     (),
@@ -34095,7 +34129,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
                         "BackersOnDisputes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             136u8, 171u8, 20u8, 204u8, 135u8, 153u8, 144u8, 241u8, 46u8, 193u8,
                             65u8, 22u8, 116u8, 161u8, 144u8, 186u8, 31u8, 194u8, 202u8, 225u8,
@@ -34112,8 +34146,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::backers_on_disputes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::backers_on_disputes::Param0>,
-                        ::subxt::storage::address::StorageKey<types::backers_on_disputes::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::backers_on_disputes::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::backers_on_disputes::Param1,
+                        >,
                     ),
                     types::backers_on_disputes::BackersOnDisputes,
                     ::subxt::storage::address::Yes,
@@ -34124,8 +34162,8 @@ pub mod api {
                         "ParasDisputes",
                         "BackersOnDisputes",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             136u8, 171u8, 20u8, 204u8, 135u8, 153u8, 144u8, 241u8, 46u8, 193u8,
@@ -34164,7 +34202,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::included::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::included::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::included::Param0>,
                     types::included::Included,
                     (),
                     (),
@@ -34173,7 +34211,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
                         "Included",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             47u8, 105u8, 189u8, 233u8, 206u8, 153u8, 162u8, 217u8, 141u8, 118u8,
                             31u8, 85u8, 87u8, 53u8, 100u8, 187u8, 31u8, 245u8, 50u8, 171u8, 4u8,
@@ -34190,8 +34228,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::included::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::included::Param0>,
-                        ::subxt::storage::address::StorageKey<types::included::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::included::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::included::Param1>,
                     ),
                     types::included::Included,
                     ::subxt::storage::address::Yes,
@@ -34202,8 +34240,8 @@ pub mod api {
                         "ParasDisputes",
                         "Included",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             47u8, 105u8, 189u8, 233u8, 206u8, 153u8, 162u8, 217u8, 141u8, 118u8,
@@ -34353,7 +34391,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::unapplied_slashes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::unapplied_slashes::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::unapplied_slashes::Param0>,
                     types::unapplied_slashes::UnappliedSlashes,
                     (),
                     (),
@@ -34362,7 +34400,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParasSlashing",
                         "UnappliedSlashes",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             114u8, 171u8, 137u8, 142u8, 180u8, 125u8, 226u8, 240u8, 99u8, 181u8,
                             68u8, 221u8, 91u8, 124u8, 172u8, 93u8, 103u8, 12u8, 95u8, 43u8, 67u8,
@@ -34378,8 +34416,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::unapplied_slashes::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::unapplied_slashes::Param0>,
-                        ::subxt::storage::address::StorageKey<types::unapplied_slashes::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::unapplied_slashes::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::unapplied_slashes::Param1,
+                        >,
                     ),
                     types::unapplied_slashes::UnappliedSlashes,
                     ::subxt::storage::address::Yes,
@@ -34390,8 +34432,8 @@ pub mod api {
                         "ParasSlashing",
                         "UnappliedSlashes",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             114u8, 171u8, 137u8, 142u8, 180u8, 125u8, 226u8, 240u8, 99u8, 181u8,
@@ -34427,7 +34469,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::validator_set_counts::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::validator_set_counts::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::validator_set_counts::Param0,
+                    >,
                     types::validator_set_counts::ValidatorSetCounts,
                     ::subxt::storage::address::Yes,
                     (),
@@ -34436,7 +34480,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "ParasSlashing",
                         "ValidatorSetCounts",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             195u8, 220u8, 79u8, 140u8, 114u8, 80u8, 241u8, 103u8, 4u8, 7u8, 53u8,
                             100u8, 16u8, 78u8, 104u8, 171u8, 134u8, 110u8, 158u8, 191u8, 37u8,
@@ -34728,7 +34772,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::book_state_for::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::book_state_for::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::book_state_for::Param0>,
                     types::book_state_for::BookStateFor,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -34737,7 +34781,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "MessageQueue",
                         "BookStateFor",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             32u8, 61u8, 161u8, 81u8, 134u8, 136u8, 252u8, 113u8, 204u8, 115u8,
                             206u8, 180u8, 33u8, 185u8, 137u8, 155u8, 178u8, 189u8, 234u8, 201u8,
@@ -34795,7 +34839,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pages::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::pages::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::pages::Param0>,
                     types::pages::Pages,
                     (),
                     (),
@@ -34804,7 +34848,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "MessageQueue",
                         "Pages",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             56u8, 181u8, 157u8, 16u8, 157u8, 123u8, 106u8, 93u8, 199u8, 208u8,
                             153u8, 53u8, 168u8, 188u8, 124u8, 77u8, 140u8, 163u8, 113u8, 16u8,
@@ -34820,8 +34864,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::pages::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::pages::Param0>,
-                        ::subxt::storage::address::StorageKey<types::pages::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::pages::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::pages::Param1>,
                     ),
                     types::pages::Pages,
                     ::subxt::storage::address::Yes,
@@ -34832,8 +34876,8 @@ pub mod api {
                         "MessageQueue",
                         "Pages",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             56u8, 181u8, 157u8, 16u8, 157u8, 123u8, 106u8, 93u8, 199u8, 208u8,
@@ -35160,7 +35204,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::para_id_affinity::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::para_id_affinity::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::para_id_affinity::Param0>,
                     types::para_id_affinity::ParaIdAffinity,
                     ::subxt::storage::address::Yes,
                     (),
@@ -35169,7 +35213,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "OnDemandAssignmentProvider",
                         "ParaIdAffinity",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             145u8, 117u8, 2u8, 170u8, 99u8, 68u8, 166u8, 236u8, 247u8, 80u8, 202u8,
                             87u8, 116u8, 244u8, 218u8, 172u8, 41u8, 187u8, 170u8, 163u8, 187u8,
@@ -35265,7 +35309,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::core_schedules::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::core_schedules::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param0>,
                     types::core_schedules::CoreSchedules,
                     (),
                     (),
@@ -35274,7 +35318,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
                             42u8, 42u8, 227u8, 119u8, 181u8, 247u8, 44u8, 29u8, 24u8, 128u8, 49u8,
@@ -35292,8 +35336,8 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::core_schedules::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::core_schedules::Param0>,
-                        ::subxt::storage::address::StorageKey<types::core_schedules::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param1>,
                     ),
                     types::core_schedules::CoreSchedules,
                     ::subxt::storage::address::Yes,
@@ -35304,8 +35348,8 @@ pub mod api {
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
@@ -35346,7 +35390,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::core_descriptors::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::core_descriptors::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::core_descriptors::Param0>,
                     types::core_descriptors::CoreDescriptors,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -35355,7 +35399,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreDescriptors",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             1u8, 90u8, 208u8, 119u8, 150u8, 241u8, 133u8, 74u8, 22u8, 166u8, 13u8,
                             7u8, 73u8, 136u8, 105u8, 61u8, 251u8, 245u8, 164u8, 7u8, 45u8, 68u8,
@@ -35913,7 +35957,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::pending_swap::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::pending_swap::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::pending_swap::Param0>,
                     types::pending_swap::PendingSwap,
                     ::subxt::storage::address::Yes,
                     (),
@@ -35922,7 +35966,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Registrar",
                         "PendingSwap",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             75u8, 6u8, 68u8, 43u8, 108u8, 147u8, 220u8, 90u8, 190u8, 86u8, 209u8,
                             141u8, 9u8, 254u8, 103u8, 10u8, 94u8, 187u8, 155u8, 249u8, 140u8,
@@ -35963,7 +36007,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::paras::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::paras::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::paras::Param0>,
                     types::paras::Paras,
                     ::subxt::storage::address::Yes,
                     (),
@@ -35972,7 +36016,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Registrar",
                         "Paras",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             125u8, 62u8, 50u8, 209u8, 40u8, 170u8, 61u8, 62u8, 61u8, 246u8, 103u8,
                             229u8, 213u8, 94u8, 249u8, 49u8, 18u8, 90u8, 138u8, 14u8, 101u8, 133u8,
@@ -36324,7 +36368,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::leases::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::leases::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::leases::Param0>,
                     types::leases::Leases,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -36333,7 +36377,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Slots",
                         "Leases",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             233u8, 226u8, 181u8, 160u8, 216u8, 86u8, 238u8, 229u8, 31u8, 67u8,
                             200u8, 188u8, 134u8, 22u8, 88u8, 147u8, 204u8, 11u8, 34u8, 244u8,
@@ -36824,7 +36868,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::reserved_amounts::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::reserved_amounts::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::reserved_amounts::Param0>,
                     types::reserved_amounts::ReservedAmounts,
                     (),
                     (),
@@ -36833,7 +36877,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
                         "ReservedAmounts",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             77u8, 44u8, 116u8, 36u8, 189u8, 213u8, 126u8, 32u8, 42u8, 131u8, 108u8,
                             41u8, 147u8, 40u8, 247u8, 245u8, 161u8, 42u8, 152u8, 195u8, 28u8,
@@ -36850,8 +36894,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::reserved_amounts::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::reserved_amounts::Param0>,
-                        ::subxt::storage::address::StorageKey<types::reserved_amounts::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::reserved_amounts::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::reserved_amounts::Param1,
+                        >,
                     ),
                     types::reserved_amounts::ReservedAmounts,
                     ::subxt::storage::address::Yes,
@@ -36862,8 +36910,8 @@ pub mod api {
                         "Auctions",
                         "ReservedAmounts",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             77u8, 44u8, 116u8, 36u8, 189u8, 213u8, 126u8, 32u8, 42u8, 131u8, 108u8,
@@ -36903,7 +36951,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::winning::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::winning::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::winning::Param0>,
                     types::winning::Winning,
                     ::subxt::storage::address::Yes,
                     (),
@@ -36912,7 +36960,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
                         "Winning",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             8u8, 136u8, 174u8, 152u8, 223u8, 1u8, 143u8, 45u8, 213u8, 5u8, 239u8,
                             163u8, 152u8, 99u8, 197u8, 109u8, 194u8, 140u8, 246u8, 10u8, 40u8,
@@ -37730,7 +37778,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::funds::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::funds::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::funds::Param0>,
                     types::funds::Funds,
                     ::subxt::storage::address::Yes,
                     (),
@@ -37739,7 +37787,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Crowdloan",
                         "Funds",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             191u8, 255u8, 37u8, 49u8, 246u8, 246u8, 168u8, 178u8, 73u8, 238u8,
                             49u8, 76u8, 66u8, 246u8, 207u8, 12u8, 76u8, 233u8, 31u8, 218u8, 132u8,
@@ -39391,7 +39439,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::queries::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::queries::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::queries::Param0>,
                     types::queries::Queries,
                     ::subxt::storage::address::Yes,
                     (),
@@ -39400,7 +39448,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "Queries",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             246u8, 75u8, 240u8, 129u8, 106u8, 114u8, 99u8, 154u8, 176u8, 188u8,
                             146u8, 125u8, 244u8, 103u8, 187u8, 171u8, 60u8, 119u8, 4u8, 90u8, 58u8,
@@ -39441,7 +39489,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::asset_traps::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::asset_traps::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::asset_traps::Param0>,
                     types::asset_traps::AssetTraps,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -39450,7 +39498,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "AssetTraps",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             148u8, 41u8, 254u8, 134u8, 61u8, 172u8, 126u8, 146u8, 78u8, 178u8,
                             50u8, 77u8, 226u8, 8u8, 200u8, 78u8, 77u8, 91u8, 26u8, 133u8, 104u8,
@@ -39508,7 +39556,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::supported_version::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::supported_version::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::supported_version::Param0>,
                     types::supported_version::SupportedVersion,
                     (),
                     (),
@@ -39517,7 +39565,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "SupportedVersion",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             144u8, 218u8, 177u8, 254u8, 210u8, 8u8, 84u8, 149u8, 163u8, 162u8,
                             238u8, 37u8, 157u8, 28u8, 140u8, 121u8, 201u8, 173u8, 204u8, 92u8,
@@ -39533,8 +39581,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::supported_version::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::supported_version::Param0>,
-                        ::subxt::storage::address::StorageKey<types::supported_version::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::supported_version::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::supported_version::Param1,
+                        >,
                     ),
                     types::supported_version::SupportedVersion,
                     ::subxt::storage::address::Yes,
@@ -39545,8 +39597,8 @@ pub mod api {
                         "XcmPallet",
                         "SupportedVersion",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             144u8, 218u8, 177u8, 254u8, 210u8, 8u8, 84u8, 149u8, 163u8, 162u8,
@@ -39583,7 +39635,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::version_notifiers::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::version_notifiers::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::version_notifiers::Param0>,
                     types::version_notifiers::VersionNotifiers,
                     (),
                     (),
@@ -39592,7 +39644,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "VersionNotifiers",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             175u8, 206u8, 29u8, 14u8, 111u8, 123u8, 211u8, 109u8, 159u8, 131u8,
                             80u8, 149u8, 216u8, 196u8, 181u8, 105u8, 117u8, 138u8, 80u8, 69u8,
@@ -39608,8 +39660,12 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::version_notifiers::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<types::version_notifiers::Param0>,
-                        ::subxt::storage::address::StorageKey<types::version_notifiers::Param1>,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::version_notifiers::Param0,
+                        >,
+                        ::subxt::storage::address::StaticStorageKey<
+                            types::version_notifiers::Param1,
+                        >,
                     ),
                     types::version_notifiers::VersionNotifiers,
                     ::subxt::storage::address::Yes,
@@ -39620,8 +39676,8 @@ pub mod api {
                         "XcmPallet",
                         "VersionNotifiers",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             175u8, 206u8, 29u8, 14u8, 111u8, 123u8, 211u8, 109u8, 159u8, 131u8,
@@ -39659,7 +39715,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::version_notify_targets::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::version_notify_targets::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::version_notify_targets::Param0,
+                    >,
                     types::version_notify_targets::VersionNotifyTargets,
                     (),
                     (),
@@ -39668,7 +39726,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "VersionNotifyTargets",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             113u8, 77u8, 150u8, 42u8, 82u8, 49u8, 195u8, 120u8, 96u8, 80u8, 152u8,
                             67u8, 27u8, 142u8, 10u8, 74u8, 66u8, 134u8, 35u8, 202u8, 77u8, 187u8,
@@ -39684,10 +39742,10 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::version_notify_targets::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::version_notify_targets::Param0,
                         >,
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::version_notify_targets::Param1,
                         >,
                     ),
@@ -39700,8 +39758,8 @@ pub mod api {
                         "XcmPallet",
                         "VersionNotifyTargets",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             113u8, 77u8, 150u8, 42u8, 82u8, 49u8, 195u8, 120u8, 96u8, 80u8, 152u8,
@@ -39782,7 +39840,9 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::remote_locked_fungibles::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<
+                        types::remote_locked_fungibles::Param0,
+                    >,
                     types::remote_locked_fungibles::RemoteLockedFungibles,
                     (),
                     (),
@@ -39791,7 +39851,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "RemoteLockedFungibles",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             247u8, 124u8, 77u8, 42u8, 208u8, 183u8, 99u8, 196u8, 50u8, 113u8,
                             250u8, 221u8, 222u8, 170u8, 10u8, 60u8, 143u8, 172u8, 149u8, 198u8,
@@ -39807,10 +39867,10 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param1>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param0,
                         >,
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param1,
                         >,
                     ),
@@ -39823,8 +39883,8 @@ pub mod api {
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
                         ),
                         [
                             247u8, 124u8, 77u8, 42u8, 208u8, 183u8, 99u8, 196u8, 50u8, 113u8,
@@ -39842,13 +39902,13 @@ pub mod api {
                     _2: impl ::std::borrow::Borrow<types::remote_locked_fungibles::Param2>,
                 ) -> ::subxt::storage::address::Address<
                     (
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param0,
                         >,
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param1,
                         >,
-                        ::subxt::storage::address::StorageKey<
+                        ::subxt::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param2,
                         >,
                     ),
@@ -39861,9 +39921,9 @@ pub mod api {
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         (
-                            ::subxt::storage::address::StorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_1.borrow()),
-                            ::subxt::storage::address::StorageKey::new(_2.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_2.borrow()),
                         ),
                         [
                             247u8, 124u8, 77u8, 42u8, 208u8, 183u8, 99u8, 196u8, 50u8, 113u8,
@@ -39899,7 +39959,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::locked_fungibles::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::locked_fungibles::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::locked_fungibles::Param0>,
                     types::locked_fungibles::LockedFungibles,
                     ::subxt::storage::address::Yes,
                     (),
@@ -39908,7 +39968,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
                         "LockedFungibles",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             254u8, 234u8, 1u8, 27u8, 27u8, 32u8, 217u8, 24u8, 47u8, 30u8, 62u8,
                             80u8, 86u8, 125u8, 120u8, 24u8, 143u8, 229u8, 161u8, 153u8, 240u8,
@@ -40733,7 +40793,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::permanent_slots::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::permanent_slots::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::permanent_slots::Param0>,
                     types::permanent_slots::PermanentSlots,
                     ::subxt::storage::address::Yes,
                     (),
@@ -40742,7 +40802,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "AssignedSlots",
                         "PermanentSlots",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             133u8, 179u8, 221u8, 222u8, 50u8, 75u8, 158u8, 137u8, 167u8, 190u8,
                             19u8, 237u8, 201u8, 44u8, 86u8, 64u8, 57u8, 61u8, 96u8, 112u8, 218u8,
@@ -40799,7 +40859,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::temporary_slots::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StorageKey<types::temporary_slots::Param0>,
+                    ::subxt::storage::address::StaticStorageKey<types::temporary_slots::Param0>,
                     types::temporary_slots::TemporarySlots,
                     ::subxt::storage::address::Yes,
                     (),
@@ -40808,7 +40868,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "AssignedSlots",
                         "TemporarySlots",
-                        ::subxt::storage::address::StorageKey::new(_0.borrow()),
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             184u8, 245u8, 181u8, 90u8, 169u8, 232u8, 108u8, 3u8, 153u8, 4u8, 176u8,
                             170u8, 230u8, 163u8, 236u8, 111u8, 196u8, 218u8, 154u8, 125u8, 102u8,

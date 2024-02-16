@@ -6,6 +6,7 @@
 
 mod storage_address;
 mod storage_client;
+mod storage_key;
 mod storage_type;
 
 pub mod utils;
@@ -18,9 +19,11 @@ pub use storage_type::{Storage, StorageKeyValuePair};
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        dynamic, Address, DynamicAddress, StorageAddress, StorageKey, Yes,
+        dynamic, Address, DynamicAddress, StaticStorageKey, StorageAddress, Yes,
     };
 }
+
+pub use storage_key::StorageKey;
 
 // For consistency with other modules, also expose
 // the basic address stuff at the root of the module.

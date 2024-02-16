@@ -2,7 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{StorageAddress, StorageMultiKey, Yes};
+use super::storage_address::{StorageAddress, Yes};
+use super::StorageKey;
 
 use crate::{
     backend::{BackendExt, BlockRef},
@@ -253,7 +254,7 @@ where
                     )?;
 
                     let key_bytes = kv.key;
-                    let keys = <Address::Keys as StorageMultiKey>::decode_from_address_bytes(
+                    let keys = <Address::Keys as StorageKey>::decode_from_address_bytes(
                         &key_bytes,
                         &hasher_type_id_pairs,
                         &metadata,
