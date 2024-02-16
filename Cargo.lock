@@ -2335,12 +2335,12 @@ dependencies = [
 [[package]]
 name = "jsonrpsee"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master#ea66446b25e8ecdb651c5124e1b5a9b92eafb16e"
 dependencies = [
- "jsonrpsee-client-transport 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
- "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-client-transport 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "jsonrpsee-http-client",
- "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
 ]
 
 [[package]]
@@ -2367,13 +2367,13 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-client-transport"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master#ea66446b25e8ecdb651c5124e1b5a9b92eafb16e"
 dependencies = [
  "futures-channel",
  "futures-util",
  "gloo-net",
  "http",
- "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "pin-project",
  "rustls-native-certs 0.7.0",
  "rustls-pki-types",
@@ -2412,7 +2412,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-core"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master#ea66446b25e8ecdb651c5124e1b5a9b92eafb16e"
 dependencies = [
  "anyhow",
  "async-lock 3.3.0",
@@ -2421,7 +2421,7 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "hyper",
- "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "pin-project",
  "rustc-hash",
  "serde",
@@ -2436,13 +2436,13 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-http-client"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master#ea66446b25e8ecdb651c5124e1b5a9b92eafb16e"
 dependencies = [
  "async-trait",
  "hyper",
  "hyper-rustls",
- "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
- "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee-core 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
+ "jsonrpsee-types 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "serde",
  "serde_json",
  "thiserror",
@@ -2468,7 +2468,7 @@ dependencies = [
 [[package]]
 name = "jsonrpsee-types"
 version = "0.22.0"
-source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6#4b1aaca4e255fd8e15f004718e0a15aa132d08d6"
+source = "git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master#ea66446b25e8ecdb651c5124e1b5a9b92eafb16e"
 dependencies = [
  "anyhow",
  "beef",
@@ -4575,7 +4575,7 @@ dependencies = [
  "hex",
  "impl-serde",
  "instant",
- "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "parity-scale-codec",
  "primitive-types",
  "reconnecting-jsonrpsee-ws-client",
@@ -4613,7 +4613,7 @@ dependencies = [
  "heck",
  "hex",
  "indoc",
- "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "parity-scale-codec",
  "pretty_assertions",
  "quote",
@@ -4640,7 +4640,7 @@ dependencies = [
  "getrandom",
  "heck",
  "hex",
- "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "parity-scale-codec",
  "proc-macro2",
  "quote",
@@ -4777,7 +4777,7 @@ version = "0.34.0"
 dependencies = [
  "hex",
  "impl-serde",
- "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=esp32c6)",
+ "jsonrpsee 0.22.0 (git+https://github.com/blue-freedom-technologies/jsonrpsee.git?branch=master)",
  "parity-scale-codec",
  "serde",
  "substrate-runner",
