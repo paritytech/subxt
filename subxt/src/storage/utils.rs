@@ -48,7 +48,7 @@ pub(crate) fn strip_storage_addess_root_bytes(
     address_bytes: &mut &[u8],
 ) -> Result<(), StorageAddressError> {
     if address_bytes.len() >= 16 {
-        *address_bytes = &mut &address_bytes[16..];
+        *address_bytes = &address_bytes[16..];
         Ok(())
     } else {
         Err(StorageAddressError::UnexpectedAddressBytes)
@@ -66,7 +66,7 @@ pub fn strip_concat_hash_bytes(
     match hasher {
         StorageHasher::Blake2_128Concat => {
             if hash.len() >= 16 {
-                *hash = &mut &hash[16..];
+                *hash = &hash[16..];
                 Some(Ok(()))
             } else {
                 Some(Err(StorageAddressError::UnexpectedAddressBytes))
@@ -74,7 +74,7 @@ pub fn strip_concat_hash_bytes(
         }
         StorageHasher::Twox64Concat => {
             if hash.len() >= 8 {
-                *hash = &mut &hash[8..];
+                *hash = &hash[8..];
                 Some(Ok(()))
             } else {
                 Some(Err(StorageAddressError::UnexpectedAddressBytes))

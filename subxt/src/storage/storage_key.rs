@@ -2,17 +2,13 @@ use super::{
     storage_address::StaticStorageKey,
     utils::{strip_concat_hash_bytes, strip_storage_addess_root_bytes},
 };
-
 use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, StorageAddressError},
     metadata::{DecodeWithMetadata, Metadata},
     utils::{Encoded, Static},
 };
-
-use futures::StreamExt;
 use scale_encode::EncodeAsType;
-
 use subxt_metadata::StorageHasher;
 
 /// This trait should be implemented by anything that can be used as one or multiple storage keys.
