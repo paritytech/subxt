@@ -21441,7 +21441,7 @@ pub mod api {
                 pub fn retries_iter(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::retries::Retries,
                     (),
                     (),
@@ -21450,7 +21450,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
                         "Retries",
-                        vec![],
+                        (),
                         [
                             164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
                             146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
@@ -21464,7 +21464,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::retries::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    ::subxt::storage::address::StaticStorageKey<types::retries::Param0>,
                     types::retries::Retries,
                     (),
                     (),
@@ -21473,9 +21473,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
                         "Retries",
-                        vec![::subxt::storage::address::make_static_storage_map_key(
-                            _0.borrow(),
-                        )],
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
                             146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
@@ -21490,7 +21488,10 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<types::retries::Param0>,
                     _1: impl ::std::borrow::Borrow<types::retries::Param1>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (
+                        ::subxt::storage::address::StaticStorageKey<types::retries::Param0>,
+                        ::subxt::storage::address::StaticStorageKey<types::retries::Param1>,
+                    ),
                     types::retries::Retries,
                     ::subxt::storage::address::Yes,
                     (),
@@ -21499,10 +21500,10 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
                         "Retries",
-                        vec![
-                            ::subxt::storage::address::make_static_storage_map_key(_0.borrow()),
-                            ::subxt::storage::address::make_static_storage_map_key(_1.borrow()),
-                        ],
+                        (
+                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
+                        ),
                         [
                             164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
                             146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
@@ -40139,7 +40140,7 @@ pub mod api {
                 pub fn authorities(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::authorities::Authorities,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40148,7 +40149,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "Authorities",
-                        vec![],
+                        (),
                         [
                             53u8, 171u8, 94u8, 33u8, 46u8, 83u8, 105u8, 120u8, 123u8, 201u8, 141u8,
                             71u8, 131u8, 150u8, 51u8, 121u8, 67u8, 45u8, 249u8, 146u8, 85u8, 113u8,
@@ -40160,7 +40161,7 @@ pub mod api {
                 pub fn validator_set_id(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::validator_set_id::ValidatorSetId,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40169,7 +40170,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "ValidatorSetId",
-                        vec![],
+                        (),
                         [
                             168u8, 84u8, 23u8, 134u8, 153u8, 30u8, 183u8, 176u8, 206u8, 100u8,
                             109u8, 86u8, 109u8, 126u8, 146u8, 175u8, 173u8, 1u8, 253u8, 42u8,
@@ -40182,7 +40183,7 @@ pub mod api {
                 pub fn next_authorities(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::next_authorities::NextAuthorities,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40191,7 +40192,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "NextAuthorities",
-                        vec![],
+                        (),
                         [
                             87u8, 180u8, 0u8, 85u8, 209u8, 13u8, 131u8, 103u8, 8u8, 226u8, 42u8,
                             72u8, 38u8, 47u8, 190u8, 78u8, 62u8, 4u8, 161u8, 130u8, 87u8, 196u8,
@@ -40212,7 +40213,7 @@ pub mod api {
                 pub fn set_id_session_iter(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::set_id_session::SetIdSession,
                     (),
                     (),
@@ -40221,7 +40222,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "SetIdSession",
-                        vec![],
+                        (),
                         [
                             47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
                             65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
@@ -40243,7 +40244,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
                     types::set_id_session::SetIdSession,
                     ::subxt::storage::address::Yes,
                     (),
@@ -40252,9 +40253,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "SetIdSession",
-                        vec![::subxt::storage::address::make_static_storage_map_key(
-                            _0.borrow(),
-                        )],
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
                             65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
@@ -40268,7 +40267,7 @@ pub mod api {
                 pub fn genesis_block(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::genesis_block::GenesisBlock,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40277,7 +40276,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
                         "GenesisBlock",
-                        vec![],
+                        (),
                         [
                             198u8, 155u8, 11u8, 240u8, 189u8, 245u8, 159u8, 127u8, 55u8, 33u8,
                             48u8, 29u8, 209u8, 119u8, 163u8, 24u8, 28u8, 22u8, 163u8, 163u8, 124u8,
@@ -40371,7 +40370,7 @@ pub mod api {
                 pub fn root_hash(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::root_hash::RootHash,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40380,7 +40379,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
                         "RootHash",
-                        vec![],
+                        (),
                         [
                             111u8, 206u8, 173u8, 92u8, 67u8, 49u8, 150u8, 113u8, 90u8, 245u8, 38u8,
                             254u8, 76u8, 250u8, 167u8, 66u8, 130u8, 129u8, 251u8, 220u8, 172u8,
@@ -40392,7 +40391,7 @@ pub mod api {
                 pub fn number_of_leaves(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::number_of_leaves::NumberOfLeaves,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40401,7 +40400,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
                         "NumberOfLeaves",
-                        vec![],
+                        (),
                         [
                             123u8, 58u8, 149u8, 174u8, 85u8, 45u8, 20u8, 115u8, 241u8, 0u8, 51u8,
                             174u8, 234u8, 60u8, 230u8, 59u8, 237u8, 144u8, 170u8, 32u8, 4u8, 0u8,
@@ -40416,7 +40415,7 @@ pub mod api {
                 pub fn nodes_iter(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::nodes::Nodes,
                     (),
                     (),
@@ -40425,7 +40424,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
                         "Nodes",
-                        vec![],
+                        (),
                         [
                             27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
                             206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
@@ -40441,7 +40440,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::nodes::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    ::subxt::storage::address::StaticStorageKey<types::nodes::Param0>,
                     types::nodes::Nodes,
                     ::subxt::storage::address::Yes,
                     (),
@@ -40450,9 +40449,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
                         "Nodes",
-                        vec![::subxt::storage::address::make_static_storage_map_key(
-                            _0.borrow(),
-                        )],
+                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
                         [
                             27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
                             206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
@@ -40491,7 +40488,7 @@ pub mod api {
                 pub fn beefy_authorities(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::beefy_authorities::BeefyAuthorities,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40500,7 +40497,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "MmrLeaf",
                         "BeefyAuthorities",
-                        vec![],
+                        (),
                         [
                             128u8, 35u8, 176u8, 79u8, 224u8, 58u8, 214u8, 234u8, 231u8, 71u8,
                             227u8, 153u8, 180u8, 189u8, 66u8, 44u8, 47u8, 174u8, 0u8, 83u8, 121u8,
@@ -40515,7 +40512,7 @@ pub mod api {
                 pub fn beefy_next_authorities(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::beefy_next_authorities::BeefyNextAuthorities,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -40524,7 +40521,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "MmrLeaf",
                         "BeefyNextAuthorities",
-                        vec![],
+                        (),
                         [
                             97u8, 71u8, 52u8, 111u8, 120u8, 251u8, 183u8, 155u8, 177u8, 100u8,
                             236u8, 142u8, 204u8, 117u8, 95u8, 40u8, 201u8, 36u8, 32u8, 82u8, 38u8,
