@@ -16,9 +16,6 @@ pub mod api {
         "Authorship",
         "Offences",
         "Historical",
-        "Beefy",
-        "Mmr",
-        "MmrLeaf",
         "Session",
         "Grandpa",
         "AuthorityDiscovery",
@@ -67,6 +64,9 @@ pub mod api {
         "Crowdloan",
         "Coretime",
         "XcmPallet",
+        "Beefy",
+        "Mmr",
+        "MmrLeaf",
         "IdentityMigrator",
         "ParasSudoWrapper",
         "AssignedSlots",
@@ -3560,9 +3560,6 @@ pub mod api {
         pub fn transaction_payment(&self) -> transaction_payment::constants::ConstantsApi {
             transaction_payment::constants::ConstantsApi
         }
-        pub fn beefy(&self) -> beefy::constants::ConstantsApi {
-            beefy::constants::ConstantsApi
-        }
         pub fn grandpa(&self) -> grandpa::constants::ConstantsApi {
             grandpa::constants::ConstantsApi
         }
@@ -3645,6 +3642,9 @@ pub mod api {
         pub fn coretime(&self) -> coretime::constants::ConstantsApi {
             coretime::constants::ConstantsApi
         }
+        pub fn beefy(&self) -> beefy::constants::ConstantsApi {
+            beefy::constants::ConstantsApi
+        }
         pub fn assigned_slots(&self) -> assigned_slots::constants::ConstantsApi {
             assigned_slots::constants::ConstantsApi
         }
@@ -3680,15 +3680,6 @@ pub mod api {
         }
         pub fn historical(&self) -> historical::storage::StorageApi {
             historical::storage::StorageApi
-        }
-        pub fn beefy(&self) -> beefy::storage::StorageApi {
-            beefy::storage::StorageApi
-        }
-        pub fn mmr(&self) -> mmr::storage::StorageApi {
-            mmr::storage::StorageApi
-        }
-        pub fn mmr_leaf(&self) -> mmr_leaf::storage::StorageApi {
-            mmr_leaf::storage::StorageApi
         }
         pub fn session(&self) -> session::storage::StorageApi {
             session::storage::StorageApi
@@ -3823,6 +3814,15 @@ pub mod api {
         pub fn xcm_pallet(&self) -> xcm_pallet::storage::StorageApi {
             xcm_pallet::storage::StorageApi
         }
+        pub fn beefy(&self) -> beefy::storage::StorageApi {
+            beefy::storage::StorageApi
+        }
+        pub fn mmr(&self) -> mmr::storage::StorageApi {
+            mmr::storage::StorageApi
+        }
+        pub fn mmr_leaf(&self) -> mmr_leaf::storage::StorageApi {
+            mmr_leaf::storage::StorageApi
+        }
         pub fn assigned_slots(&self) -> assigned_slots::storage::StorageApi {
             assigned_slots::storage::StorageApi
         }
@@ -3852,9 +3852,6 @@ pub mod api {
         }
         pub fn balances(&self) -> balances::calls::TransactionApi {
             balances::calls::TransactionApi
-        }
-        pub fn beefy(&self) -> beefy::calls::TransactionApi {
-            beefy::calls::TransactionApi
         }
         pub fn session(&self) -> session::calls::TransactionApi {
             session::calls::TransactionApi
@@ -3978,6 +3975,9 @@ pub mod api {
         pub fn xcm_pallet(&self) -> xcm_pallet::calls::TransactionApi {
             xcm_pallet::calls::TransactionApi
         }
+        pub fn beefy(&self) -> beefy::calls::TransactionApi {
+            beefy::calls::TransactionApi
+        }
         pub fn identity_migrator(&self) -> identity_migrator::calls::TransactionApi {
             identity_migrator::calls::TransactionApi
         }
@@ -4009,9 +4009,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                159u8, 248u8, 20u8, 74u8, 93u8, 145u8, 235u8, 204u8, 107u8, 155u8, 56u8, 127u8,
-                31u8, 147u8, 245u8, 22u8, 198u8, 239u8, 90u8, 246u8, 169u8, 84u8, 180u8, 252u8,
-                22u8, 163u8, 134u8, 37u8, 147u8, 44u8, 109u8, 13u8,
+                95u8, 47u8, 93u8, 137u8, 187u8, 229u8, 88u8, 229u8, 191u8, 198u8, 96u8, 199u8,
+                211u8, 80u8, 51u8, 45u8, 229u8, 219u8, 112u8, 171u8, 41u8, 151u8, 124u8, 61u8,
+                12u8, 50u8, 57u8, 5u8, 196u8, 180u8, 42u8, 140u8,
             ]
     }
     pub mod system {
@@ -4995,10 +4995,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            250u8, 105u8, 172u8, 217u8, 228u8, 110u8, 176u8, 187u8, 176u8, 96u8,
-                            251u8, 246u8, 10u8, 91u8, 10u8, 130u8, 149u8, 248u8, 60u8, 2u8, 95u8,
-                            25u8, 249u8, 73u8, 160u8, 204u8, 142u8, 109u8, 77u8, 204u8, 159u8,
-                            218u8,
+                            45u8, 244u8, 178u8, 49u8, 95u8, 31u8, 121u8, 90u8, 24u8, 201u8, 101u8,
+                            147u8, 242u8, 227u8, 121u8, 238u8, 126u8, 20u8, 227u8, 97u8, 123u8,
+                            195u8, 229u8, 245u8, 27u8, 158u8, 50u8, 231u8, 219u8, 54u8, 168u8,
+                            30u8,
                         ],
                     )
                 }
@@ -6759,6 +6759,31 @@ pub mod api {
                     const PALLET: &'static str = "Balances";
                     const CALL: &'static str = "force_set_balance";
                 }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                pub struct ForceAdjustTotalIssuance {
+                    pub direction: force_adjust_total_issuance::Direction,
+                    #[codec(compact)]
+                    pub delta: force_adjust_total_issuance::Delta,
+                }
+                pub mod force_adjust_total_issuance {
+                    use super::runtime_types;
+                    pub type Direction = runtime_types::pallet_balances::types::AdjustmentDirection;
+                    pub type Delta = ::core::primitive::u128;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceAdjustTotalIssuance {
+                    const PALLET: &'static str = "Balances";
+                    const CALL: &'static str = "force_adjust_total_issuance";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -6884,6 +6909,24 @@ pub mod api {
                             114u8, 229u8, 59u8, 204u8, 180u8, 83u8, 17u8, 4u8, 59u8, 4u8, 55u8,
                             39u8, 151u8, 196u8, 124u8, 60u8, 209u8, 65u8, 193u8, 11u8, 44u8, 164u8,
                             116u8, 93u8, 169u8, 30u8, 199u8, 165u8, 55u8, 231u8, 223u8, 43u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                pub fn force_adjust_total_issuance(
+                    &self,
+                    direction: types::force_adjust_total_issuance::Direction,
+                    delta: types::force_adjust_total_issuance::Delta,
+                ) -> ::subxt::tx::Payload<types::ForceAdjustTotalIssuance> {
+                    ::subxt::tx::Payload::new_static(
+                        "Balances",
+                        "force_adjust_total_issuance",
+                        types::ForceAdjustTotalIssuance { direction, delta },
+                        [
+                            208u8, 134u8, 56u8, 133u8, 232u8, 164u8, 10u8, 213u8, 53u8, 193u8,
+                            190u8, 63u8, 236u8, 186u8, 96u8, 122u8, 104u8, 87u8, 173u8, 38u8, 58u8,
+                            176u8, 21u8, 78u8, 42u8, 106u8, 46u8, 248u8, 251u8, 190u8, 150u8,
+                            202u8,
                         ],
                     )
                 }
@@ -7400,6 +7443,30 @@ pub mod api {
                 const PALLET: &'static str = "Balances";
                 const EVENT: &'static str = "Thawed";
             }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The `TotalIssuance` was forcefully changed."]
+            pub struct TotalIssuanceForced {
+                pub old: total_issuance_forced::Old,
+                pub new: total_issuance_forced::New,
+            }
+            pub mod total_issuance_forced {
+                use super::runtime_types;
+                pub type Old = ::core::primitive::u128;
+                pub type New = ::core::primitive::u128;
+            }
+            impl ::subxt::events::StaticEvent for TotalIssuanceForced {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "TotalIssuanceForced";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -7816,19 +7883,6 @@ pub mod api {
                     ::subxt::constants::Address::new_static(
                         "Balances",
                         "MaxReserves",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of holds that can exist on an account at any time."]
-                pub fn max_holds(&self) -> ::subxt::constants::Address<::core::primitive::u32> {
-                    ::subxt::constants::Address::new_static(
-                        "Balances",
-                        "MaxHolds",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -8295,594 +8349,6 @@ pub mod api {
                             134u8, 32u8, 250u8, 13u8, 201u8, 25u8, 54u8, 243u8, 231u8, 81u8, 252u8,
                             231u8, 68u8, 217u8, 235u8, 43u8, 22u8, 223u8, 220u8, 133u8, 198u8,
                             218u8, 95u8, 152u8, 189u8, 87u8, 6u8, 228u8, 242u8, 59u8, 232u8, 59u8,
-                        ],
-                    )
-                }
-            }
-        }
-    }
-    pub mod beefy {
-        use super::root_mod;
-        use super::runtime_types;
-        #[doc = "The `Error` enum of this pallet."]
-        pub type Error = runtime_types::pallet_beefy::pallet::Error;
-        #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
-        pub type Call = runtime_types::pallet_beefy::pallet::Call;
-        pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
-            type DispatchError = runtime_types::sp_runtime::DispatchError;
-            pub mod types {
-                use super::runtime_types;
-                #[derive(
-                    :: subxt :: ext :: codec :: Decode,
-                    :: subxt :: ext :: codec :: Encode,
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: codec)]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                #[doc = "See [`Pallet::report_equivocation`]."]
-                pub struct ReportEquivocation {
-                    pub equivocation_proof:
-                        ::std::boxed::Box<report_equivocation::EquivocationProof>,
-                    pub key_owner_proof: report_equivocation::KeyOwnerProof,
-                }
-                pub mod report_equivocation {
-                    use super::runtime_types;
-                    pub type EquivocationProof =
-                        runtime_types::sp_consensus_beefy::EquivocationProof<
-                            ::core::primitive::u32,
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Signature,
-                        >;
-                    pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
-                }
-                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocation {
-                    const PALLET: &'static str = "Beefy";
-                    const CALL: &'static str = "report_equivocation";
-                }
-                #[derive(
-                    :: subxt :: ext :: codec :: Decode,
-                    :: subxt :: ext :: codec :: Encode,
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: codec)]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                #[doc = "See [`Pallet::report_equivocation_unsigned`]."]
-                pub struct ReportEquivocationUnsigned {
-                    pub equivocation_proof:
-                        ::std::boxed::Box<report_equivocation_unsigned::EquivocationProof>,
-                    pub key_owner_proof: report_equivocation_unsigned::KeyOwnerProof,
-                }
-                pub mod report_equivocation_unsigned {
-                    use super::runtime_types;
-                    pub type EquivocationProof =
-                        runtime_types::sp_consensus_beefy::EquivocationProof<
-                            ::core::primitive::u32,
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Signature,
-                        >;
-                    pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
-                }
-                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocationUnsigned {
-                    const PALLET: &'static str = "Beefy";
-                    const CALL: &'static str = "report_equivocation_unsigned";
-                }
-                #[derive(
-                    :: subxt :: ext :: codec :: Decode,
-                    :: subxt :: ext :: codec :: Encode,
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: codec)]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                #[doc = "See [`Pallet::set_new_genesis`]."]
-                pub struct SetNewGenesis {
-                    pub delay_in_blocks: set_new_genesis::DelayInBlocks,
-                }
-                pub mod set_new_genesis {
-                    use super::runtime_types;
-                    pub type DelayInBlocks = ::core::primitive::u32;
-                }
-                impl ::subxt::blocks::StaticExtrinsic for SetNewGenesis {
-                    const PALLET: &'static str = "Beefy";
-                    const CALL: &'static str = "set_new_genesis";
-                }
-            }
-            pub struct TransactionApi;
-            impl TransactionApi {
-                #[doc = "See [`Pallet::report_equivocation`]."]
-                pub fn report_equivocation(
-                    &self,
-                    equivocation_proof: types::report_equivocation::EquivocationProof,
-                    key_owner_proof: types::report_equivocation::KeyOwnerProof,
-                ) -> ::subxt::tx::Payload<types::ReportEquivocation> {
-                    ::subxt::tx::Payload::new_static(
-                        "Beefy",
-                        "report_equivocation",
-                        types::ReportEquivocation {
-                            equivocation_proof: ::std::boxed::Box::new(equivocation_proof),
-                            key_owner_proof,
-                        },
-                        [
-                            156u8, 32u8, 92u8, 179u8, 165u8, 93u8, 216u8, 130u8, 121u8, 225u8,
-                            33u8, 141u8, 255u8, 12u8, 101u8, 136u8, 177u8, 25u8, 23u8, 239u8, 12u8,
-                            142u8, 88u8, 228u8, 85u8, 171u8, 218u8, 185u8, 146u8, 245u8, 149u8,
-                            85u8,
-                        ],
-                    )
-                }
-                #[doc = "See [`Pallet::report_equivocation_unsigned`]."]
-                pub fn report_equivocation_unsigned(
-                    &self,
-                    equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
-                    key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-                ) -> ::subxt::tx::Payload<types::ReportEquivocationUnsigned> {
-                    ::subxt::tx::Payload::new_static(
-                        "Beefy",
-                        "report_equivocation_unsigned",
-                        types::ReportEquivocationUnsigned {
-                            equivocation_proof: ::std::boxed::Box::new(equivocation_proof),
-                            key_owner_proof,
-                        },
-                        [
-                            126u8, 201u8, 236u8, 234u8, 107u8, 52u8, 37u8, 115u8, 228u8, 232u8,
-                            103u8, 193u8, 143u8, 224u8, 79u8, 192u8, 207u8, 204u8, 161u8, 103u8,
-                            210u8, 131u8, 64u8, 251u8, 48u8, 196u8, 249u8, 148u8, 2u8, 179u8,
-                            135u8, 121u8,
-                        ],
-                    )
-                }
-                #[doc = "See [`Pallet::set_new_genesis`]."]
-                pub fn set_new_genesis(
-                    &self,
-                    delay_in_blocks: types::set_new_genesis::DelayInBlocks,
-                ) -> ::subxt::tx::Payload<types::SetNewGenesis> {
-                    ::subxt::tx::Payload::new_static(
-                        "Beefy",
-                        "set_new_genesis",
-                        types::SetNewGenesis { delay_in_blocks },
-                        [
-                            147u8, 6u8, 252u8, 43u8, 77u8, 91u8, 170u8, 45u8, 112u8, 155u8, 158u8,
-                            79u8, 1u8, 116u8, 162u8, 146u8, 181u8, 9u8, 171u8, 48u8, 198u8, 210u8,
-                            243u8, 64u8, 229u8, 35u8, 28u8, 177u8, 144u8, 22u8, 165u8, 163u8,
-                        ],
-                    )
-                }
-            }
-        }
-        pub mod storage {
-            use super::runtime_types;
-            pub mod types {
-                use super::runtime_types;
-                pub mod authorities {
-                    use super::runtime_types;
-                    pub type Authorities =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
-                        >;
-                }
-                pub mod validator_set_id {
-                    use super::runtime_types;
-                    pub type ValidatorSetId = ::core::primitive::u64;
-                }
-                pub mod next_authorities {
-                    use super::runtime_types;
-                    pub type NextAuthorities =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
-                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
-                        >;
-                }
-                pub mod set_id_session {
-                    use super::runtime_types;
-                    pub type SetIdSession = ::core::primitive::u32;
-                    pub type Param0 = ::core::primitive::u64;
-                }
-                pub mod genesis_block {
-                    use super::runtime_types;
-                    pub type GenesisBlock = ::core::option::Option<::core::primitive::u32>;
-                }
-            }
-            pub struct StorageApi;
-            impl StorageApi {
-                #[doc = " The current authorities set"]
-                pub fn authorities(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::authorities::Authorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "Authorities",
-                        (),
-                        [
-                            53u8, 171u8, 94u8, 33u8, 46u8, 83u8, 105u8, 120u8, 123u8, 201u8, 141u8,
-                            71u8, 131u8, 150u8, 51u8, 121u8, 67u8, 45u8, 249u8, 146u8, 85u8, 113u8,
-                            23u8, 59u8, 59u8, 41u8, 0u8, 226u8, 98u8, 166u8, 253u8, 59u8,
-                        ],
-                    )
-                }
-                #[doc = " The current validator set id"]
-                pub fn validator_set_id(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::validator_set_id::ValidatorSetId,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "ValidatorSetId",
-                        (),
-                        [
-                            168u8, 84u8, 23u8, 134u8, 153u8, 30u8, 183u8, 176u8, 206u8, 100u8,
-                            109u8, 86u8, 109u8, 126u8, 146u8, 175u8, 173u8, 1u8, 253u8, 42u8,
-                            122u8, 207u8, 71u8, 4u8, 145u8, 83u8, 148u8, 29u8, 243u8, 52u8, 29u8,
-                            78u8,
-                        ],
-                    )
-                }
-                #[doc = " Authorities set scheduled to be used with the next session"]
-                pub fn next_authorities(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::next_authorities::NextAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "NextAuthorities",
-                        (),
-                        [
-                            87u8, 180u8, 0u8, 85u8, 209u8, 13u8, 131u8, 103u8, 8u8, 226u8, 42u8,
-                            72u8, 38u8, 47u8, 190u8, 78u8, 62u8, 4u8, 161u8, 130u8, 87u8, 196u8,
-                            13u8, 209u8, 205u8, 98u8, 104u8, 91u8, 3u8, 47u8, 82u8, 11u8,
-                        ],
-                    )
-                }
-                #[doc = " A mapping from BEEFY set ID to the index of the *most recent* session for which its"]
-                #[doc = " members were responsible."]
-                #[doc = ""]
-                #[doc = " This is only used for validating equivocation proofs. An equivocation proof must"]
-                #[doc = " contains a key-ownership proof for a given session, therefore we need a way to tie"]
-                #[doc = " together sessions and BEEFY set ids, i.e. we need to validate that a validator"]
-                #[doc = " was the owner of a given key on a given session, and what the active set ID was"]
-                #[doc = " during that session."]
-                #[doc = ""]
-                #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
-                pub fn set_id_session_iter(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::set_id_session::SetIdSession,
-                    (),
-                    (),
-                    ::subxt::storage::address::Yes,
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "SetIdSession",
-                        (),
-                        [
-                            47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
-                            65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
-                            238u8, 18u8, 209u8, 203u8, 38u8, 148u8, 16u8, 105u8, 72u8, 169u8,
-                        ],
-                    )
-                }
-                #[doc = " A mapping from BEEFY set ID to the index of the *most recent* session for which its"]
-                #[doc = " members were responsible."]
-                #[doc = ""]
-                #[doc = " This is only used for validating equivocation proofs. An equivocation proof must"]
-                #[doc = " contains a key-ownership proof for a given session, therefore we need a way to tie"]
-                #[doc = " together sessions and BEEFY set ids, i.e. we need to validate that a validator"]
-                #[doc = " was the owner of a given key on a given session, and what the active set ID was"]
-                #[doc = " during that session."]
-                #[doc = ""]
-                #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
-                pub fn set_id_session(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
-                ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
-                    types::set_id_session::SetIdSession,
-                    ::subxt::storage::address::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "SetIdSession",
-                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
-                        [
-                            47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
-                            65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
-                            238u8, 18u8, 209u8, 203u8, 38u8, 148u8, 16u8, 105u8, 72u8, 169u8,
-                        ],
-                    )
-                }
-                #[doc = " Block number where BEEFY consensus is enabled/started."]
-                #[doc = " By changing this (through privileged `set_new_genesis()`), BEEFY consensus is effectively"]
-                #[doc = " restarted from the newly set block number."]
-                pub fn genesis_block(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::genesis_block::GenesisBlock,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Beefy",
-                        "GenesisBlock",
-                        (),
-                        [
-                            198u8, 155u8, 11u8, 240u8, 189u8, 245u8, 159u8, 127u8, 55u8, 33u8,
-                            48u8, 29u8, 209u8, 119u8, 163u8, 24u8, 28u8, 22u8, 163u8, 163u8, 124u8,
-                            88u8, 126u8, 4u8, 193u8, 158u8, 29u8, 243u8, 212u8, 4u8, 41u8, 22u8,
-                        ],
-                    )
-                }
-            }
-        }
-        pub mod constants {
-            use super::runtime_types;
-            pub struct ConstantsApi;
-            impl ConstantsApi {
-                #[doc = " The maximum number of authorities that can be added."]
-                pub fn max_authorities(
-                    &self,
-                ) -> ::subxt::constants::Address<::core::primitive::u32> {
-                    ::subxt::constants::Address::new_static(
-                        "Beefy",
-                        "MaxAuthorities",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of nominators for each validator."]
-                pub fn max_nominators(
-                    &self,
-                ) -> ::subxt::constants::Address<::core::primitive::u32> {
-                    ::subxt::constants::Address::new_static(
-                        "Beefy",
-                        "MaxNominators",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of entries to keep in the set id to session index mapping."]
-                #[doc = ""]
-                #[doc = " Since the `SetIdSession` map is only used for validating equivocations this"]
-                #[doc = " value should relate to the bonding duration of whatever staking system is"]
-                #[doc = " being used (if any). If equivocation handling is not enabled then this value"]
-                #[doc = " can be zero."]
-                pub fn max_set_id_session_entries(
-                    &self,
-                ) -> ::subxt::constants::Address<::core::primitive::u64> {
-                    ::subxt::constants::Address::new_static(
-                        "Beefy",
-                        "MaxSetIdSessionEntries",
-                        [
-                            128u8, 214u8, 205u8, 242u8, 181u8, 142u8, 124u8, 231u8, 190u8, 146u8,
-                            59u8, 226u8, 157u8, 101u8, 103u8, 117u8, 249u8, 65u8, 18u8, 191u8,
-                            103u8, 119u8, 53u8, 85u8, 81u8, 96u8, 220u8, 42u8, 184u8, 239u8, 42u8,
-                            246u8,
-                        ],
-                    )
-                }
-            }
-        }
-    }
-    pub mod mmr {
-        use super::root_mod;
-        use super::runtime_types;
-        pub mod storage {
-            use super::runtime_types;
-            pub mod types {
-                use super::runtime_types;
-                pub mod root_hash {
-                    use super::runtime_types;
-                    pub type RootHash = ::subxt::utils::H256;
-                }
-                pub mod number_of_leaves {
-                    use super::runtime_types;
-                    pub type NumberOfLeaves = ::core::primitive::u64;
-                }
-                pub mod nodes {
-                    use super::runtime_types;
-                    pub type Nodes = ::subxt::utils::H256;
-                    pub type Param0 = ::core::primitive::u64;
-                }
-            }
-            pub struct StorageApi;
-            impl StorageApi {
-                #[doc = " Latest MMR Root hash."]
-                pub fn root_hash(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::root_hash::RootHash,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Mmr",
-                        "RootHash",
-                        (),
-                        [
-                            111u8, 206u8, 173u8, 92u8, 67u8, 49u8, 150u8, 113u8, 90u8, 245u8, 38u8,
-                            254u8, 76u8, 250u8, 167u8, 66u8, 130u8, 129u8, 251u8, 220u8, 172u8,
-                            229u8, 162u8, 251u8, 36u8, 227u8, 43u8, 189u8, 7u8, 106u8, 23u8, 13u8,
-                        ],
-                    )
-                }
-                #[doc = " Current size of the MMR (number of leaves)."]
-                pub fn number_of_leaves(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::number_of_leaves::NumberOfLeaves,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Mmr",
-                        "NumberOfLeaves",
-                        (),
-                        [
-                            123u8, 58u8, 149u8, 174u8, 85u8, 45u8, 20u8, 115u8, 241u8, 0u8, 51u8,
-                            174u8, 234u8, 60u8, 230u8, 59u8, 237u8, 144u8, 170u8, 32u8, 4u8, 0u8,
-                            34u8, 163u8, 238u8, 205u8, 93u8, 208u8, 53u8, 38u8, 141u8, 195u8,
-                        ],
-                    )
-                }
-                #[doc = " Hashes of the nodes in the MMR."]
-                #[doc = ""]
-                #[doc = " Note this collection only contains MMR peaks, the inner nodes (and leaves)"]
-                #[doc = " are pruned and only stored in the Offchain DB."]
-                pub fn nodes_iter(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::nodes::Nodes,
-                    (),
-                    (),
-                    ::subxt::storage::address::Yes,
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Mmr",
-                        "Nodes",
-                        (),
-                        [
-                            27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
-                            206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
-                            249u8, 197u8, 133u8, 78u8, 142u8, 71u8, 183u8, 3u8, 132u8, 25u8,
-                        ],
-                    )
-                }
-                #[doc = " Hashes of the nodes in the MMR."]
-                #[doc = ""]
-                #[doc = " Note this collection only contains MMR peaks, the inner nodes (and leaves)"]
-                #[doc = " are pruned and only stored in the Offchain DB."]
-                pub fn nodes(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<types::nodes::Param0>,
-                ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageKey<types::nodes::Param0>,
-                    types::nodes::Nodes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "Mmr",
-                        "Nodes",
-                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
-                        [
-                            27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
-                            206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
-                            249u8, 197u8, 133u8, 78u8, 142u8, 71u8, 183u8, 3u8, 132u8, 25u8,
-                        ],
-                    )
-                }
-            }
-        }
-    }
-    pub mod mmr_leaf {
-        use super::root_mod;
-        use super::runtime_types;
-        pub mod storage {
-            use super::runtime_types;
-            pub mod types {
-                use super::runtime_types;
-                pub mod beefy_authorities {
-                    use super::runtime_types;
-                    pub type BeefyAuthorities =
-                        runtime_types::sp_consensus_beefy::mmr::BeefyAuthoritySet<
-                            ::subxt::utils::H256,
-                        >;
-                }
-                pub mod beefy_next_authorities {
-                    use super::runtime_types;
-                    pub type BeefyNextAuthorities =
-                        runtime_types::sp_consensus_beefy::mmr::BeefyAuthoritySet<
-                            ::subxt::utils::H256,
-                        >;
-                }
-            }
-            pub struct StorageApi;
-            impl StorageApi {
-                #[doc = " Details of current BEEFY authority set."]
-                pub fn beefy_authorities(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::beefy_authorities::BeefyAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "MmrLeaf",
-                        "BeefyAuthorities",
-                        (),
-                        [
-                            128u8, 35u8, 176u8, 79u8, 224u8, 58u8, 214u8, 234u8, 231u8, 71u8,
-                            227u8, 153u8, 180u8, 189u8, 66u8, 44u8, 47u8, 174u8, 0u8, 83u8, 121u8,
-                            182u8, 226u8, 44u8, 224u8, 173u8, 237u8, 102u8, 231u8, 146u8, 110u8,
-                            7u8,
-                        ],
-                    )
-                }
-                #[doc = " Details of next BEEFY authority set."]
-                #[doc = ""]
-                #[doc = " This storage entry is used as cache for calls to `update_beefy_next_authority_set`."]
-                pub fn beefy_next_authorities(
-                    &self,
-                ) -> ::subxt::storage::address::Address<
-                    (),
-                    types::beefy_next_authorities::BeefyNextAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
-                    (),
-                > {
-                    ::subxt::storage::address::Address::new_static(
-                        "MmrLeaf",
-                        "BeefyNextAuthorities",
-                        (),
-                        [
-                            97u8, 71u8, 52u8, 111u8, 120u8, 251u8, 183u8, 155u8, 177u8, 100u8,
-                            236u8, 142u8, 204u8, 117u8, 95u8, 40u8, 201u8, 36u8, 32u8, 82u8, 38u8,
-                            234u8, 135u8, 39u8, 224u8, 69u8, 94u8, 85u8, 12u8, 89u8, 97u8, 218u8,
                         ],
                     )
                 }
@@ -12772,6 +12238,30 @@ pub mod api {
                     const PALLET: &'static str = "FellowshipCollective";
                     const CALL: &'static str = "cleanup_poll";
                 }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::exchange_member`]."]
+                pub struct ExchangeMember {
+                    pub who: exchange_member::Who,
+                    pub new_who: exchange_member::NewWho,
+                }
+                pub mod exchange_member {
+                    use super::runtime_types;
+                    pub type Who = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                    pub type NewWho = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ExchangeMember {
+                    const PALLET: &'static str = "FellowshipCollective";
+                    const CALL: &'static str = "exchange_member";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -12875,6 +12365,24 @@ pub mod api {
                             103u8, 92u8, 245u8, 25u8, 252u8, 158u8, 174u8, 137u8, 77u8, 251u8,
                             105u8, 113u8, 165u8, 46u8, 39u8, 55u8, 166u8, 79u8, 103u8, 81u8, 121u8,
                             37u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::exchange_member`]."]
+                pub fn exchange_member(
+                    &self,
+                    who: types::exchange_member::Who,
+                    new_who: types::exchange_member::NewWho,
+                ) -> ::subxt::tx::Payload<types::ExchangeMember> {
+                    ::subxt::tx::Payload::new_static(
+                        "FellowshipCollective",
+                        "exchange_member",
+                        types::ExchangeMember { who, new_who },
+                        [
+                            240u8, 208u8, 76u8, 147u8, 117u8, 23u8, 91u8, 37u8, 22u8, 101u8, 53u8,
+                            247u8, 161u8, 94u8, 109u8, 233u8, 104u8, 129u8, 67u8, 31u8, 223u8,
+                            182u8, 50u8, 233u8, 120u8, 129u8, 224u8, 135u8, 52u8, 162u8, 26u8,
+                            189u8,
                         ],
                     )
                 }
@@ -12982,6 +12490,30 @@ pub mod api {
             impl ::subxt::events::StaticEvent for Voted {
                 const PALLET: &'static str = "FellowshipCollective";
                 const EVENT: &'static str = "Voted";
+            }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The member `who` had their `AccountId` changed to `new_who`."]
+            pub struct MemberExchanged {
+                pub who: member_exchanged::Who,
+                pub new_who: member_exchanged::NewWho,
+            }
+            pub mod member_exchanged {
+                use super::runtime_types;
+                pub type Who = ::subxt::utils::AccountId32;
+                pub type NewWho = ::subxt::utils::AccountId32;
+            }
+            impl ::subxt::events::StaticEvent for MemberExchanged {
+                const PALLET: &'static str = "FellowshipCollective";
+                const EVENT: &'static str = "MemberExchanged";
             }
         }
         pub mod storage {
@@ -14706,10 +14238,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            210u8, 240u8, 64u8, 4u8, 78u8, 73u8, 77u8, 229u8, 128u8, 118u8, 167u8,
-                            126u8, 152u8, 130u8, 213u8, 196u8, 80u8, 141u8, 244u8, 241u8, 10u8,
-                            82u8, 152u8, 243u8, 94u8, 47u8, 137u8, 209u8, 151u8, 31u8, 103u8,
-                            230u8,
+                            22u8, 6u8, 147u8, 82u8, 187u8, 143u8, 69u8, 45u8, 97u8, 1u8, 106u8,
+                            162u8, 200u8, 33u8, 243u8, 148u8, 5u8, 143u8, 227u8, 242u8, 167u8,
+                            120u8, 17u8, 241u8, 102u8, 162u8, 217u8, 14u8, 178u8, 75u8, 143u8,
+                            104u8,
                         ],
                     )
                 }
@@ -15568,10 +15100,9 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            235u8, 69u8, 83u8, 214u8, 119u8, 108u8, 60u8, 227u8, 129u8, 43u8,
-                            230u8, 70u8, 242u8, 146u8, 178u8, 239u8, 75u8, 107u8, 16u8, 124u8,
-                            95u8, 189u8, 144u8, 191u8, 135u8, 243u8, 61u8, 102u8, 155u8, 3u8,
-                            230u8, 52u8,
+                            190u8, 76u8, 194u8, 104u8, 12u8, 228u8, 170u8, 51u8, 80u8, 255u8,
+                            245u8, 201u8, 1u8, 6u8, 37u8, 123u8, 161u8, 141u8, 178u8, 35u8, 195u8,
+                            118u8, 25u8, 175u8, 79u8, 55u8, 53u8, 247u8, 11u8, 160u8, 207u8, 242u8,
                         ],
                     )
                 }
@@ -15589,9 +15120,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            89u8, 19u8, 38u8, 160u8, 61u8, 225u8, 248u8, 36u8, 213u8, 109u8, 186u8,
-                            91u8, 66u8, 62u8, 55u8, 186u8, 159u8, 246u8, 125u8, 201u8, 101u8,
-                            209u8, 40u8, 35u8, 15u8, 186u8, 43u8, 216u8, 141u8, 244u8, 36u8, 178u8,
+                            150u8, 183u8, 64u8, 247u8, 10u8, 72u8, 40u8, 3u8, 104u8, 248u8, 146u8,
+                            47u8, 247u8, 114u8, 16u8, 108u8, 254u8, 162u8, 127u8, 91u8, 31u8,
+                            138u8, 203u8, 235u8, 247u8, 84u8, 30u8, 34u8, 228u8, 181u8, 103u8,
+                            246u8,
                         ],
                     )
                 }
@@ -15605,9 +15137,9 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            203u8, 246u8, 164u8, 119u8, 42u8, 254u8, 130u8, 113u8, 187u8, 95u8,
-                            175u8, 121u8, 73u8, 183u8, 95u8, 32u8, 103u8, 93u8, 214u8, 66u8, 148u8,
-                            143u8, 212u8, 50u8, 204u8, 219u8, 51u8, 37u8, 204u8, 6u8, 231u8, 133u8,
+                            93u8, 139u8, 245u8, 180u8, 137u8, 205u8, 82u8, 6u8, 172u8, 46u8, 253u8,
+                            155u8, 99u8, 197u8, 38u8, 242u8, 60u8, 160u8, 77u8, 73u8, 198u8, 233u8,
+                            204u8, 194u8, 156u8, 17u8, 64u8, 40u8, 156u8, 147u8, 212u8, 125u8,
                         ],
                     )
                 }
@@ -15625,9 +15157,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            209u8, 149u8, 31u8, 38u8, 134u8, 220u8, 22u8, 25u8, 8u8, 192u8, 23u8,
-                            136u8, 36u8, 95u8, 238u8, 118u8, 167u8, 158u8, 202u8, 37u8, 52u8, 69u8,
-                            46u8, 220u8, 60u8, 21u8, 120u8, 231u8, 193u8, 100u8, 103u8, 94u8,
+                            46u8, 149u8, 47u8, 127u8, 211u8, 128u8, 96u8, 199u8, 179u8, 166u8,
+                            217u8, 15u8, 47u8, 137u8, 115u8, 124u8, 111u8, 203u8, 27u8, 54u8, 85u8,
+                            196u8, 162u8, 158u8, 216u8, 158u8, 184u8, 166u8, 14u8, 14u8, 104u8,
+                            57u8,
                         ],
                     )
                 }
@@ -15641,9 +15174,10 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            79u8, 8u8, 104u8, 150u8, 79u8, 246u8, 104u8, 229u8, 224u8, 250u8, 43u8,
-                            122u8, 82u8, 183u8, 51u8, 198u8, 89u8, 164u8, 231u8, 218u8, 164u8,
-                            77u8, 190u8, 17u8, 80u8, 109u8, 36u8, 149u8, 138u8, 64u8, 63u8, 153u8,
+                            155u8, 161u8, 89u8, 164u8, 29u8, 151u8, 219u8, 213u8, 69u8, 167u8,
+                            226u8, 136u8, 117u8, 118u8, 112u8, 215u8, 137u8, 57u8, 237u8, 128u8,
+                            185u8, 217u8, 26u8, 24u8, 202u8, 14u8, 149u8, 113u8, 201u8, 155u8,
+                            203u8, 186u8,
                         ],
                     )
                 }
@@ -15661,10 +15195,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            162u8, 205u8, 237u8, 176u8, 167u8, 52u8, 45u8, 114u8, 66u8, 50u8,
-                            129u8, 249u8, 116u8, 253u8, 185u8, 76u8, 100u8, 236u8, 163u8, 104u8,
-                            64u8, 234u8, 102u8, 152u8, 93u8, 64u8, 37u8, 125u8, 82u8, 53u8, 145u8,
-                            220u8,
+                            47u8, 254u8, 18u8, 140u8, 124u8, 167u8, 16u8, 52u8, 50u8, 166u8, 123u8,
+                            107u8, 174u8, 238u8, 43u8, 129u8, 237u8, 255u8, 181u8, 210u8, 20u8,
+                            154u8, 96u8, 238u8, 219u8, 28u8, 74u8, 198u8, 122u8, 47u8, 13u8, 199u8,
                         ],
                     )
                 }
@@ -20042,9 +19575,9 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            85u8, 206u8, 232u8, 41u8, 57u8, 159u8, 145u8, 157u8, 94u8, 238u8, 80u8,
-                            26u8, 113u8, 194u8, 123u8, 196u8, 83u8, 235u8, 134u8, 102u8, 9u8,
-                            219u8, 64u8, 7u8, 251u8, 92u8, 23u8, 59u8, 188u8, 11u8, 24u8, 15u8,
+                            37u8, 58u8, 252u8, 116u8, 228u8, 248u8, 131u8, 216u8, 1u8, 33u8, 213u8,
+                            41u8, 203u8, 3u8, 225u8, 255u8, 195u8, 8u8, 172u8, 38u8, 249u8, 105u8,
+                            83u8, 16u8, 13u8, 213u8, 0u8, 91u8, 198u8, 141u8, 6u8, 16u8,
                         ],
                     )
                 }
@@ -21256,6 +20789,102 @@ pub mod api {
                     const PALLET: &'static str = "Scheduler";
                     const CALL: &'static str = "schedule_named_after";
                 }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::set_retry`]."]
+                pub struct SetRetry {
+                    pub task: set_retry::Task,
+                    pub retries: set_retry::Retries,
+                    pub period: set_retry::Period,
+                }
+                pub mod set_retry {
+                    use super::runtime_types;
+                    pub type Task = (::core::primitive::u32, ::core::primitive::u32);
+                    pub type Retries = ::core::primitive::u8;
+                    pub type Period = ::core::primitive::u32;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetRetry {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "set_retry";
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::set_retry_named`]."]
+                pub struct SetRetryNamed {
+                    pub id: set_retry_named::Id,
+                    pub retries: set_retry_named::Retries,
+                    pub period: set_retry_named::Period,
+                }
+                pub mod set_retry_named {
+                    use super::runtime_types;
+                    pub type Id = [::core::primitive::u8; 32usize];
+                    pub type Retries = ::core::primitive::u8;
+                    pub type Period = ::core::primitive::u32;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetRetryNamed {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "set_retry_named";
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::cancel_retry`]."]
+                pub struct CancelRetry {
+                    pub task: cancel_retry::Task,
+                }
+                pub mod cancel_retry {
+                    use super::runtime_types;
+                    pub type Task = (::core::primitive::u32, ::core::primitive::u32);
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelRetry {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "cancel_retry";
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::cancel_retry_named`]."]
+                pub struct CancelRetryNamed {
+                    pub id: cancel_retry_named::Id,
+                }
+                pub mod cancel_retry_named {
+                    use super::runtime_types;
+                    pub type Id = [::core::primitive::u8; 32usize];
+                }
+                impl ::subxt::blocks::StaticExtrinsic for CancelRetryNamed {
+                    const PALLET: &'static str = "Scheduler";
+                    const CALL: &'static str = "cancel_retry_named";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -21277,9 +20906,9 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            158u8, 215u8, 150u8, 176u8, 69u8, 99u8, 193u8, 8u8, 225u8, 121u8, 86u8,
-                            178u8, 93u8, 227u8, 146u8, 186u8, 199u8, 7u8, 249u8, 188u8, 55u8, 74u8,
-                            122u8, 251u8, 65u8, 50u8, 183u8, 238u8, 96u8, 252u8, 122u8, 186u8,
+                            138u8, 196u8, 26u8, 129u8, 131u8, 51u8, 78u8, 112u8, 92u8, 174u8, 12u8,
+                            239u8, 185u8, 165u8, 26u8, 20u8, 222u8, 255u8, 172u8, 151u8, 217u8,
+                            62u8, 14u8, 102u8, 128u8, 147u8, 143u8, 226u8, 72u8, 62u8, 155u8, 68u8,
                         ],
                     )
                 }
@@ -21321,9 +20950,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            40u8, 8u8, 195u8, 141u8, 167u8, 129u8, 96u8, 125u8, 51u8, 135u8, 252u8,
-                            10u8, 87u8, 220u8, 13u8, 137u8, 56u8, 188u8, 27u8, 59u8, 73u8, 47u8,
-                            136u8, 194u8, 218u8, 23u8, 33u8, 138u8, 91u8, 18u8, 80u8, 62u8,
+                            208u8, 81u8, 95u8, 195u8, 171u8, 238u8, 152u8, 17u8, 86u8, 72u8, 242u8,
+                            225u8, 129u8, 96u8, 255u8, 181u8, 233u8, 51u8, 174u8, 78u8, 111u8,
+                            251u8, 244u8, 84u8, 217u8, 223u8, 155u8, 119u8, 167u8, 221u8, 65u8,
+                            5u8,
                         ],
                     )
                 }
@@ -21361,9 +20991,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            66u8, 127u8, 226u8, 141u8, 231u8, 85u8, 141u8, 76u8, 145u8, 28u8,
-                            168u8, 30u8, 3u8, 53u8, 44u8, 126u8, 192u8, 214u8, 66u8, 113u8, 200u8,
-                            164u8, 109u8, 31u8, 31u8, 150u8, 91u8, 194u8, 172u8, 123u8, 8u8, 92u8,
+                            217u8, 111u8, 46u8, 195u8, 219u8, 234u8, 12u8, 95u8, 253u8, 237u8,
+                            76u8, 172u8, 88u8, 168u8, 167u8, 165u8, 199u8, 170u8, 207u8, 233u8,
+                            239u8, 33u8, 251u8, 30u8, 242u8, 210u8, 130u8, 254u8, 129u8, 30u8,
+                            186u8, 40u8,
                         ],
                     )
                 }
@@ -21387,10 +21018,87 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            26u8, 226u8, 147u8, 92u8, 228u8, 230u8, 99u8, 118u8, 206u8, 152u8,
-                            34u8, 209u8, 180u8, 135u8, 19u8, 43u8, 134u8, 19u8, 20u8, 106u8, 236u8,
-                            224u8, 120u8, 255u8, 113u8, 185u8, 193u8, 31u8, 58u8, 58u8, 136u8,
-                            239u8,
+                            79u8, 253u8, 17u8, 220u8, 97u8, 235u8, 221u8, 156u8, 35u8, 51u8, 19u8,
+                            230u8, 126u8, 42u8, 51u8, 92u8, 171u8, 168u8, 67u8, 13u8, 63u8, 185u8,
+                            58u8, 30u8, 7u8, 171u8, 53u8, 144u8, 156u8, 255u8, 237u8, 19u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::set_retry`]."]
+                pub fn set_retry(
+                    &self,
+                    task: types::set_retry::Task,
+                    retries: types::set_retry::Retries,
+                    period: types::set_retry::Period,
+                ) -> ::subxt::tx::Payload<types::SetRetry> {
+                    ::subxt::tx::Payload::new_static(
+                        "Scheduler",
+                        "set_retry",
+                        types::SetRetry {
+                            task,
+                            retries,
+                            period,
+                        },
+                        [
+                            2u8, 242u8, 180u8, 69u8, 237u8, 168u8, 243u8, 93u8, 47u8, 222u8, 189u8,
+                            74u8, 233u8, 106u8, 54u8, 40u8, 160u8, 61u8, 78u8, 138u8, 232u8, 20u8,
+                            243u8, 17u8, 151u8, 194u8, 67u8, 200u8, 186u8, 192u8, 210u8, 214u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::set_retry_named`]."]
+                pub fn set_retry_named(
+                    &self,
+                    id: types::set_retry_named::Id,
+                    retries: types::set_retry_named::Retries,
+                    period: types::set_retry_named::Period,
+                ) -> ::subxt::tx::Payload<types::SetRetryNamed> {
+                    ::subxt::tx::Payload::new_static(
+                        "Scheduler",
+                        "set_retry_named",
+                        types::SetRetryNamed {
+                            id,
+                            retries,
+                            period,
+                        },
+                        [
+                            240u8, 102u8, 255u8, 253u8, 52u8, 81u8, 164u8, 170u8, 184u8, 178u8,
+                            254u8, 126u8, 41u8, 247u8, 121u8, 22u8, 254u8, 136u8, 237u8, 37u8,
+                            11u8, 42u8, 227u8, 234u8, 132u8, 83u8, 109u8, 168u8, 31u8, 44u8, 231u8,
+                            70u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::cancel_retry`]."]
+                pub fn cancel_retry(
+                    &self,
+                    task: types::cancel_retry::Task,
+                ) -> ::subxt::tx::Payload<types::CancelRetry> {
+                    ::subxt::tx::Payload::new_static(
+                        "Scheduler",
+                        "cancel_retry",
+                        types::CancelRetry { task },
+                        [
+                            142u8, 126u8, 127u8, 216u8, 64u8, 189u8, 42u8, 126u8, 63u8, 249u8,
+                            211u8, 202u8, 224u8, 197u8, 199u8, 240u8, 58u8, 94u8, 219u8, 177u8,
+                            20u8, 210u8, 153u8, 0u8, 127u8, 255u8, 235u8, 238u8, 170u8, 240u8,
+                            44u8, 49u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::cancel_retry_named`]."]
+                pub fn cancel_retry_named(
+                    &self,
+                    id: types::cancel_retry_named::Id,
+                ) -> ::subxt::tx::Payload<types::CancelRetryNamed> {
+                    ::subxt::tx::Payload::new_static(
+                        "Scheduler",
+                        "cancel_retry_named",
+                        types::CancelRetryNamed { id },
+                        [
+                            76u8, 157u8, 253u8, 113u8, 162u8, 54u8, 98u8, 21u8, 62u8, 44u8, 155u8,
+                            202u8, 2u8, 28u8, 153u8, 219u8, 67u8, 166u8, 206u8, 79u8, 139u8, 3u8,
+                            119u8, 182u8, 254u8, 134u8, 143u8, 121u8, 155u8, 220u8, 192u8, 209u8,
                         ],
                     )
                 }
@@ -21485,6 +21193,58 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Set a retry configuration for some task."]
+            pub struct RetrySet {
+                pub task: retry_set::Task,
+                pub id: retry_set::Id,
+                pub period: retry_set::Period,
+                pub retries: retry_set::Retries,
+            }
+            pub mod retry_set {
+                use super::runtime_types;
+                pub type Task = (::core::primitive::u32, ::core::primitive::u32);
+                pub type Id = ::core::option::Option<[::core::primitive::u8; 32usize]>;
+                pub type Period = ::core::primitive::u32;
+                pub type Retries = ::core::primitive::u8;
+            }
+            impl ::subxt::events::StaticEvent for RetrySet {
+                const PALLET: &'static str = "Scheduler";
+                const EVENT: &'static str = "RetrySet";
+            }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Cancel a retry configuration for some task."]
+            pub struct RetryCancelled {
+                pub task: retry_cancelled::Task,
+                pub id: retry_cancelled::Id,
+            }
+            pub mod retry_cancelled {
+                use super::runtime_types;
+                pub type Task = (::core::primitive::u32, ::core::primitive::u32);
+                pub type Id = ::core::option::Option<[::core::primitive::u8; 32usize]>;
+            }
+            impl ::subxt::events::StaticEvent for RetryCancelled {
+                const PALLET: &'static str = "Scheduler";
+                const EVENT: &'static str = "RetryCancelled";
+            }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "The call for the provided hash was not found so the task has been aborted."]
             pub struct CallUnavailable {
                 pub task: call_unavailable::Task,
@@ -21522,6 +21282,31 @@ pub mod api {
             impl ::subxt::events::StaticEvent for PeriodicFailed {
                 const PALLET: &'static str = "Scheduler";
                 const EVENT: &'static str = "PeriodicFailed";
+            }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The given task was unable to be retried since the agenda is full at that block or there"]
+            #[doc = "was not enough weight to reschedule it."]
+            pub struct RetryFailed {
+                pub task: retry_failed::Task,
+                pub id: retry_failed::Id,
+            }
+            pub mod retry_failed {
+                use super::runtime_types;
+                pub type Task = (::core::primitive::u32, ::core::primitive::u32);
+                pub type Id = ::core::option::Option<[::core::primitive::u8; 32usize]>;
+            }
+            impl ::subxt::events::StaticEvent for RetryFailed {
+                const PALLET: &'static str = "Scheduler";
+                const EVENT: &'static str = "RetryFailed";
             }
             #[derive(
                 :: subxt :: ext :: codec :: Decode,
@@ -21573,6 +21358,13 @@ pub mod api {
                         >,
                     >;
                     pub type Param0 = ::core::primitive::u32;
+                }
+                pub mod retries {
+                    use super::runtime_types;
+                    pub type Retries =
+                        runtime_types::pallet_scheduler::RetryConfig<::core::primitive::u32>;
+                    pub type Param0 = ::core::primitive::u32;
+                    pub type Param1 = ::core::primitive::u32;
                 }
                 pub mod lookup {
                     use super::runtime_types;
@@ -21642,6 +21434,80 @@ pub mod api {
                             10u8, 123u8, 252u8, 106u8, 154u8, 9u8, 245u8, 203u8, 188u8, 254u8,
                             20u8, 41u8, 6u8, 226u8, 78u8, 188u8, 0u8, 173u8, 143u8, 44u8, 117u8,
                             249u8, 180u8, 13u8, 236u8, 224u8, 170u8, 202u8, 24u8, 3u8, 163u8, 37u8,
+                        ],
+                    )
+                }
+                #[doc = " Retry configurations for items to be executed, indexed by task address."]
+                pub fn retries_iter(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::retries::Retries,
+                    (),
+                    (),
+                    ::subxt::storage::address::Yes,
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Scheduler",
+                        "Retries",
+                        vec![],
+                        [
+                            164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
+                            146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
+                            59u8, 32u8, 77u8, 201u8, 27u8, 78u8, 183u8, 164u8, 74u8, 46u8, 139u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " Retry configurations for items to be executed, indexed by task address."]
+                pub fn retries_iter1(
+                    &self,
+                    _0: impl ::std::borrow::Borrow<types::retries::Param0>,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::retries::Retries,
+                    (),
+                    (),
+                    ::subxt::storage::address::Yes,
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Scheduler",
+                        "Retries",
+                        vec![::subxt::storage::address::make_static_storage_map_key(
+                            _0.borrow(),
+                        )],
+                        [
+                            164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
+                            146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
+                            59u8, 32u8, 77u8, 201u8, 27u8, 78u8, 183u8, 164u8, 74u8, 46u8, 139u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " Retry configurations for items to be executed, indexed by task address."]
+                pub fn retries(
+                    &self,
+                    _0: impl ::std::borrow::Borrow<types::retries::Param0>,
+                    _1: impl ::std::borrow::Borrow<types::retries::Param1>,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::retries::Retries,
+                    ::subxt::storage::address::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Scheduler",
+                        "Retries",
+                        vec![
+                            ::subxt::storage::address::make_static_storage_map_key(_0.borrow()),
+                            ::subxt::storage::address::make_static_storage_map_key(_1.borrow()),
+                        ],
+                        [
+                            164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
+                            146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
+                            59u8, 32u8, 77u8, 201u8, 27u8, 78u8, 183u8, 164u8, 74u8, 46u8, 139u8,
+                            145u8,
                         ],
                     )
                 }
@@ -22029,9 +21895,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            122u8, 7u8, 247u8, 164u8, 62u8, 254u8, 12u8, 208u8, 188u8, 49u8, 244u8,
-                            153u8, 59u8, 65u8, 73u8, 58u8, 88u8, 134u8, 255u8, 150u8, 157u8, 8u8,
-                            153u8, 41u8, 21u8, 186u8, 114u8, 71u8, 128u8, 108u8, 203u8, 20u8,
+                            27u8, 41u8, 64u8, 205u8, 145u8, 228u8, 163u8, 100u8, 114u8, 12u8,
+                            176u8, 150u8, 113u8, 197u8, 148u8, 23u8, 28u8, 27u8, 246u8, 111u8,
+                            117u8, 252u8, 190u8, 69u8, 164u8, 213u8, 185u8, 65u8, 213u8, 172u8,
+                            183u8, 205u8,
                         ],
                     )
                 }
@@ -22215,9 +22082,9 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            109u8, 140u8, 6u8, 12u8, 91u8, 4u8, 254u8, 2u8, 91u8, 243u8, 154u8,
-                            79u8, 83u8, 153u8, 67u8, 160u8, 206u8, 37u8, 85u8, 25u8, 10u8, 224u8,
-                            146u8, 227u8, 134u8, 129u8, 191u8, 47u8, 243u8, 93u8, 215u8, 222u8,
+                            81u8, 161u8, 1u8, 212u8, 29u8, 249u8, 101u8, 27u8, 174u8, 148u8, 164u8,
+                            13u8, 37u8, 206u8, 239u8, 219u8, 107u8, 255u8, 101u8, 108u8, 122u8,
+                            46u8, 19u8, 233u8, 82u8, 130u8, 11u8, 148u8, 40u8, 212u8, 214u8, 39u8,
                         ],
                     )
                 }
@@ -22738,9 +22605,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            174u8, 71u8, 76u8, 85u8, 10u8, 92u8, 166u8, 33u8, 124u8, 212u8, 89u8,
-                            40u8, 24u8, 94u8, 252u8, 139u8, 68u8, 122u8, 191u8, 247u8, 212u8, 48u8,
-                            173u8, 252u8, 86u8, 57u8, 178u8, 208u8, 56u8, 49u8, 64u8, 182u8,
+                            160u8, 32u8, 154u8, 37u8, 200u8, 55u8, 129u8, 224u8, 146u8, 248u8,
+                            74u8, 123u8, 141u8, 242u8, 178u8, 218u8, 203u8, 229u8, 3u8, 189u8,
+                            150u8, 28u8, 101u8, 126u8, 182u8, 233u8, 181u8, 254u8, 146u8, 180u8,
+                            124u8, 102u8,
                         ],
                     )
                 }
@@ -22764,9 +22632,10 @@ pub mod api {
                             max_weight,
                         },
                         [
-                            122u8, 132u8, 216u8, 231u8, 74u8, 72u8, 208u8, 47u8, 203u8, 32u8, 71u8,
-                            2u8, 240u8, 74u8, 236u8, 139u8, 226u8, 162u8, 182u8, 152u8, 69u8, 62u8,
-                            172u8, 188u8, 119u8, 227u8, 134u8, 59u8, 255u8, 164u8, 74u8, 179u8,
+                            253u8, 142u8, 244u8, 88u8, 243u8, 78u8, 231u8, 191u8, 169u8, 215u8,
+                            44u8, 15u8, 85u8, 234u8, 100u8, 22u8, 80u8, 150u8, 80u8, 119u8, 5u8,
+                            183u8, 239u8, 148u8, 100u8, 219u8, 211u8, 155u8, 23u8, 228u8, 34u8,
+                            231u8,
                         ],
                     )
                 }
@@ -26635,6 +26504,31 @@ pub mod api {
                     const PALLET: &'static str = "NisCounterpartBalances";
                     const CALL: &'static str = "force_set_balance";
                 }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                pub struct ForceAdjustTotalIssuance {
+                    pub direction: force_adjust_total_issuance::Direction,
+                    #[codec(compact)]
+                    pub delta: force_adjust_total_issuance::Delta,
+                }
+                pub mod force_adjust_total_issuance {
+                    use super::runtime_types;
+                    pub type Direction = runtime_types::pallet_balances::types::AdjustmentDirection;
+                    pub type Delta = ::core::primitive::u128;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ForceAdjustTotalIssuance {
+                    const PALLET: &'static str = "NisCounterpartBalances";
+                    const CALL: &'static str = "force_adjust_total_issuance";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -26760,6 +26654,24 @@ pub mod api {
                             114u8, 229u8, 59u8, 204u8, 180u8, 83u8, 17u8, 4u8, 59u8, 4u8, 55u8,
                             39u8, 151u8, 196u8, 124u8, 60u8, 209u8, 65u8, 193u8, 11u8, 44u8, 164u8,
                             116u8, 93u8, 169u8, 30u8, 199u8, 165u8, 55u8, 231u8, 223u8, 43u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                pub fn force_adjust_total_issuance(
+                    &self,
+                    direction: types::force_adjust_total_issuance::Direction,
+                    delta: types::force_adjust_total_issuance::Delta,
+                ) -> ::subxt::tx::Payload<types::ForceAdjustTotalIssuance> {
+                    ::subxt::tx::Payload::new_static(
+                        "NisCounterpartBalances",
+                        "force_adjust_total_issuance",
+                        types::ForceAdjustTotalIssuance { direction, delta },
+                        [
+                            208u8, 134u8, 56u8, 133u8, 232u8, 164u8, 10u8, 213u8, 53u8, 193u8,
+                            190u8, 63u8, 236u8, 186u8, 96u8, 122u8, 104u8, 87u8, 173u8, 38u8, 58u8,
+                            176u8, 21u8, 78u8, 42u8, 106u8, 46u8, 248u8, 251u8, 190u8, 150u8,
+                            202u8,
                         ],
                     )
                 }
@@ -27276,6 +27188,30 @@ pub mod api {
                 const PALLET: &'static str = "NisCounterpartBalances";
                 const EVENT: &'static str = "Thawed";
             }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The `TotalIssuance` was forcefully changed."]
+            pub struct TotalIssuanceForced {
+                pub old: total_issuance_forced::Old,
+                pub new: total_issuance_forced::New,
+            }
+            pub mod total_issuance_forced {
+                use super::runtime_types;
+                pub type Old = ::core::primitive::u128;
+                pub type New = ::core::primitive::u128;
+            }
+            impl ::subxt::events::StaticEvent for TotalIssuanceForced {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "TotalIssuanceForced";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -27692,19 +27628,6 @@ pub mod api {
                     ::subxt::constants::Address::new_static(
                         "NisCounterpartBalances",
                         "MaxReserves",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of holds that can exist on an account at any time."]
-                pub fn max_holds(&self) -> ::subxt::constants::Address<::core::primitive::u32> {
-                    ::subxt::constants::Address::new_static(
-                        "NisCounterpartBalances",
-                        "MaxHolds",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -29608,9 +29531,9 @@ pub mod api {
                         "ActiveConfig",
                         (),
                         [
-                            241u8, 129u8, 175u8, 69u8, 121u8, 171u8, 135u8, 98u8, 205u8, 87u8,
-                            244u8, 201u8, 27u8, 143u8, 112u8, 77u8, 83u8, 107u8, 22u8, 120u8, 58u8,
-                            74u8, 48u8, 72u8, 236u8, 132u8, 248u8, 60u8, 131u8, 107u8, 7u8, 98u8,
+                            121u8, 69u8, 70u8, 58u8, 91u8, 124u8, 53u8, 11u8, 49u8, 82u8, 119u8,
+                            36u8, 116u8, 193u8, 238u8, 208u8, 187u8, 148u8, 200u8, 30u8, 174u8,
+                            195u8, 201u8, 181u8, 40u8, 93u8, 153u8, 220u8, 158u8, 24u8, 153u8, 5u8,
                         ],
                     )
                 }
@@ -30341,9 +30264,7 @@ pub mod api {
                     )
                 }
                 #[doc = " One entry for each availability core. The `VecDeque` represents the assignments to be"]
-                #[doc = " scheduled on that core. `None` is used to signal to not schedule the next para of the core"]
-                #[doc = " as there is one currently being scheduled. Not using `None` here would overwrite the"]
-                #[doc = " `CoreState` in the runtime API. The value contained here will not be valid after the end of"]
+                #[doc = " scheduled on that core. The value contained here will not be valid after the end of"]
                 #[doc = " a block. Runtime APIs should be used to determine scheduled cores/ for the upcoming block."]
                 pub fn claim_queue(
                     &self,
@@ -39307,6 +39228,28 @@ pub mod api {
                 const PALLET: &'static str = "XcmPallet";
                 const EVENT: &'static str = "AssetsClaimed";
             }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A XCM version migration finished."]
+            pub struct VersionMigrationFinished {
+                pub version: version_migration_finished::Version,
+            }
+            pub mod version_migration_finished {
+                use super::runtime_types;
+                pub type Version = ::core::primitive::u32;
+            }
+            impl ::subxt::events::StaticEvent for VersionMigrationFinished {
+                const PALLET: &'static str = "XcmPallet";
+                const EVENT: &'static str = "VersionMigrationFinished";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -39994,6 +39937,598 @@ pub mod api {
                             182u8, 54u8, 69u8, 68u8, 78u8, 76u8, 103u8, 79u8, 47u8, 136u8, 99u8,
                             104u8, 128u8, 129u8, 249u8, 54u8, 214u8, 136u8, 97u8, 48u8, 178u8,
                             42u8, 26u8, 27u8, 82u8, 24u8, 33u8, 77u8, 33u8, 27u8, 20u8, 127u8,
+                        ],
+                    )
+                }
+            }
+        }
+    }
+    pub mod beefy {
+        use super::root_mod;
+        use super::runtime_types;
+        #[doc = "The `Error` enum of this pallet."]
+        pub type Error = runtime_types::pallet_beefy::pallet::Error;
+        #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+        pub type Call = runtime_types::pallet_beefy::pallet::Call;
+        pub mod calls {
+            use super::root_mod;
+            use super::runtime_types;
+            type DispatchError = runtime_types::sp_runtime::DispatchError;
+            pub mod types {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::report_equivocation`]."]
+                pub struct ReportEquivocation {
+                    pub equivocation_proof:
+                        ::std::boxed::Box<report_equivocation::EquivocationProof>,
+                    pub key_owner_proof: report_equivocation::KeyOwnerProof,
+                }
+                pub mod report_equivocation {
+                    use super::runtime_types;
+                    pub type EquivocationProof =
+                        runtime_types::sp_consensus_beefy::EquivocationProof<
+                            ::core::primitive::u32,
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Signature,
+                        >;
+                    pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocation {
+                    const PALLET: &'static str = "Beefy";
+                    const CALL: &'static str = "report_equivocation";
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::report_equivocation_unsigned`]."]
+                pub struct ReportEquivocationUnsigned {
+                    pub equivocation_proof:
+                        ::std::boxed::Box<report_equivocation_unsigned::EquivocationProof>,
+                    pub key_owner_proof: report_equivocation_unsigned::KeyOwnerProof,
+                }
+                pub mod report_equivocation_unsigned {
+                    use super::runtime_types;
+                    pub type EquivocationProof =
+                        runtime_types::sp_consensus_beefy::EquivocationProof<
+                            ::core::primitive::u32,
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Signature,
+                        >;
+                    pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for ReportEquivocationUnsigned {
+                    const PALLET: &'static str = "Beefy";
+                    const CALL: &'static str = "report_equivocation_unsigned";
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                #[doc = "See [`Pallet::set_new_genesis`]."]
+                pub struct SetNewGenesis {
+                    pub delay_in_blocks: set_new_genesis::DelayInBlocks,
+                }
+                pub mod set_new_genesis {
+                    use super::runtime_types;
+                    pub type DelayInBlocks = ::core::primitive::u32;
+                }
+                impl ::subxt::blocks::StaticExtrinsic for SetNewGenesis {
+                    const PALLET: &'static str = "Beefy";
+                    const CALL: &'static str = "set_new_genesis";
+                }
+            }
+            pub struct TransactionApi;
+            impl TransactionApi {
+                #[doc = "See [`Pallet::report_equivocation`]."]
+                pub fn report_equivocation(
+                    &self,
+                    equivocation_proof: types::report_equivocation::EquivocationProof,
+                    key_owner_proof: types::report_equivocation::KeyOwnerProof,
+                ) -> ::subxt::tx::Payload<types::ReportEquivocation> {
+                    ::subxt::tx::Payload::new_static(
+                        "Beefy",
+                        "report_equivocation",
+                        types::ReportEquivocation {
+                            equivocation_proof: ::std::boxed::Box::new(equivocation_proof),
+                            key_owner_proof,
+                        },
+                        [
+                            156u8, 32u8, 92u8, 179u8, 165u8, 93u8, 216u8, 130u8, 121u8, 225u8,
+                            33u8, 141u8, 255u8, 12u8, 101u8, 136u8, 177u8, 25u8, 23u8, 239u8, 12u8,
+                            142u8, 88u8, 228u8, 85u8, 171u8, 218u8, 185u8, 146u8, 245u8, 149u8,
+                            85u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::report_equivocation_unsigned`]."]
+                pub fn report_equivocation_unsigned(
+                    &self,
+                    equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
+                    key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
+                ) -> ::subxt::tx::Payload<types::ReportEquivocationUnsigned> {
+                    ::subxt::tx::Payload::new_static(
+                        "Beefy",
+                        "report_equivocation_unsigned",
+                        types::ReportEquivocationUnsigned {
+                            equivocation_proof: ::std::boxed::Box::new(equivocation_proof),
+                            key_owner_proof,
+                        },
+                        [
+                            126u8, 201u8, 236u8, 234u8, 107u8, 52u8, 37u8, 115u8, 228u8, 232u8,
+                            103u8, 193u8, 143u8, 224u8, 79u8, 192u8, 207u8, 204u8, 161u8, 103u8,
+                            210u8, 131u8, 64u8, 251u8, 48u8, 196u8, 249u8, 148u8, 2u8, 179u8,
+                            135u8, 121u8,
+                        ],
+                    )
+                }
+                #[doc = "See [`Pallet::set_new_genesis`]."]
+                pub fn set_new_genesis(
+                    &self,
+                    delay_in_blocks: types::set_new_genesis::DelayInBlocks,
+                ) -> ::subxt::tx::Payload<types::SetNewGenesis> {
+                    ::subxt::tx::Payload::new_static(
+                        "Beefy",
+                        "set_new_genesis",
+                        types::SetNewGenesis { delay_in_blocks },
+                        [
+                            147u8, 6u8, 252u8, 43u8, 77u8, 91u8, 170u8, 45u8, 112u8, 155u8, 158u8,
+                            79u8, 1u8, 116u8, 162u8, 146u8, 181u8, 9u8, 171u8, 48u8, 198u8, 210u8,
+                            243u8, 64u8, 229u8, 35u8, 28u8, 177u8, 144u8, 22u8, 165u8, 163u8,
+                        ],
+                    )
+                }
+            }
+        }
+        pub mod storage {
+            use super::runtime_types;
+            pub mod types {
+                use super::runtime_types;
+                pub mod authorities {
+                    use super::runtime_types;
+                    pub type Authorities =
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                        >;
+                }
+                pub mod validator_set_id {
+                    use super::runtime_types;
+                    pub type ValidatorSetId = ::core::primitive::u64;
+                }
+                pub mod next_authorities {
+                    use super::runtime_types;
+                    pub type NextAuthorities =
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                        >;
+                }
+                pub mod set_id_session {
+                    use super::runtime_types;
+                    pub type SetIdSession = ::core::primitive::u32;
+                    pub type Param0 = ::core::primitive::u64;
+                }
+                pub mod genesis_block {
+                    use super::runtime_types;
+                    pub type GenesisBlock = ::core::option::Option<::core::primitive::u32>;
+                }
+            }
+            pub struct StorageApi;
+            impl StorageApi {
+                #[doc = " The current authorities set"]
+                pub fn authorities(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::authorities::Authorities,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "Authorities",
+                        vec![],
+                        [
+                            53u8, 171u8, 94u8, 33u8, 46u8, 83u8, 105u8, 120u8, 123u8, 201u8, 141u8,
+                            71u8, 131u8, 150u8, 51u8, 121u8, 67u8, 45u8, 249u8, 146u8, 85u8, 113u8,
+                            23u8, 59u8, 59u8, 41u8, 0u8, 226u8, 98u8, 166u8, 253u8, 59u8,
+                        ],
+                    )
+                }
+                #[doc = " The current validator set id"]
+                pub fn validator_set_id(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::validator_set_id::ValidatorSetId,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "ValidatorSetId",
+                        vec![],
+                        [
+                            168u8, 84u8, 23u8, 134u8, 153u8, 30u8, 183u8, 176u8, 206u8, 100u8,
+                            109u8, 86u8, 109u8, 126u8, 146u8, 175u8, 173u8, 1u8, 253u8, 42u8,
+                            122u8, 207u8, 71u8, 4u8, 145u8, 83u8, 148u8, 29u8, 243u8, 52u8, 29u8,
+                            78u8,
+                        ],
+                    )
+                }
+                #[doc = " Authorities set scheduled to be used with the next session"]
+                pub fn next_authorities(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::next_authorities::NextAuthorities,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "NextAuthorities",
+                        vec![],
+                        [
+                            87u8, 180u8, 0u8, 85u8, 209u8, 13u8, 131u8, 103u8, 8u8, 226u8, 42u8,
+                            72u8, 38u8, 47u8, 190u8, 78u8, 62u8, 4u8, 161u8, 130u8, 87u8, 196u8,
+                            13u8, 209u8, 205u8, 98u8, 104u8, 91u8, 3u8, 47u8, 82u8, 11u8,
+                        ],
+                    )
+                }
+                #[doc = " A mapping from BEEFY set ID to the index of the *most recent* session for which its"]
+                #[doc = " members were responsible."]
+                #[doc = ""]
+                #[doc = " This is only used for validating equivocation proofs. An equivocation proof must"]
+                #[doc = " contains a key-ownership proof for a given session, therefore we need a way to tie"]
+                #[doc = " together sessions and BEEFY set ids, i.e. we need to validate that a validator"]
+                #[doc = " was the owner of a given key on a given session, and what the active set ID was"]
+                #[doc = " during that session."]
+                #[doc = ""]
+                #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
+                pub fn set_id_session_iter(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::set_id_session::SetIdSession,
+                    (),
+                    (),
+                    ::subxt::storage::address::Yes,
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "SetIdSession",
+                        vec![],
+                        [
+                            47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
+                            65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
+                            238u8, 18u8, 209u8, 203u8, 38u8, 148u8, 16u8, 105u8, 72u8, 169u8,
+                        ],
+                    )
+                }
+                #[doc = " A mapping from BEEFY set ID to the index of the *most recent* session for which its"]
+                #[doc = " members were responsible."]
+                #[doc = ""]
+                #[doc = " This is only used for validating equivocation proofs. An equivocation proof must"]
+                #[doc = " contains a key-ownership proof for a given session, therefore we need a way to tie"]
+                #[doc = " together sessions and BEEFY set ids, i.e. we need to validate that a validator"]
+                #[doc = " was the owner of a given key on a given session, and what the active set ID was"]
+                #[doc = " during that session."]
+                #[doc = ""]
+                #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
+                pub fn set_id_session(
+                    &self,
+                    _0: impl ::std::borrow::Borrow<types::set_id_session::Param0>,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::set_id_session::SetIdSession,
+                    ::subxt::storage::address::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "SetIdSession",
+                        vec![::subxt::storage::address::make_static_storage_map_key(
+                            _0.borrow(),
+                        )],
+                        [
+                            47u8, 0u8, 239u8, 121u8, 187u8, 213u8, 254u8, 50u8, 238u8, 10u8, 162u8,
+                            65u8, 189u8, 166u8, 37u8, 74u8, 82u8, 81u8, 160u8, 20u8, 180u8, 253u8,
+                            238u8, 18u8, 209u8, 203u8, 38u8, 148u8, 16u8, 105u8, 72u8, 169u8,
+                        ],
+                    )
+                }
+                #[doc = " Block number where BEEFY consensus is enabled/started."]
+                #[doc = " By changing this (through privileged `set_new_genesis()`), BEEFY consensus is effectively"]
+                #[doc = " restarted from the newly set block number."]
+                pub fn genesis_block(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::genesis_block::GenesisBlock,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Beefy",
+                        "GenesisBlock",
+                        vec![],
+                        [
+                            198u8, 155u8, 11u8, 240u8, 189u8, 245u8, 159u8, 127u8, 55u8, 33u8,
+                            48u8, 29u8, 209u8, 119u8, 163u8, 24u8, 28u8, 22u8, 163u8, 163u8, 124u8,
+                            88u8, 126u8, 4u8, 193u8, 158u8, 29u8, 243u8, 212u8, 4u8, 41u8, 22u8,
+                        ],
+                    )
+                }
+            }
+        }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " The maximum number of authorities that can be added."]
+                pub fn max_authorities(
+                    &self,
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
+                        "Beefy",
+                        "MaxAuthorities",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " The maximum number of nominators for each validator."]
+                pub fn max_nominators(
+                    &self,
+                ) -> ::subxt::constants::Address<::core::primitive::u32> {
+                    ::subxt::constants::Address::new_static(
+                        "Beefy",
+                        "MaxNominators",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " The maximum number of entries to keep in the set id to session index mapping."]
+                #[doc = ""]
+                #[doc = " Since the `SetIdSession` map is only used for validating equivocations this"]
+                #[doc = " value should relate to the bonding duration of whatever staking system is"]
+                #[doc = " being used (if any). If equivocation handling is not enabled then this value"]
+                #[doc = " can be zero."]
+                pub fn max_set_id_session_entries(
+                    &self,
+                ) -> ::subxt::constants::Address<::core::primitive::u64> {
+                    ::subxt::constants::Address::new_static(
+                        "Beefy",
+                        "MaxSetIdSessionEntries",
+                        [
+                            128u8, 214u8, 205u8, 242u8, 181u8, 142u8, 124u8, 231u8, 190u8, 146u8,
+                            59u8, 226u8, 157u8, 101u8, 103u8, 117u8, 249u8, 65u8, 18u8, 191u8,
+                            103u8, 119u8, 53u8, 85u8, 81u8, 96u8, 220u8, 42u8, 184u8, 239u8, 42u8,
+                            246u8,
+                        ],
+                    )
+                }
+            }
+        }
+    }
+    pub mod mmr {
+        use super::root_mod;
+        use super::runtime_types;
+        pub mod storage {
+            use super::runtime_types;
+            pub mod types {
+                use super::runtime_types;
+                pub mod root_hash {
+                    use super::runtime_types;
+                    pub type RootHash = ::subxt::utils::H256;
+                }
+                pub mod number_of_leaves {
+                    use super::runtime_types;
+                    pub type NumberOfLeaves = ::core::primitive::u64;
+                }
+                pub mod nodes {
+                    use super::runtime_types;
+                    pub type Nodes = ::subxt::utils::H256;
+                    pub type Param0 = ::core::primitive::u64;
+                }
+            }
+            pub struct StorageApi;
+            impl StorageApi {
+                #[doc = " Latest MMR Root hash."]
+                pub fn root_hash(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::root_hash::RootHash,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Mmr",
+                        "RootHash",
+                        vec![],
+                        [
+                            111u8, 206u8, 173u8, 92u8, 67u8, 49u8, 150u8, 113u8, 90u8, 245u8, 38u8,
+                            254u8, 76u8, 250u8, 167u8, 66u8, 130u8, 129u8, 251u8, 220u8, 172u8,
+                            229u8, 162u8, 251u8, 36u8, 227u8, 43u8, 189u8, 7u8, 106u8, 23u8, 13u8,
+                        ],
+                    )
+                }
+                #[doc = " Current size of the MMR (number of leaves)."]
+                pub fn number_of_leaves(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::number_of_leaves::NumberOfLeaves,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Mmr",
+                        "NumberOfLeaves",
+                        vec![],
+                        [
+                            123u8, 58u8, 149u8, 174u8, 85u8, 45u8, 20u8, 115u8, 241u8, 0u8, 51u8,
+                            174u8, 234u8, 60u8, 230u8, 59u8, 237u8, 144u8, 170u8, 32u8, 4u8, 0u8,
+                            34u8, 163u8, 238u8, 205u8, 93u8, 208u8, 53u8, 38u8, 141u8, 195u8,
+                        ],
+                    )
+                }
+                #[doc = " Hashes of the nodes in the MMR."]
+                #[doc = ""]
+                #[doc = " Note this collection only contains MMR peaks, the inner nodes (and leaves)"]
+                #[doc = " are pruned and only stored in the Offchain DB."]
+                pub fn nodes_iter(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::nodes::Nodes,
+                    (),
+                    (),
+                    ::subxt::storage::address::Yes,
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Mmr",
+                        "Nodes",
+                        vec![],
+                        [
+                            27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
+                            206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
+                            249u8, 197u8, 133u8, 78u8, 142u8, 71u8, 183u8, 3u8, 132u8, 25u8,
+                        ],
+                    )
+                }
+                #[doc = " Hashes of the nodes in the MMR."]
+                #[doc = ""]
+                #[doc = " Note this collection only contains MMR peaks, the inner nodes (and leaves)"]
+                #[doc = " are pruned and only stored in the Offchain DB."]
+                pub fn nodes(
+                    &self,
+                    _0: impl ::std::borrow::Borrow<types::nodes::Param0>,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::nodes::Nodes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "Mmr",
+                        "Nodes",
+                        vec![::subxt::storage::address::make_static_storage_map_key(
+                            _0.borrow(),
+                        )],
+                        [
+                            27u8, 84u8, 41u8, 195u8, 146u8, 81u8, 211u8, 189u8, 63u8, 125u8, 173u8,
+                            206u8, 69u8, 198u8, 202u8, 213u8, 89u8, 31u8, 89u8, 177u8, 76u8, 154u8,
+                            249u8, 197u8, 133u8, 78u8, 142u8, 71u8, 183u8, 3u8, 132u8, 25u8,
+                        ],
+                    )
+                }
+            }
+        }
+    }
+    pub mod mmr_leaf {
+        use super::root_mod;
+        use super::runtime_types;
+        pub mod storage {
+            use super::runtime_types;
+            pub mod types {
+                use super::runtime_types;
+                pub mod beefy_authorities {
+                    use super::runtime_types;
+                    pub type BeefyAuthorities =
+                        runtime_types::sp_consensus_beefy::mmr::BeefyAuthoritySet<
+                            ::subxt::utils::H256,
+                        >;
+                }
+                pub mod beefy_next_authorities {
+                    use super::runtime_types;
+                    pub type BeefyNextAuthorities =
+                        runtime_types::sp_consensus_beefy::mmr::BeefyAuthoritySet<
+                            ::subxt::utils::H256,
+                        >;
+                }
+            }
+            pub struct StorageApi;
+            impl StorageApi {
+                #[doc = " Details of current BEEFY authority set."]
+                pub fn beefy_authorities(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::beefy_authorities::BeefyAuthorities,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "MmrLeaf",
+                        "BeefyAuthorities",
+                        vec![],
+                        [
+                            128u8, 35u8, 176u8, 79u8, 224u8, 58u8, 214u8, 234u8, 231u8, 71u8,
+                            227u8, 153u8, 180u8, 189u8, 66u8, 44u8, 47u8, 174u8, 0u8, 83u8, 121u8,
+                            182u8, 226u8, 44u8, 224u8, 173u8, 237u8, 102u8, 231u8, 146u8, 110u8,
+                            7u8,
+                        ],
+                    )
+                }
+                #[doc = " Details of next BEEFY authority set."]
+                #[doc = ""]
+                #[doc = " This storage entry is used as cache for calls to `update_beefy_next_authority_set`."]
+                pub fn beefy_next_authorities(
+                    &self,
+                ) -> ::subxt::storage::address::Address<
+                    ::subxt::storage::address::StaticStorageMapKey,
+                    types::beefy_next_authorities::BeefyNextAuthorities,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    (),
+                > {
+                    ::subxt::storage::address::Address::new_static(
+                        "MmrLeaf",
+                        "BeefyNextAuthorities",
+                        vec![],
+                        [
+                            97u8, 71u8, 52u8, 111u8, 120u8, 251u8, 183u8, 155u8, 177u8, 100u8,
+                            236u8, 142u8, 204u8, 117u8, 95u8, 40u8, 201u8, 36u8, 32u8, 82u8, 38u8,
+                            234u8, 135u8, 39u8, 224u8, 69u8, 94u8, 85u8, 12u8, 89u8, 97u8, 218u8,
                         ],
                     )
                 }
@@ -41972,10 +42507,10 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            126u8, 191u8, 96u8, 252u8, 103u8, 117u8, 232u8, 59u8, 13u8, 216u8,
-                            200u8, 186u8, 103u8, 56u8, 211u8, 188u8, 66u8, 63u8, 12u8, 200u8,
-                            114u8, 107u8, 46u8, 113u8, 249u8, 239u8, 130u8, 235u8, 107u8, 167u8,
-                            28u8, 234u8,
+                            129u8, 167u8, 214u8, 9u8, 176u8, 203u8, 82u8, 70u8, 118u8, 155u8,
+                            220u8, 184u8, 74u8, 62u8, 231u8, 49u8, 151u8, 73u8, 97u8, 9u8, 254u8,
+                            88u8, 44u8, 197u8, 205u8, 60u8, 182u8, 226u8, 195u8, 245u8, 253u8,
+                            241u8,
                         ],
                     )
                 }
@@ -41993,9 +42528,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            115u8, 252u8, 134u8, 42u8, 167u8, 146u8, 239u8, 12u8, 141u8, 126u8,
-                            53u8, 7u8, 6u8, 51u8, 253u8, 87u8, 111u8, 24u8, 23u8, 167u8, 28u8,
-                            210u8, 65u8, 219u8, 65u8, 167u8, 41u8, 51u8, 139u8, 44u8, 132u8, 82u8,
+                            29u8, 141u8, 94u8, 132u8, 67u8, 244u8, 164u8, 193u8, 22u8, 27u8, 211u8,
+                            2u8, 138u8, 11u8, 60u8, 46u8, 32u8, 62u8, 190u8, 74u8, 153u8, 171u8,
+                            78u8, 200u8, 16u8, 60u8, 158u8, 114u8, 139u8, 232u8, 52u8, 40u8,
                         ],
                     )
                 }
@@ -42029,9 +42564,9 @@ pub mod api {
                             call: ::std::boxed::Box::new(call),
                         },
                         [
-                            51u8, 226u8, 36u8, 234u8, 26u8, 132u8, 248u8, 140u8, 45u8, 72u8, 176u8,
-                            70u8, 127u8, 173u8, 147u8, 25u8, 21u8, 188u8, 41u8, 93u8, 2u8, 214u8,
-                            39u8, 150u8, 155u8, 68u8, 91u8, 193u8, 73u8, 101u8, 118u8, 119u8,
+                            173u8, 60u8, 217u8, 75u8, 249u8, 36u8, 21u8, 151u8, 225u8, 59u8, 148u8,
+                            137u8, 185u8, 252u8, 116u8, 231u8, 19u8, 27u8, 240u8, 9u8, 177u8, 20u8,
+                            216u8, 90u8, 87u8, 7u8, 78u8, 173u8, 57u8, 221u8, 223u8, 42u8,
                         ],
                     )
                 }
@@ -43111,6 +43646,13 @@ pub mod api {
                         #[codec(compact)]
                         new_free: ::core::primitive::u128,
                     },
+                    #[codec(index = 9)]
+                    #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                    force_adjust_total_issuance {
+                        direction: runtime_types::pallet_balances::types::AdjustmentDirection,
+                        #[codec(compact)]
+                        delta: ::core::primitive::u128,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -43170,6 +43712,13 @@ pub mod api {
                         #[codec(compact)]
                         new_free: ::core::primitive::u128,
                     },
+                    #[codec(index = 9)]
+                    #[doc = "See [`Pallet::force_adjust_total_issuance`]."]
+                    force_adjust_total_issuance {
+                        direction: runtime_types::pallet_balances::types::AdjustmentDirection,
+                        #[codec(compact)]
+                        delta: ::core::primitive::u128,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -43208,11 +43757,17 @@ pub mod api {
                     #[doc = "Number of named reserves exceed `MaxReserves`."]
                     TooManyReserves,
                     #[codec(index = 8)]
-                    #[doc = "Number of holds exceed `MaxHolds`."]
+                    #[doc = "Number of holds exceed `VariantCountOf<T::RuntimeHoldReason>`."]
                     TooManyHolds,
                     #[codec(index = 9)]
                     #[doc = "Number of freezes exceed `MaxFreezes`."]
                     TooManyFreezes,
+                    #[codec(index = 10)]
+                    #[doc = "The issuance cannot be modified since it is already deactivated."]
+                    IssuanceDeactivated,
+                    #[codec(index = 11)]
+                    #[doc = "The delta cannot be zero."]
+                    DeltaZero,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -43251,11 +43806,17 @@ pub mod api {
                     #[doc = "Number of named reserves exceed `MaxReserves`."]
                     TooManyReserves,
                     #[codec(index = 8)]
-                    #[doc = "Number of holds exceed `MaxHolds`."]
+                    #[doc = "Number of holds exceed `VariantCountOf<T::RuntimeHoldReason>`."]
                     TooManyHolds,
                     #[codec(index = 9)]
                     #[doc = "Number of freezes exceed `MaxFreezes`."]
                     TooManyFreezes,
+                    #[codec(index = 10)]
+                    #[doc = "The issuance cannot be modified since it is already deactivated."]
+                    IssuanceDeactivated,
+                    #[codec(index = 11)]
+                    #[doc = "The delta cannot be zero."]
+                    DeltaZero,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -43391,6 +43952,12 @@ pub mod api {
                     Thawed {
                         who: ::subxt::utils::AccountId32,
                         amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 21)]
+                    #[doc = "The `TotalIssuance` was forcefully changed."]
+                    TotalIssuanceForced {
+                        old: ::core::primitive::u128,
+                        new: ::core::primitive::u128,
                     },
                 }
                 #[derive(
@@ -43528,6 +44095,12 @@ pub mod api {
                         who: ::subxt::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 21)]
+                    #[doc = "The `TotalIssuance` was forcefully changed."]
+                    TotalIssuanceForced {
+                        old: ::core::primitive::u128,
+                        new: ::core::primitive::u128,
+                    },
                 }
             }
             pub mod types {
@@ -43547,6 +44120,22 @@ pub mod api {
                     pub reserved: _0,
                     pub frozen: _0,
                     pub flags: runtime_types::pallet_balances::types::ExtraFlags,
+                }
+                #[derive(
+                    :: subxt :: ext :: codec :: Decode,
+                    :: subxt :: ext :: codec :: Encode,
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: codec)]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub enum AdjustmentDirection {
+                    #[codec(index = 0)]
+                    Increase,
+                    #[codec(index = 1)]
+                    Decrease,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -44251,7 +44840,7 @@ pub mod api {
                     AlreadyDelegating,
                     #[codec(index = 5)]
                     #[doc = "The account currently has votes attached to it and the operation cannot succeed until"]
-                    #[doc = "these are removed, either through `unvote` or `reap_vote`."]
+                    #[doc = "these are removed through `remove_vote`."]
                     AlreadyVoting,
                     #[codec(index = 6)]
                     #[doc = "Too high a balance was provided that the account cannot afford."]
@@ -46242,6 +46831,12 @@ pub mod api {
                         poll_index: ::core::primitive::u32,
                         max: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
+                    #[doc = "See [`Pallet::exchange_member`]."]
+                    exchange_member {
+                        who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                        new_who: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -46282,6 +46877,9 @@ pub mod api {
                     #[codec(index = 8)]
                     #[doc = "The origin is not sufficiently privileged to do the operation."]
                     NoPermission,
+                    #[codec(index = 9)]
+                    #[doc = "The new member to exchange is the same as the old member"]
+                    SameMember,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -46318,6 +46916,12 @@ pub mod api {
                         poll: ::core::primitive::u32,
                         vote: runtime_types::pallet_ranked_collective::VoteRecord,
                         tally: runtime_types::pallet_ranked_collective::Tally,
+                    },
+                    #[codec(index = 4)]
+                    #[doc = "The member `who` had their `AccountId` changed to `new_who`."]
+                    MemberExchanged {
+                        who: ::subxt::utils::AccountId32,
+                        new_who: ::subxt::utils::AccountId32,
                     },
                 }
             }
@@ -47317,6 +47921,30 @@ pub mod api {
                         priority: ::core::primitive::u8,
                         call: ::std::boxed::Box<runtime_types::rococo_runtime::RuntimeCall>,
                     },
+                    #[codec(index = 6)]
+                    #[doc = "See [`Pallet::set_retry`]."]
+                    set_retry {
+                        task: (::core::primitive::u32, ::core::primitive::u32),
+                        retries: ::core::primitive::u8,
+                        period: ::core::primitive::u32,
+                    },
+                    #[codec(index = 7)]
+                    #[doc = "See [`Pallet::set_retry_named`]."]
+                    set_retry_named {
+                        id: [::core::primitive::u8; 32usize],
+                        retries: ::core::primitive::u8,
+                        period: ::core::primitive::u32,
+                    },
+                    #[codec(index = 8)]
+                    #[doc = "See [`Pallet::cancel_retry`]."]
+                    cancel_retry {
+                        task: (::core::primitive::u32, ::core::primitive::u32),
+                    },
+                    #[codec(index = 9)]
+                    #[doc = "See [`Pallet::cancel_retry_named`]."]
+                    cancel_retry_named {
+                        id: [::core::primitive::u8; 32usize],
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -47379,24 +48007,60 @@ pub mod api {
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Set a retry configuration for some task."]
+                    RetrySet {
+                        task: (::core::primitive::u32, ::core::primitive::u32),
+                        id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                        period: ::core::primitive::u32,
+                        retries: ::core::primitive::u8,
+                    },
+                    #[codec(index = 4)]
+                    #[doc = "Cancel a retry configuration for some task."]
+                    RetryCancelled {
+                        task: (::core::primitive::u32, ::core::primitive::u32),
+                        id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                    },
+                    #[codec(index = 5)]
                     #[doc = "The call for the provided hash was not found so the task has been aborted."]
                     CallUnavailable {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
-                    #[codec(index = 4)]
+                    #[codec(index = 6)]
                     #[doc = "The given task was unable to be renewed since the agenda is full at that block."]
                     PeriodicFailed {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
-                    #[codec(index = 5)]
+                    #[codec(index = 7)]
+                    #[doc = "The given task was unable to be retried since the agenda is full at that block or there"]
+                    #[doc = "was not enough weight to reschedule it."]
+                    RetryFailed {
+                        task: (::core::primitive::u32, ::core::primitive::u32),
+                        id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                    },
+                    #[codec(index = 8)]
                     #[doc = "The given task can never be executed since it is overweight."]
                     PermanentlyOverweight {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
                 }
+            }
+            #[derive(
+                :: subxt :: ext :: codec :: Decode,
+                :: subxt :: ext :: codec :: Encode,
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            pub struct RetryConfig<_0> {
+                pub total_retries: ::core::primitive::u8,
+                pub remaining: ::core::primitive::u8,
+                pub period: _0,
             }
             #[derive(
                 :: subxt :: ext :: codec :: Decode,
@@ -49410,6 +50074,9 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v4::location::Location,
                         assets: runtime_types::xcm::VersionedAssets,
                     },
+                    #[codec(index = 23)]
+                    #[doc = "A XCM version migration finished."]
+                    VersionMigrationFinished { version: ::core::primitive::u32 },
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -51372,8 +52039,8 @@ pub mod api {
                         #[doc = "The ID given for registration has not been reserved."]
                         NotReserved,
                         #[codec(index = 12)]
-                        #[doc = "Registering parachain with empty code is not allowed."]
-                        EmptyCode,
+                        #[doc = "The validation code is invalid."]
+                        InvalidCode,
                         #[codec(index = 13)]
                         #[doc = "Cannot perform a parachain slot / lifecycle swap. Check that the state of both paras"]
                         #[doc = "are correct for the swap to work."]
@@ -52688,6 +53355,9 @@ pub mod api {
                         #[codec(index = 11)]
                         #[doc = "Parachain cannot currently schedule a code upgrade."]
                         CannotUpgradeCode,
+                        #[codec(index = 12)]
+                        #[doc = "Invalid validation code size."]
+                        InvalidCode,
                     }
                     #[derive(
                         :: subxt :: ext :: codec :: Decode,
@@ -53182,8 +53852,6 @@ pub mod api {
                 Indices(runtime_types::pallet_indices::pallet::Call),
                 #[codec(index = 4)]
                 Balances(runtime_types::pallet_balances::pallet::Call),
-                #[codec(index = 240)]
-                Beefy(runtime_types::pallet_beefy::pallet::Call),
                 #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::Call),
                 #[codec(index = 10)]
@@ -53272,6 +53940,8 @@ pub mod api {
                 Coretime(runtime_types::polkadot_runtime_parachains::coretime::pallet::Call),
                 #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::Call),
+                #[codec(index = 240)]
+                Beefy(runtime_types::pallet_beefy::pallet::Call),
                 #[codec(index = 248)]
                 IdentityMigrator(
                     runtime_types::polkadot_runtime_common::identity_migrator::pallet::Call,
@@ -53310,8 +53980,6 @@ pub mod api {
                 Indices(runtime_types::pallet_indices::pallet::Error),
                 #[codec(index = 4)]
                 Balances(runtime_types::pallet_balances::pallet::Error),
-                #[codec(index = 240)]
-                Beefy(runtime_types::pallet_beefy::pallet::Error),
                 #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::Error),
                 #[codec(index = 10)]
@@ -53400,6 +54068,8 @@ pub mod api {
                 Coretime(runtime_types::polkadot_runtime_parachains::coretime::pallet::Error),
                 #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::Error),
+                #[codec(index = 240)]
+                Beefy(runtime_types::pallet_beefy::pallet::Error),
                 #[codec(index = 250)]
                 ParasSudoWrapper(
                     runtime_types::polkadot_runtime_common::paras_sudo_wrapper::pallet::Error,
