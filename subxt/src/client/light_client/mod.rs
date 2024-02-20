@@ -20,6 +20,7 @@ use crate::{
     tx::TxClient,
     OnlineClient,
 };
+use super::BaseClient;
 pub use builder::{LightClientBuilder, RawLightClientBuilder};
 use derivative::Derivative;
 use subxt_lightclient::LightClientRpcError;
@@ -132,6 +133,11 @@ impl<T: Config> LightClient<T> {
         self.client.runtime_version()
     }
 
+    /// Return the inner [`BaseClient`].
+    pub fn base_client(&self) -> BaseClient<T> {
+        self.client.base_client()
+    }
+
     /// Work with transactions.
     pub fn tx(&self) -> TxClient<T, Self> {
         <Self as OfflineClientT<T>>::tx(self)
@@ -190,5 +196,9 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
 
     fn runtime_version(&self) -> crate::backend::RuntimeVersion {
         self.runtime_version()
+    }
+
+    fn base_client(&self) -> BaseClient<T> {
+        self.base_client()
     }
 }

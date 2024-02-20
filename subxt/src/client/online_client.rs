@@ -358,7 +358,6 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
     }
-
     fn base_client(&self) -> BaseClient<T> {
         self.base_client()
     }
