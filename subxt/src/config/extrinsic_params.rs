@@ -87,8 +87,10 @@ pub struct BaseParams<T: Config> {
     pub nonce: u64,
 }
 
-/// Types implementing this trait can be constructed from a minimal set of data provided by the client.
+/// Types implementing this trait can be constructed from some minimal data ([`BaseParams`]) provided by the client.
 /// Implementing this trait is similar to implementing Default, only that we pass in some prior information here.
+/// We use this trait to provide defaults for the `Params` associated type of ExtrinsicParams for cases where the `Params`
+/// are not specified by the user.
 pub trait FromBaseParams<T: Config> {
     /// Constructs the value from the given mandatory params.
     fn from_base_params(params: &BaseParams<T>) -> Self;
@@ -98,7 +100,7 @@ impl<T: Config> FromBaseParams<T> for () {
     fn from_base_params(_params: &BaseParams<T>) {}
 }
 
-macro_rules! impl_default_from_tuples {
+macro_rules! impl_tuples {
     ($($ident:ident),+) => {
         impl <T: Config, $($ident),+> FromBaseParams<T> for ($($ident,)+)
         where
@@ -113,28 +115,28 @@ macro_rules! impl_default_from_tuples {
     }
 }
 
-// Note: these implementations are necessary, such that `DefaultOrFrom` works with `AnyOf` where arbitrary tuples are the `OtherParams`.
+// Note: these implementations are necessary, such that `FromBaseParams` works with `AnyOf` where arbitrary tuples are the `Params`.
 #[rustfmt::skip]
 const _: () = {
-    impl_default_from_tuples!(A);
-    impl_default_from_tuples!(A, B);
-    impl_default_from_tuples!(A, B, C);
-    impl_default_from_tuples!(A, B, C, D);
-    impl_default_from_tuples!(A, B, C, D, E);
-    impl_default_from_tuples!(A, B, C, D, E, F);
-    impl_default_from_tuples!(A, B, C, D, E, F, G);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U);
-    impl_default_from_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U, V);
+    impl_tuples!(A);
+    impl_tuples!(A, B);
+    impl_tuples!(A, B, C);
+    impl_tuples!(A, B, C, D);
+    impl_tuples!(A, B, C, D, E);
+    impl_tuples!(A, B, C, D, E, F);
+    impl_tuples!(A, B, C, D, E, F, G);
+    impl_tuples!(A, B, C, D, E, F, G, H);
+    impl_tuples!(A, B, C, D, E, F, G, H, I);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U);
+    impl_tuples!(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, U, V);
 };

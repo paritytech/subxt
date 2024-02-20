@@ -27,7 +27,8 @@ pub use online_client::{
 
 use crate::{backend::RuntimeVersion, Config, Metadata};
 
-/// The inner values, any client should contain.
+/// Some inner values any client should contain.
+/// In a [`crate::OfflineClient`] these are fixed, while in a [`crate::OnlineClient`] they might get updated over time.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct BaseClient<T: Config> {

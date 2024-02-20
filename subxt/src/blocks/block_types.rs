@@ -66,7 +66,7 @@ where
         &self.header
     }
 
-    /// Return the entire block header. Consumes the block itself
+    /// Return the entire block header. Consumes the block.
     pub fn into_header(self) -> T::Header {
         self.header
     }

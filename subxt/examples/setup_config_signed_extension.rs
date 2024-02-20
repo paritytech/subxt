@@ -78,10 +78,10 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 }
 
 // When composing a tuple of signed extensions, the user parameters we need must
-// be able to convert `Into` a tuple of corresponding `OtherParams`. Here, we just
-// "hijack" the default param builder, but add the `OtherParams` (`()`) for our
+// be able to convert `Into` a tuple of corresponding `Params`. Here, we just
+// "hijack" the default param builder, but add the `Params` (`()`) for our
 // new signed extension at the end, to make the types line up. IN reality you may wish
-// to construct an entirely new interface to provide the relevant `OtherParams`.
+// to construct an entirely new interface to provide the relevant `Params`.
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::Params {
