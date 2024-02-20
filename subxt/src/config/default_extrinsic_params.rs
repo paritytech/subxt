@@ -20,12 +20,14 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
     ),
 >;
 
-/// A builder that outputs the set of [`super::ExtrinsicParams::OtherParams`] required for
+/// A builder that outputs the set of [`super::ExtrinsicParams::Params`] required for
 /// [`DefaultExtrinsicParams`]. This may expose methods that aren't applicable to the current
 /// chain; such values will simply be ignored if so.
 pub struct DefaultExtrinsicParamsBuilder<T: Config> {
     /// `None` means the tx will be immortal.
     mortality: Option<Mortality<T::Hash>>,
+    /// The account nonce has to be set explicitly when creating extrinsic params.
+    nonce: Option<u64>,
     /// `None` means we'll use the native token.
     tip_of_asset_id: Option<T::AssetId>,
     tip: u128,
@@ -36,7 +38,7 @@ struct Mortality<Hash> {
     /// Block hash that mortality starts from
     checkpoint_hash: Hash,
     /// Block number that mortality starts from (must
-    // point to the same block as the hash above)
+    /// point to the same block as the hash above)
     checkpoint_number: u64,
     /// How many blocks the tx is mortal for
     period: u64,
@@ -46,6 +48,7 @@ impl<T: Config> Default for DefaultExtrinsicParamsBuilder<T> {
     fn default() -> Self {
         Self {
             mortality: None,
+            nonce: None,
             tip: 0,
             tip_of: 0,
             tip_of_asset_id: None,
@@ -111,7 +114,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     }
 
     /// Build the extrinsic parameters.
-    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams {
+    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::Params {
         let check_mortality_params = if let Some(mortality) = self.mortality {
             signed_extensions::CheckMortalityParams::mortal(
                 mortality.period,
@@ -128,13 +131,15 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             signed_extensions::ChargeAssetTxPaymentParams::tip(self.tip)
         };
 
+        let check_nonce_params = signed_extensions::CheckNonceParams(self.nonce);
+
         let charge_transaction_params =
             signed_extensions::ChargeTransactionPaymentParams::tip(self.tip);
 
         (
             (),
             (),
-            (),
+            check_nonce_params,
             (),
             check_mortality_params,
             charge_asset_tx_params,

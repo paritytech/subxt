@@ -7,9 +7,8 @@
 //! [`AnyOf`] to configure the set of signed extensions which are known about
 //! when interacting with a chain.
 
-use super::extrinsic_params::{
-    DefaultOrFrom, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError,
-};
+use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use super::{BaseParams, FromBaseParams};
 use crate::config::Header;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
@@ -40,14 +39,15 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
 pub struct CheckSpecVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
-    type OtherParams = ();
+    type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        client: Client,
-        _other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckSpecVersion(client.runtime_version().spec_version))
+        Ok(CheckSpecVersion(
+            base_params.client.runtime_version().spec_version,
+        ))
     }
 }
 
@@ -68,13 +68,13 @@ impl<T: Config> SignedExtension<T> for CheckSpecVersion {
 pub struct CheckNonce(Compact<u64>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
-    type OtherParams = ();
+    type Params = CheckNonceParams;
 
-    fn new<Client: OfflineClientT<T>>(
-        nonce: u64,
-        _client: Client,
-        _other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
+        let nonce = params.0.unwrap_or_else(|| base_params.nonce);
         Ok(CheckNonce(Compact(nonce)))
     }
 }
@@ -92,18 +92,29 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
     }
 }
 
+/// The nonce can be explicitly set to `Some(_)` or left empty with `None`. In this case it will be taken from the base params.
+#[derive(Debug, Clone, Default)]
+pub struct CheckNonceParams(pub Option<u64>);
+
+impl<T: Config> FromBaseParams<T> for CheckNonceParams {
+    fn from_base_params(params: &BaseParams<T>) -> Self {
+        CheckNonceParams(Some(params.nonce))
+    }
+}
+
 /// The [`CheckTxVersion`] signed extension.
 pub struct CheckTxVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
-    type OtherParams = ();
+    type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        client: Client,
-        _other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckTxVersion(client.runtime_version().transaction_version))
+        Ok(CheckTxVersion(
+            base_params.client.runtime_version().transaction_version,
+        ))
     }
 }
 
@@ -124,14 +135,13 @@ impl<T: Config> SignedExtension<T> for CheckTxVersion {
 pub struct CheckGenesis<T: Config>(T::Hash);
 
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
-    type OtherParams = ();
+    type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        client: Client,
-        _other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckGenesis(client.genesis_hash()))
+        Ok(CheckGenesis(base_params.client.genesis_hash()))
     }
 }
 
@@ -169,9 +179,9 @@ impl<T: Config> Default for CheckMortalityParams<T> {
     }
 }
 
-impl<T: Config> DefaultOrFrom<T::Header> for CheckMortalityParams<T> {
-    fn default_or_from(value: Option<&T::Header>) -> Self {
-        if let Some(header) = value {
+impl<T: Config> FromBaseParams<T> for CheckMortalityParams<T> {
+    fn from_base_params(params: &BaseParams<T>) -> Self {
+        if let Some(header) = &params.latest_block_header {
             const FOR_N_BLOCKS: u64 = 32;
             CheckMortalityParams::mortal(FOR_N_BLOCKS, header.number().into(), header.hash())
         } else {
@@ -201,16 +211,17 @@ impl<T: Config> CheckMortalityParams<T> {
 }
 
 impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
-    type OtherParams = CheckMortalityParams<T>;
+    type Params = CheckMortalityParams<T>;
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        client: Client,
-        other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckMortality {
-            era: other_params.era,
-            checkpoint: other_params.checkpoint.unwrap_or(client.genesis_hash()),
+            era: params.era,
+            checkpoint: params
+                .checkpoint
+                .unwrap_or(base_params.client.genesis_hash()),
         })
     }
 }
@@ -267,8 +278,8 @@ impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
     }
 }
 
-impl<T: Config> DefaultOrFrom<T::Header> for ChargeAssetTxPaymentParams<T> {
-    fn default_or_from(_value: Option<&T::Header>) -> Self {
+impl<T: Config> FromBaseParams<T> for ChargeAssetTxPaymentParams<T> {
+    fn from_base_params(params: &BaseParams<T>) -> Self {
         Default::default()
     }
 }
@@ -298,16 +309,15 @@ impl<T: Config> ChargeAssetTxPaymentParams<T> {
 }
 
 impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
-    type OtherParams = ChargeAssetTxPaymentParams<T>;
+    type Params = ChargeAssetTxPaymentParams<T>;
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        _client: Client,
-        other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
-            tip: Compact(other_params.tip),
-            asset_id: other_params.asset_id,
+            tip: Compact(params.tip),
+            asset_id: params.asset_id,
         })
     }
 }
@@ -344,8 +354,8 @@ pub struct ChargeTransactionPaymentParams {
     tip: u128,
 }
 
-impl<T> DefaultOrFrom<T> for ChargeTransactionPaymentParams {
-    fn default_or_from(_value: Option<&T>) -> Self {
+impl<T: Config> FromBaseParams<T> for ChargeTransactionPaymentParams {
+    fn from_base_params(params: &BaseParams<T>) -> Self {
         Default::default()
     }
 }
@@ -362,15 +372,14 @@ impl ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
-    type OtherParams = ChargeTransactionPaymentParams;
+    type Params = ChargeTransactionPaymentParams;
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        _client: Client,
-        other_params: Self::OtherParams,
+    fn new(
+        base_params: &BaseParams<T>,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {
-            tip: Compact(other_params.tip),
+            tip: Compact(params.tip),
         })
     }
 }
@@ -406,14 +415,13 @@ macro_rules! impl_tuples {
             T: Config,
             $($ident: SignedExtension<T>,)+
         {
-            type OtherParams = ($($ident::OtherParams,)+);
+            type Params = ($($ident::Params,)+);
 
-            fn new<Client: OfflineClientT<T>>(
-                nonce: u64,
-                client: Client,
-                other_params: Self::OtherParams,
+            fn new(
+                base_params: &BaseParams<T>,
+                params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
-                let metadata = client.metadata();
+                let metadata = base_params.client.metadata();
                 let types = metadata.types();
 
                 // For each signed extension in the tuple, find the matching index in the metadata, if
@@ -427,7 +435,7 @@ macro_rules! impl_tuples {
                         }
                         // Break and record as soon as we find a match:
                         if $ident::matches(e.identifier(), e.extra_ty(), types) {
-                            let ext = $ident::new(nonce, client.clone(), other_params.$index)?;
+                            let ext = $ident::new(base_params, params.$index)?;
                             let boxed_ext: Box<dyn ExtrinsicParamsEncoder> = Box::new(ext);
                             exts_by_index.insert(idx, boxed_ext);
                             break

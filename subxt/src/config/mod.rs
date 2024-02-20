@@ -24,7 +24,7 @@ use serde::{de::DeserializeOwned, Serialize};
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 pub use extrinsic_params::{
-    DefaultOrFrom, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError,
+    BaseParams, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, FromBaseParams,
 };
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use signed_extensions::SignedExtension;
@@ -62,7 +62,7 @@ pub trait Config: Sized + Send + Sync + 'static {
 }
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
-pub type OtherParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams;
+pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::Params;
 
 /// Block hashes must conform to a bunch of things to be used in Subxt.
 pub trait BlockHash:

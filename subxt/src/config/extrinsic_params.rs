@@ -7,7 +7,7 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::OfflineClientT, Config};
+use crate::{client::BaseClient, Config};
 use core::fmt::Debug;
 
 /// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
@@ -53,14 +53,11 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
-    type OtherParams;
+    type Params: FromBaseParams<T>;
 
     /// Construct a new instance of our [`ExtrinsicParams`].
-    fn new<Client: OfflineClientT<T>>(
-        nonce: u64,
-        client: Client,
-        other_params: Self::OtherParams,
-    ) -> Result<Self, ExtrinsicParamsError>;
+    fn new(base_params: &BaseParams<T>, params: Self::Params)
+        -> Result<Self, ExtrinsicParamsError>;
 }
 
 /// This trait is expected to be implemented for any [`ExtrinsicParams`], and
@@ -80,26 +77,36 @@ pub trait ExtrinsicParamsEncoder: 'static {
     fn encode_additional_to(&self, _v: &mut Vec<u8>) {}
 }
 
-/// Like the `From<T>` trait, if value is Some(_), but it lets us circumvent the orphan rule, because we want to implement
-/// `DefaultOrFrom<Header>` for `()`, such that DefaultOrFrom<Header> is implemented by `((),(),(),CheckMortalityParams)`, if `CheckMortalityParams` implements `DefaultFrom<Header>`
-pub trait DefaultOrFrom<T> {
-    /// If value is None, Self is constructed as some default value. Otherwise it takes the value of `T` into account.
-    fn default_or_from(value: Option<&T>) -> Self;
+/// Params that always need to be known to construct the Params of an extrinsic.
+pub struct BaseParams<T: Config> {
+    /// [`BaseClient`] containing the metadata, genesis hash and runtime version.
+    pub client: BaseClient<T>,
+    /// Latest hash of a finalized block. Not always known (None), e.g. if only a [`crate::OfflineClient`] is available.
+    pub latest_block_header: Option<T::Header>,
+    /// Account nonce for the account submitting the extrinsic.
+    pub nonce: u64,
 }
 
-impl<T> DefaultOrFrom<T> for () {
-    fn default_or_from(_value: Option<&T>) {}
+/// Types implementing this trait can be constructed from a minimal set of data provided by the client.
+/// Implementing this trait is similar to implementing Default, only that we pass in some prior information here.
+pub trait FromBaseParams<T: Config> {
+    /// Constructs the value from the given mandatory params.
+    fn from_base_params(params: &BaseParams<T>) -> Self;
+}
+
+impl<T: Config> FromBaseParams<T> for () {
+    fn from_base_params(_params: &BaseParams<T>) {}
 }
 
 macro_rules! impl_default_from_tuples {
     ($($ident:ident),+) => {
-        impl <T, $($ident),+> DefaultOrFrom<T> for ($($ident,)+)
+        impl <T: Config, $($ident),+> FromBaseParams<T> for ($($ident,)+)
         where
-            $($ident: DefaultOrFrom<T>,)+
+            $($ident: FromBaseParams<T>,)+
         {
-            fn default_or_from(value: Option<&T>) -> Self {
+            fn from_base_params(params: &BaseParams<T>) -> Self {
                 ($(
-                    (<$ident as DefaultOrFrom<T>>::default_or_from(value)),
+                    (<$ident as FromBaseParams<T>>::from_base_params(params)),
                 )+)
             }
         }

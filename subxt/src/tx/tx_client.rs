@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, DefaultOrFrom, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher},
+    config::{BaseParams, Config, ExtrinsicParams, ExtrinsicParamsEncoder, FromBaseParams, Hasher},
     error::{Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
@@ -103,11 +103,11 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Create a partial extrinsic.
-    pub fn create_partial_signed_with_nonce<Call>(
+    fn create_partial_signed_with_base_params<Call>(
         &self,
         call: &Call,
-        account_nonce: u64,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        base_params: BaseParams<T>,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -120,11 +120,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let call_data = self.call_data(call)?;
 
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
-            account_nonce,
-            self.client.clone(),
-            other_params,
-        )?;
+        let additional_and_extra_params =
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(&base_params, other_params)?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(PartialExtrinsic {
@@ -135,12 +132,12 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates a signed extrinsic without submitting it.
-    pub fn create_signed_with_nonce<Call, Signer>(
+    fn create_signed_with_base_params<Call, Signer>(
         &self,
         call: &Call,
         signer: &Signer,
-        account_nonce: u64,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        base_params: BaseParams<T>,
+        params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
@@ -153,7 +150,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         // 2. Gather the "additional" and "extra" params along with the encoded call data,
         //    ready to be signed.
         let partial_signed =
-            self.create_partial_signed_with_nonce(call, account_nonce, other_params)?;
+            self.create_partial_signed_with_base_params(call, base_params, params)?;
 
         // 3. Sign and construct an extrinsic from these details.
         Ok(partial_signed.sign(signer))
@@ -171,18 +168,30 @@ where
         crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await
     }
 
+    async fn base_params(&self, account_id: &T::AccountId) -> Result<BaseParams<T>, Error> {
+        let nonce = self.account_nonce(account_id).await?;
+        let latest_block = self.client.blocks().at_latest().await.ok();
+        let latest_block_header = latest_block.map(|b| b.into_header());
+        let base_params = BaseParams::<T> {
+            client: self.client.base_client(),
+            latest_block_header,
+            nonce,
+        };
+        Ok(base_params)
+    }
+
     /// Creates a partial signed extrinsic, without submitting it.
     pub async fn create_partial_signed<Call>(
         &self,
         call: &Call,
         account_id: &T::AccountId,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
     {
-        let account_nonce = self.account_nonce(account_id).await?;
-        self.create_partial_signed_with_nonce(call, account_nonce, other_params)
+        let base_params = self.base_params(account_id).await?;
+        self.create_partial_signed_with_base_params(call, base_params, other_params)
     }
 
     /// Creates a signed extrinsic, without submitting it.
@@ -190,14 +199,14 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        let account_nonce = self.account_nonce(&signer.account_id()).await?;
-        self.create_signed_with_nonce(call, signer, account_nonce, other_params)
+        let base_params = self.base_params(&signer.account_id()).await?;
+        self.create_signed_with_base_params(call, signer, base_params, other_params)
     }
 
     /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
@@ -213,13 +222,12 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: DefaultOrFrom<T::Header>,
     {
-        let latest_block = self.client.blocks().at_latest().await.ok();
-        let latest_header = latest_block.as_ref().map(|b| b.header());
-        let other_params =
-            <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams::default_or_from(latest_header);
-        self.sign_and_submit_then_watch(call, signer, other_params)
+        let base_params = self.base_params(&signer.account_id()).await?;
+        let params =
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::Params::from_base_params(&base_params);
+        self.create_signed_with_base_params(call, signer, base_params, params)?
+            .submit_and_watch()
             .await
     }
 
@@ -231,14 +239,14 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<TxProgress<T, C>, Error>
     where
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        self.create_signed(call, signer, other_params)
-            .await?
+        let base_params = self.base_params(&signer.account_id()).await?;
+        self.create_signed_with_base_params(call, signer, base_params, other_params)?
             .submit_and_watch()
             .await
     }
@@ -261,12 +269,10 @@ where
     where
         Call: TxPayload,
         Signer: SignerT<T>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: DefaultOrFrom<T::Header>,
     {
-        let latest_block = self.client.blocks().at_latest().await.ok();
-        let latest_header = latest_block.as_ref().map(|b| b.header());
+        let base_params = self.base_params(&signer.account_id()).await?;
         let other_params =
-            <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams::default_or_from(latest_header);
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::Params::from_base_params(&base_params);
         self.sign_and_submit(call, signer, other_params).await
     }
 
@@ -282,7 +288,7 @@ where
         &self,
         call: &Call,
         signer: &Signer,
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<T::Hash, Error>
     where
         Call: TxPayload,

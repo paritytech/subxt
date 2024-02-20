@@ -65,6 +65,11 @@ where
     pub fn header(&self) -> &T::Header {
         &self.header
     }
+
+    /// Return the entire block header. Consumes the block itself
+    pub fn into_header(self) -> T::Header {
+        self.header
+    }
 }
 
 impl<T, C> Block<T, C>

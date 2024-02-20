@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::BaseClient;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::RuntimeVersion, blocks::BlocksClient, constants::ConstantsClient,
@@ -9,7 +10,6 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
-
 use std::sync::Arc;
 
 /// A trait representing a client that can perform
@@ -21,6 +21,8 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn genesis_hash(&self) -> T::Hash;
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+    /// Return the inner [`BaseClient`].
+    fn base_client(&self) -> BaseClient<T>;
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
@@ -63,15 +65,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<Inner<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
+    inner: Arc<BaseClient<T>>,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -83,11 +77,11 @@ impl<T: Config> OfflineClient<T> {
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         OfflineClient {
-            inner: Arc::new(Inner {
+            inner: Arc::new(BaseClient::new(
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
-            }),
+                metadata.into(),
+            )),
         }
     }
 
@@ -104,6 +98,12 @@ impl<T: Config> OfflineClient<T> {
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
         self.inner.metadata.clone()
+    }
+
+    /// Return the inner [`BaseClient`].
+    pub fn base_client(&self) -> BaseClient<T> {
+        // Note: this clone should be cheap because metadata is arced up.
+        (*self.inner).clone()
     }
 
     // Just a copy of the most important trait methods so that people
@@ -144,6 +144,10 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
+    }
+
+    fn base_client(&self) -> BaseClient<T> {
+        self.base_client()
     }
 }
 

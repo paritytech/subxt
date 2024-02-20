@@ -53,13 +53,13 @@ impl CustomExtrinsicParamsBuilder {
 
 // Describe how to fetch and then encode the params:
 impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
-    type OtherParams = CustomExtrinsicParamsBuilder;
+    type Params = CustomExtrinsicParamsBuilder;
 
     // Gather together all of the params we will need to encode:
     fn new<Client: OfflineClientT<T>>(
         _nonce: u64,
         client: Client,
-        other_params: Self::OtherParams,
+        other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
             genesis_hash: client.genesis_hash(),
@@ -86,7 +86,7 @@ async fn main() {
 
     let tx_payload = runtime::tx().system().remark(b"Hello".to_vec());
 
-    // Build your custom "OtherParams":
+    // Build your custom "Params":
     let tx_config = CustomExtrinsicParamsBuilder::new().tip(1234).enable_foo();
 
     // And provide them when submitting a transaction:

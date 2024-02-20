@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{OfflineClient, OfflineClientT};
+use super::{BaseClient, OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{
@@ -33,16 +33,8 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
-    inner: Arc<RwLock<Inner<T>>>,
+    inner: Arc<RwLock<BaseClient<T>>>,
     backend: Arc<dyn Backend<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
 }
 
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
@@ -146,11 +138,11 @@ impl<T: Config> OnlineClient<T> {
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
         Ok(OnlineClient {
-            inner: Arc::new(RwLock::new(Inner {
+            inner: Arc::new(RwLock::new(BaseClient::new(
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
-            })),
+                metadata.into(),
+            ))),
             backend,
         })
     }
@@ -268,6 +260,12 @@ impl<T: Config> OnlineClient<T> {
         inner.genesis_hash
     }
 
+    /// Return the inner [`BaseClient`].
+    pub fn base_client(&self) -> BaseClient<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        inner.clone()
+    }
+
     /// Change the genesis hash used in this client.
     ///
     /// # Warning
@@ -359,6 +357,10 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
+    }
+
+    fn base_client(&self) -> BaseClient<T> {
+        self.base_client()
     }
 }
 

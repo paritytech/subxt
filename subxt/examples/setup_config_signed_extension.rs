@@ -58,12 +58,12 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 
 // Gather together any params we need for our signed extension, here none.
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
-    type OtherParams = ();
+    type Params = ();
 
     fn new<Client: OfflineClientT<T>>(
         _nonce: u64,
         _client: Client,
-        _other_params: Self::OtherParams,
+        _other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }
@@ -86,7 +86,7 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 // to construct an entirely new interface to provide the relevant `OtherParams`.
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
-) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::OtherParams {
+) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::Params {
     let (a, b, c, d, e, f, g) = params.build();
     (a, b, c, d, e, f, g, ())
 }
