@@ -103,8 +103,8 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         self
     }
 
-     /// Provide a specific nonce for the submitter of the extrinsic
-     pub fn nonce(mut self, nonce: u64) -> Self {
+    /// Provide a specific nonce for the submitter of the extrinsic
+    pub fn nonce(mut self, nonce: u64) -> Self {
         self.nonce = Some(nonce);
         self
     }

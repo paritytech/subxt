@@ -2,11 +2,10 @@
 use codec::Encode;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
-use subxt::client::OfflineClientT;
 use subxt::config::signed_extensions;
 use subxt::config::{
-    Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
-    ExtrinsicParamsError, BaseParams
+    BaseParams, Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
+    ExtrinsicParamsError,
 };
 use subxt_signer::sr25519::dev;
 
@@ -60,7 +59,10 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type Params = ();
 
-    fn new( base_params: &BaseParams<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _base_params: &BaseParams<T>,
+        _params: Self::Params,
+    ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }
 }

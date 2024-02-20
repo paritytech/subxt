@@ -40,7 +40,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
         let current_header = rpc.chain_get_header(None).await?.unwrap();
 
-        let ext_params = Params::new().mortal(&current_header, 8).nonce(current_nonce).build();
+        let ext_params = Params::new()
+            .mortal(&current_header, 8)
+            .nonce(current_nonce)
+            .build();
 
         let balance_transfer = polkadot::tx()
             .balances()
@@ -48,7 +51,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let ext_hash = api
             .tx()
-            .create_signed(&balance_transfer, &alice, ext_params).await?
+            .create_signed(&balance_transfer, &alice, ext_params)
+            .await?
             .submit()
             .await?;
 

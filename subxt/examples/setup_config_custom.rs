@@ -1,7 +1,9 @@
 #![allow(missing_docs)]
 use codec::Encode;
-use subxt::client::OfflineClientT;
-use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, BaseParams, FromBaseParams};
+use subxt::config::{
+    BaseParams, Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError,
+    FromBaseParams,
+};
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
@@ -51,8 +53,8 @@ impl CustomExtrinsicParamsBuilder {
     }
 }
 
-impl<T: Config> FromBaseParams<T> for CustomExtrinsicParamsBuilder{
-    fn from_base_params(params: &BaseParams<T>) -> Self {
+impl<T: Config> FromBaseParams<T> for CustomExtrinsicParamsBuilder {
+    fn from_base_params(_params: &BaseParams<T>) -> Self {
         Default::default()
     }
 }

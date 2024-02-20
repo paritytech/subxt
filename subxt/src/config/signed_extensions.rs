@@ -11,7 +11,7 @@ use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, Extrinsic
 use super::{BaseParams, FromBaseParams};
 use crate::config::Header;
 use crate::utils::Era;
-use crate::{client::OfflineClientT, Config};
+use crate::Config;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
 use derivative::Derivative;
@@ -43,7 +43,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
 
     fn new(
         base_params: &BaseParams<T>,
-        params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckSpecVersion(
             base_params.client.runtime_version().spec_version,
@@ -74,7 +74,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckNonce {
         base_params: &BaseParams<T>,
         params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        let nonce = params.0.unwrap_or_else(|| base_params.nonce);
+        let nonce = params.0.unwrap_or(base_params.nonce);
         Ok(CheckNonce(Compact(nonce)))
     }
 }
@@ -110,7 +110,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
 
     fn new(
         base_params: &BaseParams<T>,
-        params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckTxVersion(
             base_params.client.runtime_version().transaction_version,
@@ -139,7 +139,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
 
     fn new(
         base_params: &BaseParams<T>,
-        params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckGenesis(base_params.client.genesis_hash()))
     }
@@ -279,7 +279,7 @@ impl<T: Config> Default for ChargeAssetTxPaymentParams<T> {
 }
 
 impl<T: Config> FromBaseParams<T> for ChargeAssetTxPaymentParams<T> {
-    fn from_base_params(params: &BaseParams<T>) -> Self {
+    fn from_base_params(_params: &BaseParams<T>) -> Self {
         Default::default()
     }
 }
@@ -312,7 +312,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
     type Params = ChargeAssetTxPaymentParams<T>;
 
     fn new(
-        base_params: &BaseParams<T>,
+        _base_params: &BaseParams<T>,
         params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
@@ -355,7 +355,7 @@ pub struct ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> FromBaseParams<T> for ChargeTransactionPaymentParams {
-    fn from_base_params(params: &BaseParams<T>) -> Self {
+    fn from_base_params(_params: &BaseParams<T>) -> Self {
         Default::default()
     }
 }
@@ -375,7 +375,7 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
     type Params = ChargeTransactionPaymentParams;
 
     fn new(
-        base_params: &BaseParams<T>,
+        _base_params: &BaseParams<T>,
         params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {

@@ -348,6 +348,10 @@ mod test {
         fn runtime_version(&self) -> crate::backend::RuntimeVersion {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
+
+        fn base_client(&self) -> crate::client::BaseClient<SubstrateConfig> {
+            unimplemented!("just a mock impl to satisfy trait bounds")
+        }
     }
 
     impl OnlineClientT<SubstrateConfig> for MockClient {
