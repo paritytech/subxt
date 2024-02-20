@@ -6,7 +6,7 @@ use subxt::client::OfflineClientT;
 use subxt::config::signed_extensions;
 use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
-    ExtrinsicParamsError,
+    ExtrinsicParamsError, BaseParams
 };
 use subxt_signer::sr25519::dev;
 
@@ -60,11 +60,7 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        _client: Client,
-        _other_params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new( base_params: &BaseParams<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }
 }

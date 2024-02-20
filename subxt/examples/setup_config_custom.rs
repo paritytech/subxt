@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 use codec::Encode;
 use subxt::client::OfflineClientT;
-use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, BaseParams, FromBaseParams};
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
@@ -51,18 +51,23 @@ impl CustomExtrinsicParamsBuilder {
     }
 }
 
+impl<T: Config> FromBaseParams<T> for CustomExtrinsicParamsBuilder{
+    fn from_base_params(params: &BaseParams<T>) -> Self {
+        Default::default()
+    }
+}
+
 // Describe how to fetch and then encode the params:
 impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     type Params = CustomExtrinsicParamsBuilder;
 
     // Gather together all of the params we will need to encode:
-    fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
-        client: Client,
+    fn new(
+        base_params: &BaseParams<T>,
         other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
-            genesis_hash: client.genesis_hash(),
+            genesis_hash: base_params.client.genesis_hash(),
             tip: other_params.tip,
             foo: other_params.foo,
         })

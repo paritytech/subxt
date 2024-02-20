@@ -103,6 +103,12 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         self
     }
 
+     /// Provide a specific nonce for the submitter of the extrinsic
+     pub fn nonce(mut self, nonce: u64) -> Self {
+        self.nonce = Some(nonce);
+        self
+    }
+
     /// Provide a tip to the block author using the token denominated by the `asset_id` provided. This
     /// is not applicable on chains which don't use the `ChargeAssetTxPayment` signed extension; in this
     /// case, no tip will be given.
