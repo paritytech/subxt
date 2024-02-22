@@ -95,7 +95,7 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
 pub struct CheckNonceParams(pub Option<u64>);
 
 impl<T: Config> RefineParams<T> for CheckNonceParams {
-    fn refine(&mut self, account_nonce: u64, block_number: u64, block_hash: T::Hash) {
+    fn refine(&mut self, account_nonce: u64, _block_number: u64, _block_hash: T::Hash) {
         if self.0.is_none() {
             self.0 = Some(account_nonce);
         }
@@ -176,7 +176,7 @@ impl<T: Config> Default for CheckMortalityParams<T> {
 }
 
 impl<T: Config> RefineParams<T> for CheckMortalityParams<T> {
-    fn refine(&mut self, account_nonce: u64, block_number: u64, block_hash: T::Hash) {
+    fn refine(&mut self, _account_nonce: u64, block_number: u64, block_hash: T::Hash) {
         if self.0.is_none() {
             // By default we refine the params to have a mortal transaction valid for 32 blocks.
             const TX_VALID_FOR: u64 = 32;

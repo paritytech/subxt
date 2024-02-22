@@ -7,6 +7,7 @@ use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::SubmittableExtrinsic;
 use subxt::tx::TxPayload;
 use subxt::utils::{AccountId32, MultiSignature};
+use subxt::config::DefaultExtrinsicParamsBuilder;
 
 use crate::services::{extension_signature_for_extrinsic, get_accounts, polkadot, Account};
 use web_sys::HtmlInputElement;
@@ -155,7 +156,8 @@ impl Component for SigningExamplesComponent {
                                     return Message::Error(anyhow!("MultiSignature Decoding"));
                                 };
 
-                                let Ok(partial_signed) = api.tx().create_partial_signed_with_nonce(&remark_call, account_nonce, Default::default()) else {
+                                let params = DefaultExtrinsicParamsBuilder::new().nonce(account_nonce).build();
+                                let Ok(partial_signed) = api.tx().create_partial_signed_offline(&remark_call, params) else {
                                     return Message::Error(anyhow!("PartialExtrinsic creation failed"));
                                 };
 
