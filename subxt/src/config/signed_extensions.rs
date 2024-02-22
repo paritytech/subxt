@@ -8,6 +8,7 @@
 //! when interacting with a chain.
 
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use super::RefineParams;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
 use codec::{Compact, Encode};
@@ -37,12 +38,11 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
 pub struct CheckSpecVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
-    type OtherParams = ();
+    type Params = ();
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         client: Client,
-        _other_params: Self::OtherParams,
+        _other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckSpecVersion(client.runtime_version().spec_version))
     }
@@ -65,13 +65,14 @@ impl<T: Config> SignedExtension<T> for CheckSpecVersion {
 pub struct CheckNonce(Compact<u64>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
-    type OtherParams = ();
+    type Params = CheckNonceParams;
 
     fn new<Client: OfflineClientT<T>>(
-        nonce: u64,
         _client: Client,
-        _other_params: Self::OtherParams,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
+        // If no nonce is set (nor by user nor refinement), use a nonce of 0.
+        let nonce = params.0.unwrap_or(0);
         Ok(CheckNonce(Compact(nonce)))
     }
 }
@@ -89,16 +90,27 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
     }
 }
 
+/// Params for [`CheckNonce`]
+#[derive(Debug, Clone, Default)]
+pub struct CheckNonceParams(pub Option<u64>);
+
+impl<T: Config> RefineParams<T> for CheckNonceParams {
+    fn refine(&mut self, account_nonce: u64, block_number: u64, block_hash: T::Hash) {
+        if self.0.is_none() {
+            self.0 = Some(account_nonce);
+        }
+    }
+}
+
 /// The [`CheckTxVersion`] signed extension.
 pub struct CheckTxVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
-    type OtherParams = ();
+    type Params = ();
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         client: Client,
-        _other_params: Self::OtherParams,
+        _other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckTxVersion(client.runtime_version().transaction_version))
     }
@@ -121,12 +133,11 @@ impl<T: Config> SignedExtension<T> for CheckTxVersion {
 pub struct CheckGenesis<T: Config>(T::Hash);
 
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
-    type OtherParams = ();
+    type Params = ();
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         client: Client,
-        _other_params: Self::OtherParams,
+        _other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckGenesis(client.genesis_hash()))
     }
@@ -152,16 +163,24 @@ pub struct CheckMortality<T: Config> {
 }
 
 /// Parameters to configure the [`CheckMortality`] signed extension.
-pub struct CheckMortalityParams<T: Config> {
+pub struct CheckMortalityParams<T: Config>(Option<CheckMortalityParamsInner<T>>);
+struct CheckMortalityParamsInner<T: Config> {
     era: Era,
     checkpoint: Option<T::Hash>,
 }
 
 impl<T: Config> Default for CheckMortalityParams<T> {
     fn default() -> Self {
-        Self {
-            era: Default::default(),
-            checkpoint: Default::default(),
+        CheckMortalityParams(None)
+    }
+}
+
+impl<T: Config> RefineParams<T> for CheckMortalityParams<T> {
+    fn refine(&mut self, account_nonce: u64, block_number: u64, block_hash: T::Hash) {
+        if self.0.is_none() {
+            // By default we refine the params to have a mortal transaction valid for 32 blocks.
+            const TX_VALID_FOR: u64 = 32;
+            *self = CheckMortalityParams::mortal(TX_VALID_FOR, block_number, block_hash);
         }
     }
 }
@@ -172,32 +191,39 @@ impl<T: Config> CheckMortalityParams<T> {
     /// `block_hash` should both point to the same block, and are the block that
     /// the transaction is mortal from.
     pub fn mortal(period: u64, block_number: u64, block_hash: T::Hash) -> Self {
-        CheckMortalityParams {
+        Self(Some(CheckMortalityParamsInner {
             era: Era::mortal(period, block_number),
             checkpoint: Some(block_hash),
-        }
+        }))
     }
     /// An immortal transaction.
     pub fn immortal() -> Self {
-        CheckMortalityParams {
+        Self(Some(CheckMortalityParamsInner {
             era: Era::Immortal,
             checkpoint: None,
-        }
+        }))
     }
 }
 
 impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
-    type OtherParams = CheckMortalityParams<T>;
+    type Params = CheckMortalityParams<T>;
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         client: Client,
-        other_params: Self::OtherParams,
+        other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckMortality {
-            era: other_params.era,
-            checkpoint: other_params.checkpoint.unwrap_or(client.genesis_hash()),
-        })
+        let check_mortality = if let Some(params) = other_params.0 {
+            CheckMortality {
+                era: params.era,
+                checkpoint: params.checkpoint.unwrap_or(client.genesis_hash()),
+            }
+        } else {
+            CheckMortality {
+                era: Era::Immortal,
+                checkpoint: client.genesis_hash(),
+            }
+        };
+        Ok(check_mortality)
     }
 }
 
@@ -278,12 +304,11 @@ impl<T: Config> ChargeAssetTxPaymentParams<T> {
 }
 
 impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
-    type OtherParams = ChargeAssetTxPaymentParams<T>;
+    type Params = ChargeAssetTxPaymentParams<T>;
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         _client: Client,
-        other_params: Self::OtherParams,
+        other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
             tip: Compact(other_params.tip),
@@ -291,6 +316,8 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
         })
     }
 }
+
+impl<T: Config> RefineParams<T> for ChargeAssetTxPaymentParams<T> {}
 
 impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
@@ -336,18 +363,19 @@ impl ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
-    type OtherParams = ChargeTransactionPaymentParams;
+    type Params = ChargeTransactionPaymentParams;
 
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         _client: Client,
-        other_params: Self::OtherParams,
+        other_params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {
             tip: Compact(other_params.tip),
         })
     }
 }
+
+impl<T: Config> RefineParams<T> for ChargeTransactionPaymentParams {}
 
 impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
@@ -380,12 +408,11 @@ macro_rules! impl_tuples {
             T: Config,
             $($ident: SignedExtension<T>,)+
         {
-            type OtherParams = ($($ident::OtherParams,)+);
+            type Params = ($($ident::Params,)+);
 
             fn new<Client: OfflineClientT<T>>(
-                nonce: u64,
                 client: Client,
-                other_params: Self::OtherParams,
+                other_params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
                 let metadata = client.metadata();
                 let types = metadata.types();
@@ -401,7 +428,7 @@ macro_rules! impl_tuples {
                         }
                         // Break and record as soon as we find a match:
                         if $ident::matches(e.identifier(), e.extra_ty(), types) {
-                            let ext = $ident::new(nonce, client.clone(), other_params.$index)?;
+                            let ext = $ident::new(client.clone(), other_params.$index)?;
                             let boxed_ext: Box<dyn ExtrinsicParamsEncoder> = Box::new(ext);
                             exts_by_index.insert(idx, boxed_ext);
                             break
