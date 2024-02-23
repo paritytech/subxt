@@ -1,6 +1,8 @@
 use super::{
     storage_address::StaticStorageKey,
-    utils::{strip_concat_hash_bytes, strip_storage_addess_root_bytes},
+    utils::{
+        hash_contains_unhashed_value, strip_storage_hash_bytes,
+    },
 };
 use crate::{
     dynamic::DecodedValueThunk,
@@ -15,148 +17,167 @@ use subxt_metadata::StorageHasher;
 pub trait StorageKey {
     /// Iterator over the storage keys, each key implements EncodeAsType to
     /// give the corresponding bytes to a `StorageHasher`.
-    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType>;
+    fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType>;
 
-    /// Attempts to decode the StorageKey from a whole storage address.
-    /// The key/keys can only be recovered if all hashers are concat-style hashers.
+    /// How many keys are there in total? Each key is an element that needs to be individually hashed.
+    // Note: Ideally we would use `impl ExactSizeIterator<Item = &dyn EncodeAsType>` for `keys_iter` above,
+    // But that plays poorly with the `Flatten` and `Chain` structs.
+    fn keys_len(&self) -> usize;
+
+    /// Attempts to decode the StorageKey from a storage address that has been stripped of its root bytes.
+    ///
     /// Example: Imagine The `StorageKey` is a tuple (A,B) and the hashers are: [Blake2_128Concat, Twox64Concat].
-    /// Then the memory layout of the storage key is:
+    /// Then the memory layout of the storage address is:
     /// ```txt
     /// | 8 bytes pallet hash | 8 bytes entry hash | 16 bytes hash of A | ... bytes of A | 8 bytes hash of B | ... bytes of B |
     /// ```
-    /// Returns None, if any of the hashers is not a concat-style hasher.
-    fn decode_from_address_bytes(
-        address_bytes: &[u8],
-        hashers_and_ty_ids: &[(StorageHasher, u32)],
+    /// `cursor` should point into a region after those first 16 bytes, at the start of a new hash.
+    /// `hashers_and_ty_ids` should consume all the hashers that have been used for decoding, such that there are less hashers coming to the next key.
+    fn decode_from_bytes(
+        cursor: &mut &[u8],
+        hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
         metadata: &Metadata,
-    ) -> Option<Result<Self, Error>>
+    ) -> Result<Self, Error>
     where
         Self: Sized + 'static;
 }
 
-/// Implement `StorageKey` for `()` which can be used for keyless storage entries
+/// Implement `StorageKey` for `()` which can be used for keyless storage entries.
 impl StorageKey for () {
-    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
-        // Note: this returns the storage root address of the storage entry.
-        // It gives the same result as if you were to use `vec![]` as a `StorageKey`.
+    fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType> {
         std::iter::empty()
     }
 
-    fn decode_from_address_bytes(
-        address_bytes: &[u8],
-        _hashers_and_ty_ids: &[(StorageHasher, u32)],
+    fn keys_len(&self) -> usize {
+        0
+    }
+
+    fn decode_from_bytes(
+        _cursor: &mut &[u8],
+        hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
         _metadata: &Metadata,
-    ) -> Option<Result<Self, Error>> {
-        // We need at least 16 bytes, becauase there are 8 bytes for the pallet hash and
-        // another 8 bytes for the entry hash at the beginning of each storage address.
-        if address_bytes.len() < 16 {
-            return Some(Err(StorageAddressError::UnexpectedAddressBytes.into()));
+    ) -> Result<Self, Error> {
+        if hashers_and_ty_ids.is_empty() {
+            return Err(StorageAddressError::WrongNumberOfHashers {
+                hashers: 0,
+                fields: 1,
+            }
+            .into());
         }
-        Some(Ok(()))
+        *hashers_and_ty_ids = &hashers_and_ty_ids[1..]; // Advance cursor by 1
+        Ok(())
     }
 }
 
 // Note: The ?Sized bound is necessary to support e.g. `StorageKey<[u8]>`.
 impl<K: EncodeAsType + codec::Decode + ?Sized> StorageKey for StaticStorageKey<K> {
-    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
-        // Note: this returns the storage root address of the storage entry.
-        // It gives the same result as if you were to use `vec![]` as a `StorageKey`.
+    fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType> {
         std::iter::once(&self.bytes as &dyn EncodeAsType)
     }
 
-    fn decode_from_address_bytes(
-        address_bytes: &[u8],
-        hashers_and_ty_ids: &[(StorageHasher, u32)],
+    fn keys_len(&self) -> usize {
+        1
+    }
+
+    fn decode_from_bytes(
+        cursor: &mut &[u8],
+        hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
         metadata: &Metadata,
-    ) -> Option<Result<Self, Error>>
+    ) -> Result<Self, Error>
     where
         Self: Sized + 'static,
     {
-        let cursor = &mut &*address_bytes;
-        if let Err(err) = strip_storage_addess_root_bytes(cursor) {
-            return Some(Err(err.into()));
-        }
-
         let Some((hasher, ty_id)) = hashers_and_ty_ids.first() else {
-            return Some(Err(StorageAddressError::WrongNumberOfHashers {
+            return Err(StorageAddressError::WrongNumberOfHashers {
                 hashers: 0,
                 fields: 1,
             }
-            .into()));
+            .into());
         };
-        decode_storage_key_from_hash(address_bytes, cursor, hasher, *ty_id, metadata)
+        *hashers_and_ty_ids = &hashers_and_ty_ids[1..]; // Advance cursor by 1
+        decode_storage_key_from_hash(cursor, hasher, *ty_id, metadata)
     }
 }
 
 pub fn decode_storage_key_from_hash<K: ?Sized>(
-    address_bytes: &[u8],
     cursor: &mut &[u8],
     hasher: &StorageHasher,
     ty_id: u32,
     metadata: &Metadata,
-) -> Option<Result<StaticStorageKey<K>, Error>> {
-    if let Err(err) = strip_concat_hash_bytes(cursor, hasher)? {
-        return Some(Err(err.into()));
-    }
-    let start_idx = address_bytes.len() - cursor.len();
+) -> Result<StaticStorageKey<K>, Error> {
+    strip_storage_hash_bytes(cursor, hasher)?;
+
+    let bytes = *cursor;
     if let Err(err) = scale_decode::visitor::decode_with_visitor(
         cursor,
         ty_id,
         metadata.types(),
         scale_decode::visitor::IgnoreVisitor,
     ) {
-        return Some(Err(scale_decode::Error::from(err).into()));
+        return Err(scale_decode::Error::from(err).into());
     }
-    let end_idx = address_bytes.len() - cursor.len();
-    let key_bytes = address_bytes[start_idx..end_idx].to_vec();
+    let bytes_decoded = bytes.len() - cursor.len();
+
+    // Note: This validation check makes sure, only zero-sized types can be decoded from
+    // hashers that do not support reconstruction of a value
+    if !hash_contains_unhashed_value(hasher) && bytes_decoded > 0 {
+        let ty_name = metadata
+            .types()
+            .resolve(ty_id)
+            .expect("ty_id is in metadata, because decode_with_visitor did not fail above; qed")
+            .path
+            .to_string();
+        return Err(StorageAddressError::HasherCannotReconstructKey {
+            ty_id,
+            ty_name,
+            hasher: *hasher,
+        }
+        .into());
+    };
+
+    let key_bytes = bytes[..bytes_decoded].to_vec();
     let key = StaticStorageKey {
         bytes: Static(Encoded(key_bytes)),
         _marker: std::marker::PhantomData::<K>,
     };
-    Some(Ok(key))
+    Ok(key)
 }
 
 impl StorageKey for Vec<scale_value::Value> {
-    fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
+    fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType> {
         // Note: this returns the storage root address of the storage entry.
         // It gives the same result as if you were to use `vec![]` as a `StorageKey`.
         self.iter().map(|e| e as &dyn EncodeAsType)
     }
 
-    fn decode_from_address_bytes(
-        address_bytes: &[u8],
-        hashers_and_ty_ids: &[(StorageHasher, u32)],
+    fn keys_len(&self) -> usize {
+        self.len()
+    }
+
+    fn decode_from_bytes(
+        cursor: &mut &[u8],
+        hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
         metadata: &Metadata,
-    ) -> Option<Result<Self, Error>>
+    ) -> Result<Self, Error>
     where
         Self: Sized + 'static,
     {
-        let cursor = &mut &*address_bytes;
-        if let Err(err) = strip_storage_addess_root_bytes(cursor) {
-            return Some(Err(err.into()));
-        }
         let mut hashers_and_ty_ids_iter = hashers_and_ty_ids.iter();
-
         let mut result: Vec<scale_value::Value> = vec![];
+        let mut n = 0;
         while !cursor.is_empty() {
             let Some((hasher, ty_id)) = hashers_and_ty_ids_iter.next() else {
                 // Still bytes left, but no hashers and type ids anymore to pull from: this is an unexpected error.
-                return Some(Err(StorageAddressError::UnexpectedAddressBytes.into()));
+                return Err(StorageAddressError::UnexpectedAddressBytes.into());
             };
-            if let Err(err) = strip_concat_hash_bytes(cursor, hasher)? {
-                return Some(Err(err.into()));
-            }
-            match DecodedValueThunk::decode_with_metadata(cursor, *ty_id, metadata) {
-                Ok(decoded) => {
-                    match decoded.to_value() {
-                        Ok(value) => result.push(value.remove_context()),
-                        Err(err) => return Some(Err(err)),
-                    };
-                }
-                Err(err) => return Some(Err(err)),
-            }
+            strip_storage_hash_bytes(cursor, hasher)?;
+            let decoded = DecodedValueThunk::decode_with_metadata(cursor, *ty_id, metadata)?;
+            let value = decoded.to_value()?;
+            result.push(value.remove_context());
+            n += 1;
         }
-        Some(Ok(result))
+        *hashers_and_ty_ids = &hashers_and_ty_ids[n..]; // Advance cursor by n
+        Ok(result)
     }
 }
 
@@ -170,51 +191,54 @@ impl StorageKey for Vec<scale_value::Value> {
 /// }
 /// ```
 macro_rules! impl_tuples {
-    ($($ty:ident $n:tt),+) => {{
-        impl<$($ty: EncodeAsType + ?Sized),+> StorageKey for ($( StaticStorageKey<$ty >),+) {
-            fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
-                let arr = [$(
-                    &self.$n.bytes as &dyn EncodeAsType
-                ),+];
-                arr.into_iter()
+    ($($ty:ident $iter:ident $n:tt),+) => {{
+        impl<$($ty: StorageKey),+> StorageKey for ($( $ty ),+) {
+            fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType> {
+
+                $(
+                    let mut $iter = self.$n.keys_iter();
+                )+
+
+                std::iter::from_fn(move || {
+                    let mut i = 0;
+                    loop {
+                        match i {
+                            $(
+                                $n => {
+                                    let el = $iter.next();
+                                    if el.is_some(){
+                                        return el;
+                                    }
+                                },
+                            )+
+                                _ => return None,
+                        };
+                        i+=1;
+                    }
+                })
             }
 
-            fn decode_from_address_bytes(
-                address_bytes: &[u8],
-                hashers_and_ty_ids: &[(StorageHasher, u32)],
+            fn keys_len(&self) -> usize {
+                $((self.$n.keys_len())+)+0
+            }
+
+            fn decode_from_bytes(
+                cursor: &mut &[u8],
+                hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
                 metadata: &Metadata,
-            ) -> Option<Result<Self, Error>>
+            ) -> Result<Self, Error>
             where
                 Self: Sized + 'static,
             {
-                let cursor = &mut &*address_bytes;
-                if let Err(err) = strip_storage_addess_root_bytes(cursor) {
-                    return Some(Err(err.into()));
-                }
-
-                // The number of elements in this tuple.
-                const LEN: usize = $((0*$n + 1)+)+0;
-
-                // It is an error to not provide a hasher and type id for each element in this tuple.
-                if hashers_and_ty_ids.len() < LEN {
-                    return Some(Err(StorageAddressError::WrongNumberOfKeys{actual: hashers_and_ty_ids.len(), expected: LEN}.into()))
-                }
-
                 // Construct the tuple as a series of expressions.
                 let tuple : Self = ( $(
                     {
-                        // index is available, because of bounds check above; qed
-                        let (hasher, ty_id) = &hashers_and_ty_ids[$n];
-                        let key = match decode_storage_key_from_hash::<$ty>(address_bytes, cursor, hasher, *ty_id, metadata)? {
-                            Ok(key) => key,
-                            Err(err) => {
-                                return Some(Err(err));
-                            }
-                        };
+                        let key =
+                        $ty::decode_from_bytes(cursor, hashers_and_ty_ids, metadata)?;
                         key
                     },
                 )+);
-                return Some(Ok(tuple))
+                return Ok(tuple)
             }
         }
     }};
@@ -222,11 +246,11 @@ macro_rules! impl_tuples {
 
 #[rustfmt::skip]
 const _: () = {
-    impl_tuples!(A 0, B 1);
-    impl_tuples!(A 0, B 1, C 2);
-    impl_tuples!(A 0, B 1, C 2, D 3);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
+    impl_tuples!(A iter_a 0, B iter_ab 1);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6);
+    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6, H iter_h 7);
 };

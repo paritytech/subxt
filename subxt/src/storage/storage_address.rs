@@ -192,7 +192,7 @@ where
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
         let keys_iter = self.keys.keys_iter();
-        let keys_len = keys_iter.len();
+        let keys_len = self.keys.keys_len();
 
         if keys_len == 0 {
             return Ok(());

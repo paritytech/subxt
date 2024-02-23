@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
+use super::utils::strip_storage_addess_root_bytes;
 use super::StorageKey;
 
 use crate::{
@@ -254,12 +255,13 @@ where
                     )?;
 
                     let key_bytes = kv.key;
-                    let keys = <Address::Keys as StorageKey>::decode_from_address_bytes(
-                        &key_bytes,
-                        &hasher_type_id_pairs,
+                    let cursor = &mut &key_bytes[..];
+                    strip_storage_addess_root_bytes(cursor)?;
+                    let keys = <Address::Keys as StorageKey>::decode_from_bytes(
+                        cursor,
+                        &mut &hasher_type_id_pairs[..],
                         &metadata,
-                    )
-                    .transpose()?;
+                    )?;
                     Ok(StorageKeyValuePair::<Address> {
                         keys,
                         key_bytes,
@@ -362,7 +364,7 @@ pub struct StorageKeyValuePair<T: StorageAddress> {
     /// The bytes that make up the address of the storage entry.
     pub key_bytes: Vec<u8>,
     /// The keys that can be used to construct the address of this storage entry.
-    pub keys: Option<T::Keys>,
+    pub keys: T::Keys,
     /// The value of the storage entry.
     pub value: T::Target,
 }

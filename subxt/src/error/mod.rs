@@ -14,6 +14,7 @@ crate::macros::cfg_unstable_light_client! {
 pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
+use subxt_metadata::StorageHasher;
 
 // Re-expose the errors we use from other crates here:
 pub use crate::config::ExtrinsicParamsError;
@@ -209,6 +210,16 @@ pub enum StorageAddressError {
     /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
     #[error("Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata.")]
     UnexpectedAddressBytes,
+    /// An invalid hasher was used to reconstruct a value from a chunk of bytes that is part of a storage address. Hashers where the hash does not contain the original value are invalid for this purpose.
+    #[error("An invalid hasher was used to reconstruct a value of type {ty_name} (id={ty_id}) from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher")]
+    HasherCannotReconstructKey {
+        /// Type id of the key's type.
+        ty_id: u32,
+        /// Type name of the key's type.
+        ty_name: String,
+        /// The invalid hasher that caused this error.
+        hasher: StorageHasher,
+    },
 }
 
 /// Something went wrong trying to access details in the metadata.
