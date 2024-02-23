@@ -36,7 +36,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         key: &[u8],
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageKey>, Error> {
+    ) -> Result<Option<StorageData>, Error> {
         let params = rpc_params![to_hex(key), hash];
         let data: Option<Bytes> = self.client.request("state_getStorage", params).await?;
         Ok(data.map(|b| b.0))
@@ -51,7 +51,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         count: u32,
         start_key: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageData>, Error> {
+    ) -> Result<Vec<StorageKey>, Error> {
         let start_key = start_key.map(to_hex);
         let params = rpc_params![to_hex(key), count, start_key, at];
         let data: Vec<Bytes> = self.client.request("state_getKeysPaged", params).await?;
