@@ -535,6 +535,13 @@ impl DryRunResultBytes {
         // dryRun returns an ApplyExtrinsicResult, which is basically a
         // `Result<Result<(), DispatchError>, TransactionValidityError>`.
         let bytes = self.0;
+
+        // We expect at least 2 bytes. In case we got a naff response back (or
+        // manually constructed this struct), just error to avoid a panic:
+        if bytes.len() < 2 {
+            return Err(crate::Error::Unknown(bytes));
+        }
+
         if bytes[0] == 0 && bytes[1] == 0 {
             // Ok(Ok(())); transaction is valid and executed ok
             Ok(DryRunResult::Success)
