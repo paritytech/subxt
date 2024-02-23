@@ -149,13 +149,11 @@ impl<T: Config> Stream for StorageItems<T> {
                     // We have items; buffer them to emit next loops.
                     self.buffered_responses = items.items;
                     continue;
-                },
-                FollowEvent::OperationError(err)
-                    if err.operation_id == *self.operation_id =>
-                {
+                }
+                FollowEvent::OperationError(err) if err.operation_id == *self.operation_id => {
                     // Something went wrong obtaining storage items; mark as done and return the error.
                     self.done = true;
-                    return Poll::Ready(Some(Err(Error::Other(err.error))))
+                    return Poll::Ready(Some(Err(Error::Other(err.error))));
                 }
                 _ => {
                     // We don't care about this event; wait for the next.
