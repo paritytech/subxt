@@ -86,7 +86,7 @@ scale-bits = "0.4.0"
 scale-decode = "0.10.0"
 scale-encode = "0.5.0"
 serde = { version = "1.0.197" }
-serde_json = { version = "1.0.113" }
+serde_json = { version = "1.0.114" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.57"
 tokio = { version = "1.36", default-features = false }
