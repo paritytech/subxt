@@ -1,18 +1,27 @@
+//! Example for how to use the Light client and connect to a relay+parachain.
+//!
+//! Run: `cargo run --example light_client_parachains --features="unstable-light-client native"`.
+
 #![allow(missing_docs)]
-use futures::StreamExt;
 use std::{iter, num::NonZeroU32};
 use subxt::{
     client::{LightClient, RawLightClient},
     PolkadotConfig,
 };
+use sp_core::crypto::{AccountId32, Ss58Codec};
+use std::collections::BTreeSet;
+use sp_core::ByteArray;
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
 
+#[subxt::subxt(runtime_metadata_path = "../artifacts/collectives-polkadot.scale")]
+pub mod collectives {}
+
 const POLKADOT_SPEC: &str = include_str!("../../artifacts/demo_chain_specs/polkadot.json");
-const ASSET_HUB_SPEC: &str =
-    include_str!("../../artifacts/demo_chain_specs/polkadot_asset_hub.json");
+const COLLECTIVES_SPEC: &str =
+    include_str!("../../artifacts/demo_chain_specs/polkadot_collectives.json");
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -46,25 +55,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Light client configured with json rpc enabled; qed");
     let polkadot_chain_id = polkadot_connection.chain_id;
 
-    // Step 3. Connect to the parachain. For this example, the Asset hub parachain.
-    let assethub_connection = client
+    // Step 3. Connect to the parachain. For this example, the Collectives parachain.
+    let collectives_connection = client
         .add_chain(subxt_lightclient::smoldot::AddChainConfig {
-            specification: ASSET_HUB_SPEC,
+            specification: COLLECTIVES_SPEC,
             json_rpc: subxt_lightclient::smoldot::AddChainConfigJsonRpc::Enabled {
                 max_pending_requests: NonZeroU32::new(128).unwrap(),
                 max_subscriptions: 1024,
             },
-            // The chain specification of the asset hub parachain mentions that the identifier
+            // The chain specification of the collectives parachain mentions that the identifier
             // of its relay chain is `polkadot`.
             potential_relay_chains: [polkadot_chain_id].into_iter(),
             database_content: "",
             user_data: (),
         })
         .expect("Light client chain added with valid spec; qed");
-    let parachain_json_rpc_responses = assethub_connection
+    let parachain_json_rpc_responses = collectives_connection
         .json_rpc_responses
         .expect("Light client configured with json rpc enabled; qed");
-    let parachain_chain_id = assethub_connection.chain_id;
+    let parachain_chain_id = collectives_connection.chain_id;
 
     // Step 4. Turn the smoldot client into a raw client.
     let raw_light_client = RawLightClient::builder()
@@ -74,28 +83,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Step 5. Obtain a client to target the relay chain and the parachain.
-    let polkadot_api: LightClient<PolkadotConfig> =
+    let _polkadot_api: LightClient<PolkadotConfig> =
         raw_light_client.for_chain(polkadot_chain_id).await?;
     let parachain_api: LightClient<PolkadotConfig> =
         raw_light_client.for_chain(parachain_chain_id).await?;
 
     // Step 6. Subscribe to the finalized blocks of the chains.
-    let polkadot_sub = polkadot_api
-        .blocks()
-        .subscribe_finalized()
-        .await?
-        .map(|block| ("Polkadot", block));
-    let parachain_sub = parachain_api
-        .blocks()
-        .subscribe_finalized()
-        .await?
-        .map(|block| ("AssetHub", block));
-    let mut stream_combinator = futures::stream::select(polkadot_sub, parachain_sub);
+    let key = collectives::storage().fellowship_collective().members_iter();
+    let mut query = parachain_api.storage().at_latest().await.unwrap().iter(key).await?;
+    let mut members = BTreeSet::new();
 
-    while let Some((chain, block)) = stream_combinator.next().await {
-        let block = block?;
+    while let Some(Ok((id, fellow))) = query.next().await {
+        let account = AccountId32::from_slice(&id[id.len() - 32..]).unwrap();
 
-        println!("     Chain {:?} hash={:?}", chain, block.hash());
+        println!("Fetched member: {} rank {}", account.to_ss58check(), fellow.rank);
+        if members.contains(&account) {
+            println!("ERROR: Fetched account twice");
+        }
+        members.insert(account);
     }
 
     Ok(())
