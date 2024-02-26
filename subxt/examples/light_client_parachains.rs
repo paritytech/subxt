@@ -3,14 +3,14 @@
 //! Run: `cargo run --example light_client_parachains --features="unstable-light-client native"`.
 
 #![allow(missing_docs)]
+use sp_core::crypto::{AccountId32, Ss58Codec};
+use sp_core::ByteArray;
+use std::collections::BTreeSet;
 use std::{iter, num::NonZeroU32};
 use subxt::{
     client::{LightClient, RawLightClient},
     PolkadotConfig,
 };
-use sp_core::crypto::{AccountId32, Ss58Codec};
-use std::collections::BTreeSet;
-use sp_core::ByteArray;
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -89,18 +89,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         raw_light_client.for_chain(parachain_chain_id).await?;
 
     // Step 6. Subscribe to the finalized blocks of the chains.
-    let key = collectives::storage().fellowship_collective().members_iter();
-    let mut query = parachain_api.storage().at_latest().await.unwrap().iter(key).await?;
-    let mut members = BTreeSet::new();
+    {
+        let key = collectives::storage()
+            .fellowship_collective()
+            .members_iter();
+        let mut query = parachain_api
+            .storage()
+            .at_latest()
+            .await
+            .unwrap()
+            .iter(key)
+            .await?;
+        let mut members = BTreeSet::new();
+        let mut members_by_key = BTreeSet::new();
 
-    while let Some(Ok((id, fellow))) = query.next().await {
-        let account = AccountId32::from_slice(&id[id.len() - 32..]).unwrap();
+        while let Some(Ok((id, fellow))) = query.next().await {
+            let account = AccountId32::from_slice(&id[id.len() - 32..]).unwrap();
 
-        println!("Fetched member: {} rank {}", account.to_ss58check(), fellow.rank);
-        if members.contains(&account) {
-            println!("ERROR: Fetched account twice");
+            println!(
+                "Fetched member: {} rank {}",
+                account.to_ss58check(),
+                fellow.rank
+            );
+            if members.contains(&account) {
+                let cont = members_by_key.contains(&id);
+                println!(
+                    "ERROR: Fetched account twice. However is the key already inserted? {}",
+                    cont
+                );
+            }
+            members.insert(account);
+            members_by_key.insert(id);
         }
-        members.insert(account);
     }
 
     Ok(())
