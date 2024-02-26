@@ -59,6 +59,9 @@ pub enum DispatchError {
         "Some resource (e.g. a preimage) is unavailable right now. This might fix itself later."
     )]
     Unavailable,
+    /// Root origin is not allowed.
+    #[error("Root origin is not allowed.")]
+    RootNotAllowed,
 }
 
 /// An error relating to tokens when dispatching a transaction.
@@ -92,6 +95,9 @@ pub enum TokenError {
     /// Withdrawal would cause unwanted loss of account.
     #[error("Withdrawal would cause unwanted loss of account.")]
     NotExpendable,
+    /// Account cannot receive the assets.
+    #[error("Account cannot receive the assets.")]
+    Blocked,
 }
 
 /// An error relating to arithmetic when dispatching a transaction.
@@ -249,6 +255,7 @@ impl DispatchError {
             Exhausted,
             Corruption,
             Unavailable,
+            RootNotAllowed,
         }
 
         // ModuleError is a bit special; we want to support being decoded from either
@@ -298,6 +305,7 @@ impl DispatchError {
             DecodedDispatchError::Exhausted => DispatchError::Exhausted,
             DecodedDispatchError::Corruption => DispatchError::Corruption,
             DecodedDispatchError::Unavailable => DispatchError::Unavailable,
+            DecodedDispatchError::RootNotAllowed => DispatchError::RootNotAllowed,
             // But we apply custom logic to transform the module error into the outward facing version:
             DecodedDispatchError::Module(module_bytes) => {
                 let module_bytes = module_bytes.0;
