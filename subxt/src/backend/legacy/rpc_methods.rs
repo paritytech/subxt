@@ -36,7 +36,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         key: &[u8],
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageKey>, Error> {
+    ) -> Result<Option<StorageData>, Error> {
         let params = rpc_params![to_hex(key), hash];
         let data: Option<Bytes> = self.client.request("state_getStorage", params).await?;
         Ok(data.map(|b| b.0))
@@ -51,7 +51,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         count: u32,
         start_key: Option<&[u8]>,
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageData>, Error> {
+    ) -> Result<Vec<StorageKey>, Error> {
         let start_key = start_key.map(to_hex);
         let params = rpc_params![to_hex(key), count, start_key, at];
         let data: Vec<Bytes> = self.client.request("state_getKeysPaged", params).await?;
@@ -535,6 +535,13 @@ impl DryRunResultBytes {
         // dryRun returns an ApplyExtrinsicResult, which is basically a
         // `Result<Result<(), DispatchError>, TransactionValidityError>`.
         let bytes = self.0;
+
+        // We expect at least 2 bytes. In case we got a naff response back (or
+        // manually constructed this struct), just error to avoid a panic:
+        if bytes.len() < 2 {
+            return Err(crate::Error::Unknown(bytes));
+        }
+
         if bytes[0] == 0 && bytes[1] == 0 {
             // Ok(Ok(())); transaction is valid and executed ok
             Ok(DryRunResult::Success)

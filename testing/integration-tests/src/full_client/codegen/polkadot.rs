@@ -4009,9 +4009,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                95u8, 47u8, 93u8, 137u8, 187u8, 229u8, 88u8, 229u8, 191u8, 198u8, 96u8, 199u8,
-                211u8, 80u8, 51u8, 45u8, 229u8, 219u8, 112u8, 171u8, 41u8, 151u8, 124u8, 61u8,
-                12u8, 50u8, 57u8, 5u8, 196u8, 180u8, 42u8, 140u8,
+                242u8, 57u8, 130u8, 28u8, 242u8, 22u8, 24u8, 111u8, 149u8, 94u8, 72u8, 167u8, 72u8,
+                22u8, 128u8, 181u8, 113u8, 19u8, 74u8, 216u8, 162u8, 229u8, 14u8, 254u8, 68u8,
+                90u8, 180u8, 37u8, 184u8, 74u8, 59u8, 10u8,
             ]
     }
     pub mod system {
@@ -43581,6 +43581,9 @@ pub mod api {
                     #[codec(index = 1)]
                     #[doc = "The given asset ID already has an assigned conversion rate and cannot be re-created."]
                     AlreadyExists,
+                    #[codec(index = 2)]
+                    #[doc = "Overflow ocurred when calculating the inverse rate."]
+                    Overflow,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
@@ -53674,6 +53677,12 @@ pub mod api {
                         #[codec(index = 6)]
                         #[doc = "A candidate was backed by a disabled validator"]
                         BackedByDisabled,
+                        #[codec(index = 7)]
+                        #[doc = "A candidate was backed even though the paraid was not scheduled."]
+                        BackedOnUnscheduledCore,
+                        #[codec(index = 8)]
+                        #[doc = "Too many candidates supplied."]
+                        UnscheduledCandidate,
                     }
                 }
             }

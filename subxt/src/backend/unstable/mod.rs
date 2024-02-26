@@ -610,7 +610,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         TransactionStatus::Dropped { message: error }
                     }
                     rpc_methods::TransactionStatus::Error { error } => {
-                        TransactionStatus::Dropped { message: error }
+                        TransactionStatus::Error { message: error }
                     }
                     rpc_methods::TransactionStatus::Invalid { error } => {
                         TransactionStatus::Invalid { message: error }
