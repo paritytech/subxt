@@ -475,6 +475,37 @@ pub enum StorageHasher {
     Identity,
 }
 
+impl StorageHasher {
+    /// The hash produced by a [`StorageHasher`] has 1 or 2 of the following components:
+    /// 1. A fixed size hash. (not present for [`StorageHasher::Identity`])
+    /// 2. The key that was used as an input to the hasher. (only present for
+    /// [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
+    ///
+    /// This function returns the number of hash bytes that must be skipped to get to the 2. component, the unhashed key.
+    /// To check whether or not an unhashed key is contained, see [`StorageHasher::hash_bytes_before_unhashed_key`].
+    pub fn hash_bytes_before_unhashed_key(&self) -> usize {
+        match self {
+            StorageHasher::Blake2_128Concat => 16,
+            StorageHasher::Twox64Concat => 8,
+            StorageHasher::Blake2_128 => 16,
+            StorageHasher::Blake2_256 => 32,
+            StorageHasher::Twox128 => 16,
+            StorageHasher::Twox256 => 32,
+            StorageHasher::Identity => 0,
+        }
+    }
+
+    /// Returns if the key a hash was produces for, is contained in the hash itself.
+    /// If this is `true`, [`StorageHasher::hash_bytes_before_unhashed_key`] can be used,
+    /// to find the offset of the start byte of the key from the start of the hash bytes.
+    pub fn hash_contains_unhashed_key(&self) -> bool {
+        matches!(
+            self,
+            StorageHasher::Blake2_128Concat | StorageHasher::Twox64Concat | StorageHasher::Identity
+        )
+    }
+}
+
 /// Is the storage entry optional, or does it have a default value.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum StorageEntryModifier {

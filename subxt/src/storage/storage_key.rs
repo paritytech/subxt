@@ -1,7 +1,7 @@
 use super::{
     storage_address::StaticStorageKey,
     utils::{
-        hash_contains_unhashed_value, strip_storage_hash_bytes,
+        strip_storage_hash_bytes,
     },
 };
 use crate::{
@@ -120,7 +120,7 @@ pub fn decode_storage_key_from_hash<K: ?Sized>(
 
     // Note: This validation check makes sure, only zero-sized types can be decoded from
     // hashers that do not support reconstruction of a value
-    if !hash_contains_unhashed_value(hasher) && bytes_decoded > 0 {
+    if !hasher.hash_contains_unhashed_key() && bytes_decoded > 0 {
         let ty_name = metadata
             .types()
             .resolve(ty_id)
@@ -199,6 +199,7 @@ macro_rules! impl_tuples {
                     let mut $iter = self.$n.keys_iter();
                 )+
 
+                // Note: this functions just flattens the iterators (that might all have different types).
                 std::iter::from_fn(move || {
                     let mut i = 0;
                     loop {

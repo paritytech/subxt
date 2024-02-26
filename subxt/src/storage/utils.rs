@@ -64,20 +64,10 @@ pub fn strip_storage_hash_bytes(
     hash: &mut &[u8],
     hasher: &StorageHasher,
 ) -> Result<(), StorageAddressError> {
-    let bytes_to_strip = match hasher {
-        StorageHasher::Blake2_128Concat => 16,
-        StorageHasher::Twox64Concat => 8,
-        StorageHasher::Blake2_128 => 16,
-        StorageHasher::Blake2_256 => 32,
-        StorageHasher::Twox128 => 16,
-        StorageHasher::Twox256 => 32,
-        StorageHasher::Identity => 0,
-    };
-
+    let bytes_to_strip = hasher.hash_bytes_before_unhashed_key();
     if hash.len() < bytes_to_strip {
         return Err(StorageAddressError::UnexpectedAddressBytes);
     }
-
     *hash = &hash[bytes_to_strip..];
     Ok(())
 }
