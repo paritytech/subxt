@@ -56,7 +56,7 @@ pub(crate) fn strip_storage_addess_root_bytes(
 }
 
 /// Strips the first few bytes off a hash to possibly skip to the plan key value,
-/// if [`hash_contains_unhashed_value()`] for this StorageHasher.
+/// if [`StorageHasher::hash_contains_unhashed_key()`] for this StorageHasher.
 ///
 /// Returns `Err(..)` if there are not enough bytes.
 /// Returns `Ok(())` otherwise
@@ -70,14 +70,4 @@ pub fn strip_storage_hash_bytes(
     }
     *hash = &hash[bytes_to_strip..];
     Ok(())
-}
-
-/// This value is contained within the hash for concat-stle hashers
-/// ([`StorageHasher::Identity`] or [`StorageHasher::Identity`]) and the
-/// identity hash function ([`StorageHasher::Identity`]).
-pub fn hash_contains_unhashed_value(hasher: &StorageHasher) -> bool {
-    matches!(
-        hasher,
-        StorageHasher::Blake2_128Concat | StorageHasher::Twox64Concat | StorageHasher::Identity
-    )
 }

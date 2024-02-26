@@ -1,9 +1,4 @@
-use super::{
-    storage_address::StaticStorageKey,
-    utils::{
-        strip_storage_hash_bytes,
-    },
-};
+use super::utils::strip_storage_hash_bytes;
 use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, StorageAddressError},
@@ -12,6 +7,8 @@ use crate::{
 };
 use scale_encode::EncodeAsType;
 use subxt_metadata::StorageHasher;
+
+use derivative::Derivative;
 
 /// This trait should be implemented by anything that can be used as one or multiple storage keys.
 pub trait StorageKey {
@@ -69,8 +66,42 @@ impl StorageKey for () {
     }
 }
 
+/// A storage key for static encoded values.
+/// The original value is only present at construction, but can be decoded from the contained bytes.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
+pub struct StaticStorageKey<K: ?Sized> {
+    pub(super) bytes: Static<Encoded>,
+    pub(super) _marker: std::marker::PhantomData<K>,
+}
+
+impl<K: codec::Encode + ?Sized> StaticStorageKey<K> {
+    /// Creates a new static storage key
+    pub fn new(key: &K) -> Self {
+        StaticStorageKey {
+            bytes: Static(Encoded(key.encode())),
+            _marker: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<K: codec::Decode + ?Sized> StaticStorageKey<K> {
+    /// Decodes the encoded inner bytes into the type `K`.
+    pub fn decoded(&self) -> Result<K, Error> {
+        let decoded = K::decode(&mut self.bytes())?;
+        Ok(decoded)
+    }
+}
+
+impl<K: ?Sized> StaticStorageKey<K> {
+    /// Returns the scale-encoded bytes that make up this key
+    pub fn bytes(&self) -> &[u8] {
+        &self.bytes.0 .0
+    }
+}
+
 // Note: The ?Sized bound is necessary to support e.g. `StorageKey<[u8]>`.
-impl<K: EncodeAsType + codec::Decode + ?Sized> StorageKey for StaticStorageKey<K> {
+impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
     fn keys_iter(&self) -> impl Iterator<Item = &dyn EncodeAsType> {
         std::iter::once(&self.bytes as &dyn EncodeAsType)
     }

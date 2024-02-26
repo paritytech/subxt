@@ -173,6 +173,10 @@ fn generate_storage_entry_fns(
         StorageEntryModifier::Optional => quote!(()),
     };
 
+    // Note: putting `#crate_path::storage::address::StaticStorageKey` into this variable is necessary
+    // to get the line width below a certain limit. If not done, rustfmt will refuse to format the following big expression.
+    // for more information see [this post](https://users.rust-lang.org/t/rustfmt-silently-fails-to-work/75485/4).
+    let static_storage_key: TokenStream = quote!(#crate_path::storage::address::StaticStorageKey);
     let all_fns = (0..=keys.len()).map(|n_keys| {
         let keys_slice = &keys[..n_keys];
         let (fn_name, is_fetchable, is_iterable) = if n_keys == keys.len() {
@@ -186,29 +190,65 @@ fn generate_storage_entry_fns(
             };
             (fn_name, false, true)
         };
-        let is_fetchable_type = is_fetchable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let is_iterable_type = is_iterable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let (keys, keys_type) = match keys_slice.len(){
-            0 => (quote!( () ), quote!( () )),
+        let is_fetchable_type = is_fetchable
+            .then_some(quote!(#crate_path::storage::address::Yes))
+            .unwrap_or(quote!(()));
+        let is_iterable_type = is_iterable
+            .then_some(quote!(#crate_path::storage::address::Yes))
+            .unwrap_or(quote!(()));
+
+        let (keys, keys_type) = match keys_slice.len() {
+            0 => (quote!(()), quote!(())),
             1 => {
-                let arg_name = &keys_slice[0].arg_name;
-                let keys = quote!( #crate_path::storage::address::StaticStorageKey::new(#arg_name.borrow()) );
-                let path = &keys_slice[0].alias_type_path;
-                let path = quote!( #crate_path::storage::address::StaticStorageKey<#path> );
-                (keys, path)
+                let key = &keys_slice[0];
+                if key.hasher.hash_contains_unhashed_key() {
+                    let arg = &key.arg_name;
+                    let keys = quote!(#static_storage_key::new(#arg.borrow()));
+                    let path = &key.alias_type_path;
+                    let path = quote!(#static_storage_key<#path>);
+                    (keys, path)
+                } else {
+                    (quote!(()), quote!(()))
+                }
             }
-            _ =>  {
-                let keys_iter = keys_slice.iter().map(|MapEntryKey{arg_name, ..}| quote!( #crate_path::storage::address::StaticStorageKey::new(#arg_name.borrow()) ));
+            _ => {
+                let keys_iter = keys_slice.iter().map(
+                    |MapEntryKey {
+                         arg_name, hasher, ..
+                     }| {
+                        if hasher.hash_contains_unhashed_key() {
+                            quote!( #static_storage_key::new(#arg_name.borrow()) )
+                        } else {
+                            quote!(())
+                        }
+                    },
+                );
                 let keys = quote!( (#(#keys_iter,)*) );
-                let paths_iter = keys_slice.iter().map(|MapEntryKey{alias_type_path, ..}| quote!( #crate_path::storage::address::StaticStorageKey<#alias_type_path> ) );
+                let paths_iter = keys_slice.iter().map(
+                    |MapEntryKey {
+                         alias_type_path,
+                         hasher,
+                         ..
+                     }| {
+                        if hasher.hash_contains_unhashed_key() {
+                            quote!( #static_storage_key<#alias_type_path> )
+                        } else {
+                            quote!(())
+                        }
+                    },
+                );
                 let paths = quote!( (#(#paths_iter,)*) );
                 (keys, paths)
             }
         };
 
-        let key_args = keys_slice.iter().map(|MapEntryKey{arg_name, alias_type_path, ..}| {
-            quote!( #arg_name: impl ::std::borrow::Borrow<#alias_type_path> )
-        });
+        let key_args = keys_slice.iter().map(
+            |MapEntryKey {
+                 arg_name,
+                 alias_type_path,
+                 ..
+             }| quote!( #arg_name: impl ::std::borrow::Borrow<#alias_type_path> ),
+        );
 
         quote!(
             #docs

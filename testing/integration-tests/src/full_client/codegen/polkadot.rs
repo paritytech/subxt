@@ -35126,7 +35126,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::para_id_affinity::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageKey<types::para_id_affinity::Param0>,
+                    (),
                     types::para_id_affinity::ParaIdAffinity,
                     ::subxt::storage::address::Yes,
                     (),
@@ -35135,7 +35135,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "OnDemandAssignmentProvider",
                         "ParaIdAffinity",
-                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                        (),
                         [
                             145u8, 117u8, 2u8, 170u8, 99u8, 68u8, 166u8, 236u8, 247u8, 80u8, 202u8,
                             87u8, 116u8, 244u8, 218u8, 172u8, 41u8, 187u8, 170u8, 163u8, 187u8,
@@ -35231,7 +35231,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::core_schedules::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param0>,
+                    (),
                     types::core_schedules::CoreSchedules,
                     (),
                     (),
@@ -35240,7 +35240,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
-                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                        (),
                         [
                             34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
                             42u8, 42u8, 227u8, 119u8, 181u8, 247u8, 44u8, 29u8, 24u8, 128u8, 49u8,
@@ -35257,10 +35257,7 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<types::core_schedules::Param0>,
                     _1: impl ::std::borrow::Borrow<types::core_schedules::Param1>,
                 ) -> ::subxt::storage::address::Address<
-                    (
-                        ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param0>,
-                        ::subxt::storage::address::StaticStorageKey<types::core_schedules::Param1>,
-                    ),
+                    ((), ()),
                     types::core_schedules::CoreSchedules,
                     ::subxt::storage::address::Yes,
                     (),
@@ -35269,10 +35266,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
-                        (
-                            ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
-                            ::subxt::storage::address::StaticStorageKey::new(_1.borrow()),
-                        ),
+                        ((), ()),
                         [
                             34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
                             42u8, 42u8, 227u8, 119u8, 181u8, 247u8, 44u8, 29u8, 24u8, 128u8, 49u8,
@@ -35312,7 +35306,7 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<types::core_descriptors::Param0>,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageKey<types::core_descriptors::Param0>,
+                    (),
                     types::core_descriptors::CoreDescriptors,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -35321,7 +35315,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreDescriptors",
-                        ::subxt::storage::address::StaticStorageKey::new(_0.borrow()),
+                        (),
                         [
                             1u8, 90u8, 208u8, 119u8, 150u8, 241u8, 133u8, 74u8, 22u8, 166u8, 13u8,
                             7u8, 73u8, 136u8, 105u8, 61u8, 251u8, 245u8, 164u8, 7u8, 45u8, 68u8,

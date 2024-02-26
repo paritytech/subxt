@@ -6,7 +6,6 @@ use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
-    utils::{Encoded, Static},
 };
 use derivative::Derivative;
 
@@ -72,30 +71,6 @@ pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
     keys: Keys,
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
-}
-
-/// A storage key for static encoded values.
-/// The original value is only present at construction, but can be decoded from the contained bytes.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
-pub struct StaticStorageKey<K: ?Sized> {
-    pub(super) bytes: Static<Encoded>,
-    pub(super) _marker: std::marker::PhantomData<K>,
-}
-
-impl<K: codec::Encode + ?Sized> StaticStorageKey<K> {
-    /// Creates a new static storage key
-    pub fn new(key: &K) -> Self {
-        StaticStorageKey {
-            bytes: Static(Encoded(key.encode())),
-            _marker: std::marker::PhantomData,
-        }
-    }
-
-    /// Returns the scale-encoded bytes that make up this key
-    pub fn bytes(&self) -> &[u8] {
-        &self.bytes.0 .0
-    }
 }
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
