@@ -333,7 +333,7 @@ where
 }
 
 /// How many keys/values to fetch at once.
-const STORAGE_PAGE_SIZE: u32 = 32;
+const STORAGE_PAGE_SIZE: u32 = 1000;
 
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
