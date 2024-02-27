@@ -97,6 +97,16 @@ impl RawLightClient {
 
         Ok(LightClient { client, chain_id })
     }
+
+    /// Target a different chain identified by the provided chain ID for requests.
+    pub async fn rpc_client_for_chain(
+        &self,
+        chain_id: smoldot::ChainId,
+    ) -> Result<RpcClient, crate::Error> {
+        let raw_rpc = self.raw_rpc.for_chain(chain_id);
+        let rpc_client = RpcClient::new(raw_rpc.clone());
+        Ok(rpc_client)
+    }
 }
 
 /// The light-client RPC implementation that is used to connect with the chain.

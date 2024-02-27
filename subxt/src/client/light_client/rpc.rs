@@ -74,7 +74,6 @@ impl RpcClientT for LightClientRpc {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         let client = self.clone();
-        let chain_id = self.chain_id();
 
         Box::pin(async move {
             let params = match params {
@@ -94,8 +93,6 @@ impl RpcClientT for LightClientRpc {
             let response = rx
                 .await
                 .map_err(|_| RpcError::ClientError(Box::new(LightClientError::BackgroundClosed)))?;
-
-            tracing::trace!(target: LOG_TARGET, "RPC response={:?} chain={:?}", response, chain_id);
 
             response.map_err(|err| RpcError::ClientError(Box::new(err)))
         })
