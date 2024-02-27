@@ -330,7 +330,7 @@ mod tests {
                 name,
                 modifier: v15::StorageEntryModifier::Optional,
                 ty: v15::StorageEntryType::Map {
-                    hashers: vec![],
+                    hashers: vec![v15::StorageHasher::Blake2_128Concat],
                     key,
                     value: meta_type::<bool>(),
                 },
