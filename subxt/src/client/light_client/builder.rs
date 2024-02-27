@@ -3,12 +3,16 @@
 // see LICENSE for license details.
 
 use super::{rpc::LightClientRpc, LightClient, LightClientError};
-use crate::backend::rpc::RpcClient;
+use crate::backend::legacy::{LegacyBackend,LegacyBackendBuilder};
+use crate::backend::unstable::UnstableBackendBuilder;
+use crate::backend::{self, rpc::RpcClient};
 use crate::client::RawLightClient;
 use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use crate::{config::Config, error::Error, OnlineClient};
 use std::num::NonZeroU32;
 use subxt_lightclient::{smoldot, AddedChain};
+use std::sync::Arc;
+use std::future::Future;
 
 #[cfg(feature = "jsonrpsee")]
 use crate::utils::validate_url_is_secure;
@@ -119,7 +123,8 @@ impl<T: Config> LightClientBuilder<T> {
         url: Url,
     ) -> Result<LightClient<T>, Error> {
         let chain_spec = fetch_url(url.as_ref()).await?;
-        self.build_client(chain_spec).await
+        let legacy_builder = LegacyBackend::builder();
+        self.build_client(legacy_builder, chain_spec).await
     }
 
     /// Build the light client from chain spec.
@@ -156,14 +161,64 @@ impl<T: Config> LightClientBuilder<T> {
         let chain_spec = serde_json::from_str(chain_spec)
             .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
 
-        self.build_client(chain_spec).await
+        let legacy_builder = LegacyBackend::builder();
+        self.build_client(legacy_builder, chain_spec).await
     }
 
-    /// Build the light client.
-    async fn build_client(
+    /// Construct a light client given either an [`UnstableBackendBuilder`] or [`LegacyBackendBuilder`].
+    ///
+    /// # Examples
+    ///
+    /// To use the legacy backend which relies on the legacy RPC methods (this is the default), you can do this:
+    ///
+    /// ```no_run
+    /// # async fn example() {
+    /// use subxt::backend::legacy::LegacyBackend;
+    /// use subxt::client::LightClient;
+    /// use subxt::config::PolkadotConfig;
+    ///
+    /// let legacy_builder = LegacyBackend::<PolkadotConfig>::builder();
+    /// let chain_spec = "...";
+    ///
+    /// let client = LightClient::builder()
+    ///     .build_from_backend(legacy_builder, chain_spec)
+    ///     .await
+    ///     .unwrap();
+    /// # }
+    /// ```
+    ///
+    /// To use the unstable backend which relies on the unstable RPC V2 methods, you can do this:
+    ///
+    /// ```no_run
+    /// # async fn example() {
+    /// use subxt::backend::unstable::UnstableBackend;
+    /// use subxt::client::LightClient;
+    /// use subxt::config::PolkadotConfig;
+    ///
+    /// let unstable_builder = UnstableBackend::<PolkadotConfig>::builder();
+    /// let chain_spec = "...";
+    ///
+    /// // The "driver" is an UnstableBackendDriver, and needs polling in order to
+    /// // allow the UnstableBackend, and thus client, to progress.
+    /// let (client, driver) = LightClient::builder()
+    ///     .build_from_backend(unstable_builder, chain_spec)
+    ///     .await
+    ///     .unwrap();
+    /// # }
+    /// ```
+    pub async fn build_from_backend<B: BackendBuilderToLightClient<T>>(self, backend_builder: B, chain_spec: &str) -> Result<B::Output, Error> {
+        let chain_spec = serde_json::from_str(chain_spec)
+            .map_err(|_| Error::LightClient(LightClientError::InvalidChainSpec))?;
+
+        self.build_client(backend_builder, chain_spec).await
+    }
+
+    // Build the light client.
+    async fn build_client<B: BackendBuilderToLightClient<T>>(
         self,
+        backend_builder: B,
         mut chain_spec: serde_json::Value,
-    ) -> Result<LightClient<T>, Error> {
+    ) -> Result<B::Output, Error> {
         // Set custom bootnodes if provided.
         if let Some(bootnodes) = self.bootnodes {
             if let serde_json::Value::Object(map) = &mut chain_spec {
@@ -183,7 +238,11 @@ impl<T: Config> LightClientBuilder<T> {
         };
 
         let raw_rpc = LightClientRpc::new(config)?;
-        build_client_from_rpc(raw_rpc).await
+        let chain_id = raw_rpc.chain_id();
+        let rpc_client = RpcClient::new(raw_rpc);
+        let light_client = backend_builder.build_light_client(chain_id, rpc_client).await?;
+
+        Ok(light_client)
     }
 }
 
@@ -231,17 +290,6 @@ impl RawLightClientBuilder {
     }
 }
 
-/// Build the light client from a raw rpc client.
-async fn build_client_from_rpc<T: Config>(
-    raw_rpc: LightClientRpc,
-) -> Result<LightClient<T>, Error> {
-    let chain_id = raw_rpc.chain_id();
-    let rpc_client = RpcClient::new(raw_rpc);
-    let client = OnlineClient::<T>::from_rpc_client(rpc_client).await?;
-
-    Ok(LightClient { client, chain_id })
-}
-
 /// Fetch the chain spec from the URL.
 #[cfg(feature = "jsonrpsee")]
 async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
@@ -275,6 +323,38 @@ async fn fetch_url(url: impl AsRef<str>) -> Result<serde_json::Value, Error> {
     let _ = subscription.next().await;
 
     Ok(result)
+}
+
+// To instantiate a light client, we first build an RPC client that knows how to talk to
+// Smoldot, and then we need a way to create a Backend which uses that RPC client. This
+// trait provides a means to do this.
+#[doc(hidden)]
+pub trait BackendBuilderToLightClient<T>: sealed::Sealed {
+    type Output;
+    fn build_light_client(self, chain_id: smoldot::ChainId, client: RpcClient) -> impl Future<Output = Result<Self::Output, Error>>;
+}
+impl <T: Config> BackendBuilderToLightClient<T> for LegacyBackendBuilder<T> {
+    type Output = LightClient<T>;
+    async fn build_light_client(self, chain_id: smoldot::ChainId, client: RpcClient) -> Result<Self::Output, Error> {
+        let legacy_backend = self.build(client);
+        let client = OnlineClient::<T>::from_backend(Arc::new(legacy_backend)).await?;
+        Ok(LightClient { client, chain_id })
+    }
+}
+impl <T: Config> BackendBuilderToLightClient<T> for UnstableBackendBuilder<T> {
+    type Output = (LightClient<T>, backend::unstable::UnstableBackendDriver<T>);
+    async fn build_light_client(self, chain_id: smoldot::ChainId, client: RpcClient) -> Result<Self::Output, Error> {
+        let (unstable_backend, driver) = self.build(client);
+        let client = OnlineClient::<T>::from_backend(Arc::new(unstable_backend)).await?;
+        Ok((LightClient { client, chain_id }, driver))
+    }
+}
+
+// Prevent additional implementations of the above trait, since it's not something
+mod sealed {
+    pub trait Sealed {}
+    impl <T> Sealed for super::LegacyBackendBuilder<T> {}
+    impl <T> Sealed for super::UnstableBackendBuilder<T> {}
 }
 
 cfg_jsonrpsee_native! {

@@ -25,20 +25,20 @@ default = ["jsonrpsee", "native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "jsonrpsee?/async-client", 
-    "jsonrpsee?/client-ws-transport-native-tls", 
-    "subxt-lightclient?/native", 
+    "jsonrpsee?/async-client",
+    "jsonrpsee?/client-ws-transport-native-tls",
+    "subxt-lightclient?/native",
     "tokio-util"
 ]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
 web = [
-    "jsonrpsee?/async-wasm-client", 
-    "jsonrpsee?/client-web-transport", 
-    "getrandom/js", 
-    "subxt-lightclient?/web", 
-    "subxt-macro/web", 
+    "jsonrpsee?/async-wasm-client",
+    "jsonrpsee?/client-web-transport",
+    "getrandom/js",
+    "subxt-lightclient?/web",
+    "subxt-macro/web",
     "instant/wasm-bindgen"
 ]
 

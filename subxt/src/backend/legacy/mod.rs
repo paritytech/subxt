@@ -22,6 +22,31 @@ use std::task::{Context, Poll};
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
 
+/// Configure and build a [`LegacyBackend`].
+pub struct LegacyBackendBuilder<T> {
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Config> Default for LegacyBackendBuilder<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: Config> LegacyBackendBuilder<T> {
+    /// Create a new [`LegacyBackendBuilder`].
+    pub fn new() -> Self {
+        Self {
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Given an RPC client, construct a [`LegacyBackend`].
+    pub fn build(self, client: RpcClient) -> LegacyBackend<T> {
+        LegacyBackend::new(client)
+    }
+}
+
 /// The legacy backend.
 #[derive(Debug, Clone)]
 pub struct LegacyBackend<T> {
@@ -29,6 +54,11 @@ pub struct LegacyBackend<T> {
 }
 
 impl<T: Config> LegacyBackend<T> {
+    /// Configure and construct a [`LegacyBackend`].
+    pub fn builder() -> LegacyBackendBuilder<T> {
+        LegacyBackendBuilder::new()
+    }
+
     /// Instantiate a new backend which uses the legacy API methods.
     pub fn new(client: RpcClient) -> Self {
         Self {
