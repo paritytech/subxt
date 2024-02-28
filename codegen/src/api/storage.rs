@@ -201,7 +201,7 @@ fn generate_storage_entry_fns(
             0 => (quote!(()), quote!(())),
             1 => {
                 let key = &keys_slice[0];
-                if key.hasher.hash_contains_unhashed_key() {
+                if key.hasher.ends_with_key() {
                     let arg = &key.arg_name;
                     let keys = quote!(#static_storage_key::new(#arg.borrow()));
                     let path = &key.alias_type_path;
@@ -216,7 +216,7 @@ fn generate_storage_entry_fns(
                     |MapEntryKey {
                          arg_name, hasher, ..
                      }| {
-                        if hasher.hash_contains_unhashed_key() {
+                        if hasher.ends_with_key() {
                             quote!( #static_storage_key::new(#arg_name.borrow()) )
                         } else {
                             quote!(())
@@ -230,7 +230,7 @@ fn generate_storage_entry_fns(
                          hasher,
                          ..
                      }| {
-                        if hasher.hash_contains_unhashed_key() {
+                        if hasher.ends_with_key() {
                             quote!( #static_storage_key<#alias_type_path> )
                         } else {
                             quote!(())
