@@ -259,7 +259,7 @@ where
                     let keys = <Address::Keys as StorageKey>::decode_from_bytes(
                         cursor,
                         &mut &hasher_type_id_pairs[..],
-                        &metadata,
+                        metadata.types(),
                     )?;
                     Ok(StorageKeyValuePair::<Address> {
                         keys,

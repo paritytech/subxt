@@ -37,7 +37,7 @@ pub trait StorageKey {
     fn decode_from_bytes(
         bytes: &mut &[u8],
         hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
-        metadata: &Metadata,
+        types: &PortableRegistry,
     ) -> Result<Self, Error>
     where
         Self: Sized + 'static;
@@ -57,7 +57,7 @@ impl StorageKey for () {
     fn decode_from_bytes(
         bytes: &mut &[u8],
         hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
-        metadata: &Metadata,
+        types: &PortableRegistry,
     ) -> Result<Self, Error> {
         // If no hashers, we just do nothing (erroring if ).
         let Some((hasher, ty_id)) = hashers_and_ty_ids.first() else {
@@ -69,7 +69,7 @@ impl StorageKey for () {
         };
 
         // Consume the hash bytes (we don't care about the key output here).
-        consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, metadata.types())?;
+        consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, types)?;
         // Advance our hasher cursor as well now that we've used it.
         *hashers_and_ty_ids = &hashers_and_ty_ids[1..];
 
@@ -124,7 +124,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
     fn decode_from_bytes(
         bytes: &mut &[u8],
         hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
-        metadata: &Metadata,
+        types: &PortableRegistry,
     ) -> Result<Self, Error>
     where
         Self: Sized + 'static,
@@ -138,7 +138,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         };
 
         // Advance the bytes cursor, returning any key bytes.
-        let key_bytes = consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, metadata.types())?;
+        let key_bytes = consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, types)?;
         // Advance the hasher cursor now we've used it.
         *hashers_and_ty_ids = &hashers_and_ty_ids[1..];
 
@@ -174,17 +174,16 @@ impl StorageKey for Vec<scale_value::Value> {
     fn decode_from_bytes(
         bytes: &mut &[u8],
         hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
-        metadata: &Metadata,
+        types: &PortableRegistry,
     ) -> Result<Self, Error>
     where
         Self: Sized + 'static,
     {
         let mut result: Vec<scale_value::Value> = vec![];
         for (hasher, ty_id) in hashers_and_ty_ids.iter() {
-            match consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, metadata.types())? {
+            match consume_hash_returning_key_bytes(bytes, *hasher, *ty_id, types)? {
                 Some(value_bytes) => {
-                    let value =
-                        Value::decode_as_type(&mut &*value_bytes, *ty_id, metadata.types())?;
+                    let value = Value::decode_as_type(&mut &*value_bytes, *ty_id, types)?;
                     result.push(value.remove_context());
                 }
                 None => {
@@ -223,9 +222,9 @@ fn consume_hash_returning_key_bytes<'a>(
     if hasher.ends_with_key() {
         scale_decode::visitor::decode_with_visitor(bytes, ty_id, types, IgnoreVisitor)
             .map_err(|err| Error::Decode(err.into()))?;
-
         // Return the key bytes, having advanced the input cursor past them.
-        let key_bytes = &before_key[before_key.len() - bytes.len()..];
+        let key_bytes = &before_key[..before_key.len() - bytes.len()];
+
         Ok(Some(key_bytes))
     } else {
         // There are no key bytes, so return None.
@@ -278,7 +277,7 @@ macro_rules! impl_tuples {
             fn decode_from_bytes(
                 cursor: &mut &[u8],
                 hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
-                metadata: &Metadata,
+                types: &PortableRegistry,
             ) -> Result<Self, Error>
             where
                 Self: Sized + 'static,
@@ -287,7 +286,7 @@ macro_rules! impl_tuples {
                 let tuple : Self = ( $(
                     {
                         let key =
-                        $ty::decode_from_bytes(cursor, hashers_and_ty_ids, metadata)?;
+                        $ty::decode_from_bytes(cursor, hashers_and_ty_ids, types)?;
                         key
                     },
                 )+);
@@ -307,3 +306,130 @@ const _: () = {
     impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6);
     impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6, H iter_h 7);
 };
+
+#[cfg(test)]
+mod tests {
+
+    use codec::Encode;
+    use scale_info::{meta_type, PortableRegistry, Registry, TypeInfo};
+    use subxt_metadata::StorageHasher;
+
+    use crate::{metadata::EncodeWithMetadata, utils::Era};
+
+    use super::{StaticStorageKey, StorageKey};
+
+    struct KeyBuilder {
+        registry: Registry,
+        bytes: Vec<u8>,
+        hashers_and_ty_ids: Vec<(StorageHasher, u32)>,
+    }
+
+    impl KeyBuilder {
+        fn new() -> KeyBuilder {
+            KeyBuilder {
+                registry: Registry::new(),
+                bytes: vec![],
+                hashers_and_ty_ids: vec![],
+            }
+        }
+
+        fn add<T: TypeInfo + Encode + 'static>(mut self, value: T, hasher: StorageHasher) -> Self {
+            let id = self.registry.register_type(&meta_type::<T>()).id;
+
+            self.hashers_and_ty_ids.push((hasher, id));
+            for i in 0..hasher.len_excluding_key() {
+                self.bytes.push(0);
+            }
+            value.encode_to(&mut self.bytes);
+            self
+        }
+
+        fn build(self) -> (PortableRegistry, Vec<u8>, Vec<(StorageHasher, u32)>) {
+            (self.registry.into(), self.bytes, self.hashers_and_ty_ids)
+        }
+    }
+
+    #[test]
+    fn storage_key_decoding_fuzz() {
+        let hashers = [
+            StorageHasher::Blake2_128,
+            StorageHasher::Blake2_128Concat,
+            StorageHasher::Blake2_256,
+            StorageHasher::Identity,
+            StorageHasher::Twox128,
+            StorageHasher::Twox256,
+            StorageHasher::Twox64Concat,
+        ];
+
+        let key_preserving_hashers = [
+            StorageHasher::Blake2_128Concat,
+            StorageHasher::Identity,
+            StorageHasher::Twox64Concat,
+        ];
+
+        type T4A = (
+            (),
+            StaticStorageKey<u32>,
+            StaticStorageKey<String>,
+            StaticStorageKey<Era>,
+        );
+        type T4B = (
+            (),
+            (StaticStorageKey<u32>, StaticStorageKey<String>),
+            StaticStorageKey<Era>,
+        );
+        type T4C = (
+            ((), StaticStorageKey<u32>),
+            (StaticStorageKey<String>, StaticStorageKey<Era>),
+        );
+
+        let era = Era::Immortal;
+        for h0 in hashers {
+            for h1 in key_preserving_hashers {
+                for h2 in key_preserving_hashers {
+                    for h3 in key_preserving_hashers {
+                        let (types, bytes, hashers_and_ty_ids) = KeyBuilder::new()
+                            .add((), h0)
+                            .add(13u32, h1)
+                            .add("Hello", h2)
+                            .add(era, h3)
+                            .build();
+
+                        let keys_a = T4A::decode_from_bytes(
+                            &mut &bytes[..],
+                            &mut &hashers_and_ty_ids[..],
+                            &types,
+                        )
+                        .unwrap();
+
+                        let keys_b = T4B::decode_from_bytes(
+                            &mut &bytes[..],
+                            &mut &hashers_and_ty_ids[..],
+                            &types,
+                        )
+                        .unwrap();
+
+
+                        let keys_c = T4C::decode_from_bytes(
+                            &mut &bytes[..],
+                            &mut &hashers_and_ty_ids[..],
+                            &types,
+                        )
+                        .unwrap();
+
+                        assert_eq!(keys_a.1.decoded().unwrap(), 13);
+                        assert_eq!(keys_b.1 .0.decoded().unwrap(), 13);
+                        assert_eq!(keys_c.0 .1.decoded().unwrap(), 13);
+
+                        assert_eq!(keys_a.2.decoded().unwrap(), "Hello");
+                        assert_eq!(keys_b.1 .1.decoded().unwrap(), "Hello");
+                        assert_eq!(keys_c.1 .0.decoded().unwrap(), "Hello");
+                        assert_eq!(keys_a.3.decoded().unwrap(), era);
+                        assert_eq!(keys_b.2.decoded().unwrap(), era);
+                        assert_eq!(keys_c.1 .1.decoded().unwrap(), era);
+                    }
+                }
+            }
+        }
+    }
+}
