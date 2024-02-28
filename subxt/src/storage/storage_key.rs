@@ -1,6 +1,5 @@
 use crate::{
     error::{Error, StorageAddressError},
-    metadata::Metadata,
     utils::{Encoded, Static},
 };
 use scale_decode::{visitor::IgnoreVisitor, DecodeAsType};
@@ -408,7 +407,6 @@ mod tests {
                             &types,
                         )
                         .unwrap();
-
 
                         let keys_c = T4C::decode_from_bytes(
                             &mut &bytes[..],
