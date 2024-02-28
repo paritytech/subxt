@@ -208,7 +208,12 @@ fn consume_hash_returning_key_bytes<'a>(
     types: &PortableRegistry,
 ) -> Result<Option<&'a [u8]>, Error> {
     // Strip the bytes off for the actual hash, consuming them.
-    strip_storage_hash_bytes(bytes, hasher)?;
+    let bytes_to_strip = hasher.len_excluding_key();
+    if bytes.len() < bytes_to_strip {
+        return Err(StorageAddressError::UnexpectedAddressBytes.into());
+    }
+    *bytes = &bytes[bytes_to_strip..];
+
     // Now, find the bytes representing the key, consuming them.
     let before_key = *bytes;
     if hasher.ends_with_key() {
@@ -219,25 +224,9 @@ fn consume_hash_returning_key_bytes<'a>(
         let key_bytes = &before_key[before_key.len() - bytes.len()..];
         Ok(Some(key_bytes))
     } else {
+        // There are no key bytes, so return None.
         Ok(None)
     }
-}
-
-/// Strips the first few bytes off a hash to possibly skip to the plan key value,
-/// if [`StorageHasher::hash_contains_unhashed_key()`] for this StorageHasher.
-///
-/// Returns `Err(..)` if there are not enough bytes.
-/// Returns `Ok(())` otherwise
-fn strip_storage_hash_bytes(
-    hash: &mut &[u8],
-    hasher: StorageHasher,
-) -> Result<(), StorageAddressError> {
-    let bytes_to_strip = hasher.len_excluding_key();
-    if hash.len() < bytes_to_strip {
-        return Err(StorageAddressError::UnexpectedAddressBytes);
-    }
-    *hash = &hash[bytes_to_strip..];
-    Ok(())
 }
 
 /// Generates StorageKey implementations for tuples, e.g.
@@ -306,11 +295,11 @@ macro_rules! impl_tuples {
 
 #[rustfmt::skip]
 const _: () = {
-    impl_tuples!(A iter_a 0, B iter_ab 1);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6);
-    impl_tuples!(A iter_a 0, B iter_ab 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6, H iter_h 7);
+    impl_tuples!(A iter_a 0, B iter_b 1);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6);
+    impl_tuples!(A iter_a 0, B iter_b 1, C iter_c 2, D iter_d 3, E iter_e 4, F iter_f 5, G iter_g 6, H iter_h 7);
 };
