@@ -8,8 +8,7 @@ mod storage_address;
 mod storage_client;
 mod storage_key;
 mod storage_type;
-
-pub mod utils;
+mod utils;
 
 pub use storage_client::StorageClient;
 

@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
-use super::utils::strip_storage_addess_root_bytes;
 use super::StorageKey;
 
 use crate::{
@@ -311,7 +310,8 @@ where
     }
 }
 
-pub(crate) fn storage_hasher_type_id_pairs(
+/// Return a vec of hashers and the associated type IDs for the keys that are hashed.
+fn storage_hasher_type_id_pairs(
     entry: &StorageEntryType,
     metadata: &Metadata,
 ) -> Result<Vec<(StorageHasher, u32)>, Error> {
@@ -354,6 +354,16 @@ pub(crate) fn storage_hasher_type_id_pairs(
                 }
             }
         }
+    }
+}
+
+/// Strips the first 16 bytes (8 for the pallet hash, 8 for the entry hash) off some storage address bytes.
+fn strip_storage_addess_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
+    if address_bytes.len() >= 16 {
+        *address_bytes = &address_bytes[16..];
+        Ok(())
+    } else {
+        Err(StorageAddressError::UnexpectedAddressBytes)
     }
 }
 
