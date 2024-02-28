@@ -234,7 +234,7 @@ fn consume_hash_returning_key_bytes<'a>(
 }
 
 /// Generates StorageKey implementations for tuples, e.g.
-/// ```rs,norun
+/// ```rs,no_run
 /// impl<A: EncodeAsType, B: EncodeAsType> StorageKey for (StorageKey<A>, StorageKey<B>) {
 ///     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
 ///         let arr = [&self.0 as &dyn EncodeAsType, &self.1 as &dyn EncodeAsType];
