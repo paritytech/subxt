@@ -65,10 +65,6 @@ pub struct Payload<CallData> {
     validation_hash: Option<[u8; 32]>,
 }
 
-/// A boxed transaction payload.
-// Dev Note: Arc used to enable easy cloning (given that we can't have dyn Clone).
-pub type BoxedPayload = Payload<Arc<dyn EncodeAsFields + Send + Sync + 'static>>;
-
 /// The type of a payload typically used for dynamic transaction payloads.
 pub type DynamicPayload = Payload<Composite<()>>;
 
@@ -101,19 +97,6 @@ impl<CallData> Payload<CallData> {
             call_name: Cow::Borrowed(call_name),
             call_data,
             validation_hash: Some(validation_hash),
-        }
-    }
-
-    /// Box the payload.
-    pub fn boxed(self) -> BoxedPayload
-    where
-        CallData: EncodeAsFields + Send + Sync + 'static,
-    {
-        BoxedPayload {
-            pallet_name: self.pallet_name,
-            call_name: self.call_name,
-            call_data: Arc::new(self.call_data),
-            validation_hash: self.validation_hash,
         }
     }
 
@@ -174,7 +157,7 @@ impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
         let mut fields = call
             .fields
             .iter()
-            .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
+            .map(|f| scale_encode::Field::new(&f.ty.id, f.name.as_deref()));
 
         self.call_data
             .encode_as_fields_to(&mut fields, metadata.types(), out)?;

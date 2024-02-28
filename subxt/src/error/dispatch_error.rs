@@ -7,7 +7,8 @@
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, TypeResolver};
+use scale_info::PortableRegistry;
 use std::borrow::Cow;
 
 use super::{Error, MetadataError};
@@ -209,7 +210,7 @@ impl ModuleError {
     pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.bytes[..],
-            self.metadata.outer_enums().error_enum_ty(),
+            &self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -266,19 +267,22 @@ impl DispatchError {
         impl scale_decode::Visitor for DecodedModuleErrorBytesVisitor {
             type Error = scale_decode::Error;
             type Value<'scale, 'info> = DecodedModuleErrorBytes;
+            type TypeResolver = PortableRegistry;
+
             fn unchecked_decode_as_type<'scale, 'info>(
                 self,
                 input: &mut &'scale [u8],
-                _type_id: scale_decode::visitor::TypeId,
+                _type_id: &u32,
                 _types: &'info scale_info::PortableRegistry,
             ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>>
             {
                 DecodeAsTypeResult::Decoded(Ok(DecodedModuleErrorBytes(input.to_vec())))
             }
         }
+
         impl scale_decode::IntoVisitor for DecodedModuleErrorBytes {
-            type Visitor = DecodedModuleErrorBytesVisitor;
-            fn into_visitor() -> Self::Visitor {
+            type AnyVisitor<R: TypeResolver> = DecodedModuleErrorBytesVisitor;
+            fn into_visitor() -> DecodedModuleErrorBytesVisitor {
                 DecodedModuleErrorBytesVisitor
             }
         }

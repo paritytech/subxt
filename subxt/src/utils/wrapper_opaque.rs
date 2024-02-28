@@ -5,8 +5,9 @@
 use super::PhantomDataSendSync;
 use codec::{Compact, Decode, DecodeAll, Encode};
 use derivative::Derivative;
-use scale_decode::{IntoVisitor, Visitor};
+use scale_decode::{ext::scale_type_resolver::visitor, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
+use scale_info::PortableRegistry;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
@@ -74,23 +75,33 @@ impl<T> WrapperKeepOpaque<T> {
 }
 
 impl<T> EncodeAsType for WrapperKeepOpaque<T> {
-    fn encode_as_type_to(
+    fn encode_as_type_to<R: TypeResolver>(
         &self,
-        type_id: u32,
-        types: &scale_info::PortableRegistry,
+        type_id: &R::TypeId,
+        types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
         use scale_encode::error::{Error, ErrorKind, Kind};
 
+        let visitor = visitor::new(out, |_, _| {
+            Err(Error::new(ErrorKind::WrongShape {
+                actual: Kind::Struct,
+                expected_id: format!("{:?}", type_id),
+            }))
+        })
+        .visit_composite(|| {});
+
+        types.resolve_type(type_id, visitor);
+
         let Some(ty) = types.resolve(type_id) else {
-            return Err(Error::new(ErrorKind::TypeNotFound(type_id)));
+            return;
         };
 
         // Do a basic check that the target shape lines up.
         let scale_info::TypeDef::Composite(_) = &ty.type_def else {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
-                expected: type_id,
+                expected_id: format!("{:?}", type_id),
             }));
         };
 
@@ -98,7 +109,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         if ty.path.ident().as_deref() != Some("WrapperKeepOpaque") {
             return Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
-                expected: type_id,
+                expected_id: format!("{:?}", type_id),
             }));
         }
 
@@ -108,15 +119,16 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
     }
 }
 
-pub struct WrapperKeepOpaqueVisitor<T>(std::marker::PhantomData<T>);
-impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
+pub struct WrapperKeepOpaqueVisitor<T, R>(std::marker::PhantomData<(T, R)>);
+impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
     type Value<'scale, 'info> = WrapperKeepOpaque<T>;
     type Error = scale_decode::Error;
+    type TypeResolver = R;
 
     fn visit_composite<'scale, 'info>(
         self,
-        value: &mut scale_decode::visitor::types::Composite<'scale, 'info>,
-        _type_id: scale_decode::visitor::TypeId,
+        value: &mut scale_decode::visitor::types::Composite<'scale, 'info, R>,
+        _type_id: &R::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};
 
@@ -151,8 +163,8 @@ impl<T> Visitor for WrapperKeepOpaqueVisitor<T> {
 }
 
 impl<T> IntoVisitor for WrapperKeepOpaque<T> {
-    type Visitor = WrapperKeepOpaqueVisitor<T>;
-    fn into_visitor() -> Self::Visitor {
+    type AnyVisitor<R: TypeResolver> = WrapperKeepOpaqueVisitor<T, R>;
+    fn into_visitor<R: TypeResolver>() -> WrapperKeepOpaqueVisitor<T, R> {
         WrapperKeepOpaqueVisitor(std::marker::PhantomData)
     }
 }
@@ -205,7 +217,7 @@ mod test {
         let (type_id, types) = make_type::<T>();
 
         let scale_codec_encoded = t.encode();
-        let encode_as_type_encoded = t.encode_as_type(type_id, &types).unwrap();
+        let encode_as_type_encoded = t.encode_as_type(&type_id, &types).unwrap();
 
         assert_eq!(
             scale_codec_encoded, encode_as_type_encoded,
@@ -213,7 +225,7 @@ mod test {
         );
 
         let decode_as_type_bytes = &mut &*scale_codec_encoded;
-        let decoded_as_type = T::decode_as_type(decode_as_type_bytes, type_id, &types)
+        let decoded_as_type = T::decode_as_type(decode_as_type_bytes, &type_id, &types)
             .expect("decode-as-type decodes");
 
         let decode_scale_codec_bytes = &mut &*scale_codec_encoded;

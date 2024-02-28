@@ -12,7 +12,8 @@
 use std::marker::PhantomData;
 
 use codec::{Decode, Encode};
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, Visitor};
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, TypeResolver, Visitor};
+use scale_info::PortableRegistry;
 
 use super::{Encoded, Static};
 
@@ -52,10 +53,10 @@ impl<Address, Call, Signature, Extra> Decode
 impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
-    fn encode_as_type_to(
+    fn encode_as_type_to<R: TypeResolver>(
         &self,
-        type_id: u32,
-        types: &scale_info::PortableRegistry,
+        type_id: &R::TypeId,
+        types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
         self.0.encode_as_type_to(type_id, types, out)
@@ -78,32 +79,35 @@ impl<Address, Call, Signature, Extra> From<UncheckedExtrinsic<Address, Call, Sig
     }
 }
 
-pub struct UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra>(
-    PhantomData<(Address, Call, Signature, Extra)>,
+pub struct UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R: TypeResolver>(
+    PhantomData<(Address, Call, Signature, Extra, R)>,
 );
 
-impl<Address, Call, Signature, Extra> Visitor
-    for UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra>
+impl<Address, Call, Signature, Extra, R: TypeResolver> Visitor
+    for UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R>
 {
     type Value<'scale, 'info> = UncheckedExtrinsic<Address, Call, Signature, Extra>;
     type Error = scale_decode::Error;
+    type TypeResolver = R;
 
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        type_id: scale_decode::visitor::TypeId,
-        types: &'info scale_info::PortableRegistry,
+        type_id: &R::TypeId,
+        types: &'info R,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
-        DecodeAsTypeResult::Decoded(Self::Value::decode_as_type(input, type_id.0, types))
+        DecodeAsTypeResult::Decoded(Self::Value::decode_as_type(input, type_id, types))
     }
 }
 
 impl<Address, Call, Signature, Extra> IntoVisitor
     for UncheckedExtrinsic<Address, Call, Signature, Extra>
 {
-    type Visitor = UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra>;
+    type AnyVisitor<R: TypeResolver> =
+        UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R>;
 
-    fn into_visitor() -> Self::Visitor {
+    fn into_visitor<R: TypeResolver>(
+    ) -> UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R> {
         UncheckedExtrinsicDecodeAsTypeVisitor(PhantomData)
     }
 }

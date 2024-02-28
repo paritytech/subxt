@@ -17,7 +17,7 @@ pub use scale_value::{At, Value};
 /// regarding what type was used to decode each part of it. This implements
 /// [`crate::metadata::DecodeWithMetadata`], and is used as a return type
 /// for dynamic requests.
-pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
+pub type DecodedValue = scale_value::Value<u32>;
 
 // Submit dynamic transactions.
 pub use crate::tx::dynamic as tx;
@@ -79,7 +79,7 @@ impl DecodedValueThunk {
     pub fn as_type<T: DecodeAsType>(&self) -> Result<T, scale_decode::Error> {
         T::decode_as_type(
             &mut &self.scale_bytes[..],
-            self.type_id,
+            &self.type_id,
             self.metadata.types(),
         )
     }

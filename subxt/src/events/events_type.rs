@@ -228,9 +228,9 @@ impl<T: Config> EventDetails<T> {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
-                field_metadata.ty.id,
+                &field_metadata.ty.id,
                 metadata.types(),
-                scale_decode::visitor::IgnoreVisitor,
+                scale_decode::visitor::IgnoreVisitor::new(),
             )
             .map_err(scale_decode::Error::from)?;
         }
@@ -321,9 +321,7 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn field_values(
-        &self,
-    ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
+    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
@@ -331,10 +329,10 @@ impl<T: Config> EventDetails<T> {
             .variant
             .fields
             .iter()
-            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
 
         use scale_decode::DecodeAsFields;
-        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
+        let decoded = <scale_value::Composite<u32>>::decode_as_fields(
             bytes,
             &mut fields,
             self.metadata.types(),
@@ -352,7 +350,7 @@ impl<T: Config> EventDetails<T> {
                 .variant
                 .fields
                 .iter()
-                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+                .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
@@ -369,7 +367,7 @@ impl<T: Config> EventDetails<T> {
 
         let decoded = E::decode_as_type(
             &mut &bytes[..],
-            self.metadata.outer_enums().event_enum_ty(),
+            &self.metadata.outer_enums().event_enum_ty(),
             self.metadata.types(),
         )?;
 
