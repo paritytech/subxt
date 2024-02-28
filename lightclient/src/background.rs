@@ -218,7 +218,9 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         unsubscribe_method,
                     },
                 };
-                chain_data.id_to_subscription.insert(id, subscription_id_state);
+                chain_data
+                    .id_to_subscription
+                    .insert(id, subscription_id_state);
 
                 let result = client.json_rpc_request(request, chain_id);
                 if let Err(err) = result {
@@ -272,7 +274,9 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                             "Cannot send method response to id={id} chain={chain_id:?}",
                         );
                     }
-                } else if let Some(subscription_id_state) = chain_data.id_to_subscription.remove(&id) {
+                } else if let Some(subscription_id_state) =
+                    chain_data.id_to_subscription.remove(&id)
+                {
                     if subscription_id_state
                         .sub_id_sender
                         .send(Err(LightClientRpcError::Request(error.to_string())))
@@ -299,7 +303,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                             "Cannot send method response to id={id} chain={chain_id:?}",
                         );
                     }
-                } else if let Some(pending_subscription) = chain_data.id_to_subscription.remove(&id) {
+                } else if let Some(pending_subscription) = chain_data.id_to_subscription.remove(&id)
+                {
                     let Ok(sub_id) = result
                         .get()
                         .trim_start_matches('"')
