@@ -59,9 +59,13 @@ impl StorageKey for () {
         hashers_and_ty_ids: &mut &[(StorageHasher, u32)],
         metadata: &Metadata,
     ) -> Result<Self, Error> {
-        // If no hashers, we just do nothing.
+        // If no hashers, we just do nothing (erroring if ).
         let Some((hasher, ty_id)) = hashers_and_ty_ids.first() else {
-            return Ok(());
+            if bytes.is_empty() {
+                return Ok(());
+            } else {
+                return Err(StorageAddressError::TooManyBytes.into());
+            }
         };
 
         // Consume the hash bytes (we don't care about the key output here).
@@ -192,7 +196,7 @@ impl StorageKey for Vec<scale_value::Value> {
 
         // We've consumed all of the hashers, so we expect to also consume all of the bytes:
         if !bytes.is_empty() {
-            return Err(StorageAddressError::UnexpectedAddressBytes.into());
+            return Err(StorageAddressError::TooManyBytes.into());
         }
 
         Ok(result)
@@ -210,7 +214,7 @@ fn consume_hash_returning_key_bytes<'a>(
     // Strip the bytes off for the actual hash, consuming them.
     let bytes_to_strip = hasher.len_excluding_key();
     if bytes.len() < bytes_to_strip {
-        return Err(StorageAddressError::UnexpectedAddressBytes.into());
+        return Err(StorageAddressError::NotEnoughBytes.into());
     }
     *bytes = &bytes[bytes_to_strip..];
 
