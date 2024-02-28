@@ -154,15 +154,15 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 sender,
                 chain_id,
             } => {
-                let (data, client) = self.for_chain_id(chain_id);
-                let id = data.next_id();
+                let (chain_data, client) = self.for_chain_id(chain_id);
+                let id = chain_data.next_id();
 
                 let request = format!(
                     r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
                     id, method, params
                 );
 
-                data.requests.insert(id, sender);
+                chain_data.requests.insert(id, sender);
                 tracing::trace!(target: LOG_TARGET, "Tracking request id={id} chain={chain_id:?}");
 
                 let result = client.json_rpc_request(request, chain_id);
@@ -173,7 +173,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         err.to_string()
                     );
 
-                    let sender = data
+                    let sender = chain_data
                         .requests
                         .remove(&id)
                         .expect("Channel is inserted above; qed");
@@ -200,8 +200,8 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 sender,
                 chain_id,
             } => {
-                let (data, client) = self.for_chain_id(chain_id);
-                let id = data.next_id();
+                let (chain_data, client) = self.for_chain_id(chain_id);
+                let id = chain_data.next_id();
 
                 // For subscriptions we need to make a plain RPC request to the subscription method.
                 // The server will return as a result the subscription ID.
@@ -218,7 +218,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         unsubscribe_method,
                     },
                 };
-                data.id_to_subscription.insert(id, subscription_id_state);
+                chain_data.id_to_subscription.insert(id, subscription_id_state);
 
                 let result = client.json_rpc_request(request, chain_id);
                 if let Err(err) = result {
@@ -227,7 +227,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         "Cannot send RPC request to lightclient {:?}",
                         err.to_string()
                     );
-                    let subscription_id_state = data
+                    let subscription_id_state = chain_data
                         .id_to_subscription
                         .remove(&id)
                         .expect("Channels are inserted above; qed");
@@ -253,7 +253,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, chain_id: smoldot_light::ChainId, response: String) {
         tracing::trace!(target: LOG_TARGET, "Received from smoldot response={response} chain={chain_id:?}");
-        let (data, _client) = self.for_chain_id(chain_id);
+        let (chain_data, _client) = self.for_chain_id(chain_id);
 
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Error { id, error }) => {
@@ -262,7 +262,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     return;
                 };
 
-                if let Some(sender) = data.requests.remove(&id) {
+                if let Some(sender) = chain_data.requests.remove(&id) {
                     if sender
                         .send(Err(LightClientRpcError::Request(error.to_string())))
                         .is_err()
@@ -272,7 +272,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                             "Cannot send method response to id={id} chain={chain_id:?}",
                         );
                     }
-                } else if let Some(subscription_id_state) = data.id_to_subscription.remove(&id) {
+                } else if let Some(subscription_id_state) = chain_data.id_to_subscription.remove(&id) {
                     if subscription_id_state
                         .sub_id_sender
                         .send(Err(LightClientRpcError::Request(error.to_string())))
@@ -292,14 +292,14 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 };
 
                 // Send the response back.
-                if let Some(sender) = data.requests.remove(&id) {
+                if let Some(sender) = chain_data.requests.remove(&id) {
                     if sender.send(Ok(result)).is_err() {
                         tracing::warn!(
                             target: LOG_TARGET,
                             "Cannot send method response to id={id} chain={chain_id:?}",
                         );
                     }
-                } else if let Some(pending_subscription) = data.id_to_subscription.remove(&id) {
+                } else if let Some(pending_subscription) = chain_data.id_to_subscription.remove(&id) {
                     let Ok(sub_id) = result
                         .get()
                         .trim_start_matches('"')
@@ -326,7 +326,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     }
 
                     // Track this subscription ID if send is successful.
-                    data.subscriptions.insert(sub_id, active_subscription);
+                    chain_data.subscriptions.insert(sub_id, active_subscription);
                 } else {
                     tracing::warn!(
                         target: LOG_TARGET,
@@ -340,7 +340,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                     return;
                 };
 
-                let Some(subscription_state) = data.subscriptions.get_mut(&id) else {
+                let Some(subscription_state) = chain_data.subscriptions.get_mut(&id) else {
                     tracing::warn!(
                         target: LOG_TARGET,
                         "Subscription response id={id} chain={chain_id:?} method={method} is not tracked",
@@ -353,12 +353,12 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                 }
 
                 // User dropped the receiver, unsubscribe from the method and remove internal tracking.
-                let Some(subscription_state) = data.subscriptions.remove(&id) else {
+                let Some(subscription_state) = chain_data.subscriptions.remove(&id) else {
                     // State is checked to be some above, so this should never happen.
                     return;
                 };
                 // Make a call to unsubscribe from this method.
-                let unsub_id = data.next_id();
+                let unsub_id = chain_data.next_id();
                 let request = format!(
                     r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":["{}"]}}"#,
                     unsub_id, subscription_state.unsubscribe_method, id
